@@ -13,4 +13,3 @@ describe("workspace scaffold", () => {
     expect(workspacePackages).toContain("@crucialy-rich/react");
   });
 });
-

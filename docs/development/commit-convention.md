@@ -38,4 +38,3 @@ docs: document project structure
 ```
 
 执行 `pnpm hooks:install` 后，`.githooks/commit-msg` 会使用 commitlint 校验提交信息。
-

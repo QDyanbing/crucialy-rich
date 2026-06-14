@@ -11,4 +11,3 @@ test("renders the demo shell", async ({ page }) => {
     '"type": "document"',
   );
 });
-

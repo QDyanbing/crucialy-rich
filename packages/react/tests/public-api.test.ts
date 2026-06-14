@@ -7,4 +7,3 @@ describe("@crucialy-rich/react public API", () => {
     expect(reactPackage).toBeDefined();
   });
 });
-

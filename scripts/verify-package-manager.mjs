@@ -45,7 +45,9 @@ const userAgent = process.env.npm_config_user_agent ?? "";
 const pnpmMatch = userAgent.match(/pnpm\/(\d+\.\d+\.\d+)/);
 
 if (!pnpmMatch) {
-  fail("Install dependencies with pnpm. Other package managers are intentionally blocked.");
+  fail(
+    "Install dependencies with pnpm. Other package managers are intentionally blocked.",
+  );
 }
 
 const pnpmVersion = parseVersion(pnpmMatch[1]);

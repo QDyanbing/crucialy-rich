@@ -7,4 +7,3 @@ describe("@crucialy-rich/core public API", () => {
     expect(core).toBeDefined();
   });
 });
-

@@ -7,6 +7,5 @@
     "rootDir": "src",
     "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo"
   },
-  "include": ["src/**/*.{ts,tsx}"]
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
 }
-

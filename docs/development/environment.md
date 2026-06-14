@@ -26,4 +26,3 @@ pnpm hooks:install
 - `packageManager` 固定为 `pnpm@8.6.11`。
 - `.npmrc` 开启 `engine-strict` 和 `package-manager-strict`。
 - `.npmrc` 开启 `save-exact`，新增依赖默认写入精确版本。
-

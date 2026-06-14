@@ -9,6 +9,7 @@ const browserGlobals = {
 
 const nodeGlobals = {
   console: "readonly",
+  module: "readonly",
   process: "readonly",
 };
 
@@ -54,4 +55,3 @@ export default tseslint.config(
   },
   eslintConfigPrettier,
 );
-

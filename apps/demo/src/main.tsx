@@ -38,4 +38,3 @@ createRoot(rootElement).render(
     </main>
   </StrictMode>,
 );
-

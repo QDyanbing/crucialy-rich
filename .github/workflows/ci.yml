@@ -38,4 +38,3 @@ jobs:
 
       - name: Run e2e smoke
         run: pnpm test:e2e
-
