@@ -1,0 +1,8 @@
+{
+  "name": "crucialy-rich",
+  "version": "0.0.0",
+  "description": "Self-hosted rich text editor kernel and React component workspace.",
+  "private": true,
+  "type": "module",
+  "license": "UNLICENSED"
+}
