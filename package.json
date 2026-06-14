@@ -15,7 +15,17 @@
     "pnpm": "8.6.11"
   },
   "scripts": {
-    "preinstall": "node ./scripts/verify-package-manager.mjs"
+    "build": "pnpm -r --if-present build",
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "dev": "pnpm --filter @crucialy-rich/demo dev",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "hooks:install": "git config core.hooksPath .githooks",
+    "lint": "eslint . --max-warnings=0",
+    "preinstall": "node ./scripts/verify-package-manager.mjs",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "typecheck": "tsc -b --pretty false"
   },
   "lint-staged": {
     "*.{css,html,json,md,yaml,yml}": "prettier --check",
@@ -23,5 +33,24 @@
       "prettier --check",
       "eslint --max-warnings=0"
     ]
+  },
+  "devDependencies": {
+    "@commitlint/cli": "19.8.1",
+    "@commitlint/config-conventional": "19.8.1",
+    "@eslint/js": "9.28.0",
+    "@playwright/test": "1.52.0",
+    "@types/node": "22.15.29",
+    "@types/react": "18.3.12",
+    "@types/react-dom": "18.3.1",
+    "@vitejs/plugin-react": "4.6.0",
+    "eslint": "9.28.0",
+    "eslint-config-prettier": "10.1.5",
+    "lint-staged": "15.5.2",
+    "prettier": "3.5.3",
+    "tsup": "8.5.0",
+    "typescript": "5.8.3",
+    "typescript-eslint": "8.33.1",
+    "vite": "6.3.5",
+    "vitest": "3.2.4"
   }
 }
