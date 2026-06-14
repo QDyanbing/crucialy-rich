@@ -16,5 +16,12 @@
   },
   "scripts": {
     "preinstall": "node ./scripts/verify-package-manager.mjs"
+  },
+  "lint-staged": {
+    "*.{css,html,json,md,yaml,yml}": "prettier --check",
+    "*.{js,mjs,cjs,ts,tsx}": [
+      "prettier --check",
+      "eslint --max-warnings=0"
+    ]
   }
 }
