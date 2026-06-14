@@ -2,6 +2,17 @@
   "name": "@crucialy-rich/demo",
   "version": "0.0.0",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "typecheck": "tsc -p tsconfig.json --pretty false"
+  },
+  "dependencies": {
+    "@crucialy-rich/core": "workspace:*",
+    "@crucialy-rich/react": "workspace:*",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  }
 }
-
