@@ -104,9 +104,11 @@ pnpm test:e2e
 - [工程结构](./docs/architecture/project-structure.md)
 - [环境要求](./docs/development/environment.md)
 - [初始化流程](./docs/development/initialization-flow.md)
+- [脚手架补项清单](./docs/development/scaffold-checklist.md)
 - [提交规范](./docs/development/commit-convention.md)
 - [测试策略](./docs/qa/test-strategy.md)
 - [脚手架验收](./docs/qa/scaffold-acceptance.md)
+- [变更记录](./CHANGELOG.md)
 
 ## 反馈入口
 
