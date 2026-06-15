@@ -43,6 +43,12 @@ pnpm test:e2e:install
 
 CI 会自动安装 Playwright Chromium，本地需要手动执行一次。
 
+Linux 新机器如果缺少浏览器系统依赖，可以执行：
+
+```sh
+pnpm test:e2e:install:deps
+```
+
 ## 5. 验证工程链路
 
 基础验证：
@@ -88,5 +94,6 @@ pnpm clean
 | `pnpm install` 被阻止            | 确认使用 pnpm，且版本满足 `>=8.6.11 <9`                              |
 | Node.js 版本不匹配               | 使用 Volta 或 nvm 切到 Node.js `22.14.0`                             |
 | `pnpm test:e2e` 提示浏览器不存在 | 先执行 `pnpm test:e2e:install`                                       |
+| Linux 浏览器系统依赖缺失         | 执行 `pnpm test:e2e:install:deps`                                    |
 | 提交信息被拒绝                   | 按 `docs/development/commit-convention.md` 使用 Conventional Commits |
 | lint 扫到构建产物                | 执行 `pnpm clean` 后重试                                             |

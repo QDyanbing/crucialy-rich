@@ -38,6 +38,9 @@ importers:
       eslint-config-prettier:
         specifier: 10.1.5
         version: 10.1.5(eslint@9.28.0)
+      globals:
+        specifier: 14.0.0
+        version: 14.0.0
       lint-staged:
         specifier: 15.5.2
         version: 15.5.2

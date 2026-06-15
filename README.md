@@ -62,6 +62,7 @@ pnpm dev
 - `pnpm test`：运行 Vitest smoke 测试。
 - `pnpm test:e2e`：运行 Playwright demo smoke 测试。
 - `pnpm test:e2e:install`：安装本地 Playwright Chromium。
+- `pnpm test:e2e:install:deps`：安装 Playwright Chromium 和 Linux 系统依赖。
 - `pnpm typecheck`：运行 TypeScript 项目引用类型检查。
 - `pnpm lint`：运行 ESLint。
 - `pnpm format`：格式化仓库文件。

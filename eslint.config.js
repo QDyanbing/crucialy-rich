@@ -1,17 +1,7 @@
 import js from "@eslint/js";
 import eslintConfigPrettier from "eslint-config-prettier";
+import globals from "globals";
 import tseslint from "typescript-eslint";
-
-const browserGlobals = {
-  document: "readonly",
-  window: "readonly",
-};
-
-const nodeGlobals = {
-  console: "readonly",
-  module: "readonly",
-  process: "readonly",
-};
 
 export default tseslint.config(
   {
@@ -32,8 +22,8 @@ export default tseslint.config(
       ecmaVersion: "latest",
       sourceType: "module",
       globals: {
-        ...browserGlobals,
-        ...nodeGlobals,
+        ...globals.browser,
+        ...globals.node,
       },
     },
     rules: {
@@ -50,7 +40,7 @@ export default tseslint.config(
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
-      globals: nodeGlobals,
+      globals: globals.node,
     },
   },
   eslintConfigPrettier,

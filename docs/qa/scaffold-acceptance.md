@@ -8,6 +8,7 @@
 - TypeScript、Vitest、Playwright、ESLint、Prettier 和 commitlint 配置存在。
 - `pnpm check` 可以作为本地质量门禁。
 - `pnpm test:e2e:install` 可以安装本地 e2e 浏览器依赖。
+- `pnpm test:e2e:install:deps` 可以安装 Linux e2e 系统依赖。
 - `pnpm clean` 可以清理本地生成产物。
 
 建议验收命令：

@@ -13,6 +13,12 @@
    pnpm test:e2e:install
    ```
 
+   Linux 新机器如果缺少浏览器系统依赖，可以改用：
+
+   ```sh
+   pnpm test:e2e:install:deps
+   ```
+
 3. 修改前先确认当前阶段边界：未经明确要求，不实现富文本内核或 React 组件逻辑。
 4. 提交前运行质量门禁。
 

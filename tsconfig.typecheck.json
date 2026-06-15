@@ -1,0 +1,21 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "jsx": "react-jsx",
+    "noEmit": true
+  },
+  "include": [
+    "apps/demo/src/**/*.ts",
+    "apps/demo/src/**/*.tsx",
+    "apps/demo/vite.config.ts",
+    "packages/*/src/**/*.ts",
+    "packages/*/src/**/*.tsx",
+    "packages/*/tests/**/*.ts",
+    "playwright.config.ts",
+    "tests/**/*.ts",
+    "vitest.config.ts"
+  ]
+}
