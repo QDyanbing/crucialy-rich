@@ -1,0 +1,74 @@
+name: 缺陷报告
+description: 反馈可复现的问题、异常行为或工程缺陷
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        请尽量提供最小复现场景。当前仓库仍处于脚手架阶段，和富文本编辑逻辑相关的问题请标注为后续实现需求。
+  - type: textarea
+    id: summary
+    attributes:
+      label: 问题概述
+      description: 用一两句话说明问题是什么。
+      placeholder: 例如：运行 pnpm check 时 typecheck 失败。
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: 影响范围
+      options:
+        - core
+        - react
+        - demo
+        - docs
+        - tooling
+        - ci
+        - unknown
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      description: 写出从干净环境到触发问题的步骤。
+      placeholder: |
+        1. pnpm install
+        2. pnpm check
+        3. 观察到 ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望行为
+      placeholder: 应该发生什么？
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际行为
+      placeholder: 实际发生了什么？可以粘贴关键日志。
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: 环境信息
+      description: 运行 pnpm、Node.js、系统和浏览器版本。
+      value: |
+        - OS:
+        - Node.js:
+        - pnpm:
+        - Browser:
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: 补充信息
+      description: 截图、日志、相关链接或初步判断。

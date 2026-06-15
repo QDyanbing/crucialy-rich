@@ -1,0 +1,50 @@
+name: 需求建议
+description: 提议一个新的富文本能力、工程能力或文档改进
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 背景问题
+      description: 现在遇到的限制、使用场景或目标是什么？
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 建议方案
+      description: 你希望如何解决？
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: 影响范围
+      options:
+        - core
+        - react
+        - demo
+        - docs
+        - tooling
+        - ci
+        - unknown
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 验收标准
+      description: 如何判断这个需求完成？
+      placeholder: |
+        - pnpm check 通过
+        - demo 中可以验证 ...
+        - docs/features/... 已更新
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 备选方案
+      description: 已经考虑过但暂不采用的方案。

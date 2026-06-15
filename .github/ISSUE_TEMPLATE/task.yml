@@ -1,0 +1,43 @@
+name: 工程任务
+description: 记录配置、文档、测试、CI 或脚手架类任务
+title: "[Task]: "
+labels:
+  - task
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: 任务目标
+      description: 这个任务要完成什么？
+    validations:
+      required: true
+  - type: dropdown
+    id: category
+    attributes:
+      label: 任务类型
+      options:
+        - scaffold
+        - docs
+        - test
+        - build
+        - lint
+        - ci
+        - release
+        - other
+    validations:
+      required: true
+  - type: textarea
+    id: checklist
+    attributes:
+      label: 完成清单
+      value: |
+        - [ ] 代码或配置已更新
+        - [ ] 文档已更新
+        - [ ] pnpm check 通过
+        - [ ] 如涉及浏览器行为，pnpm test:e2e 通过
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: 备注

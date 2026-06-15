@@ -102,6 +102,12 @@ pnpm test:e2e
 - [测试策略](./docs/qa/test-strategy.md)
 - [脚手架验收](./docs/qa/scaffold-acceptance.md)
 
+## 反馈入口
+
+- [缺陷报告](./.github/ISSUE_TEMPLATE/bug_report.yml)
+- [需求建议](./.github/ISSUE_TEMPLATE/feature_request.yml)
+- [工程任务](./.github/ISSUE_TEMPLATE/task.yml)
+
 ## License
 
 [MIT](./LICENSE)
