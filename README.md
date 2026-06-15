@@ -29,6 +29,7 @@
 | 格式化    | Prettier 3.5                       | 统一代码、文档和配置格式                                |
 | 提交检查  | commitlint、lint-staged、git hooks | 提交信息和 staged 文件质量门禁                          |
 | CI        | GitHub Actions                     | 安装、检查、构建和 e2e smoke                            |
+| 依赖维护  | Dependabot                         | 定期检查 npm 和 GitHub Actions 更新                     |
 
 ## 工程结构
 
@@ -115,6 +116,7 @@ pnpm test:e2e
 - [工程任务](./.github/ISSUE_TEMPLATE/task.yml)
 - [PR 模板](./.github/PULL_REQUEST_TEMPLATE.md)
 - [安全策略](./SECURITY.md)
+- [CODEOWNERS](./.github/CODEOWNERS)
 
 ## License
 
