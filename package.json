@@ -17,6 +17,8 @@
   "scripts": {
     "build": "pnpm -r --if-present build",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "check:all": "pnpm check && pnpm test:e2e",
+    "clean": "node ./scripts/clean.mjs",
     "dev": "pnpm --filter @crucialy-rich/demo dev",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -25,6 +27,7 @@
     "preinstall": "node ./scripts/verify-package-manager.mjs",
     "test": "vitest run",
     "test:e2e": "playwright test",
+    "test:e2e:install": "playwright install chromium",
     "typecheck": "tsc -b --pretty false"
   },
   "lint-staged": {
