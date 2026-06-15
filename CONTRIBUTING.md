@@ -10,6 +10,7 @@
    ```sh
    pnpm install
    pnpm hooks:install
+   pnpm test:e2e:install
    ```
 
 3. 修改前先确认当前阶段边界：未经明确要求，不实现富文本内核或 React 组件逻辑。
@@ -24,6 +25,8 @@
    ```sh
    pnpm test:e2e
    ```
+
+完整初始化流程见 [初始化流程](./docs/development/initialization-flow.md)。
 
 ## 提交信息
 

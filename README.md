@@ -50,19 +50,23 @@
 ```sh
 pnpm install
 pnpm hooks:install
+pnpm test:e2e:install
 pnpm dev
 ```
 
 常用命令：
 
 - `pnpm build`：构建 workspace 内可构建项目。
+- `pnpm clean`：清理构建、测试和报告产物。
 - `pnpm test`：运行 Vitest smoke 测试。
 - `pnpm test:e2e`：运行 Playwright demo smoke 测试。
+- `pnpm test:e2e:install`：安装本地 Playwright Chromium。
 - `pnpm typecheck`：运行 TypeScript 项目引用类型检查。
 - `pnpm lint`：运行 ESLint。
 - `pnpm format`：格式化仓库文件。
 - `pnpm format:check`：检查格式化状态。
 - `pnpm check`：聚合格式检查、Lint、类型检查、单测和构建。
+- `pnpm check:all`：运行 `pnpm check` 和 e2e smoke。
 
 ## 质量门禁
 
@@ -98,6 +102,7 @@ pnpm test:e2e
 
 - [工程结构](./docs/architecture/project-structure.md)
 - [环境要求](./docs/development/environment.md)
+- [初始化流程](./docs/development/initialization-flow.md)
 - [提交规范](./docs/development/commit-convention.md)
 - [测试策略](./docs/qa/test-strategy.md)
 - [脚手架验收](./docs/qa/scaffold-acceptance.md)
