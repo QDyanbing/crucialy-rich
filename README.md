@@ -104,10 +104,12 @@ pnpm test:e2e
 
 ## 反馈入口
 
+- [贡献指南](./CONTRIBUTING.md)
 - [缺陷报告](./.github/ISSUE_TEMPLATE/bug_report.yml)
 - [需求建议](./.github/ISSUE_TEMPLATE/feature_request.yml)
 - [工程任务](./.github/ISSUE_TEMPLATE/task.yml)
 - [PR 模板](./.github/PULL_REQUEST_TEMPLATE.md)
+- [安全策略](./SECURITY.md)
 
 ## License
 

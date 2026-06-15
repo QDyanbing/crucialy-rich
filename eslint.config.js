@@ -16,12 +16,12 @@ const nodeGlobals = {
 export default tseslint.config(
   {
     ignores: [
-      "coverage/",
-      "dist/",
-      "dist-types/",
-      "node_modules/",
-      "playwright-report/",
-      "test-results/",
+      "**/coverage/**",
+      "**/dist/**",
+      "**/dist-types/**",
+      "**/node_modules/**",
+      "**/playwright-report/**",
+      "**/test-results/**",
     ],
   },
   js.configs.recommended,
