@@ -4,7 +4,7 @@
   "description": "Self-hosted rich text editor kernel and React component workspace.",
   "private": true,
   "type": "module",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "packageManager": "pnpm@8.6.11",
   "engines": {
     "node": ">=22.14.0 <23",
