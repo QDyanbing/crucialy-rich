@@ -19,12 +19,12 @@
 - [x] 初始化流程文档。
 - [x] 清理生成产物命令。
 - [x] CHANGELOG。
+- [x] 包开源发布元信息（publishConfig、repository、各包 README 和 LICENSE）。
 
 暂不处理：
 
 - [ ] 文档站，例如 VitePress 或 Docusaurus。
-- [ ] 发布流水线，例如 changesets 或 semantic-release。
-- [ ] npm 发布配置。
+- [ ] 发布流水线与自动化 npm 发布，例如 changesets 或 semantic-release。
 - [ ] 富文本内核或组件实现。
 
 这些暂不处理项需要等第一个可用包 API 或明确发布目标出现后再定。
