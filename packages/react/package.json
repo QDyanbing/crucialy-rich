@@ -1,8 +1,25 @@
 {
   "name": "@crucialy-rich/react",
   "version": "0.0.0",
-  "private": true,
+  "description": "React bindings for the crucialy-rich editor kernel.",
+  "keywords": [
+    "rich-text",
+    "editor",
+    "wysiwyg",
+    "react",
+    "crucialy-rich"
+  ],
+  "homepage": "https://github.com/QDyanbing/crucialy-rich/tree/main/packages/react#readme",
+  "bugs": {
+    "url": "https://github.com/QDyanbing/crucialy-rich/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/QDyanbing/crucialy-rich.git",
+    "directory": "packages/react"
+  },
   "license": "MIT",
+  "author": "QDyanbing",
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.js",
@@ -14,8 +31,13 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts --clean",
     "typecheck": "tsc -p tsconfig.json --noEmit --pretty false"
