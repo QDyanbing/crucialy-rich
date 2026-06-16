@@ -80,7 +80,11 @@ importers:
 
   packages/core: {}
 
-  packages/react: {}
+  packages/react:
+    dependencies:
+      '@crucialy-rich/core':
+        specifier: workspace:*
+        version: link:../core
 
 packages:
 

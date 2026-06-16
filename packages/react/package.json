@@ -20,6 +20,9 @@
     "build": "tsup src/index.ts --format esm --dts --clean",
     "typecheck": "tsc -p tsconfig.json --noEmit --pretty false"
   },
+  "dependencies": {
+    "@crucialy-rich/core": "workspace:*"
+  },
   "peerDependencies": {
     "react": ">=18 <20",
     "react-dom": ">=18 <20"
