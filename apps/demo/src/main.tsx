@@ -1,12 +1,14 @@
+import { createDocument, createParagraph, createText } from "@crucialy-rich/core";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
 import "./styles.css";
 
-const documentPreview = `{
-  "type": "document",
-  "children": []
-}`;
+const initialDocument = createDocument([
+  createParagraph([createText("Hello crucialy-rich.")]),
+]);
+
+const documentPreview = JSON.stringify(initialDocument, null, 2);
 
 const rootElement = document.getElementById("root");
 
