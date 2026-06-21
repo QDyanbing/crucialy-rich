@@ -106,6 +106,7 @@ pnpm test:e2e
 - [环境要求](./docs/development/environment.md)
 - [初始化流程](./docs/development/initialization-flow.md)
 - [脚手架补项清单](./docs/development/scaffold-checklist.md)
+- [Selection](./docs/features/selection.md)
 - [提交规范](./docs/development/commit-convention.md)
 - [测试策略](./docs/qa/test-strategy.md)
 - [脚手架验收](./docs/qa/scaffold-acceptance.md)
