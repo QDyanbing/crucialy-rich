@@ -10,6 +10,12 @@ interface LinearSegment {
   text: string;
 }
 
+export interface TextRangeSplit {
+  before: string;
+  selected: string;
+  after: string;
+}
+
 function isSamePath(left: Path, right: Path): boolean {
   return (
     left.length === right.length && left.every((part, index) => part === right[index])
@@ -56,6 +62,21 @@ function getPointTextOffset(document: DocumentNode, point: Point): number | unde
   return segment ? segment.start + point.offset : undefined;
 }
 
+function getRangeTextOffsets(
+  document: DocumentNode,
+  range: RangeSelection,
+): { startOffset: number; endOffset: number } {
+  const normalizedRange = normalizeRange(range);
+  const startOffset = getPointTextOffset(document, normalizedRange.anchor);
+  const endOffset = getPointTextOffset(document, normalizedRange.focus);
+
+  if (startOffset === undefined || endOffset === undefined) {
+    throw new RangeError("range points must reference text nodes");
+  }
+
+  return { startOffset, endOffset };
+}
+
 function readLinearText(
   document: DocumentNode,
   startOffset: number,
@@ -75,14 +96,28 @@ function readLinearText(
     .join("");
 }
 
-export function getTextInRange(document: DocumentNode, range: RangeSelection): string {
-  const normalizedRange = normalizeRange(range);
-  const startOffset = getPointTextOffset(document, normalizedRange.anchor);
-  const endOffset = getPointTextOffset(document, normalizedRange.focus);
+function readDocumentText(document: DocumentNode): string {
+  return createLinearSegments(document)
+    .map((segment) => segment.text)
+    .join("");
+}
 
-  if (startOffset === undefined || endOffset === undefined) {
-    throw new RangeError("range points must reference text nodes");
-  }
+export function getTextInRange(document: DocumentNode, range: RangeSelection): string {
+  const { startOffset, endOffset } = getRangeTextOffsets(document, range);
 
   return readLinearText(document, startOffset, endOffset);
+}
+
+export function splitTextByRange(
+  document: DocumentNode,
+  range: RangeSelection,
+): TextRangeSplit {
+  const { startOffset, endOffset } = getRangeTextOffsets(document, range);
+  const text = readDocumentText(document);
+
+  return {
+    before: text.slice(0, startOffset),
+    selected: text.slice(startOffset, endOffset),
+    after: text.slice(endOffset),
+  };
 }
