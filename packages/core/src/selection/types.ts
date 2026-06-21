@@ -7,3 +7,11 @@
  * - [blockIndex, textIndex]：text
  */
 export type Path = number[];
+
+/**
+ * Point 定位 text 节点内的偏移。
+ */
+export interface Point {
+  path: Path;
+  offset: number;
+}
