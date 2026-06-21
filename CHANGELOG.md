@@ -12,9 +12,10 @@ The format follows the spirit of [Keep a Changelog](https://keepachangelog.com/e
 - Added TypeScript, tsup, Vite, Vitest, Playwright, ESLint, Prettier, commitlint, lint-staged, and Git hooks.
 - Added GitHub Actions CI, Issue templates, PR template, CODEOWNERS, and Dependabot config.
 - Added MIT license, contribution guide, security policy, initialization flow, and scaffold QA docs.
+- Added the first document model with factories, type guards, validation, normalize, docs, QA, and demo JSON output.
+- Added the first model selection API with Path, Point, RangeSelection, text range extraction, text range splitting, docs, QA, and demo inspector.
 
 ### Not Included Yet
 
-- Rich text document model.
 - React rich text editor component logic.
-- Editing commands, selection, history, parsing, serialization, or rendering behavior.
+- Editing commands, history, parsing, serialization, DOM mapping, browser selection sync, or rendering behavior.

@@ -10,7 +10,9 @@
 
 ## 当前阶段
 
-本次初始化只搭建工程架子，不编写编辑器内核逻辑，也不实现富文本组件逻辑。
+已完成工程初始化、文档模型第一版和 model selection 第一版。
+
+当前仍未实现 React 富文本组件逻辑、浏览器 selection 同步、DOM 映射或真实编辑行为。
 
 ## 技术栈
 
@@ -37,7 +39,7 @@
 .
 ├── apps/demo              # Vite + React demo 空壳
 ├── docs                   # 架构、开发和 QA 文档
-├── packages/core          # 富文本内核包占位
+├── packages/core          # 富文本内核模型和 selection
 ├── packages/react         # React 集成包占位
 ├── tests/e2e              # Playwright e2e smoke
 ├── eslint.config.js       # ESLint flat config
@@ -106,10 +108,13 @@ pnpm test:e2e
 - [环境要求](./docs/development/environment.md)
 - [初始化流程](./docs/development/initialization-flow.md)
 - [脚手架补项清单](./docs/development/scaffold-checklist.md)
+- [文档模型](./docs/features/model.md)
 - [Selection](./docs/features/selection.md)
 - [提交规范](./docs/development/commit-convention.md)
 - [测试策略](./docs/qa/test-strategy.md)
 - [脚手架验收](./docs/qa/scaffold-acceptance.md)
+- [模型 QA](./docs/qa/model.md)
+- [Selection QA](./docs/qa/selection.md)
 - [变更记录](./CHANGELOG.md)
 
 ## 反馈入口

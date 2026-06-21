@@ -20,11 +20,13 @@
 - [x] 清理生成产物命令。
 - [x] CHANGELOG。
 - [x] 包开源发布元信息（publishConfig、repository、各包 README 和 LICENSE）。
+- [x] 文档模型第一版。
+- [x] Selection 第一版。
 
 暂不处理：
 
 - [ ] 文档站，例如 VitePress 或 Docusaurus。
 - [ ] 发布流水线与自动化 npm 发布，例如 changesets 或 semantic-release。
-- [ ] 富文本内核或组件实现。
+- [ ] React 富文本组件、DOM 映射和真实编辑行为。
 
 这些暂不处理项需要等第一个可用包 API 或明确发布目标出现后再定。
