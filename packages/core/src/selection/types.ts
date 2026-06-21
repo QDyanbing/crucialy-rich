@@ -15,3 +15,11 @@ export interface Point {
   path: Path;
   offset: number;
 }
+
+/**
+ * RangeSelection 使用 anchor/focus 表达方向。
+ */
+export interface RangeSelection {
+  anchor: Point;
+  focus: Point;
+}
