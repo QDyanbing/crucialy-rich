@@ -15,4 +15,15 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.normalizeDocument).toBe("function");
     expect(typeof core.isDocumentNode).toBe("function");
   });
+
+  it("exposes the selection API", () => {
+    expect(typeof core.getNodeAtPath).toBe("function");
+    expect(typeof core.hasNodeAtPath).toBe("function");
+    expect(typeof core.isValidPoint).toBe("function");
+    expect(typeof core.comparePoint).toBe("function");
+    expect(typeof core.isCollapsed).toBe("function");
+    expect(typeof core.normalizeRange).toBe("function");
+    expect(typeof core.getTextInRange).toBe("function");
+    expect(typeof core.splitTextByRange).toBe("function");
+  });
 });
