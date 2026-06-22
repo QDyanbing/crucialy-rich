@@ -29,6 +29,7 @@ pnpm test:e2e
 | 反向 range normalize | anchor 在 focus 后面                              | normalize 后 anchor/focus 对调 | 通过 |
 | 同段文本读取         | 输入 `[0,0] 0 -> [0,0] 5`                         | demo 显示 `Hello`              | 通过 |
 | 手动修改选区         | demo 中把 anchor offset 改为 `6`，focus 改为 `14` | demo 显示 `crucialy`           | 通过 |
+| JSON 节点高亮        | demo 中把 anchor path 改为 `1,0`                  | 文档映射中高亮第二段 text 节点 | 通过 |
 
 ## 当前限制
 
@@ -39,4 +40,4 @@ pnpm test:e2e
 
 ## 结论
 
-Selection 第一版 model 能力已闭环，后续可以进入基础渲染和 DOM 映射阶段。
+Selection 第一版 model 能力已闭环，demo 可验证文本读取、选区 JSON 和 path 对应节点高亮，后续可以进入基础渲染和 DOM 映射阶段。
