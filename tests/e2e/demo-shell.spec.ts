@@ -39,3 +39,17 @@ test("normalizes invalid model examples", async ({ page }) => {
   await expect(page.getByLabel("Model validation status")).toContainText("Valid");
   await expect(page.getByLabel("Document JSON")).toContainText('"type": "paragraph"');
 });
+
+test("highlights the selected document json node", async ({ page }) => {
+  await page.goto("/");
+
+  await expect(page.getByLabel("Highlighted document node")).toContainText(
+    "Hello crucialy-rich.",
+  );
+
+  await page.getByLabel("Anchor path").fill("1,0");
+
+  await expect(page.getByLabel("Highlighted document node")).toContainText(
+    "Selection model ready.",
+  );
+});
