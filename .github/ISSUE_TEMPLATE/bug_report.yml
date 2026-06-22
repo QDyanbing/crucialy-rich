@@ -7,7 +7,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        请尽量提供最小复现场景。当前仓库仍处于脚手架阶段，和富文本编辑逻辑相关的问题请标注为后续实现需求。
+        请尽量提供最小复现场景。当前仓库仍处于早期阶段，请标明问题影响的是工程配置、文档模型、model selection、demo，还是后续待实现的编辑行为。
   - type: textarea
     id: summary
     attributes:
