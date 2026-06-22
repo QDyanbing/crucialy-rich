@@ -2,7 +2,7 @@
 
 crucialy-rich 编辑内核的 React 集成包，对外暴露可集成的 React 富文本组件。
 
-> 当前处于早期阶段，包入口为占位，尚未提供稳定 API。
+> 当前处于早期阶段，只提供空的 `RichTextEditor` 外壳组件，尚未提供 DOM 渲染、事件绑定或真实编辑行为。
 
 ## 安装
 
@@ -15,7 +15,11 @@ pnpm add @crucialy-rich/react @crucialy-rich/core react react-dom
 ## 使用
 
 ```tsx
-import {} from "@crucialy-rich/react";
+import { RichTextEditor } from "@crucialy-rich/react";
+
+export function Demo() {
+  return <RichTextEditor label="Editor shell" />;
+}
 ```
 
 ## 许可
