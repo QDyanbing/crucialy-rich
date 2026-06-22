@@ -69,6 +69,19 @@ describe("splitTextByRange", () => {
     });
   });
 
+  it("splits across sibling text nodes in one paragraph", () => {
+    expect(
+      splitTextByRange(document, {
+        anchor: { path: [0, 0], offset: 3 },
+        focus: { path: [0, 1], offset: 2 },
+      }),
+    ).toEqual({
+      before: "alp",
+      selected: "habe",
+      after: "ta\ngamma",
+    });
+  });
+
   it("splits across paragraphs", () => {
     expect(
       splitTextByRange(document, {
