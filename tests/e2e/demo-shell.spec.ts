@@ -37,19 +37,23 @@ test("normalizes invalid model examples", async ({ page }) => {
   await page.getByRole("button", { name: "Normalize" }).click();
 
   await expect(page.getByLabel("Model validation status")).toContainText("Valid");
-  await expect(page.getByLabel("Document JSON")).toContainText('"type": "paragraph"');
+  await expect(page.getByLabel("Document JSON", { exact: true })).toContainText(
+    '"type": "paragraph"',
+  );
 });
 
 test("highlights the selected document json node", async ({ page }) => {
   await page.goto("/");
 
-  await expect(page.getByLabel("Highlighted document node")).toContainText(
-    "Hello crucialy-rich.",
-  );
+  const highlightedLines = page.locator('.json-line[data-selected="true"]');
+
+  await expect(
+    highlightedLines.filter({ hasText: "Hello crucialy-rich." }),
+  ).toBeVisible();
 
   await page.getByLabel("Anchor path").fill("1,0");
 
-  await expect(page.getByLabel("Highlighted document node")).toContainText(
-    "Selection model ready.",
-  );
+  await expect(
+    highlightedLines.filter({ hasText: "Selection model ready." }),
+  ).toBeVisible();
 });

@@ -159,7 +159,6 @@ function DocumentJsonMap({ document, selectedPath }: DocumentJsonMapProps) {
         return (
           <span
             key={line.key}
-            aria-label={selected ? "Highlighted document node" : undefined}
             className="json-line"
             data-selected={selected ? "true" : "false"}
           >
