@@ -8,6 +8,7 @@ import {
   normalizeDocument,
   validateDocument,
   type DocumentNode,
+  type Path,
   type Point,
   type RangeSelection,
 } from "@crucialy-rich/core";
@@ -55,6 +56,120 @@ function cloneModelValue(value: unknown): unknown {
 
 function getModelExample(id: ModelExampleId): ModelExample {
   return modelExamples.find((example) => example.id === id) ?? modelExamples[0]!;
+}
+
+interface JsonLine {
+  key: string;
+  path?: Path;
+  text: string;
+}
+
+function isSamePath(left: Path, right: Path): boolean {
+  return (
+    left.length === right.length && left.every((part, index) => part === right[index])
+  );
+}
+
+function createDocumentJsonLines(document: DocumentNode): JsonLine[] {
+  const lines: JsonLine[] = [
+    { key: "document-open", path: [], text: "{" },
+    { key: "document-type", path: [], text: '  "type": "document",' },
+    { key: "document-children-open", path: [], text: '  "children": [' },
+  ];
+
+  document.children.forEach((block, blockIndex) => {
+    const blockPath = [blockIndex];
+    const blockSuffix = blockIndex === document.children.length - 1 ? "" : ",";
+
+    lines.push(
+      { key: `block-${blockIndex}-open`, path: blockPath, text: "    {" },
+      {
+        key: `block-${blockIndex}-type`,
+        path: blockPath,
+        text: '      "type": "paragraph",',
+      },
+      {
+        key: `block-${blockIndex}-children-open`,
+        path: blockPath,
+        text: '      "children": [',
+      },
+    );
+
+    block.children.forEach((node, textIndex) => {
+      const textPath = [blockIndex, textIndex];
+      const textSuffix = textIndex === block.children.length - 1 ? "" : ",";
+
+      lines.push(
+        {
+          key: `text-${blockIndex}-${textIndex}-open`,
+          path: textPath,
+          text: "        {",
+        },
+        {
+          key: `text-${blockIndex}-${textIndex}-type`,
+          path: textPath,
+          text: '          "type": "text",',
+        },
+        {
+          key: `text-${blockIndex}-${textIndex}-value`,
+          path: textPath,
+          text: `          "text": ${JSON.stringify(node.text)}`,
+        },
+        {
+          key: `text-${blockIndex}-${textIndex}-close`,
+          path: textPath,
+          text: `        }${textSuffix}`,
+        },
+      );
+    });
+
+    lines.push(
+      {
+        key: `block-${blockIndex}-children-close`,
+        path: blockPath,
+        text: "      ]",
+      },
+      {
+        key: `block-${blockIndex}-close`,
+        path: blockPath,
+        text: `    }${blockSuffix}`,
+      },
+    );
+  });
+
+  lines.push(
+    { key: "document-children-close", path: [], text: "  ]" },
+    { key: "document-close", path: [], text: "}" },
+  );
+
+  return lines;
+}
+
+interface DocumentJsonMapProps {
+  document: DocumentNode;
+  selectedPath: Path;
+}
+
+function DocumentJsonMap({ document, selectedPath }: DocumentJsonMapProps) {
+  return (
+    <pre aria-label="Document JSON selection map">
+      {createDocumentJsonLines(document).map((line) => {
+        const selected = line.path ? isSamePath(line.path, selectedPath) : false;
+
+        return (
+          <span
+            key={line.key}
+            aria-label={selected ? "Highlighted document node" : undefined}
+            className="json-line"
+            data-selected={selected ? "true" : "false"}
+          >
+            {line.text}
+            {"\n"}
+          </span>
+        );
+      })}
+    </pre>
+  );
 }
 
 function parsePath(value: string): number[] {
@@ -158,6 +273,10 @@ function SelectionDebugger({ document }: SelectionDebuggerProps) {
           <pre aria-label="Selected node">
             {JSON.stringify(anchorNode ?? null, null, 2)}
           </pre>
+        </div>
+        <div>
+          <h3>Document map</h3>
+          <DocumentJsonMap document={document} selectedPath={selection.anchor.path} />
         </div>
       </div>
     </section>
