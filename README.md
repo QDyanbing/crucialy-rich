@@ -113,6 +113,7 @@ pnpm test:e2e
 - [提交规范](./docs/development/commit-convention.md)
 - [测试策略](./docs/qa/test-strategy.md)
 - [脚手架验收](./docs/qa/scaffold-acceptance.md)
+- [第 1 周 QA](./docs/qa/week-01.md)
 - [模型 QA](./docs/qa/model.md)
 - [Selection QA](./docs/qa/selection.md)
 - [变更记录](./CHANGELOG.md)
