@@ -25,8 +25,8 @@ body {
 
 button,
 input,
-textarea,
-select {
+select,
+textarea {
   font: inherit;
 }
 
@@ -130,6 +130,45 @@ h3 {
   padding: 20px;
 }
 
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.model-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+}
+
+button,
+select {
+  min-height: 36px;
+  border: 1px solid #cfd8d1;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #1c2520;
+}
+
+button {
+  cursor: pointer;
+  font-weight: 700;
+  padding: 0 14px;
+}
+
+button:hover {
+  border-color: #94aa9b;
+  background: #eef2ef;
+}
+
+select {
+  width: 100%;
+  padding: 0 10px;
+}
+
 pre {
   flex: 1;
   min-height: 0;
@@ -141,6 +180,31 @@ pre {
   font-size: 0.86rem;
   line-height: 1.6;
   padding: 16px;
+}
+
+.validation-errors {
+  flex: initial;
+  max-height: 160px;
+}
+
+.state-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 800;
+  padding: 0 10px;
+}
+
+.state-pill[data-state="valid"] {
+  background: #e9f4ed;
+  color: #254531;
+}
+
+.state-pill[data-state="invalid"] {
+  background: #f9e6df;
+  color: #7c2d18;
 }
 
 .selection-debugger {

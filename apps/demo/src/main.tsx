@@ -5,21 +5,57 @@ import {
   getNodeAtPath,
   getTextInRange,
   isValidPoint,
+  normalizeDocument,
+  validateDocument,
+  type DocumentNode,
   type Point,
   type RangeSelection,
 } from "@crucialy-rich/core";
 import { RichTextEditor } from "@crucialy-rich/react";
-import { StrictMode, useMemo, useState } from "react";
+import { StrictMode, useMemo, useState, type ChangeEvent } from "react";
 import { createRoot } from "react-dom/client";
 
 import "./styles.css";
 
-const initialDocument = createDocument([
-  createParagraph([createText("Hello crucialy-rich.")]),
-  createParagraph([createText("Selection model ready.")]),
-]);
+type ModelExampleId = "regular" | "empty" | "invalid";
 
-const documentPreview = JSON.stringify(initialDocument, null, 2);
+interface ModelExample {
+  id: ModelExampleId;
+  label: string;
+  value: unknown;
+}
+
+const modelExamples: ModelExample[] = [
+  {
+    id: "regular",
+    label: "Regular document",
+    value: createDocument([
+      createParagraph([createText("Hello crucialy-rich.")]),
+      createParagraph([createText("Selection model ready.")]),
+    ]),
+  },
+  {
+    id: "empty",
+    label: "Empty document",
+    value: { type: "document", children: [] },
+  },
+  {
+    id: "invalid",
+    label: "Invalid document",
+    value: {
+      type: "document",
+      children: [{ type: "text", text: "Loose text" }],
+    },
+  },
+];
+
+function cloneModelValue(value: unknown): unknown {
+  return JSON.parse(JSON.stringify(value)) as unknown;
+}
+
+function getModelExample(id: ModelExampleId): ModelExample {
+  return modelExamples.find((example) => example.id === id) ?? modelExamples[0]!;
+}
 
 function parsePath(value: string): number[] {
   if (value.trim() === "") {
@@ -36,7 +72,11 @@ function createPoint(pathValue: string, offsetValue: string): Point {
   };
 }
 
-function SelectionDebugger() {
+interface SelectionDebuggerProps {
+  document: DocumentNode;
+}
+
+function SelectionDebugger({ document }: SelectionDebuggerProps) {
   const [anchorPath, setAnchorPath] = useState("0,0");
   const [anchorOffset, setAnchorOffset] = useState("0");
   const [focusPath, setFocusPath] = useState("0,0");
@@ -49,11 +89,11 @@ function SelectionDebugger() {
     }),
     [anchorOffset, anchorPath, focusOffset, focusPath],
   );
-  const anchorValid = isValidPoint(initialDocument, selection.anchor);
-  const focusValid = isValidPoint(initialDocument, selection.focus);
+  const anchorValid = isValidPoint(document, selection.anchor);
+  const focusValid = isValidPoint(document, selection.focus);
   const selectedText =
-    anchorValid && focusValid ? getTextInRange(initialDocument, selection) : "";
-  const anchorNode = getNodeAtPath(initialDocument, selection.anchor.path);
+    anchorValid && focusValid ? getTextInRange(document, selection) : "";
+  const anchorNode = getNodeAtPath(document, selection.anchor.path);
 
   return (
     <section className="selection-debugger" aria-label="Selection debugger">
@@ -130,8 +170,33 @@ if (!rootElement) {
   throw new Error("Missing root element.");
 }
 
-createRoot(rootElement).render(
-  <StrictMode>
+function DemoApp() {
+  const [modelExampleId, setModelExampleId] = useState<ModelExampleId>("regular");
+  const [documentValue, setDocumentValue] = useState(() =>
+    cloneModelValue(getModelExample("regular").value),
+  );
+  const validation = useMemo(() => validateDocument(documentValue), [documentValue]);
+  const normalizedDocument = useMemo(
+    () => normalizeDocument(documentValue),
+    [documentValue],
+  );
+  const documentPreview = useMemo(
+    () => JSON.stringify(documentValue, null, 2),
+    [documentValue],
+  );
+
+  function handleModelExampleChange(event: ChangeEvent<HTMLSelectElement>) {
+    const nextExampleId = event.target.value as ModelExampleId;
+
+    setModelExampleId(nextExampleId);
+    setDocumentValue(cloneModelValue(getModelExample(nextExampleId).value));
+  }
+
+  function handleNormalize() {
+    setDocumentValue(normalizeDocument(documentValue));
+  }
+
+  return (
     <main className="app-shell" aria-labelledby="page-title">
       <header className="top-bar">
         <div>
@@ -147,12 +212,54 @@ createRoot(rootElement).render(
         </div>
 
         <aside className="debug-panel" aria-label="Document debug panel">
-          <h2>Document JSON</h2>
-          <pre>{documentPreview}</pre>
+          <div className="panel-header">
+            <h2>Document JSON</h2>
+            <span
+              aria-label="Model validation status"
+              className="state-pill"
+              data-state={validation.valid ? "valid" : "invalid"}
+            >
+              {validation.valid ? "Valid" : "Invalid"}
+            </span>
+          </div>
+
+          <div className="model-controls" aria-label="Model controls">
+            <label>
+              <span>Model example</span>
+              <select
+                aria-label="Model example"
+                value={modelExampleId}
+                onChange={handleModelExampleChange}
+              >
+                {modelExamples.map((example) => (
+                  <option key={example.id} value={example.id}>
+                    {example.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button type="button" onClick={handleNormalize}>
+              Normalize
+            </button>
+          </div>
+
+          {validation.errors.length > 0 ? (
+            <pre aria-label="Model validation errors" className="validation-errors">
+              {JSON.stringify(validation.errors, null, 2)}
+            </pre>
+          ) : null}
+
+          <pre aria-label="Document JSON">{documentPreview}</pre>
         </aside>
       </section>
 
-      <SelectionDebugger />
+      <SelectionDebugger document={normalizedDocument} />
     </main>
+  );
+}
+
+createRoot(rootElement).render(
+  <StrictMode>
+    <DemoApp />
   </StrictMode>,
 );
