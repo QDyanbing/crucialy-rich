@@ -14,8 +14,16 @@ The format follows the spirit of [Keep a Changelog](https://keepachangelog.com/e
 - Added MIT license, contribution guide, security policy, initialization flow, and scaffold QA docs.
 - Added the first document model with factories, type guards, validation, normalize, docs, QA, and demo JSON output.
 - Added the first model selection API with Path, Point, RangeSelection, text range extraction, text range splitting, docs, QA, and demo inspector.
+- Added a React editor shell component and wired it into the demo shell.
+- Added model demo controls for example switching, validation status, and normalize verification.
+- Added selection JSON node highlighting in the demo inspector.
+
+### Changed
+
+- Updated project, QA, package, and collaboration docs to match the completed model and selection scope.
+- Updated package homepage metadata to use the `master` branch.
 
 ### Not Included Yet
 
-- React rich text editor component logic.
+- React rich text editor component logic beyond the empty shell.
 - Editing commands, history, parsing, serialization, DOM mapping, browser selection sync, or rendering behavior.
