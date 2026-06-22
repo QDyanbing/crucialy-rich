@@ -23,3 +23,19 @@ test("updates the selection debug preview", async ({ page }) => {
   await expect(page.getByLabel("Selected text")).toContainText("crucialy");
   await expect(page.getByLabel("Selection JSON")).toContainText('"offset": 14');
 });
+
+test("normalizes invalid model examples", async ({ page }) => {
+  await page.goto("/");
+
+  await page.getByLabel("Model example").selectOption("invalid");
+
+  await expect(page.getByLabel("Model validation status")).toContainText("Invalid");
+  await expect(page.getByLabel("Model validation errors")).toContainText(
+    "document child must be a block node",
+  );
+
+  await page.getByRole("button", { name: "Normalize" }).click();
+
+  await expect(page.getByLabel("Model validation status")).toContainText("Valid");
+  await expect(page.getByLabel("Document JSON")).toContainText('"type": "paragraph"');
+});
