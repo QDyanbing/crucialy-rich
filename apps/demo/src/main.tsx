@@ -8,6 +8,7 @@ import {
   type Point,
   type RangeSelection,
 } from "@crucialy-rich/core";
+import { RichTextEditor } from "@crucialy-rich/react";
 import { StrictMode, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -142,7 +143,7 @@ createRoot(rootElement).render(
 
       <section className="workspace-grid" aria-label="Editor workspace">
         <div className="editor-surface" aria-label="Editor preview">
-          <div className="empty-state">Editor shell</div>
+          <RichTextEditor className="empty-state" label="Editor shell" />
         </div>
 
         <aside className="debug-panel" aria-label="Document debug panel">
