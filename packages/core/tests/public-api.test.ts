@@ -21,6 +21,7 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.hasNodeAtPath).toBe("function");
     expect(typeof core.isValidPoint).toBe("function");
     expect(typeof core.comparePoint).toBe("function");
+    expect(typeof core.compareRange).toBe("function");
     expect(typeof core.isCollapsed).toBe("function");
     expect(typeof core.normalizeRange).toBe("function");
     expect(typeof core.getTextInRange).toBe("function");
