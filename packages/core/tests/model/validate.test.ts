@@ -32,6 +32,19 @@ describe("validateDocument", () => {
     expect(result.errors[0]?.path).toEqual([0]);
   });
 
+  it("rejects an unknown document child type", () => {
+    const result = validateDocument({
+      type: "document",
+      children: [{ type: "heading", children: [] }],
+    });
+
+    expect(result.valid).toBe(false);
+    expect(result.errors[0]).toEqual({
+      path: [0],
+      message: "document child must be a block node",
+    });
+  });
+
   it("rejects a non-text paragraph child", () => {
     const result = validateDocument({
       type: "document",
@@ -41,5 +54,18 @@ describe("validateDocument", () => {
     });
     expect(result.valid).toBe(false);
     expect(result.errors[0]?.path).toEqual([0, 0]);
+  });
+
+  it("rejects an unknown paragraph child type", () => {
+    const result = validateDocument({
+      type: "document",
+      children: [{ type: "paragraph", children: [{ type: "inline", text: "x" }] }],
+    });
+
+    expect(result.valid).toBe(false);
+    expect(result.errors[0]).toEqual({
+      path: [0, 0],
+      message: "paragraph child must be a text node",
+    });
   });
 });
