@@ -17,11 +17,14 @@ The format follows the spirit of [Keep a Changelog](https://keepachangelog.com/e
 - Added a React editor shell component and wired it into the demo shell.
 - Added model demo controls for example switching, validation status, and normalize verification.
 - Added selection JSON node highlighting in the demo inspector.
+- Added week 2 and week 3 QA records for model and selection milestones.
+- Added schema tests for unknown node types and invalid document child normalization.
 
 ### Changed
 
 - Updated project, QA, package, and collaboration docs to match the completed model and selection scope.
 - Updated package homepage metadata to use the `master` branch.
+- Clarified contribution, model attrs, and selection demo inspector documentation.
 
 ### Not Included Yet
 
