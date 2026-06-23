@@ -40,7 +40,7 @@
 ├── apps/demo              # Vite + React demo 空壳
 ├── docs                   # 架构、开发和 QA 文档
 ├── packages/core          # 富文本内核模型和 selection
-├── packages/react         # React 集成包占位
+├── packages/react         # React 集成包和空编辑器外壳
 ├── tests/e2e              # Playwright e2e smoke
 ├── eslint.config.js       # ESLint flat config
 ├── playwright.config.ts   # Playwright 配置
