@@ -73,6 +73,15 @@ API：
 - 反向 range 会先 normalize。
 - 如果 range 中任一点非法，会抛出 `RangeError`。
 
+## Demo 调试入口
+
+demo 当前提供 model selection 调试面板：
+
+- 手动输入 anchor/focus 的 path 和 offset。
+- 展示 selection JSON。
+- 展示 anchor path 对应的 model 节点。
+- 在文档 JSON 映射中高亮 anchor path 对应节点。
+
 ## 当前限制
 
 - 不包含浏览器 selection 同步。
