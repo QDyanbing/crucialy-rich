@@ -22,6 +22,9 @@
 - [x] 包开源发布元信息（publishConfig、repository、各包 README 和 LICENSE）。
 - [x] 文档模型第一版。
 - [x] Selection 第一版。
+- [x] React 空编辑器外壳。
+- [x] model demo 示例切换、校验状态和 normalize 验收入口。
+- [x] selection demo 的 path 对应 JSON 节点高亮。
 
 暂不处理：
 
