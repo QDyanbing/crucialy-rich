@@ -68,4 +68,5 @@ interface DocumentNode {
 ## 当前限制
 
 - 只支持 paragraph 和纯文本，不支持 marks、heading、list 等。
+- 第一版节点不包含 `attrs` 字段，后续新增 heading、link、image 等能力时再引入属性模型。
 - normalize 丢弃非法节点而不尝试转换，转换策略留待后续。
