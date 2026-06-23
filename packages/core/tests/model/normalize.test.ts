@@ -25,6 +25,20 @@ describe("normalizeDocument", () => {
     expect(result.children[0]?.children[0]?.text).toBe("");
   });
 
+  it("drops invalid document children", () => {
+    const result = normalizeDocument({
+      type: "document",
+      children: [
+        { type: "text", text: "loose" },
+        { type: "paragraph", children: [{ type: "text", text: "keep" }] },
+      ],
+    });
+
+    expect(result.children).toHaveLength(1);
+    expect(result.children[0]?.children[0]?.text).toBe("keep");
+    expect(validateDocument(result).valid).toBe(true);
+  });
+
   it("drops invalid paragraph children", () => {
     const result = normalizeDocument({
       type: "document",
