@@ -1,0 +1,65 @@
+import { describe, expect, it } from "vitest";
+
+import { createDocument, createParagraph, createText } from "../../src/model";
+import { MODEL_PATH_ATTRIBUTE, renderDocument } from "../../src/render";
+
+describe("renderDocument", () => {
+  it("renders document, paragraph, and text nodes with model paths", () => {
+    const document = createDocument([
+      createParagraph([createText("Hello"), createText(" world")]),
+      createParagraph([createText("Second")]),
+    ]);
+
+    expect(renderDocument(document)).toEqual({
+      tagName: "div",
+      path: [],
+      attributes: {
+        [MODEL_PATH_ATTRIBUTE]: "[]",
+      },
+      children: [
+        {
+          tagName: "p",
+          path: [0],
+          attributes: {
+            [MODEL_PATH_ATTRIBUTE]: "[0]",
+          },
+          children: [
+            {
+              tagName: "span",
+              path: [0, 0],
+              attributes: {
+                [MODEL_PATH_ATTRIBUTE]: "[0,0]",
+              },
+              text: "Hello",
+            },
+            {
+              tagName: "span",
+              path: [0, 1],
+              attributes: {
+                [MODEL_PATH_ATTRIBUTE]: "[0,1]",
+              },
+              text: " world",
+            },
+          ],
+        },
+        {
+          tagName: "p",
+          path: [1],
+          attributes: {
+            [MODEL_PATH_ATTRIBUTE]: "[1]",
+          },
+          children: [
+            {
+              tagName: "span",
+              path: [1, 0],
+              attributes: {
+                [MODEL_PATH_ATTRIBUTE]: "[1,0]",
+              },
+              text: "Second",
+            },
+          ],
+        },
+      ],
+    });
+  });
+});
