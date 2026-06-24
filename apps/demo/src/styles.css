@@ -109,18 +109,41 @@ h3 {
 }
 
 .editor-surface {
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
   padding: 24px;
 }
 
 .empty-state {
-  width: min(100%, 360px);
-  padding: 32px;
+  width: 100%;
+  padding: 14px 16px;
   border: 1px dashed #9fb0a4;
   border-radius: 8px;
   color: #4b5d52;
-  text-align: center;
+  text-align: left;
+}
+
+.rendered-document {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+  min-height: 360px;
+  border: 1px solid #d9ded8;
+  border-radius: 8px;
+  background: #fbfcfb;
+  padding: 18px;
+}
+
+.rendered-document p {
+  margin: 0;
+  color: #17211b;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.rendered-document span {
+  white-space: pre-wrap;
 }
 
 .debug-panel {

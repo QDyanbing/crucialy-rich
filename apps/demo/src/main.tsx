@@ -6,14 +6,16 @@ import {
   getTextInRange,
   isValidPoint,
   normalizeDocument,
+  renderDocument,
   validateDocument,
   type DocumentNode,
   type Path,
   type Point,
   type RangeSelection,
+  type RenderedElementNode,
 } from "@crucialy-rich/core";
 import { RichTextEditor } from "@crucialy-rich/react";
-import { StrictMode, useMemo, useState, type ChangeEvent } from "react";
+import { StrictMode, createElement, useMemo, useState, type ChangeEvent } from "react";
 import { createRoot } from "react-dom/client";
 
 import "./styles.css";
@@ -171,6 +173,25 @@ function DocumentJsonMap({ document, selectedPath }: DocumentJsonMapProps) {
   );
 }
 
+interface RenderedElementViewProps {
+  className?: string;
+  node: RenderedElementNode;
+}
+
+function RenderedElementView({ className, node }: RenderedElementViewProps) {
+  return createElement(
+    node.tagName,
+    {
+      ...node.attributes,
+      className,
+    },
+    node.text,
+    node.children?.map((child) => (
+      <RenderedElementView key={child.path.join(".")} node={child} />
+    )),
+  );
+}
+
 function parsePath(value: string): number[] {
   if (value.trim() === "") {
     return [];
@@ -298,6 +319,10 @@ function DemoApp() {
     () => normalizeDocument(documentValue),
     [documentValue],
   );
+  const renderedDocument = useMemo(
+    () => renderDocument(normalizedDocument),
+    [normalizedDocument],
+  );
   const documentPreview = useMemo(
     () => JSON.stringify(documentValue, null, 2),
     [documentValue],
@@ -327,6 +352,7 @@ function DemoApp() {
       <section className="workspace-grid" aria-label="Editor workspace">
         <div className="editor-surface" aria-label="Editor preview">
           <RichTextEditor className="empty-state" label="Editor shell" />
+          <RenderedElementView className="rendered-document" node={renderedDocument} />
         </div>
 
         <aside className="debug-panel" aria-label="Document debug panel">
