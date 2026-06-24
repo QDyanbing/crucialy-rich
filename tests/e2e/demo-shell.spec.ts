@@ -24,6 +24,18 @@ test("updates the selection debug preview", async ({ page }) => {
   await expect(page.getByLabel("Selection JSON")).toContainText('"offset": 14');
 });
 
+test("renders the model document in the editor preview", async ({ page }) => {
+  await page.goto("/");
+
+  await expect(page.getByLabel("Editor preview")).toContainText("Hello crucialy-rich.");
+  await expect(page.locator('[data-crucialy-path="[0,0]"]')).toContainText(
+    "Hello crucialy-rich.",
+  );
+  await expect(page.locator('[data-crucialy-path="[1,0]"]')).toContainText(
+    "Selection model ready.",
+  );
+});
+
 test("normalizes invalid model examples", async ({ page }) => {
   await page.goto("/");
 
