@@ -25,11 +25,12 @@
 - [x] React 空编辑器外壳。
 - [x] model demo 示例切换、校验状态和 normalize 验收入口。
 - [x] selection demo 的 path 对应 JSON 节点高亮。
+- [x] 基础 model 渲染和 demo 渲染验收。
 
 暂不处理：
 
 - [ ] 文档站，例如 VitePress 或 Docusaurus。
 - [ ] 发布流水线与自动化 npm 发布，例如 changesets 或 semantic-release。
-- [ ] React 富文本组件、DOM 映射和真实编辑行为。
+- [ ] React 富文本组件、DOM 到 model 映射和真实编辑行为。
 
 这些暂不处理项需要等第一个可用包 API 或明确发布目标出现后再定。

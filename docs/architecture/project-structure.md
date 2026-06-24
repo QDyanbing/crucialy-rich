@@ -1,6 +1,6 @@
 # 工程结构
 
-本仓库按 monorepo 组织，当前阶段已经完成工程骨架、文档模型第一版和 model selection 第一版。
+本仓库按 monorepo 组织，当前阶段已经完成工程骨架、文档模型第一版、model selection 第一版和基础 model 渲染第一版。
 
 ```text
 .
@@ -35,7 +35,7 @@
 
 ## 包职责
 
-- `packages/core`：富文本内核包，当前承载文档模型、normalize 和 model selection；后续继续扩展 operation、transaction、command、history、parser、serializer。
+- `packages/core`：富文本内核包，当前承载文档模型、normalize、model selection 和基础 renderer；后续继续扩展 operation、transaction、command、history、parser、serializer。
 - `packages/react`：React 集成层，当前只保留空编辑器外壳；后续承载 DOM 渲染、事件绑定、工具栏和菜单。
 - `apps/demo`：开发与验收入口，当前展示文档模型 JSON 和 selection 调试面板。
 - `tests/e2e`：浏览器级 smoke、demo 验收和后续关键交互测试。
@@ -43,4 +43,4 @@
 
 ## 当前边界
 
-当前仍不包含 React 富文本组件逻辑、DOM 映射、浏览器 selection 同步或真实编辑行为。
+当前仍不包含 React 富文本组件逻辑、DOM 到 model 映射、浏览器 selection 同步或真实编辑行为。

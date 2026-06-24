@@ -10,9 +10,9 @@
 
 ## 当前阶段
 
-已完成工程初始化、文档模型第一版和 model selection 第一版。
+已完成工程初始化、文档模型第一版、model selection 第一版和基础 model 渲染第一版。
 
-当前仍未实现 React 富文本组件逻辑、浏览器 selection 同步、DOM 映射或真实编辑行为。
+当前仍未实现 React 富文本组件逻辑、DOM 到 model 映射、浏览器 selection 同步或真实编辑行为。
 
 ## 技术栈
 
@@ -39,7 +39,7 @@
 .
 ├── apps/demo              # Vite + React 调试 demo
 ├── docs                   # 架构、开发和 QA 文档
-├── packages/core          # 富文本内核模型和 selection
+├── packages/core          # 富文本内核模型、selection 和基础渲染
 ├── packages/react         # React 集成包和空编辑器外壳
 ├── tests/e2e              # Playwright e2e smoke
 ├── eslint.config.js       # ESLint flat config

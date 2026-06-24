@@ -19,14 +19,16 @@ The format follows the spirit of [Keep a Changelog](https://keepachangelog.com/e
 - Added selection JSON node highlighting in the demo inspector.
 - Added week 2 and week 3 QA records for model and selection milestones.
 - Added schema tests for unknown node types and invalid document child normalization.
+- Added the first basic renderer with model path attributes, HTML serialization, docs, QA, and demo rendering.
 
 ### Changed
 
 - Updated project, QA, package, and collaboration docs to match the completed model and selection scope.
 - Updated package homepage metadata to use the `master` branch.
 - Clarified contribution, model attrs, and selection demo inspector documentation.
+- Updated project status docs for the completed basic renderer.
 
 ### Not Included Yet
 
 - React rich text editor component logic beyond the empty shell.
-- Editing commands, history, parsing, serialization, DOM mapping, browser selection sync, or rendering behavior.
+- Editing commands, history, parsing, document serialization, DOM-to-model mapping, browser selection sync, or real editing behavior.
