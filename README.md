@@ -24,7 +24,7 @@
 | 语言      | TypeScript 5.8                     | packages 和 demo 类型系统                               |
 | 包构建    | tsup 8.5                           | `packages/core`、`packages/react` 的 ESM 和类型声明构建 |
 | Demo 构建 | Vite 6.3                           | `apps/demo` 的开发服务和生产构建                        |
-| Demo UI   | React 18.3                         | demo 空壳页面运行时                                     |
+| Demo UI   | React 18.3                         | demo 调试页面运行时                                     |
 | 单元测试  | Vitest 3.2                         | workspace 和包入口 smoke 测试                           |
 | E2E 测试  | Playwright 1.52                    | demo 页面浏览器 smoke 测试                              |
 | Lint      | ESLint 9、typescript-eslint        | TypeScript、脚本和配置文件检查                          |
@@ -37,7 +37,7 @@
 
 ```text
 .
-├── apps/demo              # Vite + React demo 空壳
+├── apps/demo              # Vite + React 调试 demo
 ├── docs                   # 架构、开发和 QA 文档
 ├── packages/core          # 富文本内核模型和 selection
 ├── packages/react         # React 集成包和空编辑器外壳
