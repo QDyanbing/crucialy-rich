@@ -4,7 +4,7 @@
 
 - workspace 目录存在。
 - `packages/core` 和 `packages/react` 有可构建入口，但不包含编辑器实现逻辑。
-- `apps/demo` 可以启动空壳页面。
+- `apps/demo` 可以启动调试页面。
 - TypeScript、Vitest、Playwright、ESLint、Prettier 和 commitlint 配置存在。
 - `pnpm check` 可以作为本地质量门禁。
 - `pnpm test:e2e:install` 可以安装本地 e2e 浏览器依赖。
