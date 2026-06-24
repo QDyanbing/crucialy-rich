@@ -110,6 +110,7 @@ pnpm test:e2e
 - [脚手架补项清单](./docs/development/scaffold-checklist.md)
 - [文档模型](./docs/features/model.md)
 - [Selection](./docs/features/selection.md)
+- [基础渲染](./docs/features/render.md)
 - [提交规范](./docs/development/commit-convention.md)
 - [测试策略](./docs/qa/test-strategy.md)
 - [脚手架验收](./docs/qa/scaffold-acceptance.md)
@@ -118,6 +119,7 @@ pnpm test:e2e
 - [第 3 周 QA](./docs/qa/week-03.md)
 - [模型 QA](./docs/qa/model.md)
 - [Selection QA](./docs/qa/selection.md)
+- [基础渲染 QA](./docs/qa/render.md)
 - [变更记录](./CHANGELOG.md)
 
 ## 反馈入口
