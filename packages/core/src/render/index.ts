@@ -5,10 +5,12 @@ export {
   MODEL_PATH_ATTRIBUTE,
 } from "./attributes";
 export {
+  domPointToModelPoint,
   findClosestModelPathElement,
   findElementByModelPath,
   getElementModelPath,
 } from "./dom-mapping";
+export type { DomPoint } from "./dom-mapping";
 export { renderNodeToHtml } from "./html";
 export { renderDocument } from "./render";
 export type { RenderedElementNode, RenderedTagName } from "./types";
