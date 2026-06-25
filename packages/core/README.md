@@ -2,7 +2,7 @@
 
 自研富文本编辑内核，不依赖 ProseMirror、Tiptap、Lexical、Slate 作为运行时内核。
 
-> 当前处于早期阶段，已提供文档模型、model selection 和基础 renderer 第一版 API，尚未提供编辑命令、DOM 到 model 映射或浏览器 selection 同步。
+> 当前处于早期阶段，已提供文档模型、model selection、基础 renderer 和 DOM/model point 映射第一版 API，尚未提供编辑命令或浏览器 selection 同步。
 
 ## 安装
 
@@ -41,6 +41,7 @@ const selectedText = getTextInRange(normalized, {
 - 校验和修复：`validateDocument`、`normalizeDocument`。
 - Selection：`Path`、`Point`、`RangeSelection`、`getNodeAtPath`、`isValidPoint`、`normalizeRange`、`getTextInRange`、`splitTextByRange`。
 - 基础渲染：`renderDocument`、`renderNodeToHtml`、`MODEL_PATH_ATTRIBUTE`、`encodeModelPath`、`decodeModelPath`。
+- DOM 映射：`domPointToModelPoint`、`modelPointToDomPoint`、`findElementByModelPath`、`findClosestModelPathElement`。
 
 ## 许可
 
