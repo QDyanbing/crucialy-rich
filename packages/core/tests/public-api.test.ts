@@ -32,6 +32,8 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.MODEL_PATH_ATTRIBUTE).toBe("string");
     expect(typeof core.encodeModelPath).toBe("function");
     expect(typeof core.decodeModelPath).toBe("function");
+    expect(typeof core.domPointToModelPoint).toBe("function");
+    expect(typeof core.modelPointToDomPoint).toBe("function");
     expect(typeof core.renderDocument).toBe("function");
     expect(typeof core.renderNodeToHtml).toBe("function");
   });

@@ -9,6 +9,7 @@ import {
   findClosestModelPathElement,
   findElementByModelPath,
   getElementModelPath,
+  modelPointToDomPoint,
 } from "../../src/render";
 
 describe("dom model path helpers", () => {
@@ -98,6 +99,38 @@ describe("dom model path helpers", () => {
     expect(domPointToModelPoint(model, { node: paragraph!, offset: 2 })).toEqual({
       path: [0, 1],
       offset: 6,
+    });
+  });
+
+  it("maps a model point to a text dom point", () => {
+    const model = createDocument([createParagraph([createText("Hello")])]);
+    const result = modelPointToDomPoint(document.body, model, {
+      path: [0, 0],
+      offset: 3,
+    });
+
+    expect(result?.node).toBe(document.querySelector("span")?.firstChild);
+    expect(result?.offset).toBe(3);
+  });
+
+  it("maps an empty model text point to its element", () => {
+    const model = createDocument([createParagraph([createText("")])]);
+    document.body.innerHTML = `
+      <div data-crucialy-path="[]">
+        <p data-crucialy-path="[0]">
+          <span data-crucialy-path="[0,0]"></span>
+        </p>
+      </div>
+    `;
+    const span = document.querySelector("span");
+    const result = modelPointToDomPoint(document.body, model, {
+      path: [0, 0],
+      offset: 0,
+    });
+
+    expect(result).toEqual({
+      node: span,
+      offset: 0,
     });
   });
 });
