@@ -3,7 +3,9 @@
  */
 import { beforeEach, describe, expect, it } from "vitest";
 
+import { createDocument, createParagraph, createText } from "../../src/model";
 import {
+  domPointToModelPoint,
   findClosestModelPathElement,
   findElementByModelPath,
   getElementModelPath,
@@ -39,5 +41,34 @@ describe("dom model path helpers", () => {
 
     expect(findElementByModelPath(root, [0, 0])).toBe(document.querySelector("span"));
     expect(findElementByModelPath(root, [9])).toBeUndefined();
+  });
+
+  it("maps a text dom point to a model point", () => {
+    const model = createDocument([createParagraph([createText("Hello")])]);
+    const text = document.querySelector("span")?.firstChild;
+
+    expect(text).toBeDefined();
+    expect(domPointToModelPoint(model, { node: text!, offset: 2 })).toEqual({
+      path: [0, 0],
+      offset: 2,
+    });
+  });
+
+  it("maps an empty text element to offset zero", () => {
+    const model = createDocument([createParagraph([createText("")])]);
+    document.body.innerHTML = `
+      <div data-crucialy-path="[]">
+        <p data-crucialy-path="[0]">
+          <span data-crucialy-path="[0,0]"></span>
+        </p>
+      </div>
+    `;
+    const span = document.querySelector("span");
+
+    expect(span).not.toBeNull();
+    expect(domPointToModelPoint(model, { node: span!, offset: 0 })).toEqual({
+      path: [0, 0],
+      offset: 0,
+    });
   });
 });
