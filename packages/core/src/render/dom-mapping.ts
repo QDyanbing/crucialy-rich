@@ -129,3 +129,30 @@ export function domPointToModelPoint(
 
   return createParagraphBoundaryPoint(document, path, domPoint.offset);
 }
+
+export function modelPointToDomPoint(
+  root: ParentNode,
+  document: DocumentNode,
+  point: Point,
+): DomPoint | undefined {
+  if (!isValidPoint(document, point)) {
+    return undefined;
+  }
+
+  const element = findElementByModelPath(root, point.path);
+  const textNode = Array.from(element?.childNodes ?? []).find(isTextDomNode);
+
+  if (textNode) {
+    return {
+      node: textNode,
+      offset: Math.min(point.offset, textNode.data.length),
+    };
+  }
+
+  return element
+    ? {
+        node: element,
+        offset: 0,
+      }
+    : undefined;
+}

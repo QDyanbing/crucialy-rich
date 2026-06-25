@@ -9,6 +9,7 @@ export {
   findClosestModelPathElement,
   findElementByModelPath,
   getElementModelPath,
+  modelPointToDomPoint,
 } from "./dom-mapping";
 export type { DomPoint } from "./dom-mapping";
 export { renderNodeToHtml } from "./html";
