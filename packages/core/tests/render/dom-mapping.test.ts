@@ -71,4 +71,33 @@ describe("dom model path helpers", () => {
       offset: 0,
     });
   });
+
+  it("maps paragraph dom boundaries to model points", () => {
+    const model = createDocument([
+      createParagraph([createText("Hello"), createText(" world")]),
+    ]);
+    document.body.innerHTML = `
+      <div data-crucialy-path="[]">
+        <p data-crucialy-path="[0]">
+          <span data-crucialy-path="[0,0]">Hello</span>
+          <span data-crucialy-path="[0,1]"> world</span>
+        </p>
+      </div>
+    `;
+    const paragraph = document.querySelector("p");
+
+    expect(paragraph).not.toBeNull();
+    expect(domPointToModelPoint(model, { node: paragraph!, offset: 0 })).toEqual({
+      path: [0, 0],
+      offset: 0,
+    });
+    expect(domPointToModelPoint(model, { node: paragraph!, offset: 1 })).toEqual({
+      path: [0, 1],
+      offset: 0,
+    });
+    expect(domPointToModelPoint(model, { node: paragraph!, offset: 2 })).toEqual({
+      path: [0, 1],
+      offset: 6,
+    });
+  });
 });
