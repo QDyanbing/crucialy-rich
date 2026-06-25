@@ -1,4 +1,4 @@
-import { isTextNode, type DocumentNode } from "../model";
+import { isParagraphNode, isTextNode, type DocumentNode } from "../model";
 import { getNodeAtPath, isValidPoint, type Path, type Point } from "../selection";
 import { decodeModelPath, encodeModelPath, MODEL_PATH_ATTRIBUTE } from "./attributes";
 
@@ -30,6 +30,33 @@ function createValidPoint(
   const point = { path, offset };
 
   return isValidPoint(document, point) ? point : undefined;
+}
+
+function createParagraphBoundaryPoint(
+  document: DocumentNode,
+  path: Path,
+  offset: number,
+): Point | undefined {
+  const node = getNodeAtPath(document, path);
+
+  if (!isParagraphNode(node) || node.children.length === 0) {
+    return undefined;
+  }
+
+  if (offset <= 0) {
+    return createValidPoint(document, [...path, 0], 0);
+  }
+
+  if (offset >= node.children.length) {
+    const lastTextIndex = node.children.length - 1;
+    const lastTextNode = node.children[lastTextIndex];
+
+    return lastTextNode
+      ? createValidPoint(document, [...path, lastTextIndex], lastTextNode.text.length)
+      : undefined;
+  }
+
+  return createValidPoint(document, [...path, offset], 0);
 }
 
 export function getElementModelPath(element: Element): Path | undefined {
@@ -92,9 +119,13 @@ export function domPointToModelPoint(
   const path = getElementModelPath(domPoint.node);
   const modelNode = path ? getNodeAtPath(document, path) : undefined;
 
-  if (!path || !isTextNode(modelNode)) {
+  if (!path) {
     return undefined;
   }
 
-  return createValidPoint(document, path, domPoint.offset);
+  if (isTextNode(modelNode)) {
+    return createValidPoint(document, path, domPoint.offset);
+  }
+
+  return createParagraphBoundaryPoint(document, path, domPoint.offset);
 }
