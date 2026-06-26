@@ -4,7 +4,11 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { createDocument, createParagraph, createText } from "../../src/model";
-import { domSelectionToModelSelection } from "../../src/render";
+import {
+  applyModelSelectionToDom,
+  createDomRangeFromModelSelection,
+  domSelectionToModelSelection,
+} from "../../src/render";
 
 describe("domSelectionToModelSelection", () => {
   beforeEach(() => {
@@ -45,5 +49,34 @@ describe("domSelectionToModelSelection", () => {
     selection!.removeAllRanges();
 
     expect(domSelectionToModelSelection(model, selection!)).toBeUndefined();
+  });
+
+  it("creates a collapsed dom range from a model selection", () => {
+    const model = createDocument([createParagraph([createText("Hello")])]);
+    const text = document.querySelector("span")?.firstChild;
+    const range = createDomRangeFromModelSelection(document.body, model, {
+      anchor: { path: [0, 0], offset: 3 },
+      focus: { path: [0, 0], offset: 3 },
+    });
+
+    expect(range).toBeDefined();
+    expect(range?.startContainer).toBe(text);
+    expect(range?.startOffset).toBe(3);
+    expect(range?.collapsed).toBe(true);
+  });
+
+  it("applies a model selection to the browser selection", () => {
+    const model = createDocument([createParagraph([createText("Hello")])]);
+    const selection = window.getSelection();
+
+    expect(selection).not.toBeNull();
+    expect(
+      applyModelSelectionToDom(document.body, model, {
+        anchor: { path: [0, 0], offset: 4 },
+        focus: { path: [0, 0], offset: 4 },
+      }),
+    ).toBe(true);
+    expect(selection?.anchorNode).toBe(document.querySelector("span")?.firstChild);
+    expect(selection?.anchorOffset).toBe(4);
   });
 });
