@@ -34,6 +34,9 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.decodeModelPath).toBe("function");
     expect(typeof core.domPointToModelPoint).toBe("function");
     expect(typeof core.modelPointToDomPoint).toBe("function");
+    expect(typeof core.domSelectionToModelSelection).toBe("function");
+    expect(typeof core.createDomRangeFromModelSelection).toBe("function");
+    expect(typeof core.applyModelSelectionToDom).toBe("function");
     expect(typeof core.renderDocument).toBe("function");
     expect(typeof core.renderNodeToHtml).toBe("function");
   });
