@@ -2,6 +2,7 @@ import {
   createDocument,
   createParagraph,
   createText,
+  domSelectionToModelSelection,
   getNodeAtPath,
   getTextInRange,
   isValidPoint,
@@ -51,6 +52,11 @@ const modelExamples: ModelExample[] = [
     },
   },
 ];
+
+const defaultSelection: RangeSelection = {
+  anchor: { path: [0, 0], offset: 0 },
+  focus: { path: [0, 0], offset: 5 },
+};
 
 function cloneModelValue(value: unknown): unknown {
   return JSON.parse(JSON.stringify(value)) as unknown;
@@ -176,14 +182,24 @@ function DocumentJsonMap({ document, selectedPath }: DocumentJsonMapProps) {
 interface RenderedElementViewProps {
   className?: string;
   node: RenderedElementNode;
+  onSelectionSync?: () => void;
 }
 
-function RenderedElementView({ className, node }: RenderedElementViewProps) {
+function RenderedElementView({
+  className,
+  node,
+  onSelectionSync,
+}: RenderedElementViewProps) {
   return createElement(
     node.tagName,
     {
       ...node.attributes,
+      "aria-label": className ? "Rendered document" : undefined,
       className,
+      contentEditable: className ? true : undefined,
+      onKeyUp: onSelectionSync,
+      onMouseUp: onSelectionSync,
+      suppressContentEditableWarning: className ? true : undefined,
     },
     node.text,
     node.children?.map((child) => (
@@ -209,26 +225,34 @@ function createPoint(pathValue: string, offsetValue: string): Point {
 
 interface SelectionDebuggerProps {
   document: DocumentNode;
+  onSelectionChange: (selection: RangeSelection) => void;
+  selection: RangeSelection;
 }
 
-function SelectionDebugger({ document }: SelectionDebuggerProps) {
-  const [anchorPath, setAnchorPath] = useState("0,0");
-  const [anchorOffset, setAnchorOffset] = useState("0");
-  const [focusPath, setFocusPath] = useState("0,0");
-  const [focusOffset, setFocusOffset] = useState("5");
-
-  const selection = useMemo<RangeSelection>(
-    () => ({
-      anchor: createPoint(anchorPath, anchorOffset),
-      focus: createPoint(focusPath, focusOffset),
-    }),
-    [anchorOffset, anchorPath, focusOffset, focusPath],
-  );
+function SelectionDebugger({
+  document,
+  onSelectionChange,
+  selection,
+}: SelectionDebuggerProps) {
   const anchorValid = isValidPoint(document, selection.anchor);
   const focusValid = isValidPoint(document, selection.focus);
   const selectedText =
     anchorValid && focusValid ? getTextInRange(document, selection) : "";
   const anchorNode = getNodeAtPath(document, selection.anchor.path);
+
+  function updateAnchor(pathValue: string, offsetValue: string) {
+    onSelectionChange({
+      ...selection,
+      anchor: createPoint(pathValue, offsetValue),
+    });
+  }
+
+  function updateFocus(pathValue: string, offsetValue: string) {
+    onSelectionChange({
+      ...selection,
+      focus: createPoint(pathValue, offsetValue),
+    });
+  }
 
   return (
     <section className="selection-debugger" aria-label="Selection debugger">
@@ -239,8 +263,10 @@ function SelectionDebugger({ document }: SelectionDebuggerProps) {
           <span>Anchor path</span>
           <input
             aria-label="Anchor path"
-            value={anchorPath}
-            onChange={(event) => setAnchorPath(event.target.value)}
+            value={selection.anchor.path.join(",")}
+            onChange={(event) =>
+              updateAnchor(event.target.value, String(selection.anchor.offset))
+            }
           />
         </label>
         <label>
@@ -248,16 +274,20 @@ function SelectionDebugger({ document }: SelectionDebuggerProps) {
           <input
             aria-label="Anchor offset"
             inputMode="numeric"
-            value={anchorOffset}
-            onChange={(event) => setAnchorOffset(event.target.value)}
+            value={selection.anchor.offset}
+            onChange={(event) =>
+              updateAnchor(selection.anchor.path.join(","), event.target.value)
+            }
           />
         </label>
         <label>
           <span>Focus path</span>
           <input
             aria-label="Focus path"
-            value={focusPath}
-            onChange={(event) => setFocusPath(event.target.value)}
+            value={selection.focus.path.join(",")}
+            onChange={(event) =>
+              updateFocus(event.target.value, String(selection.focus.offset))
+            }
           />
         </label>
         <label>
@@ -265,8 +295,10 @@ function SelectionDebugger({ document }: SelectionDebuggerProps) {
           <input
             aria-label="Focus offset"
             inputMode="numeric"
-            value={focusOffset}
-            onChange={(event) => setFocusOffset(event.target.value)}
+            value={selection.focus.offset}
+            onChange={(event) =>
+              updateFocus(selection.focus.path.join(","), event.target.value)
+            }
           />
         </label>
       </div>
@@ -311,6 +343,8 @@ if (!rootElement) {
 
 function DemoApp() {
   const [modelExampleId, setModelExampleId] = useState<ModelExampleId>("regular");
+  const [modelSelection, setModelSelection] =
+    useState<RangeSelection>(defaultSelection);
   const [documentValue, setDocumentValue] = useState(() =>
     cloneModelValue(getModelExample("regular").value),
   );
@@ -339,6 +373,17 @@ function DemoApp() {
     setDocumentValue(normalizeDocument(documentValue));
   }
 
+  function handleBrowserSelectionSync() {
+    const browserSelection = window.getSelection();
+    const nextSelection = browserSelection
+      ? domSelectionToModelSelection(normalizedDocument, browserSelection)
+      : undefined;
+
+    if (nextSelection) {
+      setModelSelection(nextSelection);
+    }
+  }
+
   return (
     <main className="app-shell" aria-labelledby="page-title">
       <header className="top-bar">
@@ -352,7 +397,11 @@ function DemoApp() {
       <section className="workspace-grid" aria-label="Editor workspace">
         <div className="editor-surface" aria-label="Editor preview">
           <RichTextEditor className="empty-state" label="Editor shell" />
-          <RenderedElementView className="rendered-document" node={renderedDocument} />
+          <RenderedElementView
+            className="rendered-document"
+            node={renderedDocument}
+            onSelectionSync={handleBrowserSelectionSync}
+          />
         </div>
 
         <aside className="debug-panel" aria-label="Document debug panel">
@@ -397,7 +446,11 @@ function DemoApp() {
         </aside>
       </section>
 
-      <SelectionDebugger document={normalizedDocument} />
+      <SelectionDebugger
+        document={normalizedDocument}
+        onSelectionChange={setModelSelection}
+        selection={modelSelection}
+      />
     </main>
   );
 }
