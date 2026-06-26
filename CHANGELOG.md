@@ -21,6 +21,8 @@ The format follows the spirit of [Keep a Changelog](https://keepachangelog.com/e
 - Added schema tests for unknown node types and invalid document child normalization.
 - Added the first basic renderer with model path attributes, HTML serialization, docs, QA, and demo rendering.
 - Added DOM/model point mapping helpers with jsdom-backed tests.
+- Added browser selection/model selection sync helpers with jsdom and demo e2e coverage.
+- Added selection sync documentation and QA records.
 
 ### Changed
 
@@ -29,8 +31,9 @@ The format follows the spirit of [Keep a Changelog](https://keepachangelog.com/e
 - Clarified contribution, model attrs, and selection demo inspector documentation.
 - Updated project status docs for the completed basic renderer.
 - Updated render docs for DOM/model point mapping.
+- Updated project status docs for completed selection sync.
 
 ### Not Included Yet
 
 - React rich text editor component logic beyond the empty shell.
-- Editing commands, history, parsing, document serialization, browser selection sync, or real editing behavior.
+- Editing commands, history, parsing, document serialization, or real editing behavior.
