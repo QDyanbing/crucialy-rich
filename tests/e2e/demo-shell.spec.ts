@@ -36,6 +36,30 @@ test("renders the model document in the editor preview", async ({ page }) => {
   );
 });
 
+test("syncs browser selection back to model selection", async ({ page }) => {
+  await page.goto("/");
+
+  await page.locator('[data-crucialy-path="[0,0]"]').evaluate((element) => {
+    const text = element.firstChild;
+    const range = document.createRange();
+    const selection = window.getSelection();
+    const renderedDocument = element.closest('[aria-label="Rendered document"]');
+
+    if (!text || !selection || !renderedDocument) {
+      throw new Error("Missing rendered text selection target.");
+    }
+
+    range.setStart(text, 3);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    renderedDocument.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+  });
+
+  await expect(page.getByLabel("Selection JSON")).toContainText('"offset": 3');
+  await expect(page.getByLabel("Selected text")).toContainText("(empty)");
+});
+
 test("normalizes invalid model examples", async ({ page }) => {
   await page.goto("/");
 
