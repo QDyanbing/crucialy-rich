@@ -14,4 +14,9 @@ export {
 export type { DomPoint } from "./dom-mapping";
 export { renderNodeToHtml } from "./html";
 export { renderDocument } from "./render";
+export {
+  applyModelSelectionToDom,
+  createDomRangeFromModelSelection,
+  domSelectionToModelSelection,
+} from "./selection-sync";
 export type { RenderedElementNode, RenderedTagName } from "./types";
