@@ -414,6 +414,21 @@ function DemoApp() {
         </aside>
       </section>
 
+      <section className="component-examples" aria-label="Component API examples">
+        <h2>Component API</h2>
+
+        <div className="component-grid">
+          <div className="component-example">
+            <h3>Controlled</h3>
+            <RichTextEditor
+              className="mini-editor"
+              label="Controlled editor"
+              value={normalizedDocument}
+            />
+          </div>
+        </div>
+      </section>
+
       <SelectionDebugger
         document={normalizedDocument}
         onSelectionChange={setModelSelection}

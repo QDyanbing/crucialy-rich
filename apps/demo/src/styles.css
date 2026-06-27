@@ -325,6 +325,50 @@ input {
   padding: 0 6px;
 }
 
+.component-examples {
+  display: grid;
+  gap: 16px;
+  margin-top: 16px;
+  padding: 20px;
+  border: 1px solid #d9ded8;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 16px 36px rgb(26 36 30 / 8%);
+}
+
+.component-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.component-example {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.mini-editor {
+  display: grid;
+  gap: 8px;
+  min-height: 128px;
+  border: 1px solid #d9ded8;
+  border-radius: 8px;
+  background: #fbfcfb;
+  padding: 14px;
+}
+
+.mini-editor p {
+  margin: 0;
+  color: #17211b;
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.mini-editor span {
+  white-space: pre-wrap;
+}
+
 @media (max-width: 760px) {
   .app-shell {
     width: min(100% - 24px, 1180px);
@@ -341,6 +385,7 @@ input {
   }
 
   .control-grid,
+  .component-grid,
   .debug-stack {
     grid-template-columns: 1fr;
   }
