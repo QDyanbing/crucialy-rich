@@ -38,6 +38,27 @@ test("renders the model document in the editor preview", async ({ page }) => {
   );
 });
 
+test("shows controlled and uncontrolled editor examples", async ({ page }) => {
+  await page.goto("/");
+
+  const controlledEditor = page.getByRole("textbox", {
+    exact: true,
+    name: "Controlled editor",
+  });
+  const uncontrolledEditor = page.getByRole("textbox", {
+    exact: true,
+    name: "Uncontrolled editor",
+  });
+
+  await expect(controlledEditor).toContainText("Hello crucialy-rich.");
+  await expect(uncontrolledEditor).toContainText("Uncontrolled initial document.");
+
+  await page.getByLabel("Model example").selectOption("empty");
+
+  await expect(controlledEditor).not.toContainText("Hello crucialy-rich.");
+  await expect(uncontrolledEditor).toContainText("Uncontrolled initial document.");
+});
+
 test("syncs browser selection back to model selection", async ({ page }) => {
   await page.goto("/");
 
