@@ -36,4 +36,18 @@ describe("@crucialy-rich/react public API", () => {
     expect(html).toContain("Controlled value.");
     expect(html).toContain('data-crucialy-path="[0,0]"');
   });
+
+  it("renders an uncontrolled default document", () => {
+    const document = createDocument([createParagraph([createText("Default value.")])]);
+
+    const html = renderToStaticMarkup(
+      createElement(RichTextEditor, {
+        defaultValue: document,
+        label: "Uncontrolled editor",
+      }),
+    );
+
+    expect(html).toContain("Default value.");
+    expect(html).toContain('aria-label="Uncontrolled editor"');
+  });
 });
