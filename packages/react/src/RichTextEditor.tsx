@@ -23,6 +23,7 @@ export interface RichTextEditorProps
   > {
   defaultValue?: DocumentNode;
   label?: string;
+  onChange?: (value: DocumentNode) => void;
   value?: DocumentNode;
 }
 
