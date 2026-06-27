@@ -27,11 +27,13 @@ test("updates the selection debug preview", async ({ page }) => {
 test("renders the model document in the editor preview", async ({ page }) => {
   await page.goto("/");
 
-  await expect(page.getByLabel("Editor preview")).toContainText("Hello crucialy-rich.");
-  await expect(page.locator('[data-crucialy-path="[0,0]"]')).toContainText(
+  const renderedDocument = page.getByLabel("Rendered document");
+
+  await expect(renderedDocument).toContainText("Hello crucialy-rich.");
+  await expect(renderedDocument.locator('[data-crucialy-path="[0,0]"]')).toContainText(
     "Hello crucialy-rich.",
   );
-  await expect(page.locator('[data-crucialy-path="[1,0]"]')).toContainText(
+  await expect(renderedDocument.locator('[data-crucialy-path="[1,0]"]')).toContainText(
     "Selection model ready.",
   );
 });
@@ -39,22 +41,25 @@ test("renders the model document in the editor preview", async ({ page }) => {
 test("syncs browser selection back to model selection", async ({ page }) => {
   await page.goto("/");
 
-  await page.locator('[data-crucialy-path="[0,0]"]').evaluate((element) => {
-    const text = element.firstChild;
-    const range = document.createRange();
-    const selection = window.getSelection();
-    const renderedDocument = element.closest('[aria-label="Rendered document"]');
+  await page
+    .getByLabel("Rendered document")
+    .locator('[data-crucialy-path="[0,0]"]')
+    .evaluate((element) => {
+      const text = element.firstChild;
+      const range = document.createRange();
+      const selection = window.getSelection();
+      const renderedDocument = element.closest('[aria-label="Rendered document"]');
 
-    if (!text || !selection || !renderedDocument) {
-      throw new Error("Missing rendered text selection target.");
-    }
+      if (!text || !selection || !renderedDocument) {
+        throw new Error("Missing rendered text selection target.");
+      }
 
-    range.setStart(text, 3);
-    range.collapse(true);
-    selection.removeAllRanges();
-    selection.addRange(range);
-    renderedDocument.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
-  });
+      range.setStart(text, 3);
+      range.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      renderedDocument.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+    });
 
   await expect(page.getByLabel("Selection JSON")).toContainText('"offset": 3');
   await expect(page.getByLabel("Selected text")).toContainText("(empty)");
