@@ -1,5 +1,5 @@
 import { createDocument, createParagraph, createText } from "@crucialy-rich/core";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createElement, isValidElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
@@ -49,5 +49,21 @@ describe("@crucialy-rich/react public API", () => {
 
     expect(html).toContain("Default value.");
     expect(html).toContain('aria-label="Uncontrolled editor"');
+  });
+
+  it("does not emit onChange during initial render", () => {
+    const handleChange = vi.fn();
+    const document = createDocument([
+      createParagraph([createText("Read only render.")]),
+    ]);
+
+    renderToStaticMarkup(
+      createElement(RichTextEditor, {
+        onChange: handleChange,
+        value: document,
+      }),
+    );
+
+    expect(handleChange).not.toHaveBeenCalled();
   });
 });
