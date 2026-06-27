@@ -10,9 +10,9 @@
 
 ## 当前阶段
 
-已完成工程初始化、文档模型第一版、model selection 第一版、基础 model 渲染第一版、DOM/model point 映射第一版和 selection 双向同步第一版。
+已完成工程初始化、文档模型第一版、model selection 第一版、基础 model 渲染第一版、DOM/model point 映射第一版、selection 双向同步第一版和 React 组件 API 第一版。
 
-当前仍未实现 React 富文本组件逻辑或真实编辑行为。
+当前 React 组件已支持通过 `value` / `defaultValue` 展示文档模型，但仍未实现真实编辑行为。
 
 ## 技术栈
 
@@ -40,7 +40,7 @@
 ├── apps/demo              # Vite + React 调试 demo
 ├── docs                   # 架构、开发和 QA 文档
 ├── packages/core          # 富文本内核模型、selection、基础渲染、DOM 映射和 selection 同步
-├── packages/react         # React 集成包和空编辑器外壳
+├── packages/react         # React 集成包和 RichTextEditor 组件 API
 ├── tests/e2e              # Playwright e2e smoke
 ├── eslint.config.js       # ESLint flat config
 ├── playwright.config.ts   # Playwright 配置
@@ -112,6 +112,7 @@ pnpm test:e2e
 - [Selection](./docs/features/selection.md)
 - [基础渲染](./docs/features/render.md)
 - [Selection 双向同步](./docs/features/selection-sync.md)
+- [Component API](./docs/features/component-api.md)
 - [提交规范](./docs/development/commit-convention.md)
 - [测试策略](./docs/qa/test-strategy.md)
 - [脚手架验收](./docs/qa/scaffold-acceptance.md)

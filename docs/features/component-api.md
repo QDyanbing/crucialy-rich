@@ -1,0 +1,54 @@
+# Component API
+
+`@crucialy-rich/react` 当前暴露 `RichTextEditor` 组件，用于把文档模型渲染到 React 应用中。
+
+## Props
+
+| Prop           | 类型                              | 说明                                           |
+| -------------- | --------------------------------- | ---------------------------------------------- |
+| `value`        | `DocumentNode`                    | 受控文档。传入后组件会按该文档渲染内容。       |
+| `defaultValue` | `DocumentNode`                    | 非受控初始文档。仅用于组件初始化时的渲染内容。 |
+| `onChange`     | `(value: DocumentNode) => void`   | 预留变更回调。当前阶段不会主动触发。           |
+| `label`        | `string`                          | 编辑器区域的可访问名称。                       |
+| `className`    | `string`                          | 传给编辑器根节点的样式类名。                   |
+| DOM 事件 props | `onMouseUp`、`onKeyUp` 等基础事件 | 用于 demo 继续接入 selection 同步。            |
+
+## Controlled Usage
+
+```tsx
+import { createDocument, createParagraph, createText } from "@crucialy-rich/core";
+import { RichTextEditor } from "@crucialy-rich/react";
+
+const value = createDocument([createParagraph([createText("Controlled document.")])]);
+
+export function ControlledEditor() {
+  return <RichTextEditor label="Controlled editor" value={value} />;
+}
+```
+
+## Uncontrolled Usage
+
+```tsx
+import { createDocument, createParagraph, createText } from "@crucialy-rich/core";
+import { RichTextEditor } from "@crucialy-rich/react";
+
+const defaultValue = createDocument([
+  createParagraph([createText("Initial document.")]),
+]);
+
+export function UncontrolledEditor() {
+  return <RichTextEditor defaultValue={defaultValue} label="Uncontrolled editor" />;
+}
+```
+
+## Current Behavior
+
+- 组件内部复用 `@crucialy-rich/core` 的 `renderDocument`。
+- 渲染出的节点会保留 `data-crucialy-path`，用于 DOM/model 映射和 selection 同步。
+- `value` 优先级高于 `defaultValue`。
+- `defaultValue` 只在组件初始化时读取。
+- `onChange` 仅作为公开 API 形态预留，当前不会在初始渲染或浏览器 selection 变化时触发。
+
+## Boundaries
+
+当前组件仍不包含真实编辑命令、operation、transaction、history、输入法处理、粘贴解析或序列化能力。

@@ -23,6 +23,7 @@ The format follows the spirit of [Keep a Changelog](https://keepachangelog.com/e
 - Added DOM/model point mapping helpers with jsdom-backed tests.
 - Added browser selection/model selection sync helpers with jsdom and demo e2e coverage.
 - Added selection sync documentation and QA records.
+- Added the first React component API with `value`, `defaultValue`, `onChange`, renderer-backed output, docs, and demo examples.
 
 ### Changed
 
@@ -35,5 +36,4 @@ The format follows the spirit of [Keep a Changelog](https://keepachangelog.com/e
 
 ### Not Included Yet
 
-- React rich text editor component logic beyond the empty shell.
 - Editing commands, history, parsing, document serialization, or real editing behavior.

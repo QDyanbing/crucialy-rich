@@ -77,7 +77,7 @@ pnpm dev
 http://127.0.0.1:5173/
 ```
 
-当前 demo 提供编辑器外壳、文档模型 JSON 和 model selection 调试入口；仍不包含 DOM 映射、浏览器 selection 同步或真实编辑行为。
+当前 demo 提供文档模型 JSON、React 组件渲染示例、selection 调试入口和浏览器 selection 同步验证；仍不包含真实编辑行为。
 
 ## 7. 清理生成产物
 
