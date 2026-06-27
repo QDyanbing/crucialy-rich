@@ -12,14 +12,13 @@ describe("@crucialy-rich/react public API", () => {
   });
 
   it("exposes a renderable editor shell", () => {
-    const element = RichTextEditor({});
+    const element = createElement(RichTextEditor);
+    const html = renderToStaticMarkup(element);
 
     expect(isValidElement(element)).toBe(true);
-    expect(element.props).toMatchObject({
-      "aria-label": "Rich text editor",
-      "data-crucialy-rich-editor": "true",
-      role: "textbox",
-    });
+    expect(html).toContain('aria-label="Rich text editor"');
+    expect(html).toContain('data-crucialy-rich-editor="true"');
+    expect(html).toContain('role="textbox"');
   });
 
   it("renders a controlled document value", () => {
