@@ -51,6 +51,10 @@ const modelExamples: ModelExample[] = [
   },
 ];
 
+const uncontrolledPreviewDocument = createDocument([
+  createParagraph([createText("Uncontrolled initial document.")]),
+]);
+
 const defaultSelection: RangeSelection = {
   anchor: { path: [0, 0], offset: 0 },
   focus: { path: [0, 0], offset: 5 },
@@ -424,6 +428,14 @@ function DemoApp() {
               className="mini-editor"
               label="Controlled editor"
               value={normalizedDocument}
+            />
+          </div>
+          <div className="component-example">
+            <h3>Uncontrolled</h3>
+            <RichTextEditor
+              className="mini-editor"
+              defaultValue={uncontrolledPreviewDocument}
+              label="Uncontrolled editor"
             />
           </div>
         </div>
