@@ -40,7 +40,7 @@
   },
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts --clean --tsconfig tsconfig.build.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit --pretty false"
+    "typecheck": "tsc -p tsconfig.typecheck.json --pretty false"
   },
   "dependencies": {
     "@crucialy-rich/core": "workspace:*"

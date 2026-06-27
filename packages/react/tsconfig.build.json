@@ -2,6 +2,9 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "composite": false,
-    "declarationMap": false
+    "declarationMap": false,
+    "paths": {
+      "@crucialy-rich/core": ["packages/core/dist/index.d.ts"]
+    }
   }
 }
