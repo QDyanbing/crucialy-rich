@@ -4,7 +4,13 @@ import {
   type DocumentNode,
   type RenderedElementNode,
 } from "@crucialy-rich/core";
-import { createElement, type HTMLAttributes, type ReactElement } from "react";
+import {
+  createElement,
+  useMemo,
+  useState,
+  type HTMLAttributes,
+  type ReactElement,
+} from "react";
 
 export interface RichTextEditorProps
   extends Pick<
@@ -15,6 +21,7 @@ export interface RichTextEditorProps
     | "onMouseUp"
     | "suppressContentEditableWarning"
   > {
+  defaultValue?: DocumentNode;
   label?: string;
   value?: DocumentNode;
 }
@@ -35,14 +42,16 @@ function createRenderedElement(node: RenderedElementNode): ReactElement {
 export function RichTextEditor({
   className,
   contentEditable,
+  defaultValue,
   label = "Rich text editor",
   onKeyUp,
   onMouseUp,
   suppressContentEditableWarning,
   value,
 }: RichTextEditorProps): ReactElement {
-  const document = value ?? createDocument();
-  const renderedDocument = renderDocument(document);
+  const [uncontrolledDocument] = useState(() => defaultValue ?? createDocument());
+  const document = value ?? uncontrolledDocument;
+  const renderedDocument = useMemo(() => renderDocument(document), [document]);
 
   return (
     <div
