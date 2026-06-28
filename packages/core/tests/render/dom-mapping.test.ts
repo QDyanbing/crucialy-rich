@@ -37,11 +37,24 @@ describe("dom model path helpers", () => {
     expect(findClosestModelPathElement(text!)).toBe(document.querySelector("span"));
   });
 
+  it("returns undefined when no closest model path element exists", () => {
+    const text = document.createTextNode("Loose");
+
+    expect(findClosestModelPathElement(text)).toBeUndefined();
+  });
+
   it("finds an element by model path", () => {
     const root = document.body;
 
     expect(findElementByModelPath(root, [0, 0])).toBe(document.querySelector("span"));
     expect(findElementByModelPath(root, [9])).toBeUndefined();
+  });
+
+  it("finds the root element by an empty model path", () => {
+    const root = document.querySelector("div");
+
+    expect(root).not.toBeNull();
+    expect(findElementByModelPath(root!, [])).toBe(root);
   });
 
   it("maps a text dom point to a model point", () => {
