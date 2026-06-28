@@ -27,6 +27,12 @@ interface ModelExample {
   value: unknown;
 }
 
+interface RenderBoundaryExample {
+  document: DocumentNode;
+  id: string;
+  label: string;
+}
+
 const modelExamples: ModelExample[] = [
   {
     id: "regular",
@@ -54,6 +60,17 @@ const modelExamples: ModelExample[] = [
 const uncontrolledPreviewDocument = createDocument([
   createParagraph([createText("Uncontrolled initial document.")]),
 ]);
+
+const renderBoundaryExamples: RenderBoundaryExample[] = [
+  {
+    id: "empty-document",
+    label: "Empty document boundary",
+    document: {
+      type: "document",
+      children: [],
+    },
+  },
+];
 
 const defaultSelection: RangeSelection = {
   anchor: { path: [0, 0], offset: 0 },
@@ -438,6 +455,23 @@ function DemoApp() {
               label="Uncontrolled editor"
             />
           </div>
+        </div>
+      </section>
+
+      <section className="render-boundaries" aria-label="Render boundary examples">
+        <h2>Render boundaries</h2>
+
+        <div className="boundary-grid">
+          {renderBoundaryExamples.map((example) => (
+            <div className="boundary-example" key={example.id}>
+              <h3>{example.label}</h3>
+              <RichTextEditor
+                className="mini-editor"
+                label={example.label}
+                value={example.document}
+              />
+            </div>
+          ))}
         </div>
       </section>
 
