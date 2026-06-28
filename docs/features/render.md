@@ -47,6 +47,7 @@ interface RenderedElementNode {
 
 - `domPointToModelPoint(document, domPoint)`：把 DOM node/offset 转成 model `Point`。
 - `modelPointToDomPoint(root, document, point)`：把 model `Point` 转成 DOM node/offset。
+- `getElementModelPath(element)`：读取元素上的 model path。
 - `findElementByModelPath(root, path)`：按 `data-crucialy-path` 查找 DOM element。
 - `findClosestModelPathElement(node)`：从 DOM node 向上查找最近的 model path element。
 
@@ -56,13 +57,28 @@ interface RenderedElementNode {
 - 空 text 没有 text node 时，落在对应 `span` element 的 offset `0`。
 - paragraph element 的 offset `0` 映射到段首。
 - paragraph element 的末尾 offset 映射到段尾。
+- 非法 DOM offset、没有 model path 的 DOM node、非法 model point 都返回 `undefined`。
+
+## 边界渲染
+
+渲染层只按传入的合法文档结构生成 DOM 描述，不隐式 normalize：
+
+- 空 document 渲染为带根 path 的空 `div`。
+- 空 paragraph 渲染为带 path 的空 `p`。
+- 多段落按 block 顺序分配 `[0]`、`[1]`、`[2]` 等 path。
 
 ## Demo 验收
 
-demo 的编辑区当前会使用 renderer 渲染 normalize 后的文档。切换 model 示例或点击 Normalize 后，编辑区内容会随合法文档更新。
+demo 的主编辑区会使用 React 组件渲染 normalize 后的文档。切换 model 示例或点击 Normalize 后，编辑区内容会随合法文档更新。
+
+demo 还提供渲染边界示例：
+
+- Empty document boundary。
+- Empty paragraph boundary。
+- Multiple paragraph boundary。
 
 ## 当前限制
 
-- 不读取或恢复浏览器 selection。
+- 浏览器 selection 同步当前只覆盖已验证的基础场景。
 - 不处理 contentEditable、beforeinput 或真实编辑行为。
 - 不包含 marks、heading、list 等扩展节点渲染。
