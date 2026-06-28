@@ -1,4 +1,9 @@
-import { createDocument, createParagraph, createText } from "@crucialy-rich/core";
+import {
+  createDocument,
+  createParagraph,
+  createText,
+  type DocumentNode,
+} from "@crucialy-rich/core";
 import { describe, expect, it, vi } from "vitest";
 import { createElement, isValidElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -35,6 +40,23 @@ describe("@crucialy-rich/react public API", () => {
 
     expect(html).toContain("Controlled value.");
     expect(html).toContain('data-crucialy-path="[0,0]"');
+  });
+
+  it("renders an empty document boundary", () => {
+    const document: DocumentNode = {
+      type: "document",
+      children: [],
+    };
+
+    const html = renderToStaticMarkup(
+      createElement(RichTextEditor, {
+        label: "Empty editor",
+        value: document,
+      }),
+    );
+
+    expect(html).toContain('data-crucialy-path="[]"');
+    expect(html).not.toContain("<p");
   });
 
   it("renders an uncontrolled default document", () => {
