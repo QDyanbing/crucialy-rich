@@ -70,6 +70,14 @@ const renderBoundaryExamples: RenderBoundaryExample[] = [
       children: [],
     },
   },
+  {
+    id: "empty-paragraph",
+    label: "Empty paragraph boundary",
+    document: {
+      type: "document",
+      children: [{ type: "paragraph", children: [] }],
+    },
+  },
 ];
 
 const defaultSelection: RangeSelection = {
