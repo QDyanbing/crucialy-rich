@@ -1,9 +1,30 @@
 import { describe, expect, it } from "vitest";
 
-import { createDocument, createParagraph, createText } from "../../src/model";
+import {
+  createDocument,
+  createParagraph,
+  createText,
+  type DocumentNode,
+} from "../../src/model";
 import { MODEL_PATH_ATTRIBUTE, renderDocument } from "../../src/render";
 
 describe("renderDocument", () => {
+  it("renders an empty document as an empty root", () => {
+    const document: DocumentNode = {
+      type: "document",
+      children: [],
+    };
+
+    expect(renderDocument(document)).toEqual({
+      tagName: "div",
+      path: [],
+      attributes: {
+        [MODEL_PATH_ATTRIBUTE]: "[]",
+      },
+      children: [],
+    });
+  });
+
   it("renders document, paragraph, and text nodes with model paths", () => {
     const document = createDocument([
       createParagraph([createText("Hello"), createText(" world")]),
