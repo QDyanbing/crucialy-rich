@@ -30,9 +30,13 @@ describe("@crucialy-rich/core public API", () => {
 
   it("exposes the render API", () => {
     expect(typeof core.MODEL_PATH_ATTRIBUTE).toBe("string");
+    expect(typeof core.createModelPathAttributes).toBe("function");
     expect(typeof core.encodeModelPath).toBe("function");
     expect(typeof core.decodeModelPath).toBe("function");
     expect(typeof core.domPointToModelPoint).toBe("function");
+    expect(typeof core.findClosestModelPathElement).toBe("function");
+    expect(typeof core.findElementByModelPath).toBe("function");
+    expect(typeof core.getElementModelPath).toBe("function");
     expect(typeof core.modelPointToDomPoint).toBe("function");
     expect(typeof core.domSelectionToModelSelection).toBe("function");
     expect(typeof core.createDomRangeFromModelSelection).toBe("function");
