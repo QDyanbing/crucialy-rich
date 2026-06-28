@@ -59,6 +59,34 @@ test("shows controlled and uncontrolled editor examples", async ({ page }) => {
   await expect(uncontrolledEditor).toContainText("Uncontrolled initial document.");
 });
 
+test("renders boundary examples without selection errors", async ({ page }) => {
+  await page.goto("/");
+
+  const emptyDocument = page.getByRole("textbox", {
+    exact: true,
+    name: "Empty document boundary",
+  });
+  const emptyParagraph = page.getByRole("textbox", {
+    exact: true,
+    name: "Empty paragraph boundary",
+  });
+  const multiParagraph = page.getByRole("textbox", {
+    exact: true,
+    name: "Multiple paragraph boundary",
+  });
+
+  await expect(emptyDocument).toHaveAttribute("data-crucialy-path", "[]");
+  await expect(emptyDocument.locator("p")).toHaveCount(0);
+  await expect(emptyParagraph.locator('[data-crucialy-path="[0]"]')).toHaveCount(1);
+  await expect(emptyParagraph.locator('[data-crucialy-path="[0,0]"]')).toHaveCount(0);
+  await expect(multiParagraph).toContainText("Boundary first paragraph.");
+  await expect(multiParagraph).toContainText("Boundary third paragraph.");
+  await expect(multiParagraph.locator('[data-crucialy-path="[2,0]"]')).toContainText(
+    "Boundary third paragraph.",
+  );
+  await expect(page.getByLabel("Selection debugger")).toBeVisible();
+});
+
 test("syncs browser selection back to model selection", async ({ page }) => {
   await page.goto("/");
 
