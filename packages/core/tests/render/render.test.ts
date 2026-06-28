@@ -25,6 +25,31 @@ describe("renderDocument", () => {
     });
   });
 
+  it("renders an empty paragraph without text children", () => {
+    const document: DocumentNode = {
+      type: "document",
+      children: [{ type: "paragraph", children: [] }],
+    };
+
+    expect(renderDocument(document)).toEqual({
+      tagName: "div",
+      path: [],
+      attributes: {
+        [MODEL_PATH_ATTRIBUTE]: "[]",
+      },
+      children: [
+        {
+          tagName: "p",
+          path: [0],
+          attributes: {
+            [MODEL_PATH_ATTRIBUTE]: "[0]",
+          },
+          children: [],
+        },
+      ],
+    });
+  });
+
   it("renders document, paragraph, and text nodes with model paths", () => {
     const document = createDocument([
       createParagraph([createText("Hello"), createText(" world")]),
