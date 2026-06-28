@@ -10,7 +10,7 @@
 
 ## 当前阶段
 
-已完成工程初始化、文档模型第一版、model selection 第一版、基础 model 渲染第一版、DOM/model point 映射第一版、selection 双向同步第一版和 React 组件 API 第一版。
+已完成工程初始化、文档模型第一版、model selection 第一版、基础 model 渲染第一版、DOM/model point 映射第一版、selection 双向同步第一版、React 组件 API 第一版和渲染闭环验收。
 
 当前 React 组件已支持通过 `value` / `defaultValue` 展示文档模型，但仍未实现真实编辑行为。
 
@@ -119,6 +119,7 @@ pnpm test:e2e
 - [第 1 周 QA](./docs/qa/week-01.md)
 - [第 2 周 QA](./docs/qa/week-02.md)
 - [第 3 周 QA](./docs/qa/week-03.md)
+- [第 4 周 QA](./docs/qa/week-04.md)
 - [模型 QA](./docs/qa/model.md)
 - [Selection QA](./docs/qa/selection.md)
 - [基础渲染 QA](./docs/qa/render.md)

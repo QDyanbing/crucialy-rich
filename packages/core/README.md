@@ -2,7 +2,7 @@
 
 自研富文本编辑内核，不依赖 ProseMirror、Tiptap、Lexical、Slate 作为运行时内核。
 
-> 当前处于早期阶段，已提供文档模型、model selection、基础 renderer、DOM/model point 映射和 selection 双向同步第一版 API，尚未提供编辑命令。
+> 当前处于早期阶段，已提供文档模型、model selection、基础 renderer、DOM/model point 映射、selection 双向同步和渲染闭环验收，尚未提供编辑命令。
 
 ## 安装
 

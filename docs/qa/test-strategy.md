@@ -1,6 +1,6 @@
 # 测试策略
 
-当前阶段已经包含工程 smoke、文档模型单测、model selection 单测、React 组件 API 单测和 demo e2e 验收。
+当前阶段已经包含工程 smoke、文档模型单测、model selection 单测、render/DOM mapping 单测、React 组件 API 单测和 demo e2e 验收。
 
 ## 单元测试
 
@@ -10,13 +10,14 @@
   - 包入口可导入。
   - 文档模型类型、创建、guard、validate 和 normalize。
   - Path、Point、RangeSelection 和文本切片工具。
+  - 基础 renderer、HTML 序列化、DOM/model point 映射和 selection 同步。
   - React 组件 `value`、`defaultValue` 和 `onChange` 初始渲染契约。
 - 命令：`pnpm test`。
 
 ## 浏览器测试
 
 - 工具：Playwright。
-- 范围：demo 页面可打开，文档 JSON 面板、React 组件示例、selection 调试面板和浏览器 selection 同步可验证。
+- 范围：demo 页面可打开，文档 JSON 面板、React 组件示例、渲染边界示例、selection 调试面板和浏览器 selection 同步可验证。
 - 命令：`pnpm test:e2e`。
 
 ## 类型检查

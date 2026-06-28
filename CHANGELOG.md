@@ -24,6 +24,7 @@ The format follows the spirit of [Keep a Changelog](https://keepachangelog.com/e
 - Added browser selection/model selection sync helpers with jsdom and demo e2e coverage.
 - Added selection sync documentation and QA records.
 - Added the first React component API with `value`, `defaultValue`, `onChange`, renderer-backed output, docs, and demo examples.
+- Added render closure coverage for empty documents, empty paragraphs, DOM mapping invalid inputs, React component boundaries, demo boundary examples, and week 4 QA.
 
 ### Changed
 
@@ -33,6 +34,7 @@ The format follows the spirit of [Keep a Changelog](https://keepachangelog.com/e
 - Updated project status docs for the completed basic renderer.
 - Updated render docs for DOM/model point mapping.
 - Updated project status docs for completed selection sync.
+- Updated render docs and project status for the completed render closure.
 
 ### Not Included Yet
 
