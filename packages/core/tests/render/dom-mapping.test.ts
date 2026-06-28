@@ -55,6 +55,25 @@ describe("dom model path helpers", () => {
     });
   });
 
+  it("returns undefined for invalid dom point offsets", () => {
+    const model = createDocument([createParagraph([createText("Hello")])]);
+    const text = document.querySelector("span")?.firstChild;
+
+    expect(text).toBeDefined();
+    expect(domPointToModelPoint(model, { node: text!, offset: -1 })).toBeUndefined();
+  });
+
+  it("returns undefined for dom nodes without model paths", () => {
+    const model = createDocument([createParagraph([createText("Hello")])]);
+
+    expect(
+      domPointToModelPoint(model, {
+        node: document.createTextNode("Loose"),
+        offset: 0,
+      }),
+    ).toBeUndefined();
+  });
+
   it("maps an empty text element to offset zero", () => {
     const model = createDocument([createParagraph([createText("")])]);
     document.body.innerHTML = `
@@ -111,6 +130,17 @@ describe("dom model path helpers", () => {
 
     expect(result?.node).toBe(document.querySelector("span")?.firstChild);
     expect(result?.offset).toBe(3);
+  });
+
+  it("returns undefined for invalid model points", () => {
+    const model = createDocument([createParagraph([createText("Hello")])]);
+
+    expect(
+      modelPointToDomPoint(document.body, model, {
+        path: [0, 0],
+        offset: 99,
+      }),
+    ).toBeUndefined();
   });
 
   it("maps an empty model text point to its element", () => {
