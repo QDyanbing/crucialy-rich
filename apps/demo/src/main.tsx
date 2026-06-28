@@ -78,6 +78,15 @@ const renderBoundaryExamples: RenderBoundaryExample[] = [
       children: [{ type: "paragraph", children: [] }],
     },
   },
+  {
+    id: "multi-paragraph",
+    label: "Multiple paragraph boundary",
+    document: createDocument([
+      createParagraph([createText("Boundary first paragraph.")]),
+      createParagraph([createText("Boundary second paragraph.")]),
+      createParagraph([createText("Boundary third paragraph.")]),
+    ]),
+  },
 ];
 
 const defaultSelection: RangeSelection = {
