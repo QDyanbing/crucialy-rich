@@ -73,6 +73,23 @@ describe("@crucialy-rich/react public API", () => {
     expect(html).toContain('aria-label="Uncontrolled editor"');
   });
 
+  it("prefers value over defaultValue", () => {
+    const defaultValue = createDocument([
+      createParagraph([createText("Default fallback.")]),
+    ]);
+    const value = createDocument([createParagraph([createText("Controlled wins.")])]);
+
+    const html = renderToStaticMarkup(
+      createElement(RichTextEditor, {
+        defaultValue,
+        value,
+      }),
+    );
+
+    expect(html).toContain("Controlled wins.");
+    expect(html).not.toContain("Default fallback.");
+  });
+
   it("does not emit onChange during initial render", () => {
     const handleChange = vi.fn();
     const document = createDocument([
