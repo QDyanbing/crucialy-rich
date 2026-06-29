@@ -26,15 +26,15 @@
 
 - 标题最长 100 个字符。
 - 标题必须包含允许的 `type`。
-- `subject` 使用英文或中文均可，但 PR 标题按仓库协作规则使用英文。
+- `subject` 使用英文或中文均可；创建 PR 时标题按仓库协作规则使用英文。
 - 提交前建议运行 `pnpm check`。
 
 示例：
 
 ```text
-chore: configure workspace scripts
-test: add demo smoke test
-docs: document project structure
+chore: 配置工作区脚本
+test: 增加演示冒烟测试
+docs: 记录工程结构
 ```
 
 执行 `pnpm hooks:install` 后，`.githooks/commit-msg` 会使用 commitlint 校验提交信息。

@@ -22,7 +22,7 @@ pnpm install
 
 安装前会自动执行 `scripts/verify-package-manager.mjs`，校验包管理器和版本范围。
 
-## 3. 启用 Git Hooks
+## 3. 启用 Git 钩子
 
 ```sh
 pnpm hooks:install
@@ -77,7 +77,7 @@ pnpm dev
 http://127.0.0.1:5173/
 ```
 
-当前 demo 提供文档模型 JSON、React 组件渲染示例、selection 调试入口和浏览器 selection 同步验证；仍不包含真实编辑行为。
+当前演示提供文档模型 JSON、React 组件渲染示例、选区调试入口和浏览器选区同步验证；仍不包含真实编辑行为。
 
 ## 7. 清理生成产物
 
