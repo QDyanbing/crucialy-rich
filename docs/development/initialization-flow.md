@@ -65,7 +65,7 @@ pnpm check:all
 
 `pnpm check:all` 会运行 `pnpm check` 和 `pnpm test:e2e`。
 
-## 6. 启动 Demo
+## 6. 启动演示
 
 ```sh
 pnpm dev
@@ -85,7 +85,7 @@ http://127.0.0.1:5173/
 pnpm clean
 ```
 
-会清理 demo 构建产物、package 构建产物、Playwright 报告和测试结果。
+会清理演示构建产物、包构建产物、Playwright 报告和测试结果。
 
 ## 常见问题
 
@@ -96,4 +96,4 @@ pnpm clean
 | `pnpm test:e2e` 提示浏览器不存在 | 先执行 `pnpm test:e2e:install`                                       |
 | Linux 浏览器系统依赖缺失         | 执行 `pnpm test:e2e:install:deps`                                    |
 | 提交信息被拒绝                   | 按 `docs/development/commit-convention.md` 使用 Conventional Commits |
-| lint 扫到构建产物                | 执行 `pnpm clean` 后重试                                             |
+| 代码检查扫到构建产物             | 执行 `pnpm clean` 后重试                                             |

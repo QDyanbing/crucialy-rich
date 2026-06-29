@@ -67,7 +67,7 @@ interface RenderedElementNode {
 - 空 paragraph 渲染为带路径的空 `p`。
 - 多段落按块顺序分配 `[0]`、`[1]`、`[2]` 等路径。
 
-## Demo 验收
+## 演示验收
 
 演示主编辑区会使用 React 组件渲染规范化后的文档。切换模型示例或点击“规范化”后，编辑区内容会随合法文档更新。
 
@@ -79,6 +79,6 @@ interface RenderedElementNode {
 
 ## 当前限制
 
-- 浏览器 selection 同步当前只覆盖已验证的基础场景。
+- 浏览器选区同步当前只覆盖已验证的基础场景。
 - 不处理 `contentEditable`、`beforeinput` 或真实编辑行为。
 - 不包含标记、标题、列表等扩展节点渲染。

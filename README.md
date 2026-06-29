@@ -16,22 +16,22 @@
 
 ## 技术栈
 
-| 分类       | 工具                               | 用途                                                    |
-| ---------- | ---------------------------------- | ------------------------------------------------------- |
-| 运行时     | Node.js 22.14.0                    | 本地开发、脚本和 CI 运行时                              |
-| 包管理     | pnpm 8.6.11                        | workspace 依赖管理                                      |
-| 版本钉定   | Volta                              | 固定 Node.js 和 pnpm 版本                               |
-| 语言       | TypeScript 5.8                     | packages 和 demo 类型系统                               |
-| 包构建     | tsup 8.5                           | `packages/core`、`packages/react` 的 ESM 和类型声明构建 |
-| 演示构建   | Vite 6.3                           | `apps/demo` 的开发服务和生产构建                        |
-| 演示界面   | React 18.3                         | 演示调试页面运行时                                      |
-| 单元测试   | Vitest 3.2                         | 工作区和包入口冒烟测试                                  |
-| 端到端测试 | Playwright 1.52                    | 演示页面浏览器冒烟测试                                  |
-| 代码检查   | ESLint 9、typescript-eslint        | TypeScript、脚本和配置文件检查                          |
-| 格式化     | Prettier 3.5                       | 统一代码、文档和配置格式                                |
-| 提交检查   | commitlint、lint-staged、git hooks | 提交信息和 staged 文件质量门禁                          |
-| CI         | GitHub Actions                     | 安装、检查、构建和 e2e smoke                            |
-| 依赖维护   | Dependabot                         | 定期检查 npm 和 GitHub Actions 更新                     |
+| 分类       | 工具                              | 用途                                                    |
+| ---------- | --------------------------------- | ------------------------------------------------------- |
+| 运行时     | Node.js 22.14.0                   | 本地开发、脚本和 CI 运行时                              |
+| 包管理     | pnpm 8.6.11                       | 工作区依赖管理                                          |
+| 版本钉定   | Volta                             | 固定 Node.js 和 pnpm 版本                               |
+| 语言       | TypeScript 5.8                    | 包和演示应用类型系统                                    |
+| 包构建     | tsup 8.5                          | `packages/core`、`packages/react` 的 ESM 和类型声明构建 |
+| 演示构建   | Vite 6.3                          | `apps/demo` 的开发服务和生产构建                        |
+| 演示界面   | React 18.3                        | 演示调试页面运行时                                      |
+| 单元测试   | Vitest 3.2                        | 工作区和包入口冒烟测试                                  |
+| 端到端测试 | Playwright 1.52                   | 演示页面浏览器冒烟测试                                  |
+| 代码检查   | ESLint 9、typescript-eslint       | TypeScript、脚本和配置文件检查                          |
+| 格式化     | Prettier 3.5                      | 统一代码、文档和配置格式                                |
+| 提交检查   | commitlint、lint-staged、Git 钩子 | 提交信息和暂存文件质量门禁                              |
+| CI         | GitHub Actions                    | 安装、检查、构建和端到端冒烟测试                        |
+| 依赖维护   | Dependabot                        | 定期检查 npm 和 GitHub Actions 更新                     |
 
 ## 工程结构
 
@@ -42,7 +42,7 @@
 ├── packages/core          # 富文本内核模型、选区、基础渲染、DOM 映射和选区同步
 ├── packages/react         # React 集成包和 RichTextEditor 组件 API
 ├── tests/e2e              # Playwright 端到端冒烟测试
-├── eslint.config.js       # ESLint flat config
+├── eslint.config.js       # ESLint 扁平配置
 ├── playwright.config.ts   # Playwright 配置
 ├── tsconfig.base.json     # TypeScript 基础配置
 └── vitest.config.ts       # Vitest 配置
