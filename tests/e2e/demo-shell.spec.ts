@@ -6,10 +6,8 @@ test("renders the demo shell", async ({ page }) => {
   await expect(
     page.getByRole("heading", { level: 1, name: "crucialy-rich" }),
   ).toBeVisible();
-  await expect(page.getByLabel("Editor preview")).toBeVisible();
-  await expect(page.getByLabel("Document debug panel")).toContainText(
-    '"type": "document"',
-  );
+  await expect(page.getByLabel("编辑器预览")).toBeVisible();
+  await expect(page.getByLabel("文档调试面板")).toContainText('"type": "document"');
   await expect(page.getByLabel("Selection debugger")).toBeVisible();
   await expect(page.getByLabel("Selected text")).toContainText("你好");
 });
@@ -27,7 +25,7 @@ test("updates the selection debug preview", async ({ page }) => {
 test("renders the model document in the editor preview", async ({ page }) => {
   await page.goto("/");
 
-  const renderedDocument = page.getByLabel("Rendered document");
+  const renderedDocument = page.getByLabel("已渲染文档");
 
   await expect(renderedDocument).toContainText("你好，crucialy-rich。");
   await expect(renderedDocument.locator('[data-crucialy-path="[0,0]"]')).toContainText(
@@ -53,7 +51,7 @@ test("shows controlled and uncontrolled editor examples", async ({ page }) => {
   await expect(controlledEditor).toContainText("你好，crucialy-rich。");
   await expect(uncontrolledEditor).toContainText("非受控初始文档。");
 
-  await page.getByLabel("Model example").selectOption("empty");
+  await page.getByLabel("模型示例").selectOption("empty");
 
   await expect(controlledEditor).not.toContainText("你好，crucialy-rich。");
   await expect(uncontrolledEditor).toContainText("非受控初始文档。");
@@ -91,13 +89,13 @@ test("syncs browser selection back to model selection", async ({ page }) => {
   await page.goto("/");
 
   await page
-    .getByLabel("Rendered document")
+    .getByLabel("已渲染文档")
     .locator('[data-crucialy-path="[0,0]"]')
     .evaluate((element) => {
       const text = element.firstChild;
       const range = document.createRange();
       const selection = window.getSelection();
-      const renderedDocument = element.closest('[aria-label="Rendered document"]');
+      const renderedDocument = element.closest('[aria-label="已渲染文档"]');
 
       if (!text || !selection || !renderedDocument) {
         throw new Error("Missing rendered text selection target.");
@@ -117,17 +115,17 @@ test("syncs browser selection back to model selection", async ({ page }) => {
 test("normalizes invalid model examples", async ({ page }) => {
   await page.goto("/");
 
-  await page.getByLabel("Model example").selectOption("invalid");
+  await page.getByLabel("模型示例").selectOption("invalid");
 
-  await expect(page.getByLabel("Model validation status")).toContainText("Invalid");
-  await expect(page.getByLabel("Model validation errors")).toContainText(
+  await expect(page.getByLabel("模型校验状态")).toContainText("非法");
+  await expect(page.getByLabel("模型校验错误")).toContainText(
     "document child must be a block node",
   );
 
-  await page.getByRole("button", { name: "Normalize" }).click();
+  await page.getByRole("button", { name: "规范化" }).click();
 
-  await expect(page.getByLabel("Model validation status")).toContainText("Valid");
-  await expect(page.getByLabel("Document JSON", { exact: true })).toContainText(
+  await expect(page.getByLabel("模型校验状态")).toContainText("合法");
+  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
     '"type": "paragraph"',
   );
 });

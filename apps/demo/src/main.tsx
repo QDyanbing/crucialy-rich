@@ -391,18 +391,18 @@ function DemoApp() {
     <main className="app-shell" aria-labelledby="page-title">
       <header className="top-bar">
         <div>
-          <p className="eyebrow">Demo workspace</p>
+          <p className="eyebrow">调试工作台</p>
           <h1 id="page-title">crucialy-rich</h1>
         </div>
-        <span className="status-pill">Scaffold ready</span>
+        <span className="status-pill">脚手架就绪</span>
       </header>
 
-      <section className="workspace-grid" aria-label="Editor workspace">
-        <div className="editor-surface" aria-label="Editor preview">
+      <section className="workspace-grid" aria-label="编辑器工作区">
+        <div className="editor-surface" aria-label="编辑器预览">
           <RichTextEditor
             className="rendered-document"
             contentEditable
-            label="Rendered document"
+            label="已渲染文档"
             onKeyUp={handleBrowserSelectionSync}
             onMouseUp={handleBrowserSelectionSync}
             suppressContentEditableWarning
@@ -410,23 +410,23 @@ function DemoApp() {
           />
         </div>
 
-        <aside className="debug-panel" aria-label="Document debug panel">
+        <aside className="debug-panel" aria-label="文档调试面板">
           <div className="panel-header">
-            <h2>Document JSON</h2>
+            <h2>文档 JSON</h2>
             <span
-              aria-label="Model validation status"
+              aria-label="模型校验状态"
               className="state-pill"
               data-state={validation.valid ? "valid" : "invalid"}
             >
-              {validation.valid ? "Valid" : "Invalid"}
+              {validation.valid ? "合法" : "非法"}
             </span>
           </div>
 
-          <div className="model-controls" aria-label="Model controls">
+          <div className="model-controls" aria-label="模型控制">
             <label>
-              <span>Model example</span>
+              <span>模型示例</span>
               <select
-                aria-label="Model example"
+                aria-label="模型示例"
                 value={modelExampleId}
                 onChange={handleModelExampleChange}
               >
@@ -438,17 +438,17 @@ function DemoApp() {
               </select>
             </label>
             <button type="button" onClick={handleNormalize}>
-              Normalize
+              规范化
             </button>
           </div>
 
           {validation.errors.length > 0 ? (
-            <pre aria-label="Model validation errors" className="validation-errors">
+            <pre aria-label="模型校验错误" className="validation-errors">
               {JSON.stringify(validation.errors, null, 2)}
             </pre>
           ) : null}
 
-          <pre aria-label="Document JSON">{documentPreview}</pre>
+          <pre aria-label="文档 JSON">{documentPreview}</pre>
         </aside>
       </section>
 
