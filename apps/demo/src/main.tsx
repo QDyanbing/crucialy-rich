@@ -64,7 +64,7 @@ const uncontrolledPreviewDocument = createDocument([
 const renderBoundaryExamples: RenderBoundaryExample[] = [
   {
     id: "empty-document",
-    label: "Empty document boundary",
+    label: "空文档边界",
     document: {
       type: "document",
       children: [],
@@ -72,7 +72,7 @@ const renderBoundaryExamples: RenderBoundaryExample[] = [
   },
   {
     id: "empty-paragraph",
-    label: "Empty paragraph boundary",
+    label: "空段落边界",
     document: {
       type: "document",
       children: [{ type: "paragraph", children: [] }],
@@ -80,7 +80,7 @@ const renderBoundaryExamples: RenderBoundaryExample[] = [
   },
   {
     id: "multi-paragraph",
-    label: "Multiple paragraph boundary",
+    label: "多段落边界",
     document: createDocument([
       createParagraph([createText("边界第一段。")]),
       createParagraph([createText("边界第二段。")]),
@@ -450,31 +450,31 @@ function DemoApp() {
         </aside>
       </section>
 
-      <section className="component-examples" aria-label="Component API examples">
-        <h2>Component API</h2>
+      <section className="component-examples" aria-label="组件 API 示例">
+        <h2>组件 API</h2>
 
         <div className="component-grid">
           <div className="component-example">
-            <h3>Controlled</h3>
+            <h3>受控组件</h3>
             <RichTextEditor
               className="mini-editor"
-              label="Controlled editor"
+              label="受控编辑器"
               value={normalizedDocument}
             />
           </div>
           <div className="component-example">
-            <h3>Uncontrolled</h3>
+            <h3>非受控组件</h3>
             <RichTextEditor
               className="mini-editor"
               defaultValue={uncontrolledPreviewDocument}
-              label="Uncontrolled editor"
+              label="非受控编辑器"
             />
           </div>
         </div>
       </section>
 
-      <section className="render-boundaries" aria-label="Render boundary examples">
-        <h2>Render boundaries</h2>
+      <section className="render-boundaries" aria-label="渲染边界示例">
+        <h2>渲染边界</h2>
 
         <div className="boundary-grid">
           {renderBoundaryExamples.map((example) => (

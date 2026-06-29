@@ -41,11 +41,11 @@ test("shows controlled and uncontrolled editor examples", async ({ page }) => {
 
   const controlledEditor = page.getByRole("textbox", {
     exact: true,
-    name: "Controlled editor",
+    name: "受控编辑器",
   });
   const uncontrolledEditor = page.getByRole("textbox", {
     exact: true,
-    name: "Uncontrolled editor",
+    name: "非受控编辑器",
   });
 
   await expect(controlledEditor).toContainText("你好，crucialy-rich。");
@@ -62,15 +62,15 @@ test("renders boundary examples without selection errors", async ({ page }) => {
 
   const emptyDocument = page.getByRole("textbox", {
     exact: true,
-    name: "Empty document boundary",
+    name: "空文档边界",
   });
   const emptyParagraph = page.getByRole("textbox", {
     exact: true,
-    name: "Empty paragraph boundary",
+    name: "空段落边界",
   });
   const multiParagraph = page.getByRole("textbox", {
     exact: true,
-    name: "Multiple paragraph boundary",
+    name: "多段落边界",
   });
 
   await expect(emptyDocument).toHaveAttribute("data-crucialy-path", "[]");
