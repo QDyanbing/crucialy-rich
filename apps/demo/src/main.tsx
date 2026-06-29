@@ -343,7 +343,7 @@ function SelectionDebugger({
 const rootElement = document.getElementById("root");
 
 if (!rootElement) {
-  throw new Error("Missing root element.");
+  throw new Error("缺少根节点。");
 }
 
 function DemoApp() {
