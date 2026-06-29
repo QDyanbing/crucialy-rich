@@ -1,41 +1,41 @@
-# Changelog
+# 变更记录
 
-All notable changes to this project will be documented in this file.
+本文件记录项目中的重要变更。
 
-The format follows the spirit of [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project uses Conventional Commits for commit messages.
+格式参考 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 的精神，提交信息遵循 Conventional Commits。
 
-## Unreleased
+## 未发布
 
-### Added
+### 新增
 
-- Initialized pnpm workspace layout for `packages/core`, `packages/react`, and `apps/demo`.
-- Added TypeScript, tsup, Vite, Vitest, Playwright, ESLint, Prettier, commitlint, lint-staged, and Git hooks.
-- Added GitHub Actions CI, Issue templates, PR template, CODEOWNERS, and Dependabot config.
-- Added MIT license, contribution guide, security policy, initialization flow, and scaffold QA docs.
-- Added the first document model with factories, type guards, validation, normalize, docs, QA, and demo JSON output.
-- Added the first model selection API with Path, Point, RangeSelection, text range extraction, text range splitting, docs, QA, and demo inspector.
-- Added a React editor shell component and wired it into the demo shell.
-- Added model demo controls for example switching, validation status, and normalize verification.
-- Added selection JSON node highlighting in the demo inspector.
-- Added week 2 and week 3 QA records for model and selection milestones.
-- Added schema tests for unknown node types and invalid document child normalization.
-- Added the first basic renderer with model path attributes, HTML serialization, docs, QA, and demo rendering.
-- Added DOM/model point mapping helpers with jsdom-backed tests.
-- Added browser selection/model selection sync helpers with jsdom and demo e2e coverage.
-- Added selection sync documentation and QA records.
-- Added the first React component API with `value`, `defaultValue`, `onChange`, renderer-backed output, docs, and demo examples.
-- Added render closure coverage for empty documents, empty paragraphs, DOM mapping invalid inputs, React component boundaries, demo boundary examples, and week 4 QA.
+- 初始化 `packages/core`、`packages/react` 和 `apps/demo` 的 pnpm 工作区结构。
+- 新增 TypeScript、tsup、Vite、Vitest、Playwright、ESLint、Prettier、commitlint、lint-staged 和 Git hooks。
+- 新增 GitHub Actions CI、Issue 模板、PR 模板、CODEOWNERS 和 Dependabot 配置。
+- 新增 MIT 许可证、贡献指南、安全策略、初始化流程和脚手架 QA 文档。
+- 新增文档模型第一版，包含工厂函数、类型判断、校验、规范化、文档、QA 和演示 JSON 输出。
+- 新增模型选区第一版，包含 Path、Point、RangeSelection、文本范围读取、文本范围切分、文档、QA 和演示调试器。
+- 新增 React 编辑器外壳组件，并接入演示页面。
+- 新增模型演示控制区，支持示例切换、校验状态和规范化验收。
+- 新增选区 JSON 节点高亮能力。
+- 新增第 2 周和第 3 周的模型与选区 QA 记录。
+- 新增未知节点类型和非法 document 子节点规范化测试。
+- 新增基础渲染第一版，包含模型路径属性、HTML 序列化、文档、QA 和演示渲染。
+- 新增 DOM 与模型位置映射工具，并配套 jsdom 测试。
+- 新增浏览器选区与模型选区同步工具，并配套 jsdom 和演示端到端覆盖。
+- 新增选区同步文档和 QA 记录。
+- 新增 React 组件 API 第一版，包含 `value`、`defaultValue`、`onChange`、renderer 输出、文档和演示示例。
+- 新增渲染闭环覆盖，包括空文档、空段落、DOM 映射非法输入、React 组件边界、演示边界示例和第 4 周 QA。
 
-### Changed
+### 变更
 
-- Updated project, QA, package, and collaboration docs to match the completed model and selection scope.
-- Updated package homepage metadata to use the `master` branch.
-- Clarified contribution, model attrs, and selection demo inspector documentation.
-- Updated project status docs for the completed basic renderer.
-- Updated render docs for DOM/model point mapping.
-- Updated project status docs for completed selection sync.
-- Updated render docs and project status for the completed render closure.
+- 更新项目、QA、包和协作文档，使其匹配已完成的模型与选区范围。
+- 更新包主页元信息，统一使用 `master` 分支。
+- 澄清贡献、模型属性和选区演示调试器相关文档。
+- 更新基础 renderer 完成后的项目状态文档。
+- 更新 DOM 与模型位置映射相关的渲染文档。
+- 更新选区同步完成后的项目状态文档。
+- 更新渲染闭环完成后的渲染文档和项目状态。
 
-### Not Included Yet
+### 暂未包含
 
-- Editing commands, history, parsing, document serialization, or real editing behavior.
+- 编辑命令、历史记录、解析、文档序列化或真实编辑行为。
