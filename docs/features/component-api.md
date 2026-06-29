@@ -1,54 +1,52 @@
-# Component API
+# 组件 API
 
 `@crucialy-rich/react` 当前暴露 `RichTextEditor` 组件，用于把文档模型渲染到 React 应用中。
 
-## Props
+## 属性
 
-| Prop           | 类型                              | 说明                                           |
+| 属性           | 类型                              | 说明                                           |
 | -------------- | --------------------------------- | ---------------------------------------------- |
 | `value`        | `DocumentNode`                    | 受控文档。传入后组件会按该文档渲染内容。       |
 | `defaultValue` | `DocumentNode`                    | 非受控初始文档。仅用于组件初始化时的渲染内容。 |
 | `onChange`     | `(value: DocumentNode) => void`   | 预留变更回调。当前阶段不会主动触发。           |
 | `label`        | `string`                          | 编辑器区域的可访问名称。                       |
 | `className`    | `string`                          | 传给编辑器根节点的样式类名。                   |
-| DOM 事件 props | `onMouseUp`、`onKeyUp` 等基础事件 | 用于 demo 继续接入 selection 同步。            |
+| DOM 事件属性   | `onMouseUp`、`onKeyUp` 等基础事件 | 用于演示继续接入选区同步。                     |
 
-## Controlled Usage
+## 受控用法
 
 ```tsx
 import { createDocument, createParagraph, createText } from "@crucialy-rich/core";
 import { RichTextEditor } from "@crucialy-rich/react";
 
-const value = createDocument([createParagraph([createText("Controlled document.")])]);
+const value = createDocument([createParagraph([createText("受控文档。")])]);
 
 export function ControlledEditor() {
-  return <RichTextEditor label="Controlled editor" value={value} />;
+  return <RichTextEditor label="受控编辑器" value={value} />;
 }
 ```
 
-## Uncontrolled Usage
+## 非受控用法
 
 ```tsx
 import { createDocument, createParagraph, createText } from "@crucialy-rich/core";
 import { RichTextEditor } from "@crucialy-rich/react";
 
-const defaultValue = createDocument([
-  createParagraph([createText("Initial document.")]),
-]);
+const defaultValue = createDocument([createParagraph([createText("初始文档。")])]);
 
 export function UncontrolledEditor() {
-  return <RichTextEditor defaultValue={defaultValue} label="Uncontrolled editor" />;
+  return <RichTextEditor defaultValue={defaultValue} label="非受控编辑器" />;
 }
 ```
 
-## Current Behavior
+## 当前行为
 
 - 组件内部复用 `@crucialy-rich/core` 的 `renderDocument`。
-- 渲染出的节点会保留 `data-crucialy-path`，用于 DOM/model 映射和 selection 同步。
+- 渲染出的节点会保留 `data-crucialy-path`，用于 DOM 与模型映射和选区同步。
 - `value` 优先级高于 `defaultValue`。
 - `defaultValue` 只在组件初始化时读取。
-- `onChange` 仅作为公开 API 形态预留，当前不会在初始渲染或浏览器 selection 变化时触发。
+- `onChange` 仅作为公开 API 形态预留，当前不会在初始渲染或浏览器选区变化时触发。
 
-## Boundaries
+## 当前边界
 
-当前组件仍不包含真实编辑命令、operation、transaction、history、输入法处理、粘贴解析或序列化能力。
+当前组件仍不包含真实编辑命令、操作、事务、历史、输入法处理、粘贴解析或序列化能力。
