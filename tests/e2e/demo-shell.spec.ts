@@ -8,18 +8,18 @@ test("renders the demo shell", async ({ page }) => {
   ).toBeVisible();
   await expect(page.getByLabel("编辑器预览")).toBeVisible();
   await expect(page.getByLabel("文档调试面板")).toContainText('"type": "document"');
-  await expect(page.getByLabel("Selection debugger")).toBeVisible();
-  await expect(page.getByLabel("Selected text")).toContainText("你好");
+  await expect(page.getByLabel("选区调试器")).toBeVisible();
+  await expect(page.getByLabel("选中文本")).toContainText("你好");
 });
 
 test("updates the selection debug preview", async ({ page }) => {
   await page.goto("/");
 
-  await page.getByLabel("Anchor offset").fill("3");
-  await page.getByLabel("Focus offset").fill("11");
+  await page.getByLabel("锚点偏移").fill("3");
+  await page.getByLabel("焦点偏移").fill("11");
 
-  await expect(page.getByLabel("Selected text")).toContainText("crucialy");
-  await expect(page.getByLabel("Selection JSON")).toContainText('"offset": 11');
+  await expect(page.getByLabel("选中文本")).toContainText("crucialy");
+  await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 11');
 });
 
 test("renders the model document in the editor preview", async ({ page }) => {
@@ -82,7 +82,7 @@ test("renders boundary examples without selection errors", async ({ page }) => {
   await expect(multiParagraph.locator('[data-crucialy-path="[2,0]"]')).toContainText(
     "边界第三段。",
   );
-  await expect(page.getByLabel("Selection debugger")).toBeVisible();
+  await expect(page.getByLabel("选区调试器")).toBeVisible();
 });
 
 test("syncs browser selection back to model selection", async ({ page }) => {
@@ -108,8 +108,8 @@ test("syncs browser selection back to model selection", async ({ page }) => {
       renderedDocument.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
     });
 
-  await expect(page.getByLabel("Selection JSON")).toContainText('"offset": 3');
-  await expect(page.getByLabel("Selected text")).toContainText("(empty)");
+  await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 3');
+  await expect(page.getByLabel("选中文本")).toContainText("（空）");
 });
 
 test("normalizes invalid model examples", async ({ page }) => {
@@ -139,7 +139,7 @@ test("highlights the selected document json node", async ({ page }) => {
     highlightedLines.filter({ hasText: "你好，crucialy-rich。" }),
   ).toBeVisible();
 
-  await page.getByLabel("Anchor path").fill("1,0");
+  await page.getByLabel("锚点路径").fill("1,0");
 
   await expect(highlightedLines.filter({ hasText: "选区模型已就绪。" })).toBeVisible();
 });

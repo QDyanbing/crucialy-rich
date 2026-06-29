@@ -196,7 +196,7 @@ interface DocumentJsonMapProps {
 
 function DocumentJsonMap({ document, selectedPath }: DocumentJsonMapProps) {
   return (
-    <pre aria-label="Document JSON selection map">
+    <pre aria-label="文档 JSON 选区映射">
       {createDocumentJsonLines(document).map((line) => {
         const selected = line.path ? isSamePath(line.path, selectedPath) : false;
 
@@ -262,14 +262,14 @@ function SelectionDebugger({
   }
 
   return (
-    <section className="selection-debugger" aria-label="Selection debugger">
-      <h2>Selection</h2>
+    <section className="selection-debugger" aria-label="选区调试器">
+      <h2>选区</h2>
 
       <div className="control-grid">
         <label>
-          <span>Anchor path</span>
+          <span>锚点路径</span>
           <input
-            aria-label="Anchor path"
+            aria-label="锚点路径"
             value={selection.anchor.path.join(",")}
             onChange={(event) =>
               updateAnchor(event.target.value, String(selection.anchor.offset))
@@ -277,9 +277,9 @@ function SelectionDebugger({
           />
         </label>
         <label>
-          <span>Anchor offset</span>
+          <span>锚点偏移</span>
           <input
-            aria-label="Anchor offset"
+            aria-label="锚点偏移"
             inputMode="numeric"
             value={selection.anchor.offset}
             onChange={(event) =>
@@ -288,9 +288,9 @@ function SelectionDebugger({
           />
         </label>
         <label>
-          <span>Focus path</span>
+          <span>焦点路径</span>
           <input
-            aria-label="Focus path"
+            aria-label="焦点路径"
             value={selection.focus.path.join(",")}
             onChange={(event) =>
               updateFocus(event.target.value, String(selection.focus.offset))
@@ -298,9 +298,9 @@ function SelectionDebugger({
           />
         </label>
         <label>
-          <span>Focus offset</span>
+          <span>焦点偏移</span>
           <input
-            aria-label="Focus offset"
+            aria-label="焦点偏移"
             inputMode="numeric"
             value={selection.focus.offset}
             onChange={(event) =>
@@ -314,27 +314,25 @@ function SelectionDebugger({
         className="selection-status"
         data-state={anchorValid && focusValid ? "valid" : "invalid"}
       >
-        {anchorValid && focusValid ? "Valid selection" : "Invalid selection"}
+        {anchorValid && focusValid ? "选区合法" : "选区非法"}
       </div>
 
       <div className="selection-result">
-        <span>Selected text</span>
-        <code aria-label="Selected text">{selectedText || "(empty)"}</code>
+        <span>选中文本</span>
+        <code aria-label="选中文本">{selectedText || "（空）"}</code>
       </div>
 
       <div className="debug-stack">
         <div>
-          <h3>Selection JSON</h3>
-          <pre aria-label="Selection JSON">{JSON.stringify(selection, null, 2)}</pre>
+          <h3>选区 JSON</h3>
+          <pre aria-label="选区 JSON">{JSON.stringify(selection, null, 2)}</pre>
         </div>
         <div>
-          <h3>Anchor node</h3>
-          <pre aria-label="Selected node">
-            {JSON.stringify(anchorNode ?? null, null, 2)}
-          </pre>
+          <h3>锚点节点</h3>
+          <pre aria-label="选中节点">{JSON.stringify(anchorNode ?? null, null, 2)}</pre>
         </div>
         <div>
-          <h3>Document map</h3>
+          <h3>文档映射</h3>
           <DocumentJsonMap document={document} selectedPath={selection.anchor.path} />
         </div>
       </div>
