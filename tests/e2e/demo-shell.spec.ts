@@ -11,17 +11,17 @@ test("renders the demo shell", async ({ page }) => {
     '"type": "document"',
   );
   await expect(page.getByLabel("Selection debugger")).toBeVisible();
-  await expect(page.getByLabel("Selected text")).toContainText("Hello");
+  await expect(page.getByLabel("Selected text")).toContainText("你好");
 });
 
 test("updates the selection debug preview", async ({ page }) => {
   await page.goto("/");
 
-  await page.getByLabel("Anchor offset").fill("6");
-  await page.getByLabel("Focus offset").fill("14");
+  await page.getByLabel("Anchor offset").fill("3");
+  await page.getByLabel("Focus offset").fill("11");
 
   await expect(page.getByLabel("Selected text")).toContainText("crucialy");
-  await expect(page.getByLabel("Selection JSON")).toContainText('"offset": 14');
+  await expect(page.getByLabel("Selection JSON")).toContainText('"offset": 11');
 });
 
 test("renders the model document in the editor preview", async ({ page }) => {
@@ -29,12 +29,12 @@ test("renders the model document in the editor preview", async ({ page }) => {
 
   const renderedDocument = page.getByLabel("Rendered document");
 
-  await expect(renderedDocument).toContainText("Hello crucialy-rich.");
+  await expect(renderedDocument).toContainText("你好，crucialy-rich。");
   await expect(renderedDocument.locator('[data-crucialy-path="[0,0]"]')).toContainText(
-    "Hello crucialy-rich.",
+    "你好，crucialy-rich。",
   );
   await expect(renderedDocument.locator('[data-crucialy-path="[1,0]"]')).toContainText(
-    "Selection model ready.",
+    "选区模型已就绪。",
   );
 });
 
@@ -50,13 +50,13 @@ test("shows controlled and uncontrolled editor examples", async ({ page }) => {
     name: "Uncontrolled editor",
   });
 
-  await expect(controlledEditor).toContainText("Hello crucialy-rich.");
-  await expect(uncontrolledEditor).toContainText("Uncontrolled initial document.");
+  await expect(controlledEditor).toContainText("你好，crucialy-rich。");
+  await expect(uncontrolledEditor).toContainText("非受控初始文档。");
 
   await page.getByLabel("Model example").selectOption("empty");
 
-  await expect(controlledEditor).not.toContainText("Hello crucialy-rich.");
-  await expect(uncontrolledEditor).toContainText("Uncontrolled initial document.");
+  await expect(controlledEditor).not.toContainText("你好，crucialy-rich。");
+  await expect(uncontrolledEditor).toContainText("非受控初始文档。");
 });
 
 test("renders boundary examples without selection errors", async ({ page }) => {
@@ -79,10 +79,10 @@ test("renders boundary examples without selection errors", async ({ page }) => {
   await expect(emptyDocument.locator("p")).toHaveCount(0);
   await expect(emptyParagraph.locator('[data-crucialy-path="[0]"]')).toHaveCount(1);
   await expect(emptyParagraph.locator('[data-crucialy-path="[0,0]"]')).toHaveCount(0);
-  await expect(multiParagraph).toContainText("Boundary first paragraph.");
-  await expect(multiParagraph).toContainText("Boundary third paragraph.");
+  await expect(multiParagraph).toContainText("边界第一段。");
+  await expect(multiParagraph).toContainText("边界第三段。");
   await expect(multiParagraph.locator('[data-crucialy-path="[2,0]"]')).toContainText(
-    "Boundary third paragraph.",
+    "边界第三段。",
   );
   await expect(page.getByLabel("Selection debugger")).toBeVisible();
 });
@@ -138,12 +138,10 @@ test("highlights the selected document json node", async ({ page }) => {
   const highlightedLines = page.locator('.json-line[data-selected="true"]');
 
   await expect(
-    highlightedLines.filter({ hasText: "Hello crucialy-rich." }),
+    highlightedLines.filter({ hasText: "你好，crucialy-rich。" }),
   ).toBeVisible();
 
   await page.getByLabel("Anchor path").fill("1,0");
 
-  await expect(
-    highlightedLines.filter({ hasText: "Selection model ready." }),
-  ).toBeVisible();
+  await expect(highlightedLines.filter({ hasText: "选区模型已就绪。" })).toBeVisible();
 });

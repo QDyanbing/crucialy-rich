@@ -36,29 +36,29 @@ interface RenderBoundaryExample {
 const modelExamples: ModelExample[] = [
   {
     id: "regular",
-    label: "Regular document",
+    label: "常规文档",
     value: createDocument([
-      createParagraph([createText("Hello crucialy-rich.")]),
-      createParagraph([createText("Selection model ready.")]),
+      createParagraph([createText("你好，crucialy-rich。")]),
+      createParagraph([createText("选区模型已就绪。")]),
     ]),
   },
   {
     id: "empty",
-    label: "Empty document",
+    label: "空文档",
     value: { type: "document", children: [] },
   },
   {
     id: "invalid",
-    label: "Invalid document",
+    label: "非法文档",
     value: {
       type: "document",
-      children: [{ type: "text", text: "Loose text" }],
+      children: [{ type: "text", text: "游离文本" }],
     },
   },
 ];
 
 const uncontrolledPreviewDocument = createDocument([
-  createParagraph([createText("Uncontrolled initial document.")]),
+  createParagraph([createText("非受控初始文档。")]),
 ]);
 
 const renderBoundaryExamples: RenderBoundaryExample[] = [
@@ -82,9 +82,9 @@ const renderBoundaryExamples: RenderBoundaryExample[] = [
     id: "multi-paragraph",
     label: "Multiple paragraph boundary",
     document: createDocument([
-      createParagraph([createText("Boundary first paragraph.")]),
-      createParagraph([createText("Boundary second paragraph.")]),
-      createParagraph([createText("Boundary third paragraph.")]),
+      createParagraph([createText("边界第一段。")]),
+      createParagraph([createText("边界第二段。")]),
+      createParagraph([createText("边界第三段。")]),
     ]),
   },
 ];
