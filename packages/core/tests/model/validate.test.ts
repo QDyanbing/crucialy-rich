@@ -19,7 +19,7 @@ describe("validateDocument", () => {
     expect(result.valid).toBe(false);
     expect(result.errors[0]).toEqual({
       path: [],
-      message: "root must be a document node",
+      message: "根节点必须是 document 节点",
     });
   });
 
@@ -41,7 +41,7 @@ describe("validateDocument", () => {
     expect(result.valid).toBe(false);
     expect(result.errors[0]).toEqual({
       path: [0],
-      message: "document child must be a block node",
+      message: "document 子节点必须是块级节点",
     });
   });
 
@@ -65,7 +65,7 @@ describe("validateDocument", () => {
     expect(result.valid).toBe(false);
     expect(result.errors[0]).toEqual({
       path: [0, 0],
-      message: "paragraph child must be a text node",
+      message: "paragraph 子节点必须是 text 节点",
     });
   });
 });

@@ -23,7 +23,7 @@ export function validateDocument(value: unknown): ValidationResult {
   const errors: ValidationError[] = [];
 
   if (!isDocumentNode(value)) {
-    errors.push({ path: [], message: "root must be a document node" });
+    errors.push({ path: [], message: "根节点必须是 document 节点" });
     return { valid: false, errors };
   }
 
@@ -31,7 +31,7 @@ export function validateDocument(value: unknown): ValidationResult {
     if (!isBlockNode(child)) {
       errors.push({
         path: [blockIndex],
-        message: "document child must be a block node",
+        message: "document 子节点必须是块级节点",
       });
       return;
     }
@@ -40,7 +40,7 @@ export function validateDocument(value: unknown): ValidationResult {
       if (!isTextNode(leaf)) {
         errors.push({
           path: [blockIndex, leafIndex],
-          message: "paragraph child must be a text node",
+          message: "paragraph 子节点必须是 text 节点",
         });
       }
     });

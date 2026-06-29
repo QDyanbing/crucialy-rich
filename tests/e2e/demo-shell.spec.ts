@@ -119,7 +119,7 @@ test("normalizes invalid model examples", async ({ page }) => {
 
   await expect(page.getByLabel("模型校验状态")).toContainText("非法");
   await expect(page.getByLabel("模型校验错误")).toContainText(
-    "document child must be a block node",
+    "document 子节点必须是块级节点",
   );
 
   await page.getByRole("button", { name: "规范化" }).click();
