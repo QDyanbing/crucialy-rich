@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { createDocument, createParagraph, createText } from "../../src/model";
-import { applyInsertText, createInsertTextOperation } from "../../src/operation";
+import {
+  applyInsertText,
+  createInsertTextOperation,
+  createSelectionAfterInsertText,
+} from "../../src/operation";
 
 describe("createInsertTextOperation", () => {
   it("creates an insert text operation from a point and text", () => {
@@ -131,5 +135,28 @@ describe("applyInsertText", () => {
     );
 
     expect(result).toBe(document);
+  });
+});
+
+describe("createSelectionAfterInsertText", () => {
+  it("creates a collapsed selection after the inserted text", () => {
+    const operation = createInsertTextOperation(
+      {
+        path: [0, 0],
+        offset: 2,
+      },
+      "abc",
+    );
+
+    expect(createSelectionAfterInsertText(operation)).toEqual({
+      anchor: {
+        path: [0, 0],
+        offset: 5,
+      },
+      focus: {
+        path: [0, 0],
+        offset: 5,
+      },
+    });
   });
 });

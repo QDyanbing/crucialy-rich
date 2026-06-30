@@ -1,5 +1,5 @@
 import type { DocumentNode } from "../model";
-import type { Point } from "../selection";
+import type { Point, RangeSelection } from "../selection";
 import { isValidPoint } from "../selection";
 import type { InsertTextOperation } from "./types";
 
@@ -64,5 +64,22 @@ export function applyInsertText(
           }
         : block,
     ),
+  };
+}
+
+export function createSelectionAfterInsertText(
+  operation: InsertTextOperation,
+): RangeSelection {
+  const point = {
+    path: [...operation.point.path],
+    offset: operation.point.offset + operation.text.length,
+  };
+
+  return {
+    anchor: point,
+    focus: {
+      path: [...point.path],
+      offset: point.offset,
+    },
   };
 }

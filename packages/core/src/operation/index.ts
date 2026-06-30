@@ -1,2 +1,6 @@
-export { applyInsertText, createInsertTextOperation } from "./insert-text";
+export {
+  applyInsertText,
+  createInsertTextOperation,
+  createSelectionAfterInsertText,
+} from "./insert-text";
 export type { InsertTextOperation, Operation } from "./types";
