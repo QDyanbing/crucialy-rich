@@ -50,7 +50,10 @@ export function applyInsertText(
               currentTextIndex === textIndex
                 ? {
                     ...textNode,
-                    text: `${operation.text}${textNode.text}`,
+                    text: `${textNode.text.slice(
+                      0,
+                      operation.point.offset,
+                    )}${operation.text}${textNode.text.slice(operation.point.offset)}`,
                   }
                 : textNode,
             ),

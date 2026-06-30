@@ -50,4 +50,36 @@ describe("applyInsertText", () => {
     expect(result.children[0]?.children[0]?.text).toBe("你好，世界");
     expect(document.children[0]?.children[0]?.text).toBe("世界");
   });
+
+  it("inserts text in the middle of a text node", () => {
+    const document = createDocument([createParagraph([createText("你好世界")])]);
+    const result = applyInsertText(
+      document,
+      createInsertTextOperation(
+        {
+          path: [0, 0],
+          offset: 2,
+        },
+        "，",
+      ),
+    );
+
+    expect(result.children[0]?.children[0]?.text).toBe("你好，世界");
+  });
+
+  it("inserts text at the end of a text node", () => {
+    const document = createDocument([createParagraph([createText("你好")])]);
+    const result = applyInsertText(
+      document,
+      createInsertTextOperation(
+        {
+          path: [0, 0],
+          offset: 2,
+        },
+        "，crucialy-rich。",
+      ),
+    );
+
+    expect(result.children[0]?.children[0]?.text).toBe("你好，crucialy-rich。");
+  });
 });
