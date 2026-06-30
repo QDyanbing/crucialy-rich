@@ -12,6 +12,7 @@ import {
   normalizeDocument,
   validateDocument,
   type DocumentNode,
+  type InsertTextOperation,
   type Path,
   type Point,
   type RangeSelection,
@@ -354,6 +355,7 @@ function DemoApp() {
   const [modelSelection, setModelSelection] =
     useState<RangeSelection>(defaultSelection);
   const [insertTextValue, setInsertTextValue] = useState("插入文本");
+  const [lastOperation, setLastOperation] = useState<InsertTextOperation | null>(null);
   const [documentValue, setDocumentValue] = useState(() =>
     cloneModelValue(getModelExample("regular").value),
   );
@@ -383,6 +385,7 @@ function DemoApp() {
 
     setDocumentValue(applyInsertText(normalizedDocument, operation));
     setModelSelection(createSelectionAfterInsertText(operation));
+    setLastOperation(operation);
   }
 
   function handleBrowserSelectionSync() {
@@ -464,6 +467,10 @@ function DemoApp() {
               插入
             </button>
           </div>
+
+          <pre aria-label="最近操作" className="operation-preview">
+            {lastOperation ? JSON.stringify(lastOperation, null, 2) : "暂无操作"}
+          </pre>
 
           {validation.errors.length > 0 ? (
             <pre aria-label="模型校验错误" className="validation-errors">

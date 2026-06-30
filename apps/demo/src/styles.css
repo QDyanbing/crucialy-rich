@@ -211,6 +211,11 @@ pre {
   max-height: 160px;
 }
 
+.operation-preview {
+  flex: initial;
+  max-height: 180px;
+}
+
 .state-pill {
   display: inline-flex;
   align-items: center;
