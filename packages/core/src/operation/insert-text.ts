@@ -1,4 +1,6 @@
+import type { DocumentNode } from "../model";
 import type { Point } from "../selection";
+import { isValidPoint } from "../selection";
 import type { InsertTextOperation } from "./types";
 
 export function createInsertTextOperation(
@@ -12,5 +14,48 @@ export function createInsertTextOperation(
     },
     text,
     type: "insert_text",
+  };
+}
+
+function getInsertTextIndexes(
+  document: DocumentNode,
+  operation: InsertTextOperation,
+): [number, number] {
+  if (!isValidPoint(document, operation.point)) {
+    throw new RangeError("insert text point must reference a text node");
+  }
+
+  const [blockIndex, textIndex] = operation.point.path;
+
+  if (blockIndex === undefined || textIndex === undefined) {
+    throw new RangeError("insert text point must reference a text node");
+  }
+
+  return [blockIndex, textIndex];
+}
+
+export function applyInsertText(
+  document: DocumentNode,
+  operation: InsertTextOperation,
+): DocumentNode {
+  const [blockIndex, textIndex] = getInsertTextIndexes(document, operation);
+
+  return {
+    ...document,
+    children: document.children.map((block, currentBlockIndex) =>
+      currentBlockIndex === blockIndex
+        ? {
+            ...block,
+            children: block.children.map((textNode, currentTextIndex) =>
+              currentTextIndex === textIndex
+                ? {
+                    ...textNode,
+                    text: `${operation.text}${textNode.text}`,
+                  }
+                : textNode,
+            ),
+          }
+        : block,
+    ),
   };
 }

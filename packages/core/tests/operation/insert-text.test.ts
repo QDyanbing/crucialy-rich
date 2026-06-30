@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { createInsertTextOperation } from "../../src/operation";
+import { createDocument, createParagraph, createText } from "../../src/model";
+import { applyInsertText, createInsertTextOperation } from "../../src/operation";
 
 describe("createInsertTextOperation", () => {
   it("creates an insert text operation from a point and text", () => {
@@ -29,5 +30,24 @@ describe("createInsertTextOperation", () => {
     path[0] = 9;
 
     expect(operation.point.path).toEqual([0, 0]);
+  });
+});
+
+describe("applyInsertText", () => {
+  it("inserts text at the start of a text node", () => {
+    const document = createDocument([createParagraph([createText("世界")])]);
+    const result = applyInsertText(
+      document,
+      createInsertTextOperation(
+        {
+          path: [0, 0],
+          offset: 0,
+        },
+        "你好，",
+      ),
+    );
+
+    expect(result.children[0]?.children[0]?.text).toBe("你好，世界");
+    expect(document.children[0]?.children[0]?.text).toBe("世界");
   });
 });
