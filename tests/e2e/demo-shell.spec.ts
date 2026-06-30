@@ -130,6 +130,19 @@ test("normalizes invalid model examples", async ({ page }) => {
   );
 });
 
+test("applies insert text from the operation controls", async ({ page }) => {
+  await page.goto("/");
+
+  await page.getByLabel("插入文本").fill("新文本");
+  await page.getByRole("button", { name: "插入" }).click();
+
+  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
+    '"text": "新文本你好，crucialy-rich。"',
+  );
+  await expect(page.getByLabel("最近操作")).toContainText('"type": "insert_text"');
+  await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 3');
+});
+
 test("highlights the selected document json node", async ({ page }) => {
   await page.goto("/");
 
