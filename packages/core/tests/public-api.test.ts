@@ -44,4 +44,10 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.renderDocument).toBe("function");
     expect(typeof core.renderNodeToHtml).toBe("function");
   });
+
+  it("exposes the operation API", () => {
+    expect(typeof core.createInsertTextOperation).toBe("function");
+    expect(typeof core.applyInsertText).toBe("function");
+    expect(typeof core.createSelectionAfterInsertText).toBe("function");
+  });
 });
