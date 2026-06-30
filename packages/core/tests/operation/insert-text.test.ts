@@ -82,4 +82,38 @@ describe("applyInsertText", () => {
 
     expect(result.children[0]?.children[0]?.text).toBe("你好，crucialy-rich。");
   });
+
+  it("throws when the point path does not reference text", () => {
+    const document = createDocument([createParagraph([createText("你好")])]);
+
+    expect(() =>
+      applyInsertText(
+        document,
+        createInsertTextOperation(
+          {
+            path: [0],
+            offset: 0,
+          },
+          "x",
+        ),
+      ),
+    ).toThrow(RangeError);
+  });
+
+  it("throws when the point offset is outside text", () => {
+    const document = createDocument([createParagraph([createText("你好")])]);
+
+    expect(() =>
+      applyInsertText(
+        document,
+        createInsertTextOperation(
+          {
+            path: [0, 0],
+            offset: 3,
+          },
+          "x",
+        ),
+      ),
+    ).toThrow("insert text point must reference a text node");
+  });
 });
