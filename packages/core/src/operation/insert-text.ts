@@ -40,6 +40,10 @@ export function applyInsertText(
 ): DocumentNode {
   const [blockIndex, textIndex] = getInsertTextIndexes(document, operation);
 
+  if (operation.text.length === 0) {
+    return document;
+  }
+
   return {
     ...document,
     children: document.children.map((block, currentBlockIndex) =>

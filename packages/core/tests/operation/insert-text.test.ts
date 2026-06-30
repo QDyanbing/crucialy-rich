@@ -116,4 +116,20 @@ describe("applyInsertText", () => {
       ),
     ).toThrow("insert text point must reference a text node");
   });
+
+  it("keeps the same document reference when inserted text is empty", () => {
+    const document = createDocument([createParagraph([createText("你好")])]);
+    const result = applyInsertText(
+      document,
+      createInsertTextOperation(
+        {
+          path: [0, 0],
+          offset: 1,
+        },
+        "",
+      ),
+    );
+
+    expect(result).toBe(document);
+  });
 });
