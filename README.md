@@ -10,9 +10,9 @@
 
 ## 当前阶段
 
-已完成工程初始化、文档模型第一版、模型选区第一版、基础模型渲染第一版、DOM 与模型位置映射第一版、选区双向同步第一版、React 组件 API 第一版和渲染闭环验收。
+已完成工程初始化、文档模型第一版、模型选区第一版、基础模型渲染第一版、DOM 与模型位置映射第一版、选区双向同步第一版、React 组件 API 第一版、渲染闭环验收和 `insertText` operation 第一版。
 
-当前 React 组件已支持通过 `value` / `defaultValue` 展示文档模型，但仍未实现真实编辑行为。
+当前 React 组件已支持通过 `value` / `defaultValue` 展示文档模型，演示页可以通过 operation 控件插入文本，但仍未接入真实键盘输入、删除、分段、合并或事务。
 
 ## 技术栈
 
@@ -39,7 +39,7 @@
 .
 ├── apps/demo              # Vite + React 调试演示
 ├── docs                   # 架构、开发和 QA 文档
-├── packages/core          # 富文本内核模型、选区、基础渲染、DOM 映射和选区同步
+├── packages/core          # 富文本内核模型、选区、基础渲染、DOM 映射、选区同步和 operation
 ├── packages/react         # React 集成包和 RichTextEditor 组件 API
 ├── tests/e2e              # Playwright 端到端冒烟测试
 ├── eslint.config.js       # ESLint 扁平配置
@@ -113,6 +113,7 @@ pnpm test:e2e
 - [基础渲染](./docs/features/render.md)
 - [选区双向同步](./docs/features/selection-sync.md)
 - [组件 API](./docs/features/component-api.md)
+- [Operation](./docs/features/operation.md)
 - [提交规范](./docs/development/commit-convention.md)
 - [测试策略](./docs/qa/test-strategy.md)
 - [脚手架验收](./docs/qa/scaffold-acceptance.md)
@@ -120,10 +121,12 @@ pnpm test:e2e
 - [第 2 周 QA](./docs/qa/week-02.md)
 - [第 3 周 QA](./docs/qa/week-03.md)
 - [第 4 周 QA](./docs/qa/week-04.md)
+- [第 5 周 QA](./docs/qa/week-05.md)
 - [模型 QA](./docs/qa/model.md)
 - [选区 QA](./docs/qa/selection.md)
 - [基础渲染 QA](./docs/qa/render.md)
 - [选区同步 QA](./docs/qa/selection-sync.md)
+- [Operation QA](./docs/qa/operation.md)
 - [变更记录](./CHANGELOG.md)
 
 ## 反馈入口

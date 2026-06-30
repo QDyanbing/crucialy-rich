@@ -25,6 +25,7 @@
 - 新增选区同步文档和 QA 记录。
 - 新增 React 组件 API 第一版，包含 `value`、`defaultValue`、`onChange`、renderer 输出、文档和演示示例。
 - 新增渲染闭环覆盖，包括空文档、空段落、DOM 映射非法输入、React 组件边界、演示边界示例和第 4 周 QA。
+- 新增 `insert_text` operation 第一版，包含创建、应用、插入后选区计算、测试、文档、QA 和演示调试入口。
 
 ### 变更
 
@@ -38,4 +39,4 @@
 
 ### 暂未包含
 
-- 编辑命令、历史记录、解析、文档序列化或真实编辑行为。
+- delete、split、merge、transaction、历史记录、解析、文档序列化或真实键盘输入行为。
