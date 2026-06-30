@@ -1,5 +1,7 @@
 import {
+  applyInsertText,
   createDocument,
+  createInsertTextOperation,
   createParagraph,
   createText,
   domSelectionToModelSelection,
@@ -350,6 +352,7 @@ function DemoApp() {
   const [modelExampleId, setModelExampleId] = useState<ModelExampleId>("regular");
   const [modelSelection, setModelSelection] =
     useState<RangeSelection>(defaultSelection);
+  const [insertTextValue, setInsertTextValue] = useState("插入文本");
   const [documentValue, setDocumentValue] = useState(() =>
     cloneModelValue(getModelExample("regular").value),
   );
@@ -372,6 +375,12 @@ function DemoApp() {
 
   function handleNormalize() {
     setDocumentValue(normalizeDocument(documentValue));
+  }
+
+  function handleInsertText() {
+    const operation = createInsertTextOperation(modelSelection.anchor, insertTextValue);
+
+    setDocumentValue(applyInsertText(normalizedDocument, operation));
   }
 
   function handleBrowserSelectionSync() {
@@ -437,6 +446,20 @@ function DemoApp() {
             </label>
             <button type="button" onClick={handleNormalize}>
               规范化
+            </button>
+          </div>
+
+          <div className="operation-controls" aria-label="操作控制">
+            <label>
+              <span>插入文本</span>
+              <input
+                aria-label="插入文本"
+                value={insertTextValue}
+                onChange={(event) => setInsertTextValue(event.target.value)}
+              />
+            </label>
+            <button type="button" onClick={handleInsertText}>
+              插入
             </button>
           </div>
 
