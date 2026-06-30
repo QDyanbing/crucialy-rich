@@ -3,6 +3,7 @@ import {
   createDocument,
   createInsertTextOperation,
   createParagraph,
+  createSelectionAfterInsertText,
   createText,
   domSelectionToModelSelection,
   getNodeAtPath,
@@ -381,6 +382,7 @@ function DemoApp() {
     const operation = createInsertTextOperation(modelSelection.anchor, insertTextValue);
 
     setDocumentValue(applyInsertText(normalizedDocument, operation));
+    setModelSelection(createSelectionAfterInsertText(operation));
   }
 
   function handleBrowserSelectionSync() {
