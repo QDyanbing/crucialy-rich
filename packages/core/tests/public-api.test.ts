@@ -49,5 +49,8 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.createInsertTextOperation).toBe("function");
     expect(typeof core.applyInsertText).toBe("function");
     expect(typeof core.createSelectionAfterInsertText).toBe("function");
+    expect(typeof core.createDeleteTextOperation).toBe("function");
+    expect(typeof core.applyDeleteText).toBe("function");
+    expect(typeof core.createSelectionAfterDeleteText).toBe("function");
   });
 });
