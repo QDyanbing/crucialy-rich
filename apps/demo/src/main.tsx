@@ -1,8 +1,11 @@
 import {
+  applyDeleteText,
   applyInsertText,
   createDocument,
+  createDeleteTextOperation,
   createInsertTextOperation,
   createParagraph,
+  createSelectionAfterDeleteText,
   createSelectionAfterInsertText,
   createText,
   domSelectionToModelSelection,
@@ -12,7 +15,7 @@ import {
   normalizeDocument,
   validateDocument,
   type DocumentNode,
-  type InsertTextOperation,
+  type Operation,
   type Path,
   type Point,
   type RangeSelection,
@@ -355,7 +358,7 @@ function DemoApp() {
   const [modelSelection, setModelSelection] =
     useState<RangeSelection>(defaultSelection);
   const [insertTextValue, setInsertTextValue] = useState("插入文本");
-  const [lastOperation, setLastOperation] = useState<InsertTextOperation | null>(null);
+  const [lastOperation, setLastOperation] = useState<Operation | null>(null);
   const [documentValue, setDocumentValue] = useState(() =>
     cloneModelValue(getModelExample("regular").value),
   );
@@ -385,6 +388,14 @@ function DemoApp() {
 
     setDocumentValue(applyInsertText(normalizedDocument, operation));
     setModelSelection(createSelectionAfterInsertText(operation));
+    setLastOperation(operation);
+  }
+
+  function handleDeleteText() {
+    const operation = createDeleteTextOperation(modelSelection);
+
+    setDocumentValue(applyDeleteText(normalizedDocument, operation));
+    setModelSelection(createSelectionAfterDeleteText(operation));
     setLastOperation(operation);
   }
 
@@ -465,6 +476,9 @@ function DemoApp() {
             </label>
             <button type="button" onClick={handleInsertText}>
               插入
+            </button>
+            <button type="button" onClick={handleDeleteText}>
+              删除选区
             </button>
           </div>
 

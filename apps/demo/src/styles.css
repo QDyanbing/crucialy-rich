@@ -160,10 +160,16 @@ h3 {
   gap: 12px;
 }
 
-.model-controls,
-.operation-controls {
+.model-controls {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.operation-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   gap: 12px;
   align-items: end;
 }
