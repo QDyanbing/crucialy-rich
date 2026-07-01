@@ -62,7 +62,10 @@ export function applyDeleteText(
               currentTextIndex === textIndex
                 ? {
                     ...textNode,
-                    text: textNode.text.slice(range.focus.offset),
+                    text: `${textNode.text.slice(
+                      0,
+                      range.anchor.offset,
+                    )}${textNode.text.slice(range.focus.offset)}`,
                   }
                 : textNode,
             ),

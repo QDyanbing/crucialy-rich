@@ -67,4 +67,61 @@ describe("applyDeleteText", () => {
     expect(result.children[0]?.children[0]?.text).toBe("世界");
     expect(document.children[0]?.children[0]?.text).toBe("你好世界");
   });
+
+  it("deletes text in the middle of a text node", () => {
+    const document = createDocument([createParagraph([createText("你好，美丽世界")])]);
+    const result = applyDeleteText(
+      document,
+      createDeleteTextOperation({
+        anchor: {
+          path: [0, 0],
+          offset: 3,
+        },
+        focus: {
+          path: [0, 0],
+          offset: 5,
+        },
+      }),
+    );
+
+    expect(result.children[0]?.children[0]?.text).toBe("你好，世界");
+  });
+
+  it("deletes text at the end of a text node", () => {
+    const document = createDocument([createParagraph([createText("你好世界尾巴")])]);
+    const result = applyDeleteText(
+      document,
+      createDeleteTextOperation({
+        anchor: {
+          path: [0, 0],
+          offset: 4,
+        },
+        focus: {
+          path: [0, 0],
+          offset: 6,
+        },
+      }),
+    );
+
+    expect(result.children[0]?.children[0]?.text).toBe("你好世界");
+  });
+
+  it("supports backward ranges inside one text node", () => {
+    const document = createDocument([createParagraph([createText("你好，世界")])]);
+    const result = applyDeleteText(
+      document,
+      createDeleteTextOperation({
+        anchor: {
+          path: [0, 0],
+          offset: 5,
+        },
+        focus: {
+          path: [0, 0],
+          offset: 3,
+        },
+      }),
+    );
+
+    expect(result.children[0]?.children[0]?.text).toBe("你好，");
+  });
 });
