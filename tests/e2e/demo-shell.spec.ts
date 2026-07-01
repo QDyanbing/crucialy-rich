@@ -143,6 +143,20 @@ test("applies insert text from the operation controls", async ({ page }) => {
   await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 3');
 });
 
+test("applies delete text from the operation controls", async ({ page }) => {
+  await page.goto("/");
+
+  await page.getByLabel("锚点偏移").fill("0");
+  await page.getByLabel("焦点偏移").fill("3");
+  await page.getByRole("button", { name: "删除选区" }).click();
+
+  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
+    '"text": "crucialy-rich。"',
+  );
+  await expect(page.getByLabel("最近操作")).toContainText('"type": "delete_text"');
+  await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 0');
+});
+
 test("highlights the selected document json node", async ({ page }) => {
   await page.goto("/");
 
