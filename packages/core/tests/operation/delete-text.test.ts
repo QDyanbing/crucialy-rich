@@ -124,4 +124,66 @@ describe("applyDeleteText", () => {
 
     expect(result.children[0]?.children[0]?.text).toBe("你好，");
   });
+
+  it("throws when a range point does not reference text", () => {
+    const document = createDocument([createParagraph([createText("你好")])]);
+
+    expect(() =>
+      applyDeleteText(
+        document,
+        createDeleteTextOperation({
+          anchor: {
+            path: [0],
+            offset: 0,
+          },
+          focus: {
+            path: [0, 0],
+            offset: 1,
+          },
+        }),
+      ),
+    ).toThrow("delete text range must reference text nodes");
+  });
+
+  it("throws when a range offset is outside text", () => {
+    const document = createDocument([createParagraph([createText("你好")])]);
+
+    expect(() =>
+      applyDeleteText(
+        document,
+        createDeleteTextOperation({
+          anchor: {
+            path: [0, 0],
+            offset: 0,
+          },
+          focus: {
+            path: [0, 0],
+            offset: 3,
+          },
+        }),
+      ),
+    ).toThrow("delete text range must reference text nodes");
+  });
+
+  it("throws when a range crosses text nodes", () => {
+    const document = createDocument([
+      createParagraph([createText("你好"), createText("世界")]),
+    ]);
+
+    expect(() =>
+      applyDeleteText(
+        document,
+        createDeleteTextOperation({
+          anchor: {
+            path: [0, 0],
+            offset: 1,
+          },
+          focus: {
+            path: [0, 1],
+            offset: 1,
+          },
+        }),
+      ),
+    ).toThrow("delete text range must stay inside one text node");
+  });
 });
