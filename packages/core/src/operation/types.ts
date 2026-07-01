@@ -1,4 +1,4 @@
-import type { Point } from "../selection";
+import type { Point, RangeSelection } from "../selection";
 
 export interface InsertTextOperation {
   point: Point;
@@ -6,4 +6,9 @@ export interface InsertTextOperation {
   type: "insert_text";
 }
 
-export type Operation = InsertTextOperation;
+export interface DeleteTextOperation {
+  range: RangeSelection;
+  type: "delete_text";
+}
+
+export type Operation = DeleteTextOperation | InsertTextOperation;
