@@ -1,4 +1,8 @@
-export { applyDeleteText, createDeleteTextOperation } from "./delete-text";
+export {
+  applyDeleteText,
+  createDeleteTextOperation,
+  createSelectionAfterDeleteText,
+} from "./delete-text";
 export {
   applyInsertText,
   createInsertTextOperation,

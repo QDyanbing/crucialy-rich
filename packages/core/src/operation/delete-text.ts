@@ -78,3 +78,21 @@ export function applyDeleteText(
     ),
   };
 }
+
+export function createSelectionAfterDeleteText(
+  operation: DeleteTextOperation,
+): RangeSelection {
+  const range = normalizeRange(operation.range);
+  const point = {
+    path: [...range.anchor.path],
+    offset: range.anchor.offset,
+  };
+
+  return {
+    anchor: point,
+    focus: {
+      path: [...point.path],
+      offset: point.offset,
+    },
+  };
+}

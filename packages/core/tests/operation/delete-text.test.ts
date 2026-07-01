@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { createDocument, createParagraph, createText } from "../../src/model";
-import { applyDeleteText, createDeleteTextOperation } from "../../src/operation";
+import {
+  applyDeleteText,
+  createDeleteTextOperation,
+  createSelectionAfterDeleteText,
+} from "../../src/operation";
 
 describe("createDeleteTextOperation", () => {
   it("creates a delete text operation from a range", () => {
@@ -204,5 +208,55 @@ describe("applyDeleteText", () => {
     );
 
     expect(result).toBe(document);
+  });
+});
+
+describe("createSelectionAfterDeleteText", () => {
+  it("creates a collapsed selection at the start of the deleted range", () => {
+    const operation = createDeleteTextOperation({
+      anchor: {
+        path: [0, 0],
+        offset: 1,
+      },
+      focus: {
+        path: [0, 0],
+        offset: 3,
+      },
+    });
+
+    expect(createSelectionAfterDeleteText(operation)).toEqual({
+      anchor: {
+        path: [0, 0],
+        offset: 1,
+      },
+      focus: {
+        path: [0, 0],
+        offset: 1,
+      },
+    });
+  });
+
+  it("uses the normalized start for a backward deleted range", () => {
+    const operation = createDeleteTextOperation({
+      anchor: {
+        path: [0, 0],
+        offset: 5,
+      },
+      focus: {
+        path: [0, 0],
+        offset: 2,
+      },
+    });
+
+    expect(createSelectionAfterDeleteText(operation)).toEqual({
+      anchor: {
+        path: [0, 0],
+        offset: 2,
+      },
+      focus: {
+        path: [0, 0],
+        offset: 2,
+      },
+    });
   });
 });
