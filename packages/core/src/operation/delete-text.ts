@@ -1,6 +1,6 @@
 import type { DocumentNode } from "../model";
 import type { RangeSelection } from "../selection";
-import { isValidPoint, normalizeRange } from "../selection";
+import { isCollapsed, isValidPoint, normalizeRange } from "../selection";
 import type { DeleteTextOperation } from "./types";
 
 export function createDeleteTextOperation(range: RangeSelection): DeleteTextOperation {
@@ -51,6 +51,10 @@ export function applyDeleteText(
   operation: DeleteTextOperation,
 ): DocumentNode {
   const [blockIndex, textIndex, range] = getDeleteTextIndexes(document, operation);
+
+  if (isCollapsed(range)) {
+    return document;
+  }
 
   return {
     ...document,

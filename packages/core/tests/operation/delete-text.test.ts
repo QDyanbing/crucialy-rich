@@ -186,4 +186,23 @@ describe("applyDeleteText", () => {
       ),
     ).toThrow("delete text range must stay inside one text node");
   });
+
+  it("keeps the same document reference when the range is collapsed", () => {
+    const document = createDocument([createParagraph([createText("你好")])]);
+    const result = applyDeleteText(
+      document,
+      createDeleteTextOperation({
+        anchor: {
+          path: [0, 0],
+          offset: 1,
+        },
+        focus: {
+          path: [0, 0],
+          offset: 1,
+        },
+      }),
+    );
+
+    expect(result).toBe(document);
+  });
 });
