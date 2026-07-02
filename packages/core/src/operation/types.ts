@@ -11,4 +11,9 @@ export interface DeleteTextOperation {
   type: "delete_text";
 }
 
-export type Operation = DeleteTextOperation | InsertTextOperation;
+export interface SplitBlockOperation {
+  point: Point;
+  type: "split_block";
+}
+
+export type Operation = DeleteTextOperation | InsertTextOperation | SplitBlockOperation;
