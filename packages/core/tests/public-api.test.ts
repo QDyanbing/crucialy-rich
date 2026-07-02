@@ -52,5 +52,11 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.createDeleteTextOperation).toBe("function");
     expect(typeof core.applyDeleteText).toBe("function");
     expect(typeof core.createSelectionAfterDeleteText).toBe("function");
+    expect(typeof core.createSplitBlockOperation).toBe("function");
+    expect(typeof core.applySplitBlock).toBe("function");
+    expect(typeof core.createSelectionAfterSplitBlock).toBe("function");
+    expect(typeof core.createMergeBlockOperation).toBe("function");
+    expect(typeof core.applyMergeBlock).toBe("function");
+    expect(typeof core.createSelectionAfterMergeBlock).toBe("function");
   });
 });
