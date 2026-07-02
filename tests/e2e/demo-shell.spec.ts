@@ -157,6 +157,41 @@ test("applies delete text from the operation controls", async ({ page }) => {
   await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 0');
 });
 
+test("applies split block from the operation controls", async ({ page }) => {
+  await page.goto("/");
+
+  await page.getByLabel("锚点偏移").fill("3");
+  await page.getByRole("button", { name: "分段" }).click();
+
+  const renderedDocument = page.getByLabel("已渲染文档");
+
+  await expect(renderedDocument.locator("p")).toHaveCount(3);
+  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
+    '"text": "你好，"',
+  );
+  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
+    '"text": "crucialy-rich。"',
+  );
+  await expect(page.getByLabel("最近操作")).toContainText('"type": "split_block"');
+  await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 0');
+});
+
+test("applies merge block from the operation controls", async ({ page }) => {
+  await page.goto("/");
+
+  await page.getByLabel("锚点路径").fill("1,0");
+  await page.getByLabel("锚点偏移").fill("0");
+  await page.getByRole("button", { name: "合并段落" }).click();
+
+  const renderedDocument = page.getByLabel("已渲染文档");
+
+  await expect(renderedDocument.locator("p")).toHaveCount(1);
+  await expect(renderedDocument).toContainText("你好，crucialy-rich。");
+  await expect(renderedDocument).toContainText("选区模型已就绪。");
+  await expect(page.getByLabel("最近操作")).toContainText('"type": "merge_block"');
+  await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 17');
+});
+
 test("highlights the selected document json node", async ({ page }) => {
   await page.goto("/");
 
