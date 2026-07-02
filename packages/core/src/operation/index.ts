@@ -8,6 +8,7 @@ export {
   createInsertTextOperation,
   createSelectionAfterInsertText,
 } from "./insert-text";
+export { createMergeBlockOperation } from "./merge-block";
 export {
   applySplitBlock,
   createSelectionAfterSplitBlock,
@@ -16,6 +17,7 @@ export {
 export type {
   DeleteTextOperation,
   InsertTextOperation,
+  MergeBlockOperation,
   Operation,
   SplitBlockOperation,
 } from "./types";
