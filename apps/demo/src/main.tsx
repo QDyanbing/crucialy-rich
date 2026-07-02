@@ -1,12 +1,18 @@
 import {
   applyDeleteText,
   applyInsertText,
+  applyMergeBlock,
+  applySplitBlock,
   createDocument,
   createDeleteTextOperation,
   createInsertTextOperation,
+  createMergeBlockOperation,
   createParagraph,
   createSelectionAfterDeleteText,
   createSelectionAfterInsertText,
+  createSelectionAfterMergeBlock,
+  createSelectionAfterSplitBlock,
+  createSplitBlockOperation,
   createText,
   domSelectionToModelSelection,
   getNodeAtPath,
@@ -399,6 +405,22 @@ function DemoApp() {
     setLastOperation(operation);
   }
 
+  function handleSplitBlock() {
+    const operation = createSplitBlockOperation(modelSelection.anchor);
+
+    setDocumentValue(applySplitBlock(normalizedDocument, operation));
+    setModelSelection(createSelectionAfterSplitBlock(operation));
+    setLastOperation(operation);
+  }
+
+  function handleMergeBlock() {
+    const operation = createMergeBlockOperation(modelSelection.anchor);
+
+    setDocumentValue(applyMergeBlock(normalizedDocument, operation));
+    setModelSelection(createSelectionAfterMergeBlock(normalizedDocument, operation));
+    setLastOperation(operation);
+  }
+
   function handleBrowserSelectionSync() {
     const browserSelection = window.getSelection();
     const nextSelection = browserSelection
@@ -479,6 +501,12 @@ function DemoApp() {
             </button>
             <button type="button" onClick={handleDeleteText}>
               删除选区
+            </button>
+            <button type="button" onClick={handleSplitBlock}>
+              分段
+            </button>
+            <button type="button" onClick={handleMergeBlock}>
+              合并段落
             </button>
           </div>
 

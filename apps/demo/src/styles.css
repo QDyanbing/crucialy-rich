@@ -169,7 +169,7 @@ h3 {
 
 .operation-controls {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) repeat(4, auto);
   gap: 12px;
   align-items: end;
 }
@@ -422,7 +422,8 @@ input {
   .control-grid,
   .boundary-grid,
   .component-grid,
-  .debug-stack {
+  .debug-stack,
+  .operation-controls {
     grid-template-columns: 1fr;
   }
 
