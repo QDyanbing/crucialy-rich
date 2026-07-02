@@ -1,5 +1,5 @@
 import { createText, type DocumentNode, type ParagraphNode } from "../model";
-import type { Point } from "../selection";
+import type { Point, RangeSelection } from "../selection";
 import { isValidPoint } from "../selection";
 import type { SplitBlockOperation } from "./types";
 
@@ -66,5 +66,23 @@ export function applySplitBlock(
       rightBlock,
       ...document.children.slice(blockIndex + 1),
     ],
+  };
+}
+
+export function createSelectionAfterSplitBlock(
+  operation: SplitBlockOperation,
+): RangeSelection {
+  const [blockIndex] = operation.point.path;
+  const point = {
+    path: [blockIndex === undefined ? 0 : blockIndex + 1, 0],
+    offset: 0,
+  };
+
+  return {
+    anchor: point,
+    focus: {
+      path: [...point.path],
+      offset: point.offset,
+    },
   };
 }

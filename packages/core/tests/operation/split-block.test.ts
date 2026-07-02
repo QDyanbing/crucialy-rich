@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { createDocument, createParagraph, createText } from "../../src/model";
-import { applySplitBlock, createSplitBlockOperation } from "../../src/operation";
+import {
+  applySplitBlock,
+  createSelectionAfterSplitBlock,
+  createSplitBlockOperation,
+} from "../../src/operation";
 
 describe("createSplitBlockOperation", () => {
   it("creates a split block operation from a point", () => {
@@ -117,5 +121,25 @@ describe("applySplitBlock", () => {
         }),
       ),
     ).toThrow("split block point must reference a text node");
+  });
+});
+
+describe("createSelectionAfterSplitBlock", () => {
+  it("creates a collapsed selection at the start of the next block", () => {
+    const operation = createSplitBlockOperation({
+      path: [2, 1],
+      offset: 3,
+    });
+
+    expect(createSelectionAfterSplitBlock(operation)).toEqual({
+      anchor: {
+        path: [3, 0],
+        offset: 0,
+      },
+      focus: {
+        path: [3, 0],
+        offset: 0,
+      },
+    });
   });
 });
