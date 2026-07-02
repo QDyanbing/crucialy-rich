@@ -8,7 +8,11 @@ export {
   createInsertTextOperation,
   createSelectionAfterInsertText,
 } from "./insert-text";
-export { applyMergeBlock, createMergeBlockOperation } from "./merge-block";
+export {
+  applyMergeBlock,
+  createMergeBlockOperation,
+  createSelectionAfterMergeBlock,
+} from "./merge-block";
 export {
   applySplitBlock,
   createSelectionAfterSplitBlock,

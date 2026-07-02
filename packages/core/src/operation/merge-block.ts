@@ -1,5 +1,5 @@
 import { createText, type DocumentNode, type ParagraphNode } from "../model";
-import type { Point } from "../selection";
+import type { Point, RangeSelection } from "../selection";
 import { isValidPoint } from "../selection";
 import type { MergeBlockOperation } from "./types";
 
@@ -81,5 +81,29 @@ export function applyMergeBlock(
       mergedBlock,
       ...document.children.slice(blockIndex + 1),
     ],
+  };
+}
+
+export function createSelectionAfterMergeBlock(
+  document: DocumentNode,
+  operation: MergeBlockOperation,
+): RangeSelection {
+  const blockIndex = getMergeBlockIndex(document, operation);
+  const previousBlockIndex = blockIndex - 1;
+  const previousChildren = document.children[previousBlockIndex]?.children ?? [];
+  const previousEmpty = isEmptyParagraphChildren(previousChildren);
+  const lastTextIndex = previousEmpty ? 0 : previousChildren.length - 1;
+  const lastText = previousEmpty ? createText() : previousChildren[lastTextIndex]!;
+  const point = {
+    path: [previousBlockIndex, lastTextIndex],
+    offset: lastText.text.length,
+  };
+
+  return {
+    anchor: point,
+    focus: {
+      path: [...point.path],
+      offset: point.offset,
+    },
   };
 }

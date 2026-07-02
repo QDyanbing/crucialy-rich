@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { createDocument, createParagraph, createText } from "../../src/model";
-import { applyMergeBlock, createMergeBlockOperation } from "../../src/operation";
+import {
+  applyMergeBlock,
+  createMergeBlockOperation,
+  createSelectionAfterMergeBlock,
+} from "../../src/operation";
 
 describe("createMergeBlockOperation", () => {
   it("creates a merge block operation from a point", () => {
@@ -129,5 +133,51 @@ describe("applyMergeBlock", () => {
         }),
       ),
     ).toThrow("merge block point must be at the start of a non-first block");
+  });
+});
+
+describe("createSelectionAfterMergeBlock", () => {
+  it("creates a collapsed selection at the previous block end", () => {
+    const document = createDocument([
+      createParagraph([createText("你"), createText("好")]),
+      createParagraph([createText("世界")]),
+    ]);
+    const operation = createMergeBlockOperation({
+      path: [1, 0],
+      offset: 0,
+    });
+
+    expect(createSelectionAfterMergeBlock(document, operation)).toEqual({
+      anchor: {
+        path: [0, 1],
+        offset: 1,
+      },
+      focus: {
+        path: [0, 1],
+        offset: 1,
+      },
+    });
+  });
+
+  it("uses offset zero when the previous block is empty", () => {
+    const document = createDocument([
+      createParagraph([createText("")]),
+      createParagraph([createText("世界")]),
+    ]);
+    const operation = createMergeBlockOperation({
+      path: [1, 0],
+      offset: 0,
+    });
+
+    expect(createSelectionAfterMergeBlock(document, operation)).toEqual({
+      anchor: {
+        path: [0, 0],
+        offset: 0,
+      },
+      focus: {
+        path: [0, 0],
+        offset: 0,
+      },
+    });
   });
 });
