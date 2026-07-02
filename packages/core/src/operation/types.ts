@@ -16,4 +16,13 @@ export interface SplitBlockOperation {
   type: "split_block";
 }
 
-export type Operation = DeleteTextOperation | InsertTextOperation | SplitBlockOperation;
+export interface MergeBlockOperation {
+  point: Point;
+  type: "merge_block";
+}
+
+export type Operation =
+  | DeleteTextOperation
+  | InsertTextOperation
+  | MergeBlockOperation
+  | SplitBlockOperation;
