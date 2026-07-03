@@ -8,7 +8,9 @@
 
 第 5 周 Day 3「splitBlock 和 mergeBlock」已完成。
 
-下一步进入 Day 4「Transaction」。
+第 5 周 Day 4「Transaction」已完成。
+
+下一步进入 Day 5「Operation 闭环验收」。
 
 ## 已完成范围
 
@@ -29,6 +31,11 @@
 - 实现 `applyMergeBlock`。
 - 实现合并后的折叠选区计算。
 - 演示页增加合并段落调试入口。
+- 实现 transaction 数据结构。
+- 实现 `applyOperation` 分发器。
+- 实现 `applyTransaction` 批量应用。
+- transaction 结束后自动执行 normalize。
+- 演示页展示最近 transaction。
 - 文档和 QA 记录同步更新。
 
 ## 自动化覆盖
@@ -37,16 +44,17 @@
 - `packages/core/tests/operation/delete-text.test.ts`
 - `packages/core/tests/operation/split-block.test.ts`
 - `packages/core/tests/operation/merge-block.test.ts`
+- `packages/core/tests/operation/transaction.test.ts`
 - `packages/core/tests/public-api.test.ts`
 - `tests/e2e/demo-shell.spec.ts`
 
 ## 当前限制
 
-- 尚未实现 transaction。
 - 尚未接入真实 `beforeinput`。
 - `deleteText` 暂不支持跨 text 节点或跨 paragraph 删除。
 - `mergeBlock` 暂不支持批量跨多段合并。
+- transaction 当前不包含 inverse、撤销重做或 history 记录。
 
 ## 结论
 
-`insertText`、`deleteText`、`splitBlock` 和 `mergeBlock` 已按代码、测试、demo、文档和验收记录闭环；第 5 周剩余任务继续从 transaction 开始。
+`insertText`、`deleteText`、`splitBlock`、`mergeBlock` 和 `Transaction` 已按代码、测试、demo、文档和验收记录闭环；第 5 周剩余任务进入 Operation 综合验收。

@@ -2,7 +2,7 @@
 
 ## 范围
 
-验证 `insert_text`、`delete_text`、`split_block` 和 `merge_block` operation 的创建、应用、边界处理、操作后选区计算和演示调试入口。
+验证 `insert_text`、`delete_text`、`split_block`、`merge_block` operation 和 transaction 的创建、应用、边界处理、操作后选区计算和演示调试入口。
 
 ## 自动化测试
 
@@ -10,8 +10,9 @@
 - `packages/core/tests/operation/delete-text.test.ts`：operation 创建、path 复制、段首/段中/段尾删除、反向 range、非法 range、折叠 range no-op 和删除后 selection。
 - `packages/core/tests/operation/split-block.test.ts`：operation 创建、path 复制、段首/段中/段尾分段、多 text children、非法 point 和分段后 selection。
 - `packages/core/tests/operation/merge-block.test.ts`：operation 创建、path 复制、普通段落合并、空段落合并、非法 point 和合并后 selection。
+- `packages/core/tests/operation/transaction.test.ts`：transaction 创建、operation 分发、批量应用、结束 normalize 和失败不污染原文档。
 - `packages/core/tests/public-api.test.ts`：确认 operation API 通过 `@crucialy-rich/core` 入口导出。
-- `tests/e2e/demo-shell.spec.ts`：演示操作控件可插入、删除、分段或合并文本，并更新文档 JSON、最近 operation 和选区 JSON。
+- `tests/e2e/demo-shell.spec.ts`：演示操作控件可插入、删除、分段或合并文本，并更新文档 JSON、最近 transaction 和选区 JSON。
 
 命令：
 
@@ -54,6 +55,11 @@ pnpm test:e2e
 | 非法 merge       | 首段或非段首 point 执行 merge         | 抛出 `RangeError`                     | 通过 |
 | 合并后选区       | 调用 `createSelectionAfterMergeBlock` | selection 折叠到原上一段末尾          | 通过 |
 | 演示合并         | 第二段段首点击“合并段落”              | 文档 JSON、渲染预览和最近操作同步更新 | 通过 |
+| 创建 transaction | 调用 `createTransaction`              | operation 被复制进 transaction        | 通过 |
+| 批量应用         | 连续 insert 和 delete                 | 按顺序得到最终文档                    | 通过 |
+| 结束 normalize   | 空文档执行空 transaction              | 自动补合法空 paragraph                | 通过 |
+| 失败保护         | transaction 中包含非法 operation      | 抛错且原始文档不变                    | 通过 |
+| 演示 transaction | 点击任意 operation 控件               | 最近 transaction JSON 同步更新        | 通过 |
 
 ## 当前限制
 
@@ -61,9 +67,10 @@ pnpm test:e2e
 - 非折叠选区不会替换选中内容。
 - 删除暂不支持跨 text 节点或跨 paragraph range。
 - 合并暂不支持批量跨多段合并。
+- transaction 当前不包含 inverse、撤销重做或回滚事件对象。
 - 真实键盘输入尚未接入 operation。
-- 暂无 transaction，失败回滚和批量操作留到后续任务。
+- 失败保护依赖 operation 不可变返回新文档。
 
 ## 结论
 
-`insert_text`、`delete_text`、`split_block` 和 `merge_block` 的核心模型操作、测试、演示调试和 QA 记录已闭环，下一步可以继续推进 transaction。
+`insert_text`、`delete_text`、`split_block`、`merge_block` 和 transaction 的核心模型操作、测试、演示调试和 QA 记录已闭环，下一步可以进入 Operation 闭环验收。
