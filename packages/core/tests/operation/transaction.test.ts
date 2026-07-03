@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
+import { createDocument, createParagraph, createText } from "../../src/model";
 import {
+  applyOperation,
   createDeleteTextOperation,
   createInsertTextOperation,
   createTransaction,
@@ -40,5 +42,30 @@ describe("createTransaction", () => {
         focus: { path: [0, 0] },
       },
     });
+  });
+});
+
+describe("applyOperation", () => {
+  it("applies an insert text operation", () => {
+    const document = createDocument([createParagraph([createText("你好")])]);
+    const result = applyOperation(
+      document,
+      createInsertTextOperation({ path: [0, 0], offset: 2 }, "世界"),
+    );
+
+    expect(result.children[0]?.children[0]?.text).toBe("你好世界");
+  });
+
+  it("applies a delete text operation", () => {
+    const document = createDocument([createParagraph([createText("你好世界")])]);
+    const result = applyOperation(
+      document,
+      createDeleteTextOperation({
+        anchor: { path: [0, 0], offset: 2 },
+        focus: { path: [0, 0], offset: 4 },
+      }),
+    );
+
+    expect(result.children[0]?.children[0]?.text).toBe("你好");
   });
 });

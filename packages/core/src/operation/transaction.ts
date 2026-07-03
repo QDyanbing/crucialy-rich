@@ -1,4 +1,9 @@
+import type { DocumentNode } from "../model";
 import type { Point, RangeSelection } from "../selection";
+import { applyDeleteText } from "./delete-text";
+import { applyInsertText } from "./insert-text";
+import { applyMergeBlock } from "./merge-block";
+import { applySplitBlock } from "./split-block";
 import type { Operation, Transaction } from "./types";
 
 function clonePoint(point: Point): Point {
@@ -45,4 +50,20 @@ export function createTransaction(operations: Operation[] = []): Transaction {
   return {
     operations: operations.map(cloneOperation),
   };
+}
+
+export function applyOperation(
+  document: DocumentNode,
+  operation: Operation,
+): DocumentNode {
+  switch (operation.type) {
+    case "delete_text":
+      return applyDeleteText(document, operation);
+    case "insert_text":
+      return applyInsertText(document, operation);
+    case "merge_block":
+      return applyMergeBlock(document, operation);
+    case "split_block":
+      return applySplitBlock(document, operation);
+  }
 }
