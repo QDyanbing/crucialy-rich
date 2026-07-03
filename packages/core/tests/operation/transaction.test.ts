@@ -5,6 +5,8 @@ import {
   applyOperation,
   createDeleteTextOperation,
   createInsertTextOperation,
+  createMergeBlockOperation,
+  createSplitBlockOperation,
   createTransaction,
 } from "../../src/operation";
 
@@ -67,5 +69,34 @@ describe("applyOperation", () => {
     );
 
     expect(result.children[0]?.children[0]?.text).toBe("你好");
+  });
+
+  it("applies a split block operation", () => {
+    const document = createDocument([createParagraph([createText("你好世界")])]);
+    const result = applyOperation(
+      document,
+      createSplitBlockOperation({ path: [0, 0], offset: 2 }),
+    );
+
+    expect(result.children).toHaveLength(2);
+    expect(result.children[0]?.children[0]?.text).toBe("你好");
+    expect(result.children[1]?.children[0]?.text).toBe("世界");
+  });
+
+  it("applies a merge block operation", () => {
+    const document = createDocument([
+      createParagraph([createText("你好")]),
+      createParagraph([createText("世界")]),
+    ]);
+    const result = applyOperation(
+      document,
+      createMergeBlockOperation({ path: [1, 0], offset: 0 }),
+    );
+
+    expect(result.children).toHaveLength(1);
+    expect(result.children[0]?.children.map((node) => node.text)).toEqual([
+      "你好",
+      "世界",
+    ]);
   });
 });
