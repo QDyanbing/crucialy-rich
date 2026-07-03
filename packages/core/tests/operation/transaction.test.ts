@@ -117,4 +117,15 @@ describe("applyTransaction", () => {
     expect(result.children[0]?.children[0]?.text).toBe("世界");
     expect(document.children[0]?.children[0]?.text).toBe("你好");
   });
+
+  it("normalizes the document after applying operations", () => {
+    const document = {
+      type: "document",
+      children: [],
+    } as const;
+    const result = applyTransaction(document, createTransaction());
+
+    expect(result.children).toHaveLength(1);
+    expect(result.children[0]?.children[0]?.text).toBe("");
+  });
 });

@@ -1,4 +1,4 @@
-import type { DocumentNode } from "../model";
+import { normalizeDocument, type DocumentNode } from "../model";
 import type { Point, RangeSelection } from "../selection";
 import { applyDeleteText } from "./delete-text";
 import { applyInsertText } from "./insert-text";
@@ -72,5 +72,5 @@ export function applyTransaction(
   document: DocumentNode,
   transaction: Transaction,
 ): DocumentNode {
-  return transaction.operations.reduce(applyOperation, document);
+  return normalizeDocument(transaction.operations.reduce(applyOperation, document));
 }
