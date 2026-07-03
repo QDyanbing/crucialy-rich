@@ -128,4 +128,18 @@ describe("applyTransaction", () => {
     expect(result.children).toHaveLength(1);
     expect(result.children[0]?.children[0]?.text).toBe("");
   });
+
+  it("does not mutate the original document when an operation fails", () => {
+    const document = createDocument([createParagraph([createText("你好")])]);
+    const transaction = createTransaction([
+      createInsertTextOperation({ path: [0, 0], offset: 2 }, "世界"),
+      createDeleteTextOperation({
+        anchor: { path: [0, 0], offset: 99 },
+        focus: { path: [0, 0], offset: 100 },
+      }),
+    ]);
+
+    expect(() => applyTransaction(document, transaction)).toThrow(RangeError);
+    expect(document.children[0]?.children[0]?.text).toBe("你好");
+  });
 });
