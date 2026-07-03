@@ -58,5 +58,8 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.createMergeBlockOperation).toBe("function");
     expect(typeof core.applyMergeBlock).toBe("function");
     expect(typeof core.createSelectionAfterMergeBlock).toBe("function");
+    expect(typeof core.createTransaction).toBe("function");
+    expect(typeof core.applyOperation).toBe("function");
+    expect(typeof core.applyTransaction).toBe("function");
   });
 });
