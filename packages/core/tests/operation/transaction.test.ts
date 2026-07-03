@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { createDocument, createParagraph, createText } from "../../src/model";
 import {
   applyOperation,
+  applyTransaction,
   createDeleteTextOperation,
   createInsertTextOperation,
   createMergeBlockOperation,
@@ -98,5 +99,22 @@ describe("applyOperation", () => {
       "你好",
       "世界",
     ]);
+  });
+});
+
+describe("applyTransaction", () => {
+  it("applies multiple operations in order", () => {
+    const document = createDocument([createParagraph([createText("你好")])]);
+    const transaction = createTransaction([
+      createInsertTextOperation({ path: [0, 0], offset: 2 }, "世界"),
+      createDeleteTextOperation({
+        anchor: { path: [0, 0], offset: 0 },
+        focus: { path: [0, 0], offset: 2 },
+      }),
+    ]);
+    const result = applyTransaction(document, transaction);
+
+    expect(result.children[0]?.children[0]?.text).toBe("世界");
+    expect(document.children[0]?.children[0]?.text).toBe("你好");
   });
 });

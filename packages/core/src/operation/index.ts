@@ -18,7 +18,12 @@ export {
   createSelectionAfterSplitBlock,
   createSplitBlockOperation,
 } from "./split-block";
-export { applyOperation, cloneOperation, createTransaction } from "./transaction";
+export {
+  applyOperation,
+  applyTransaction,
+  cloneOperation,
+  createTransaction,
+} from "./transaction";
 export type {
   DeleteTextOperation,
   InsertTextOperation,

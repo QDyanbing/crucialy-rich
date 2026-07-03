@@ -67,3 +67,10 @@ export function applyOperation(
       return applySplitBlock(document, operation);
   }
 }
+
+export function applyTransaction(
+  document: DocumentNode,
+  transaction: Transaction,
+): DocumentNode {
+  return transaction.operations.reduce(applyOperation, document);
+}
