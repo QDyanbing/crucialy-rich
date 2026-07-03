@@ -13,6 +13,7 @@ import {
   createSelectionAfterMergeBlock,
   createSelectionAfterSplitBlock,
   createSplitBlockOperation,
+  createTransaction,
   createText,
   domSelectionToModelSelection,
   getNodeAtPath,
@@ -21,10 +22,10 @@ import {
   normalizeDocument,
   validateDocument,
   type DocumentNode,
-  type Operation,
   type Path,
   type Point,
   type RangeSelection,
+  type Transaction,
 } from "@crucialy-rich/core";
 import { RichTextEditor } from "@crucialy-rich/react";
 import { StrictMode, useMemo, useState, type ChangeEvent } from "react";
@@ -364,7 +365,7 @@ function DemoApp() {
   const [modelSelection, setModelSelection] =
     useState<RangeSelection>(defaultSelection);
   const [insertTextValue, setInsertTextValue] = useState("插入文本");
-  const [lastOperation, setLastOperation] = useState<Operation | null>(null);
+  const [lastTransaction, setLastTransaction] = useState<Transaction | null>(null);
   const [documentValue, setDocumentValue] = useState(() =>
     cloneModelValue(getModelExample("regular").value),
   );
@@ -394,7 +395,7 @@ function DemoApp() {
 
     setDocumentValue(applyInsertText(normalizedDocument, operation));
     setModelSelection(createSelectionAfterInsertText(operation));
-    setLastOperation(operation);
+    setLastTransaction(createTransaction([operation]));
   }
 
   function handleDeleteText() {
@@ -402,7 +403,7 @@ function DemoApp() {
 
     setDocumentValue(applyDeleteText(normalizedDocument, operation));
     setModelSelection(createSelectionAfterDeleteText(operation));
-    setLastOperation(operation);
+    setLastTransaction(createTransaction([operation]));
   }
 
   function handleSplitBlock() {
@@ -410,7 +411,7 @@ function DemoApp() {
 
     setDocumentValue(applySplitBlock(normalizedDocument, operation));
     setModelSelection(createSelectionAfterSplitBlock(operation));
-    setLastOperation(operation);
+    setLastTransaction(createTransaction([operation]));
   }
 
   function handleMergeBlock() {
@@ -418,7 +419,7 @@ function DemoApp() {
 
     setDocumentValue(applyMergeBlock(normalizedDocument, operation));
     setModelSelection(createSelectionAfterMergeBlock(normalizedDocument, operation));
-    setLastOperation(operation);
+    setLastTransaction(createTransaction([operation]));
   }
 
   function handleBrowserSelectionSync() {
@@ -510,8 +511,8 @@ function DemoApp() {
             </button>
           </div>
 
-          <pre aria-label="最近操作" className="operation-preview">
-            {lastOperation ? JSON.stringify(lastOperation, null, 2) : "暂无操作"}
+          <pre aria-label="最近 Transaction" className="operation-preview">
+            {lastTransaction ? JSON.stringify(lastTransaction, null, 2) : "暂无事务"}
           </pre>
 
           {validation.errors.length > 0 ? (
