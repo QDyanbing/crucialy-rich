@@ -1,6 +1,8 @@
 # Operation（第一版）
 
-Operation 用于描述一次对文档模型的可复现修改。当前阶段已经实现 `insert_text`、`delete_text`、`split_block` 和 `merge_block`，后续会在同一模块继续扩展事务。
+Operation 用于描述一次对文档模型的可复现修改。Transaction 用于把多个 operation 按顺序组合为一次批量模型变更。
+
+当前阶段已经实现 `insert_text`、`delete_text`、`split_block`、`merge_block` 和第一版 transaction。
 
 ## 操作类型
 
@@ -25,6 +27,10 @@ interface MergeBlockOperation {
   type: "merge_block";
   point: Point;
 }
+
+interface Transaction {
+  operations: Operation[];
+}
 ```
 
 字段说明：
@@ -33,6 +39,7 @@ interface MergeBlockOperation {
 - `point`：插入、分段或合并位置，必须指向 text 节点内的合法偏移。
 - `text`：要插入的文本。
 - `range`：删除范围，当前必须落在同一个 text 节点内。
+- `operations`：transaction 中按顺序执行的 operation 列表。
 
 ## 创建插入操作
 
@@ -105,6 +112,34 @@ interface MergeBlockOperation {
 - 不会修改传入的原始文档对象。
 - 首段、非段首 point 或非法 point 会抛出 `RangeError`。
 
+## 创建 Transaction
+
+使用 `createTransaction(operations)` 创建 transaction。
+
+创建时会复制 operation 内部的 path，避免外部数组后续修改影响 transaction。
+
+## 应用 Operation
+
+使用 `applyOperation(document, operation)` 应用单个 operation。
+
+当前会按 `operation.type` 分发到：
+
+- `applyInsertText`
+- `applyDeleteText`
+- `applySplitBlock`
+- `applyMergeBlock`
+
+## 应用 Transaction
+
+使用 `applyTransaction(document, transaction)` 按顺序应用一组 operation。
+
+当前规则：
+
+- operation 会按数组顺序依次执行。
+- transaction 结束后会统一执行 `normalizeDocument`。
+- 如果中途某个 operation 抛错，`applyTransaction` 会继续向外抛错。
+- 当前 operation 都按不可变方式返回新文档，失败不会修改传入的原始文档。
+
 ## 插入后的选区
 
 使用 `createSelectionAfterInsertText(operation)` 计算插入后的折叠选区。
@@ -156,8 +191,8 @@ interface MergeBlockOperation {
 - “删除选区”按钮。
 - “分段”按钮。
 - “合并段落”按钮。
-- 最近 operation JSON。
-- 插入、删除、分段或合并后文档 JSON 和渲染预览同步更新。
+- 最近 transaction JSON。
+- 插入、删除、分段或合并会通过 transaction 更新文档 JSON 和渲染预览。
 - 操作后选区 JSON 会同步到对应的落点。
 
 ## 当前限制
@@ -166,5 +201,6 @@ interface MergeBlockOperation {
 - 插入非折叠选区时不会自动删除选中内容，当前插入点取 selection anchor。
 - 删除暂不支持跨 text 节点或跨 paragraph 范围。
 - 合并暂不支持跨多段批量合并。
+- transaction 当前只负责批量应用和结束 normalize，不包含 undo/redo inverse 信息。
 - 尚未接入 `beforeinput`，真实键盘输入仍不更新 model。
-- 尚未实现通用 transaction 或撤销重做。
+- 尚未实现撤销重做。
