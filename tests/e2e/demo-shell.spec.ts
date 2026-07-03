@@ -139,7 +139,10 @@ test("applies insert text from the operation controls", async ({ page }) => {
   await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
     '"text": "新文本你好，crucialy-rich。"',
   );
-  await expect(page.getByLabel("最近操作")).toContainText('"type": "insert_text"');
+  await expect(page.getByLabel("最近 Transaction")).toContainText('"operations"');
+  await expect(page.getByLabel("最近 Transaction")).toContainText(
+    '"type": "insert_text"',
+  );
   await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 3');
 });
 
@@ -153,7 +156,10 @@ test("applies delete text from the operation controls", async ({ page }) => {
   await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
     '"text": "crucialy-rich。"',
   );
-  await expect(page.getByLabel("最近操作")).toContainText('"type": "delete_text"');
+  await expect(page.getByLabel("最近 Transaction")).toContainText('"operations"');
+  await expect(page.getByLabel("最近 Transaction")).toContainText(
+    '"type": "delete_text"',
+  );
   await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 0');
 });
 
@@ -172,7 +178,10 @@ test("applies split block from the operation controls", async ({ page }) => {
   await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
     '"text": "crucialy-rich。"',
   );
-  await expect(page.getByLabel("最近操作")).toContainText('"type": "split_block"');
+  await expect(page.getByLabel("最近 Transaction")).toContainText('"operations"');
+  await expect(page.getByLabel("最近 Transaction")).toContainText(
+    '"type": "split_block"',
+  );
   await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 0');
 });
 
@@ -188,7 +197,10 @@ test("applies merge block from the operation controls", async ({ page }) => {
   await expect(renderedDocument.locator("p")).toHaveCount(1);
   await expect(renderedDocument).toContainText("你好，crucialy-rich。");
   await expect(renderedDocument).toContainText("选区模型已就绪。");
-  await expect(page.getByLabel("最近操作")).toContainText('"type": "merge_block"');
+  await expect(page.getByLabel("最近 Transaction")).toContainText('"operations"');
+  await expect(page.getByLabel("最近 Transaction")).toContainText(
+    '"type": "merge_block"',
+  );
   await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 17');
 });
 
