@@ -1,8 +1,5 @@
 import {
-  applyDeleteText,
-  applyInsertText,
-  applyMergeBlock,
-  applySplitBlock,
+  applyTransaction,
   createDocument,
   createDeleteTextOperation,
   createInsertTextOperation,
@@ -392,34 +389,38 @@ function DemoApp() {
 
   function handleInsertText() {
     const operation = createInsertTextOperation(modelSelection.anchor, insertTextValue);
+    const transaction = createTransaction([operation]);
 
-    setDocumentValue(applyInsertText(normalizedDocument, operation));
+    setDocumentValue(applyTransaction(normalizedDocument, transaction));
     setModelSelection(createSelectionAfterInsertText(operation));
-    setLastTransaction(createTransaction([operation]));
+    setLastTransaction(transaction);
   }
 
   function handleDeleteText() {
     const operation = createDeleteTextOperation(modelSelection);
+    const transaction = createTransaction([operation]);
 
-    setDocumentValue(applyDeleteText(normalizedDocument, operation));
+    setDocumentValue(applyTransaction(normalizedDocument, transaction));
     setModelSelection(createSelectionAfterDeleteText(operation));
-    setLastTransaction(createTransaction([operation]));
+    setLastTransaction(transaction);
   }
 
   function handleSplitBlock() {
     const operation = createSplitBlockOperation(modelSelection.anchor);
+    const transaction = createTransaction([operation]);
 
-    setDocumentValue(applySplitBlock(normalizedDocument, operation));
+    setDocumentValue(applyTransaction(normalizedDocument, transaction));
     setModelSelection(createSelectionAfterSplitBlock(operation));
-    setLastTransaction(createTransaction([operation]));
+    setLastTransaction(transaction);
   }
 
   function handleMergeBlock() {
     const operation = createMergeBlockOperation(modelSelection.anchor);
+    const transaction = createTransaction([operation]);
 
-    setDocumentValue(applyMergeBlock(normalizedDocument, operation));
+    setDocumentValue(applyTransaction(normalizedDocument, transaction));
     setModelSelection(createSelectionAfterMergeBlock(normalizedDocument, operation));
-    setLastTransaction(createTransaction([operation]));
+    setLastTransaction(transaction);
   }
 
   function handleBrowserSelectionSync() {
