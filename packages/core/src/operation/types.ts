@@ -26,3 +26,7 @@ export type Operation =
   | InsertTextOperation
   | MergeBlockOperation
   | SplitBlockOperation;
+
+export interface Transaction {
+  operations: Operation[];
+}
