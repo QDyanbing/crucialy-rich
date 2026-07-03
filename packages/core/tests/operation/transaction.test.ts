@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { createDocument, createParagraph, createText } from "../../src/model";
+import {
+  createDocument,
+  createParagraph,
+  createText,
+  type DocumentNode,
+} from "../../src/model";
 import {
   applyOperation,
   applyTransaction,
@@ -119,10 +124,10 @@ describe("applyTransaction", () => {
   });
 
   it("normalizes the document after applying operations", () => {
-    const document = {
+    const document: DocumentNode = {
       type: "document",
       children: [],
-    } as const;
+    };
     const result = applyTransaction(document, createTransaction());
 
     expect(result.children).toHaveLength(1);
