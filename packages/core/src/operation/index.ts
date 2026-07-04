@@ -29,9 +29,15 @@ export {
   isBlockOperation,
   isTextOperation,
   summarizeOperation,
+  summarizeTransaction,
   TEXT_OPERATION_TYPES,
 } from "./summary";
-export type { BlockOperation, OperationSummary, TextOperation } from "./summary";
+export type {
+  BlockOperation,
+  OperationSummary,
+  TextOperation,
+  TransactionSummary,
+} from "./summary";
 export type {
   DeleteTextOperation,
   InsertTextOperation,

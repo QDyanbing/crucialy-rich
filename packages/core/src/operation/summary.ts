@@ -7,6 +7,7 @@ import type {
   Operation,
   OperationType,
   SplitBlockOperation,
+  Transaction,
 } from "./types";
 
 export type TextOperation = DeleteTextOperation | InsertTextOperation;
@@ -19,6 +20,15 @@ export interface OperationSummary {
   targetPath: Path;
   textLength?: number;
   type: OperationType;
+}
+
+export interface TransactionSummary {
+  blockOperationCount: number;
+  hasBlockOperations: boolean;
+  hasTextOperations: boolean;
+  operationCount: number;
+  operationTypes: OperationType[];
+  textOperationCount: number;
 }
 
 export const TEXT_OPERATION_TYPES = [
@@ -72,4 +82,23 @@ export function summarizeOperation(operation: Operation): OperationSummary {
         type: "split_block",
       };
   }
+}
+
+export function summarizeTransaction(transaction: Transaction): TransactionSummary {
+  const operationSummaries = transaction.operations.map(summarizeOperation);
+  const textOperationCount = operationSummaries.filter(
+    (summary) => summary.scope === "text",
+  ).length;
+  const blockOperationCount = operationSummaries.filter(
+    (summary) => summary.scope === "block",
+  ).length;
+
+  return {
+    blockOperationCount,
+    hasBlockOperations: blockOperationCount > 0,
+    hasTextOperations: textOperationCount > 0,
+    operationCount: operationSummaries.length,
+    operationTypes: operationSummaries.map((summary) => summary.type),
+    textOperationCount,
+  };
 }
