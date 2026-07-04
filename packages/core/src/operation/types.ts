@@ -1,5 +1,14 @@
 import type { Point, RangeSelection } from "../selection";
 
+export const OPERATION_TYPES = [
+  "insert_text",
+  "delete_text",
+  "split_block",
+  "merge_block",
+] as const;
+
+export type OperationType = (typeof OPERATION_TYPES)[number];
+
 export interface InsertTextOperation {
   point: Point;
   text: string;

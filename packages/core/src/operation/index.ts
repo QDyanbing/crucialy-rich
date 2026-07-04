@@ -30,5 +30,7 @@ export type {
   MergeBlockOperation,
   Operation,
   SplitBlockOperation,
+  OperationType,
   Transaction,
 } from "./types";
+export { OPERATION_TYPES } from "./types";
