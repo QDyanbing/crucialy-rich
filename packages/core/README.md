@@ -20,6 +20,7 @@ import {
   createDeleteTextOperation,
   createMergeBlockOperation,
   createTransaction,
+  createTransactionAcceptanceReport,
   createText,
   createInsertTextOperation,
   createSplitBlockOperation,
@@ -52,6 +53,7 @@ const transaction = createTransaction([
   mergeOperation,
 ]);
 const nextDocument = applyTransaction(normalized, transaction);
+const report = createTransactionAcceptanceReport(normalized, transaction);
 ```
 
 ## 当前 API 范围
@@ -64,7 +66,7 @@ const nextDocument = applyTransaction(normalized, transaction);
 - DOM 映射：`domPointToModelPoint`、`modelPointToDomPoint`、`findElementByModelPath`、`findClosestModelPathElement`。
 - 选区同步：`domSelectionToModelSelection`、`createDomRangeFromModelSelection`、`applyModelSelectionToDom`。
 - Operation：`createInsertTextOperation`、`applyInsertText`、`createSelectionAfterInsertText`、`createDeleteTextOperation`、`applyDeleteText`、`createSelectionAfterDeleteText`、`createSplitBlockOperation`、`applySplitBlock`、`createSelectionAfterSplitBlock`、`createMergeBlockOperation`、`applyMergeBlock`、`createSelectionAfterMergeBlock`。
-- Transaction：`createTransaction`、`applyOperation`、`applyTransaction`。
+- Transaction：`createTransaction`、`applyOperation`、`applyTransaction`、`summarizeOperation`、`summarizeTransaction`、`createTransactionAcceptanceReport`。
 
 ## 许可
 

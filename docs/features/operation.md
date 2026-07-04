@@ -31,6 +31,14 @@ interface MergeBlockOperation {
 interface Transaction {
   operations: Operation[];
 }
+
+interface TransactionAcceptanceReport {
+  before: ValidationResult;
+  after: ValidationResult | null;
+  transaction: TransactionSummary;
+  ok: boolean;
+  error: string | null;
+}
 ```
 
 字段说明：
@@ -40,6 +48,8 @@ interface Transaction {
 - `text`：要插入的文本。
 - `range`：删除范围，当前必须落在同一个 text 节点内。
 - `operations`：transaction 中按顺序执行的 operation 列表。
+- `TransactionSummary`：transaction 的只读摘要，包含操作总数、操作类型顺序、文本操作数量和块级操作数量。
+- `TransactionAcceptanceReport`：transaction 闭环验收报告，包含执行前校验、执行后校验、事务摘要和失败错误。
 
 ## 创建插入操作
 
@@ -140,6 +150,38 @@ interface Transaction {
 - 如果中途某个 operation 抛错，`applyTransaction` 会继续向外抛错。
 - 当前 operation 都按不可变方式返回新文档，失败不会修改传入的原始文档。
 
+## 摘要和闭环验收
+
+使用 `summarizeOperation(operation)` 获取单个 operation 的只读摘要。
+
+当前摘要包含：
+
+- `type`：operation 类型。
+- `scope`：`text` 或 `block`。
+- `targetPath`：operation 作用的模型 path。
+- `textLength`：插入或删除涉及的文本长度。
+- `collapsedRange`：删除 range 是否折叠。
+
+使用 `summarizeTransaction(transaction)` 获取 transaction 摘要。
+
+当前摘要包含：
+
+- `operationCount`：operation 总数。
+- `operationTypes`：按执行顺序记录的 operation 类型。
+- `textOperationCount`：文本操作数量。
+- `blockOperationCount`：块级操作数量。
+- `hasTextOperations` / `hasBlockOperations`：是否包含对应作用域。
+
+使用 `createTransactionAcceptanceReport(document, transaction)` 生成闭环验收报告。
+
+当前规则：
+
+- 先校验执行前文档。
+- 尝试通过 `applyTransaction` 应用 transaction。
+- 成功后校验执行后文档，并给出 `ok`。
+- 失败时保留错误信息，`after` 为 `null`。
+- 报告只用于调试和验收，不替代真实编辑命令。
+
 ## 插入后的选区
 
 使用 `createSelectionAfterInsertText(operation)` 计算插入后的折叠选区。
@@ -192,6 +234,7 @@ interface Transaction {
 - “分段”按钮。
 - “合并段落”按钮。
 - 最近 transaction JSON。
+- 最近 transaction 验收报告。
 - 插入、删除、分段或合并会通过 transaction 更新文档 JSON 和渲染预览。
 - 操作后选区 JSON 会同步到对应的落点。
 
