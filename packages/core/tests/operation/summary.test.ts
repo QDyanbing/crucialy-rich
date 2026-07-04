@@ -6,10 +6,12 @@ import {
   createInsertTextOperation,
   createMergeBlockOperation,
   createSplitBlockOperation,
+  createTransaction,
   isBlockOperation,
   isTextOperation,
   OPERATION_TYPES,
   summarizeOperation,
+  summarizeTransaction,
   TEXT_OPERATION_TYPES,
 } from "../../src/operation";
 
@@ -106,6 +108,40 @@ describe("summarizeOperation", () => {
       scope: "block",
       targetPath: [1, 0],
       type: "merge_block",
+    });
+  });
+});
+
+describe("summarizeTransaction", () => {
+  it("summarizes operation counts and ordered operation types", () => {
+    const transaction = createTransaction([
+      createInsertTextOperation({ path: [0, 0], offset: 0 }, "新"),
+      createDeleteTextOperation({
+        anchor: { path: [0, 0], offset: 1 },
+        focus: { path: [0, 0], offset: 2 },
+      }),
+      createSplitBlockOperation({ path: [0, 0], offset: 2 }),
+      createMergeBlockOperation({ path: [1, 0], offset: 0 }),
+    ]);
+
+    expect(summarizeTransaction(transaction)).toEqual({
+      blockOperationCount: 2,
+      hasBlockOperations: true,
+      hasTextOperations: true,
+      operationCount: 4,
+      operationTypes: ["insert_text", "delete_text", "split_block", "merge_block"],
+      textOperationCount: 2,
+    });
+  });
+
+  it("summarizes empty transactions", () => {
+    expect(summarizeTransaction(createTransaction())).toEqual({
+      blockOperationCount: 0,
+      hasBlockOperations: false,
+      hasTextOperations: false,
+      operationCount: 0,
+      operationTypes: [],
+      textOperationCount: 0,
     });
   });
 });
