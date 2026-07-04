@@ -9,6 +9,7 @@ import {
   isBlockOperation,
   isTextOperation,
   OPERATION_TYPES,
+  summarizeOperation,
   TEXT_OPERATION_TYPES,
 } from "../../src/operation";
 
@@ -48,5 +49,63 @@ describe("operation scope classification", () => {
     expect(isBlockOperation(splitOperation)).toBe(true);
     expect(isBlockOperation(mergeOperation)).toBe(true);
     expect(isTextOperation(splitOperation)).toBe(false);
+  });
+});
+
+describe("summarizeOperation", () => {
+  it("summarizes insert text operations", () => {
+    const operation = createInsertTextOperation({ path: [0, 0], offset: 1 }, "新文本");
+
+    expect(summarizeOperation(operation)).toEqual({
+      scope: "text",
+      targetPath: [0, 0],
+      textLength: 3,
+      type: "insert_text",
+    });
+  });
+
+  it("summarizes delete text operations with normalized ranges", () => {
+    const operation = createDeleteTextOperation({
+      anchor: { path: [0, 0], offset: 4 },
+      focus: { path: [0, 0], offset: 1 },
+    });
+
+    expect(summarizeOperation(operation)).toEqual({
+      collapsedRange: false,
+      scope: "text",
+      targetPath: [0, 0],
+      textLength: 3,
+      type: "delete_text",
+    });
+  });
+
+  it("marks collapsed delete ranges", () => {
+    const operation = createDeleteTextOperation({
+      anchor: { path: [0, 0], offset: 2 },
+      focus: { path: [0, 0], offset: 2 },
+    });
+
+    expect(summarizeOperation(operation)).toMatchObject({
+      collapsedRange: true,
+      textLength: 0,
+      type: "delete_text",
+    });
+  });
+
+  it("summarizes block operations", () => {
+    expect(
+      summarizeOperation(createSplitBlockOperation({ path: [0, 0], offset: 2 })),
+    ).toEqual({
+      scope: "block",
+      targetPath: [0, 0],
+      type: "split_block",
+    });
+    expect(
+      summarizeOperation(createMergeBlockOperation({ path: [1, 0], offset: 0 })),
+    ).toEqual({
+      scope: "block",
+      targetPath: [1, 0],
+      type: "merge_block",
+    });
   });
 });
