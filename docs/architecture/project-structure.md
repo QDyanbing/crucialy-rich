@@ -1,6 +1,6 @@
 # 工程结构
 
-本仓库按单体仓库组织，当前阶段已经完成工程骨架、文档模型第一版、模型选区第一版、基础模型渲染第一版、DOM 与模型位置映射第一版、选区双向同步第一版、React 组件 API 第一版、渲染闭环验收、`insertText`、`deleteText`、`splitBlock`、`mergeBlock` operation 第一版和 Transaction 第一版。
+本仓库按单体仓库组织，当前阶段已经完成工程骨架、文档模型第一版、模型选区第一版、基础模型渲染第一版、DOM 与模型位置映射第一版、选区双向同步第一版、React 组件 API 第一版、渲染闭环验收、`insertText`、`deleteText`、`splitBlock`、`mergeBlock` operation 第一版、Transaction 第一版和 Operation 闭环验收。
 
 ```text
 .
@@ -35,7 +35,7 @@
 
 ## 包职责
 
-- `packages/core`：富文本内核包，当前承载文档模型、规范化、模型选区、基础渲染器、DOM 与模型位置映射、选区双向同步、`insertText`、`deleteText`、`splitBlock`、`mergeBlock` operation 和 Transaction；后续继续扩展命令、历史、解析器和序列化器。
+- `packages/core`：富文本内核包，当前承载文档模型、规范化、模型选区、基础渲染器、DOM 与模型位置映射、选区双向同步、`insertText`、`deleteText`、`splitBlock`、`mergeBlock` operation、Transaction 和 Operation 闭环验收工具；后续继续扩展命令、历史、解析器和序列化器。
 - `packages/react`：React 集成层，当前提供可渲染 `value` / `defaultValue` 的 `RichTextEditor`；后续承载真实编辑事件、工具栏和菜单。
 - `apps/demo`：开发与验收入口，当前展示文档模型 JSON、React 组件示例、渲染边界示例和选区调试面板。
 - `tests/e2e`：浏览器级冒烟测试、演示验收和后续关键交互测试。

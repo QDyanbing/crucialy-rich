@@ -10,9 +10,9 @@
 
 ## 当前阶段
 
-已完成工程初始化、文档模型第一版、模型选区第一版、基础模型渲染第一版、DOM 与模型位置映射第一版、选区双向同步第一版、React 组件 API 第一版、渲染闭环验收、`insertText`、`deleteText`、`splitBlock`、`mergeBlock` operation 第一版和 Transaction 第一版。
+已完成工程初始化、文档模型第一版、模型选区第一版、基础模型渲染第一版、DOM 与模型位置映射第一版、选区双向同步第一版、React 组件 API 第一版、渲染闭环验收、`insertText`、`deleteText`、`splitBlock`、`mergeBlock` operation 第一版、Transaction 第一版和 Operation 闭环验收。
 
-当前 React 组件已支持通过 `value` / `defaultValue` 展示文档模型，演示页可以通过 transaction 驱动 operation 控件插入、删除、分段和合并段落，但仍未接入真实键盘输入。
+当前 React 组件已支持通过 `value` / `defaultValue` 展示文档模型，演示页可以通过 transaction 驱动 operation 控件插入、删除、分段和合并段落，并展示最近 transaction 与验收报告，但仍未接入真实键盘输入。
 
 ## 技术栈
 
