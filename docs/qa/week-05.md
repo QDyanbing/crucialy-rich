@@ -10,7 +10,9 @@
 
 第 5 周 Day 4「Transaction」已完成。
 
-下一步进入 Day 5「Operation 闭环验收」。
+第 5 周 Day 5「Operation 闭环验收」已完成。
+
+下一步进入第 6 周 Day 1「beforeinput 插入文本」。
 
 ## 已完成范围
 
@@ -36,6 +38,10 @@
 - 实现 `applyTransaction` 批量应用。
 - transaction 结束后自动执行 normalize。
 - 演示页展示最近 transaction。
+- 实现 operation 类型注册、text/block 分类和只读摘要。
+- 实现 transaction 摘要。
+- 实现 transaction 闭环验收报告。
+- 演示页展示最近 transaction 验收报告。
 - 文档和 QA 记录同步更新。
 
 ## 自动化覆盖
@@ -45,6 +51,8 @@
 - `packages/core/tests/operation/split-block.test.ts`
 - `packages/core/tests/operation/merge-block.test.ts`
 - `packages/core/tests/operation/transaction.test.ts`
+- `packages/core/tests/operation/summary.test.ts`
+- `packages/core/tests/operation/acceptance.test.ts`
 - `packages/core/tests/public-api.test.ts`
 - `tests/e2e/demo-shell.spec.ts`
 
@@ -57,4 +65,4 @@
 
 ## 结论
 
-`insertText`、`deleteText`、`splitBlock`、`mergeBlock` 和 `Transaction` 已按代码、测试、demo、文档和验收记录闭环；第 5 周剩余任务进入 Operation 综合验收。
+`insertText`、`deleteText`、`splitBlock`、`mergeBlock` 和 `Transaction` 已按代码、测试、demo、文档、摘要和验收报告完成综合闭环；第 5 周 Operation 和 Transaction 阶段完成，下一步进入真实输入事件。
