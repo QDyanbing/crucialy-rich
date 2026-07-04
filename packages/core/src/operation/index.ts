@@ -24,6 +24,13 @@ export {
   cloneOperation,
   createTransaction,
 } from "./transaction";
+export {
+  BLOCK_OPERATION_TYPES,
+  isBlockOperation,
+  isTextOperation,
+  TEXT_OPERATION_TYPES,
+} from "./summary";
+export type { BlockOperation, TextOperation } from "./summary";
 export type {
   DeleteTextOperation,
   InsertTextOperation,
