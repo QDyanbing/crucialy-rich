@@ -1,3 +1,5 @@
+export { createTransactionAcceptanceReport } from "./acceptance";
+export type { TransactionAcceptanceReport } from "./acceptance";
 export {
   applyDeleteText,
   createDeleteTextOperation,
