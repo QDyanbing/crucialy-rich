@@ -61,5 +61,16 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.createTransaction).toBe("function");
     expect(typeof core.applyOperation).toBe("function");
     expect(typeof core.applyTransaction).toBe("function");
+    expect(core.OPERATION_TYPES).toEqual([
+      "insert_text",
+      "delete_text",
+      "split_block",
+      "merge_block",
+    ]);
+    expect(typeof core.isTextOperation).toBe("function");
+    expect(typeof core.isBlockOperation).toBe("function");
+    expect(typeof core.summarizeOperation).toBe("function");
+    expect(typeof core.summarizeTransaction).toBe("function");
+    expect(typeof core.createTransactionAcceptanceReport).toBe("function");
   });
 });
