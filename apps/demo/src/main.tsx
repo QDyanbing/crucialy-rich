@@ -1,5 +1,6 @@
 import {
   applyTransaction,
+  createTransactionAcceptanceReport,
   createDocument,
   createDeleteTextOperation,
   createInsertTextOperation,
@@ -23,6 +24,7 @@ import {
   type Point,
   type RangeSelection,
   type Transaction,
+  type TransactionAcceptanceReport,
 } from "@crucialy-rich/core";
 import { RichTextEditor } from "@crucialy-rich/react";
 import { StrictMode, useMemo, useState, type ChangeEvent } from "react";
@@ -363,6 +365,8 @@ function DemoApp() {
     useState<RangeSelection>(defaultSelection);
   const [insertTextValue, setInsertTextValue] = useState("插入文本");
   const [lastTransaction, setLastTransaction] = useState<Transaction | null>(null);
+  const [lastTransactionReport, setLastTransactionReport] =
+    useState<TransactionAcceptanceReport | null>(null);
   const [documentValue, setDocumentValue] = useState(() =>
     cloneModelValue(getModelExample("regular").value),
   );
@@ -381,10 +385,14 @@ function DemoApp() {
 
     setModelExampleId(nextExampleId);
     setDocumentValue(cloneModelValue(getModelExample(nextExampleId).value));
+    setLastTransaction(null);
+    setLastTransactionReport(null);
   }
 
   function handleNormalize() {
     setDocumentValue(normalizeDocument(documentValue));
+    setLastTransaction(null);
+    setLastTransactionReport(null);
   }
 
   function handleInsertText() {
@@ -394,6 +402,9 @@ function DemoApp() {
     setDocumentValue(applyTransaction(normalizedDocument, transaction));
     setModelSelection(createSelectionAfterInsertText(operation));
     setLastTransaction(transaction);
+    setLastTransactionReport(
+      createTransactionAcceptanceReport(normalizedDocument, transaction),
+    );
   }
 
   function handleDeleteText() {
@@ -403,6 +414,9 @@ function DemoApp() {
     setDocumentValue(applyTransaction(normalizedDocument, transaction));
     setModelSelection(createSelectionAfterDeleteText(operation));
     setLastTransaction(transaction);
+    setLastTransactionReport(
+      createTransactionAcceptanceReport(normalizedDocument, transaction),
+    );
   }
 
   function handleSplitBlock() {
@@ -412,6 +426,9 @@ function DemoApp() {
     setDocumentValue(applyTransaction(normalizedDocument, transaction));
     setModelSelection(createSelectionAfterSplitBlock(operation));
     setLastTransaction(transaction);
+    setLastTransactionReport(
+      createTransactionAcceptanceReport(normalizedDocument, transaction),
+    );
   }
 
   function handleMergeBlock() {
@@ -421,6 +438,9 @@ function DemoApp() {
     setDocumentValue(applyTransaction(normalizedDocument, transaction));
     setModelSelection(createSelectionAfterMergeBlock(normalizedDocument, operation));
     setLastTransaction(transaction);
+    setLastTransactionReport(
+      createTransactionAcceptanceReport(normalizedDocument, transaction),
+    );
   }
 
   function handleBrowserSelectionSync() {
@@ -514,6 +534,12 @@ function DemoApp() {
 
           <pre aria-label="最近 Transaction" className="operation-preview">
             {lastTransaction ? JSON.stringify(lastTransaction, null, 2) : "暂无事务"}
+          </pre>
+
+          <pre aria-label="最近 Transaction 验收报告" className="operation-preview">
+            {lastTransactionReport
+              ? JSON.stringify(lastTransactionReport, null, 2)
+              : "暂无验收报告"}
           </pre>
 
           {validation.errors.length > 0 ? (
