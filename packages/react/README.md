@@ -2,7 +2,7 @@
 
 crucialy-rich 编辑内核的 React 集成包，对外暴露可集成的 React 富文本组件。
 
-> 当前处于早期阶段，`RichTextEditor` 已支持通过 `value` / `defaultValue` 渲染文档模型，但尚未提供真实编辑行为。
+> 当前处于早期阶段，`RichTextEditor` 已支持通过 `value` / `defaultValue` 渲染文档模型，并接入 `beforeinput insertText` 普通文本输入。
 
 ## 安装
 
@@ -21,7 +21,16 @@ import { createDocument, createParagraph, createText } from "@crucialy-rich/core
 const value = createDocument([createParagraph([createText("你好，crucialy-rich。")])]);
 
 export function Demo() {
-  return <RichTextEditor label="编辑器" value={value} />;
+  return (
+    <RichTextEditor
+      contentEditable
+      label="编辑器"
+      onChange={(nextValue) => {
+        console.log(nextValue);
+      }}
+      value={value}
+    />
+  );
 }
 ```
 
@@ -29,7 +38,8 @@ export function Demo() {
 
 - `value`：受控文档。
 - `defaultValue`：非受控初始文档。
-- `onChange`：预留回调，当前阶段不会主动触发。
+- `onChange`：输入后输出最新文档。
+- `selection` / `onSelectionChange`：受控模型选区和输入后的选区回调。
 - `label`、`className` 和基础 DOM 事件属性。
 
 完整说明见 [组件 API](../../docs/features/component-api.md)。

@@ -58,7 +58,7 @@
 
 ## 当前限制
 
-- 尚未接入真实 `beforeinput`。
+- 普通 `beforeinput insertText` 已在第 6 周 Day 1 接入，删除和换行类输入尚未接入。
 - `deleteText` 暂不支持跨 text 节点或跨 paragraph 删除。
 - `mergeBlock` 暂不支持批量跨多段合并。
 - transaction 当前不包含 inverse、撤销重做或 history 记录。

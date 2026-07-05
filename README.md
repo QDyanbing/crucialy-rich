@@ -10,9 +10,9 @@
 
 ## 当前阶段
 
-已完成工程初始化、文档模型第一版、模型选区第一版、基础模型渲染第一版、DOM 与模型位置映射第一版、选区双向同步第一版、React 组件 API 第一版、渲染闭环验收、`insertText`、`deleteText`、`splitBlock`、`mergeBlock` operation 第一版、Transaction 第一版和 Operation 闭环验收。
+已完成工程初始化、文档模型第一版、模型选区第一版、基础模型渲染第一版、DOM 与模型位置映射第一版、选区双向同步第一版、React 组件 API 第一版、渲染闭环验收、`insertText`、`deleteText`、`splitBlock`、`mergeBlock` operation 第一版、Transaction 第一版、Operation 闭环验收和 `beforeinput insertText` 第一版。
 
-当前 React 组件已支持通过 `value` / `defaultValue` 展示文档模型，演示页可以通过 transaction 驱动 operation 控件插入、删除、分段和合并段落，并展示最近 transaction 与验收报告，但仍未接入真实键盘输入。
+当前 React 组件已支持通过 `value` / `defaultValue` 展示文档模型，演示页可以通过 transaction 驱动 operation 控件插入、删除、分段和合并段落，并支持在主编辑区真实输入普通文本，但尚未接入 Backspace、Delete 和 Enter。
 
 ## 技术栈
 
@@ -114,6 +114,7 @@ pnpm test:e2e
 - [选区双向同步](./docs/features/selection-sync.md)
 - [组件 API](./docs/features/component-api.md)
 - [Operation](./docs/features/operation.md)
+- [输入事件](./docs/features/input.md)
 - [提交规范](./docs/development/commit-convention.md)
 - [测试策略](./docs/qa/test-strategy.md)
 - [脚手架验收](./docs/qa/scaffold-acceptance.md)
@@ -122,11 +123,13 @@ pnpm test:e2e
 - [第 3 周 QA](./docs/qa/week-03.md)
 - [第 4 周 QA](./docs/qa/week-04.md)
 - [第 5 周 QA](./docs/qa/week-05.md)
+- [第 6 周 QA](./docs/qa/week-06.md)
 - [模型 QA](./docs/qa/model.md)
 - [选区 QA](./docs/qa/selection.md)
 - [基础渲染 QA](./docs/qa/render.md)
 - [选区同步 QA](./docs/qa/selection-sync.md)
 - [Operation QA](./docs/qa/operation.md)
+- [输入事件 QA](./docs/qa/input.md)
 - [变更记录](./CHANGELOG.md)
 
 ## 反馈入口
