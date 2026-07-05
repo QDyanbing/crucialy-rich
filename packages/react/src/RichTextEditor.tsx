@@ -1,15 +1,20 @@
 import {
   applyTransaction,
+  applyModelSelectionToDom,
   createDocument,
   createInsertTextInputTransaction,
+  createSelectionAfterInsertTextInput,
   domSelectionToModelSelection,
   renderDocument,
   type DocumentNode,
+  type RangeSelection,
   type RenderedElementNode,
 } from "@crucialy-rich/core";
 import {
   createElement,
+  useLayoutEffect,
   useMemo,
+  useRef,
   useState,
   type FormEvent,
   type HTMLAttributes,
@@ -29,6 +34,8 @@ export interface RichTextEditorProps
   defaultValue?: DocumentNode;
   label?: string;
   onChange?: (value: DocumentNode) => void;
+  onSelectionChange?: (selection: RangeSelection) => void;
+  selection?: RangeSelection;
   value?: DocumentNode;
 }
 
@@ -58,9 +65,12 @@ export function RichTextEditor({
   onKeyUp,
   onMouseUp,
   onChange,
+  onSelectionChange,
+  selection,
   suppressContentEditableWarning,
   value,
 }: RichTextEditorProps): ReactElement {
+  const rootRef = useRef<HTMLDivElement>(null);
   const [uncontrolledDocument, setUncontrolledDocument] = useState(
     () => defaultValue ?? createDocument(),
   );
@@ -68,6 +78,14 @@ export function RichTextEditor({
   const document = value ?? uncontrolledDocument;
   const renderedDocument = useMemo(() => renderDocument(document), [document]);
   const editable = isEditableContent(contentEditable);
+
+  useLayoutEffect(() => {
+    if (!selection || !rootRef.current) {
+      return;
+    }
+
+    applyModelSelectionToDom(rootRef.current, document, selection);
+  }, [document, selection]);
 
   function commitDocumentChange(nextDocument: DocumentNode) {
     if (!controlled) {
@@ -99,21 +117,22 @@ export function RichTextEditor({
       return;
     }
 
+    const input = {
+      data: nativeEvent.data,
+      selection: modelSelection,
+    };
+
     event.preventDefault();
     commitDocumentChange(
-      applyTransaction(
-        document,
-        createInsertTextInputTransaction({
-          data: nativeEvent.data,
-          selection: modelSelection,
-        }),
-      ),
+      applyTransaction(document, createInsertTextInputTransaction(input)),
     );
+    onSelectionChange?.(createSelectionAfterInsertTextInput(input));
   }
 
   return (
     <div
       {...renderedDocument.attributes}
+      ref={rootRef}
       aria-label={label}
       aria-readonly={editable ? "false" : "true"}
       className={className}
