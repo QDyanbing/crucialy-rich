@@ -73,4 +73,9 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.summarizeTransaction).toBe("function");
     expect(typeof core.createTransactionAcceptanceReport).toBe("function");
   });
+
+  it("exposes the input API", () => {
+    expect(typeof core.createInsertTextInputTransaction).toBe("function");
+    expect(typeof core.createSelectionAfterInsertTextInput).toBe("function");
+  });
 });
