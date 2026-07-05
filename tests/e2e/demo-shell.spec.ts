@@ -192,6 +192,20 @@ test("inserts text through beforeinput in the editor", async ({ page }) => {
   await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 4');
 });
 
+test("keeps the caret moving during consecutive beforeinput inserts", async ({
+  page,
+}) => {
+  await page.goto("/");
+
+  await placeCaretInRenderedText(page, "[0,0]", 3);
+  await page.keyboard.type("输入");
+
+  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
+    '"text": "你好，输入crucialy-rich。"',
+  );
+  await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 5');
+});
+
 test("applies delete text from the operation controls", async ({ page }) => {
   await page.goto("/");
 
