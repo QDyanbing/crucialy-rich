@@ -42,6 +42,16 @@ describe("@crucialy-rich/react public API", () => {
     expect(html).toContain('data-crucialy-path="[0,0]"');
   });
 
+  it("marks editable renders as not readonly", () => {
+    const html = renderToStaticMarkup(
+      createElement(RichTextEditor, {
+        contentEditable: true,
+      }),
+    );
+
+    expect(html).toContain('aria-readonly="false"');
+  });
+
   it("renders an empty document boundary", () => {
     const document: DocumentNode = {
       type: "document",
