@@ -56,6 +56,16 @@ function isEditableContent(contentEditable: RichTextEditorProps["contentEditable
   return contentEditable === true || contentEditable === "true";
 }
 
+function getInsertTextInputData(event: Event): string | undefined {
+  const inputEvent = event as InputEvent;
+
+  if (inputEvent.inputType && inputEvent.inputType !== "insertText") {
+    return undefined;
+  }
+
+  return inputEvent.data || undefined;
+}
+
 export function RichTextEditor({
   className,
   contentEditable,
@@ -102,9 +112,9 @@ export function RichTextEditor({
       return;
     }
 
-    const nativeEvent = event.nativeEvent as InputEvent;
+    const data = getInsertTextInputData(event.nativeEvent);
 
-    if (nativeEvent.inputType !== "insertText" || !nativeEvent.data) {
+    if (!data) {
       return;
     }
 
@@ -118,7 +128,7 @@ export function RichTextEditor({
     }
 
     const input = {
-      data: nativeEvent.data,
+      data,
       selection: modelSelection,
     };
 
