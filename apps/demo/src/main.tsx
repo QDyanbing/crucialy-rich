@@ -443,6 +443,12 @@ function DemoApp() {
     );
   }
 
+  function handleEditorChange(nextDocument: DocumentNode) {
+    setDocumentValue(nextDocument);
+    setLastTransaction(null);
+    setLastTransactionReport(null);
+  }
+
   function handleBrowserSelectionSync() {
     const browserSelection = window.getSelection();
     const nextSelection = browserSelection
@@ -470,8 +476,11 @@ function DemoApp() {
             className="rendered-document"
             contentEditable
             label="已渲染文档"
+            onChange={handleEditorChange}
             onKeyUp={handleBrowserSelectionSync}
             onMouseUp={handleBrowserSelectionSync}
+            onSelectionChange={setModelSelection}
+            selection={modelSelection}
             suppressContentEditableWarning
             value={normalizedDocument}
           />
