@@ -40,6 +40,10 @@ function createRenderedElement(node: RenderedElementNode): ReactElement {
   );
 }
 
+function isEditableContent(contentEditable: RichTextEditorProps["contentEditable"]) {
+  return contentEditable === true || contentEditable === "true";
+}
+
 export function RichTextEditor({
   className,
   contentEditable,
@@ -53,12 +57,13 @@ export function RichTextEditor({
   const [uncontrolledDocument] = useState(() => defaultValue ?? createDocument());
   const document = value ?? uncontrolledDocument;
   const renderedDocument = useMemo(() => renderDocument(document), [document]);
+  const editable = isEditableContent(contentEditable);
 
   return (
     <div
       {...renderedDocument.attributes}
       aria-label={label}
-      aria-readonly="true"
+      aria-readonly={editable ? "false" : "true"}
       className={className}
       contentEditable={contentEditable}
       data-crucialy-rich-editor="true"
