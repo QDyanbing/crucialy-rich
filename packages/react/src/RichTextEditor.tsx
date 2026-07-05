@@ -17,6 +17,7 @@ export interface RichTextEditorProps
     HTMLAttributes<HTMLDivElement>,
     | "className"
     | "contentEditable"
+    | "onBeforeInput"
     | "onKeyUp"
     | "onMouseUp"
     | "suppressContentEditableWarning"
@@ -49,6 +50,7 @@ export function RichTextEditor({
   contentEditable,
   defaultValue,
   label = "Rich text editor",
+  onBeforeInput,
   onKeyUp,
   onMouseUp,
   suppressContentEditableWarning,
@@ -67,6 +69,7 @@ export function RichTextEditor({
       className={className}
       contentEditable={contentEditable}
       data-crucialy-rich-editor="true"
+      onBeforeInput={onBeforeInput}
       onKeyUp={onKeyUp}
       onMouseUp={onMouseUp}
       role="textbox"
