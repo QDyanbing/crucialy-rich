@@ -1,4 +1,27 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+
+async function placeCaretInRenderedText(page: Page, path: string, offset: number) {
+  await page
+    .getByLabel("已渲染文档")
+    .locator(`[data-crucialy-path="${path}"]`)
+    .evaluate((element, nextOffset) => {
+      const text = element.firstChild;
+      const range = document.createRange();
+      const selection = window.getSelection();
+      const renderedDocument = element.closest('[aria-label="已渲染文档"]');
+
+      if (!text || !selection || !(renderedDocument instanceof HTMLElement)) {
+        throw new Error("Missing rendered text selection target.");
+      }
+
+      renderedDocument.focus();
+      range.setStart(text, nextOffset);
+      range.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      renderedDocument.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+    }, offset);
+}
 
 test("renders the demo shell", async ({ page }) => {
   await page.goto("/");
@@ -155,6 +178,18 @@ test("applies insert text from the operation controls", async ({ page }) => {
     '"insert_text"',
   );
   await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 3');
+});
+
+test("inserts text through beforeinput in the editor", async ({ page }) => {
+  await page.goto("/");
+
+  await placeCaretInRenderedText(page, "[0,0]", 3);
+  await page.keyboard.type("真");
+
+  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
+    '"text": "你好，真crucialy-rich。"',
+  );
+  await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 4');
 });
 
 test("applies delete text from the operation controls", async ({ page }) => {
