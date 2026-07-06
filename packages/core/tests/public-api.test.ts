@@ -75,6 +75,8 @@ describe("@crucialy-rich/core public API", () => {
   });
 
   it("exposes the input API", () => {
+    expect(typeof core.createBackspaceInputTransaction).toBe("function");
+    expect(typeof core.createSelectionAfterBackspaceInput).toBe("function");
     expect(typeof core.createInsertTextInputTransaction).toBe("function");
     expect(typeof core.createSelectionAfterInsertTextInput).toBe("function");
   });
