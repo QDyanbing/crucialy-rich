@@ -31,6 +31,7 @@
 - 新增 Transaction 第一版，包含 operation 分发、批量应用、结束 normalize、失败保护、测试、文档、QA 和演示调试入口。
 - 新增 Operation 闭环验收能力，包含 operation 类型注册、text/block 分类、operation 摘要、transaction 摘要、transaction 验收报告、测试、文档、QA 和演示验收报告。
 - 新增 `beforeinput insertText` 第一版，包含输入 helper、React 组件真实文本输入、输入后选区同步、演示输入、端到端测试、文档和 QA。
+- 新增 Backspace 第一版，包含段中删除前一个字符、段首合并上一段、空段合并、输入后选区同步、测试、文档、QA 和演示端到端覆盖。
 
 ### 变更
 
@@ -44,4 +45,4 @@
 
 ### 暂未包含
 
-- 历史记录、解析、文档序列化、删除输入、换行输入或输入法完整处理。
+- 历史记录、解析、文档序列化、Delete 输入、Enter 换行输入或输入法完整处理。
