@@ -27,6 +27,7 @@ export interface RichTextEditorProps
     | "className"
     | "contentEditable"
     | "onBeforeInput"
+    | "onKeyDown"
     | "onKeyUp"
     | "onMouseUp"
     | "suppressContentEditableWarning"
@@ -72,6 +73,7 @@ export function RichTextEditor({
   defaultValue,
   label = "Rich text editor",
   onBeforeInput,
+  onKeyDown,
   onKeyUp,
   onMouseUp,
   onChange,
@@ -149,6 +151,7 @@ export function RichTextEditor({
       contentEditable={contentEditable}
       data-crucialy-rich-editor="true"
       onBeforeInput={handleBeforeInput}
+      onKeyDown={onKeyDown}
       onKeyUp={onKeyUp}
       onMouseUp={onMouseUp}
       role="textbox"
