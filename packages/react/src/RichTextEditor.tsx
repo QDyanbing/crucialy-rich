@@ -14,6 +14,7 @@ import {
 } from "@crucialy-rich/core";
 import {
   createElement,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -70,6 +71,9 @@ function getInsertTextInputData(event: Event): string | undefined {
   return inputEvent.data || undefined;
 }
 
+const useIsomorphicLayoutEffect =
+  typeof window === "undefined" ? useEffect : useLayoutEffect;
+
 export function RichTextEditor({
   className,
   contentEditable,
@@ -94,7 +98,7 @@ export function RichTextEditor({
   const renderedDocument = useMemo(() => renderDocument(document), [document]);
   const editable = isEditableContent(contentEditable);
 
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (!selection || !rootRef.current) {
       return;
     }
