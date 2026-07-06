@@ -193,7 +193,7 @@ export function RichTextEditor({
       onKeyUp={onKeyUp}
       onMouseUp={onMouseUp}
       role="textbox"
-      suppressContentEditableWarning={suppressContentEditableWarning}
+      suppressContentEditableWarning={suppressContentEditableWarning ?? editable}
     >
       {renderedDocument.children?.map(createRenderedElement)}
     </div>
