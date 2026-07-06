@@ -2,7 +2,7 @@
 
 自研富文本编辑内核，不依赖 ProseMirror、Tiptap、Lexical、Slate 作为运行时内核。
 
-> 当前处于早期阶段，已提供文档模型、模型选区、基础渲染器、DOM 与模型位置映射、选区双向同步、`insertText`、`deleteText`、`splitBlock`、`mergeBlock` operation、Transaction、Operation 闭环验收工具和 `beforeinput insertText` 输入 helper，尚未提供完整编辑命令。
+> 当前处于早期阶段，已提供文档模型、模型选区、基础渲染器、DOM 与模型位置映射、选区双向同步、`insertText`、`deleteText`、`splitBlock`、`mergeBlock` operation、Transaction、Operation 闭环验收工具、`beforeinput insertText` 输入 helper 和 Backspace 输入 helper，尚未提供完整编辑命令。
 
 ## 安装
 
@@ -17,6 +17,7 @@ import {
   createDocument,
   applyTransaction,
   createParagraph,
+  createBackspaceInputTransaction,
   createDeleteTextOperation,
   createInsertTextInputTransaction,
   createMergeBlockOperation,
@@ -62,6 +63,13 @@ const inputTransaction = createInsertTextInputTransaction({
     focus: { path: [0, 0], offset: 0 },
   },
 });
+const backspaceTransaction = createBackspaceInputTransaction({
+  document: normalized,
+  selection: {
+    anchor: { path: [0, 0], offset: 1 },
+    focus: { path: [0, 0], offset: 1 },
+  },
+});
 ```
 
 ## 当前 API 范围
@@ -75,7 +83,7 @@ const inputTransaction = createInsertTextInputTransaction({
 - 选区同步：`domSelectionToModelSelection`、`createDomRangeFromModelSelection`、`applyModelSelectionToDom`。
 - Operation：`createInsertTextOperation`、`applyInsertText`、`createSelectionAfterInsertText`、`createDeleteTextOperation`、`applyDeleteText`、`createSelectionAfterDeleteText`、`createSplitBlockOperation`、`applySplitBlock`、`createSelectionAfterSplitBlock`、`createMergeBlockOperation`、`applyMergeBlock`、`createSelectionAfterMergeBlock`。
 - Transaction：`createTransaction`、`applyOperation`、`applyTransaction`、`summarizeOperation`、`summarizeTransaction`、`createTransactionAcceptanceReport`。
-- 输入：`createInsertTextInputTransaction`、`createSelectionAfterInsertTextInput`。
+- 输入：`createInsertTextInputTransaction`、`createSelectionAfterInsertTextInput`、`createBackspaceInputTransaction`、`createSelectionAfterBackspaceInput`。
 
 ## 许可
 
