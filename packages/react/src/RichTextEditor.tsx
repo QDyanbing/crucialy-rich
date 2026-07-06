@@ -2,7 +2,9 @@ import {
   applyTransaction,
   applyModelSelectionToDom,
   createDocument,
+  createBackspaceInputTransaction,
   createInsertTextInputTransaction,
+  createSelectionAfterBackspaceInput,
   createSelectionAfterInsertTextInput,
   domSelectionToModelSelection,
   renderDocument,
@@ -18,6 +20,7 @@ import {
   useState,
   type FormEvent,
   type HTMLAttributes,
+  type KeyboardEvent,
   type ReactElement,
 } from "react";
 
@@ -141,6 +144,37 @@ export function RichTextEditor({
     onSelectionChange?.(createSelectionAfterInsertTextInput(input));
   }
 
+  function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    onKeyDown?.(event);
+
+    if (event.defaultPrevented || !editable || event.key !== "Backspace") {
+      return;
+    }
+
+    const domSelection = event.currentTarget.ownerDocument.getSelection();
+    const modelSelection = domSelection
+      ? domSelectionToModelSelection(document, domSelection)
+      : undefined;
+
+    if (!modelSelection) {
+      return;
+    }
+
+    const input = {
+      document,
+      selection: modelSelection,
+    };
+    const transaction = createBackspaceInputTransaction(input);
+
+    event.preventDefault();
+
+    if (transaction.operations.length > 0) {
+      commitDocumentChange(applyTransaction(document, transaction));
+    }
+
+    onSelectionChange?.(createSelectionAfterBackspaceInput(input));
+  }
+
   return (
     <div
       {...renderedDocument.attributes}
@@ -151,7 +185,7 @@ export function RichTextEditor({
       contentEditable={contentEditable}
       data-crucialy-rich-editor="true"
       onBeforeInput={handleBeforeInput}
-      onKeyDown={onKeyDown}
+      onKeyDown={handleKeyDown}
       onKeyUp={onKeyUp}
       onMouseUp={onMouseUp}
       role="textbox"
