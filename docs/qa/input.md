@@ -2,14 +2,15 @@
 
 ## 范围
 
-验证 `beforeinput insertText` 和 collapsed selection 下的 Backspace 能通过 transaction 更新模型，而不是直接信任浏览器 DOM 修改结果。
+验证 `beforeinput insertText`、collapsed selection 下的 Backspace 和 collapsed selection 下的 Delete 能通过 transaction 更新模型，而不是直接信任浏览器 DOM 修改结果。
 
 ## 自动化测试
 
 - `packages/core/tests/input/insert-text.test.ts`：输入文本转换为 `insert_text` transaction、反向 selection 规范化、通过 operation pipeline 应用、输入后 selection 落点。
 - `packages/core/tests/input/backspace.test.ts`：Backspace 转换为 `delete_text` 或 `merge_block` transaction、段中删除、段首合并、空段删除、首段开头 no-op 和 selection 落点。
+- `packages/core/tests/input/delete.test.ts`：Delete 转换为 `delete_text` 或 `merge_block` transaction、段中删除、段尾合并、空段删除、末段结尾 no-op 和 selection 落点。
 - `packages/react/tests/public-api.test.ts`：可编辑状态会暴露为 `aria-readonly="false"`。
-- `tests/e2e/demo-shell.spec.ts`：演示页真实输入单字符、连续输入、Backspace 段中删除和 Backspace 段首合并后，文档 JSON 与选区 JSON 同步更新。
+- `tests/e2e/demo-shell.spec.ts`：演示页真实输入单字符、连续输入、Backspace 段中删除、Backspace 段首合并、Delete 段中删除和 Delete 段尾合并后，文档 JSON 与选区 JSON 同步更新。
 
 命令：
 
@@ -34,16 +35,21 @@ pnpm test:e2e
 | 段首 Backspace | 第二段开头按 Backspace                 | 当前段合并到上一段                | 通过 |
 | 空段 Backspace | 空段开头按 Backspace                   | 空段被并入上一段                  | 通过 |
 | Backspace 选区 | Backspace 后读取选区 JSON              | selection 落到删除或合并后的落点  | 通过 |
+| 段中 Delete    | 光标在 text 节点中间按 Delete          | 删除光标后一个字符                | 通过 |
+| 段尾 Delete    | 第一段结尾按 Delete                    | 下一段合并到当前段                | 通过 |
+| 空段 Delete    | 非末段空段开头按 Delete                | 下一段被并入当前空段              | 通过 |
+| Delete 选区    | Delete 后读取选区 JSON                 | selection 落到删除或合并后的落点  | 通过 |
 
 ## 当前限制
 
-- 仅支持普通 `insertText` 和 collapsed selection 下的 Backspace。
+- 仅支持普通 `insertText`、collapsed selection 下的 Backspace 和 collapsed selection 下的 Delete。
 - 非折叠 selection 暂不替换选中内容。
-- Delete、Enter、粘贴和 IME composition 尚未接入。
+- Enter、粘贴和 IME composition 尚未接入。
 - Backspace 暂不处理非折叠 selection、跨 text 删除或 inline text 节点合并。
+- Delete 暂不处理非折叠 selection、跨 text 删除或 inline text 节点合并。
 - 当前不记录 undo/redo 或 history。
 - 输入行为暂只覆盖 paragraph 内 text 节点。
 
 ## 结论
 
-`beforeinput insertText` 和 Backspace 第一版已经闭环：真实输入会转换为 transaction，更新模型并同步选区；下一步进入第 6 周 Day 3「Delete」。
+`beforeinput insertText`、Backspace 和 Delete 第一版已经闭环：真实输入会转换为 transaction，更新模型并同步选区；下一步进入第 6 周 Day 4「Enter」。
