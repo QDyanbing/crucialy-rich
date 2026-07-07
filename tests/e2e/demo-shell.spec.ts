@@ -248,6 +248,20 @@ test("deletes the next character with Delete in the editor", async ({ page }) =>
   await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 2');
 });
 
+test("merges with the next paragraph with Delete in the editor", async ({ page }) => {
+  await page.goto("/");
+
+  await placeCaretInRenderedText(page, "[0,0]", 17);
+  await page.keyboard.press("Delete");
+
+  const renderedDocument = page.getByLabel("已渲染文档");
+
+  await expect(renderedDocument.locator("p")).toHaveCount(1);
+  await expect(renderedDocument).toContainText("你好，crucialy-rich。");
+  await expect(renderedDocument).toContainText("选区模型已就绪。");
+  await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 17');
+});
+
 test("applies delete text from the operation controls", async ({ page }) => {
   await page.goto("/");
 
