@@ -236,6 +236,18 @@ test("merges with the previous paragraph with Backspace in the editor", async ({
   await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 17');
 });
 
+test("deletes the next character with Delete in the editor", async ({ page }) => {
+  await page.goto("/");
+
+  await placeCaretInRenderedText(page, "[0,0]", 2);
+  await page.keyboard.press("Delete");
+
+  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
+    '"text": "你好crucialy-rich。"',
+  );
+  await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 2');
+});
+
 test("applies delete text from the operation controls", async ({ page }) => {
   await page.goto("/");
 
