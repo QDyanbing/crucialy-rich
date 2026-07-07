@@ -11,6 +11,7 @@ import {
   type DocumentNode,
   type RangeSelection,
   type RenderedElementNode,
+  type Transaction,
 } from "@crucialy-rich/core";
 import {
   createElement,
@@ -73,6 +74,31 @@ function getInsertTextInputData(event: Event): string | undefined {
 
 const useIsomorphicLayoutEffect =
   typeof window === "undefined" ? useEffect : useLayoutEffect;
+
+interface KeyboardInputResult {
+  selection: RangeSelection;
+  transaction: Transaction;
+}
+
+function createKeyboardInputResult(
+  key: string,
+  document: DocumentNode,
+  selection: RangeSelection,
+): KeyboardInputResult | undefined {
+  if (key === "Backspace") {
+    const input = {
+      document,
+      selection,
+    };
+
+    return {
+      selection: createSelectionAfterBackspaceInput(input),
+      transaction: createBackspaceInputTransaction(input),
+    };
+  }
+
+  return undefined;
+}
 
 export function RichTextEditor({
   className,
@@ -151,7 +177,7 @@ export function RichTextEditor({
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     onKeyDown?.(event);
 
-    if (event.defaultPrevented || !editable || event.key !== "Backspace") {
+    if (event.defaultPrevented || !editable) {
       return;
     }
 
@@ -164,19 +190,19 @@ export function RichTextEditor({
       return;
     }
 
-    const input = {
-      document,
-      selection: modelSelection,
-    };
-    const transaction = createBackspaceInputTransaction(input);
+    const input = createKeyboardInputResult(event.key, document, modelSelection);
+
+    if (!input) {
+      return;
+    }
 
     event.preventDefault();
 
-    if (transaction.operations.length > 0) {
-      commitDocumentChange(applyTransaction(document, transaction));
+    if (input.transaction.operations.length > 0) {
+      commitDocumentChange(applyTransaction(document, input.transaction));
     }
 
-    onSelectionChange?.(createSelectionAfterBackspaceInput(input));
+    onSelectionChange?.(input.selection);
   }
 
   return (
