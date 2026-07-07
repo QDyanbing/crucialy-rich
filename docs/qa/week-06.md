@@ -6,7 +6,9 @@
 
 第 6 周 Day 2「Backspace」已完成。
 
-下一步进入 Day 3「Delete」。
+第 6 周 Day 3「Delete」已完成。
+
+下一步进入 Day 4「Enter」。
 
 ## 已完成范围
 
@@ -26,24 +28,33 @@
 - 段首 Backspace 合并上一段。
 - 空段 Backspace 合并上一段。
 - Backspace 后同步文档 JSON、渲染预览和选区 JSON。
+- 实现 `createDeleteInputTransaction`。
+- 实现 `createSelectionAfterDeleteInput`。
+- `RichTextEditor` 支持 collapsed selection 下的 Delete。
+- 段中 Delete 删除后一个字符。
+- 段尾 Delete 合并下一段。
+- 空段 Delete 合并下一段。
+- Delete 后同步文档 JSON、渲染预览和选区 JSON。
 - 新增输入事件功能文档和 QA 记录。
 
 ## 自动化覆盖
 
 - `packages/core/tests/input/insert-text.test.ts`
 - `packages/core/tests/input/backspace.test.ts`
+- `packages/core/tests/input/delete.test.ts`
 - `packages/core/tests/public-api.test.ts`
 - `packages/react/tests/public-api.test.ts`
 - `tests/e2e/demo-shell.spec.ts`
 
 ## 当前限制
 
-- 仅支持 `insertText` 和 collapsed selection 下的 Backspace。
-- 暂不处理 Delete、Enter、粘贴、拖拽或 IME composition。
+- 仅支持 `insertText`、collapsed selection 下的 Backspace 和 collapsed selection 下的 Delete。
+- 暂不处理 Enter、粘贴、拖拽或 IME composition。
 - 暂不替换非折叠 selection 内容。
 - Backspace 暂不处理跨 text 删除或 inline text 节点合并。
+- Delete 暂不处理跨 text 删除或 inline text 节点合并。
 - 暂不包含 history 或 undo/redo。
 
 ## 结论
 
-真实文本输入和 Backspace 已经接入 operation/transaction 管线；输入后 `onChange` 输出最新文档模型，选区会落到对应操作后的稳定位置。第 6 周下一步进入 Delete。
+真实文本输入、Backspace 和 Delete 已经接入 operation/transaction 管线；输入后 `onChange` 输出最新文档模型，选区会落到对应操作后的稳定位置。第 6 周下一步进入 Enter。
