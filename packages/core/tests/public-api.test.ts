@@ -79,6 +79,8 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.createSelectionAfterBackspaceInput).toBe("function");
     expect(typeof core.createDeleteInputTransaction).toBe("function");
     expect(typeof core.createSelectionAfterDeleteInput).toBe("function");
+    expect(typeof core.createEnterInputTransaction).toBe("function");
+    expect(typeof core.createSelectionAfterEnterInput).toBe("function");
     expect(typeof core.createInsertTextInputTransaction).toBe("function");
     expect(typeof core.createSelectionAfterInsertTextInput).toBe("function");
   });
