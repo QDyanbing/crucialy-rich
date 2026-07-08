@@ -10,12 +10,12 @@ async function placeCaretInRenderedText(page: Page, path: string, offset: number
       const selection = window.getSelection();
       const renderedDocument = element.closest('[aria-label="已渲染文档"]');
 
-      if (!text || !selection || !(renderedDocument instanceof HTMLElement)) {
+      if (!selection || !(renderedDocument instanceof HTMLElement)) {
         throw new Error("Missing rendered text selection target.");
       }
 
       renderedDocument.focus();
-      range.setStart(text, nextOffset);
+      range.setStart(text ?? element, text ? nextOffset : 0);
       range.collapse(true);
       selection.removeAllRanges();
       selection.addRange(range);
@@ -291,6 +291,20 @@ test("continues typing in the new paragraph after Enter", async ({ page }) => {
     '"text": "新段crucialy-rich。"',
   );
   await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 2');
+});
+
+test("creates another empty paragraph with Enter in an empty paragraph", async ({
+  page,
+}) => {
+  await page.goto("/");
+
+  await page.getByLabel("模型示例").selectOption("empty");
+  await page.getByRole("button", { name: "规范化" }).click();
+  await placeCaretInRenderedText(page, "[0,0]", 0);
+  await page.keyboard.press("Enter");
+
+  await expect(page.getByLabel("已渲染文档").locator("p")).toHaveCount(2);
+  await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 0');
 });
 
 test("applies delete text from the operation controls", async ({ page }) => {
