@@ -47,4 +47,69 @@ describe("createEnterInputTransaction", () => {
       focus: { path: [1, 0], offset: 0 },
     });
   });
+
+  it("splits at the start of a paragraph", () => {
+    const document = createDocument([createParagraph([createText("你好")])]);
+    const result = applyTransaction(
+      document,
+      createEnterInputTransaction({
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [0, 0], offset: 0 },
+        },
+      }),
+    );
+
+    expect(result.children[0]?.children[0]?.text).toBe("");
+    expect(result.children[1]?.children[0]?.text).toBe("你好");
+  });
+
+  it("splits at the end of a paragraph", () => {
+    const document = createDocument([createParagraph([createText("你好")])]);
+    const result = applyTransaction(
+      document,
+      createEnterInputTransaction({
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 2 },
+          focus: { path: [0, 0], offset: 2 },
+        },
+      }),
+    );
+
+    expect(result.children[0]?.children[0]?.text).toBe("你好");
+    expect(result.children[1]?.children[0]?.text).toBe("");
+  });
+
+  it("creates a new paragraph from an empty paragraph", () => {
+    const document = createDocument([createParagraph([createText("")])]);
+    const result = applyTransaction(
+      document,
+      createEnterInputTransaction({
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [0, 0], offset: 0 },
+        },
+      }),
+    );
+
+    expect(result.children).toHaveLength(2);
+    expect(result.children[0]?.children[0]?.text).toBe("");
+    expect(result.children[1]?.children[0]?.text).toBe("");
+  });
+
+  it("does nothing for non-collapsed selections", () => {
+    const document = createDocument([createParagraph([createText("你好")])]);
+    const transaction = createEnterInputTransaction({
+      document,
+      selection: {
+        anchor: { path: [0, 0], offset: 0 },
+        focus: { path: [0, 0], offset: 1 },
+      },
+    });
+
+    expect(transaction.operations).toEqual([]);
+  });
 });
