@@ -4,9 +4,11 @@ import {
   createDocument,
   createBackspaceInputTransaction,
   createDeleteInputTransaction,
+  createEnterInputTransaction,
   createInsertTextInputTransaction,
   createSelectionAfterBackspaceInput,
   createSelectionAfterDeleteInput,
+  createSelectionAfterEnterInput,
   createSelectionAfterInsertTextInput,
   domSelectionToModelSelection,
   renderDocument,
@@ -108,6 +110,18 @@ function createKeyboardInputResult(
     return {
       selection: createSelectionAfterDeleteInput(input),
       transaction: createDeleteInputTransaction(input),
+    };
+  }
+
+  if (key === "Enter") {
+    const input = {
+      document,
+      selection,
+    };
+
+    return {
+      selection: createSelectionAfterEnterInput(input),
+      transaction: createEnterInputTransaction(input),
     };
   }
 
