@@ -1,6 +1,6 @@
 # 工程结构
 
-本仓库按单体仓库组织，当前阶段已经完成工程骨架、文档模型第一版、模型选区第一版、基础模型渲染第一版、DOM 与模型位置映射第一版、选区双向同步第一版、React 组件 API 第一版、渲染闭环验收、`insertText`、`deleteText`、`splitBlock`、`mergeBlock` operation 第一版、Transaction 第一版、Operation 闭环验收、`beforeinput insertText` 第一版、Backspace 第一版和 Delete 第一版。
+本仓库按单体仓库组织，当前阶段已经完成工程骨架、文档模型第一版、模型选区第一版、基础模型渲染第一版、DOM 与模型位置映射第一版、选区双向同步第一版、React 组件 API 第一版、渲染闭环验收、`insertText`、`deleteText`、`splitBlock`、`mergeBlock` operation 第一版、Transaction 第一版、Operation 闭环验收、`beforeinput insertText` 第一版、Backspace 第一版、Delete 第一版和 Enter 第一版。
 
 ```text
 .
@@ -43,4 +43,4 @@
 
 ## 当前边界
 
-当前仍不包含 Enter、历史或输入法完整处理。
+当前仍不包含历史或输入法完整处理。
