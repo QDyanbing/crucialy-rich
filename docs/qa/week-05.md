@@ -58,7 +58,7 @@
 
 ## 当前限制
 
-- 普通 `beforeinput insertText`、Backspace 和 Delete 已在第 6 周接入，Enter 尚未接入。
+- 普通 `beforeinput insertText`、Backspace、Delete 和 Enter 已在第 6 周接入。
 - `deleteText` 暂不支持跨 text 节点或跨 paragraph 删除。
 - `mergeBlock` 暂不支持批量跨多段合并。
 - transaction 当前不包含 inverse、撤销重做或 history 记录。
