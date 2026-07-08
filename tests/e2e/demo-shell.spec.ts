@@ -280,6 +280,19 @@ test("splits the paragraph with Enter in the editor", async ({ page }) => {
   await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 0');
 });
 
+test("continues typing in the new paragraph after Enter", async ({ page }) => {
+  await page.goto("/");
+
+  await placeCaretInRenderedText(page, "[0,0]", 3);
+  await page.keyboard.press("Enter");
+  await page.keyboard.type("新段");
+
+  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
+    '"text": "新段crucialy-rich。"',
+  );
+  await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 2');
+});
+
 test("applies delete text from the operation controls", async ({ page }) => {
   await page.goto("/");
 
