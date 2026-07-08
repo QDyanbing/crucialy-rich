@@ -262,6 +262,24 @@ test("merges with the next paragraph with Delete in the editor", async ({ page }
   await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 17');
 });
 
+test("splits the paragraph with Enter in the editor", async ({ page }) => {
+  await page.goto("/");
+
+  await placeCaretInRenderedText(page, "[0,0]", 3);
+  await page.keyboard.press("Enter");
+
+  const renderedDocument = page.getByLabel("已渲染文档");
+
+  await expect(renderedDocument.locator("p")).toHaveCount(3);
+  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
+    '"text": "你好，"',
+  );
+  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
+    '"text": "crucialy-rich。"',
+  );
+  await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 0');
+});
+
 test("applies delete text from the operation controls", async ({ page }) => {
   await page.goto("/");
 
