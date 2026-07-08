@@ -2,15 +2,16 @@
 
 ## 范围
 
-验证 `beforeinput insertText`、collapsed selection 下的 Backspace 和 collapsed selection 下的 Delete 能通过 transaction 更新模型，而不是直接信任浏览器 DOM 修改结果。
+验证 `beforeinput insertText`、collapsed selection 下的 Backspace、collapsed selection 下的 Delete 和 collapsed selection 下的 Enter 能通过 transaction 更新模型，而不是直接信任浏览器 DOM 修改结果。
 
 ## 自动化测试
 
 - `packages/core/tests/input/insert-text.test.ts`：输入文本转换为 `insert_text` transaction、反向 selection 规范化、通过 operation pipeline 应用、输入后 selection 落点。
 - `packages/core/tests/input/backspace.test.ts`：Backspace 转换为 `delete_text` 或 `merge_block` transaction、段中删除、段首合并、空段删除、首段开头 no-op 和 selection 落点。
 - `packages/core/tests/input/delete.test.ts`：Delete 转换为 `delete_text` 或 `merge_block` transaction、段中删除、段尾合并、空段删除、末段结尾 no-op 和 selection 落点。
+- `packages/core/tests/input/enter.test.ts`：Enter 转换为 `split_block` transaction、段首/段中/段尾/空段分裂、非折叠 selection no-op 和 selection 落点。
 - `packages/react/tests/public-api.test.ts`：可编辑状态会暴露为 `aria-readonly="false"`。
-- `tests/e2e/demo-shell.spec.ts`：演示页真实输入单字符、连续输入、Backspace 段中删除、Backspace 段首合并、Delete 段中删除和 Delete 段尾合并后，文档 JSON 与选区 JSON 同步更新。
+- `tests/e2e/demo-shell.spec.ts`：演示页真实输入单字符、连续输入、Backspace 段中删除、Backspace 段首合并、Delete 段中删除、Delete 段尾合并、Enter 分段、Enter 后继续输入和空段 Enter 后，文档 JSON 与选区 JSON 同步更新。
 
 命令：
 
@@ -39,17 +40,23 @@ pnpm test:e2e
 | 段尾 Delete    | 第一段结尾按 Delete                    | 下一段合并到当前段                | 通过 |
 | 空段 Delete    | 非末段空段开头按 Delete                | 下一段被并入当前空段              | 通过 |
 | Delete 选区    | Delete 后读取选区 JSON                 | selection 落到删除或合并后的落点  | 通过 |
+| 段中 Enter     | 光标在 text 节点中间按 Enter           | 当前段分裂为两个段落              | 通过 |
+| 段首 Enter     | 光标在段首按 Enter                     | 前方创建空段，文本进入下一段      | 通过 |
+| 段尾 Enter     | 光标在段尾按 Enter                     | 后方创建空段                      | 通过 |
+| 空段 Enter     | 空段内按 Enter                         | 创建新的空段                      | 通过 |
+| Enter 后输入   | Enter 后继续输入文字                   | 文本进入新段开头                  | 通过 |
 
 ## 当前限制
 
-- 仅支持普通 `insertText`、collapsed selection 下的 Backspace 和 collapsed selection 下的 Delete。
+- 仅支持普通 `insertText`、collapsed selection 下的 Backspace、collapsed selection 下的 Delete 和 collapsed selection 下的 Enter。
 - 非折叠 selection 暂不替换选中内容。
-- Enter、粘贴和 IME composition 尚未接入。
+- 粘贴和 IME composition 尚未接入。
 - Backspace 暂不处理非折叠 selection、跨 text 删除或 inline text 节点合并。
 - Delete 暂不处理非折叠 selection、跨 text 删除或 inline text 节点合并。
+- Enter 暂不处理非折叠 selection，也不复制 marks 或 block attributes。
 - 当前不记录 undo/redo 或 history。
 - 输入行为暂只覆盖 paragraph 内 text 节点。
 
 ## 结论
 
-`beforeinput insertText`、Backspace 和 Delete 第一版已经闭环：真实输入会转换为 transaction，更新模型并同步选区；下一步进入第 6 周 Day 4「Enter」。
+`beforeinput insertText`、Backspace、Delete 和 Enter 第一版已经闭环：真实输入会转换为 transaction，更新模型并同步选区；下一步进入第 6 周 Day 5「基础编辑闭环验收」。
