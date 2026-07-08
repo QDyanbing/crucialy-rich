@@ -47,11 +47,11 @@ export function UncontrolledEditor() {
 - 渲染出的节点会保留 `data-crucialy-path`，用于 DOM 与模型映射和选区同步。
 - `value` 优先级高于 `defaultValue`。
 - `defaultValue` 只在组件初始化时读取。
-- `contentEditable` 开启后，普通 `insertText`、collapsed selection 下的 Backspace 和 collapsed selection 下的 Delete 会通过 transaction 更新模型并触发 `onChange`。
+- `contentEditable` 开启后，普通 `insertText`、collapsed selection 下的 Backspace、collapsed selection 下的 Delete 和 collapsed selection 下的 Enter 会通过 transaction 更新模型并触发 `onChange`。
 - 输入后会通过 `onSelectionChange` 输出新的折叠选区。
 - 外部 `onBeforeInput` / `onKeyDown` 会先执行，若已 `preventDefault`，内部不再处理对应输入。
 - 初始渲染或浏览器选区变化不会触发 `onChange`。
 
 ## 当前边界
 
-当前组件仍不包含 Enter、历史、输入法完整处理、粘贴解析或序列化能力；Backspace 和 Delete 当前只覆盖 collapsed selection 下的段内删除和段落合并。
+当前组件仍不包含历史、输入法完整处理、粘贴解析或序列化能力；Backspace、Delete 和 Enter 当前只覆盖 collapsed selection 下的基础编辑路径。
