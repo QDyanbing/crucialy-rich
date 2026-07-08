@@ -8,6 +8,8 @@ export {
   createSelectionAfterDeleteInput,
 } from "./delete";
 export type { DeleteInput } from "./delete";
+export { createEnterInputTransaction, createSelectionAfterEnterInput } from "./enter";
+export type { EnterInput } from "./enter";
 export {
   createInsertTextInputTransaction,
   createSelectionAfterInsertTextInput,
