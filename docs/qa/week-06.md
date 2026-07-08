@@ -8,7 +8,9 @@
 
 第 6 周 Day 3「Delete」已完成。
 
-下一步进入 Day 4「Enter」。
+第 6 周 Day 4「Enter」已完成。
+
+下一步进入 Day 5「基础编辑闭环验收」。
 
 ## 已完成范围
 
@@ -35,6 +37,12 @@
 - 段尾 Delete 合并下一段。
 - 空段 Delete 合并下一段。
 - Delete 后同步文档 JSON、渲染预览和选区 JSON。
+- 实现 `createEnterInputTransaction`。
+- 实现 `createSelectionAfterEnterInput`。
+- `RichTextEditor` 支持 collapsed selection 下的 Enter。
+- 段首、段中、段尾和空段 Enter 分裂 paragraph。
+- Enter 后可以继续在新 paragraph 输入文本。
+- Enter 后同步文档 JSON、渲染预览和选区 JSON。
 - 新增输入事件功能文档和 QA 记录。
 
 ## 自动化覆盖
@@ -42,19 +50,21 @@
 - `packages/core/tests/input/insert-text.test.ts`
 - `packages/core/tests/input/backspace.test.ts`
 - `packages/core/tests/input/delete.test.ts`
+- `packages/core/tests/input/enter.test.ts`
 - `packages/core/tests/public-api.test.ts`
 - `packages/react/tests/public-api.test.ts`
 - `tests/e2e/demo-shell.spec.ts`
 
 ## 当前限制
 
-- 仅支持 `insertText`、collapsed selection 下的 Backspace 和 collapsed selection 下的 Delete。
-- 暂不处理 Enter、粘贴、拖拽或 IME composition。
+- 仅支持 `insertText`、collapsed selection 下的 Backspace、collapsed selection 下的 Delete 和 collapsed selection 下的 Enter。
+- 暂不处理粘贴、拖拽或 IME composition。
 - 暂不替换非折叠 selection 内容。
 - Backspace 暂不处理跨 text 删除或 inline text 节点合并。
 - Delete 暂不处理跨 text 删除或 inline text 节点合并。
+- Enter 暂不处理非折叠 selection，也不复制 marks 或 block attributes。
 - 暂不包含 history 或 undo/redo。
 
 ## 结论
 
-真实文本输入、Backspace 和 Delete 已经接入 operation/transaction 管线；输入后 `onChange` 输出最新文档模型，选区会落到对应操作后的稳定位置。第 6 周下一步进入 Enter。
+真实文本输入、Backspace、Delete 和 Enter 已经接入 operation/transaction 管线；输入后 `onChange` 输出最新文档模型，选区会落到对应操作后的稳定位置。第 6 周下一步进入基础编辑闭环验收。
