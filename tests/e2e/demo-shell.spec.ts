@@ -236,6 +236,21 @@ test("merges with the previous paragraph with Backspace in the editor", async ({
   await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 17');
 });
 
+test("keeps the model valid after Backspace merge and typing", async ({ page }) => {
+  await page.goto("/");
+
+  await placeCaretInRenderedText(page, "[1,0]", 0);
+  await page.keyboard.press("Backspace");
+  await page.keyboard.type("续");
+
+  await expect(page.getByLabel("模型校验状态")).toContainText("合法");
+  await expect(page.getByLabel("已渲染文档").locator("p")).toHaveCount(1);
+  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
+    '"text": "你好，crucialy-rich。续选区模型已就绪。"',
+  );
+  await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 18');
+});
+
 test("deletes the next character with Delete in the editor", async ({ page }) => {
   await page.goto("/");
 
@@ -291,6 +306,27 @@ test("continues typing in the new paragraph after Enter", async ({ page }) => {
     '"text": "新段crucialy-rich。"',
   );
   await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 2');
+});
+
+test("runs a basic editing loop with insert enter and delete", async ({ page }) => {
+  await page.goto("/");
+
+  await placeCaretInRenderedText(page, "[0,0]", 3);
+  await page.keyboard.type("新");
+  await page.keyboard.press("Enter");
+  await page.keyboard.type("段");
+  await page.keyboard.press("Delete");
+
+  const renderedDocument = page.getByLabel("已渲染文档");
+
+  await expect(renderedDocument.locator("p")).toHaveCount(3);
+  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
+    '"text": "你好，新"',
+  );
+  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
+    '"text": "段rucialy-rich。"',
+  );
+  await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 1');
 });
 
 test("creates another empty paragraph with Enter in an empty paragraph", async ({
