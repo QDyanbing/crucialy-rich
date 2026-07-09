@@ -245,5 +245,5 @@ interface TransactionAcceptanceReport {
 - 删除暂不支持跨 text 节点或跨 paragraph 范围。
 - 合并暂不支持跨多段批量合并。
 - transaction 当前只负责批量应用和结束 normalize，不包含 undo/redo inverse 信息。
-- 普通 `beforeinput insertText`、collapsed selection 下的 Backspace、collapsed selection 下的 Delete 和 collapsed selection 下的 Enter 已接入输入事件管线。
+- 普通 `beforeinput insertText`、collapsed selection 下的 Backspace、collapsed selection 下的 Delete 和 collapsed selection 下的 Enter 已接入输入事件管线，并复用当前 operation/transaction 更新模型。
 - 尚未实现撤销重做。
