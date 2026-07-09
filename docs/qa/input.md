@@ -11,7 +11,7 @@
 - `packages/core/tests/input/delete.test.ts`：Delete 转换为 `delete_text` 或 `merge_block` transaction、段中删除、段尾合并、空段删除、末段结尾 no-op 和 selection 落点。
 - `packages/core/tests/input/enter.test.ts`：Enter 转换为 `split_block` transaction、段首/段中/段尾/空段分裂、非折叠 selection no-op 和 selection 落点。
 - `packages/react/tests/public-api.test.ts`：可编辑状态会暴露为 `aria-readonly="false"`。
-- `tests/e2e/demo-shell.spec.ts`：演示页真实输入单字符、连续输入、Backspace 段中删除、Backspace 段首合并、Delete 段中删除、Delete 段尾合并、Enter 分段、Enter 后继续输入和空段 Enter 后，文档 JSON 与选区 JSON 同步更新。
+- `tests/e2e/demo-shell.spec.ts`：演示页真实输入单字符、连续输入、Backspace 段中删除、Backspace 段首合并、Backspace 合并后继续输入、Delete 段中删除、Delete 段尾合并、Enter 分段、Enter 后继续输入、输入/Enter/Delete 组合编辑和空段 Enter 后，文档 JSON 与选区 JSON 同步更新。
 
 命令：
 
@@ -45,6 +45,8 @@ pnpm test:e2e
 | 段尾 Enter     | 光标在段尾按 Enter                     | 后方创建空段                      | 通过 |
 | 空段 Enter     | 空段内按 Enter                         | 创建新的空段                      | 通过 |
 | Enter 后输入   | Enter 后继续输入文字                   | 文本进入新段开头                  | 通过 |
+| 组合编辑       | 输入文字后 Enter，再输入并按 Delete    | 文档分段、删除和选区都稳定        | 通过 |
+| 合并后输入     | 第二段段首 Backspace 后继续输入        | 合并段落保持合法并继续插入文本    | 通过 |
 
 ## 当前限制
 
@@ -59,4 +61,4 @@ pnpm test:e2e
 
 ## 结论
 
-`beforeinput insertText`、Backspace、Delete 和 Enter 第一版已经闭环：真实输入会转换为 transaction，更新模型并同步选区；下一步进入第 6 周 Day 5「基础编辑闭环验收」。
+`beforeinput insertText`、Backspace、Delete 和 Enter 第一版已经闭环：真实输入会转换为 transaction，更新模型并同步选区；基础编辑闭环验收已经完成，下一步进入第 7 周 Day 1「Command 基础接口」。
