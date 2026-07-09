@@ -74,9 +74,9 @@ pnpm test:e2e
 - 删除暂不支持跨 text 节点或跨 paragraph range。
 - 合并暂不支持批量跨多段合并。
 - transaction 当前不包含 inverse、撤销重做或回滚事件对象。
-- 普通 `beforeinput insertText`、collapsed selection 下的 Backspace、collapsed selection 下的 Delete 和 collapsed selection 下的 Enter 已接入输入事件管线。
+- 普通 `beforeinput insertText`、collapsed selection 下的 Backspace、collapsed selection 下的 Delete 和 collapsed selection 下的 Enter 已接入输入事件管线，并已完成基础编辑闭环验收。
 - 失败保护依赖 operation 不可变返回新文档。
 
 ## 结论
 
-`insert_text`、`delete_text`、`split_block`、`merge_block` 和 transaction 的核心模型操作、测试、演示调试、摘要、闭环验收报告和 QA 记录已闭环；普通文本输入、Backspace、Delete 和 Enter 已经进入输入事件管线。
+`insert_text`、`delete_text`、`split_block`、`merge_block` 和 transaction 的核心模型操作、测试、演示调试、摘要、闭环验收报告和 QA 记录已闭环；普通文本输入、Backspace、Delete 和 Enter 已经进入输入事件管线，并通过基础编辑组合场景验收。
