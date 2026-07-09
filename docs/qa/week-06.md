@@ -10,7 +10,9 @@
 
 第 6 周 Day 4「Enter」已完成。
 
-下一步进入 Day 5「基础编辑闭环验收」。
+第 6 周 Day 5「基础编辑闭环验收」已完成。
+
+下一步进入第 7 周 Day 1「Command 基础接口」。
 
 ## 已完成范围
 
@@ -43,6 +45,8 @@
 - 段首、段中、段尾和空段 Enter 分裂 paragraph。
 - Enter 后可以继续在新 paragraph 输入文本。
 - Enter 后同步文档 JSON、渲染预览和选区 JSON。
+- 清理 React 输入事件中的 DOM selection 读取和输入结果提交逻辑。
+- 补齐基础编辑组合验收，覆盖输入、Enter、Delete 和 Backspace 合并后继续输入。
 - 新增输入事件功能文档和 QA 记录。
 
 ## 自动化覆盖
@@ -67,4 +71,4 @@
 
 ## 结论
 
-真实文本输入、Backspace、Delete 和 Enter 已经接入 operation/transaction 管线；输入后 `onChange` 输出最新文档模型，选区会落到对应操作后的稳定位置。第 6 周下一步进入基础编辑闭环验收。
+真实文本输入、Backspace、Delete 和 Enter 已经接入 operation/transaction 管线；输入后 `onChange` 输出最新文档模型，选区会落到对应操作后的稳定位置。第 6 周输入事件和基础编辑闭环已经完成，下一步进入 Command 系统。
