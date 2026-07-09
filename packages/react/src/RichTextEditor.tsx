@@ -84,6 +84,14 @@ interface KeyboardInputResult {
   transaction: Transaction;
 }
 
+function getModelSelectionFromDom(root: HTMLDivElement, document: DocumentNode) {
+  const domSelection = root.ownerDocument.getSelection();
+
+  return domSelection
+    ? domSelectionToModelSelection(document, domSelection)
+    : undefined;
+}
+
 function createKeyboardInputResult(
   key: string,
   document: DocumentNode,
@@ -168,6 +176,14 @@ export function RichTextEditor({
     onChange?.(nextDocument);
   }
 
+  function commitInputResult(input: KeyboardInputResult) {
+    if (input.transaction.operations.length > 0) {
+      commitDocumentChange(applyTransaction(document, input.transaction));
+    }
+
+    onSelectionChange?.(input.selection);
+  }
+
   function handleBeforeInput(event: FormEvent<HTMLDivElement>) {
     onBeforeInput?.(event);
 
@@ -181,10 +197,7 @@ export function RichTextEditor({
       return;
     }
 
-    const domSelection = event.currentTarget.ownerDocument.getSelection();
-    const modelSelection = domSelection
-      ? domSelectionToModelSelection(document, domSelection)
-      : undefined;
+    const modelSelection = getModelSelectionFromDom(event.currentTarget, document);
 
     if (!modelSelection) {
       return;
@@ -196,10 +209,10 @@ export function RichTextEditor({
     };
 
     event.preventDefault();
-    commitDocumentChange(
-      applyTransaction(document, createInsertTextInputTransaction(input)),
-    );
-    onSelectionChange?.(createSelectionAfterInsertTextInput(input));
+    commitInputResult({
+      selection: createSelectionAfterInsertTextInput(input),
+      transaction: createInsertTextInputTransaction(input),
+    });
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
@@ -209,10 +222,7 @@ export function RichTextEditor({
       return;
     }
 
-    const domSelection = event.currentTarget.ownerDocument.getSelection();
-    const modelSelection = domSelection
-      ? domSelectionToModelSelection(document, domSelection)
-      : undefined;
+    const modelSelection = getModelSelectionFromDom(event.currentTarget, document);
 
     if (!modelSelection) {
       return;
@@ -225,12 +235,7 @@ export function RichTextEditor({
     }
 
     event.preventDefault();
-
-    if (input.transaction.operations.length > 0) {
-      commitDocumentChange(applyTransaction(document, input.transaction));
-    }
-
-    onSelectionChange?.(input.selection);
+    commitInputResult(input);
   }
 
   return (
