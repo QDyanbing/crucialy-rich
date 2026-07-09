@@ -2,7 +2,7 @@
 
 crucialy-rich 编辑内核的 React 集成包，对外暴露可集成的 React 富文本组件。
 
-> 当前处于早期阶段，`RichTextEditor` 已支持通过 `value` / `defaultValue` 渲染文档模型，并接入 `beforeinput insertText` 普通文本输入、collapsed selection 下的 Backspace、collapsed selection 下的 Delete 和 collapsed selection 下的 Enter。
+> 当前处于早期阶段，`RichTextEditor` 已支持通过 `value` / `defaultValue` 渲染文档模型，并接入 `beforeinput insertText` 普通文本输入、collapsed selection 下的 Backspace、collapsed selection 下的 Delete 和 collapsed selection 下的 Enter；基础编辑闭环已完成验收。
 
 ## 安装
 
@@ -41,6 +41,7 @@ export function Demo() {
 - `onChange`：输入后输出最新文档。
 - `selection` / `onSelectionChange`：受控模型选区和输入后的选区回调。
 - `contentEditable`：开启普通文本输入、Backspace、Delete 和 Enter。
+- 输入事件：通过模型 transaction 更新文档，并在输入后回传稳定模型选区。
 - `label`、`className` 和基础 DOM 事件属性。
 
 完整说明见 [组件 API](../../docs/features/component-api.md)。
