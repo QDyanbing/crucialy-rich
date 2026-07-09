@@ -119,6 +119,19 @@ function createSelectionAfterEnterInput(input: EnterInput): RangeSelection;
 - `onSelectionChange`：输入后输出新的模型选区。
 - `onBeforeInput`：仍会先调用外部回调，若外部已 `preventDefault`，内部不再处理。
 
+## 基础编辑闭环
+
+普通文本输入、Backspace、Delete 和 Enter 当前使用同一组基础步骤：
+
+- 从当前 contenteditable 根节点读取浏览器 `Selection`。
+- 转换为模型 `RangeSelection`。
+- 创建对应输入 transaction。
+- 阻止浏览器默认 DOM 修改。
+- 通过 `applyTransaction` 得到下一份文档模型。
+- 通过 `onChange` 和 `onSelectionChange` 把文档和选区交回调用方。
+
+即使某次按键生成空 transaction，也会回传稳定的模型选区，避免 DOM selection 和模型 selection 分叉。
+
 ## Demo 验收
 
 演示页的主编辑区已经接入真实输入：
