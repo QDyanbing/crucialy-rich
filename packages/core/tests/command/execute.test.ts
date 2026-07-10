@@ -41,4 +41,34 @@ describe("executeCommand", () => {
       status: "failure",
     });
   });
+
+  it("returns skipped when canExecute blocks the command", () => {
+    const registry = createCommandRegistry([
+      createCommand({ canExecute: () => false }),
+    ]);
+
+    expect(executeCommand(registry, "noop", { context })).toEqual({
+      commandName: "noop",
+      ok: false,
+      reason: "Command cannot execute in the current context.",
+      status: "skipped",
+    });
+  });
+
+  it("returns failure when a command throws", () => {
+    const registry = createCommandRegistry([
+      createCommand({
+        execute: () => {
+          throw new Error("Broken command.");
+        },
+      }),
+    ]);
+
+    expect(executeCommand(registry, "noop", { context })).toEqual({
+      commandName: "noop",
+      ok: false,
+      reason: "Broken command.",
+      status: "failure",
+    });
+  });
 });
