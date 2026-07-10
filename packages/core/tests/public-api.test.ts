@@ -84,4 +84,13 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.createInsertTextInputTransaction).toBe("function");
     expect(typeof core.createSelectionAfterInsertTextInput).toBe("function");
   });
+
+  it("exposes the command API", () => {
+    expect(typeof core.canExecuteCommand).toBe("function");
+    expect(typeof core.createCommandFailure).toBe("function");
+    expect(typeof core.createCommandRegistry).toBe("function");
+    expect(typeof core.createCommandSkipped).toBe("function");
+    expect(typeof core.createCommandSuccess).toBe("function");
+    expect(typeof core.executeCommand).toBe("function");
+  });
 });
