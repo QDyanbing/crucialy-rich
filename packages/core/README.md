@@ -2,7 +2,7 @@
 
 自研富文本编辑内核，不依赖 ProseMirror、Tiptap、Lexical、Slate 作为运行时内核。
 
-> 当前处于早期阶段，已提供文档模型、模型选区、基础渲染器、DOM 与模型位置映射、选区双向同步、`insertText`、`deleteText`、`splitBlock`、`mergeBlock` operation、Transaction、Operation 闭环验收工具、`beforeinput insertText` 输入 helper、Backspace 输入 helper、Delete 输入 helper 和 Enter 输入 helper，基础编辑 transaction 与 selection 计算已闭环，尚未提供完整编辑命令。
+> 当前处于早期阶段，已提供文档模型、模型选区、基础渲染器、DOM 与模型位置映射、选区双向同步、`insertText`、`deleteText`、`splitBlock`、`mergeBlock` operation、Transaction、Operation 闭环验收工具、`beforeinput insertText` 输入 helper、Backspace 输入 helper、Delete 输入 helper、Enter 输入 helper 和 Command 基础接口，基础编辑 transaction 与 selection 计算已闭环，尚未提供完整编辑命令。
 
 ## 安装
 
@@ -21,6 +21,7 @@ import {
   createDeleteInputTransaction,
   createDeleteTextOperation,
   createEnterInputTransaction,
+  createCommandRegistry,
   createInsertTextInputTransaction,
   createMergeBlockOperation,
   createTransaction,
@@ -86,6 +87,7 @@ const enterTransaction = createEnterInputTransaction({
     focus: { path: [0, 0], offset: 1 },
   },
 });
+const commandRegistry = createCommandRegistry();
 ```
 
 ## 当前 API 范围
@@ -101,6 +103,7 @@ const enterTransaction = createEnterInputTransaction({
 - Transaction：`createTransaction`、`applyOperation`、`applyTransaction`、`summarizeOperation`、`summarizeTransaction`、`createTransactionAcceptanceReport`。
 - 输入：`createInsertTextInputTransaction`、`createSelectionAfterInsertTextInput`、`createBackspaceInputTransaction`、`createSelectionAfterBackspaceInput`、`createDeleteInputTransaction`、`createSelectionAfterDeleteInput`、`createEnterInputTransaction`、`createSelectionAfterEnterInput`。
 - 当前输入 helper 覆盖普通文本插入、段中删除、段落合并、段落分裂和输入后 selection 落点。
+- Command：`createCommandRegistry`、`canExecuteCommand`、`executeCommand`、`createCommandSuccess`、`createCommandFailure`、`createCommandSkipped`。
 
 ## 许可
 
