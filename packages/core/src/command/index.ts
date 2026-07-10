@@ -1,3 +1,4 @@
+export { canExecuteCommand } from "./can-execute";
 export {
   createCommandFailure,
   createCommandSkipped,
