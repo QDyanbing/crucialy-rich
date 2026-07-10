@@ -10,7 +10,7 @@
 
 ## 当前阶段
 
-已完成工程初始化、文档模型第一版、模型选区第一版、基础模型渲染第一版、DOM 与模型位置映射第一版、选区双向同步第一版、React 组件 API 第一版、渲染闭环验收、`insertText`、`deleteText`、`splitBlock`、`mergeBlock` operation 第一版、Transaction 第一版、Operation 闭环验收、`beforeinput insertText` 第一版、Backspace 第一版、Delete 第一版、Enter 第一版和基础编辑闭环验收。
+已完成工程初始化、文档模型第一版、模型选区第一版、基础模型渲染第一版、DOM 与模型位置映射第一版、选区双向同步第一版、React 组件 API 第一版、渲染闭环验收、`insertText`、`deleteText`、`splitBlock`、`mergeBlock` operation 第一版、Transaction 第一版、Operation 闭环验收、`beforeinput insertText` 第一版、Backspace 第一版、Delete 第一版、Enter 第一版、基础编辑闭环验收和 Command 基础接口。
 
 当前 React 组件已支持通过 `value` / `defaultValue` 展示文档模型，演示页可以通过 transaction 驱动 operation 控件插入、删除、分段和合并段落，并支持在主编辑区组合使用普通文本输入、Backspace、Delete 和 Enter 完成基础编辑路径。
 
@@ -115,6 +115,7 @@ pnpm test:e2e
 - [组件 API](./docs/features/component-api.md)
 - [Operation](./docs/features/operation.md)
 - [输入事件](./docs/features/input.md)
+- [Command 系统](./docs/features/command.md)
 - [提交规范](./docs/development/commit-convention.md)
 - [测试策略](./docs/qa/test-strategy.md)
 - [脚手架验收](./docs/qa/scaffold-acceptance.md)
