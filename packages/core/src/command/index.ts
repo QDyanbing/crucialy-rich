@@ -3,6 +3,7 @@ export {
   createCommandSkipped,
   createCommandSuccess,
 } from "./result";
+export { createCommandRegistry, type CommandRegistry } from "./registry";
 export type {
   Command,
   CommandContext,
