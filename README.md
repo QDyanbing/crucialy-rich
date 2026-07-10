@@ -125,6 +125,7 @@ pnpm test:e2e
 - [第 4 周 QA](./docs/qa/week-04.md)
 - [第 5 周 QA](./docs/qa/week-05.md)
 - [第 6 周 QA](./docs/qa/week-06.md)
+- [第 7 周 QA](./docs/qa/week-07.md)
 - [模型 QA](./docs/qa/model.md)
 - [选区 QA](./docs/qa/selection.md)
 - [基础渲染 QA](./docs/qa/render.md)
