@@ -6,6 +6,12 @@ export {
   createCommandSuccess,
 } from "./result";
 export { createCommandRegistry, type CommandRegistry } from "./registry";
+export {
+  canExecuteInsertTextCommand,
+  INSERT_TEXT_COMMAND_NAME,
+  insertTextCommand,
+} from "./text";
+export type { InsertTextCommandPayload } from "./text";
 export type {
   Command,
   CommandContext,
