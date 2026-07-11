@@ -9,6 +9,8 @@ import {
   createSelectionAfterBackspaceInput,
   createSelectionAfterDeleteInput,
   createSelectionAfterEnterInput,
+  DELETE_SELECTION_COMMAND_NAME,
+  deleteSelectionCommand,
   domSelectionToModelSelection,
   executeCommand,
   INSERT_TEXT_COMMAND_NAME,
@@ -81,7 +83,10 @@ function getInsertTextInputData(event: Event): string | undefined {
 const useIsomorphicLayoutEffect =
   typeof window === "undefined" ? useEffect : useLayoutEffect;
 
-const richTextCommandRegistry = createCommandRegistry([insertTextCommand]);
+const richTextCommandRegistry = createCommandRegistry([
+  deleteSelectionCommand,
+  insertTextCommand,
+]);
 
 interface KeyboardInputResult {
   selection: RangeSelection;
@@ -154,6 +159,29 @@ function createInsertTextCommandResult(
       text,
     },
   });
+
+  return result.ok && result.selection && result.transaction
+    ? {
+        selection: result.selection,
+        transaction: result.transaction,
+      }
+    : undefined;
+}
+
+function createDeleteSelectionCommandResult(
+  document: DocumentNode,
+  selection: RangeSelection,
+): KeyboardInputResult | undefined {
+  const result = executeCommand(
+    richTextCommandRegistry,
+    DELETE_SELECTION_COMMAND_NAME,
+    {
+      context: {
+        document,
+        selection,
+      },
+    },
+  );
 
   return result.ok && result.selection && result.transaction
     ? {
@@ -250,6 +278,20 @@ export function RichTextEditor({
 
     if (!modelSelection) {
       return;
+    }
+
+    if (event.key === "Backspace" || event.key === "Delete") {
+      const deleteSelectionInput = createDeleteSelectionCommandResult(
+        document,
+        modelSelection,
+      );
+
+      if (deleteSelectionInput) {
+        event.preventDefault();
+        commitInputResult(deleteSelectionInput);
+
+        return;
+      }
     }
 
     const input = createKeyboardInputResult(event.key, document, modelSelection);
