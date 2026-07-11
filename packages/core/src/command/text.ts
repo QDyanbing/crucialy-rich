@@ -1,6 +1,7 @@
 import {
   createDeleteTextOperation,
   createInsertTextOperation,
+  createSelectionAfterDeleteText,
   createSelectionAfterInsertText,
   createTransaction,
 } from "../operation";
@@ -13,6 +14,7 @@ import {
 import type { Command, CommandInput } from "./types";
 
 export const INSERT_TEXT_COMMAND_NAME = "insertText";
+export const DELETE_SELECTION_COMMAND_NAME = "deleteSelection";
 
 export interface InsertTextCommandPayload {
   text: string;
@@ -46,6 +48,23 @@ function canEditTextRange(input: CommandInput): boolean {
     isValidPoint(input.context.document, range.anchor) &&
     isValidPoint(input.context.document, range.focus) &&
     (isCollapsed(range) || isSamePath(range.anchor.path, range.focus.path))
+  );
+}
+
+function canDeleteTextRange(input: CommandInput): boolean {
+  const selection = input.context.selection;
+
+  if (!selection) {
+    return false;
+  }
+
+  const range = normalizeRange(selection);
+
+  return (
+    !isCollapsed(range) &&
+    isValidPoint(input.context.document, range.anchor) &&
+    isValidPoint(input.context.document, range.focus) &&
+    isSamePath(range.anchor.path, range.focus.path)
   );
 }
 
@@ -86,4 +105,30 @@ export const insertTextCommand: Command<InsertTextCommandPayload> = {
     });
   },
   name: INSERT_TEXT_COMMAND_NAME,
+};
+
+export function canExecuteDeleteSelectionCommand(input: CommandInput): boolean {
+  return canDeleteTextRange(input);
+}
+
+export const deleteSelectionCommand: Command = {
+  canExecute: canExecuteDeleteSelectionCommand,
+  execute(input) {
+    const selection = input.context.selection;
+
+    if (!selection || !canDeleteTextRange(input)) {
+      return createCommandSkipped(
+        DELETE_SELECTION_COMMAND_NAME,
+        "Delete selection command requires a non-collapsed text selection.",
+      );
+    }
+
+    const operation = createDeleteTextOperation(selection);
+
+    return createCommandSuccess(DELETE_SELECTION_COMMAND_NAME, {
+      selection: createSelectionAfterDeleteText(operation),
+      transaction: createTransaction([operation]),
+    });
+  },
+  name: DELETE_SELECTION_COMMAND_NAME,
 };

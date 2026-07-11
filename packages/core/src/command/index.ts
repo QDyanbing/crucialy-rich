@@ -8,6 +8,9 @@ export {
 export { createCommandRegistry, type CommandRegistry } from "./registry";
 export {
   canExecuteInsertTextCommand,
+  canExecuteDeleteSelectionCommand,
+  DELETE_SELECTION_COMMAND_NAME,
+  deleteSelectionCommand,
   INSERT_TEXT_COMMAND_NAME,
   insertTextCommand,
 } from "./text";
