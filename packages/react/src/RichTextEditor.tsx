@@ -1,16 +1,18 @@
 import {
   applyTransaction,
   applyModelSelectionToDom,
+  createCommandRegistry,
   createDocument,
   createBackspaceInputTransaction,
   createDeleteInputTransaction,
   createEnterInputTransaction,
-  createInsertTextInputTransaction,
   createSelectionAfterBackspaceInput,
   createSelectionAfterDeleteInput,
   createSelectionAfterEnterInput,
-  createSelectionAfterInsertTextInput,
   domSelectionToModelSelection,
+  executeCommand,
+  INSERT_TEXT_COMMAND_NAME,
+  insertTextCommand,
   renderDocument,
   type DocumentNode,
   type RangeSelection,
@@ -79,6 +81,8 @@ function getInsertTextInputData(event: Event): string | undefined {
 const useIsomorphicLayoutEffect =
   typeof window === "undefined" ? useEffect : useLayoutEffect;
 
+const richTextCommandRegistry = createCommandRegistry([insertTextCommand]);
+
 interface KeyboardInputResult {
   selection: RangeSelection;
   transaction: Transaction;
@@ -134,6 +138,29 @@ function createKeyboardInputResult(
   }
 
   return undefined;
+}
+
+function createInsertTextCommandResult(
+  document: DocumentNode,
+  selection: RangeSelection,
+  text: string,
+): KeyboardInputResult | undefined {
+  const result = executeCommand(richTextCommandRegistry, INSERT_TEXT_COMMAND_NAME, {
+    context: {
+      document,
+      selection,
+    },
+    payload: {
+      text,
+    },
+  });
+
+  return result.ok && result.selection && result.transaction
+    ? {
+        selection: result.selection,
+        transaction: result.transaction,
+      }
+    : undefined;
 }
 
 export function RichTextEditor({
@@ -203,16 +230,13 @@ export function RichTextEditor({
       return;
     }
 
-    const input = {
-      data,
-      selection: modelSelection,
-    };
+    const input = createInsertTextCommandResult(document, modelSelection, data);
 
     event.preventDefault();
-    commitInputResult({
-      selection: createSelectionAfterInsertTextInput(input),
-      transaction: createInsertTextInputTransaction(input),
-    });
+
+    if (input) {
+      commitInputResult(input);
+    }
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
