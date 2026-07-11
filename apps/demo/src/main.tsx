@@ -1,24 +1,27 @@
 import {
   applyTransaction,
+  createCommandRegistry,
   createTransactionAcceptanceReport,
   createDocument,
   createDeleteTextOperation,
-  createInsertTextOperation,
   createMergeBlockOperation,
   createParagraph,
   createSelectionAfterDeleteText,
-  createSelectionAfterInsertText,
   createSelectionAfterMergeBlock,
   createSelectionAfterSplitBlock,
   createSplitBlockOperation,
   createTransaction,
   createText,
   domSelectionToModelSelection,
+  executeCommand,
   getNodeAtPath,
   getTextInRange,
+  INSERT_TEXT_COMMAND_NAME,
+  insertTextCommand,
   isValidPoint,
   normalizeDocument,
   validateDocument,
+  type CommandResult,
   type DocumentNode,
   type Path,
   type Point,
@@ -73,6 +76,8 @@ const modelExamples: ModelExample[] = [
 const uncontrolledPreviewDocument = createDocument([
   createParagraph([createText("非受控初始文档。")]),
 ]);
+
+const demoCommandRegistry = createCommandRegistry([insertTextCommand]);
 
 const renderBoundaryExamples: RenderBoundaryExample[] = [
   {
@@ -395,15 +400,30 @@ function DemoApp() {
     setLastTransactionReport(null);
   }
 
-  function handleInsertText() {
-    const operation = createInsertTextOperation(modelSelection.anchor, insertTextValue);
-    const transaction = createTransaction([operation]);
+  function applyCommandResult(result: CommandResult) {
+    if (!result.ok || !result.transaction || !result.selection) {
+      return;
+    }
 
-    setDocumentValue(applyTransaction(normalizedDocument, transaction));
-    setModelSelection(createSelectionAfterInsertText(operation));
-    setLastTransaction(transaction);
+    setDocumentValue(applyTransaction(normalizedDocument, result.transaction));
+    setModelSelection(result.selection);
+    setLastTransaction(result.transaction);
     setLastTransactionReport(
-      createTransactionAcceptanceReport(normalizedDocument, transaction),
+      createTransactionAcceptanceReport(normalizedDocument, result.transaction),
+    );
+  }
+
+  function handleInsertText() {
+    applyCommandResult(
+      executeCommand(demoCommandRegistry, INSERT_TEXT_COMMAND_NAME, {
+        context: {
+          document: normalizedDocument,
+          selection: modelSelection,
+        },
+        payload: {
+          text: insertTextValue,
+        },
+      }),
     );
   }
 
