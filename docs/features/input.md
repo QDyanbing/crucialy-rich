@@ -30,7 +30,7 @@ beforeinput
   -> 读取输入文本 data
   -> 读取浏览器 Selection
   -> domSelectionToModelSelection
-  -> createInsertTextInputTransaction
+  -> executeCommand(insertTextCommand)
   -> applyTransaction
   -> onChange(nextDocument)
   -> onSelectionChange(nextSelection)
@@ -38,12 +38,13 @@ beforeinput
 
 `RichTextEditor` 会阻止浏览器默认 DOM 修改，避免直接信任 contenteditable 生成的 DOM 结果。模型更新只通过 operation 和 transaction 完成。
 
-Backspace、Delete 和 Enter 当前走 `keydown` 入口：
+Backspace、Delete 和 Enter 当前走 `keydown` 入口；非折叠 selection 下的 Backspace/Delete 会先尝试 `deleteSelectionCommand`：
 
 ```text
 keydown Backspace/Delete/Enter
   -> 读取浏览器 Selection
   -> domSelectionToModelSelection
+  -> 非折叠 Backspace/Delete 优先 executeCommand(deleteSelectionCommand)
   -> createBackspaceInputTransaction / createDeleteInputTransaction / createEnterInputTransaction
   -> applyTransaction
   -> onChange(nextDocument)
@@ -118,6 +119,8 @@ function createSelectionAfterEnterInput(input: EnterInput): RangeSelection;
 - `selection`：受控模型选区。
 - `onSelectionChange`：输入后输出新的模型选区。
 - `onBeforeInput`：仍会先调用外部回调，若外部已 `preventDefault`，内部不再处理。
+- 普通文本输入复用 `insertTextCommand`。
+- 非折叠 selection 下的 Backspace/Delete 复用 `deleteSelectionCommand`。
 
 ## 基础编辑闭环
 

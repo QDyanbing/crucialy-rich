@@ -50,6 +50,8 @@ export function UncontrolledEditor() {
 - `contentEditable` 开启后，普通 `insertText`、collapsed selection 下的 Backspace、collapsed selection 下的 Delete 和 collapsed selection 下的 Enter 会通过 transaction 更新模型并触发 `onChange`。
 - 输入后会通过 `onSelectionChange` 输出新的折叠选区。
 - 输入处理会复用当前 DOM selection，先转换为模型 selection，再创建输入 transaction。
+- 普通文本输入会通过 `insertTextCommand` 创建 transaction。
+- 非折叠 selection 下的 Backspace/Delete 会通过 `deleteSelectionCommand` 创建 transaction。
 - 输入、删除、分段和段落合并都不会直接信任浏览器默认修改后的 DOM。
 - 外部 `onBeforeInput` / `onKeyDown` 会先执行，若已 `preventDefault`，内部不再处理对应输入。
 - 初始渲染或浏览器选区变化不会触发 `onChange`。
