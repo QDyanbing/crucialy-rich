@@ -86,11 +86,17 @@ describe("@crucialy-rich/core public API", () => {
   });
 
   it("exposes the command API", () => {
+    expect(typeof core.DELETE_SELECTION_COMMAND_NAME).toBe("string");
+    expect(typeof core.INSERT_TEXT_COMMAND_NAME).toBe("string");
     expect(typeof core.canExecuteCommand).toBe("function");
+    expect(typeof core.canExecuteDeleteSelectionCommand).toBe("function");
+    expect(typeof core.canExecuteInsertTextCommand).toBe("function");
     expect(typeof core.createCommandFailure).toBe("function");
     expect(typeof core.createCommandRegistry).toBe("function");
     expect(typeof core.createCommandSkipped).toBe("function");
     expect(typeof core.createCommandSuccess).toBe("function");
+    expect(typeof core.deleteSelectionCommand).toBe("object");
     expect(typeof core.executeCommand).toBe("function");
+    expect(typeof core.insertTextCommand).toBe("object");
   });
 });
