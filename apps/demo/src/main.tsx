@@ -3,15 +3,15 @@ import {
   createCommandRegistry,
   createTransactionAcceptanceReport,
   createDocument,
-  createDeleteTextOperation,
   createMergeBlockOperation,
   createParagraph,
-  createSelectionAfterDeleteText,
   createSelectionAfterMergeBlock,
   createSelectionAfterSplitBlock,
   createSplitBlockOperation,
   createTransaction,
   createText,
+  DELETE_SELECTION_COMMAND_NAME,
+  deleteSelectionCommand,
   domSelectionToModelSelection,
   executeCommand,
   getNodeAtPath,
@@ -77,7 +77,10 @@ const uncontrolledPreviewDocument = createDocument([
   createParagraph([createText("非受控初始文档。")]),
 ]);
 
-const demoCommandRegistry = createCommandRegistry([insertTextCommand]);
+const demoCommandRegistry = createCommandRegistry([
+  deleteSelectionCommand,
+  insertTextCommand,
+]);
 
 const renderBoundaryExamples: RenderBoundaryExample[] = [
   {
@@ -428,14 +431,13 @@ function DemoApp() {
   }
 
   function handleDeleteText() {
-    const operation = createDeleteTextOperation(modelSelection);
-    const transaction = createTransaction([operation]);
-
-    setDocumentValue(applyTransaction(normalizedDocument, transaction));
-    setModelSelection(createSelectionAfterDeleteText(operation));
-    setLastTransaction(transaction);
-    setLastTransactionReport(
-      createTransactionAcceptanceReport(normalizedDocument, transaction),
+    applyCommandResult(
+      executeCommand(demoCommandRegistry, DELETE_SELECTION_COMMAND_NAME, {
+        context: {
+          document: normalizedDocument,
+          selection: modelSelection,
+        },
+      }),
     );
   }
 
