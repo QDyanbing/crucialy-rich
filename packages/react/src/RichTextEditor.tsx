@@ -15,6 +15,8 @@ import {
   executeCommand,
   INSERT_TEXT_COMMAND_NAME,
   insertTextCommand,
+  MERGE_BLOCK_COMMAND_NAME,
+  mergeBlockCommand,
   renderDocument,
   SPLIT_BLOCK_COMMAND_NAME,
   splitBlockCommand,
@@ -88,6 +90,7 @@ const useIsomorphicLayoutEffect =
 const richTextCommandRegistry = createCommandRegistry([
   deleteSelectionCommand,
   insertTextCommand,
+  mergeBlockCommand,
   splitBlockCommand,
 ]);
 
@@ -213,6 +216,25 @@ function createSplitBlockCommandResult(
     : undefined;
 }
 
+function createMergeBlockCommandResult(
+  document: DocumentNode,
+  selection: RangeSelection,
+): KeyboardInputResult | undefined {
+  const result = executeCommand(richTextCommandRegistry, MERGE_BLOCK_COMMAND_NAME, {
+    context: {
+      document,
+      selection,
+    },
+  });
+
+  return result.ok && result.selection && result.transaction
+    ? {
+        selection: result.selection,
+        transaction: result.transaction,
+      }
+    : undefined;
+}
+
 export function RichTextEditor({
   className,
   contentEditable,
@@ -322,6 +344,17 @@ export function RichTextEditor({
       if (deleteSelectionInput) {
         event.preventDefault();
         commitInputResult(deleteSelectionInput);
+
+        return;
+      }
+    }
+
+    if (event.key === "Backspace") {
+      const mergeBlockInput = createMergeBlockCommandResult(document, modelSelection);
+
+      if (mergeBlockInput) {
+        event.preventDefault();
+        commitInputResult(mergeBlockInput);
 
         return;
       }
