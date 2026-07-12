@@ -1,6 +1,6 @@
 # 测试策略
 
-当前阶段已经包含工程冒烟测试、文档模型单测、模型选区单测、渲染与 DOM 映射单测、React 组件 API 单测、输入 helper 单测和演示端到端验收。
+当前阶段已经包含工程冒烟测试、文档模型单测、模型选区单测、渲染与 DOM 映射单测、React 组件 API 单测、输入 helper 单测、command 单测和演示端到端验收。
 
 ## 单元测试
 
@@ -13,12 +13,13 @@
   - 基础渲染器、HTML 序列化、DOM 与模型位置映射和选区同步。
   - React 组件 `value`、`defaultValue` 和 `onChange` 初始渲染契约。
   - 输入 helper 的普通文本输入、Backspace、Delete 和 Enter transaction。
+  - Command 注册、执行、可执行判断、文本编辑 command 和 block 编辑 command。
 - 命令：`pnpm test`。
 
 ## 浏览器测试
 
 - 工具：Playwright。
-- 范围：演示页面可打开，文档 JSON 面板、React 组件示例、渲染边界示例、选区调试面板、浏览器选区同步和基础编辑闭环可验证。
+- 范围：演示页面可打开，文档 JSON 面板、React 组件示例、渲染边界示例、选区调试面板、浏览器选区同步、基础编辑闭环和 command 按钮复用可验证。
 - 命令：`pnpm test:e2e`。
 
 ## 类型检查
