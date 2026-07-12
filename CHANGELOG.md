@@ -37,6 +37,7 @@
 - 新增基础编辑闭环验收，覆盖输入、Backspace、Delete、Enter 的组合交互和输入后模型合法性。
 - 新增 Command 基础接口，包含 command 类型、结果 helper、注册表、可执行判断、按名称执行、测试、文档和 QA。
 - 新增文本编辑命令，包含 `insertTextCommand`、`deleteSelectionCommand`、collapsed/range selection 覆盖、React 输入复用和 demo 按钮复用。
+- 新增 Block 编辑命令，包含 `splitBlockCommand`、`mergeBlockCommand`、collapsed selection 覆盖、React Enter/Backspace 复用和 demo 按钮复用。
 
 ### 变更
 
@@ -51,6 +52,7 @@
 - 更新输入事件、组件 API、QA 和包说明，使其匹配基础编辑闭环状态。
 - 更新项目状态和包说明，使其匹配 Command 基础接口范围。
 - 更新 Command、输入事件、组件 API、QA 和包说明，使其匹配文本编辑命令范围。
+- 更新 Command、输入事件、组件 API、QA 和包说明，使其匹配 Block 编辑命令范围。
 
 ### 暂未包含
 
