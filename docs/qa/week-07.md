@@ -6,7 +6,9 @@
 
 第 7 周 Day 2「文本编辑命令」已完成。
 
-下一步进入 Day 3「Block 编辑命令」。
+第 7 周 Day 3「Block 编辑命令」已完成。
+
+下一步进入 Day 4「Command 状态读取」。
 
 ## 已完成范围
 
@@ -22,6 +24,11 @@
 - React 编辑器 `beforeinput insertText` 复用 `insertTextCommand`。
 - React 编辑器非折叠 Backspace/Delete 优先复用 `deleteSelectionCommand`。
 - demo 操作区“插入”和“删除选区”按钮通过 `executeCommand` 调用文本 command。
+- 新增 `splitBlockCommand`。
+- 新增 `mergeBlockCommand`。
+- React 编辑器 Enter 优先复用 `splitBlockCommand`。
+- React 编辑器段首 Backspace 优先复用 `mergeBlockCommand`。
+- demo 操作区“分段”和“合并段落”按钮通过 `executeCommand` 调用 block command。
 
 ## 自动化覆盖
 
@@ -31,14 +38,15 @@
 - `packages/core/tests/command/execute.test.ts`
 - `packages/core/tests/command/insert-text.test.ts`
 - `packages/core/tests/command/delete-selection.test.ts`
+- `packages/core/tests/command/split-block.test.ts`
+- `packages/core/tests/command/merge-block.test.ts`
 - `packages/core/tests/public-api.test.ts`
 
 ## 当前限制
 
-- 暂未内置 `splitBlockCommand` 或 `mergeBlockCommand`。
-- demo 的“分段”和“合并段落”按钮暂未切换到 command。
+- 暂未提供 command 状态读取 API。
 - 暂未接入快捷键、工具栏、history 或 undo/redo。
 
 ## 结论
 
-Command 基础接口和文本编辑 command 已经具备注册、查询、可执行判断、按名称执行、插入文本、删除选区和 demo 按钮复用能力；下一步开始把 block 编辑能力封装为 command。
+Command 基础接口、文本编辑 command 和 block 编辑 command 已经具备注册、查询、可执行判断、按名称执行、键盘输入复用和 demo 按钮复用能力；下一步进入 command 状态读取。
