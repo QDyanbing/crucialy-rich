@@ -16,6 +16,8 @@ import {
   INSERT_TEXT_COMMAND_NAME,
   insertTextCommand,
   renderDocument,
+  SPLIT_BLOCK_COMMAND_NAME,
+  splitBlockCommand,
   type DocumentNode,
   type RangeSelection,
   type RenderedElementNode,
@@ -86,6 +88,7 @@ const useIsomorphicLayoutEffect =
 const richTextCommandRegistry = createCommandRegistry([
   deleteSelectionCommand,
   insertTextCommand,
+  splitBlockCommand,
 ]);
 
 interface KeyboardInputResult {
@@ -191,6 +194,25 @@ function createDeleteSelectionCommandResult(
     : undefined;
 }
 
+function createSplitBlockCommandResult(
+  document: DocumentNode,
+  selection: RangeSelection,
+): KeyboardInputResult | undefined {
+  const result = executeCommand(richTextCommandRegistry, SPLIT_BLOCK_COMMAND_NAME, {
+    context: {
+      document,
+      selection,
+    },
+  });
+
+  return result.ok && result.selection && result.transaction
+    ? {
+        selection: result.selection,
+        transaction: result.transaction,
+      }
+    : undefined;
+}
+
 export function RichTextEditor({
   className,
   contentEditable,
@@ -278,6 +300,17 @@ export function RichTextEditor({
 
     if (!modelSelection) {
       return;
+    }
+
+    if (event.key === "Enter") {
+      const splitBlockInput = createSplitBlockCommandResult(document, modelSelection);
+
+      if (splitBlockInput) {
+        event.preventDefault();
+        commitInputResult(splitBlockInput);
+
+        return;
+      }
     }
 
     if (event.key === "Backspace" || event.key === "Delete") {
