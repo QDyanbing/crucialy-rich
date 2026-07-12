@@ -3,10 +3,7 @@ import {
   createCommandRegistry,
   createTransactionAcceptanceReport,
   createDocument,
-  createMergeBlockOperation,
   createParagraph,
-  createSelectionAfterMergeBlock,
-  createTransaction,
   createText,
   DELETE_SELECTION_COMMAND_NAME,
   deleteSelectionCommand,
@@ -17,6 +14,8 @@ import {
   INSERT_TEXT_COMMAND_NAME,
   insertTextCommand,
   isValidPoint,
+  MERGE_BLOCK_COMMAND_NAME,
+  mergeBlockCommand,
   normalizeDocument,
   SPLIT_BLOCK_COMMAND_NAME,
   splitBlockCommand,
@@ -80,6 +79,7 @@ const uncontrolledPreviewDocument = createDocument([
 const demoCommandRegistry = createCommandRegistry([
   deleteSelectionCommand,
   insertTextCommand,
+  mergeBlockCommand,
   splitBlockCommand,
 ]);
 
@@ -454,14 +454,13 @@ function DemoApp() {
   }
 
   function handleMergeBlock() {
-    const operation = createMergeBlockOperation(modelSelection.anchor);
-    const transaction = createTransaction([operation]);
-
-    setDocumentValue(applyTransaction(normalizedDocument, transaction));
-    setModelSelection(createSelectionAfterMergeBlock(normalizedDocument, operation));
-    setLastTransaction(transaction);
-    setLastTransactionReport(
-      createTransactionAcceptanceReport(normalizedDocument, transaction),
+    applyCommandResult(
+      executeCommand(demoCommandRegistry, MERGE_BLOCK_COMMAND_NAME, {
+        context: {
+          document: normalizedDocument,
+          selection: modelSelection,
+        },
+      }),
     );
   }
 
