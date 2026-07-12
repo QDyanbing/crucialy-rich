@@ -1,3 +1,11 @@
+export {
+  canExecuteMergeBlockCommand,
+  canExecuteSplitBlockCommand,
+  MERGE_BLOCK_COMMAND_NAME,
+  mergeBlockCommand,
+  SPLIT_BLOCK_COMMAND_NAME,
+  splitBlockCommand,
+} from "./block";
 export { canExecuteCommand } from "./can-execute";
 export { executeCommand } from "./execute";
 export {
