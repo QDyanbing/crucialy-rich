@@ -6,8 +6,6 @@ import {
   createMergeBlockOperation,
   createParagraph,
   createSelectionAfterMergeBlock,
-  createSelectionAfterSplitBlock,
-  createSplitBlockOperation,
   createTransaction,
   createText,
   DELETE_SELECTION_COMMAND_NAME,
@@ -20,6 +18,8 @@ import {
   insertTextCommand,
   isValidPoint,
   normalizeDocument,
+  SPLIT_BLOCK_COMMAND_NAME,
+  splitBlockCommand,
   validateDocument,
   type CommandResult,
   type DocumentNode,
@@ -80,6 +80,7 @@ const uncontrolledPreviewDocument = createDocument([
 const demoCommandRegistry = createCommandRegistry([
   deleteSelectionCommand,
   insertTextCommand,
+  splitBlockCommand,
 ]);
 
 const renderBoundaryExamples: RenderBoundaryExample[] = [
@@ -442,14 +443,13 @@ function DemoApp() {
   }
 
   function handleSplitBlock() {
-    const operation = createSplitBlockOperation(modelSelection.anchor);
-    const transaction = createTransaction([operation]);
-
-    setDocumentValue(applyTransaction(normalizedDocument, transaction));
-    setModelSelection(createSelectionAfterSplitBlock(operation));
-    setLastTransaction(transaction);
-    setLastTransactionReport(
-      createTransactionAcceptanceReport(normalizedDocument, transaction),
+    applyCommandResult(
+      executeCommand(demoCommandRegistry, SPLIT_BLOCK_COMMAND_NAME, {
+        context: {
+          document: normalizedDocument,
+          selection: modelSelection,
+        },
+      }),
     );
   }
 
