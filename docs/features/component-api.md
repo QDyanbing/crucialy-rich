@@ -52,10 +52,12 @@ export function UncontrolledEditor() {
 - 输入处理会复用当前 DOM selection，先转换为模型 selection，再创建输入 transaction。
 - 普通文本输入会通过 `insertTextCommand` 创建 transaction。
 - 非折叠 selection 下的 Backspace/Delete 会通过 `deleteSelectionCommand` 创建 transaction。
+- Enter 会通过 `splitBlockCommand` 创建 transaction。
+- 段首 Backspace 会通过 `mergeBlockCommand` 创建 transaction。
 - 输入、删除、分段和段落合并都不会直接信任浏览器默认修改后的 DOM。
 - 外部 `onBeforeInput` / `onKeyDown` 会先执行，若已 `preventDefault`，内部不再处理对应输入。
 - 初始渲染或浏览器选区变化不会触发 `onChange`。
 
 ## 当前边界
 
-当前组件仍不包含历史、输入法完整处理、粘贴解析或序列化能力；Backspace、Delete 和 Enter 当前只覆盖 collapsed selection 下的基础编辑路径。
+当前组件仍不包含历史、输入法完整处理、粘贴解析或序列化能力；Backspace、Delete 和 Enter 当前只覆盖基础编辑路径。
