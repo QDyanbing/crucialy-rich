@@ -427,6 +427,12 @@ function DemoApp() {
     [insertTextValue, modelSelection, normalizedDocument],
   );
 
+  function isCommandDisabled(name: CommandName) {
+    return (
+      commandStates.find((command) => command.commandName === name)?.disabled ?? true
+    );
+  }
+
   function handleModelExampleChange(event: ChangeEvent<HTMLSelectElement>) {
     const nextExampleId = event.target.value as ModelExampleId;
 
@@ -586,16 +592,32 @@ function DemoApp() {
                 onChange={(event) => setInsertTextValue(event.target.value)}
               />
             </label>
-            <button type="button" onClick={handleInsertText}>
+            <button
+              type="button"
+              disabled={isCommandDisabled(INSERT_TEXT_COMMAND_NAME)}
+              onClick={handleInsertText}
+            >
               插入
             </button>
-            <button type="button" onClick={handleDeleteText}>
+            <button
+              type="button"
+              disabled={isCommandDisabled(DELETE_SELECTION_COMMAND_NAME)}
+              onClick={handleDeleteText}
+            >
               删除选区
             </button>
-            <button type="button" onClick={handleSplitBlock}>
+            <button
+              type="button"
+              disabled={isCommandDisabled(SPLIT_BLOCK_COMMAND_NAME)}
+              onClick={handleSplitBlock}
+            >
               分段
             </button>
-            <button type="button" onClick={handleMergeBlock}>
+            <button
+              type="button"
+              disabled={isCommandDisabled(MERGE_BLOCK_COMMAND_NAME)}
+              onClick={handleMergeBlock}
+            >
               合并段落
             </button>
           </div>
