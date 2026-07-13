@@ -194,6 +194,18 @@ button:hover {
   background: #eef2ef;
 }
 
+button:disabled {
+  cursor: not-allowed;
+  border-color: #d9ded8;
+  background: #f2f4f1;
+  color: #8a948d;
+}
+
+button:disabled:hover {
+  border-color: #d9ded8;
+  background: #f2f4f1;
+}
+
 select {
   width: 100%;
   padding: 0 10px;
