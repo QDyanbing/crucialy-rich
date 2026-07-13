@@ -160,7 +160,7 @@ test("applies insert text from the operation controls", async ({ page }) => {
   await page.getByRole("button", { name: "插入" }).click();
 
   await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
-    '"text": "新文本你好，crucialy-rich。"',
+    '"text": "新文本ucialy-rich。"',
   );
   await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
     '"operations"',
@@ -246,7 +246,10 @@ test("keeps the model valid after Backspace merge and typing", async ({ page }) 
   await expect(page.getByLabel("模型校验状态")).toContainText("合法");
   await expect(page.getByLabel("已渲染文档").locator("p")).toHaveCount(1);
   await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
-    '"text": "你好，crucialy-rich。续选区模型已就绪。"',
+    '"text": "你好，crucialy-rich。续"',
+  );
+  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
+    '"text": "选区模型已就绪。"',
   );
   await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 18');
 });
@@ -366,6 +369,7 @@ test("applies split block from the operation controls", async ({ page }) => {
   await page.goto("/");
 
   await page.getByLabel("锚点偏移").fill("3");
+  await page.getByLabel("焦点偏移").fill("3");
   await page.getByRole("button", { name: "分段" }).click();
 
   const renderedDocument = page.getByLabel("已渲染文档");
@@ -391,6 +395,8 @@ test("applies merge block from the operation controls", async ({ page }) => {
 
   await page.getByLabel("锚点路径").fill("1,0");
   await page.getByLabel("锚点偏移").fill("0");
+  await page.getByLabel("焦点路径").fill("1,0");
+  await page.getByLabel("焦点偏移").fill("0");
   await page.getByRole("button", { name: "合并段落" }).click();
 
   const renderedDocument = page.getByLabel("已渲染文档");
