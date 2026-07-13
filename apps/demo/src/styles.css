@@ -222,6 +222,46 @@ pre {
   max-height: 180px;
 }
 
+.command-state-panel {
+  display: grid;
+  gap: 10px;
+}
+
+.command-state-list {
+  display: grid;
+  gap: 8px;
+}
+
+.command-state-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 8px;
+  align-items: center;
+  min-height: 34px;
+  border: 1px solid #d9ded8;
+  border-radius: 8px;
+  color: #415248;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 6px 8px;
+}
+
+.command-state-pill {
+  border-radius: 999px;
+  font-size: 0.74rem;
+  padding: 4px 8px;
+}
+
+.command-state-pill[data-state="enabled"] {
+  background: #e9f4ed;
+  color: #254531;
+}
+
+.command-state-pill[data-state="disabled"] {
+  background: #f9e6df;
+  color: #7c2d18;
+}
+
 .state-pill {
   display: inline-flex;
   align-items: center;
