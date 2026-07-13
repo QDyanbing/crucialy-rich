@@ -68,13 +68,11 @@ function canDeleteTextRange(input: CommandInput): boolean {
   );
 }
 
-export function canExecuteInsertTextCommand(
-  input: CommandInput<InsertTextCommandPayload>,
-): boolean {
+export function canExecuteInsertTextCommand(input: CommandInput): boolean {
   return hasInsertTextPayload(input.payload) && canEditTextRange(input);
 }
 
-export const insertTextCommand: Command<InsertTextCommandPayload> = {
+export const insertTextCommand: Command = {
   canExecute: canExecuteInsertTextCommand,
   execute(input) {
     if (!hasInsertTextPayload(input.payload)) {

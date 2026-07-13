@@ -53,7 +53,7 @@ export const splitBlockCommand: Command = {
   execute(input) {
     const point = getSelectionAnchor(input);
 
-    if (!canSplitBlockAt(input, point)) {
+    if (!point || !canSplitBlockAt(input, point)) {
       return createCommandSkipped(
         SPLIT_BLOCK_COMMAND_NAME,
         "Split block command requires a collapsed text selection.",
@@ -79,7 +79,7 @@ export const mergeBlockCommand: Command = {
   execute(input) {
     const point = getSelectionAnchor(input);
 
-    if (!canMergeBlockAt(input, point)) {
+    if (!point || !canMergeBlockAt(input, point)) {
       return createCommandSkipped(
         MERGE_BLOCK_COMMAND_NAME,
         "Merge block command requires the start of a non-first block.",

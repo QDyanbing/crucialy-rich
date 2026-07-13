@@ -9,7 +9,7 @@ export interface CommandContext {
   selection?: RangeSelection;
 }
 
-export interface CommandInput<TPayload = undefined> {
+export interface CommandInput<TPayload = unknown> {
   context: CommandContext;
   payload?: TPayload;
 }
@@ -25,9 +25,9 @@ export interface CommandResult {
   transaction?: Transaction;
 }
 
-export interface Command<TPayload = undefined> {
+export interface Command {
   name: CommandName;
-  canExecute?: (input: CommandInput<TPayload>) => boolean;
-  execute: (input: CommandInput<TPayload>) => CommandResult;
-  isActive?: (input: CommandInput<TPayload>) => boolean;
+  canExecute?: (input: CommandInput) => boolean;
+  execute: (input: CommandInput) => CommandResult;
+  isActive?: (input: CommandInput) => boolean;
 }

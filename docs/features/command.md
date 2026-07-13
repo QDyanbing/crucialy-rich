@@ -70,7 +70,7 @@ interface InsertTextCommandPayload {
   text: string;
 }
 
-const insertTextCommand: Command<InsertTextCommandPayload>;
+const insertTextCommand: Command;
 
 const DELETE_SELECTION_COMMAND_NAME = "deleteSelection";
 
