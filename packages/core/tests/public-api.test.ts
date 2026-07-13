@@ -103,6 +103,7 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.executeCommand).toBe("function");
     expect(typeof core.insertTextCommand).toBe("object");
     expect(typeof core.mergeBlockCommand).toBe("object");
+    expect(typeof core.queryCommandState).toBe("function");
     expect(typeof core.splitBlockCommand).toBe("object");
   });
 });
