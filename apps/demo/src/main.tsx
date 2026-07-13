@@ -17,10 +17,13 @@ import {
   MERGE_BLOCK_COMMAND_NAME,
   mergeBlockCommand,
   normalizeDocument,
+  queryCommandState,
   SPLIT_BLOCK_COMMAND_NAME,
   splitBlockCommand,
   validateDocument,
+  type CommandName,
   type CommandResult,
+  type CommandState,
   type DocumentNode,
   type Path,
   type Point,
@@ -45,6 +48,15 @@ interface ModelExample {
 interface RenderBoundaryExample {
   document: DocumentNode;
   id: string;
+  label: string;
+}
+
+interface DemoCommandDescriptor {
+  label: string;
+  name: CommandName;
+}
+
+interface DemoCommandState extends CommandState {
   label: string;
 }
 
@@ -82,6 +94,13 @@ const demoCommandRegistry = createCommandRegistry([
   mergeBlockCommand,
   splitBlockCommand,
 ]);
+
+const demoCommandDescriptors: DemoCommandDescriptor[] = [
+  { label: "插入", name: INSERT_TEXT_COMMAND_NAME },
+  { label: "删除选区", name: DELETE_SELECTION_COMMAND_NAME },
+  { label: "分段", name: SPLIT_BLOCK_COMMAND_NAME },
+  { label: "合并段落", name: MERGE_BLOCK_COMMAND_NAME },
+];
 
 const renderBoundaryExamples: RenderBoundaryExample[] = [
   {
@@ -388,6 +407,25 @@ function DemoApp() {
     () => JSON.stringify(documentValue, null, 2),
     [documentValue],
   );
+  const commandStates = useMemo<DemoCommandState[]>(
+    () =>
+      demoCommandDescriptors.map((command) => ({
+        ...queryCommandState(demoCommandRegistry, command.name, {
+          context: {
+            document: normalizedDocument,
+            selection: modelSelection,
+          },
+          payload:
+            command.name === INSERT_TEXT_COMMAND_NAME
+              ? {
+                  text: insertTextValue,
+                }
+              : undefined,
+        }),
+        label: command.label,
+      })),
+    [insertTextValue, modelSelection, normalizedDocument],
+  );
 
   function handleModelExampleChange(event: ChangeEvent<HTMLSelectElement>) {
     const nextExampleId = event.target.value as ModelExampleId;
@@ -560,6 +598,28 @@ function DemoApp() {
             <button type="button" onClick={handleMergeBlock}>
               合并段落
             </button>
+          </div>
+
+          <div className="command-state-panel" aria-label="Command 状态调试面板">
+            <h3>Command 状态</h3>
+            <div className="command-state-list">
+              {commandStates.map((command) => (
+                <div
+                  aria-label={`${command.label} Command 状态`}
+                  className="command-state-row"
+                  key={command.commandName}
+                >
+                  <span>{command.label}</span>
+                  <span
+                    className="command-state-pill"
+                    data-state={command.disabled ? "disabled" : "enabled"}
+                  >
+                    {command.disabled ? "不可用" : "可用"}
+                  </span>
+                  <span>{command.active ? "激活" : "未激活"}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
           <pre aria-label="最近 Transaction" className="operation-preview">
