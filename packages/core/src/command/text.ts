@@ -121,7 +121,7 @@ export const deleteSelectionCommand: Command = {
       );
     }
 
-    const operation = createDeleteTextOperation(selection);
+    const operation = createDeleteTextOperation(normalizeRange(selection));
 
     return createCommandSuccess(DELETE_SELECTION_COMMAND_NAME, {
       selection: createSelectionAfterDeleteText(operation),

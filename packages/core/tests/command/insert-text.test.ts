@@ -56,7 +56,7 @@ describe("insertTextCommand", () => {
         document,
         selection: {
           anchor: { path: [0, 0], offset: 2 },
-          focus: { path: [0, 0], offset: 5 },
+          focus: { path: [0, 0], offset: 4 },
         },
       },
       payload: { text: "新" },
@@ -67,7 +67,7 @@ describe("insertTextCommand", () => {
         {
           range: {
             anchor: { path: [0, 0], offset: 2 },
-            focus: { path: [0, 0], offset: 5 },
+            focus: { path: [0, 0], offset: 4 },
           },
           type: "delete_text",
         },

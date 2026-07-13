@@ -17,7 +17,7 @@ describe("deleteSelectionCommand", () => {
         document,
         selection: {
           anchor: { path: [0, 0], offset: 2 },
-          focus: { path: [0, 0], offset: 5 },
+          focus: { path: [0, 0], offset: 4 },
         },
       },
     };
@@ -38,7 +38,7 @@ describe("deleteSelectionCommand", () => {
         {
           range: {
             anchor: { path: [0, 0], offset: 2 },
-            focus: { path: [0, 0], offset: 5 },
+            focus: { path: [0, 0], offset: 4 },
           },
           type: "delete_text",
         },
