@@ -48,4 +48,20 @@ describe("queryCommandState", () => {
       registered: true,
     });
   });
+
+  it("returns enabled and active command state", () => {
+    const registry = createCommandRegistry([
+      createNoopCommand({
+        canExecute: () => true,
+        isActive: () => true,
+      }),
+    ]);
+
+    expect(queryCommandState(registry, "noop", { context })).toEqual({
+      active: true,
+      commandName: "noop",
+      disabled: false,
+      registered: true,
+    });
+  });
 });
