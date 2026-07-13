@@ -29,4 +29,5 @@ export interface Command<TPayload = undefined> {
   name: CommandName;
   canExecute?: (input: CommandInput<TPayload>) => boolean;
   execute: (input: CommandInput<TPayload>) => CommandResult;
+  isActive?: (input: CommandInput<TPayload>) => boolean;
 }

@@ -13,6 +13,7 @@ export {
   createCommandSkipped,
   createCommandSuccess,
 } from "./result";
+export { queryCommandState, type CommandState } from "./state";
 export { createCommandRegistry, type CommandRegistry } from "./registry";
 export {
   canExecuteInsertTextCommand,
