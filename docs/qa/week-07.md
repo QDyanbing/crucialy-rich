@@ -8,7 +8,9 @@
 
 第 7 周 Day 3「Block 编辑命令」已完成。
 
-下一步进入 Day 4「Command 状态读取」。
+第 7 周 Day 4「Command 状态读取」已完成。
+
+下一步进入 Day 5「Command 闭环验收」。
 
 ## 已完成范围
 
@@ -29,6 +31,10 @@
 - React 编辑器 Enter 优先复用 `splitBlockCommand`。
 - React 编辑器段首 Backspace 优先复用 `mergeBlockCommand`。
 - demo 操作区“分段”和“合并段落”按钮通过 `executeCommand` 调用 block command。
+- 新增 `queryCommandState`。
+- Command 支持可选 `isActive` 状态读取钩子。
+- demo 显示 Command 状态调试面板。
+- demo 操作区按钮会根据 command disabled 状态禁用。
 
 ## 自动化覆盖
 
@@ -40,13 +46,13 @@
 - `packages/core/tests/command/delete-selection.test.ts`
 - `packages/core/tests/command/split-block.test.ts`
 - `packages/core/tests/command/merge-block.test.ts`
+- `packages/core/tests/command/state.test.ts`
 - `packages/core/tests/public-api.test.ts`
 
 ## 当前限制
 
-- 暂未提供 command 状态读取 API。
 - 暂未接入快捷键、工具栏、history 或 undo/redo。
 
 ## 结论
 
-Command 基础接口、文本编辑 command 和 block 编辑 command 已经具备注册、查询、可执行判断、按名称执行、键盘输入复用和 demo 按钮复用能力；下一步进入 command 状态读取。
+Command 基础接口、文本编辑 command、block 编辑 command 和状态读取已经具备注册、查询、可执行判断、按名称执行、键盘输入复用、demo 按钮复用和 disabled 状态展示能力；下一步进入 Command 闭环验收。
