@@ -7,6 +7,7 @@ export {
   splitBlockCommand,
 } from "./block";
 export { canExecuteCommand } from "./can-execute";
+export { createDefaultCommandRegistry, DEFAULT_COMMANDS } from "./defaults";
 export { executeCommand } from "./execute";
 export {
   createCommandFailure,
