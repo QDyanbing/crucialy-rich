@@ -10,7 +10,9 @@
 
 第 7 周 Day 4「Command 状态读取」已完成。
 
-下一步进入 Day 5「Command 闭环验收」。
+第 7 周 Day 5「Command 闭环验收」已完成。
+
+下一步进入第 8 周「History 撤销重做闭环」。
 
 ## 已完成范围
 
@@ -35,6 +37,10 @@
 - Command 支持可选 `isActive` 状态读取钩子。
 - demo 显示 Command 状态调试面板。
 - demo 操作区按钮会根据 command disabled 状态禁用。
+- 新增默认 Command 注册表，demo 和 React 复用同一套内置 command。
+- React 编辑器 Enter 只通过 `splitBlockCommand` 更新 model。
+- React 编辑器段尾 Delete 会优先通过 `mergeBlockCommand` 合并下一段。
+- 新增 `docs/qa/command.md`，记录 Command 闭环验收。
 
 ## 自动化覆盖
 
@@ -47,7 +53,9 @@
 - `packages/core/tests/command/split-block.test.ts`
 - `packages/core/tests/command/merge-block.test.ts`
 - `packages/core/tests/command/state.test.ts`
+- `packages/core/tests/command/integration.test.ts`
 - `packages/core/tests/public-api.test.ts`
+- `tests/e2e/demo-shell.spec.ts`
 
 ## 当前限制
 
@@ -55,4 +63,4 @@
 
 ## 结论
 
-Command 基础接口、文本编辑 command、block 编辑 command 和状态读取已经具备注册、查询、可执行判断、按名称执行、键盘输入复用、demo 按钮复用和 disabled 状态展示能力；下一步进入 Command 闭环验收。
+Command 系统第 7 周闭环已完成：基础接口、文本编辑 command、block 编辑 command、状态读取、默认注册表、键盘输入复用、demo 按钮复用、disabled 状态展示和独立 QA 验收已经具备；下一步进入 History 撤销重做。
