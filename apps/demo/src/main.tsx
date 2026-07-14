@@ -1,25 +1,21 @@
 import {
   applyTransaction,
-  createCommandRegistry,
+  createDefaultCommandRegistry,
   createTransactionAcceptanceReport,
   createDocument,
   createParagraph,
   createText,
   DELETE_SELECTION_COMMAND_NAME,
-  deleteSelectionCommand,
   domSelectionToModelSelection,
   executeCommand,
   getNodeAtPath,
   getTextInRange,
   INSERT_TEXT_COMMAND_NAME,
-  insertTextCommand,
   isValidPoint,
   MERGE_BLOCK_COMMAND_NAME,
-  mergeBlockCommand,
   normalizeDocument,
   queryCommandState,
   SPLIT_BLOCK_COMMAND_NAME,
-  splitBlockCommand,
   validateDocument,
   type CommandName,
   type CommandResult,
@@ -88,12 +84,7 @@ const uncontrolledPreviewDocument = createDocument([
   createParagraph([createText("非受控初始文档。")]),
 ]);
 
-const demoCommandRegistry = createCommandRegistry([
-  deleteSelectionCommand,
-  insertTextCommand,
-  mergeBlockCommand,
-  splitBlockCommand,
-]);
+const demoCommandRegistry = createDefaultCommandRegistry();
 
 const demoCommandDescriptors: DemoCommandDescriptor[] = [
   { label: "插入", name: INSERT_TEXT_COMMAND_NAME },
