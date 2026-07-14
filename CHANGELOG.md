@@ -39,6 +39,8 @@
 - 新增文本编辑命令，包含 `insertTextCommand`、`deleteSelectionCommand`、collapsed/range selection 覆盖、React 输入复用和 demo 按钮复用。
 - 新增 Block 编辑命令，包含 `splitBlockCommand`、`mergeBlockCommand`、collapsed selection 覆盖、React Enter/Backspace 复用和 demo 按钮复用。
 - 新增 Command 状态读取，包含 `queryCommandState`、`isActive` 钩子、disabled/active 状态、测试、demo 状态面板和按钮禁用。
+- 新增默认 Command 注册表，demo 与 React 复用同一套内置 command。
+- 新增 Command 闭环验收文档，覆盖默认注册表、综合执行、状态矩阵、demo 状态面板和 React 输入复用。
 
 ### 变更
 
@@ -55,6 +57,8 @@
 - 更新 Command、输入事件、组件 API、QA 和包说明，使其匹配文本编辑命令范围。
 - 更新 Command、输入事件、组件 API、QA 和包说明，使其匹配 Block 编辑命令范围。
 - 更新 Command、QA、测试策略和包说明，使其匹配 Command 状态读取范围。
+- 更新 React 键盘输入路径，使 Enter 只通过 `splitBlockCommand`，段尾 Delete 优先通过 `mergeBlockCommand` 合并下一段。
+- 更新 README、core README、架构和 Command 文档，使其匹配 Command 闭环验收状态。
 
 ### 暂未包含
 
