@@ -1,7 +1,7 @@
 import {
   applyTransaction,
   applyModelSelectionToDom,
-  createCommandRegistry,
+  createDefaultCommandRegistry,
   createDocument,
   createBackspaceInputTransaction,
   createDeleteInputTransaction,
@@ -10,16 +10,12 @@ import {
   createSelectionAfterDeleteInput,
   createSelectionAfterEnterInput,
   DELETE_SELECTION_COMMAND_NAME,
-  deleteSelectionCommand,
   domSelectionToModelSelection,
   executeCommand,
   INSERT_TEXT_COMMAND_NAME,
-  insertTextCommand,
   MERGE_BLOCK_COMMAND_NAME,
-  mergeBlockCommand,
   renderDocument,
   SPLIT_BLOCK_COMMAND_NAME,
-  splitBlockCommand,
   type DocumentNode,
   type RangeSelection,
   type RenderedElementNode,
@@ -87,12 +83,7 @@ function getInsertTextInputData(event: Event): string | undefined {
 const useIsomorphicLayoutEffect =
   typeof window === "undefined" ? useEffect : useLayoutEffect;
 
-const richTextCommandRegistry = createCommandRegistry([
-  deleteSelectionCommand,
-  insertTextCommand,
-  mergeBlockCommand,
-  splitBlockCommand,
-]);
+const richTextCommandRegistry = createDefaultCommandRegistry();
 
 interface KeyboardInputResult {
   selection: RangeSelection;
