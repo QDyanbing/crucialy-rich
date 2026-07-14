@@ -10,9 +10,9 @@
 
 ## 当前阶段
 
-已完成工程初始化、文档模型第一版、模型选区第一版、基础模型渲染第一版、DOM 与模型位置映射第一版、选区双向同步第一版、React 组件 API 第一版、渲染闭环验收、`insertText`、`deleteText`、`splitBlock`、`mergeBlock` operation 第一版、Transaction 第一版、Operation 闭环验收、`beforeinput insertText` 第一版、Backspace 第一版、Delete 第一版、Enter 第一版、基础编辑闭环验收、Command 基础接口、文本编辑命令、Block 编辑命令和 Command 状态读取。
+已完成工程初始化、文档模型第一版、模型选区第一版、基础模型渲染第一版、DOM 与模型位置映射第一版、选区双向同步第一版、React 组件 API 第一版、渲染闭环验收、`insertText`、`deleteText`、`splitBlock`、`mergeBlock` operation 第一版、Transaction 第一版、Operation 闭环验收、`beforeinput insertText` 第一版、Backspace 第一版、Delete 第一版、Enter 第一版、基础编辑闭环验收、Command 基础接口、文本编辑命令、Block 编辑命令、Command 状态读取和 Command 闭环验收。
 
-当前 React 组件已支持通过 `value` / `defaultValue` 展示文档模型，普通文本输入、非折叠删除选区、Enter 分段和段首 Backspace 合并会复用 command；演示页操作区的插入、删除选区、分段和合并段落按钮也已通过 command 执行，并显示 command 可用状态。
+当前 React 组件已支持通过 `value` / `defaultValue` 展示文档模型，普通文本输入、非折叠删除选区、Enter 分段、段首 Backspace 合并和段尾 Delete 合并会优先复用 command；演示页操作区的插入、删除选区、分段和合并段落按钮也已通过默认 command registry 执行，并显示 command 可用状态。
 
 ## 技术栈
 
@@ -132,6 +132,7 @@ pnpm test:e2e
 - [选区同步 QA](./docs/qa/selection-sync.md)
 - [Operation QA](./docs/qa/operation.md)
 - [输入事件 QA](./docs/qa/input.md)
+- [Command QA](./docs/qa/command.md)
 - [变更记录](./CHANGELOG.md)
 
 ## 反馈入口
