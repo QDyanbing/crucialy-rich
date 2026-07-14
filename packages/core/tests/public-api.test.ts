@@ -96,9 +96,16 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.canExecuteMergeBlockCommand).toBe("function");
     expect(typeof core.canExecuteSplitBlockCommand).toBe("function");
     expect(typeof core.createCommandFailure).toBe("function");
+    expect(typeof core.createDefaultCommandRegistry).toBe("function");
     expect(typeof core.createCommandRegistry).toBe("function");
     expect(typeof core.createCommandSkipped).toBe("function");
     expect(typeof core.createCommandSuccess).toBe("function");
+    expect(core.DEFAULT_COMMANDS.map((command) => command.name)).toEqual([
+      "deleteSelection",
+      "insertText",
+      "mergeBlock",
+      "splitBlock",
+    ]);
     expect(typeof core.deleteSelectionCommand).toBe("object");
     expect(typeof core.executeCommand).toBe("function");
     expect(typeof core.insertTextCommand).toBe("object");
