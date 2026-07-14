@@ -13,13 +13,13 @@
   - 基础渲染器、HTML 序列化、DOM 与模型位置映射和选区同步。
   - React 组件 `value`、`defaultValue` 和 `onChange` 初始渲染契约。
   - 输入 helper 的普通文本输入、Backspace、Delete 和 Enter transaction。
-  - Command 注册、执行、可执行判断、状态读取、文本编辑 command 和 block 编辑 command。
+  - Command 注册、执行、可执行判断、默认注册表、状态矩阵、文本编辑 command 和 block 编辑 command。
 - 命令：`pnpm test`。
 
 ## 浏览器测试
 
 - 工具：Playwright。
-- 范围：演示页面可打开，文档 JSON 面板、React 组件示例、渲染边界示例、选区调试面板、浏览器选区同步、基础编辑闭环、command 按钮复用和 command 状态面板可验证。
+- 范围：演示页面可打开，文档 JSON 面板、React 组件示例、渲染边界示例、选区调试面板、浏览器选区同步、基础编辑闭环、command 按钮复用、command 状态面板和 selection 驱动的 command 状态切换可验证。
 - 命令：`pnpm test:e2e`。
 
 ## 类型检查
