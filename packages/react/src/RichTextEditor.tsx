@@ -10,7 +10,10 @@ import {
   DELETE_SELECTION_COMMAND_NAME,
   domSelectionToModelSelection,
   executeCommand,
+  getNodeAtPath,
   INSERT_TEXT_COMMAND_NAME,
+  isCollapsed,
+  isTextNode,
   MERGE_BLOCK_COMMAND_NAME,
   renderDocument,
   SPLIT_BLOCK_COMMAND_NAME,
@@ -204,6 +207,49 @@ function createMergeBlockCommandResult(
   return createKeyboardInputResultFromCommandResult(result);
 }
 
+function createCollapsedSelection(point: RangeSelection["anchor"]): RangeSelection {
+  return {
+    anchor: {
+      path: [...point.path],
+      offset: point.offset,
+    },
+    focus: {
+      path: [...point.path],
+      offset: point.offset,
+    },
+  };
+}
+
+function createMergeNextBlockCommandResult(
+  document: DocumentNode,
+  selection: RangeSelection,
+): KeyboardInputResult | undefined {
+  if (!isCollapsed(selection)) {
+    return undefined;
+  }
+
+  const point = selection.anchor;
+  const [blockIndex] = point.path;
+  const node = getNodeAtPath(document, point.path);
+
+  if (
+    blockIndex === undefined ||
+    blockIndex >= document.children.length - 1 ||
+    !isTextNode(node) ||
+    point.offset !== node.text.length
+  ) {
+    return undefined;
+  }
+
+  return createMergeBlockCommandResult(
+    document,
+    createCollapsedSelection({
+      path: [blockIndex + 1, 0],
+      offset: 0,
+    }),
+  );
+}
+
 export function RichTextEditor({
   className,
   contentEditable,
@@ -324,6 +370,20 @@ export function RichTextEditor({
       if (mergeBlockInput) {
         event.preventDefault();
         commitInputResult(mergeBlockInput);
+
+        return;
+      }
+    }
+
+    if (event.key === "Delete") {
+      const mergeNextBlockInput = createMergeNextBlockCommandResult(
+        document,
+        modelSelection,
+      );
+
+      if (mergeNextBlockInput) {
+        event.preventDefault();
+        commitInputResult(mergeNextBlockInput);
 
         return;
       }
