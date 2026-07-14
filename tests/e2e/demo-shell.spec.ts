@@ -45,6 +45,25 @@ test("updates the selection debug preview", async ({ page }) => {
   await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 11');
 });
 
+test("updates command states from the current selection", async ({ page }) => {
+  await page.goto("/");
+
+  await expect(page.getByLabel("插入 Command 状态")).toContainText("可用");
+  await expect(page.getByLabel("删除选区 Command 状态")).toContainText("可用");
+  await expect(page.getByLabel("分段 Command 状态")).toContainText("不可用");
+  await expect(page.getByLabel("合并段落 Command 状态")).toContainText("不可用");
+
+  await page.getByLabel("焦点偏移").fill("0");
+
+  await expect(page.getByLabel("删除选区 Command 状态")).toContainText("不可用");
+  await expect(page.getByLabel("分段 Command 状态")).toContainText("可用");
+
+  await page.getByLabel("锚点路径").fill("1,0");
+  await page.getByLabel("焦点路径").fill("1,0");
+
+  await expect(page.getByLabel("合并段落 Command 状态")).toContainText("可用");
+});
+
 test("renders the model document in the editor preview", async ({ page }) => {
   await page.goto("/");
 
