@@ -16,6 +16,7 @@ import {
   MERGE_BLOCK_COMMAND_NAME,
   renderDocument,
   SPLIT_BLOCK_COMMAND_NAME,
+  type CommandResult,
   type DocumentNode,
   type RangeSelection,
   type RenderedElementNode,
@@ -90,6 +91,17 @@ interface KeyboardInputResult {
   transaction: Transaction;
 }
 
+function createKeyboardInputResultFromCommandResult(
+  result: CommandResult,
+): KeyboardInputResult | undefined {
+  return result.ok && result.selection && result.transaction
+    ? {
+        selection: result.selection,
+        transaction: result.transaction,
+      }
+    : undefined;
+}
+
 function getModelSelectionFromDom(root: HTMLDivElement, document: DocumentNode) {
   const domSelection = root.ownerDocument.getSelection();
 
@@ -157,12 +169,7 @@ function createInsertTextCommandResult(
     },
   });
 
-  return result.ok && result.selection && result.transaction
-    ? {
-        selection: result.selection,
-        transaction: result.transaction,
-      }
-    : undefined;
+  return createKeyboardInputResultFromCommandResult(result);
 }
 
 function createDeleteSelectionCommandResult(
@@ -180,12 +187,7 @@ function createDeleteSelectionCommandResult(
     },
   );
 
-  return result.ok && result.selection && result.transaction
-    ? {
-        selection: result.selection,
-        transaction: result.transaction,
-      }
-    : undefined;
+  return createKeyboardInputResultFromCommandResult(result);
 }
 
 function createSplitBlockCommandResult(
@@ -199,12 +201,7 @@ function createSplitBlockCommandResult(
     },
   });
 
-  return result.ok && result.selection && result.transaction
-    ? {
-        selection: result.selection,
-        transaction: result.transaction,
-      }
-    : undefined;
+  return createKeyboardInputResultFromCommandResult(result);
 }
 
 function createMergeBlockCommandResult(
@@ -218,12 +215,7 @@ function createMergeBlockCommandResult(
     },
   });
 
-  return result.ok && result.selection && result.transaction
-    ? {
-        selection: result.selection,
-        transaction: result.transaction,
-      }
-    : undefined;
+  return createKeyboardInputResultFromCommandResult(result);
 }
 
 export function RichTextEditor({
