@@ -41,6 +41,7 @@
 - 新增 Command 状态读取，包含 `queryCommandState`、`isActive` 钩子、disabled/active 状态、测试、demo 状态面板和按钮禁用。
 - 新增默认 Command 注册表，demo 与 React 复用同一套内置 command。
 - 新增 Command 闭环验收文档，覆盖默认注册表、综合执行、状态矩阵、demo 状态面板和 React 输入复用。
+- 新增 History 数据结构第一版，包含快照、undo/redo 栈、transaction 记录入口、batch 标记、查询 helper、测试和文档。
 
 ### 变更
 
@@ -59,6 +60,7 @@
 - 更新 Command、QA、测试策略和包说明，使其匹配 Command 状态读取范围。
 - 更新 React 键盘输入路径，使 Enter 只通过 `splitBlockCommand`，段尾 Delete 优先通过 `mergeBlockCommand` 合并下一段。
 - 更新 README、core README、架构和 Command 文档，使其匹配 Command 闭环验收状态。
+- 更新 README、core README、架构、测试策略和变更记录，使其匹配 History 数据结构范围。
 
 ### 暂未包含
 

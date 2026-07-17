@@ -1,6 +1,6 @@
 # 测试策略
 
-当前阶段已经包含工程冒烟测试、文档模型单测、模型选区单测、渲染与 DOM 映射单测、React 组件 API 单测、输入 helper 单测、command 单测和演示端到端验收。
+当前阶段已经包含工程冒烟测试、文档模型单测、模型选区单测、渲染与 DOM 映射单测、React 组件 API 单测、输入 helper 单测、command 单测、history 单测和演示端到端验收。
 
 ## 单元测试
 
@@ -14,6 +14,7 @@
   - React 组件 `value`、`defaultValue` 和 `onChange` 初始渲染契约。
   - 输入 helper 的普通文本输入、Backspace、Delete 和 Enter transaction。
   - Command 注册、执行、可执行判断、默认注册表、状态矩阵、文本编辑 command 和 block 编辑 command。
+  - History 快照、状态工厂、记录入口和查询 helper。
 - 命令：`pnpm test`。
 
 ## 浏览器测试
