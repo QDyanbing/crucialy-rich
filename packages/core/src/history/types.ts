@@ -18,3 +18,11 @@ export interface HistoryState {
   redoStack: HistoryEntry[];
   undoStack: HistoryEntry[];
 }
+
+export interface RecordHistoryInput {
+  after: HistorySnapshot;
+  batch?: string;
+  before: HistorySnapshot;
+  history: HistoryState;
+  transaction: Transaction;
+}
