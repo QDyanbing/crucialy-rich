@@ -85,6 +85,18 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.createSelectionAfterInsertTextInput).toBe("function");
   });
 
+  it("exposes the history API", () => {
+    expect(typeof core.canRedo).toBe("function");
+    expect(typeof core.canUndo).toBe("function");
+    expect(typeof core.clearHistory).toBe("function");
+    expect(typeof core.cloneHistorySnapshot).toBe("function");
+    expect(typeof core.createHistorySnapshot).toBe("function");
+    expect(typeof core.createHistoryState).toBe("function");
+    expect(typeof core.getRedoEntry).toBe("function");
+    expect(typeof core.getUndoEntry).toBe("function");
+    expect(typeof core.recordHistory).toBe("function");
+  });
+
   it("exposes the command API", () => {
     expect(typeof core.DELETE_SELECTION_COMMAND_NAME).toBe("string");
     expect(typeof core.INSERT_TEXT_COMMAND_NAME).toBe("string");
