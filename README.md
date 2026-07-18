@@ -128,6 +128,7 @@ pnpm test:e2e
 - [第 5 周 QA](./docs/qa/week-05.md)
 - [第 6 周 QA](./docs/qa/week-06.md)
 - [第 7 周 QA](./docs/qa/week-07.md)
+- [第 8 周 QA](./docs/qa/week-08.md)
 - [模型 QA](./docs/qa/model.md)
 - [选区 QA](./docs/qa/selection.md)
 - [基础渲染 QA](./docs/qa/render.md)
@@ -135,6 +136,7 @@ pnpm test:e2e
 - [Operation QA](./docs/qa/operation.md)
 - [输入事件 QA](./docs/qa/input.md)
 - [Command QA](./docs/qa/command.md)
+- [History QA](./docs/qa/history.md)
 - [变更记录](./CHANGELOG.md)
 
 ## 反馈入口

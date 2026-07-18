@@ -12,7 +12,7 @@
 
 第 7 周 Day 5「Command 闭环验收」已完成。
 
-下一步进入第 8 周「History 撤销重做闭环」。
+第 8 周「History 撤销重做闭环」已经推进到按钮级可验证状态，详见 `docs/qa/week-08.md`。
 
 ## 已完成范围
 
@@ -57,10 +57,6 @@
 - `packages/core/tests/public-api.test.ts`
 - `tests/e2e/demo-shell.spec.ts`
 
-## 当前限制
-
-- 暂未接入快捷键、工具栏、history 或 undo/redo。
-
 ## 结论
 
-Command 系统第 7 周闭环已完成：基础接口、文本编辑 command、block 编辑 command、状态读取、默认注册表、键盘输入复用、demo 按钮复用、disabled 状态展示和独立 QA 验收已经具备；下一步进入 History 撤销重做。
+Command 系统第 7 周闭环已完成：基础接口、文本编辑 command、block 编辑 command、状态读取、默认注册表、键盘输入复用、demo 按钮复用、disabled 状态展示和独立 QA 验收已经具备；后续 History 已基于 command 管道继续推进。
