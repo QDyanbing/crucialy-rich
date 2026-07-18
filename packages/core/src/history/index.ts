@@ -3,7 +3,9 @@ export { canRedo, canUndo, getRedoEntry, getUndoEntry } from "./query";
 export { recordHistory } from "./record";
 export { cloneHistorySnapshot, createHistorySnapshot } from "./snapshot";
 export { clearHistory, createHistoryState } from "./state";
+export { undoHistory } from "./undo";
 export type {
+  HistoryChange,
   HistoryEntry,
   HistorySnapshot,
   HistoryState,

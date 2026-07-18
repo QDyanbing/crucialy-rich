@@ -19,6 +19,13 @@ export interface HistoryState {
   undoStack: HistoryEntry[];
 }
 
+export interface HistoryChange {
+  document: DocumentNode;
+  entry: HistoryEntry;
+  history: HistoryState;
+  selection?: RangeSelection;
+}
+
 export interface RecordHistoryInput {
   after: HistorySnapshot;
   batch?: string;
