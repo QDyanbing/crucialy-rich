@@ -42,6 +42,7 @@
 - 新增默认 Command 注册表，demo 与 React 复用同一套内置 command。
 - 新增 Command 闭环验收文档，覆盖默认注册表、综合执行、状态矩阵、demo 状态面板和 React 输入复用。
 - 新增 History 数据结构第一版，包含快照、undo/redo 栈、transaction 记录入口、batch 标记、查询 helper、测试和文档。
+- 新增 History 撤销/重做第一版，包含 entry 克隆、`undoHistory`、`redoHistory`、`undoCommand`、`redoCommand`、demo history 记录、撤销/重做按钮、测试和文档。
 
 ### 变更
 
@@ -61,7 +62,8 @@
 - 更新 React 键盘输入路径，使 Enter 只通过 `splitBlockCommand`，段尾 Delete 优先通过 `mergeBlockCommand` 合并下一段。
 - 更新 README、core README、架构和 Command 文档，使其匹配 Command 闭环验收状态。
 - 更新 README、core README、架构、测试策略和变更记录，使其匹配 History 数据结构范围。
+- 更新 README、History 文档和变更记录，使其匹配 History 撤销/重做范围。
 
 ### 暂未包含
 
-- 历史记录、解析、文档序列化或输入法完整处理。
+- 连续输入历史合并、解析、文档序列化或输入法完整处理。
