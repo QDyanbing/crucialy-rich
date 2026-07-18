@@ -1,6 +1,7 @@
 import type { DocumentNode } from "../model";
 import type { Transaction } from "../operation";
 import type { RangeSelection } from "../selection";
+import type { HistoryState } from "../history/types";
 
 export type CommandName = string;
 
@@ -18,6 +19,8 @@ export type CommandResultStatus = "success" | "failure" | "skipped";
 
 export interface CommandResult {
   commandName: CommandName;
+  document?: DocumentNode;
+  history?: HistoryState;
   ok: boolean;
   status: CommandResultStatus;
   reason?: string;

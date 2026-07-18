@@ -1,3 +1,12 @@
+export {
+  canExecuteRedoCommand,
+  canExecuteUndoCommand,
+  REDO_COMMAND_NAME,
+  redoCommand,
+  UNDO_COMMAND_NAME,
+  undoCommand,
+  type HistoryCommandPayload,
+} from "./command";
 export { cloneHistoryEntry, createHistoryEntry } from "./entry";
 export { canRedo, canUndo, getRedoEntry, getUndoEntry } from "./query";
 export { redoHistory } from "./redo";
