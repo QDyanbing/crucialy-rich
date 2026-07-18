@@ -1,6 +1,8 @@
 import {
   applyTransaction,
   createDefaultCommandRegistry,
+  createHistorySnapshot,
+  createHistoryState,
   createTransactionAcceptanceReport,
   createDocument,
   createParagraph,
@@ -15,6 +17,7 @@ import {
   MERGE_BLOCK_COMMAND_NAME,
   normalizeDocument,
   queryCommandState,
+  recordHistory,
   SPLIT_BLOCK_COMMAND_NAME,
   validateDocument,
   type CommandName,
@@ -386,6 +389,7 @@ function DemoApp() {
   const [lastTransaction, setLastTransaction] = useState<Transaction | null>(null);
   const [lastTransactionReport, setLastTransactionReport] =
     useState<TransactionAcceptanceReport | null>(null);
+  const [historyState, setHistoryState] = useState(() => createHistoryState());
   const [documentValue, setDocumentValue] = useState(() =>
     cloneModelValue(getModelExample("regular").value),
   );
@@ -397,6 +401,18 @@ function DemoApp() {
   const documentPreview = useMemo(
     () => JSON.stringify(documentValue, null, 2),
     [documentValue],
+  );
+  const historyPreview = useMemo(
+    () =>
+      JSON.stringify(
+        {
+          redoStack: historyState.redoStack.length,
+          undoStack: historyState.undoStack.length,
+        },
+        null,
+        2,
+      ),
+    [historyState],
   );
   const commandStates = useMemo<DemoCommandState[]>(
     () =>
@@ -429,12 +445,14 @@ function DemoApp() {
 
     setModelExampleId(nextExampleId);
     setDocumentValue(cloneModelValue(getModelExample(nextExampleId).value));
+    setHistoryState(createHistoryState());
     setLastTransaction(null);
     setLastTransactionReport(null);
   }
 
   function handleNormalize() {
     setDocumentValue(normalizeDocument(documentValue));
+    setHistoryState(createHistoryState());
     setLastTransaction(null);
     setLastTransactionReport(null);
   }
@@ -444,11 +462,23 @@ function DemoApp() {
       return;
     }
 
-    setDocumentValue(applyTransaction(normalizedDocument, result.transaction));
-    setModelSelection(result.selection);
-    setLastTransaction(result.transaction);
+    const nextSelection = result.selection;
+    const transaction = result.transaction;
+    const nextDocument = applyTransaction(normalizedDocument, transaction);
+
+    setDocumentValue(nextDocument);
+    setModelSelection(nextSelection);
+    setHistoryState((currentHistory) =>
+      recordHistory({
+        after: createHistorySnapshot(nextDocument, nextSelection),
+        before: createHistorySnapshot(normalizedDocument, modelSelection),
+        history: currentHistory,
+        transaction,
+      }),
+    );
+    setLastTransaction(transaction);
     setLastTransactionReport(
-      createTransactionAcceptanceReport(normalizedDocument, result.transaction),
+      createTransactionAcceptanceReport(normalizedDocument, transaction),
     );
   }
 
@@ -501,6 +531,7 @@ function DemoApp() {
 
   function handleEditorChange(nextDocument: DocumentNode) {
     setDocumentValue(nextDocument);
+    setHistoryState(createHistoryState());
     setLastTransaction(null);
     setLastTransactionReport(null);
   }
@@ -643,6 +674,10 @@ function DemoApp() {
             {lastTransactionReport
               ? JSON.stringify(lastTransactionReport, null, 2)
               : "暂无验收报告"}
+          </pre>
+
+          <pre aria-label="History 状态" className="operation-preview">
+            {historyPreview}
           </pre>
 
           {validation.errors.length > 0 ? (
