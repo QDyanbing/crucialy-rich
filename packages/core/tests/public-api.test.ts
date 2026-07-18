@@ -86,15 +86,25 @@ describe("@crucialy-rich/core public API", () => {
   });
 
   it("exposes the history API", () => {
+    expect(typeof core.REDO_COMMAND_NAME).toBe("string");
+    expect(typeof core.UNDO_COMMAND_NAME).toBe("string");
+    expect(typeof core.canExecuteRedoCommand).toBe("function");
+    expect(typeof core.canExecuteUndoCommand).toBe("function");
     expect(typeof core.canRedo).toBe("function");
     expect(typeof core.canUndo).toBe("function");
     expect(typeof core.clearHistory).toBe("function");
+    expect(typeof core.cloneHistoryEntry).toBe("function");
     expect(typeof core.cloneHistorySnapshot).toBe("function");
+    expect(typeof core.createHistoryEntry).toBe("function");
     expect(typeof core.createHistorySnapshot).toBe("function");
     expect(typeof core.createHistoryState).toBe("function");
     expect(typeof core.getRedoEntry).toBe("function");
     expect(typeof core.getUndoEntry).toBe("function");
     expect(typeof core.recordHistory).toBe("function");
+    expect(typeof core.redoCommand).toBe("object");
+    expect(typeof core.redoHistory).toBe("function");
+    expect(typeof core.undoCommand).toBe("object");
+    expect(typeof core.undoHistory).toBe("function");
   });
 
   it("exposes the command API", () => {
