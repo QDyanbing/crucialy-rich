@@ -169,7 +169,7 @@ h3 {
 
 .operation-controls {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) repeat(4, auto);
+  grid-template-columns: minmax(0, 1fr) repeat(6, auto);
   gap: 12px;
   align-items: end;
 }

@@ -1,5 +1,7 @@
 import {
   applyTransaction,
+  canRedo,
+  canUndo,
   createDefaultCommandRegistry,
   createHistorySnapshot,
   createHistoryState,
@@ -17,13 +19,16 @@ import {
   MERGE_BLOCK_COMMAND_NAME,
   normalizeDocument,
   queryCommandState,
+  redoHistory,
   recordHistory,
   SPLIT_BLOCK_COMMAND_NAME,
+  undoHistory,
   validateDocument,
   type CommandName,
   type CommandResult,
   type CommandState,
   type DocumentNode,
+  type HistoryChange,
   type Path,
   type Point,
   type RangeSelection,
@@ -482,6 +487,22 @@ function DemoApp() {
     );
   }
 
+  function applyHistoryChange(change: HistoryChange | undefined) {
+    if (!change) {
+      return;
+    }
+
+    setDocumentValue(change.document);
+    setHistoryState(change.history);
+
+    if (change.selection) {
+      setModelSelection(change.selection);
+    }
+
+    setLastTransaction(change.entry.transaction);
+    setLastTransactionReport(null);
+  }
+
   function handleInsertText() {
     applyCommandResult(
       executeCommand(demoCommandRegistry, INSERT_TEXT_COMMAND_NAME, {
@@ -527,6 +548,14 @@ function DemoApp() {
         },
       }),
     );
+  }
+
+  function handleUndo() {
+    applyHistoryChange(undoHistory(historyState));
+  }
+
+  function handleRedo() {
+    applyHistoryChange(redoHistory(historyState));
   }
 
   function handleEditorChange(nextDocument: DocumentNode) {
@@ -641,6 +670,20 @@ function DemoApp() {
               onClick={handleMergeBlock}
             >
               合并段落
+            </button>
+            <button
+              type="button"
+              disabled={!canUndo(historyState)}
+              onClick={handleUndo}
+            >
+              撤销
+            </button>
+            <button
+              type="button"
+              disabled={!canRedo(historyState)}
+              onClick={handleRedo}
+            >
+              重做
             </button>
           </div>
 
