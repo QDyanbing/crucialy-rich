@@ -1,3 +1,4 @@
+export { cloneHistoryEntry, createHistoryEntry } from "./entry";
 export { canRedo, canUndo, getRedoEntry, getUndoEntry } from "./query";
 export { recordHistory } from "./record";
 export { cloneHistorySnapshot, createHistorySnapshot } from "./snapshot";
