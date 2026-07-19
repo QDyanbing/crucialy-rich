@@ -90,6 +90,7 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.UNDO_COMMAND_NAME).toBe("string");
     expect(typeof core.canExecuteRedoCommand).toBe("function");
     expect(typeof core.canExecuteUndoCommand).toBe("function");
+    expect(typeof core.canMergeHistoryEntries).toBe("function");
     expect(typeof core.canRedo).toBe("function");
     expect(typeof core.canUndo).toBe("function");
     expect(typeof core.clearHistory).toBe("function");
@@ -100,6 +101,7 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.createHistoryState).toBe("function");
     expect(typeof core.getRedoEntry).toBe("function");
     expect(typeof core.getUndoEntry).toBe("function");
+    expect(typeof core.mergeHistoryEntries).toBe("function");
     expect(typeof core.recordHistory).toBe("function");
     expect(typeof core.redoCommand).toBe("object");
     expect(typeof core.redoHistory).toBe("function");
