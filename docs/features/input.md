@@ -33,6 +33,7 @@ beforeinput
   -> executeCommand(insertTextCommand)
   -> applyTransaction
   -> onChange(nextDocument)
+  -> onTransaction({ before, after, transaction, batch: "typing" })
   -> onSelectionChange(nextSelection)
 ```
 
@@ -50,6 +51,7 @@ keydown Backspace/Delete/Enter
   -> createBackspaceInputTransaction / createDeleteInputTransaction / createEnterInputTransaction
   -> applyTransaction
   -> onChange(nextDocument)
+  -> onTransaction({ before, after, transaction })
   -> onSelectionChange(nextSelection)
 ```
 
@@ -120,6 +122,7 @@ function createSelectionAfterEnterInput(input: EnterInput): RangeSelection;
 - `onChange`：输入后输出最新文档模型。
 - `selection`：受控模型选区。
 - `onSelectionChange`：输入后输出新的模型选区。
+- `onTransaction`：输入后输出 before、after、transaction、inputType 和输入前后 selection；普通文本输入会额外带上 `batch: "typing"`。
 - `onBeforeInput`：仍会先调用外部回调，若外部已 `preventDefault`，内部不再处理。
 - 普通文本输入复用 `insertTextCommand`。
 - 非折叠 selection 下的 Backspace/Delete 复用 `deleteSelectionCommand`。
@@ -136,6 +139,7 @@ function createSelectionAfterEnterInput(input: EnterInput): RangeSelection;
 - 阻止浏览器默认 DOM 修改。
 - 通过 `applyTransaction` 得到下一份文档模型。
 - 通过 `onChange` 和 `onSelectionChange` 把文档和选区交回调用方。
+- 通过 `onTransaction` 把 transaction 交给宿主，demo 用它记录真实输入 history。
 
 即使某次按键生成空 transaction，也会回传稳定的模型选区，避免 DOM selection 和模型 selection 分叉。
 
@@ -153,6 +157,8 @@ function createSelectionAfterEnterInput(input: EnterInput): RangeSelection;
 - 文档 JSON 会跟随输入更新。
 - 渲染预览会使用最新模型重渲染。
 - 选区 JSON 会折叠到插入文本后。
+- History 状态会记录真实输入产生的 transaction。
+- 连续普通文本输入会按 `typing` batch 合并为一个 undo item。
 
 ## 当前限制
 
@@ -163,4 +169,4 @@ function createSelectionAfterEnterInput(input: EnterInput): RangeSelection;
 - Delete 暂不处理非折叠 selection、跨 text 删除或 inline text 节点合并。
 - Enter 暂不处理非折叠 selection，也不复制 marks 或 block attributes。
 - 暂不处理 IME composition 的完整生命周期。
-- 暂不包含 undo/redo 或 history 记录。
+- 暂不包含撤销重做快捷键。

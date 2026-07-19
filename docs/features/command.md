@@ -118,4 +118,5 @@ const mergeBlockCommand: Command;
 - 文本 command 当前只处理同一 text 节点内的 range selection。
 - block command 当前只处理 collapsed selection。
 - 当前没有 command 分组、快捷键绑定或权限系统。
-- 当前没有 history、undo/redo 或批量 command pipeline。
+- History 模块已提供 `undoCommand` 和 `redoCommand`；默认 Command 注册表暂不内置 history command。
+- 当前没有批量 command pipeline。

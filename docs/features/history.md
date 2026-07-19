@@ -13,10 +13,12 @@ History 模块负责记录可撤销编辑的前后快照，并提供基于快照
 - 提供 `createHistoryState` 创建 history 状态。
 - 提供 `clearHistory` 清空 history 状态。
 - 提供 `recordHistory` 把非空 transaction 记录到 undoStack，并清空 redoStack。
+- 提供 `canMergeHistoryEntries`、`mergeHistoryEntries`，用于按 batch 合并连续输入。
 - 提供 `canUndo`、`canRedo`、`getUndoEntry`、`getRedoEntry` 读取 history 状态。
 - 提供 `undoHistory`、`redoHistory` 执行栈迁移，并返回需要应用到编辑器的快照结果。
 - 提供 `undoCommand`、`redoCommand`，用于通过 command 管道触发撤销和重做。
-- 演示页的按钮命令会记录 history，操作区提供“撤销”和“重做”按钮，并展示 undoStack/redoStack 长度。
+- React 组件通过 `onTransaction` 暴露真实输入 transaction，演示页会把按钮命令和真实输入都记录到 history。
+- 演示页操作区提供“撤销”和“重做”按钮，并展示 undoStack/redoStack 长度。
 
 ## Core API
 
@@ -63,6 +65,13 @@ function clearHistory(): HistoryState;
 
 function recordHistory(input: RecordHistoryInput): HistoryState;
 
+function canMergeHistoryEntries(
+  previous: HistoryEntry | undefined,
+  next: HistoryEntry,
+): previous is HistoryEntry;
+
+function mergeHistoryEntries(previous: HistoryEntry, next: HistoryEntry): HistoryEntry;
+
 function canUndo(history: HistoryState): boolean;
 
 function canRedo(history: HistoryState): boolean;
@@ -86,7 +95,8 @@ const redoCommand: Command;
 - 快照创建时会复制 document 和 selection，避免外部对象后续修改污染 history。
 - `recordHistory` 只记录非空 transaction。
 - 记录新的 transaction 后会清空 redoStack。
-- batch 是可选字符串，后续用于连续输入合并策略。
+- batch 是可选字符串；相同非空 batch 的连续记录会合并为一个 history entry。
+- 当前 React 普通文本输入会使用 `typing` batch；Enter、Backspace、Delete 和 demo 按钮命令默认保持独立 history entry。
 
 ## 撤销与重做规则
 
@@ -99,8 +109,8 @@ const redoCommand: Command;
 
 ## 当前限制
 
-- 暂未实现连续输入合并策略。
-- React 组件真实输入路径暂未记录 history；当前 demo 只记录操作区按钮产生的 command 结果。
+- 暂未实现按时间间隔、选区跳变或输入类型细分的复杂合并策略。
+- 暂未接入撤销重做快捷键。
 - 当前快照克隆只覆盖现有 document -> paragraph -> text 模型；后续 marks、attrs、heading 等扩展时需要同步扩展克隆规则。
 
 ## 验收
@@ -109,6 +119,7 @@ const redoCommand: Command;
 - `packages/core/tests/history/snapshot.test.ts`
 - `packages/core/tests/history/state.test.ts`
 - `packages/core/tests/history/record.test.ts`
+- `packages/core/tests/history/merge.test.ts`
 - `packages/core/tests/history/query.test.ts`
 - `packages/core/tests/history/undo.test.ts`
 - `packages/core/tests/history/redo.test.ts`

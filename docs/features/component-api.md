@@ -11,6 +11,7 @@
 | `onChange`          | `(value: DocumentNode) => void`                                 | 文本输入后输出最新文档。                       |
 | `selection`         | `RangeSelection`                                                | 受控模型选区，用于输入后回写 DOM selection。   |
 | `onSelectionChange` | `(selection: RangeSelection) => void`                           | 输入后输出新的模型选区。                       |
+| `onTransaction`     | `(event: RichTextEditorTransactionEvent) => void`               | 输入后输出 before、after、transaction 和选区。 |
 | `label`             | `string`                                                        | 编辑器区域的可访问名称。                       |
 | `className`         | `string`                                                        | 传给编辑器根节点的样式类名。                   |
 | DOM 事件属性        | `onBeforeInput`、`onKeyDown`、`onMouseUp`、`onKeyUp` 等基础事件 | 用于输入和选区同步。                           |
@@ -49,6 +50,8 @@ export function UncontrolledEditor() {
 - `defaultValue` 只在组件初始化时读取。
 - `contentEditable` 开启后，普通 `insertText`、collapsed selection 下的 Backspace、collapsed selection 下的 Delete 和 collapsed selection 下的 Enter 会通过 transaction 更新模型并触发 `onChange`。
 - 输入后会通过 `onSelectionChange` 输出新的折叠选区。
+- 非空 transaction 输入后会通过 `onTransaction` 输出输入前文档、输入后文档、输入前 selection、输入后 selection、transaction 和 inputType。
+- 普通文本输入的 `onTransaction` 事件会带有 `batch: "typing"`，宿主可用于连续输入合并。
 - 输入处理会复用当前 DOM selection，先转换为模型 selection，再创建输入 transaction。
 - 普通文本输入会通过 `insertTextCommand` 创建 transaction。
 - 非折叠 selection 下的 Backspace/Delete 会通过 `deleteSelectionCommand` 创建 transaction。
@@ -60,4 +63,4 @@ export function UncontrolledEditor() {
 
 ## 当前边界
 
-当前组件仍不包含历史、输入法完整处理、粘贴解析或序列化能力；Backspace、Delete 和 Enter 当前只覆盖基础编辑路径。
+当前组件仍不内置 history 状态、输入法完整处理、粘贴解析或序列化能力；Backspace、Delete 和 Enter 当前只覆盖基础编辑路径。
