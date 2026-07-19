@@ -88,15 +88,21 @@ const useIsomorphicLayoutEffect =
 const richTextCommandRegistry = createDefaultCommandRegistry();
 
 interface KeyboardInputResult {
+  beforeSelection: RangeSelection;
+  inputType: "deleteBackward" | "deleteForward" | "insertParagraph" | "insertText";
   selection: RangeSelection;
   transaction: Transaction;
 }
 
 function createKeyboardInputResultFromCommandResult(
   result: CommandResult,
+  beforeSelection: RangeSelection,
+  inputType: KeyboardInputResult["inputType"],
 ): KeyboardInputResult | undefined {
   return result.ok && result.selection && result.transaction
     ? {
+        beforeSelection,
+        inputType,
         selection: result.selection,
         transaction: result.transaction,
       }
@@ -123,6 +129,8 @@ function createKeyboardInputResult(
     };
 
     return {
+      beforeSelection: selection,
+      inputType: "deleteBackward",
       selection: createSelectionAfterBackspaceInput(input),
       transaction: createBackspaceInputTransaction(input),
     };
@@ -135,6 +143,8 @@ function createKeyboardInputResult(
     };
 
     return {
+      beforeSelection: selection,
+      inputType: "deleteForward",
       selection: createSelectionAfterDeleteInput(input),
       transaction: createDeleteInputTransaction(input),
     };
@@ -158,12 +168,13 @@ function createInsertTextCommandResult(
     },
   });
 
-  return createKeyboardInputResultFromCommandResult(result);
+  return createKeyboardInputResultFromCommandResult(result, selection, "insertText");
 }
 
 function createDeleteSelectionCommandResult(
   document: DocumentNode,
   selection: RangeSelection,
+  inputType: KeyboardInputResult["inputType"],
 ): KeyboardInputResult | undefined {
   const result = executeCommand(
     richTextCommandRegistry,
@@ -176,7 +187,7 @@ function createDeleteSelectionCommandResult(
     },
   );
 
-  return createKeyboardInputResultFromCommandResult(result);
+  return createKeyboardInputResultFromCommandResult(result, selection, inputType);
 }
 
 function createSplitBlockCommandResult(
@@ -190,12 +201,17 @@ function createSplitBlockCommandResult(
     },
   });
 
-  return createKeyboardInputResultFromCommandResult(result);
+  return createKeyboardInputResultFromCommandResult(
+    result,
+    selection,
+    "insertParagraph",
+  );
 }
 
 function createMergeBlockCommandResult(
   document: DocumentNode,
   selection: RangeSelection,
+  inputType: KeyboardInputResult["inputType"] = "deleteBackward",
 ): KeyboardInputResult | undefined {
   const result = executeCommand(richTextCommandRegistry, MERGE_BLOCK_COMMAND_NAME, {
     context: {
@@ -204,7 +220,7 @@ function createMergeBlockCommandResult(
     },
   });
 
-  return createKeyboardInputResultFromCommandResult(result);
+  return createKeyboardInputResultFromCommandResult(result, selection, inputType);
 }
 
 function createCollapsedSelection(point: RangeSelection["anchor"]): RangeSelection {
@@ -247,6 +263,7 @@ function createMergeNextBlockCommandResult(
       path: [blockIndex + 1, 0],
       offset: 0,
     }),
+    "deleteForward",
   );
 }
 
@@ -354,6 +371,7 @@ export function RichTextEditor({
       const deleteSelectionInput = createDeleteSelectionCommandResult(
         document,
         modelSelection,
+        event.key === "Backspace" ? "deleteBackward" : "deleteForward",
       );
 
       if (deleteSelectionInput) {
