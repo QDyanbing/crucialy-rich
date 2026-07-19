@@ -564,14 +564,18 @@ function DemoApp() {
   function handleEditorTransaction(event: RichTextEditorTransactionEvent) {
     setDocumentValue(event.after);
     setModelSelection(event.selection);
-    setHistoryState((currentHistory) =>
-      recordHistory({
+    setHistoryState((currentHistory) => {
+      const historyInput = {
         after: createHistorySnapshot(event.after, event.selection),
         before: createHistorySnapshot(event.before, event.beforeSelection),
         history: currentHistory,
         transaction: event.transaction,
-      }),
-    );
+      };
+
+      return recordHistory(
+        event.batch ? { ...historyInput, batch: event.batch } : historyInput,
+      );
+    });
     setLastTransaction(event.transaction);
     setLastTransactionReport(
       createTransactionAcceptanceReport(event.before, event.transaction),
