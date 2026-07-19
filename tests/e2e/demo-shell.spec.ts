@@ -251,6 +251,31 @@ test("inserts text through beforeinput in the editor", async ({ page }) => {
   await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 4');
 });
 
+test("records editor typing in history", async ({ page }) => {
+  await page.goto("/");
+
+  await placeCaretInRenderedText(page, "[0,0]", 3);
+  await page.keyboard.type("真");
+
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  await expect(page.getByRole("button", { name: "撤销" })).toBeEnabled();
+
+  await page.getByRole("button", { name: "撤销" }).click();
+
+  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
+    '"text": "你好，crucialy-rich。"',
+  );
+  await expect(page.getByLabel("History 状态")).toContainText('"redoStack": 1');
+  await expect(page.getByRole("button", { name: "重做" })).toBeEnabled();
+
+  await page.getByRole("button", { name: "重做" }).click();
+
+  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
+    '"text": "你好，真crucialy-rich。"',
+  );
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+});
+
 test("keeps the caret moving during consecutive beforeinput inserts", async ({
   page,
 }) => {
