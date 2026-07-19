@@ -51,8 +51,24 @@ export interface RichTextEditorProps
   label?: string;
   onChange?: (value: DocumentNode) => void;
   onSelectionChange?: (selection: RangeSelection) => void;
+  onTransaction?: (event: RichTextEditorTransactionEvent) => void;
   selection?: RangeSelection;
   value?: DocumentNode;
+}
+
+export type RichTextEditorInputType =
+  | "deleteBackward"
+  | "deleteForward"
+  | "insertParagraph"
+  | "insertText";
+
+export interface RichTextEditorTransactionEvent {
+  after: DocumentNode;
+  before: DocumentNode;
+  beforeSelection: RangeSelection;
+  inputType: RichTextEditorInputType;
+  selection: RangeSelection;
+  transaction: Transaction;
 }
 
 function createRenderedElement(node: RenderedElementNode): ReactElement {
@@ -89,7 +105,7 @@ const richTextCommandRegistry = createDefaultCommandRegistry();
 
 interface KeyboardInputResult {
   beforeSelection: RangeSelection;
-  inputType: "deleteBackward" | "deleteForward" | "insertParagraph" | "insertText";
+  inputType: RichTextEditorInputType;
   selection: RangeSelection;
   transaction: Transaction;
 }
@@ -278,6 +294,7 @@ export function RichTextEditor({
   onMouseUp,
   onChange,
   onSelectionChange,
+  onTransaction,
   selection,
   suppressContentEditableWarning,
   value,
@@ -309,7 +326,17 @@ export function RichTextEditor({
 
   function commitInputResult(input: KeyboardInputResult) {
     if (input.transaction.operations.length > 0) {
-      commitDocumentChange(applyTransaction(document, input.transaction));
+      const nextDocument = applyTransaction(document, input.transaction);
+
+      commitDocumentChange(nextDocument);
+      onTransaction?.({
+        after: nextDocument,
+        before: document,
+        beforeSelection: input.beforeSelection,
+        inputType: input.inputType,
+        selection: input.selection,
+        transaction: input.transaction,
+      });
     }
 
     onSelectionChange?.(input.selection);

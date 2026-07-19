@@ -1,2 +1,6 @@
 export { RichTextEditor } from "./RichTextEditor";
-export type { RichTextEditorProps } from "./RichTextEditor";
+export type {
+  RichTextEditorInputType,
+  RichTextEditorProps,
+  RichTextEditorTransactionEvent,
+} from "./RichTextEditor";
