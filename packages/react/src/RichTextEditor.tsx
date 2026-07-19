@@ -64,6 +64,7 @@ export type RichTextEditorInputType =
 
 export interface RichTextEditorTransactionEvent {
   after: DocumentNode;
+  batch?: string;
   before: DocumentNode;
   beforeSelection: RangeSelection;
   inputType: RichTextEditorInputType;
@@ -104,6 +105,7 @@ const useIsomorphicLayoutEffect =
 const richTextCommandRegistry = createDefaultCommandRegistry();
 
 interface KeyboardInputResult {
+  batch?: string;
   beforeSelection: RangeSelection;
   inputType: RichTextEditorInputType;
   selection: RangeSelection;
@@ -114,15 +116,20 @@ function createKeyboardInputResultFromCommandResult(
   result: CommandResult,
   beforeSelection: RangeSelection,
   inputType: KeyboardInputResult["inputType"],
+  batch?: string,
 ): KeyboardInputResult | undefined {
-  return result.ok && result.selection && result.transaction
-    ? {
-        beforeSelection,
-        inputType,
-        selection: result.selection,
-        transaction: result.transaction,
-      }
-    : undefined;
+  if (!result.ok || !result.selection || !result.transaction) {
+    return undefined;
+  }
+
+  const inputResult: KeyboardInputResult = {
+    beforeSelection,
+    inputType,
+    selection: result.selection,
+    transaction: result.transaction,
+  };
+
+  return batch ? { ...inputResult, batch } : inputResult;
 }
 
 function getModelSelectionFromDom(root: HTMLDivElement, document: DocumentNode) {
@@ -184,7 +191,12 @@ function createInsertTextCommandResult(
     },
   });
 
-  return createKeyboardInputResultFromCommandResult(result, selection, "insertText");
+  return createKeyboardInputResultFromCommandResult(
+    result,
+    selection,
+    "insertText",
+    "typing",
+  );
 }
 
 function createDeleteSelectionCommandResult(
@@ -329,14 +341,18 @@ export function RichTextEditor({
       const nextDocument = applyTransaction(document, input.transaction);
 
       commitDocumentChange(nextDocument);
-      onTransaction?.({
+      const transactionEvent: RichTextEditorTransactionEvent = {
         after: nextDocument,
         before: document,
         beforeSelection: input.beforeSelection,
         inputType: input.inputType,
         selection: input.selection,
         transaction: input.transaction,
-      });
+      };
+
+      onTransaction?.(
+        input.batch ? { ...transactionEvent, batch: input.batch } : transactionEvent,
+      );
     }
 
     onSelectionChange?.(input.selection);
