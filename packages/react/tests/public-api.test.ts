@@ -115,4 +115,20 @@ describe("@crucialy-rich/react public API", () => {
 
     expect(handleChange).not.toHaveBeenCalled();
   });
+
+  it("does not emit onTransaction during initial render", () => {
+    const handleTransaction = vi.fn();
+    const document = createDocument([
+      createParagraph([createText("Transaction callback waits for input.")]),
+    ]);
+
+    renderToStaticMarkup(
+      createElement(RichTextEditor, {
+        onTransaction: handleTransaction,
+        value: document,
+      }),
+    );
+
+    expect(handleTransaction).not.toHaveBeenCalled();
+  });
 });
