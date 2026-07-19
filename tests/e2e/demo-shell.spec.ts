@@ -290,6 +290,26 @@ test("keeps the caret moving during consecutive beforeinput inserts", async ({
   await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 5');
 });
 
+test("merges consecutive typing into one history item", async ({ page }) => {
+  await page.goto("/");
+
+  await placeCaretInRenderedText(page, "[0,0]", 3);
+  await page.keyboard.type("输入");
+
+  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
+    '"text": "你好，输入crucialy-rich。"',
+  );
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+
+  await page.getByRole("button", { name: "撤销" }).click();
+
+  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
+    '"text": "你好，crucialy-rich。"',
+  );
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+  await expect(page.getByLabel("History 状态")).toContainText('"redoStack": 1');
+});
+
 test("deletes the previous character with Backspace in the editor", async ({
   page,
 }) => {
