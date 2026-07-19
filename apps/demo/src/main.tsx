@@ -35,7 +35,10 @@ import {
   type Transaction,
   type TransactionAcceptanceReport,
 } from "@crucialy-rich/core";
-import { RichTextEditor } from "@crucialy-rich/react";
+import {
+  RichTextEditor,
+  type RichTextEditorTransactionEvent,
+} from "@crucialy-rich/react";
 import { StrictMode, useMemo, useState, type ChangeEvent } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -558,11 +561,21 @@ function DemoApp() {
     applyHistoryChange(redoHistory(historyState));
   }
 
-  function handleEditorChange(nextDocument: DocumentNode) {
-    setDocumentValue(nextDocument);
-    setHistoryState(createHistoryState());
-    setLastTransaction(null);
-    setLastTransactionReport(null);
+  function handleEditorTransaction(event: RichTextEditorTransactionEvent) {
+    setDocumentValue(event.after);
+    setModelSelection(event.selection);
+    setHistoryState((currentHistory) =>
+      recordHistory({
+        after: createHistorySnapshot(event.after, event.selection),
+        before: createHistorySnapshot(event.before, event.beforeSelection),
+        history: currentHistory,
+        transaction: event.transaction,
+      }),
+    );
+    setLastTransaction(event.transaction);
+    setLastTransactionReport(
+      createTransactionAcceptanceReport(event.before, event.transaction),
+    );
   }
 
   function handleBrowserSelectionSync() {
@@ -592,10 +605,10 @@ function DemoApp() {
             className="rendered-document"
             contentEditable
             label="已渲染文档"
-            onChange={handleEditorChange}
             onKeyUp={handleBrowserSelectionSync}
             onMouseUp={handleBrowserSelectionSync}
             onSelectionChange={setModelSelection}
+            onTransaction={handleEditorTransaction}
             selection={modelSelection}
             suppressContentEditableWarning
             value={normalizedDocument}
