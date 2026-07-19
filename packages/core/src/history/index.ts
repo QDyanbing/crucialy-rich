@@ -8,6 +8,7 @@ export {
   type HistoryCommandPayload,
 } from "./command";
 export { cloneHistoryEntry, createHistoryEntry } from "./entry";
+export { canMergeHistoryEntries, mergeHistoryEntries } from "./merge";
 export { canRedo, canUndo, getRedoEntry, getUndoEntry } from "./query";
 export { redoHistory } from "./redo";
 export { recordHistory } from "./record";
