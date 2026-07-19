@@ -10,9 +10,9 @@
 
 ## 当前阶段
 
-已完成工程初始化、文档模型第一版、模型选区第一版、基础模型渲染第一版、DOM 与模型位置映射第一版、选区双向同步第一版、React 组件 API 第一版、渲染闭环验收、`insertText`、`deleteText`、`splitBlock`、`mergeBlock` operation 第一版、Transaction 第一版、Operation 闭环验收、`beforeinput insertText` 第一版、Backspace 第一版、Delete 第一版、Enter 第一版、基础编辑闭环验收、Command 基础接口、文本编辑命令、Block 编辑命令、Command 状态读取、Command 闭环验收和 History 撤销/重做第一版。
+已完成工程初始化、文档模型第一版、模型选区第一版、基础模型渲染第一版、DOM 与模型位置映射第一版、选区双向同步第一版、React 组件 API 第一版、渲染闭环验收、`insertText`、`deleteText`、`splitBlock`、`mergeBlock` operation 第一版、Transaction 第一版、Operation 闭环验收、`beforeinput insertText` 第一版、Backspace 第一版、Delete 第一版、Enter 第一版、基础编辑闭环验收、Command 基础接口、文本编辑命令、Block 编辑命令、Command 状态读取、Command 闭环验收、History 撤销/重做第一版和连续输入合并第一版。
 
-当前 React 组件已支持通过 `value` / `defaultValue` 展示文档模型，普通文本输入、非折叠删除选区、Enter 分段、段首 Backspace 合并和段尾 Delete 合并会优先复用 command；演示页操作区的插入、删除选区、分段和合并段落按钮也已通过默认 command registry 执行，并显示 command 可用状态。演示页按钮命令会记录 history，并支持撤销、重做和 undoStack/redoStack 状态查看。
+当前 React 组件已支持通过 `value` / `defaultValue` 展示文档模型，普通文本输入、非折叠删除选区、Enter 分段、段首 Backspace 合并和段尾 Delete 合并会优先复用 command；组件会通过 `onTransaction` 暴露真实输入 transaction。演示页按钮命令和真实输入都会记录 history，并支持撤销、重做、连续 typing 合并和 undoStack/redoStack 状态查看。
 
 ## 技术栈
 
@@ -99,7 +99,8 @@ pnpm test:e2e
 - 协同编辑
 - 权限系统
 - 评论系统
-- 连续输入 history 合并策略
+- 撤销重做快捷键
+- 复杂 history 合并策略
 - 服务端历史版本
 - 服务端存储
 
@@ -117,7 +118,7 @@ pnpm test:e2e
 - [Operation](./docs/features/operation.md)
 - [输入事件](./docs/features/input.md)
 - [Command 系统](./docs/features/command.md)
-- [History 数据结构](./docs/features/history.md)
+- [History 记录与撤销重做](./docs/features/history.md)
 - [提交规范](./docs/development/commit-convention.md)
 - [测试策略](./docs/qa/test-strategy.md)
 - [脚手架验收](./docs/qa/scaffold-acceptance.md)

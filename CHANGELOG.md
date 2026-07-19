@@ -43,6 +43,8 @@
 - 新增 Command 闭环验收文档，覆盖默认注册表、综合执行、状态矩阵、demo 状态面板和 React 输入复用。
 - 新增 History 数据结构第一版，包含快照、undo/redo 栈、transaction 记录入口、batch 标记、查询 helper、测试和文档。
 - 新增 History 撤销/重做第一版，包含 entry 克隆、`undoHistory`、`redoHistory`、`undoCommand`、`redoCommand`、demo history 记录、撤销/重做按钮、测试和文档。
+- 新增 React `onTransaction` 回调，真实输入会暴露 before、after、transaction、inputType、输入前后 selection 和可选 batch。
+- 新增连续输入 history 合并第一版，普通文本输入通过 `typing` batch 合并为一个 undo item。
 
 ### 变更
 
@@ -63,7 +65,8 @@
 - 更新 README、core README、架构和 Command 文档，使其匹配 Command 闭环验收状态。
 - 更新 README、core README、架构、测试策略和变更记录，使其匹配 History 数据结构范围。
 - 更新 README、History 文档和变更记录，使其匹配 History 撤销/重做范围。
+- 更新 README、core README、react README、输入事件、组件 API、History、Command、QA 和测试策略，使其匹配真实输入 history 与连续 typing 合并范围。
 
 ### 暂未包含
 
-- 连续输入历史合并、解析、文档序列化或输入法完整处理。
+- 撤销重做快捷键、复杂历史合并策略、解析、文档序列化或输入法完整处理。

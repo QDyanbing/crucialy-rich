@@ -8,7 +8,9 @@
 
 第 8 周 Day 3「History Command 与 demo 控制」已完成。
 
-下一步继续完善真实输入路径 history 记录、连续输入合并和快捷键。
+第 8 周 Day 4「History 合并策略」已完成第一版。
+
+下一步继续完善撤销重做快捷键和更细粒度的合并边界。
 
 ## 已完成范围
 
@@ -23,6 +25,11 @@
 - demo 操作区按钮会记录 history。
 - demo 操作区新增“撤销”和“重做”按钮。
 - demo 显示 undoStack/redoStack 长度。
+- React 组件新增 `onTransaction` 回调，真实输入会暴露 transaction 和输入前后 selection。
+- demo 主编辑器真实输入会记录 history。
+- 普通文本输入会携带 `typing` batch。
+- `recordHistory` 会合并连续同 batch 的 history entry。
+- demo 覆盖连续 typing 合并为一个 undo item 的验收路径。
 - 新增 `docs/features/history.md` 和 `docs/qa/history.md`。
 
 ## 自动化覆盖
@@ -31,6 +38,7 @@
 - `packages/core/tests/history/entry.test.ts`
 - `packages/core/tests/history/state.test.ts`
 - `packages/core/tests/history/record.test.ts`
+- `packages/core/tests/history/merge.test.ts`
 - `packages/core/tests/history/query.test.ts`
 - `packages/core/tests/history/undo.test.ts`
 - `packages/core/tests/history/redo.test.ts`
@@ -40,11 +48,9 @@
 
 ## 当前限制
 
-- React 组件真实输入暂未记录 history。
-- 暂未实现连续输入 history 合并。
 - 暂未实现撤销重做快捷键。
-- demo typecheck 仍受当前 tsconfig `rootDir` 与 workspace path 映射问题影响，需要后续单独修整。
+- 暂未实现按时间间隔、选区跳变或输入类型细分的复杂合并策略。
 
 ## 结论
 
-第 8 周 History 撤销重做闭环已完成到按钮级可验证状态；下一阶段应把 history 接入真实输入事件和快捷键。
+第 8 周 History 撤销重做闭环已完成到真实输入可记录、连续 typing 可合并、按钮级可验证状态；下一阶段应接入撤销重做快捷键。
