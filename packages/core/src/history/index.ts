@@ -12,6 +12,11 @@ export { canMergeHistoryEntries, mergeHistoryEntries } from "./merge";
 export { canRedo, canUndo, getRedoEntry, getUndoEntry } from "./query";
 export { redoHistory } from "./redo";
 export { recordHistory } from "./record";
+export {
+  getHistoryShortcutAction,
+  type HistoryShortcutAction,
+  type HistoryShortcutInput,
+} from "./shortcut";
 export { cloneHistorySnapshot, createHistorySnapshot } from "./snapshot";
 export { clearHistory, createHistoryState } from "./state";
 export { undoHistory } from "./undo";
