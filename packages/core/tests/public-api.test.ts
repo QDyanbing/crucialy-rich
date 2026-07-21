@@ -100,6 +100,7 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.createHistorySnapshot).toBe("function");
     expect(typeof core.createHistoryState).toBe("function");
     expect(typeof core.getRedoEntry).toBe("function");
+    expect(typeof core.getHistoryShortcutAction).toBe("function");
     expect(typeof core.getUndoEntry).toBe("function");
     expect(typeof core.mergeHistoryEntries).toBe("function");
     expect(typeof core.recordHistory).toBe("function");
