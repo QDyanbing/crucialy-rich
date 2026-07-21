@@ -13,6 +13,7 @@ import {
   domSelectionToModelSelection,
   executeCommand,
   getNodeAtPath,
+  getHistoryShortcutAction,
   getTextInRange,
   INSERT_TEXT_COMMAND_NAME,
   isValidPoint,
@@ -39,7 +40,13 @@ import {
   RichTextEditor,
   type RichTextEditorTransactionEvent,
 } from "@crucialy-rich/react";
-import { StrictMode, useMemo, useState, type ChangeEvent } from "react";
+import {
+  StrictMode,
+  useMemo,
+  useState,
+  type ChangeEvent,
+  type KeyboardEvent,
+} from "react";
 import { createRoot } from "react-dom/client";
 
 import "./styles.css";
@@ -561,6 +568,19 @@ function DemoApp() {
     applyHistoryChange(redoHistory(historyState));
   }
 
+  function handleEditorKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    const action = getHistoryShortcutAction(event);
+
+    if (!action) {
+      return;
+    }
+
+    event.preventDefault();
+    applyHistoryChange(
+      action === "undo" ? undoHistory(historyState) : redoHistory(historyState),
+    );
+  }
+
   function handleEditorTransaction(event: RichTextEditorTransactionEvent) {
     setDocumentValue(event.after);
     setModelSelection(event.selection);
@@ -609,6 +629,7 @@ function DemoApp() {
             className="rendered-document"
             contentEditable
             label="已渲染文档"
+            onKeyDown={handleEditorKeyDown}
             onKeyUp={handleBrowserSelectionSync}
             onMouseUp={handleBrowserSelectionSync}
             onSelectionChange={setModelSelection}
