@@ -57,6 +57,7 @@ export function UncontrolledEditor() {
 - 非折叠 selection 下的 Backspace/Delete 会通过 `deleteSelectionCommand` 创建 transaction。
 - Enter 会通过 `splitBlockCommand` 创建 transaction。
 - 段首 Backspace 会通过 `mergeBlockCommand` 创建 transaction。
+- 宿主可在 `onKeyDown` 中用 `getHistoryShortcutAction` 接入撤销/重做快捷键；外部 `preventDefault` 后组件不会继续执行普通输入处理。
 - 输入、删除、分段和段落合并都不会直接信任浏览器默认修改后的 DOM。
 - 外部 `onBeforeInput` / `onKeyDown` 会先执行，若已 `preventDefault`，内部不再处理对应输入。
 - 初始渲染或浏览器选区变化不会触发 `onChange`。

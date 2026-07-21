@@ -17,8 +17,9 @@ History 模块负责记录可撤销编辑的前后快照，并提供基于快照
 - 提供 `canUndo`、`canRedo`、`getUndoEntry`、`getRedoEntry` 读取 history 状态。
 - 提供 `undoHistory`、`redoHistory` 执行栈迁移，并返回需要应用到编辑器的快照结果。
 - 提供 `undoCommand`、`redoCommand`，用于通过 command 管道触发撤销和重做。
+- 提供 `getHistoryShortcutAction`，用于把键盘事件识别为 undo 或 redo。
 - React 组件通过 `onTransaction` 暴露真实输入 transaction，演示页会把按钮命令和真实输入都记录到 history。
-- 演示页操作区提供“撤销”和“重做”按钮，并展示 undoStack/redoStack 长度。
+- 演示页操作区提供“撤销”和“重做”按钮，主编辑器支持撤销/重做快捷键，并展示 undoStack/redoStack 长度。
 
 ## Core API
 
@@ -84,6 +85,22 @@ function undoHistory(history: HistoryState): HistoryChange | undefined;
 
 function redoHistory(history: HistoryState): HistoryChange | undefined;
 
+type HistoryShortcutAction = "redo" | "undo";
+
+interface HistoryShortcutInput {
+  altKey?: boolean;
+  code?: string;
+  ctrlKey?: boolean;
+  isComposing?: boolean;
+  key: string;
+  metaKey?: boolean;
+  shiftKey?: boolean;
+}
+
+function getHistoryShortcutAction(
+  input: HistoryShortcutInput,
+): HistoryShortcutAction | undefined;
+
 const undoCommand: Command;
 
 const redoCommand: Command;
@@ -107,10 +124,17 @@ const redoCommand: Command;
 - 返回的 entry、document、selection 和栈内容都会复制，避免调用方修改污染 history。
 - `undoCommand`、`redoCommand` 需要 payload 中传入 `{ history }`，成功时返回 `document`、`history` 和可选 `selection`。
 
+## 快捷键规则
+
+- `getHistoryShortcutAction` 将 Ctrl/Meta + Z 识别为 `undo`。
+- `getHistoryShortcutAction` 将 Ctrl/Meta + Shift + Z 识别为 `redo`。
+- `getHistoryShortcutAction` 将 Ctrl/Meta + Y 识别为 `redo`。
+- Alt 组合、普通按键和 composition 期间的按键不会触发 history action。
+- React 组件不内置 history 状态；demo 通过外部 `onKeyDown` 调用 `getHistoryShortcutAction`，并在识别到 history 快捷键后阻止浏览器默认 contenteditable 行为。
+
 ## 当前限制
 
 - 暂未实现按时间间隔、选区跳变或输入类型细分的复杂合并策略。
-- 暂未接入撤销重做快捷键。
 - 当前快照克隆只覆盖现有 document -> paragraph -> text 模型；后续 marks、attrs、heading 等扩展时需要同步扩展克隆规则。
 
 ## 验收
@@ -123,6 +147,7 @@ const redoCommand: Command;
 - `packages/core/tests/history/query.test.ts`
 - `packages/core/tests/history/undo.test.ts`
 - `packages/core/tests/history/redo.test.ts`
+- `packages/core/tests/history/shortcut.test.ts`
 - `packages/core/tests/history/command.test.ts`
 - `packages/core/tests/public-api.test.ts`
 - `tests/e2e/demo-shell.spec.ts`

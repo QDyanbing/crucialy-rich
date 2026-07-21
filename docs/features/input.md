@@ -123,6 +123,7 @@ function createSelectionAfterEnterInput(input: EnterInput): RangeSelection;
 - `selection`：受控模型选区。
 - `onSelectionChange`：输入后输出新的模型选区。
 - `onTransaction`：输入后输出 before、after、transaction、inputType 和输入前后 selection；普通文本输入会额外带上 `batch: "typing"`。
+- `onKeyDown`：宿主可先拦截撤销/重做快捷键；若外部已 `preventDefault`，内部不再执行普通输入处理。
 - `onBeforeInput`：仍会先调用外部回调，若外部已 `preventDefault`，内部不再处理。
 - 普通文本输入复用 `insertTextCommand`。
 - 非折叠 selection 下的 Backspace/Delete 复用 `deleteSelectionCommand`。
@@ -159,6 +160,7 @@ function createSelectionAfterEnterInput(input: EnterInput): RangeSelection;
 - 选区 JSON 会折叠到插入文本后。
 - History 状态会记录真实输入产生的 transaction。
 - 连续普通文本输入会按 `typing` batch 合并为一个 undo item。
+- 主编辑器可通过 Ctrl/Meta + Z 撤销，通过 Ctrl/Meta + Shift + Z 或 Ctrl/Meta + Y 重做。
 
 ## 当前限制
 
@@ -169,4 +171,4 @@ function createSelectionAfterEnterInput(input: EnterInput): RangeSelection;
 - Delete 暂不处理非折叠 selection、跨 text 删除或 inline text 节点合并。
 - Enter 暂不处理非折叠 selection，也不复制 marks 或 block attributes。
 - 暂不处理 IME composition 的完整生命周期。
-- 暂不包含撤销重做快捷键。
+- 组件本身不持有 history 状态，撤销重做快捷键需要宿主接入 history 状态。
