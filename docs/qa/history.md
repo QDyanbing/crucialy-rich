@@ -2,7 +2,7 @@
 
 ## 验收范围
 
-第 8 周 History 范围覆盖快照记录、entry 克隆、undo/redo 栈转换、history command、React 真实输入记录、连续 typing 合并和 demo 撤销重做入口。
+第 8 周 History 范围覆盖快照记录、entry 克隆、undo/redo 栈转换、history command、React 真实输入记录、连续 typing 合并、快捷键识别和 demo 撤销重做入口。
 
 当前 History 能力：
 
@@ -18,6 +18,7 @@
 - `getRedoEntry`
 - `undoHistory`
 - `redoHistory`
+- `getHistoryShortcutAction`
 - `undoCommand`
 - `redoCommand`
 
@@ -31,9 +32,10 @@
 - `packages/core/tests/history/query.test.ts`：undo/redo 可用性和栈顶读取。
 - `packages/core/tests/history/undo.test.ts`：撤销到 before 快照并把 entry 移到 redoStack。
 - `packages/core/tests/history/redo.test.ts`：重做到 after 快照并把 entry 移回 undoStack。
+- `packages/core/tests/history/shortcut.test.ts`：撤销重做快捷键识别和忽略场景。
 - `packages/core/tests/history/command.test.ts`：通过 command registry 执行撤销和重做。
 - `packages/core/tests/public-api.test.ts`：History API 包出口。
-- `tests/e2e/demo-shell.spec.ts`：demo 操作区插入、真实输入、连续 typing 合并后的撤销重做和 History 状态展示。
+- `tests/e2e/demo-shell.spec.ts`：demo 操作区插入、真实输入、连续 typing 合并、快捷键触发撤销重做和 History 状态展示。
 
 ## 本地验证记录
 
@@ -43,10 +45,9 @@
 
 ## 当前限制
 
-- 暂未接入键盘快捷键，例如 Ctrl/Meta + Z 和 Ctrl/Meta + Shift + Z。
 - 暂未实现按时间间隔、选区跳变或输入类型细分的复杂合并策略。
 - 快照复制只覆盖当前 document -> paragraph -> text 模型。
 
 ## 结论
 
-History 已推进到可用的撤销重做闭环：core 具备快照记录、栈转换、command 包装和 batch 合并，React 可通过 `onTransaction` 暴露真实输入，demo 具备真实输入记录、连续 typing 合并、撤销、重做和状态展示。下一步建议处理快捷键和更细粒度的合并边界。
+History 已推进到可用的撤销重做闭环：core 具备快照记录、栈转换、command 包装、batch 合并和快捷键识别，React 可通过 `onTransaction` 暴露真实输入，demo 具备真实输入记录、连续 typing 合并、快捷键撤销重做和状态展示。下一步建议处理更细粒度的合并边界。

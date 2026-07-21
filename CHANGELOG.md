@@ -45,6 +45,7 @@
 - 新增 History 撤销/重做第一版，包含 entry 克隆、`undoHistory`、`redoHistory`、`undoCommand`、`redoCommand`、demo history 记录、撤销/重做按钮、测试和文档。
 - 新增 React `onTransaction` 回调，真实输入会暴露 before、after、transaction、inputType、输入前后 selection 和可选 batch。
 - 新增连续输入 history 合并第一版，普通文本输入通过 `typing` batch 合并为一个 undo item。
+- 新增 History 快捷键识别和 demo 接入，支持 Ctrl/Meta + Z 撤销、Ctrl/Meta + Shift + Z 和 Ctrl/Meta + Y 重做。
 
 ### 变更
 
@@ -66,7 +67,8 @@
 - 更新 README、core README、架构、测试策略和变更记录，使其匹配 History 数据结构范围。
 - 更新 README、History 文档和变更记录，使其匹配 History 撤销/重做范围。
 - 更新 README、core README、react README、输入事件、组件 API、History、Command、QA 和测试策略，使其匹配真实输入 history 与连续 typing 合并范围。
+- 更新 README、History、输入事件、组件 API、QA 和测试策略，使其匹配撤销重做快捷键范围。
 
 ### 暂未包含
 
-- 撤销重做快捷键、复杂历史合并策略、解析、文档序列化或输入法完整处理。
+- 复杂历史合并策略、解析、文档序列化或输入法完整处理。

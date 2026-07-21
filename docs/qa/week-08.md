@@ -10,7 +10,9 @@
 
 第 8 周 Day 4「History 合并策略」已完成第一版。
 
-下一步继续完善撤销重做快捷键和更细粒度的合并边界。
+第 8 周 Day 5「History 闭环验收」已完成第一版。
+
+下一步进入第 9 周「Bold 和 Italic 闭环」。
 
 ## 已完成范围
 
@@ -30,6 +32,8 @@
 - 普通文本输入会携带 `typing` batch。
 - `recordHistory` 会合并连续同 batch 的 history entry。
 - demo 覆盖连续 typing 合并为一个 undo item 的验收路径。
+- 新增 `getHistoryShortcutAction`，统一识别撤销重做快捷键。
+- demo 主编辑器接入 Ctrl/Meta + Z、Ctrl/Meta + Shift + Z 和 Ctrl/Meta + Y。
 - 新增 `docs/features/history.md` 和 `docs/qa/history.md`。
 
 ## 自动化覆盖
@@ -42,15 +46,15 @@
 - `packages/core/tests/history/query.test.ts`
 - `packages/core/tests/history/undo.test.ts`
 - `packages/core/tests/history/redo.test.ts`
+- `packages/core/tests/history/shortcut.test.ts`
 - `packages/core/tests/history/command.test.ts`
 - `packages/core/tests/public-api.test.ts`
 - `tests/e2e/demo-shell.spec.ts`
 
 ## 当前限制
 
-- 暂未实现撤销重做快捷键。
 - 暂未实现按时间间隔、选区跳变或输入类型细分的复杂合并策略。
 
 ## 结论
 
-第 8 周 History 撤销重做闭环已完成到真实输入可记录、连续 typing 可合并、按钮级可验证状态；下一阶段应接入撤销重做快捷键。
+第 8 周 History 撤销重做闭环已完成到真实输入可记录、连续 typing 可合并、按钮和快捷键均可验证状态；下一阶段进入 Bold 和 Italic。

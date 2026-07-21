@@ -14,13 +14,13 @@
   - React 组件 `value`、`defaultValue`、`onChange` 和 `onTransaction` 初始渲染契约。
   - 输入 helper 的普通文本输入、Backspace、Delete 和 Enter transaction。
   - Command 注册、执行、可执行判断、默认注册表、状态矩阵、文本编辑 command 和 block 编辑 command。
-  - History 快照、entry 克隆、状态工厂、记录入口、batch 合并、查询 helper、undo/redo 栈转换和 history command。
+  - History 快照、entry 克隆、状态工厂、记录入口、batch 合并、查询 helper、undo/redo 栈转换、快捷键识别和 history command。
 - 命令：`pnpm test`。
 
 ## 浏览器测试
 
 - 工具：Playwright。
-- 范围：演示页面可打开，文档 JSON 面板、React 组件示例、渲染边界示例、选区调试面板、浏览器选区同步、基础编辑闭环、command 按钮复用、command 状态面板、selection 驱动的 command 状态切换、真实输入 history 记录、连续 typing 合并、History 撤销重做按钮和 undoStack/redoStack 状态展示可验证。
+- 范围：演示页面可打开，文档 JSON 面板、React 组件示例、渲染边界示例、选区调试面板、浏览器选区同步、基础编辑闭环、command 按钮复用、command 状态面板、selection 驱动的 command 状态切换、真实输入 history 记录、连续 typing 合并、History 撤销重做按钮、撤销重做快捷键和 undoStack/redoStack 状态展示可验证。
 - 命令：`pnpm test:e2e`。
 
 ## 类型检查
