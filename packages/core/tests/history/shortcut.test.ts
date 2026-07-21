@@ -23,4 +23,15 @@ describe("getHistoryShortcutAction", () => {
       "redo",
     );
   });
+
+  it("ignores plain keys, alt shortcuts and composing input", () => {
+    expect(getHistoryShortcutAction({ key: "z" })).toBeUndefined();
+    expect(
+      getHistoryShortcutAction({ altKey: true, ctrlKey: true, key: "z" }),
+    ).toBeUndefined();
+    expect(
+      getHistoryShortcutAction({ ctrlKey: true, isComposing: true, key: "z" }),
+    ).toBeUndefined();
+    expect(getHistoryShortcutAction({ ctrlKey: true, key: "b" })).toBeUndefined();
+  });
 });
