@@ -276,6 +276,20 @@ test("records editor typing in history", async ({ page }) => {
   await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
 });
 
+test("undos editor typing with keyboard shortcut", async ({ page }) => {
+  await page.goto("/");
+
+  await placeCaretInRenderedText(page, "[0,0]", 3);
+  await page.keyboard.type("真");
+  await page.keyboard.press("Control+Z");
+
+  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
+    '"text": "你好，crucialy-rich。"',
+  );
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+  await expect(page.getByLabel("History 状态")).toContainText('"redoStack": 1');
+});
+
 test("keeps the caret moving during consecutive beforeinput inserts", async ({
   page,
 }) => {
