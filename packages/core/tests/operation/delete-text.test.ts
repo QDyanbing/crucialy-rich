@@ -129,6 +129,31 @@ describe("applyDeleteText", () => {
     expect(result.children[0]?.children[0]?.text).toBe("你好，");
   });
 
+  it("preserves marks on the edited text node", () => {
+    const document = createDocument([
+      createParagraph([createText("你好世界", { italic: true })]),
+    ]);
+    const result = applyDeleteText(
+      document,
+      createDeleteTextOperation({
+        anchor: {
+          path: [0, 0],
+          offset: 1,
+        },
+        focus: {
+          path: [0, 0],
+          offset: 3,
+        },
+      }),
+    );
+
+    expect(result.children[0]?.children[0]).toEqual({
+      type: "text",
+      text: "你界",
+      marks: { italic: true },
+    });
+  });
+
   it("throws when a range point does not reference text", () => {
     const document = createDocument([createParagraph([createText("你好")])]);
 

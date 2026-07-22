@@ -95,6 +95,28 @@ describe("applySplitBlock", () => {
     expect(result.children[1]?.children.map((node) => node.text)).toEqual(["丙", "丁"]);
   });
 
+  it("preserves marks on both split text nodes", () => {
+    const document = createDocument([
+      createParagraph([createText("你好世界", { bold: true, italic: true })]),
+    ]);
+    const result = applySplitBlock(
+      document,
+      createSplitBlockOperation({
+        path: [0, 0],
+        offset: 2,
+      }),
+    );
+
+    expect(result.children[0]?.children[0]?.marks).toEqual({
+      bold: true,
+      italic: true,
+    });
+    expect(result.children[1]?.children[0]?.marks).toEqual({
+      bold: true,
+      italic: true,
+    });
+  });
+
   it("throws when the point does not reference text", () => {
     const document = createDocument([createParagraph([createText("你好")])]);
 

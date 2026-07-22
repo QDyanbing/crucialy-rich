@@ -87,6 +87,25 @@ describe("applyMergeBlock", () => {
     expect(result.children[0]?.children.map((node) => node.text)).toEqual(["世界"]);
   });
 
+  it("preserves marks from both merged blocks", () => {
+    const document = createDocument([
+      createParagraph([createText("你好", { bold: true })]),
+      createParagraph([createText("世界", { italic: true })]),
+    ]);
+    const result = applyMergeBlock(
+      document,
+      createMergeBlockOperation({
+        path: [1, 0],
+        offset: 0,
+      }),
+    );
+
+    expect(result.children[0]?.children.map((node) => node.marks)).toEqual([
+      { bold: true },
+      { italic: true },
+    ]);
+  });
+
   it("throws when merging the first block", () => {
     const document = createDocument([createParagraph([createText("你好")])]);
 

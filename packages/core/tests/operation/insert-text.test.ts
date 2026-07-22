@@ -87,6 +87,24 @@ describe("applyInsertText", () => {
     expect(result.children[0]?.children[0]?.text).toBe("你好，crucialy-rich。");
   });
 
+  it("preserves marks on the inserted text node", () => {
+    const document = createDocument([
+      createParagraph([createText("你好", { bold: true })]),
+    ]);
+    const result = applyInsertText(
+      document,
+      createInsertTextOperation(
+        {
+          path: [0, 0],
+          offset: 1,
+        },
+        "，",
+      ),
+    );
+
+    expect(result.children[0]?.children[0]?.marks).toEqual({ bold: true });
+  });
+
   it("throws when the point path does not reference text", () => {
     const document = createDocument([createParagraph([createText("你好")])]);
 
