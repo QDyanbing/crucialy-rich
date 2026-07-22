@@ -68,4 +68,52 @@ describe("validateDocument", () => {
       message: "paragraph 子节点必须是 text 节点",
     });
   });
+
+  it("accepts supported text marks", () => {
+    const document = createDocument([
+      createParagraph([createText("hi", { bold: true, italic: true })]),
+    ]);
+
+    expect(validateDocument(document)).toEqual({ valid: true, errors: [] });
+  });
+
+  it("rejects non-object text marks", () => {
+    const result = validateDocument({
+      type: "document",
+      children: [
+        { type: "paragraph", children: [{ type: "text", text: "x", marks: true }] },
+      ],
+    });
+
+    expect(result).toEqual({
+      valid: false,
+      errors: [{ path: [0, 0], message: "text marks 必须是对象" }],
+    });
+  });
+
+  it("rejects unsupported or non-true text marks", () => {
+    const result = validateDocument({
+      type: "document",
+      children: [
+        {
+          type: "paragraph",
+          children: [
+            {
+              type: "text",
+              text: "x",
+              marks: { bold: false, underline: true },
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(result).toEqual({
+      valid: false,
+      errors: [
+        { path: [0, 0], message: "text mark bold 的值必须是 true" },
+        { path: [0, 0], message: "text mark underline 不受支持" },
+      ],
+    });
+  });
 });
