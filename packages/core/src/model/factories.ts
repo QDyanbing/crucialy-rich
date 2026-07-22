@@ -1,11 +1,11 @@
+import { normalizeTextMarks } from "./marks";
 import type { DocumentNode, ParagraphNode, TextMarks, TextNode } from "./types";
 
 /**
  * 创建一个 text 节点，默认空字符串。
  */
 export function createText(text = "", marks?: TextMarks): TextNode {
-  const normalizedMarks =
-    marks === undefined || Object.keys(marks).length === 0 ? undefined : { ...marks };
+  const normalizedMarks = normalizeTextMarks(marks);
 
   return normalizedMarks === undefined
     ? { type: "text", text }
