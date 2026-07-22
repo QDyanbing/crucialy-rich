@@ -135,7 +135,7 @@ const redoCommand: Command;
 ## 当前限制
 
 - 暂未实现按时间间隔、选区跳变或输入类型细分的复杂合并策略。
-- 当前快照克隆只覆盖现有 document -> paragraph -> text 模型；后续 marks、attrs、heading 等扩展时需要同步扩展克隆规则。
+- 当前快照克隆覆盖 document -> paragraph -> text 和 text marks；后续 attrs、heading 等扩展时需要同步扩展克隆规则。
 
 ## 验收
 

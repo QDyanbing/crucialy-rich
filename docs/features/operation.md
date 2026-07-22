@@ -244,6 +244,6 @@ interface TransactionAcceptanceReport {
 - 插入非折叠选区时不会自动删除选中内容，当前插入点取 selection anchor。
 - 删除暂不支持跨 text 节点或跨 paragraph 范围。
 - 合并暂不支持跨多段批量合并。
-- transaction 当前只负责批量应用和结束 normalize，不包含 undo/redo inverse 信息。
+- transaction 当前只负责批量应用和结束 normalize；History 已使用快照策略提供撤销/重做，operation 层本身暂不生成 undo/redo inverse 信息。
+- text operation 会保留现有 text marks，但暂未实现跨 range 应用、拆分或合并 marks 的专门 operation。
 - 普通 `beforeinput insertText`、collapsed selection 下的 Backspace、collapsed selection 下的 Delete 和 collapsed selection 下的 Enter 已接入输入事件管线，并复用当前 operation/transaction 更新模型。
-- 尚未实现撤销重做。

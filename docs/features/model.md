@@ -10,7 +10,10 @@
 interface TextNode {
   type: "text";
   text: string;
+  marks?: TextMarks;
 }
+
+type TextMarks = Partial<Record<"bold" | "italic", true>>;
 
 interface ParagraphNode {
   type: "paragraph";
@@ -25,6 +28,8 @@ interface DocumentNode {
 
 `BlockNode` 现在等价于 `ParagraphNode`，后续加入 heading、quote、list 等块级节点时再扩展联合类型。
 
+`TextNode.marks` 当前支持 `bold` 和 `italic` 两个内联格式标记。mark 只记录启用状态，值固定为 `true`；没有任何启用 mark 时省略 `marks` 字段。
+
 ## 类型判断
 
 提供运行时类型判断，对未知输入安全：
@@ -38,7 +43,7 @@ interface DocumentNode {
 
 ## 创建接口
 
-- `createText(text = "")`：创建 text 节点，默认空字符串。
+- `createText(text = "", marks?)`：创建 text 节点，默认空字符串，可携带 text marks。
 - `createParagraph(children = [createText()])`：创建段落，默认含一个空 text。
 - `createDocument(children = [createParagraph()])`：创建文档，默认含一个空段落。
 
@@ -51,6 +56,7 @@ interface DocumentNode {
 - 根节点必须是 `document`。
 - `document` 的 `children` 只能是块级节点。
 - `paragraph` 的 `children` 只能是 `text` 节点。
+- text marks 只能包含受支持的 `true` 值。
 
 每条错误带 `path`（节点路径，root 为空数组）和 `message`，便于定位非法节点。
 
@@ -61,12 +67,14 @@ interface DocumentNode {
 - 非 `document` 根节点替换为空文档。
 - 空 `document` 自动补一个空段落。
 - 段落里的非法 `children` 被丢弃。
+- text marks 会被规范化为受支持的 `true` 值。
 - 空 `paragraph` 自动补一个空 `text`。
 
 修复后的结果一定能通过 `validateDocument`。
 
 ## 当前限制
 
-- 只支持 paragraph 和纯文本，不支持 marks、heading、list 等。
+- 只支持 paragraph、text 和 text marks，不支持 heading、list 等。
+- text marks 当前只完成模型表达、helper、校验、规范化和编辑保留；暂未接入 mark 命令、toolbar 或 renderer 标签输出。
 - 第一版节点不包含 `attrs` 字段，后续新增 heading、link、image 等能力时再引入属性模型。
 - 规范化会丢弃非法节点而不尝试转换，转换策略留待后续。
