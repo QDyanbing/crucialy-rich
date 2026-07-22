@@ -11,6 +11,13 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.createDocument).toBe("function");
     expect(typeof core.createParagraph).toBe("function");
     expect(typeof core.createText).toBe("function");
+    expect(core.TEXT_MARK_TYPES).toEqual(["bold", "italic"]);
+    expect(typeof core.addTextMark).toBe("function");
+    expect(typeof core.areTextMarksEqual).toBe("function");
+    expect(typeof core.hasTextMark).toBe("function");
+    expect(typeof core.normalizeTextMarks).toBe("function");
+    expect(typeof core.removeTextMark).toBe("function");
+    expect(typeof core.toggleTextMark).toBe("function");
     expect(typeof core.validateDocument).toBe("function");
     expect(typeof core.normalizeDocument).toBe("function");
     expect(typeof core.isDocumentNode).toBe("function");
