@@ -1,4 +1,4 @@
-import type { DocumentNode } from "../model";
+import { createText, type DocumentNode } from "../model";
 import type { Point, RangeSelection } from "../selection";
 import type { HistorySnapshot } from "./types";
 
@@ -7,10 +7,9 @@ function cloneDocument(document: DocumentNode): DocumentNode {
     type: "document",
     children: document.children.map((block) => ({
       type: "paragraph",
-      children: block.children.map((textNode) => ({
-        type: "text",
-        text: textNode.text,
-      })),
+      children: block.children.map((textNode) =>
+        createText(textNode.text, textNode.marks),
+      ),
     })),
   };
 }
