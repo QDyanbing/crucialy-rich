@@ -56,4 +56,44 @@ describe("normalizeDocument", () => {
     expect(result.children[0]?.children[0]?.text).toBe("keep");
     expect(validateDocument(result).valid).toBe(true);
   });
+
+  it("preserves supported text marks", () => {
+    const result = normalizeDocument({
+      type: "document",
+      children: [
+        {
+          type: "paragraph",
+          children: [{ type: "text", text: "keep", marks: { bold: true } }],
+        },
+      ],
+    });
+
+    expect(result.children[0]?.children[0]?.marks).toEqual({ bold: true });
+    expect(validateDocument(result).valid).toBe(true);
+  });
+
+  it("drops unsupported or disabled text marks", () => {
+    const result = normalizeDocument({
+      type: "document",
+      children: [
+        {
+          type: "paragraph",
+          children: [
+            {
+              type: "text",
+              text: "keep",
+              marks: { bold: false, italic: true, underline: true },
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(result.children[0]?.children[0]).toEqual({
+      type: "text",
+      text: "keep",
+      marks: { italic: true },
+    });
+    expect(validateDocument(result).valid).toBe(true);
+  });
 });
