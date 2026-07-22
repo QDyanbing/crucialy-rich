@@ -1,6 +1,6 @@
 # 测试策略
 
-当前阶段已经包含工程冒烟测试、文档模型单测、模型选区单测、渲染与 DOM 映射单测、React 组件 API 单测、输入 helper 单测、command 单测、history 单测和演示端到端验收。
+当前阶段已经包含工程冒烟测试、文档模型单测、text marks 单测、模型选区单测、渲染与 DOM 映射单测、React 组件 API 单测、输入 helper 单测、command 单测、history 单测和演示端到端验收。
 
 ## 单元测试
 
@@ -9,6 +9,7 @@
   - 工作区冒烟测试。
   - 包入口可导入。
   - 文档模型类型、创建、类型判断、校验和规范化。
+  - Text marks 类型、helper、校验、规范化、operation 保留和 history 快照保留。
   - Path、Point、RangeSelection 和文本切片工具。
   - 基础渲染器、HTML 序列化、DOM 与模型位置映射和选区同步。
   - React 组件 `value`、`defaultValue`、`onChange` 和 `onTransaction` 初始渲染契约。

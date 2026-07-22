@@ -2,7 +2,7 @@
 
 自研富文本编辑内核，不依赖 ProseMirror、Tiptap、Lexical、Slate 作为运行时内核。
 
-> 当前处于早期阶段，已提供文档模型、模型选区、基础渲染器、DOM 与模型位置映射、选区双向同步、`insertText`、`deleteText`、`splitBlock`、`mergeBlock` operation、Transaction、Operation 闭环验收工具、输入 helper、Command 系统、默认 Command 注册表和 History 撤销重做与快捷键识别第一版，基础编辑 transaction 与 selection 计算已闭环。
+> 当前处于早期阶段，已提供文档模型、text marks 模型基础、模型选区、基础渲染器、DOM 与模型位置映射、选区双向同步、`insertText`、`deleteText`、`splitBlock`、`mergeBlock` operation、Transaction、Operation 闭环验收工具、输入 helper、Command 系统、默认 Command 注册表和 History 撤销重做与快捷键识别第一版，基础编辑 transaction 与 selection 计算已闭环。
 
 ## 安装
 
@@ -15,6 +15,7 @@ pnpm add @crucialy-rich/core
 ```ts
 import {
   createDocument,
+  addTextMark,
   applyTransaction,
   createParagraph,
   createBackspaceInputTransaction,
@@ -32,16 +33,22 @@ import {
   createInsertTextOperation,
   createSplitBlockOperation,
   getTextInRange,
+  normalizeTextMarks,
   normalizeDocument,
   queryCommandState,
   recordHistory,
   undoHistory,
+  toggleTextMark,
   validateDocument,
 } from "@crucialy-rich/core";
 
 const document = createDocument([
-  createParagraph([createText("你好，crucialy-rich。")]),
+  createParagraph([createText("你好，crucialy-rich。", { bold: true })]),
 ]);
+const marks = toggleTextMark(
+  addTextMark(normalizeTextMarks({ bold: true }), "italic"),
+  "bold",
+);
 
 const validation = validateDocument(document);
 const normalized = normalizeDocument(document);
@@ -117,8 +124,9 @@ const undoChange = undoHistory(history);
 
 ## 当前 API 范围
 
-- 文档模型：`DocumentNode`、`BlockNode`、`ParagraphNode`、`TextNode`。
+- 文档模型：`DocumentNode`、`BlockNode`、`ParagraphNode`、`TextNode`、`TextMarks`、`TextMarkType`、`TEXT_MARK_TYPES`。
 - 创建和判断：`createDocument`、`createParagraph`、`createText`、`isTextNode`、`isBlockNode`、`isDocumentNode`。
+- 文字标记：`normalizeTextMarks`、`hasTextMark`、`addTextMark`、`removeTextMark`、`toggleTextMark`、`areTextMarksEqual`。
 - 校验和修复：`validateDocument`、`normalizeDocument`。
 - 选区：`Path`、`Point`、`RangeSelection`、`getNodeAtPath`、`isValidPoint`、`normalizeRange`、`getTextInRange`、`splitTextByRange`。
 - 基础渲染：`renderDocument`、`renderNodeToHtml`、`MODEL_PATH_ATTRIBUTE`、`encodeModelPath`、`decodeModelPath`。

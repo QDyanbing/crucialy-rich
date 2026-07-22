@@ -46,6 +46,7 @@
 - 新增 React `onTransaction` 回调，真实输入会暴露 before、after、transaction、inputType、输入前后 selection 和可选 batch。
 - 新增连续输入 history 合并第一版，普通文本输入通过 `typing` batch 合并为一个 undo item。
 - 新增 History 快捷键识别和 demo 接入，支持 Ctrl/Meta + Z 撤销、Ctrl/Meta + Shift + Z 和 Ctrl/Meta + Y 重做。
+- 新增 text marks 模型基础，包含 `bold` / `italic` 类型、helper、校验、规范化、operation 保留、history 快照保留、文档和 QA。
 
 ### 变更
 
