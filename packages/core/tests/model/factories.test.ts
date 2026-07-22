@@ -14,6 +14,14 @@ describe("model factories", () => {
     expect(createText("hi").text).toBe("hi");
   });
 
+  it("creates a text node with cloned marks", () => {
+    const marks = { bold: true as const };
+    const text = createText("hi", marks);
+
+    expect(text).toEqual({ type: "text", text: "hi", marks: { bold: true } });
+    expect(text.marks).not.toBe(marks);
+  });
+
   it("creates a paragraph with a default empty text", () => {
     const paragraph = createParagraph();
     expect(isParagraphNode(paragraph)).toBe(true);
