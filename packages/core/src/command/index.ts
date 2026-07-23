@@ -6,6 +6,12 @@ export {
   SPLIT_BLOCK_COMMAND_NAME,
   splitBlockCommand,
 } from "./block";
+export {
+  BOLD_COMMAND_NAME,
+  boldCommand,
+  canExecuteBoldCommand,
+  isBoldCommandActive,
+} from "./mark";
 export { canExecuteCommand } from "./can-execute";
 export { createDefaultCommandRegistry, DEFAULT_COMMANDS } from "./defaults";
 export { executeCommand } from "./execute";
