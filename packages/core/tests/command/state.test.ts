@@ -7,6 +7,7 @@ import {
   createDocument,
   createParagraph,
   createText,
+  BOLD_COMMAND_NAME,
   DELETE_SELECTION_COMMAND_NAME,
   INSERT_TEXT_COMMAND_NAME,
   MERGE_BLOCK_COMMAND_NAME,
@@ -109,6 +110,11 @@ describe("queryCommandState", () => {
     expect(
       queryCommandState(registry, INSERT_TEXT_COMMAND_NAME, rangeInput).disabled,
     ).toBe(false);
+    expect(queryCommandState(registry, BOLD_COMMAND_NAME, rangeInput)).toMatchObject({
+      active: false,
+      disabled: false,
+      registered: true,
+    });
     expect(
       queryCommandState(registry, DELETE_SELECTION_COMMAND_NAME, rangeInput).disabled,
     ).toBe(false);
@@ -121,5 +127,28 @@ describe("queryCommandState", () => {
     expect(
       queryCommandState(registry, MERGE_BLOCK_COMMAND_NAME, collapsedInput).disabled,
     ).toBe(true);
+  });
+
+  it("reads active bold state from the default registry", () => {
+    const registry = createDefaultCommandRegistry();
+    const document = createDocument([
+      createParagraph([createText("你好", { bold: true })]),
+    ]);
+
+    expect(
+      queryCommandState(registry, BOLD_COMMAND_NAME, {
+        context: {
+          document,
+          selection: {
+            anchor: { path: [0, 0], offset: 1 },
+            focus: { path: [0, 0], offset: 1 },
+          },
+        },
+      }),
+    ).toMatchObject({
+      active: true,
+      disabled: false,
+      registered: true,
+    });
   });
 });

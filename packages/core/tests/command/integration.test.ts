@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   applyTransaction,
+  BOLD_COMMAND_NAME,
   createDefaultCommandRegistry,
   createDocument,
   createParagraph,
@@ -75,5 +76,21 @@ describe("default command registry integration", () => {
 
     expect(merged.ok).toBe(true);
     expect(merged.transaction?.operations[0]?.type).toBe("merge_block");
+
+    const bolded = executeCommand(registry, BOLD_COMMAND_NAME, {
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [0, 0], offset: 1 },
+        },
+      },
+    });
+
+    expect(bolded.ok).toBe(true);
+    expect(bolded.transaction?.operations[0]).toMatchObject({
+      mark: "bold",
+      type: "toggle_mark",
+    });
   });
 });
