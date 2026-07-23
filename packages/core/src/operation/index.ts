@@ -46,6 +46,7 @@ export type {
   MergeBlockOperation,
   Operation,
   SplitBlockOperation,
+  ToggleMarkOperation,
   OperationType,
   Transaction,
 } from "./types";

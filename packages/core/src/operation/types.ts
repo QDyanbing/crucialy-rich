@@ -1,8 +1,10 @@
+import type { TextMarkType } from "../model";
 import type { Point, RangeSelection } from "../selection";
 
 export const OPERATION_TYPES = [
   "insert_text",
   "delete_text",
+  "toggle_mark",
   "split_block",
   "merge_block",
 ] as const;
@@ -20,6 +22,12 @@ export interface DeleteTextOperation {
   type: "delete_text";
 }
 
+export interface ToggleMarkOperation {
+  mark: TextMarkType;
+  range: RangeSelection;
+  type: "toggle_mark";
+}
+
 export interface SplitBlockOperation {
   point: Point;
   type: "split_block";
@@ -34,7 +42,8 @@ export type Operation =
   | DeleteTextOperation
   | InsertTextOperation
   | MergeBlockOperation
-  | SplitBlockOperation;
+  | SplitBlockOperation
+  | ToggleMarkOperation;
 
 export interface Transaction {
   operations: Operation[];
