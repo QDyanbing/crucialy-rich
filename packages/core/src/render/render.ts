@@ -1,4 +1,9 @@
-import type { DocumentNode, ParagraphNode, TextNode } from "../model";
+import {
+  hasTextMark,
+  type DocumentNode,
+  type ParagraphNode,
+  type TextNode,
+} from "../model";
 import type { Path } from "../selection";
 import { createModelPathAttributes } from "./attributes";
 import type { RenderedElementNode } from "./types";
@@ -17,7 +22,9 @@ function createRenderedNode(
 }
 
 function renderTextNode(node: TextNode, path: Path): RenderedElementNode {
-  return createRenderedNode("span", path, { text: node.text });
+  return createRenderedNode(hasTextMark(node.marks, "bold") ? "strong" : "span", path, {
+    text: node.text,
+  });
 }
 
 function renderParagraphNode(node: ParagraphNode, path: Path): RenderedElementNode {
