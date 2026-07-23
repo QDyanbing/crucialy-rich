@@ -2,7 +2,7 @@
 
 Operation 用于描述一次对文档模型的可复现修改。Transaction 用于把多个 operation 按顺序组合为一次批量模型变更。
 
-当前阶段已经实现 `insert_text`、`delete_text`、`split_block`、`merge_block` 和第一版 transaction。
+当前阶段已经实现 `insert_text`、`delete_text`、`toggle_mark`、`split_block`、`merge_block` 和第一版 transaction。
 
 ## 操作类型
 
@@ -15,6 +15,12 @@ interface InsertTextOperation {
 
 interface DeleteTextOperation {
   type: "delete_text";
+  range: RangeSelection;
+}
+
+interface ToggleMarkOperation {
+  type: "toggle_mark";
+  mark: TextMarkType;
   range: RangeSelection;
 }
 
@@ -43,10 +49,11 @@ interface TransactionAcceptanceReport {
 
 字段说明：
 
-- `type`：当前支持 `insert_text`、`delete_text`、`split_block` 和 `merge_block`。
+- `type`：当前支持 `insert_text`、`delete_text`、`toggle_mark`、`split_block` 和 `merge_block`。
 - `point`：插入、分段或合并位置，必须指向 text 节点内的合法偏移。
 - `text`：要插入的文本。
-- `range`：删除范围，当前必须落在同一个 text 节点内。
+- `range`：删除范围或 mark 范围，当前必须落在同一个 text 节点内。
+- `mark`：要切换的 text mark，当前用于 `toggle_mark`。
 - `operations`：transaction 中按顺序执行的 operation 列表。
 - `TransactionSummary`：transaction 的只读摘要，包含操作总数、操作类型顺序、文本操作数量和块级操作数量。
 - `TransactionAcceptanceReport`：transaction 闭环验收报告，包含执行前校验、执行后校验、事务摘要和失败错误。
@@ -240,7 +247,7 @@ interface TransactionAcceptanceReport {
 
 ## 当前限制
 
-- 当前只实现 `insert_text`、同 text 节点内的 `delete_text`、paragraph 级 `split_block` 和 `merge_block`。
+- 当前只实现 `insert_text`、同 text 节点内的 `delete_text`、同 text 节点内的 `toggle_mark`、paragraph 级 `split_block` 和 `merge_block`。
 - 插入非折叠选区时不会自动删除选中内容，当前插入点取 selection anchor。
 - 删除暂不支持跨 text 节点或跨 paragraph 范围。
 - 合并暂不支持跨多段批量合并。

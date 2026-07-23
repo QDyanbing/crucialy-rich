@@ -1,6 +1,6 @@
 # 基础渲染（第一版）
 
-基础渲染负责把当前文档模型转换为可展示的 DOM 结构描述。第一版只覆盖 `document`、`paragraph` 和 `text`。
+基础渲染负责把当前文档模型转换为可展示的 DOM 结构描述。当前覆盖 `document`、`paragraph`、`text` 和 bold text mark。
 
 ## 渲染结构
 
@@ -9,12 +9,13 @@
 - `document` → `div`
 - `paragraph` → `p`
 - `text` → `span`
+- `text` + `marks.bold` → `strong`
 
 `renderDocument(document)` 返回 `RenderedElementNode` 树：
 
 ```ts
 interface RenderedElementNode {
-  tagName: "div" | "p" | "span";
+  tagName: "div" | "p" | "span" | "strong";
   path: Path;
   attributes: Record<string, string>;
   children?: RenderedElementNode[];
@@ -66,6 +67,7 @@ interface RenderedElementNode {
 - 空 document 渲染为带根路径的空 `div`。
 - 空 paragraph 渲染为带路径的空 `p`。
 - 多段落按块顺序分配 `[0]`、`[1]`、`[2]` 等路径。
+- 加粗 text 渲染为带 text path 的 `strong`，不改变 DOM 与模型路径对应关系。
 
 ## 演示验收
 
@@ -81,4 +83,4 @@ interface RenderedElementNode {
 
 - 浏览器选区同步当前只覆盖已验证的基础场景。
 - 不处理 `contentEditable`、`beforeinput` 或真实编辑行为。
-- 不包含标记、标题、列表等扩展节点渲染。
+- 当前只包含 bold 标记渲染，italic、标题、列表等扩展节点渲染尚未实现。

@@ -1,6 +1,6 @@
 # Command 系统（第一版）
 
-Command 系统负责把“可执行的编辑意图”包装成统一接口。当前阶段提供注册、查询、可执行判断、按名称执行、状态读取，并内置文本插入、删除选区、分段和合并段落 command。
+Command 系统负责把“可执行的编辑意图”包装成统一接口。当前阶段提供注册、查询、可执行判断、按名称执行、状态读取，并内置加粗、文本插入、删除选区、分段和合并段落 command。
 
 ## 当前范围
 
@@ -12,6 +12,7 @@ Command 系统负责把“可执行的编辑意图”包装成统一接口。当
 - 提供 `canExecuteCommand` 判断 command 是否可执行。
 - 提供 `executeCommand` 按名称执行 command。
 - 提供 `queryCommandState` 读取 command 的 registered、disabled、active 和不可用原因。
+- 提供 `boldCommand`，支持同一 text 节点内的 range selection 加粗/取消加粗，以及 collapsed selection 的后续输入加粗占位。
 - 提供 `insertTextCommand`，支持 collapsed selection 插入文本，也支持同一 text 节点内的 range selection 替换文本。
 - 提供 `deleteSelectionCommand`，支持同一 text 节点内的 range selection 删除文本。
 - 提供 `splitBlockCommand`，支持 collapsed selection 下分裂 paragraph。
@@ -69,6 +70,10 @@ function queryCommandState(
   input: CommandInput,
 ): CommandState;
 
+const BOLD_COMMAND_NAME = "bold";
+
+const boldCommand: Command;
+
 const INSERT_TEXT_COMMAND_NAME = "insertText";
 
 interface InsertTextCommandPayload {
@@ -101,6 +106,7 @@ const mergeBlockCommand: Command;
 - command 注册但 `canExecute` 返回 `false` 时，`queryCommandState` 返回 `disabled: true`。
 - command 没有 `isActive` 时，`queryCommandState` 默认 `active: false`。
 - command 提供 `isActive` 时，`queryCommandState` 使用它返回工具栏激活态。
+- `boldCommand` 成功时返回包含 `toggle_mark` 的 transaction，并根据当前 text 节点 marks 返回 active 状态。
 - `insertTextCommand` 成功时返回包含 `insert_text` 的 transaction；range selection 下会先生成 `delete_text`，再生成 `insert_text`。
 - `deleteSelectionCommand` 成功时返回包含 `delete_text` 的 transaction。
 - `splitBlockCommand` 成功时返回包含 `split_block` 的 transaction。
@@ -110,12 +116,13 @@ const mergeBlockCommand: Command;
 - React 编辑器的 Enter 会优先复用 `splitBlockCommand`。
 - React 编辑器的段首 Backspace 会优先复用 `mergeBlockCommand`。
 - React 编辑器的段尾 Delete 会优先复用 `mergeBlockCommand` 合并下一段。
-- demo 操作区的“插入”“删除选区”“分段”和“合并段落”按钮会通过 `executeCommand` 调用 command。
+- demo 操作区的“加粗”“插入”“删除选区”“分段”和“合并段落”按钮会通过 `executeCommand` 调用 command。
 - demo 操作区会通过 `queryCommandState` 展示 command 可用状态，并用 disabled 状态控制按钮。
 
 ## 当前限制
 
 - 文本 command 当前只处理同一 text 节点内的 range selection。
+- Bold command 当前只处理同一 text 节点内的 selection；跨节点 mark 应用留到 Mark 切分和合并阶段。
 - block command 当前只处理 collapsed selection。
 - 当前没有 command 分组、快捷键绑定或权限系统。
 - History 模块已提供 `undoCommand` 和 `redoCommand`；默认 Command 注册表暂不内置 history command。
