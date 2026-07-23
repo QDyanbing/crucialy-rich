@@ -6,6 +6,7 @@ import {
   createInsertTextOperation,
   createMergeBlockOperation,
   createSplitBlockOperation,
+  createToggleMarkOperation,
   createTransaction,
   isBlockOperation,
   isTextOperation,
@@ -20,10 +21,11 @@ describe("operation type registry", () => {
     expect(OPERATION_TYPES).toEqual([
       "insert_text",
       "delete_text",
+      "toggle_mark",
       "split_block",
       "merge_block",
     ]);
-    expect(TEXT_OPERATION_TYPES).toEqual(["insert_text", "delete_text"]);
+    expect(TEXT_OPERATION_TYPES).toEqual(["insert_text", "delete_text", "toggle_mark"]);
     expect(BLOCK_OPERATION_TYPES).toEqual(["split_block", "merge_block"]);
   });
 });
@@ -38,9 +40,17 @@ describe("operation scope classification", () => {
       anchor: { path: [0, 0], offset: 0 },
       focus: { path: [0, 0], offset: 1 },
     });
+    const toggleMarkOperation = createToggleMarkOperation(
+      {
+        anchor: { path: [0, 0], offset: 0 },
+        focus: { path: [0, 0], offset: 1 },
+      },
+      "bold",
+    );
 
     expect(isTextOperation(insertOperation)).toBe(true);
     expect(isTextOperation(deleteOperation)).toBe(true);
+    expect(isTextOperation(toggleMarkOperation)).toBe(true);
     expect(isBlockOperation(insertOperation)).toBe(false);
   });
 
@@ -110,6 +120,25 @@ describe("summarizeOperation", () => {
       type: "merge_block",
     });
   });
+
+  it("summarizes toggle mark operations", () => {
+    const operation = createToggleMarkOperation(
+      {
+        anchor: { path: [0, 0], offset: 3 },
+        focus: { path: [0, 0], offset: 1 },
+      },
+      "bold",
+    );
+
+    expect(summarizeOperation(operation)).toEqual({
+      collapsedRange: false,
+      mark: "bold",
+      scope: "text",
+      targetPath: [0, 0],
+      textLength: 2,
+      type: "toggle_mark",
+    });
+  });
 });
 
 describe("summarizeTransaction", () => {
@@ -120,6 +149,13 @@ describe("summarizeTransaction", () => {
         anchor: { path: [0, 0], offset: 1 },
         focus: { path: [0, 0], offset: 2 },
       }),
+      createToggleMarkOperation(
+        {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [0, 0], offset: 1 },
+        },
+        "bold",
+      ),
       createSplitBlockOperation({ path: [0, 0], offset: 2 }),
       createMergeBlockOperation({ path: [1, 0], offset: 0 }),
     ]);
@@ -128,9 +164,15 @@ describe("summarizeTransaction", () => {
       blockOperationCount: 2,
       hasBlockOperations: true,
       hasTextOperations: true,
-      operationCount: 4,
-      operationTypes: ["insert_text", "delete_text", "split_block", "merge_block"],
-      textOperationCount: 2,
+      operationCount: 5,
+      operationTypes: [
+        "insert_text",
+        "delete_text",
+        "toggle_mark",
+        "split_block",
+        "merge_block",
+      ],
+      textOperationCount: 3,
     });
   });
 

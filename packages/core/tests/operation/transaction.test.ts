@@ -13,6 +13,7 @@ import {
   createInsertTextOperation,
   createMergeBlockOperation,
   createSplitBlockOperation,
+  createToggleMarkOperation,
   createTransaction,
 } from "../../src/operation";
 
@@ -105,6 +106,26 @@ describe("applyOperation", () => {
       "世界",
     ]);
   });
+
+  it("applies a toggle mark operation", () => {
+    const document = createDocument([createParagraph([createText("你好")])]);
+    const result = applyOperation(
+      document,
+      createToggleMarkOperation(
+        {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [0, 0], offset: 2 },
+        },
+        "bold",
+      ),
+    );
+
+    expect(result.children[0]?.children[0]).toEqual({
+      type: "text",
+      text: "你好",
+      marks: { bold: true },
+    });
+  });
 });
 
 describe("applyTransaction", () => {
@@ -132,6 +153,38 @@ describe("applyTransaction", () => {
 
     expect(result.children).toHaveLength(1);
     expect(result.children[0]?.children[0]?.text).toBe("");
+  });
+
+  it("clones and applies toggle mark operations", () => {
+    const document = createDocument([createParagraph([createText("你好")])]);
+    const anchorPath = [0, 0];
+    const focusPath = [0, 0];
+    const transaction = createTransaction([
+      createToggleMarkOperation(
+        {
+          anchor: { path: anchorPath, offset: 0 },
+          focus: { path: focusPath, offset: 2 },
+        },
+        "bold",
+      ),
+    ]);
+
+    anchorPath[0] = 9;
+    focusPath[0] = 8;
+
+    expect(transaction.operations[0]).toEqual({
+      mark: "bold",
+      range: {
+        anchor: { path: [0, 0], offset: 0 },
+        focus: { path: [0, 0], offset: 2 },
+      },
+      type: "toggle_mark",
+    });
+    expect(applyTransaction(document, transaction).children[0]?.children[0]).toEqual({
+      type: "text",
+      text: "你好",
+      marks: { bold: true },
+    });
   });
 
   it("does not mutate the original document when an operation fails", () => {
