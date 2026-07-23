@@ -65,12 +65,16 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.createMergeBlockOperation).toBe("function");
     expect(typeof core.applyMergeBlock).toBe("function");
     expect(typeof core.createSelectionAfterMergeBlock).toBe("function");
+    expect(typeof core.createToggleMarkOperation).toBe("function");
+    expect(typeof core.applyToggleMark).toBe("function");
+    expect(typeof core.createSelectionAfterToggleMark).toBe("function");
     expect(typeof core.createTransaction).toBe("function");
     expect(typeof core.applyOperation).toBe("function");
     expect(typeof core.applyTransaction).toBe("function");
     expect(core.OPERATION_TYPES).toEqual([
       "insert_text",
       "delete_text",
+      "toggle_mark",
       "split_block",
       "merge_block",
     ]);
@@ -118,10 +122,12 @@ describe("@crucialy-rich/core public API", () => {
   });
 
   it("exposes the command API", () => {
+    expect(typeof core.BOLD_COMMAND_NAME).toBe("string");
     expect(typeof core.DELETE_SELECTION_COMMAND_NAME).toBe("string");
     expect(typeof core.INSERT_TEXT_COMMAND_NAME).toBe("string");
     expect(typeof core.MERGE_BLOCK_COMMAND_NAME).toBe("string");
     expect(typeof core.SPLIT_BLOCK_COMMAND_NAME).toBe("string");
+    expect(typeof core.canExecuteBoldCommand).toBe("function");
     expect(typeof core.canExecuteCommand).toBe("function");
     expect(typeof core.canExecuteDeleteSelectionCommand).toBe("function");
     expect(typeof core.canExecuteInsertTextCommand).toBe("function");
@@ -133,14 +139,17 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.createCommandSkipped).toBe("function");
     expect(typeof core.createCommandSuccess).toBe("function");
     expect(core.DEFAULT_COMMANDS.map((command) => command.name)).toEqual([
+      "bold",
       "deleteSelection",
       "insertText",
       "mergeBlock",
       "splitBlock",
     ]);
+    expect(typeof core.boldCommand).toBe("object");
     expect(typeof core.deleteSelectionCommand).toBe("object");
     expect(typeof core.executeCommand).toBe("function");
     expect(typeof core.insertTextCommand).toBe("object");
+    expect(typeof core.isBoldCommandActive).toBe("function");
     expect(typeof core.mergeBlockCommand).toBe("object");
     expect(typeof core.queryCommandState).toBe("function");
     expect(typeof core.splitBlockCommand).toBe("object");
