@@ -1,5 +1,6 @@
 import {
   applyTransaction,
+  BOLD_COMMAND_NAME,
   canRedo,
   canUndo,
   createDefaultCommandRegistry,
@@ -105,6 +106,7 @@ const uncontrolledPreviewDocument = createDocument([
 const demoCommandRegistry = createDefaultCommandRegistry();
 
 const demoCommandDescriptors: DemoCommandDescriptor[] = [
+  { label: "加粗", name: BOLD_COMMAND_NAME },
   { label: "插入", name: INSERT_TEXT_COMMAND_NAME },
   { label: "删除选区", name: DELETE_SELECTION_COMMAND_NAME },
   { label: "分段", name: SPLIT_BLOCK_COMMAND_NAME },
@@ -527,6 +529,17 @@ function DemoApp() {
     );
   }
 
+  function handleBold() {
+    applyCommandResult(
+      executeCommand(demoCommandRegistry, BOLD_COMMAND_NAME, {
+        context: {
+          document: normalizedDocument,
+          selection: modelSelection,
+        },
+      }),
+    );
+  }
+
   function handleDeleteText() {
     applyCommandResult(
       executeCommand(demoCommandRegistry, DELETE_SELECTION_COMMAND_NAME, {
@@ -687,6 +700,13 @@ function DemoApp() {
               onClick={handleInsertText}
             >
               插入
+            </button>
+            <button
+              type="button"
+              disabled={isCommandDisabled(BOLD_COMMAND_NAME)}
+              onClick={handleBold}
+            >
+              加粗
             </button>
             <button
               type="button"
