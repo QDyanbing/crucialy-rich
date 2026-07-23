@@ -108,4 +108,19 @@ describe("renderDocument", () => {
       ],
     });
   });
+
+  it("renders bold text marks as strong elements", () => {
+    const document = createDocument([
+      createParagraph([createText("Bold", { bold: true })]),
+    ]);
+
+    expect(renderDocument(document).children?.[0]?.children?.[0]).toEqual({
+      tagName: "strong",
+      path: [0, 0],
+      attributes: {
+        [MODEL_PATH_ATTRIBUTE]: "[0,0]",
+      },
+      text: "Bold",
+    });
+  });
 });

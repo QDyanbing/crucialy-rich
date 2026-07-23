@@ -21,4 +21,14 @@ describe("renderNodeToHtml", () => {
       "&lt;script&gt;&quot;&amp;",
     );
   });
+
+  it("serializes bold text marks as strong elements", () => {
+    const document = createDocument([
+      createParagraph([createText("Bold", { bold: true })]),
+    ]);
+
+    expect(renderNodeToHtml(renderDocument(document))).toContain(
+      '<strong data-crucialy-path="[0,0]">Bold</strong>',
+    );
+  });
 });
