@@ -49,6 +49,7 @@ test("updates command states from the current selection", async ({ page }) => {
   await page.goto("/");
 
   await expect(page.getByLabel("插入 Command 状态")).toContainText("可用");
+  await expect(page.getByLabel("加粗 Command 状态")).toContainText("可用");
   await expect(page.getByLabel("删除选区 Command 状态")).toContainText("可用");
   await expect(page.getByLabel("分段 Command 状态")).toContainText("不可用");
   await expect(page.getByLabel("合并段落 Command 状态")).toContainText("不可用");
@@ -62,6 +63,26 @@ test("updates command states from the current selection", async ({ page }) => {
   await page.getByLabel("焦点路径").fill("1,0");
 
   await expect(page.getByLabel("合并段落 Command 状态")).toContainText("可用");
+});
+
+test("toggles bold from the demo controls", async ({ page }) => {
+  await page.goto("/");
+
+  await page.getByRole("button", { name: "加粗" }).click();
+
+  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
+    '"marks": {',
+  );
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"type": "toggle_mark"',
+  );
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"mark": "bold"',
+  );
+  await expect(
+    page.getByLabel("已渲染文档").locator('strong[data-crucialy-path="[0,0]"]'),
+  ).toContainText("你好，cr");
+  await expect(page.getByLabel("加粗 Command 状态")).toContainText("激活");
 });
 
 test("renders the model document in the editor preview", async ({ page }) => {
