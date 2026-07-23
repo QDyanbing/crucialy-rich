@@ -4,6 +4,7 @@ import { applyDeleteText } from "./delete-text";
 import { applyInsertText } from "./insert-text";
 import { applyMergeBlock } from "./merge-block";
 import { applySplitBlock } from "./split-block";
+import { applyToggleMark } from "./toggle-mark";
 import type { Operation, Transaction } from "./types";
 
 function clonePoint(point: Point): Point {
@@ -33,6 +34,12 @@ export function cloneOperation(operation: Operation): Operation {
         text: operation.text,
         type: "insert_text",
       };
+    case "toggle_mark":
+      return {
+        mark: operation.mark,
+        range: cloneRange(operation.range),
+        type: "toggle_mark",
+      };
     case "merge_block":
       return {
         point: clonePoint(operation.point),
@@ -61,6 +68,8 @@ export function applyOperation(
       return applyDeleteText(document, operation);
     case "insert_text":
       return applyInsertText(document, operation);
+    case "toggle_mark":
+      return applyToggleMark(document, operation);
     case "merge_block":
       return applyMergeBlock(document, operation);
     case "split_block":

@@ -7,15 +7,21 @@ import type {
   Operation,
   OperationType,
   SplitBlockOperation,
+  ToggleMarkOperation,
   Transaction,
 } from "./types";
+import type { TextMarkType } from "../model";
 
-export type TextOperation = DeleteTextOperation | InsertTextOperation;
+export type TextOperation =
+  | DeleteTextOperation
+  | InsertTextOperation
+  | ToggleMarkOperation;
 
 export type BlockOperation = MergeBlockOperation | SplitBlockOperation;
 
 export interface OperationSummary {
   collapsedRange?: boolean;
+  mark?: TextMarkType;
   scope: "block" | "text";
   targetPath: Path;
   textLength?: number;
@@ -34,6 +40,7 @@ export interface TransactionSummary {
 export const TEXT_OPERATION_TYPES = [
   "insert_text",
   "delete_text",
+  "toggle_mark",
 ] as const satisfies readonly OperationType[];
 
 export const BLOCK_OPERATION_TYPES = [
@@ -42,7 +49,11 @@ export const BLOCK_OPERATION_TYPES = [
 ] as const satisfies readonly OperationType[];
 
 export function isTextOperation(operation: Operation): operation is TextOperation {
-  return operation.type === "insert_text" || operation.type === "delete_text";
+  return (
+    operation.type === "insert_text" ||
+    operation.type === "delete_text" ||
+    operation.type === "toggle_mark"
+  );
 }
 
 export function isBlockOperation(operation: Operation): operation is BlockOperation {
@@ -69,6 +80,18 @@ export function summarizeOperation(operation: Operation): OperationSummary {
         textLength: operation.text.length,
         type: "insert_text",
       };
+    case "toggle_mark": {
+      const range = normalizeRange(operation.range);
+
+      return {
+        collapsedRange: isCollapsed(range),
+        mark: operation.mark,
+        scope: "text",
+        targetPath: [...range.anchor.path],
+        textLength: range.focus.offset - range.anchor.offset,
+        type: "toggle_mark",
+      };
+    }
     case "merge_block":
       return {
         scope: "block",
