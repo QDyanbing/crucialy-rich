@@ -21,6 +21,11 @@ export {
   createSplitBlockOperation,
 } from "./split-block";
 export {
+  applyToggleMark,
+  createSelectionAfterToggleMark,
+  createToggleMarkOperation,
+} from "./toggle-mark";
+export {
   applyOperation,
   applyTransaction,
   cloneOperation,
