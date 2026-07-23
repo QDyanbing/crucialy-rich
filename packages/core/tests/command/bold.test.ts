@@ -84,6 +84,11 @@ describe("boldCommand", () => {
       },
     });
     const boldDocument = applyTransaction(document, boldResult.transaction!);
+
+    if (!boldResult.selection) {
+      throw new Error("Bold command should return a selection.");
+    }
+
     const insertResult = insertTextCommand.execute({
       context: {
         document: boldDocument,

@@ -110,6 +110,7 @@ export function createSelectionAfterDeleteInput(input: DeleteInput): RangeSelect
       return createCollapsedSelection(input.selection.anchor);
     case "insert_text":
     case "split_block":
+    case "toggle_mark":
       return createCollapsedSelection(input.selection.anchor);
   }
 }
