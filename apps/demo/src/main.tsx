@@ -196,6 +196,10 @@ function createDocumentJsonLines(document: DocumentNode): JsonLine[] {
     block.children.forEach((node, textIndex) => {
       const textPath = [blockIndex, textIndex];
       const textSuffix = textIndex === block.children.length - 1 ? "" : ",";
+      const marksText =
+        node.marks && Object.keys(node.marks).length > 0
+          ? JSON.stringify(node.marks)
+          : undefined;
 
       lines.push(
         {
@@ -211,14 +215,23 @@ function createDocumentJsonLines(document: DocumentNode): JsonLine[] {
         {
           key: `text-${blockIndex}-${textIndex}-value`,
           path: textPath,
-          text: `          "text": ${JSON.stringify(node.text)}`,
-        },
-        {
-          key: `text-${blockIndex}-${textIndex}-close`,
-          path: textPath,
-          text: `        }${textSuffix}`,
+          text: `          "text": ${JSON.stringify(node.text)}${marksText ? "," : ""}`,
         },
       );
+
+      if (marksText) {
+        lines.push({
+          key: `text-${blockIndex}-${textIndex}-marks`,
+          path: textPath,
+          text: `          "marks": ${marksText}`,
+        });
+      }
+
+      lines.push({
+        key: `text-${blockIndex}-${textIndex}-close`,
+        path: textPath,
+        text: `        }${textSuffix}`,
+      });
     });
 
     lines.push(
