@@ -67,6 +67,57 @@ describe("italicCommand", () => {
     });
   });
 
+  it("stacks with existing bold marks", () => {
+    const document = createDocument([
+      createParagraph([createText("你好", { bold: true })]),
+    ]);
+    const result = italicCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [0, 0], offset: 2 },
+        },
+      },
+    });
+
+    expect(
+      applyTransaction(document, result.transaction!).children[0]?.children[0],
+    ).toEqual({
+      type: "text",
+      text: "你好",
+      marks: {
+        bold: true,
+        italic: true,
+      },
+    });
+  });
+
+  it("removes only italic from combined marks", () => {
+    const document = createDocument([
+      createParagraph([createText("你好", { bold: true, italic: true })]),
+    ]);
+    const result = italicCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [0, 0], offset: 2 },
+        },
+      },
+    });
+
+    expect(
+      applyTransaction(document, result.transaction!).children[0]?.children[0],
+    ).toEqual({
+      type: "text",
+      text: "你好",
+      marks: {
+        bold: true,
+      },
+    });
+  });
+
   it("reports active state from the selected text node", () => {
     const document = createDocument([
       createParagraph([createText("你好", { italic: true })]),
