@@ -1,6 +1,6 @@
 # 文字标记模型
 
-文字标记用于描述 text 节点上的内联格式。当前阶段完成第 9 周 Day 1「Mark 机制」和 Day 2「Bold」第一版，覆盖数据结构、helper、校验、规范化、`toggle_mark` operation、`boldCommand`、renderer 加粗输出、operation 保留和 history 快照保留。
+文字标记用于描述 text 节点上的内联格式。当前阶段完成第 9 周 Day 1「Mark 机制」、Day 2「Bold」和 Day 3「Italic」第一版，覆盖数据结构、helper、校验、规范化、`toggle_mark` operation、`boldCommand`、`italicCommand`、renderer 加粗/斜体输出、operation 保留和 history 快照保留。
 
 ## 数据结构
 
@@ -97,13 +97,35 @@ const boldCommand: Command;
 
 `boldCommand` 已加入默认 command registry，demo 操作区可通过“加粗”按钮调用，并会记录 history。
 
+## Italic Command
+
+`italicCommand` 通过 `toggle_mark` 切换 `italic`。
+
+```ts
+const ITALIC_COMMAND_NAME = "italic";
+
+const italicCommand: Command;
+```
+
+执行规则与 `boldCommand` 保持一致：
+
+- selection 必须存在。
+- anchor 和 focus 必须都指向合法 text point。
+- 当前只支持同一个 text 节点内的 selection。
+- 成功时返回包含 `toggle_mark` 的 transaction。
+- `queryCommandState` 会通过 `isActive` 返回当前 selection 所在 text 节点是否已经斜体。
+
+`italicCommand` 已加入默认 command registry，demo 操作区可通过“斜体”按钮调用，并会记录 history。
+
 ## 渲染
 
-renderer 遇到 `marks.bold === true` 的 text 节点时输出 `<strong>`，并继续保留 `data-crucialy-path`，因此 DOM 与模型选区映射仍能定位到同一个 text path。
+renderer 遇到 text marks 时会根据标记输出内联元素，并继续保留 `data-crucialy-path`，因此 DOM 与模型选区映射仍能定位到同一个 text path：
+
+- `marks.bold === true` 输出 `<strong>`。
+- `marks.italic === true` 输出 `<em>`。
+- `bold + italic` 组合输出 `<strong style="font-style: italic;">`，保持 text path 元素下仍是直接文本节点，便于当前 DOM 映射逻辑复用。
 
 ## 当前限制
 
-- 暂未实现 `italicCommand`。
 - 暂未实现编辑器内置 toolbar；当前只有 demo 操作区按钮。
-- renderer 暂未根据 italic 输出 `<em>`。
 - 暂未实现跨 text/range 的 mark 拆分、合并和统一格式应用。
