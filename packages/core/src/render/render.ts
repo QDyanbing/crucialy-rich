@@ -11,7 +11,7 @@ import type { RenderedElementNode } from "./types";
 function createRenderedNode(
   tagName: RenderedElementNode["tagName"],
   path: Path,
-  options: Pick<RenderedElementNode, "children" | "text"> = {},
+  options: Partial<Pick<RenderedElementNode, "attributes" | "children" | "text">> = {},
 ): RenderedElementNode {
   return {
     tagName,
@@ -22,9 +22,22 @@ function createRenderedNode(
 }
 
 function renderTextNode(node: TextNode, path: Path): RenderedElementNode {
-  return createRenderedNode(hasTextMark(node.marks, "bold") ? "strong" : "span", path, {
-    text: node.text,
-  });
+  const bold = hasTextMark(node.marks, "bold");
+  const italic = hasTextMark(node.marks, "italic");
+
+  if (bold) {
+    return createRenderedNode("strong", path, {
+      attributes: italic
+        ? {
+            ...createModelPathAttributes(path),
+            style: "font-style: italic;",
+          }
+        : createModelPathAttributes(path),
+      text: node.text,
+    });
+  }
+
+  return createRenderedNode(italic ? "em" : "span", path, { text: node.text });
 }
 
 function renderParagraphNode(node: ParagraphNode, path: Path): RenderedElementNode {
