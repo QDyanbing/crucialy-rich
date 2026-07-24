@@ -10,6 +10,7 @@ import {
   DELETE_SELECTION_COMMAND_NAME,
   executeCommand,
   INSERT_TEXT_COMMAND_NAME,
+  ITALIC_COMMAND_NAME,
   MERGE_BLOCK_COMMAND_NAME,
   SPLIT_BLOCK_COMMAND_NAME,
 } from "../../src";
@@ -90,6 +91,22 @@ describe("default command registry integration", () => {
     expect(bolded.ok).toBe(true);
     expect(bolded.transaction?.operations[0]).toMatchObject({
       mark: "bold",
+      type: "toggle_mark",
+    });
+
+    const italicized = executeCommand(registry, ITALIC_COMMAND_NAME, {
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [0, 0], offset: 1 },
+        },
+      },
+    });
+
+    expect(italicized.ok).toBe(true);
+    expect(italicized.transaction?.operations[0]).toMatchObject({
+      mark: "italic",
       type: "toggle_mark",
     });
   });
