@@ -8,9 +8,13 @@ export {
 } from "./block";
 export {
   BOLD_COMMAND_NAME,
+  ITALIC_COMMAND_NAME,
   boldCommand,
   canExecuteBoldCommand,
+  canExecuteItalicCommand,
   isBoldCommandActive,
+  isItalicCommandActive,
+  italicCommand,
 } from "./mark";
 export { canExecuteCommand } from "./can-execute";
 export { createDefaultCommandRegistry, DEFAULT_COMMANDS } from "./defaults";

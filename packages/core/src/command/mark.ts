@@ -9,6 +9,7 @@ import { createCommandSkipped, createCommandSuccess } from "./result";
 import type { Command, CommandInput } from "./types";
 
 export const BOLD_COMMAND_NAME = "bold";
+export const ITALIC_COMMAND_NAME = "italic";
 
 interface TextMarkCommandConfig {
   commandName: string;
@@ -42,6 +43,10 @@ export function canExecuteBoldCommand(input: CommandInput): boolean {
   return canToggleMarkRange(input);
 }
 
+export function canExecuteItalicCommand(input: CommandInput): boolean {
+  return canToggleMarkRange(input);
+}
+
 function isTextMarkActive(input: CommandInput, mark: TextMarkType): boolean {
   const selection = input.context.selection;
 
@@ -57,6 +62,10 @@ function isTextMarkActive(input: CommandInput, mark: TextMarkType): boolean {
 
 export function isBoldCommandActive(input: CommandInput): boolean {
   return isTextMarkActive(input, "bold");
+}
+
+export function isItalicCommandActive(input: CommandInput): boolean {
+  return isTextMarkActive(input, "italic");
 }
 
 function createTextMarkCommand(config: TextMarkCommandConfig): Command {
@@ -89,4 +98,10 @@ export const boldCommand: Command = createTextMarkCommand({
   commandName: BOLD_COMMAND_NAME,
   label: "Bold",
   mark: "bold",
+});
+
+export const italicCommand: Command = createTextMarkCommand({
+  commandName: ITALIC_COMMAND_NAME,
+  label: "Italic",
+  mark: "italic",
 });
