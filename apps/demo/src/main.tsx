@@ -17,6 +17,7 @@ import {
   getHistoryShortcutAction,
   getTextInRange,
   INSERT_TEXT_COMMAND_NAME,
+  ITALIC_COMMAND_NAME,
   isValidPoint,
   MERGE_BLOCK_COMMAND_NAME,
   normalizeDocument,
@@ -108,6 +109,7 @@ const demoCommandRegistry = createDefaultCommandRegistry();
 const demoCommandDescriptors: DemoCommandDescriptor[] = [
   { label: "加粗", name: BOLD_COMMAND_NAME },
   { label: "插入", name: INSERT_TEXT_COMMAND_NAME },
+  { label: "斜体", name: ITALIC_COMMAND_NAME },
   { label: "删除选区", name: DELETE_SELECTION_COMMAND_NAME },
   { label: "分段", name: SPLIT_BLOCK_COMMAND_NAME },
   { label: "合并段落", name: MERGE_BLOCK_COMMAND_NAME },
@@ -540,6 +542,17 @@ function DemoApp() {
     );
   }
 
+  function handleItalic() {
+    applyCommandResult(
+      executeCommand(demoCommandRegistry, ITALIC_COMMAND_NAME, {
+        context: {
+          document: normalizedDocument,
+          selection: modelSelection,
+        },
+      }),
+    );
+  }
+
   function handleDeleteText() {
     applyCommandResult(
       executeCommand(demoCommandRegistry, DELETE_SELECTION_COMMAND_NAME, {
@@ -707,6 +720,13 @@ function DemoApp() {
               onClick={handleBold}
             >
               加粗
+            </button>
+            <button
+              type="button"
+              disabled={isCommandDisabled(ITALIC_COMMAND_NAME)}
+              onClick={handleItalic}
+            >
+              斜体
             </button>
             <button
               type="button"
