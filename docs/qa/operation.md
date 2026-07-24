@@ -50,6 +50,7 @@ pnpm test:e2e
 | 折叠加粗         | collapsed selection 执行 toggle mark     | 生成空的 bold text 占位节点           | 通过 |
 | mark 后选区      | 调用 `createSelectionAfterToggleMark`    | selection 落到被切换的 text 节点      | 通过 |
 | 演示加粗         | 设置选区后点击“加粗”                     | 最近 transaction 包含 `toggle_mark`   | 通过 |
+| 演示斜体         | 设置选区后点击“斜体”                     | 最近 transaction 包含 `toggle_mark`   | 通过 |
 | 创建 split 操作  | 调用 `createSplitBlockOperation`         | 返回 `type: "split_block"` 的操作对象 | 通过 |
 | 段中分段         | point 位于 text 中间                     | paragraph 拆成前后两个 paragraph      | 通过 |
 | 段首分段         | offset 为 `0`                            | 前一段为空，后一段保留原文本          | 通过 |
@@ -85,4 +86,4 @@ pnpm test:e2e
 
 ## 结论
 
-`insert_text`、`delete_text`、`toggle_mark`、`split_block`、`merge_block` 和 transaction 的核心模型操作、测试、演示调试、摘要、闭环验收报告和 QA 记录已闭环；普通文本输入、Backspace、Delete、Enter 和 Bold demo 操作已经进入可验证管线。
+`insert_text`、`delete_text`、`toggle_mark`、`split_block`、`merge_block` 和 transaction 的核心模型操作、测试、演示调试、摘要、闭环验收报告和 QA 记录已闭环；普通文本输入、Backspace、Delete、Enter 和 Bold/Italic demo 操作已经进入可验证管线。

@@ -2,7 +2,7 @@
 
 自研富文本编辑内核，不依赖 ProseMirror、Tiptap、Lexical、Slate 作为运行时内核。
 
-> 当前处于早期阶段，已提供文档模型、text marks 模型基础、Bold 命令、模型选区、基础渲染器、DOM 与模型位置映射、选区双向同步、`insertText`、`deleteText`、`toggle_mark`、`splitBlock`、`mergeBlock` operation、Transaction、Operation 闭环验收工具、输入 helper、Command 系统、默认 Command 注册表和 History 撤销重做与快捷键识别第一版，基础编辑 transaction 与 selection 计算已闭环。
+> 当前处于早期阶段，已提供文档模型、text marks 模型基础、Bold 命令、Italic 命令、模型选区、基础渲染器、DOM 与模型位置映射、选区双向同步、`insertText`、`deleteText`、`toggle_mark`、`splitBlock`、`mergeBlock` operation、Transaction、Operation 闭环验收工具、输入 helper、Command 系统、默认 Command 注册表和 History 撤销重做与快捷键识别第一版，基础编辑 transaction 与 selection 计算已闭环。
 
 ## 安装
 
@@ -36,6 +36,7 @@ import {
   createToggleMarkOperation,
   executeCommand,
   getTextInRange,
+  ITALIC_COMMAND_NAME,
   normalizeTextMarks,
   normalizeDocument,
   queryCommandState,
@@ -132,6 +133,15 @@ const boldResult = executeCommand(commandRegistry, BOLD_COMMAND_NAME, {
     },
   },
 });
+const italicResult = executeCommand(commandRegistry, ITALIC_COMMAND_NAME, {
+  context: {
+    document: normalized,
+    selection: {
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 5 },
+    },
+  },
+});
 const history = recordHistory({
   after: createHistorySnapshot(nextDocument),
   batch: "typing",
@@ -156,7 +166,7 @@ const undoChange = undoHistory(history);
 - Transaction：`createTransaction`、`applyOperation`、`applyTransaction`、`summarizeOperation`、`summarizeTransaction`、`createTransactionAcceptanceReport`。
 - 输入：`createInsertTextInputTransaction`、`createSelectionAfterInsertTextInput`、`createBackspaceInputTransaction`、`createSelectionAfterBackspaceInput`、`createDeleteInputTransaction`、`createSelectionAfterDeleteInput`、`createEnterInputTransaction`、`createSelectionAfterEnterInput`。
 - 当前输入 helper 覆盖普通文本插入、段中删除、段落合并、段落分裂和输入后 selection 落点。
-- Command：`DEFAULT_COMMANDS`、`createDefaultCommandRegistry`、`createCommandRegistry`、`canExecuteCommand`、`executeCommand`、`queryCommandState`、`createCommandSuccess`、`createCommandFailure`、`createCommandSkipped`、`boldCommand`、`insertTextCommand`、`deleteSelectionCommand`、`splitBlockCommand`、`mergeBlockCommand`、`BOLD_COMMAND_NAME`、`INSERT_TEXT_COMMAND_NAME`、`DELETE_SELECTION_COMMAND_NAME`、`SPLIT_BLOCK_COMMAND_NAME`、`MERGE_BLOCK_COMMAND_NAME`。
+- Command：`DEFAULT_COMMANDS`、`createDefaultCommandRegistry`、`createCommandRegistry`、`canExecuteCommand`、`executeCommand`、`queryCommandState`、`createCommandSuccess`、`createCommandFailure`、`createCommandSkipped`、`boldCommand`、`italicCommand`、`insertTextCommand`、`deleteSelectionCommand`、`splitBlockCommand`、`mergeBlockCommand`、`BOLD_COMMAND_NAME`、`ITALIC_COMMAND_NAME`、`INSERT_TEXT_COMMAND_NAME`、`DELETE_SELECTION_COMMAND_NAME`、`SPLIT_BLOCK_COMMAND_NAME`、`MERGE_BLOCK_COMMAND_NAME`。
 - History：`createHistorySnapshot`、`cloneHistorySnapshot`、`createHistoryEntry`、`cloneHistoryEntry`、`createHistoryState`、`clearHistory`、`recordHistory`、`canMergeHistoryEntries`、`mergeHistoryEntries`、`canUndo`、`canRedo`、`getUndoEntry`、`getRedoEntry`、`undoHistory`、`redoHistory`、`getHistoryShortcutAction`、`undoCommand`、`redoCommand`。
 
 ## 许可

@@ -1,6 +1,6 @@
 # QA：文字标记模型验收
 
-当前文字标记范围覆盖 bold / italic 的模型表达、helper、校验、规范化、`toggle_mark`、Bold command、基础编辑保留和 history 快照保留。
+当前文字标记范围覆盖 bold / italic 的模型表达、helper、校验、规范化、`toggle_mark`、Bold command、Italic command、基础编辑保留和 history 快照保留。
 
 ## 已完成范围
 
@@ -12,8 +12,10 @@
 - `normalizeDocument` 会保留合法 marks，丢弃未知或未启用 marks。
 - 新增 `toggle_mark` operation，支持同一个 text 节点内切换 mark。
 - 新增 `boldCommand`，支持选区加粗、取消加粗和 collapsed 后续输入继承 bold。
-- renderer 会把 bold text 渲染为 `<strong>`。
-- demo 操作区新增“加粗”按钮，并记录 history。
+- 新增 `italicCommand`，支持选区斜体、取消斜体、collapsed 后续输入继承 italic，并覆盖 bold+italic 叠加。
+- renderer 会把 bold text 渲染为 `<strong>`，把 italic text 渲染为 `<em>`，并覆盖 bold+italic 组合渲染。
+- demo 操作区新增“加粗”和“斜体”按钮，并记录 history。
+- demo 文档 JSON 选区映射会展示当前 text marks。
 - `insert_text`、`delete_text`、`split_block` 和 `merge_block` 已有 mark 保留测试。
 - `createHistorySnapshot` 会深拷贝 text marks。
 
@@ -30,6 +32,9 @@
 - `packages/core/tests/operation/split-block.test.ts`
 - `packages/core/tests/operation/merge-block.test.ts`
 - `packages/core/tests/command/bold.test.ts`
+- `packages/core/tests/command/italic.test.ts`
+- `packages/core/tests/command/integration.test.ts`
+- `packages/core/tests/command/state.test.ts`
 - `packages/core/tests/render/render.test.ts`
 - `packages/core/tests/render/html.test.ts`
 - `packages/core/tests/history/snapshot.test.ts`
@@ -38,11 +43,9 @@
 
 ## 当前限制
 
-- 暂未实现 `italicCommand`。
-- 暂未实现 renderer 的 `<em>` 输出。
 - 暂未实现 React 组件内置 toolbar。
 - 暂未实现跨 text/range 的 mark 应用、拆分与合并策略。
 
 ## 结论
 
-文字标记模型和 Bold 第一版已完成，可以支撑下一步继续开发 Italic 命令。
+文字标记模型、Bold 第一版和 Italic 第一版已完成，可以支撑下一步继续开发 Mark 切分与合并。
