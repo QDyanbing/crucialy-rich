@@ -10,6 +10,7 @@ import {
   BOLD_COMMAND_NAME,
   DELETE_SELECTION_COMMAND_NAME,
   INSERT_TEXT_COMMAND_NAME,
+  ITALIC_COMMAND_NAME,
   MERGE_BLOCK_COMMAND_NAME,
   queryCommandState,
   SPLIT_BLOCK_COMMAND_NAME,
@@ -115,6 +116,11 @@ describe("queryCommandState", () => {
       disabled: false,
       registered: true,
     });
+    expect(queryCommandState(registry, ITALIC_COMMAND_NAME, rangeInput)).toMatchObject({
+      active: false,
+      disabled: false,
+      registered: true,
+    });
     expect(
       queryCommandState(registry, DELETE_SELECTION_COMMAND_NAME, rangeInput).disabled,
     ).toBe(false);
@@ -137,6 +143,29 @@ describe("queryCommandState", () => {
 
     expect(
       queryCommandState(registry, BOLD_COMMAND_NAME, {
+        context: {
+          document,
+          selection: {
+            anchor: { path: [0, 0], offset: 1 },
+            focus: { path: [0, 0], offset: 1 },
+          },
+        },
+      }),
+    ).toMatchObject({
+      active: true,
+      disabled: false,
+      registered: true,
+    });
+  });
+
+  it("reads active italic state from the default registry", () => {
+    const registry = createDefaultCommandRegistry();
+    const document = createDocument([
+      createParagraph([createText("你好", { italic: true })]),
+    ]);
+
+    expect(
+      queryCommandState(registry, ITALIC_COMMAND_NAME, {
         context: {
           document,
           selection: {
