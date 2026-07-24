@@ -74,6 +74,9 @@ test("toggles bold from the demo controls", async ({ page }) => {
   await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
     '"marks": {',
   );
+  await expect(page.getByLabel("文档 JSON 选区映射")).toContainText(
+    '"marks": {"bold":true}',
+  );
   await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
     '"type": "toggle_mark"',
   );
@@ -93,6 +96,9 @@ test("toggles italic from the demo controls", async ({ page }) => {
 
   await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
     '"marks": {',
+  );
+  await expect(page.getByLabel("文档 JSON 选区映射")).toContainText(
+    '"marks": {"italic":true}',
   );
   await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
     '"type": "toggle_mark"',
