@@ -31,4 +31,24 @@ describe("renderNodeToHtml", () => {
       '<strong data-crucialy-path="[0,0]">Bold</strong>',
     );
   });
+
+  it("serializes italic text marks as em elements", () => {
+    const document = createDocument([
+      createParagraph([createText("Italic", { italic: true })]),
+    ]);
+
+    expect(renderNodeToHtml(renderDocument(document))).toContain(
+      '<em data-crucialy-path="[0,0]">Italic</em>',
+    );
+  });
+
+  it("serializes combined bold and italic marks with italic style", () => {
+    const document = createDocument([
+      createParagraph([createText("Both", { bold: true, italic: true })]),
+    ]);
+
+    expect(renderNodeToHtml(renderDocument(document))).toContain(
+      '<strong data-crucialy-path="[0,0]" style="font-style: italic;">Both</strong>',
+    );
+  });
 });

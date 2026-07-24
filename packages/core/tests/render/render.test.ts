@@ -123,4 +123,35 @@ describe("renderDocument", () => {
       text: "Bold",
     });
   });
+
+  it("renders italic text marks as em elements", () => {
+    const document = createDocument([
+      createParagraph([createText("Italic", { italic: true })]),
+    ]);
+
+    expect(renderDocument(document).children?.[0]?.children?.[0]).toEqual({
+      tagName: "em",
+      path: [0, 0],
+      attributes: {
+        [MODEL_PATH_ATTRIBUTE]: "[0,0]",
+      },
+      text: "Italic",
+    });
+  });
+
+  it("renders combined bold and italic marks without nested text paths", () => {
+    const document = createDocument([
+      createParagraph([createText("Both", { bold: true, italic: true })]),
+    ]);
+
+    expect(renderDocument(document).children?.[0]?.children?.[0]).toEqual({
+      tagName: "strong",
+      path: [0, 0],
+      attributes: {
+        [MODEL_PATH_ATTRIBUTE]: "[0,0]",
+        style: "font-style: italic;",
+      },
+      text: "Both",
+    });
+  });
 });
