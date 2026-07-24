@@ -125,12 +125,14 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.BOLD_COMMAND_NAME).toBe("string");
     expect(typeof core.DELETE_SELECTION_COMMAND_NAME).toBe("string");
     expect(typeof core.INSERT_TEXT_COMMAND_NAME).toBe("string");
+    expect(typeof core.ITALIC_COMMAND_NAME).toBe("string");
     expect(typeof core.MERGE_BLOCK_COMMAND_NAME).toBe("string");
     expect(typeof core.SPLIT_BLOCK_COMMAND_NAME).toBe("string");
     expect(typeof core.canExecuteBoldCommand).toBe("function");
     expect(typeof core.canExecuteCommand).toBe("function");
     expect(typeof core.canExecuteDeleteSelectionCommand).toBe("function");
     expect(typeof core.canExecuteInsertTextCommand).toBe("function");
+    expect(typeof core.canExecuteItalicCommand).toBe("function");
     expect(typeof core.canExecuteMergeBlockCommand).toBe("function");
     expect(typeof core.canExecuteSplitBlockCommand).toBe("function");
     expect(typeof core.createCommandFailure).toBe("function");
@@ -142,6 +144,7 @@ describe("@crucialy-rich/core public API", () => {
       "bold",
       "deleteSelection",
       "insertText",
+      "italic",
       "mergeBlock",
       "splitBlock",
     ]);
@@ -150,6 +153,8 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.executeCommand).toBe("function");
     expect(typeof core.insertTextCommand).toBe("object");
     expect(typeof core.isBoldCommandActive).toBe("function");
+    expect(typeof core.isItalicCommandActive).toBe("function");
+    expect(typeof core.italicCommand).toBe("object");
     expect(typeof core.mergeBlockCommand).toBe("object");
     expect(typeof core.queryCommandState).toBe("function");
     expect(typeof core.splitBlockCommand).toBe("object");
