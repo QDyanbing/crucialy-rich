@@ -2,7 +2,7 @@
 
 自研富文本编辑内核，不依赖 ProseMirror、Tiptap、Lexical、Slate 作为运行时内核。
 
-> 当前处于早期阶段，已提供文档模型、text marks 模型基础、Bold 命令、Italic 命令、模型选区、基础渲染器、DOM 与模型位置映射、选区双向同步、`insertText`、`deleteText`、`toggle_mark`、`splitBlock`、`mergeBlock` operation、Transaction、Operation 闭环验收工具、输入 helper、Command 系统、默认 Command 注册表和 History 撤销重做与快捷键识别第一版，基础编辑 transaction 与 selection 计算已闭环。
+> 当前处于早期阶段，已提供文档模型、text marks 模型基础、Bold 命令、Italic 命令、同一 paragraph 内跨 text 的 mark 切分与合并、模型选区、基础渲染器、DOM 与模型位置映射、选区双向同步、`insertText`、`deleteText`、`toggle_mark`、`splitBlock`、`mergeBlock` operation、Transaction、Operation 闭环验收工具、输入 helper、Command 系统、默认 Command 注册表和 History 撤销重做与快捷键识别第一版，基础编辑 transaction 与 selection 计算已闭环。
 
 ## 安装
 
@@ -156,9 +156,9 @@ const undoChange = undoHistory(history);
 
 - 文档模型：`DocumentNode`、`BlockNode`、`ParagraphNode`、`TextNode`、`TextMarks`、`TextMarkType`、`TEXT_MARK_TYPES`。
 - 创建和判断：`createDocument`、`createParagraph`、`createText`、`isTextNode`、`isBlockNode`、`isDocumentNode`。
-- 文字标记：`normalizeTextMarks`、`hasTextMark`、`addTextMark`、`removeTextMark`、`toggleTextMark`、`areTextMarksEqual`。
+- 文字标记：`normalizeTextMarks`、`hasTextMark`、`addTextMark`、`removeTextMark`、`toggleTextMark`、`areTextMarksEqual`、`mergeAdjacentTextNodes`。
 - 校验和修复：`validateDocument`、`normalizeDocument`。
-- 选区：`Path`、`Point`、`RangeSelection`、`getNodeAtPath`、`isValidPoint`、`normalizeRange`、`getTextInRange`、`splitTextByRange`。
+- 选区：`Path`、`Point`、`RangeSelection`、`getNodeAtPath`、`isValidPoint`、`normalizeRange`、`getParagraphTextOffset`、`getPointAtParagraphTextOffset`、`getTextInRange`、`splitTextByRange`。
 - 基础渲染：`renderDocument`、`renderNodeToHtml`、`MODEL_PATH_ATTRIBUTE`、`encodeModelPath`、`decodeModelPath`。
 - DOM 映射：`domPointToModelPoint`、`modelPointToDomPoint`、`findElementByModelPath`、`findClosestModelPathElement`。
 - 选区同步：`domSelectionToModelSelection`、`createDomRangeFromModelSelection`、`applyModelSelectionToDom`。

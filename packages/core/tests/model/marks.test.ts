@@ -8,6 +8,7 @@ import {
   normalizeTextMarks,
   removeTextMark,
   toggleTextMark,
+  type TextNode,
 } from "../../src/model";
 
 describe("text mark helpers", () => {
@@ -57,11 +58,17 @@ describe("text mark helpers", () => {
   });
 
   it("normalizes marks while merging text nodes", () => {
-    const original = { type: "text" as const, text: "你", marks: { bold: true } };
-    const result = mergeAdjacentTextNodes([
-      original,
-      { type: "text", text: "好", marks: { bold: true, underline: true } },
-    ]);
+    const original: TextNode = {
+      type: "text",
+      text: "你",
+      marks: { bold: true },
+    };
+    const noisyNode = {
+      type: "text",
+      text: "好",
+      marks: { bold: true, underline: true },
+    } as unknown as TextNode;
+    const result = mergeAdjacentTextNodes([original, noisyNode]);
 
     expect(result).toEqual([{ type: "text", text: "你好", marks: { bold: true } }]);
     expect(result[0]).not.toBe(original);

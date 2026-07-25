@@ -1,6 +1,6 @@
 # 文字标记模型
 
-文字标记用于描述 text 节点上的内联格式。当前阶段完成第 9 周 Day 1「Mark 机制」、Day 2「Bold」和 Day 3「Italic」第一版，覆盖数据结构、helper、校验、规范化、`toggle_mark` operation、`boldCommand`、`italicCommand`、renderer 加粗/斜体输出、operation 保留和 history 快照保留。
+文字标记用于描述 text 节点上的内联格式。当前阶段完成第 9 周 Day 1「Mark 机制」、Day 2「Bold」、Day 3「Italic」和 Day 4「Mark 切分与合并」第一版，覆盖数据结构、helper、校验、规范化、`toggle_mark` operation、`boldCommand`、`italicCommand`、renderer 加粗/斜体输出、operation 保留和 history 快照保留。
 
 ## 数据结构
 
@@ -34,6 +34,7 @@ interface TextNode {
 - `removeTextMark(marks, mark)`：返回移除指定 mark 后的新对象；没有剩余 mark 时返回 `undefined`。
 - `toggleTextMark(marks, mark)`：按当前状态切换指定 mark。
 - `areTextMarksEqual(left, right)`：比较两个 mark 集合的启用状态。
+- `mergeAdjacentTextNodes(nodes)`：合并相邻且 marks 启用状态完全一致的 text 节点。
 
 ## 校验与规范化
 
@@ -44,7 +45,7 @@ interface TextNode {
 - key 只能是 `bold` 或 `italic`。
 - value 必须是 `true`。
 
-`normalizeDocument` 会保留合法 mark，并丢弃未知 mark、非 `true` mark 和空 mark 集合。规范化后的文档仍能通过 `validateDocument`。
+`normalizeDocument` 会保留合法 mark，丢弃未知 mark、非 `true` mark 和空 mark 集合，并合并相邻同 marks 的 text 节点。规范化后的文档仍能通过 `validateDocument`。
 
 ## 编辑保留
 
@@ -59,7 +60,7 @@ History snapshot 现在会深拷贝 text marks，撤销/重做记录不会丢失
 
 ## Toggle Mark Operation
 
-`toggle_mark` 用于在同一个 text 节点范围内切换 mark。
+`toggle_mark` 用于在同一 paragraph 内切换 mark。
 
 ```ts
 interface ToggleMarkOperation {
@@ -71,11 +72,12 @@ interface ToggleMarkOperation {
 
 当前规则：
 
-- range 必须落在同一个 text 节点内。
-- 非折叠 range 会把原 text 拆为 before / selected / after 三段，只给 selected 切换 mark。
+- range 必须落在同一个 paragraph 内。
+- 非折叠 range 会按 text 边界切分 before / selected / after，只给 selected 覆盖到的 text 片段切换 mark。
+- 同一 paragraph 内跨多个 text 节点时，会逐段切换 mark，并合并相邻同 marks 的 text 节点。
+- selection 会在合并后的文档中按 paragraph text offset 重新映射。
 - collapsed range 会在光标处创建一个空 text 节点，并把切换后的 marks 写到该空节点上。
 - collapsed 后续输入会插入到该空 text 节点内，从而继承 mark。
-- 当前不会合并相邻同 marks 的 text 节点，合并策略留到 Mark 切分和合并阶段。
 
 ## Bold Command
 
@@ -91,7 +93,7 @@ const boldCommand: Command;
 
 - selection 必须存在。
 - anchor 和 focus 必须都指向合法 text point。
-- 当前只支持同一个 text 节点内的 selection。
+- 当前支持同一个 paragraph 内的 selection。
 - 成功时返回包含 `toggle_mark` 的 transaction。
 - `queryCommandState` 会通过 `isActive` 返回当前 selection 所在 text 节点是否已经加粗。
 
@@ -111,7 +113,7 @@ const italicCommand: Command;
 
 - selection 必须存在。
 - anchor 和 focus 必须都指向合法 text point。
-- 当前只支持同一个 text 节点内的 selection。
+- 当前支持同一个 paragraph 内的 selection。
 - 成功时返回包含 `toggle_mark` 的 transaction。
 - `queryCommandState` 会通过 `isActive` 返回当前 selection 所在 text 节点是否已经斜体。
 
@@ -128,4 +130,4 @@ renderer 遇到 text marks 时会根据标记输出内联元素，并继续保�
 ## 当前限制
 
 - 暂未实现编辑器内置 toolbar；当前只有 demo 操作区按钮。
-- 暂未实现跨 text/range 的 mark 拆分、合并和统一格式应用。
+- 暂未实现跨 paragraph 的 mark 应用策略。

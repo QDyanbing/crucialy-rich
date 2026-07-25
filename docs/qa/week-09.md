@@ -8,7 +8,9 @@
 
 第 9 周 Day 3「Italic 命令」已完成第一版。
 
-☑️ 当前指针：第 9 周 Day 4「Mark 切分与合并」待开始。
+第 9 周 Day 4「Mark 切分与合并」已完成第一版。
+
+☑️ 当前指针：第 9 周 Day 5「Bold/Italic 闭环验收」待开始。
 
 ## 已完成范围
 
@@ -17,12 +19,14 @@
 - `createText` 支持传入 marks，并避免共享外部 marks 对象引用。
 - 新增 marks helper，覆盖规范化、判断、添加、移除、切换和比较。
 - `validateDocument` 已覆盖 text marks 合法性。
-- `normalizeDocument` 已覆盖 text marks 收敛。
+- `normalizeDocument` 已覆盖 text marks 收敛和相邻同 marks text 合并。
 - `createHistorySnapshot` 已覆盖 marks 深拷贝。
 - 基础 text/block operation 已补 marks 保留测试。
-- 新增 `toggle_mark` operation，支持同一个 text 节点内切换 mark。
+- 新增 `toggle_mark` operation，支持同一个 paragraph 内切换 mark。
+- 新增 paragraph text offset helper，用于 mark 合并后的 selection 映射。
 - 新增 `boldCommand`，并接入默认 command registry。
 - 新增 `italicCommand`，并接入默认 command registry。
+- Bold/Italic command 支持同一个 paragraph 内跨 text selection。
 - renderer 已把 bold text 输出为 `<strong>`。
 - renderer 已把 italic text 输出为 `<em>`，并覆盖 bold+italic 组合渲染。
 - demo 操作区新增“加粗”和“斜体”按钮，并会记录 history。
@@ -36,6 +40,7 @@
 - `packages/core/tests/model/marks.test.ts`
 - `packages/core/tests/model/validate.test.ts`
 - `packages/core/tests/model/normalize.test.ts`
+- `packages/core/tests/selection/paragraph-offset.test.ts`
 - `packages/core/tests/operation/insert-text.test.ts`
 - `packages/core/tests/operation/delete-text.test.ts`
 - `packages/core/tests/operation/toggle-mark.test.ts`
@@ -54,8 +59,8 @@
 ## 当前限制
 
 - 暂未接入 React 组件内置 toolbar。
-- 暂未实现跨 range 的 mark 应用策略。
+- 暂未实现跨 paragraph 的 mark 应用策略。
 
 ## 结论
 
-第 9 周已完成 Mark 机制、Bold 第一版和 Italic 第一版；下一步可以进入 Mark 切分与合并。
+第 9 周已完成 Mark 机制、Bold 第一版、Italic 第一版和 Mark 切分与合并第一版；下一步可以进入 Bold/Italic 闭环验收。

@@ -52,7 +52,7 @@ interface TransactionAcceptanceReport {
 - `type`：当前支持 `insert_text`、`delete_text`、`toggle_mark`、`split_block` 和 `merge_block`。
 - `point`：插入、分段或合并位置，必须指向 text 节点内的合法偏移。
 - `text`：要插入的文本。
-- `range`：删除范围或 mark 范围，当前必须落在同一个 text 节点内。
+- `range`：删除范围当前必须落在同一个 text 节点内；mark 范围当前必须落在同一个 paragraph 内。
 - `mark`：要切换的 text mark，当前用于 `toggle_mark`。
 - `operations`：transaction 中按顺序执行的 operation 列表。
 - `TransactionSummary`：transaction 的只读摘要，包含操作总数、操作类型顺序、文本操作数量和块级操作数量。
@@ -247,10 +247,10 @@ interface TransactionAcceptanceReport {
 
 ## 当前限制
 
-- 当前只实现 `insert_text`、同 text 节点内的 `delete_text`、同 text 节点内的 `toggle_mark`、paragraph 级 `split_block` 和 `merge_block`。
+- 当前只实现 `insert_text`、同 text 节点内的 `delete_text`、同 paragraph 内的 `toggle_mark`、paragraph 级 `split_block` 和 `merge_block`。
 - 插入非折叠选区时不会自动删除选中内容，当前插入点取 selection anchor。
 - 删除暂不支持跨 text 节点或跨 paragraph 范围。
 - 合并暂不支持跨多段批量合并。
 - transaction 当前只负责批量应用和结束 normalize；History 已使用快照策略提供撤销/重做，operation 层本身暂不生成 undo/redo inverse 信息。
-- text operation 会保留现有 text marks，但暂未实现跨 range 应用、拆分或合并 marks 的专门 operation。
+- text operation 会保留现有 text marks；`toggle_mark` 已支持同 paragraph 内跨 text 切分与相邻同 marks 合并，跨 paragraph mark 范围留到后续阶段。
 - 普通 `beforeinput insertText`、collapsed selection 下的 Backspace、collapsed selection 下的 Delete 和 collapsed selection 下的 Enter 已接入输入事件管线，并复用当前 operation/transaction 更新模型。

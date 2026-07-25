@@ -49,6 +49,7 @@
 - 新增 text marks 模型基础，包含 `bold` / `italic` 类型、helper、校验、规范化、operation 保留、history 快照保留、文档和 QA。
 - 新增 Bold 第一版，包含 `toggle_mark` operation、`boldCommand`、默认 command 注册、`<strong>` 渲染、demo“加粗”按钮、测试、文档和 QA。
 - 新增 Italic 第一版，包含 `italicCommand`、默认 command 注册、`<em>` 渲染、bold+italic 组合渲染、demo“斜体”按钮、JSON 映射展示、测试、文档和 QA。
+- 新增 Mark 切分与合并第一版，包含段落内文本 offset helper、相邻同 marks text 合并、同一 paragraph 内跨 text 的 `toggle_mark`、合并后的 selection 映射和 Bold/Italic command 跨 text 覆盖。
 
 ### 变更
 

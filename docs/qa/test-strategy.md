@@ -9,8 +9,8 @@
   - 工作区冒烟测试。
   - 包入口可导入。
   - 文档模型类型、创建、类型判断、校验和规范化。
-  - Text marks 类型、helper、校验、规范化、`toggle_mark`、Bold command、Italic command、operation 保留和 history 快照保留。
-  - Path、Point、RangeSelection 和文本切片工具。
+  - Text marks 类型、helper、校验、规范化、`toggle_mark`、跨 text mark 切分合并、Bold command、Italic command、operation 保留和 history 快照保留。
+  - Path、Point、RangeSelection、段落 text offset 和文本切片工具。
   - 基础渲染器、bold/italic mark HTML 输出、HTML 序列化、DOM 与模型位置映射和选区同步。
   - React 组件 `value`、`defaultValue`、`onChange` 和 `onTransaction` 初始渲染契约。
   - 输入 helper 的普通文本输入、Backspace、Delete 和 Enter transaction。
