@@ -136,6 +136,54 @@ describe("applyToggleMark", () => {
     ]);
   });
 
+  it("maps selection across merged sibling text nodes", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("你"),
+        createText("好"),
+        createText("世"),
+        createText("界"),
+      ]),
+    ]);
+    const operation = createToggleMarkOperation(
+      {
+        anchor: { path: [0, 1], offset: 0 },
+        focus: { path: [0, 2], offset: 1 },
+      },
+      "bold",
+    );
+
+    expect(createSelectionAfterToggleMark(document, operation)).toEqual({
+      anchor: { path: [0, 1], offset: 0 },
+      focus: { path: [0, 1], offset: 2 },
+    });
+  });
+
+  it("maps selection after merging toggled text with neighboring marks", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("你", { bold: true }),
+        createText("好"),
+        createText("世界", { bold: true }),
+      ]),
+    ]);
+    const operation = createToggleMarkOperation(
+      {
+        anchor: { path: [0, 1], offset: 0 },
+        focus: { path: [0, 1], offset: 1 },
+      },
+      "bold",
+    );
+
+    expect(applyToggleMark(document, operation).children[0]?.children).toEqual([
+      { type: "text", text: "你好世界", marks: { bold: true } },
+    ]);
+    expect(createSelectionAfterToggleMark(document, operation)).toEqual({
+      anchor: { path: [0, 0], offset: 1 },
+      focus: { path: [0, 0], offset: 2 },
+    });
+  });
+
   it("throws when a range crosses paragraphs", () => {
     const document = createDocument([
       createParagraph([createText("你好")]),
