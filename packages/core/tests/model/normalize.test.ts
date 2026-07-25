@@ -96,4 +96,48 @@ describe("normalizeDocument", () => {
     });
     expect(validateDocument(result).valid).toBe(true);
   });
+
+  it("merges adjacent text nodes with equal marks", () => {
+    const result = normalizeDocument({
+      type: "document",
+      children: [
+        {
+          type: "paragraph",
+          children: [
+            { type: "text", text: "你", marks: { bold: true } },
+            { type: "text", text: "好", marks: { bold: true } },
+            { type: "text", text: "世", marks: { italic: true } },
+            { type: "text", text: "界", marks: { italic: true } },
+          ],
+        },
+      ],
+    });
+
+    expect(result.children[0]?.children).toEqual([
+      { type: "text", text: "你好", marks: { bold: true } },
+      { type: "text", text: "世界", marks: { italic: true } },
+    ]);
+    expect(validateDocument(result).valid).toBe(true);
+  });
+
+  it("keeps text nodes split when marks differ", () => {
+    const result = normalizeDocument({
+      type: "document",
+      children: [
+        {
+          type: "paragraph",
+          children: [
+            { type: "text", text: "你", marks: { bold: true } },
+            { type: "text", text: "好", marks: { italic: true } },
+          ],
+        },
+      ],
+    });
+
+    expect(result.children[0]?.children).toEqual([
+      { type: "text", text: "你", marks: { bold: true } },
+      { type: "text", text: "好", marks: { italic: true } },
+    ]);
+    expect(validateDocument(result).valid).toBe(true);
+  });
 });
