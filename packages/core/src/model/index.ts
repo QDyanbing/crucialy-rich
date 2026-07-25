@@ -14,6 +14,7 @@ export {
   addTextMark,
   areTextMarksEqual,
   hasTextMark,
+  mergeAdjacentTextNodes,
   normalizeTextMarks,
   removeTextMark,
   toggleTextMark,

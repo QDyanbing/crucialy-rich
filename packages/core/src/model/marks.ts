@@ -1,4 +1,9 @@
-import { TEXT_MARK_TYPES, type TextMarks, type TextMarkType } from "./types";
+import {
+  TEXT_MARK_TYPES,
+  type TextMarks,
+  type TextMarkType,
+  type TextNode,
+} from "./types";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -57,4 +62,30 @@ export function areTextMarksEqual(
   return TEXT_MARK_TYPES.every(
     (mark) => hasTextMark(left, mark) === hasTextMark(right, mark),
   );
+}
+
+function createNormalizedTextNode(node: TextNode): TextNode {
+  const marks = normalizeTextMarks(node.marks);
+
+  return marks === undefined
+    ? { text: node.text, type: "text" }
+    : { marks, text: node.text, type: "text" };
+}
+
+export function mergeAdjacentTextNodes(nodes: readonly TextNode[]): TextNode[] {
+  return nodes.reduce<TextNode[]>((result, node) => {
+    const normalizedNode = createNormalizedTextNode(node);
+    const previousNode = result[result.length - 1];
+
+    if (previousNode && areTextMarksEqual(previousNode.marks, normalizedNode.marks)) {
+      result[result.length - 1] = {
+        ...previousNode,
+        text: previousNode.text + normalizedNode.text,
+      };
+      return result;
+    }
+
+    result.push(normalizedNode);
+    return result;
+  }, []);
 }
