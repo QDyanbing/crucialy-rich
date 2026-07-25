@@ -9,6 +9,13 @@ import type { RangeSelection } from "../selection";
 import { isCollapsed, isValidPoint, normalizeRange } from "../selection";
 import type { ToggleMarkOperation } from "./types";
 
+interface ToggleMarkTarget {
+  blockIndex: number;
+  endTextIndex: number;
+  range: RangeSelection;
+  startTextIndex: number;
+}
+
 export function createToggleMarkOperation(
   range: RangeSelection,
   mark: TextMarkType,
@@ -29,10 +36,10 @@ export function createToggleMarkOperation(
   };
 }
 
-function getToggleMarkIndexes(
+function getToggleMarkTarget(
   document: DocumentNode,
   operation: ToggleMarkOperation,
-): [number, number, RangeSelection] {
+): ToggleMarkTarget {
   const range = normalizeRange(operation.range);
 
   if (!isValidPoint(document, range.anchor) || !isValidPoint(document, range.focus)) {
@@ -53,7 +60,12 @@ function getToggleMarkIndexes(
     throw new RangeError("toggle mark range must stay inside one text node");
   }
 
-  return [anchorBlockIndex, anchorTextIndex, range];
+  return {
+    blockIndex: anchorBlockIndex,
+    endTextIndex: focusTextIndex,
+    range,
+    startTextIndex: anchorTextIndex,
+  };
 }
 
 function createTextPart(text: string, source: TextNode): TextNode | undefined {
@@ -94,7 +106,10 @@ export function applyToggleMark(
   document: DocumentNode,
   operation: ToggleMarkOperation,
 ): DocumentNode {
-  const [blockIndex, textIndex, range] = getToggleMarkIndexes(document, operation);
+  const { blockIndex, range, startTextIndex } = getToggleMarkTarget(
+    document,
+    operation,
+  );
 
   return {
     ...document,
@@ -103,13 +118,13 @@ export function applyToggleMark(
         ? {
             ...block,
             children: [
-              ...block.children.slice(0, textIndex),
+              ...block.children.slice(0, startTextIndex),
               ...createToggleMarkReplacement(
-                block.children[textIndex]!,
+                block.children[startTextIndex]!,
                 range,
                 operation.mark,
               ),
-              ...block.children.slice(textIndex + 1),
+              ...block.children.slice(startTextIndex + 1),
             ],
           }
         : block,
@@ -121,9 +136,12 @@ export function createSelectionAfterToggleMark(
   document: DocumentNode,
   operation: ToggleMarkOperation,
 ): RangeSelection {
-  const [blockIndex, textIndex, range] = getToggleMarkIndexes(document, operation);
+  const { blockIndex, range, startTextIndex } = getToggleMarkTarget(
+    document,
+    operation,
+  );
   const selectedTextLength = range.focus.offset - range.anchor.offset;
-  const targetTextIndex = textIndex + (range.anchor.offset > 0 ? 1 : 0);
+  const targetTextIndex = startTextIndex + (range.anchor.offset > 0 ? 1 : 0);
   const point = {
     path: [blockIndex, targetTextIndex],
     offset: 0,
