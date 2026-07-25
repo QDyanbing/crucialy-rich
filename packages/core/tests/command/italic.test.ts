@@ -135,16 +135,68 @@ describe("italicCommand", () => {
     expect(isItalicCommandActive(input)).toBe(true);
   });
 
-  it("skips invalid or cross-node selections", () => {
+  it("toggles italic across sibling text nodes", () => {
     const document = createDocument([
-      createParagraph([createText("你好"), createText("世界")]),
+      createParagraph([createText("你"), createText("好"), createText("世界")]),
+    ]);
+    const input = {
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 1], offset: 0 },
+          focus: { path: [0, 2], offset: 1 },
+        },
+      },
+    };
+    const result = italicCommand.execute(input);
+
+    expect(canExecuteItalicCommand(input)).toBe(true);
+    expect(
+      applyTransaction(document, result.transaction!).children[0]?.children,
+    ).toEqual([
+      { type: "text", text: "你" },
+      { type: "text", text: "好世", marks: { italic: true } },
+      { type: "text", text: "界" },
+    ]);
+    expect(result.selection).toEqual({
+      anchor: { path: [0, 1], offset: 0 },
+      focus: { path: [0, 1], offset: 2 },
+    });
+  });
+
+  it("reports active state across marked sibling text nodes", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("你"),
+        createText("好", { italic: true }),
+        createText("世界", { italic: true }),
+      ]),
+    ]);
+
+    expect(
+      isItalicCommandActive({
+        context: {
+          document,
+          selection: {
+            anchor: { path: [0, 1], offset: 0 },
+            focus: { path: [0, 2], offset: 1 },
+          },
+        },
+      }),
+    ).toBe(true);
+  });
+
+  it("skips invalid or cross-paragraph selections", () => {
+    const document = createDocument([
+      createParagraph([createText("你好")]),
+      createParagraph([createText("世界")]),
     ]);
     const input = {
       context: {
         document,
         selection: {
           anchor: { path: [0, 0], offset: 1 },
-          focus: { path: [0, 1], offset: 1 },
+          focus: { path: [1, 0], offset: 1 },
         },
       },
     };
