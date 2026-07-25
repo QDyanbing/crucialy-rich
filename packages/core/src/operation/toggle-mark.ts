@@ -1,4 +1,5 @@
 import {
+  areTextMarksEqual,
   createText,
   mergeAdjacentTextNodes,
   toggleTextMark,
@@ -7,7 +8,13 @@ import {
   type TextNode,
 } from "../model";
 import type { RangeSelection } from "../selection";
-import { isCollapsed, isValidPoint, normalizeRange } from "../selection";
+import {
+  getParagraphTextOffset,
+  getPointAtParagraphTextOffset,
+  isCollapsed,
+  isValidPoint,
+  normalizeRange,
+} from "../selection";
 import type { ToggleMarkOperation } from "./types";
 
 interface ToggleMarkTarget {
@@ -149,6 +156,42 @@ function createToggleMarkReplacement(
   return compactTextParts(parts);
 }
 
+function findCollapsedMarkPlaceholder(
+  document: DocumentNode,
+  blockIndex: number,
+  textOffset: number,
+  textNode: TextNode,
+  mark: TextMarkType,
+) {
+  const block = document.children[blockIndex];
+  const toggledMarks = toggleTextMark(textNode.marks, mark);
+
+  if (!block) {
+    return undefined;
+  }
+
+  let cursor = 0;
+
+  for (let textIndex = 0; textIndex < block.children.length; textIndex += 1) {
+    const currentText = block.children[textIndex]!;
+
+    if (
+      currentText.text.length === 0 &&
+      cursor === textOffset &&
+      areTextMarksEqual(currentText.marks, toggledMarks)
+    ) {
+      return {
+        offset: 0,
+        path: [blockIndex, textIndex],
+      };
+    }
+
+    cursor += currentText.text.length;
+  }
+
+  return undefined;
+}
+
 export function applyToggleMark(
   document: DocumentNode,
   operation: ToggleMarkOperation,
@@ -176,30 +219,67 @@ export function createSelectionAfterToggleMark(
   document: DocumentNode,
   operation: ToggleMarkOperation,
 ): RangeSelection {
-  const { blockIndex, range, startTextIndex } = getToggleMarkTarget(
-    document,
-    operation,
-  );
-  const selectedTextLength = range.focus.offset - range.anchor.offset;
-  const targetTextIndex = startTextIndex + (range.anchor.offset > 0 ? 1 : 0);
-  const point = {
-    path: [blockIndex, targetTextIndex],
-    offset: 0,
-  };
+  const target = getToggleMarkTarget(document, operation);
+  const startOffset = getParagraphTextOffset(document, target.range.anchor);
+  const endOffset = getParagraphTextOffset(document, target.range.focus);
+  const nextDocument = applyToggleMark(document, operation);
 
-  return isCollapsed(range)
-    ? {
-        anchor: point,
-        focus: {
-          path: [...point.path],
-          offset: point.offset,
-        },
-      }
-    : {
-        anchor: point,
-        focus: {
-          path: [...point.path],
-          offset: selectedTextLength,
-        },
-      };
+  if (startOffset === undefined || endOffset === undefined) {
+    throw new RangeError("toggle mark range must reference text nodes");
+  }
+
+  if (isCollapsed(target.range)) {
+    const textNode =
+      document.children[target.blockIndex]?.children[target.startTextIndex];
+
+    if (!textNode) {
+      throw new RangeError("toggle mark range must reference text nodes");
+    }
+
+    const point =
+      findCollapsedMarkPlaceholder(
+        nextDocument,
+        target.blockIndex,
+        startOffset,
+        textNode,
+        operation.mark,
+      ) ??
+      getPointAtParagraphTextOffset(nextDocument, target.blockIndex, startOffset, {
+        affinity: "forward",
+      });
+
+    if (!point) {
+      throw new RangeError("toggle mark selection cannot be mapped");
+    }
+
+    return {
+      anchor: point,
+      focus: {
+        offset: point.offset,
+        path: [...point.path],
+      },
+    };
+  }
+
+  const anchor = getPointAtParagraphTextOffset(
+    nextDocument,
+    target.blockIndex,
+    startOffset,
+    { affinity: "forward" },
+  );
+  const focus = getPointAtParagraphTextOffset(
+    nextDocument,
+    target.blockIndex,
+    endOffset,
+    { affinity: "backward" },
+  );
+
+  if (!anchor || !focus) {
+    throw new RangeError("toggle mark selection cannot be mapped");
+  }
+
+  return {
+    anchor,
+    focus,
+  };
 }
