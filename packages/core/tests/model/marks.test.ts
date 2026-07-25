@@ -4,6 +4,7 @@ import {
   addTextMark,
   areTextMarksEqual,
   hasTextMark,
+  mergeAdjacentTextNodes,
   normalizeTextMarks,
   removeTextMark,
   toggleTextMark,
@@ -37,5 +38,32 @@ describe("text mark helpers", () => {
     expect(areTextMarksEqual({ bold: true }, { bold: true })).toBe(true);
     expect(areTextMarksEqual({ bold: true }, { italic: true })).toBe(false);
     expect(areTextMarksEqual(undefined, {})).toBe(true);
+  });
+
+  it("merges adjacent text nodes with equal marks", () => {
+    expect(
+      mergeAdjacentTextNodes([
+        { type: "text", text: "你" },
+        { type: "text", text: "好" },
+        { type: "text", text: "世", marks: { bold: true } },
+        { type: "text", text: "界", marks: { bold: true } },
+        { type: "text", text: "。", marks: { italic: true } },
+      ]),
+    ).toEqual([
+      { type: "text", text: "你好" },
+      { type: "text", text: "世界", marks: { bold: true } },
+      { type: "text", text: "。", marks: { italic: true } },
+    ]);
+  });
+
+  it("normalizes marks while merging text nodes", () => {
+    const original = { type: "text" as const, text: "你", marks: { bold: true } };
+    const result = mergeAdjacentTextNodes([
+      original,
+      { type: "text", text: "好", marks: { bold: true, underline: true } },
+    ]);
+
+    expect(result).toEqual([{ type: "text", text: "你好", marks: { bold: true } }]);
+    expect(result[0]).not.toBe(original);
   });
 });

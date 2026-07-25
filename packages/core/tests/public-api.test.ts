@@ -15,6 +15,7 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.addTextMark).toBe("function");
     expect(typeof core.areTextMarksEqual).toBe("function");
     expect(typeof core.hasTextMark).toBe("function");
+    expect(typeof core.mergeAdjacentTextNodes).toBe("function");
     expect(typeof core.normalizeTextMarks).toBe("function");
     expect(typeof core.removeTextMark).toBe("function");
     expect(typeof core.toggleTextMark).toBe("function");
