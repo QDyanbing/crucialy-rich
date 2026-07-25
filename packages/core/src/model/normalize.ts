@@ -1,6 +1,6 @@
 import { createDocument, createParagraph, createText } from "./factories";
 import { isBlockNode, isDocumentNode, isTextNode } from "./guards";
-import { normalizeTextMarks } from "./marks";
+import { mergeAdjacentTextNodes, normalizeTextMarks } from "./marks";
 import type { DocumentNode, ParagraphNode, TextNode } from "./types";
 
 /**
@@ -27,7 +27,9 @@ export function normalizeDocument(value: unknown): DocumentNode {
 }
 
 function normalizeParagraph(node: ParagraphNode): ParagraphNode {
-  const children = node.children.filter(isTextNode).map(normalizeTextNode);
+  const children = mergeAdjacentTextNodes(
+    node.children.filter(isTextNode).map(normalizeTextNode),
+  );
 
   return {
     type: "paragraph",
