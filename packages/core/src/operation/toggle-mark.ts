@@ -1,5 +1,6 @@
 import {
   createText,
+  mergeAdjacentTextNodes,
   toggleTextMark,
   type DocumentNode,
   type TextMarkType,
@@ -54,10 +55,9 @@ function getToggleMarkTarget(
     anchorTextIndex === undefined ||
     focusBlockIndex === undefined ||
     focusTextIndex === undefined ||
-    anchorBlockIndex !== focusBlockIndex ||
-    anchorTextIndex !== focusTextIndex
+    anchorBlockIndex !== focusBlockIndex
   ) {
-    throw new RangeError("toggle mark range must stay inside one text node");
+    throw new RangeError("toggle mark range must stay inside one paragraph");
   }
 
   return {
@@ -76,56 +76,96 @@ function compactTextParts(parts: Array<TextNode | undefined>): TextNode[] {
   return parts.filter((part): part is TextNode => part !== undefined);
 }
 
-function createToggleMarkReplacement(
+function createToggledTextPart(
+  text: string,
+  source: TextNode,
+  mark: TextMarkType,
+): TextNode | undefined {
+  return text.length > 0
+    ? createText(text, toggleTextMark(source.marks, mark))
+    : undefined;
+}
+
+function createCollapsedToggleMarkReplacement(
   textNode: TextNode,
   range: RangeSelection,
   mark: TextMarkType,
 ): TextNode[] {
   const before = textNode.text.slice(0, range.anchor.offset);
-  const selected = textNode.text.slice(range.anchor.offset, range.focus.offset);
   const after = textNode.text.slice(range.focus.offset);
   const toggledMarks = toggleTextMark(textNode.marks, mark);
-  const toggledText = createText(selected, toggledMarks);
-
-  if (isCollapsed(range)) {
-    return compactTextParts([
-      createTextPart(before, textNode),
-      toggledText,
-      createTextPart(after, textNode),
-    ]);
-  }
 
   return compactTextParts([
     createTextPart(before, textNode),
-    toggledText,
+    createText("", toggledMarks),
     createTextPart(after, textNode),
   ]);
+}
+
+function createToggleMarkReplacement(
+  textNodes: readonly TextNode[],
+  target: ToggleMarkTarget,
+  mark: TextMarkType,
+): TextNode[] {
+  if (isCollapsed(target.range)) {
+    return createCollapsedToggleMarkReplacement(
+      textNodes[target.startTextIndex]!,
+      target.range,
+      mark,
+    );
+  }
+
+  const parts: Array<TextNode | undefined> = [];
+
+  textNodes.forEach((textNode, textIndex) => {
+    if (textIndex < target.startTextIndex || textIndex > target.endTextIndex) {
+      return;
+    }
+
+    const selectionStart =
+      textIndex === target.startTextIndex ? target.range.anchor.offset : 0;
+    const selectionEnd =
+      textIndex === target.endTextIndex
+        ? target.range.focus.offset
+        : textNode.text.length;
+
+    if (textIndex === target.startTextIndex) {
+      parts.push(createTextPart(textNode.text.slice(0, selectionStart), textNode));
+    }
+
+    parts.push(
+      createToggledTextPart(
+        textNode.text.slice(selectionStart, selectionEnd),
+        textNode,
+        mark,
+      ),
+    );
+
+    if (textIndex === target.endTextIndex) {
+      parts.push(createTextPart(textNode.text.slice(selectionEnd), textNode));
+    }
+  });
+
+  return compactTextParts(parts);
 }
 
 export function applyToggleMark(
   document: DocumentNode,
   operation: ToggleMarkOperation,
 ): DocumentNode {
-  const { blockIndex, range, startTextIndex } = getToggleMarkTarget(
-    document,
-    operation,
-  );
+  const target = getToggleMarkTarget(document, operation);
 
   return {
     ...document,
     children: document.children.map((block, currentBlockIndex) =>
-      currentBlockIndex === blockIndex
+      currentBlockIndex === target.blockIndex
         ? {
             ...block,
-            children: [
-              ...block.children.slice(0, startTextIndex),
-              ...createToggleMarkReplacement(
-                block.children[startTextIndex]!,
-                range,
-                operation.mark,
-              ),
-              ...block.children.slice(startTextIndex + 1),
-            ],
+            children: mergeAdjacentTextNodes([
+              ...block.children.slice(0, target.startTextIndex),
+              ...createToggleMarkReplacement(block.children, target, operation.mark),
+              ...block.children.slice(target.endTextIndex + 1),
+            ]),
           }
         : block,
     ),
