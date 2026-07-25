@@ -114,9 +114,32 @@ describe("applyToggleMark", () => {
     });
   });
 
-  it("throws when a range crosses text nodes", () => {
+  it("toggles a range across sibling text nodes", () => {
     const document = createDocument([
-      createParagraph([createText("你好"), createText("世界")]),
+      createParagraph([createText("你好"), createText("世界"), createText("。")]),
+    ]);
+    const result = applyToggleMark(
+      document,
+      createToggleMarkOperation(
+        {
+          anchor: { path: [0, 0], offset: 1 },
+          focus: { path: [0, 1], offset: 1 },
+        },
+        "bold",
+      ),
+    );
+
+    expect(result.children[0]?.children).toEqual([
+      { type: "text", text: "你" },
+      { type: "text", text: "好世", marks: { bold: true } },
+      { type: "text", text: "界。" },
+    ]);
+  });
+
+  it("throws when a range crosses paragraphs", () => {
+    const document = createDocument([
+      createParagraph([createText("你好")]),
+      createParagraph([createText("世界")]),
     ]);
 
     expect(() =>
@@ -124,12 +147,12 @@ describe("applyToggleMark", () => {
         document,
         createToggleMarkOperation(
           {
-            anchor: { path: [0, 0], offset: 1 },
-            focus: { path: [0, 1], offset: 1 },
+            anchor: { path: [0, 0], offset: 0 },
+            focus: { path: [1, 0], offset: 1 },
           },
           "bold",
         ),
       ),
-    ).toThrow("toggle mark range must stay inside one text node");
+    ).toThrow("toggle mark range must stay inside one paragraph");
   });
 });
