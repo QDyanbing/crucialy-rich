@@ -1,7 +1,9 @@
 import {
   areTextMarksEqual,
   createText,
+  hasTextMark,
   mergeAdjacentTextNodes,
+  setTextMark,
   toggleTextMark,
   type DocumentNode,
   type TextMarkType,
@@ -83,14 +85,41 @@ function compactTextParts(parts: Array<TextNode | undefined>): TextNode[] {
   return parts.filter((part): part is TextNode => part !== undefined);
 }
 
-function createToggledTextPart(
+function createMarkedTextPart(
   text: string,
   source: TextNode,
   mark: TextMarkType,
+  active: boolean,
 ): TextNode | undefined {
   return text.length > 0
-    ? createText(text, toggleTextMark(source.marks, mark))
+    ? createText(text, setTextMark(source.marks, mark, active))
     : undefined;
+}
+
+function shouldAddTextMark(
+  textNodes: readonly TextNode[],
+  target: ToggleMarkTarget,
+  mark: TextMarkType,
+): boolean {
+  for (
+    let textIndex = target.startTextIndex;
+    textIndex <= target.endTextIndex;
+    textIndex += 1
+  ) {
+    const textNode = textNodes[textIndex]!;
+    const selectionStart =
+      textIndex === target.startTextIndex ? target.range.anchor.offset : 0;
+    const selectionEnd =
+      textIndex === target.endTextIndex
+        ? target.range.focus.offset
+        : textNode.text.length;
+
+    if (selectionStart < selectionEnd && !hasTextMark(textNode.marks, mark)) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 function createCollapsedToggleMarkReplacement(
@@ -123,6 +152,7 @@ function createToggleMarkReplacement(
   }
 
   const parts: Array<TextNode | undefined> = [];
+  const active = shouldAddTextMark(textNodes, target, mark);
 
   textNodes.forEach((textNode, textIndex) => {
     if (textIndex < target.startTextIndex || textIndex > target.endTextIndex) {
@@ -141,10 +171,11 @@ function createToggleMarkReplacement(
     }
 
     parts.push(
-      createToggledTextPart(
+      createMarkedTextPart(
         textNode.text.slice(selectionStart, selectionEnd),
         textNode,
         mark,
+        active,
       ),
     );
 
