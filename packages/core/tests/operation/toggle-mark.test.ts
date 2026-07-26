@@ -162,6 +162,34 @@ describe("applyToggleMark", () => {
     ]);
   });
 
+  it("removes a mark uniformly from a reverse selection", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("你好", { italic: true }),
+        createText("世界", { bold: true, italic: true }),
+        createText("结束", { italic: true }),
+      ]),
+    ]);
+    const result = applyToggleMark(
+      document,
+      createToggleMarkOperation(
+        {
+          anchor: { path: [0, 2], offset: 1 },
+          focus: { path: [0, 0], offset: 1 },
+        },
+        "italic",
+      ),
+    );
+
+    expect(result.children[0]?.children).toEqual([
+      { type: "text", text: "你", marks: { italic: true } },
+      { type: "text", text: "好" },
+      { type: "text", text: "世界", marks: { bold: true } },
+      { type: "text", text: "结" },
+      { type: "text", text: "束", marks: { italic: true } },
+    ]);
+  });
+
   it("maps selection across merged sibling text nodes", () => {
     const document = createDocument([
       createParagraph([
