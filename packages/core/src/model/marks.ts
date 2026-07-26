@@ -55,6 +55,14 @@ export function toggleTextMark(
     : addTextMark(marks, mark);
 }
 
+export function setTextMark(
+  marks: TextMarks | undefined,
+  mark: TextMarkType,
+  active: boolean,
+): TextMarks | undefined {
+  return active ? addTextMark(marks, mark) : removeTextMark(marks, mark);
+}
+
 export function areTextMarksEqual(
   left: TextMarks | undefined,
   right: TextMarks | undefined,

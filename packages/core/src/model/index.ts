@@ -17,6 +17,7 @@ export {
   mergeAdjacentTextNodes,
   normalizeTextMarks,
   removeTextMark,
+  setTextMark,
   toggleTextMark,
 } from "./marks";
 export { validateDocument } from "./validate";
