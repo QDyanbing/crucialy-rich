@@ -18,6 +18,7 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.mergeAdjacentTextNodes).toBe("function");
     expect(typeof core.normalizeTextMarks).toBe("function");
     expect(typeof core.removeTextMark).toBe("function");
+    expect(typeof core.setTextMark).toBe("function");
     expect(typeof core.toggleTextMark).toBe("function");
     expect(typeof core.validateDocument).toBe("function");
     expect(typeof core.normalizeDocument).toBe("function");
@@ -138,11 +139,13 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.canExecuteItalicCommand).toBe("function");
     expect(typeof core.canExecuteMergeBlockCommand).toBe("function");
     expect(typeof core.canExecuteSplitBlockCommand).toBe("function");
+    expect(typeof core.canExecuteTextMarkCommand).toBe("function");
     expect(typeof core.createCommandFailure).toBe("function");
     expect(typeof core.createDefaultCommandRegistry).toBe("function");
     expect(typeof core.createCommandRegistry).toBe("function");
     expect(typeof core.createCommandSkipped).toBe("function");
     expect(typeof core.createCommandSuccess).toBe("function");
+    expect(typeof core.createTextMarkCommand).toBe("function");
     expect(core.DEFAULT_COMMANDS.map((command) => command.name)).toEqual([
       "bold",
       "deleteSelection",
@@ -157,6 +160,7 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.insertTextCommand).toBe("object");
     expect(typeof core.isBoldCommandActive).toBe("function");
     expect(typeof core.isItalicCommandActive).toBe("function");
+    expect(typeof core.isTextMarkCommandActive).toBe("function");
     expect(typeof core.italicCommand).toBe("object");
     expect(typeof core.mergeBlockCommand).toBe("object");
     expect(typeof core.queryCommandState).toBe("function");
