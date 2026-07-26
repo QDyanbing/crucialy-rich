@@ -136,6 +136,32 @@ describe("applyToggleMark", () => {
     ]);
   });
 
+  it("adds a mark uniformly across a mixed selection", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("你好"),
+        createText("世界", { bold: true }),
+        createText("结束"),
+      ]),
+    ]);
+    const result = applyToggleMark(
+      document,
+      createToggleMarkOperation(
+        {
+          anchor: { path: [0, 0], offset: 1 },
+          focus: { path: [0, 2], offset: 1 },
+        },
+        "bold",
+      ),
+    );
+
+    expect(result.children[0]?.children).toEqual([
+      { type: "text", text: "你" },
+      { type: "text", text: "好世界结", marks: { bold: true } },
+      { type: "text", text: "束" },
+    ]);
+  });
+
   it("maps selection across merged sibling text nodes", () => {
     const document = createDocument([
       createParagraph([
