@@ -10,11 +10,11 @@
 
 ## 当前阶段
 
-已完成工程初始化、文档模型第一版、模型选区第一版、基础模型渲染第一版、DOM 与模型位置映射第一版、选区双向同步第一版、React 组件 API 第一版、渲染闭环验收、`insertText`、`deleteText`、`toggle_mark`、`splitBlock`、`mergeBlock` operation 第一版、Transaction 第一版、Operation 闭环验收、`beforeinput insertText` 第一版、Backspace 第一版、Delete 第一版、Enter 第一版、基础编辑闭环验收、Command 基础接口、文本编辑命令、Block 编辑命令、Bold 命令、Italic 命令、Mark 切分与合并第一版、Command 状态读取、Command 闭环验收、History 撤销/重做第一版、连续输入合并第一版、撤销重做快捷键第一版和 text marks 模型基础。
+已完成工程初始化、文档模型第一版、模型选区第一版、基础模型渲染第一版、DOM 与模型位置映射第一版、选区双向同步第一版、React 组件 API 第一版、渲染闭环验收、`insertText`、`deleteText`、`toggle_mark`、`splitBlock`、`mergeBlock` operation 第一版、Transaction 第一版、Operation 闭环验收、`beforeinput insertText` 第一版、Backspace 第一版、Delete 第一版、Enter 第一版、基础编辑闭环验收、Command 基础接口、文本编辑命令、Block 编辑命令、Bold 命令、Italic 命令、Mark 切分与合并第一版、Bold/Italic 闭环验收、Command 状态读取、Command 闭环验收、History 撤销/重做第一版、连续输入合并第一版、撤销重做快捷键第一版和 text marks 模型基础。
 
 当前 React 组件已支持通过 `value` / `defaultValue` 展示文档模型，普通文本输入、非折叠删除选区、Enter 分段、段首 Backspace 合并和段尾 Delete 合并会优先复用 command；组件会通过 `onTransaction` 暴露真实输入 transaction。演示页按钮命令和真实输入都会记录 history，并支持撤销、重做、Ctrl/Meta + Z、Ctrl/Meta + Shift + Z、Ctrl/Meta + Y、连续 typing 合并和 undoStack/redoStack 状态查看。
 
-text marks 当前完成 `bold` / `italic` 的模型表达、helper、校验、规范化、operation 保留和 history 快照保留；Bold 与 Italic 已具备 command、同一 paragraph 内跨 text 的 `toggle_mark`、相邻同 marks text 合并、renderer 输出、demo“加粗/斜体”按钮、JSON 映射展示和 history 记录。下一步进入 Bold/Italic 闭环验收。
+text marks 当前完成 `bold` / `italic` 的模型表达、helper、校验、规范化、operation 保留和 history 快照保留；Bold 与 Italic 已具备 command、同一 paragraph 内跨 text 的统一 `toggle_mark`、相邻同 marks text 合并、renderer 输出、demo 中文验收样例、toolbar active 状态、JSON 映射展示和 history 记录。第 9 周 Bold/Italic 已闭环，下一步进入第 10 周 Day 1「样式叠加规则」。
 
 ## 技术栈
 
@@ -135,6 +135,7 @@ pnpm test:e2e
 - [第 9 周 QA](./docs/qa/week-09.md)
 - [模型 QA](./docs/qa/model.md)
 - [文字标记 QA](./docs/qa/marks.md)
+- [Bold/Italic 闭环验收](./docs/qa/bold-italic.md)
 - [选区 QA](./docs/qa/selection.md)
 - [基础渲染 QA](./docs/qa/render.md)
 - [选区同步 QA](./docs/qa/selection-sync.md)

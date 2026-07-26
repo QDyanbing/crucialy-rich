@@ -1,6 +1,6 @@
 # 文字标记模型
 
-文字标记用于描述 text 节点上的内联格式。当前阶段完成第 9 周 Day 1「Mark 机制」、Day 2「Bold」、Day 3「Italic」和 Day 4「Mark 切分与合并」第一版，覆盖数据结构、helper、校验、规范化、`toggle_mark` operation、`boldCommand`、`italicCommand`、renderer 加粗/斜体输出、operation 保留和 history 快照保留。
+文字标记用于描述 text 节点上的内联格式。第 9 周 Bold 和 Italic 已闭环，覆盖数据结构、helper、校验、规范化、`toggle_mark` operation、可复用 mark command、renderer 加粗/斜体输出、demo 多节点验收、operation 保留和 history 快照保留。
 
 ## 数据结构
 
@@ -32,6 +32,7 @@ interface TextNode {
 - `hasTextMark(marks, mark)`：判断 mark 是否启用。
 - `addTextMark(marks, mark)`：返回启用指定 mark 后的新对象。
 - `removeTextMark(marks, mark)`：返回移除指定 mark 后的新对象；没有剩余 mark 时返回 `undefined`。
+- `setTextMark(marks, mark, active)`：按明确的激活状态添加或移除指定 mark。
 - `toggleTextMark(marks, mark)`：按当前状态切换指定 mark。
 - `areTextMarksEqual(left, right)`：比较两个 mark 集合的启用状态。
 - `mergeAdjacentTextNodes(nodes)`：合并相邻且 marks 启用状态完全一致的 text 节点。
@@ -73,8 +74,9 @@ interface ToggleMarkOperation {
 当前规则：
 
 - range 必须落在同一个 paragraph 内。
-- 非折叠 range 会按 text 边界切分 before / selected / after，只给 selected 覆盖到的 text 片段切换 mark。
-- 同一 paragraph 内跨多个 text 节点时，会逐段切换 mark，并合并相邻同 marks 的 text 节点。
+- 非折叠 range 会按 text 边界切分 before / selected / after，只修改 selected 覆盖到的 text 片段。
+- 选区内存在未激活的目标 mark 时会统一添加；全部已激活时会统一移除，避免混合选区逐节点反转。
+- 同一 paragraph 内跨多个 text 节点时会统一修改目标 mark，并合并相邻同 marks 的 text 节点。
 - selection 会在合并后的文档中按 paragraph text offset 重新映射。
 - collapsed range 会在光标处创建一个空 text 节点，并把切换后的 marks 写到该空节点上。
 - collapsed 后续输入会插入到该空 text 节点内，从而继承 mark。
@@ -119,6 +121,10 @@ const italicCommand: Command;
 
 `italicCommand` 已加入默认 command registry，demo 操作区可通过“斜体”按钮调用，并会记录 history。
 
+## 通用 Mark Command
+
+`createTextMarkCommand`、`canExecuteTextMarkCommand` 和 `isTextMarkCommandActive` 已作为公共 API 导出。后续新增文字 mark 时可以复用相同的选区校验、transaction 创建和 active 状态计算。
+
 ## 渲染
 
 renderer 遇到 text marks 时会根据标记输出内联元素，并继续保留 `data-crucialy-path`，因此 DOM 与模型选区映射仍能定位到同一个 text path：
@@ -126,6 +132,8 @@ renderer 遇到 text marks 时会根据标记输出内联元素，并继续保�
 - `marks.bold === true` 输出 `<strong>`。
 - `marks.italic === true` 输出 `<em>`。
 - `bold + italic` 组合输出 `<strong style="font-style: italic;">`，保持 text path 元素下仍是直接文本节点，便于当前 DOM 映射逻辑复用。
+
+Demo 的“文字标记”样例覆盖普通、加粗、斜体、组合格式和跨 text 选区。加粗与斜体按钮通过 `aria-pressed` 同步当前 active 状态，详细步骤见 `docs/qa/bold-italic.md`。
 
 ## 当前限制
 

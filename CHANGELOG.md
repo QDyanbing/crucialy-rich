@@ -50,6 +50,7 @@
 - 新增 Bold 第一版，包含 `toggle_mark` operation、`boldCommand`、默认 command 注册、`<strong>` 渲染、demo“加粗”按钮、测试、文档和 QA。
 - 新增 Italic 第一版，包含 `italicCommand`、默认 command 注册、`<em>` 渲染、bold+italic 组合渲染、demo“斜体”按钮、JSON 映射展示、测试、文档和 QA。
 - 新增 Mark 切分与合并第一版，包含段落内文本 offset helper、相邻同 marks text 合并、同一 paragraph 内跨 text 的 `toggle_mark`、合并后的 selection 映射和 Bold/Italic command 跨 text 覆盖。
+- 新增 Bold/Italic 闭环验收，包含混合选区统一 mark 语义、通用 mark command API、中文多节点 demo 样例、toolbar active 状态、交互覆盖和 QA 文档。
 
 ### 变更
 
@@ -72,6 +73,7 @@
 - 更新 README、History 文档和变更记录，使其匹配 History 撤销/重做范围。
 - 更新 README、core README、react README、输入事件、组件 API、History、Command、QA 和测试策略，使其匹配真实输入 history 与连续 typing 合并范围。
 - 更新 README、History、输入事件、组件 API、QA 和测试策略，使其匹配撤销重做快捷键范围。
+- 更新文字标记、Command、QA、包说明和项目状态，使其匹配 Bold/Italic 闭环范围。
 
 ### 暂未包含
 
