@@ -112,6 +112,49 @@ test("toggles italic from the demo controls", async ({ page }) => {
   await expect(page.getByLabel("斜体 Command 状态")).toContainText("激活");
 });
 
+test("completes the bold and italic acceptance loop", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("marks");
+
+  const renderedDocument = page.getByLabel("已渲染文档");
+  const acceptanceParagraph = renderedDocument.locator("p").nth(1);
+  const boldButton = page.getByRole("button", { name: "加粗" });
+  const italicButton = page.getByRole("button", { name: "斜体" });
+
+  await expect(renderedDocument).toContainText("加粗文本");
+  await expect(renderedDocument).toContainText("斜体文本");
+  await expect(page.getByLabel("选中文本")).toContainText("跨节点选区可以继续切换。");
+  await expect(boldButton).toHaveAttribute("aria-pressed", "false");
+  await expect(italicButton).toHaveAttribute("aria-pressed", "false");
+
+  await boldButton.click();
+
+  await expect(boldButton).toHaveAttribute("aria-pressed", "true");
+  await expect(italicButton).toHaveAttribute("aria-pressed", "false");
+  await expect(acceptanceParagraph.locator("strong").first()).toContainText(
+    "跨节点选区可以",
+  );
+
+  await italicButton.click();
+
+  await expect(boldButton).toHaveAttribute("aria-pressed", "true");
+  await expect(italicButton).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
+    '"bold": true',
+  );
+  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
+    '"italic": true',
+  );
+
+  await boldButton.click();
+
+  await expect(boldButton).toHaveAttribute("aria-pressed", "false");
+  await expect(italicButton).toHaveAttribute("aria-pressed", "true");
+  await expect(acceptanceParagraph.locator("em")).toContainText(
+    "跨节点选区可以继续切换。",
+  );
+});
+
 test("renders the model document in the editor preview", async ({ page }) => {
   await page.goto("/");
 
