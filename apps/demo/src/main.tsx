@@ -507,6 +507,12 @@ function DemoApp() {
     );
   }
 
+  function isCommandActive(name: CommandName) {
+    return (
+      commandStates.find((command) => command.commandName === name)?.active ?? false
+    );
+  }
+
   function handleModelExampleChange(event: ChangeEvent<HTMLSelectElement>) {
     const nextExampleId = event.target.value as ModelExampleId;
 
@@ -764,6 +770,7 @@ function DemoApp() {
               插入
             </button>
             <button
+              aria-pressed={isCommandActive(BOLD_COMMAND_NAME)}
               type="button"
               disabled={isCommandDisabled(BOLD_COMMAND_NAME)}
               onClick={handleBold}
@@ -771,6 +778,7 @@ function DemoApp() {
               加粗
             </button>
             <button
+              aria-pressed={isCommandActive(ITALIC_COMMAND_NAME)}
               type="button"
               disabled={isCommandDisabled(ITALIC_COMMAND_NAME)}
               onClick={handleItalic}
