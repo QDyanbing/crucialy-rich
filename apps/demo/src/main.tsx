@@ -53,7 +53,7 @@ import { createRoot } from "react-dom/client";
 
 import "./styles.css";
 
-type ModelExampleId = "regular" | "empty" | "invalid";
+type ModelExampleId = "regular" | "marks" | "empty" | "invalid";
 
 interface ModelExample {
   id: ModelExampleId;
@@ -83,6 +83,28 @@ const modelExamples: ModelExample[] = [
     value: createDocument([
       createParagraph([createText("你好，crucialy-rich。")]),
       createParagraph([createText("选区模型已就绪。")]),
+    ]),
+  },
+  {
+    id: "marks",
+    label: "文字标记",
+    value: createDocument([
+      createParagraph([
+        createText("普通文本，"),
+        createText("加粗文本", { bold: true }),
+        createText("，"),
+        createText("斜体文本", { italic: true }),
+        createText("，"),
+        createText("组合格式", { bold: true, italic: true }),
+        createText("。"),
+      ]),
+      createParagraph([
+        createText("跨节点"),
+        createText("选区", { bold: true }),
+        createText("可以"),
+        createText("继续", { italic: true }),
+        createText("切换。"),
+      ]),
     ]),
   },
   {
