@@ -12,10 +12,14 @@ export {
   boldCommand,
   canExecuteBoldCommand,
   canExecuteItalicCommand,
+  canExecuteTextMarkCommand,
+  createTextMarkCommand,
   isBoldCommandActive,
   isItalicCommandActive,
+  isTextMarkCommandActive,
   italicCommand,
 } from "./mark";
+export type { TextMarkCommandConfig } from "./mark";
 export { canExecuteCommand } from "./can-execute";
 export { createDefaultCommandRegistry, DEFAULT_COMMANDS } from "./defaults";
 export { executeCommand } from "./execute";

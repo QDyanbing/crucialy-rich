@@ -16,7 +16,7 @@ import type { Command, CommandInput } from "./types";
 export const BOLD_COMMAND_NAME = "bold";
 export const ITALIC_COMMAND_NAME = "italic";
 
-interface TextMarkCommandConfig {
+export interface TextMarkCommandConfig {
   commandName: string;
   label: string;
   mark: TextMarkType;
@@ -66,19 +66,22 @@ function getTextCommandRange(input: CommandInput): TextCommandRange | undefined 
   };
 }
 
-function canToggleMarkRange(input: CommandInput): boolean {
+export function canExecuteTextMarkCommand(input: CommandInput): boolean {
   return getTextCommandRange(input) !== undefined;
 }
 
 export function canExecuteBoldCommand(input: CommandInput): boolean {
-  return canToggleMarkRange(input);
+  return canExecuteTextMarkCommand(input);
 }
 
 export function canExecuteItalicCommand(input: CommandInput): boolean {
-  return canToggleMarkRange(input);
+  return canExecuteTextMarkCommand(input);
 }
 
-function isTextMarkActive(input: CommandInput, mark: TextMarkType): boolean {
+export function isTextMarkCommandActive(
+  input: CommandInput,
+  mark: TextMarkType,
+): boolean {
   const target = getTextCommandRange(input);
 
   if (!target) {
@@ -116,18 +119,18 @@ function isTextMarkActive(input: CommandInput, mark: TextMarkType): boolean {
 }
 
 export function isBoldCommandActive(input: CommandInput): boolean {
-  return isTextMarkActive(input, "bold");
+  return isTextMarkCommandActive(input, "bold");
 }
 
 export function isItalicCommandActive(input: CommandInput): boolean {
-  return isTextMarkActive(input, "italic");
+  return isTextMarkCommandActive(input, "italic");
 }
 
-function createTextMarkCommand(config: TextMarkCommandConfig): Command {
+export function createTextMarkCommand(config: TextMarkCommandConfig): Command {
   return {
-    canExecute: canToggleMarkRange,
+    canExecute: canExecuteTextMarkCommand,
     execute(input) {
-      if (!canToggleMarkRange(input) || !input.context.selection) {
+      if (!canExecuteTextMarkCommand(input) || !input.context.selection) {
         return createCommandSkipped(
           config.commandName,
           `${config.label} command requires a text selection.`,
@@ -144,7 +147,7 @@ function createTextMarkCommand(config: TextMarkCommandConfig): Command {
         transaction: createTransaction([operation]),
       });
     },
-    isActive: (input) => isTextMarkActive(input, config.mark),
+    isActive: (input) => isTextMarkCommandActive(input, config.mark),
     name: config.commandName,
   };
 }
