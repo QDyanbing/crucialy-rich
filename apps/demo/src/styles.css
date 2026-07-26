@@ -194,6 +194,17 @@ button:hover {
   background: #eef2ef;
 }
 
+button[aria-pressed="true"] {
+  border-color: #3c6e50;
+  background: #dcebe1;
+  color: #173c25;
+}
+
+button[aria-pressed="true"]:hover {
+  border-color: #315c43;
+  background: #cfe2d5;
+}
+
 button:disabled {
   cursor: not-allowed;
   border-color: #d9ded8;
