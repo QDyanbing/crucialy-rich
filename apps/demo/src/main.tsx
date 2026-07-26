@@ -58,6 +58,7 @@ type ModelExampleId = "regular" | "marks" | "empty" | "invalid";
 interface ModelExample {
   id: ModelExampleId;
   label: string;
+  selection: RangeSelection;
   value: unknown;
 }
 
@@ -80,6 +81,10 @@ const modelExamples: ModelExample[] = [
   {
     id: "regular",
     label: "常规文档",
+    selection: {
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 5 },
+    },
     value: createDocument([
       createParagraph([createText("你好，crucialy-rich。")]),
       createParagraph([createText("选区模型已就绪。")]),
@@ -88,6 +93,10 @@ const modelExamples: ModelExample[] = [
   {
     id: "marks",
     label: "文字标记",
+    selection: {
+      anchor: { path: [1, 0], offset: 0 },
+      focus: { path: [1, 4], offset: 3 },
+    },
     value: createDocument([
       createParagraph([
         createText("普通文本，"),
@@ -110,11 +119,19 @@ const modelExamples: ModelExample[] = [
   {
     id: "empty",
     label: "空文档",
+    selection: {
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 0 },
+    },
     value: { type: "document", children: [] },
   },
   {
     id: "invalid",
     label: "非法文档",
+    selection: {
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 0 },
+    },
     value: {
       type: "document",
       children: [{ type: "text", text: "游离文本" }],
@@ -164,11 +181,6 @@ const renderBoundaryExamples: RenderBoundaryExample[] = [
     ]),
   },
 ];
-
-const defaultSelection: RangeSelection = {
-  anchor: { path: [0, 0], offset: 0 },
-  focus: { path: [0, 0], offset: 5 },
-};
 
 function cloneModelValue(value: unknown): unknown {
   return JSON.parse(JSON.stringify(value)) as unknown;
@@ -437,8 +449,9 @@ if (!rootElement) {
 
 function DemoApp() {
   const [modelExampleId, setModelExampleId] = useState<ModelExampleId>("regular");
-  const [modelSelection, setModelSelection] =
-    useState<RangeSelection>(defaultSelection);
+  const [modelSelection, setModelSelection] = useState<RangeSelection>(
+    getModelExample("regular").selection,
+  );
   const [insertTextValue, setInsertTextValue] = useState("插入文本");
   const [lastTransaction, setLastTransaction] = useState<Transaction | null>(null);
   const [lastTransactionReport, setLastTransactionReport] =
@@ -499,6 +512,7 @@ function DemoApp() {
 
     setModelExampleId(nextExampleId);
     setDocumentValue(cloneModelValue(getModelExample(nextExampleId).value));
+    setModelSelection(getModelExample(nextExampleId).selection);
     setHistoryState(createHistoryState());
     setLastTransaction(null);
     setLastTransactionReport(null);
