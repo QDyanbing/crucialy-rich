@@ -7,6 +7,7 @@ import {
   mergeAdjacentTextNodes,
   normalizeTextMarks,
   removeTextMark,
+  setTextMark,
   toggleTextMark,
   type TextNode,
 } from "../../src/model";
@@ -31,6 +32,17 @@ describe("text mark helpers", () => {
     expect(boldItalic).toEqual({ bold: true, italic: true });
     expect(italic).toEqual({ italic: true });
     expect(toggleTextMark(italic, "italic")).toBeUndefined();
+  });
+
+  it("sets marks to an explicit active state", () => {
+    expect(setTextMark({ italic: true }, "bold", true)).toEqual({
+      bold: true,
+      italic: true,
+    });
+    expect(setTextMark({ bold: true, italic: true }, "bold", false)).toEqual({
+      italic: true,
+    });
+    expect(setTextMark({ bold: true }, "bold", false)).toBeUndefined();
   });
 
   it("checks and compares active marks", () => {
