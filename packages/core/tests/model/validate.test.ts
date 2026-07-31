@@ -71,7 +71,14 @@ describe("validateDocument", () => {
 
   it("accepts supported text marks", () => {
     const document = createDocument([
-      createParagraph([createText("hi", { bold: true, italic: true })]),
+      createParagraph([
+        createText("hi", {
+          bold: true,
+          italic: true,
+          strike: true,
+          underline: true,
+        }),
+      ]),
     ]);
 
     expect(validateDocument(document)).toEqual({ valid: true, errors: [] });
@@ -101,7 +108,7 @@ describe("validateDocument", () => {
             {
               type: "text",
               text: "x",
-              marks: { bold: false, underline: true },
+              marks: { bold: false, highlight: true },
             },
           ],
         },
@@ -112,7 +119,7 @@ describe("validateDocument", () => {
       valid: false,
       errors: [
         { path: [0, 0], message: "text mark bold 的值必须是 true" },
-        { path: [0, 0], message: "text mark underline 不受支持" },
+        { path: [0, 0], message: "text mark highlight 不受支持" },
       ],
     });
   });
