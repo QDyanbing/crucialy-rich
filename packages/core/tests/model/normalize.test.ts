@@ -63,12 +63,28 @@ describe("normalizeDocument", () => {
       children: [
         {
           type: "paragraph",
-          children: [{ type: "text", text: "keep", marks: { bold: true } }],
+          children: [
+            {
+              type: "text",
+              text: "keep",
+              marks: {
+                bold: true,
+                italic: true,
+                strike: true,
+                underline: true,
+              },
+            },
+          ],
         },
       ],
     });
 
-    expect(result.children[0]?.children[0]?.marks).toEqual({ bold: true });
+    expect(result.children[0]?.children[0]?.marks).toEqual({
+      bold: true,
+      italic: true,
+      strike: true,
+      underline: true,
+    });
     expect(validateDocument(result).valid).toBe(true);
   });
 
@@ -82,7 +98,13 @@ describe("normalizeDocument", () => {
             {
               type: "text",
               text: "keep",
-              marks: { bold: false, italic: true, underline: true },
+              marks: {
+                bold: false,
+                highlight: true,
+                italic: true,
+                strike: false,
+                underline: true,
+              },
             },
           ],
         },
@@ -92,7 +114,7 @@ describe("normalizeDocument", () => {
     expect(result.children[0]?.children[0]).toEqual({
       type: "text",
       text: "keep",
-      marks: { italic: true },
+      marks: { italic: true, underline: true },
     });
     expect(validateDocument(result).valid).toBe(true);
   });
