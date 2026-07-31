@@ -13,7 +13,7 @@ interface TextNode {
   marks?: TextMarks;
 }
 
-type TextMarks = Partial<Record<"bold" | "italic", true>>;
+type TextMarks = Partial<Record<"bold" | "italic" | "underline" | "strike", true>>;
 
 interface ParagraphNode {
   type: "paragraph";
@@ -28,7 +28,7 @@ interface DocumentNode {
 
 `BlockNode` 现在等价于 `ParagraphNode`，后续加入 heading、quote、list 等块级节点时再扩展联合类型。
 
-`TextNode.marks` 当前支持 `bold` 和 `italic` 两个内联格式标记。mark 只记录启用状态，值固定为 `true`；没有任何启用 mark 时省略 `marks` 字段。
+`TextNode.marks` 当前支持 `bold`、`italic`、`underline` 和 `strike` 四个 boolean 内联格式标记。mark 只记录启用状态，值固定为 `true`；四种 mark 可以共存，没有任何启用 mark 时省略 `marks` 字段。
 
 ## 类型判断
 
@@ -75,6 +75,6 @@ interface DocumentNode {
 ## 当前限制
 
 - 只支持 paragraph、text 和 text marks，不支持 heading、list 等。
-- text marks 当前只完成模型表达、helper、校验、规范化和编辑保留；暂未接入 mark 命令、toolbar 或 renderer 标签输出。
+- text marks 已完成四种 boolean mark 的模型表达、helper、校验、规范化和编辑保留；Bold/Italic 已接入 command、demo 和 renderer，Underline/Strike 仍处于 schema 阶段。
 - 第一版节点不包含 `attrs` 字段，后续新增 heading、link、image 等能力时再引入属性模型。
 - 规范化会丢弃非法节点而不尝试转换，转换策略留待后续。

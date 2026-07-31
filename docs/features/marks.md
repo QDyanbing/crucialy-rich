@@ -1,18 +1,20 @@
 # 文字标记模型
 
-文字标记用于描述 text 节点上的内联格式。第 9 周 Bold 和 Italic 已闭环，覆盖数据结构、helper、校验、规范化、`toggle_mark` operation、可复用 mark command、renderer 加粗/斜体输出、demo 多节点验收、operation 保留和 history 快照保留。
+文字标记用于描述 text 节点上的内联格式。第 9 周 Bold 和 Italic 已闭环；第 10 周 Day 1 已把 boolean mark schema 扩展为 bold、italic、underline 和 strike。当前覆盖数据结构、helper、校验、规范化、`toggle_mark` operation、可复用 mark command、renderer 加粗/斜体输出、demo 多节点验收、operation 保留和 history 快照保留。
 
 ## 数据结构
 
-当前支持两个 text mark：
+当前支持四个 boolean text mark：
 
 - `bold`：加粗。
 - `italic`：斜体。
+- `underline`：下划线，当前完成 schema，命令与渲染从 Day 2 接入。
+- `strike`：删除线，当前完成 schema，命令与渲染从 Day 3 接入。
 
 ```ts
-const TEXT_MARK_TYPES = ["bold", "italic"] as const;
+const TEXT_MARK_TYPES = ["bold", "italic", "underline", "strike"] as const;
 
-type TextMarkType = "bold" | "italic";
+type TextMarkType = "bold" | "italic" | "underline" | "strike";
 type TextMarks = Partial<Record<TextMarkType, true>>;
 
 interface TextNode {
@@ -23,6 +25,14 @@ interface TextNode {
 ```
 
 `marks` 只记录启用状态，值固定为 `true`；未启用的 mark 不写入节点。
+
+## 叠加规则
+
+- 四种 boolean mark 相互独立，同一个 text 节点可以同时启用任意组合。
+- 添加、移除或切换某一种 mark 时，其他已启用 mark 保持不变。
+- `normalizeTextMarks` 按 `TEXT_MARK_TYPES` 统一保留合法的 `true` 值。
+- 相邻 text 节点只有在四种 marks 的启用状态完全一致时才会合并。
+- History 快照和 text operation 会保留完整 marks 对象。
 
 ## Helper
 
@@ -43,7 +53,7 @@ interface TextNode {
 
 - `marks` 省略时合法。
 - `marks` 必须是普通对象。
-- key 只能是 `bold` 或 `italic`。
+- key 只能是 `bold`、`italic`、`underline` 或 `strike`。
 - value 必须是 `true`。
 
 `normalizeDocument` 会保留合法 mark，丢弃未知 mark、非 `true` mark 和空 mark 集合，并合并相邻同 marks 的 text 节点。规范化后的文档仍能通过 `validateDocument`。
@@ -132,6 +142,7 @@ renderer 遇到 text marks 时会根据标记输出内联元素，并继续保�
 - `marks.bold === true` 输出 `<strong>`。
 - `marks.italic === true` 输出 `<em>`。
 - `bold + italic` 组合输出 `<strong style="font-style: italic;">`，保持 text path 元素下仍是直接文本节点，便于当前 DOM 映射逻辑复用。
+- `underline` 和 `strike` 当前只进入模型，尚未映射为渲染标签或样式。
 
 Demo 的“文字标记”样例覆盖普通、加粗、斜体、组合格式和跨 text 选区。加粗与斜体按钮通过 `aria-pressed` 同步当前 active 状态，详细步骤见 `docs/qa/bold-italic.md`。
 
@@ -139,3 +150,4 @@ Demo 的“文字标记”样例覆盖普通、加粗、斜体、组合格式和
 
 - 暂未实现编辑器内置 toolbar；当前只有 demo 操作区按钮。
 - 暂未实现跨 paragraph 的 mark 应用策略。
+- Underline/Strike command、renderer 和 demo 控件尚未实现。

@@ -1,13 +1,14 @@
 # QA：文字标记模型验收
 
-当前文字标记范围覆盖 bold / italic 的模型表达、helper、校验、规范化、`toggle_mark`、Bold command、Italic command、同 paragraph 跨 text 切分合并、基础编辑保留和 history 快照保留。
+当前文字标记范围覆盖 bold / italic / underline / strike 的 boolean schema、helper、校验、规范化和编辑保留，以及 Bold/Italic 的 command、renderer、demo 和同 paragraph 跨 text 切分合并。
 
 ## 已完成范围
 
 - `TextNode` 支持可选 `marks` 字段。
-- `TEXT_MARK_TYPES` 固定为 `bold` 和 `italic`。
+- `TEXT_MARK_TYPES` 固定为 `bold`、`italic`、`underline` 和 `strike`。
+- 同一个 text 节点可以同时启用四种 boolean mark。
 - `createText(text, marks)` 支持创建带 marks 的 text 节点，并复制 marks 对象。
-- 新增 `normalizeTextMarks`、`hasTextMark`、`addTextMark`、`removeTextMark`、`toggleTextMark` 和 `areTextMarksEqual`。
+- 新增 `normalizeTextMarks`、`hasTextMark`、`addTextMark`、`removeTextMark`、`setTextMark`、`toggleTextMark` 和 `areTextMarksEqual`。
 - 新增 `mergeAdjacentTextNodes`，用于合并相邻同 marks text 节点。
 - `validateDocument` 会拒绝非对象、未知 mark 和非 `true` mark 值。
 - `normalizeDocument` 会保留合法 marks，丢弃未知或未启用 marks，并合并相邻同 marks text 节点。
@@ -21,6 +22,7 @@
 - demo 文档 JSON 选区映射会展示当前 text marks。
 - `insert_text`、`delete_text`、`split_block` 和 `merge_block` 已有 mark 保留测试。
 - `createHistorySnapshot` 会深拷贝 text marks。
+- Underline/Strike 当前完成 schema、校验、规范化、Operation 与 History 保留，命令和渲染按后续任务接入。
 
 ## 自动化覆盖
 
@@ -49,7 +51,8 @@
 
 - 暂未实现 React 组件内置 toolbar。
 - 暂未实现跨 paragraph 的 mark 应用策略。
+- 暂未实现 Underline/Strike command、renderer 和 demo 控件。
 
 ## 结论
 
-文字标记模型、Bold 第一版、Italic 第一版和 Mark 切分与合并第一版已完成，可以支撑下一步进入 Bold/Italic 闭环验收。
+四种 boolean mark 的共存规则已完成，Bold/Italic 已闭环；下一步进入第 10 周 Day 2「Underline」。
