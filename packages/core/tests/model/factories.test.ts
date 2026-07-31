@@ -15,10 +15,24 @@ describe("model factories", () => {
   });
 
   it("creates a text node with cloned marks", () => {
-    const marks = { bold: true as const };
+    const marks = {
+      bold: true as const,
+      italic: true as const,
+      strike: true as const,
+      underline: true as const,
+    };
     const text = createText("hi", marks);
 
-    expect(text).toEqual({ type: "text", text: "hi", marks: { bold: true } });
+    expect(text).toEqual({
+      type: "text",
+      text: "hi",
+      marks: {
+        bold: true,
+        italic: true,
+        strike: true,
+        underline: true,
+      },
+    });
     expect(text.marks).not.toBe(marks);
   });
 
