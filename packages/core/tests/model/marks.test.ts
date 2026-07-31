@@ -18,9 +18,11 @@ describe("text mark helpers", () => {
       normalizeTextMarks({
         bold: true,
         italic: false,
+        strike: true,
         underline: true,
+        highlight: true,
       }),
-    ).toEqual({ bold: true });
+    ).toEqual({ bold: true, strike: true, underline: true });
   });
 
   it("adds, removes and toggles marks", () => {
@@ -43,6 +45,32 @@ describe("text mark helpers", () => {
       italic: true,
     });
     expect(setTextMark({ bold: true }, "bold", false)).toBeUndefined();
+  });
+
+  it("keeps four boolean marks active together", () => {
+    const marks = normalizeTextMarks({
+      bold: true,
+      italic: true,
+      strike: true,
+      underline: true,
+    });
+
+    expect(marks).toEqual({
+      bold: true,
+      italic: true,
+      strike: true,
+      underline: true,
+    });
+    expect(removeTextMark(marks, "underline")).toEqual({
+      bold: true,
+      italic: true,
+      strike: true,
+    });
+    expect(setTextMark(marks, "strike", false)).toEqual({
+      bold: true,
+      italic: true,
+      underline: true,
+    });
   });
 
   it("checks and compares active marks", () => {
@@ -78,7 +106,7 @@ describe("text mark helpers", () => {
     const noisyNode = {
       type: "text",
       text: "好",
-      marks: { bold: true, underline: true },
+      marks: { bold: true, highlight: true },
     } as unknown as TextNode;
     const result = mergeAdjacentTextNodes([original, noisyNode]);
 
