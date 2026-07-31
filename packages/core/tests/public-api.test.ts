@@ -11,7 +11,7 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.createDocument).toBe("function");
     expect(typeof core.createParagraph).toBe("function");
     expect(typeof core.createText).toBe("function");
-    expect(core.TEXT_MARK_TYPES).toEqual(["bold", "italic"]);
+    expect(core.TEXT_MARK_TYPES).toEqual(["bold", "italic", "underline", "strike"]);
     expect(typeof core.addTextMark).toBe("function");
     expect(typeof core.areTextMarksEqual).toBe("function");
     expect(typeof core.hasTextMark).toBe("function");

@@ -20,10 +20,23 @@ describe("model node types", () => {
   });
 
   it("describes text marks on text nodes", () => {
-    const mark: TextMarkType = "bold";
-    const text: TextNode = { type: "text", text: "hello", marks: { [mark]: true } };
+    const underline: TextMarkType = "underline";
+    const strike: TextMarkType = "strike";
+    const text: TextNode = {
+      type: "text",
+      text: "hello",
+      marks: {
+        bold: true,
+        italic: true,
+        [underline]: true,
+        [strike]: true,
+      },
+    };
 
-    expect(TEXT_MARK_TYPES).toEqual(["bold", "italic"]);
+    expect(TEXT_MARK_TYPES).toEqual(["bold", "italic", "underline", "strike"]);
     expect(text.marks?.bold).toBe(true);
+    expect(text.marks?.italic).toBe(true);
+    expect(text.marks?.underline).toBe(true);
+    expect(text.marks?.strike).toBe(true);
   });
 });
