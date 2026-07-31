@@ -2,10 +2,10 @@
  * 文档模型的第一版类型定义。
  *
  * 当前阶段支持 `document` -> `paragraph` -> `text` 三层结构，
- * text 节点可携带 bold / italic marks。
+ * text 节点可携带 bold / italic / underline marks。
  */
 
-export const TEXT_MARK_TYPES = ["bold", "italic"] as const;
+export const TEXT_MARK_TYPES = ["bold", "italic", "underline"] as const;
 
 export type TextMarkType = (typeof TEXT_MARK_TYPES)[number];
 
