@@ -10,7 +10,14 @@ import {
 describe("createHistorySnapshot", () => {
   it("clones document and selection values", () => {
     const document = createDocument([
-      createParagraph([createText("你好", { bold: true })]),
+      createParagraph([
+        createText("你好", {
+          bold: true,
+          italic: true,
+          strike: true,
+          underline: true,
+        }),
+      ]),
     ]);
     const selection = {
       anchor: { path: [0, 0], offset: 0 },
@@ -24,7 +31,12 @@ describe("createHistorySnapshot", () => {
     selection.focus.offset = 9;
 
     expect(snapshot.document.children[0]?.children[0]?.text).toBe("你好");
-    expect(snapshot.document.children[0]?.children[0]?.marks).toEqual({ bold: true });
+    expect(snapshot.document.children[0]?.children[0]?.marks).toEqual({
+      bold: true,
+      italic: true,
+      strike: true,
+      underline: true,
+    });
     expect(snapshot.document.children[0]?.children[0]?.marks).not.toBe(
       document.children[0]?.children[0]?.marks,
     );

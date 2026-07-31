@@ -92,6 +92,39 @@ describe("applyToggleMark", () => {
     });
   });
 
+  it("adds underline without removing other boolean marks", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("你好", {
+          bold: true,
+          italic: true,
+          strike: true,
+        }),
+      ]),
+    ]);
+    const result = applyToggleMark(
+      document,
+      createToggleMarkOperation(
+        {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [0, 0], offset: 2 },
+        },
+        "underline",
+      ),
+    );
+
+    expect(result.children[0]?.children[0]).toEqual({
+      type: "text",
+      text: "你好",
+      marks: {
+        bold: true,
+        italic: true,
+        strike: true,
+        underline: true,
+      },
+    });
+  });
+
   it("creates a collapsed marked placeholder for future input", () => {
     const document = createDocument([createParagraph([createText("你好世界")])]);
     const operation = createToggleMarkOperation(
