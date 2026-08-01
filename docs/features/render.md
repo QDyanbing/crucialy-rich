@@ -1,6 +1,6 @@
 # 基础渲染（第一版）
 
-基础渲染负责把当前文档模型转换为可展示的 DOM 结构描述。当前覆盖 `document`、`paragraph`、`text`、bold text mark 和 italic text mark。
+基础渲染负责把当前文档模型转换为可展示的 DOM 结构描述。当前覆盖 `document`、`paragraph`、`text`、bold、italic 和 underline text mark。
 
 ## 渲染结构
 
@@ -11,13 +11,15 @@
 - `text` → `span`
 - `text` + `marks.bold` → `strong`
 - `text` + `marks.italic` → `em`
+- `text` + `marks.underline` → `u`
 - `text` + `marks.bold` + `marks.italic` → `strong style="font-style: italic;"`
+- underline 与 bold/italic 叠加 → 当前 text path 元素增加 `text-decoration: underline;`
 
 `renderDocument(document)` 返回 `RenderedElementNode` 树：
 
 ```ts
 interface RenderedElementNode {
-  tagName: "div" | "em" | "p" | "span" | "strong";
+  tagName: "div" | "em" | "p" | "span" | "strong" | "u";
   path: Path;
   attributes: Record<string, string>;
   children?: RenderedElementNode[];
@@ -70,7 +72,9 @@ interface RenderedElementNode {
 - 空 paragraph 渲染为带路径的空 `p`。
 - 多段落按块顺序分配 `[0]`、`[1]`、`[2]` 等路径。
 - 加粗 text 渲染为带 text path 的 `strong`，斜体 text 渲染为带 text path 的 `em`，不改变 DOM 与模型路径对应关系。
+- 下划线 text 渲染为带 text path 的 `u`。
 - 同时带有加粗和斜体的 text 会渲染为 `strong style="font-style: italic;"`，保持 text path 元素下仍是直接文本节点。
+- 下划线与加粗或斜体叠加时写入同一个路径元素的 style，不产生嵌套路径元素。
 
 ## 演示验收
 
@@ -86,4 +90,4 @@ interface RenderedElementNode {
 
 - 浏览器选区同步当前只覆盖已验证的基础场景。
 - 不处理 `contentEditable`、`beforeinput` 或真实编辑行为。
-- 当前只包含 bold 和 italic 标记渲染，标题、列表等扩展节点渲染尚未实现。
+- 当前包含 bold、italic 和 underline 标记渲染；strike、标题和列表等扩展渲染尚未实现。

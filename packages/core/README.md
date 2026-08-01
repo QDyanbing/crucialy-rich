@@ -43,6 +43,7 @@ import {
   recordHistory,
   setTextMark,
   undoHistory,
+  UNDERLINE_COMMAND_NAME,
   toggleTextMark,
   validateDocument,
 } from "@crucialy-rich/core";
@@ -144,6 +145,15 @@ const italicResult = executeCommand(commandRegistry, ITALIC_COMMAND_NAME, {
     },
   },
 });
+const underlineResult = executeCommand(commandRegistry, UNDERLINE_COMMAND_NAME, {
+  context: {
+    document: normalized,
+    selection: {
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 5 },
+    },
+  },
+});
 const history = recordHistory({
   after: createHistorySnapshot(nextDocument),
   batch: "typing",
@@ -168,7 +178,7 @@ const undoChange = undoHistory(history);
 - Transaction：`createTransaction`、`applyOperation`、`applyTransaction`、`summarizeOperation`、`summarizeTransaction`、`createTransactionAcceptanceReport`。
 - 输入：`createInsertTextInputTransaction`、`createSelectionAfterInsertTextInput`、`createBackspaceInputTransaction`、`createSelectionAfterBackspaceInput`、`createDeleteInputTransaction`、`createSelectionAfterDeleteInput`、`createEnterInputTransaction`、`createSelectionAfterEnterInput`。
 - 当前输入 helper 覆盖普通文本插入、段中删除、段落合并、段落分裂和输入后 selection 落点。
-- Command：`DEFAULT_COMMANDS`、`createDefaultCommandRegistry`、`createCommandRegistry`、`canExecuteCommand`、`executeCommand`、`queryCommandState`、`createCommandSuccess`、`createCommandFailure`、`createCommandSkipped`、`createTextMarkCommand`、`canExecuteTextMarkCommand`、`isTextMarkCommandActive`、`boldCommand`、`italicCommand`、`insertTextCommand`、`deleteSelectionCommand`、`splitBlockCommand`、`mergeBlockCommand`、`BOLD_COMMAND_NAME`、`ITALIC_COMMAND_NAME`、`INSERT_TEXT_COMMAND_NAME`、`DELETE_SELECTION_COMMAND_NAME`、`SPLIT_BLOCK_COMMAND_NAME`、`MERGE_BLOCK_COMMAND_NAME`。
+- Command：`DEFAULT_COMMANDS`、`createDefaultCommandRegistry`、`createCommandRegistry`、`canExecuteCommand`、`executeCommand`、`queryCommandState`、`createCommandSuccess`、`createCommandFailure`、`createCommandSkipped`、`createTextMarkCommand`、`canExecuteTextMarkCommand`、`isTextMarkCommandActive`、`boldCommand`、`italicCommand`、`underlineCommand`、`insertTextCommand`、`deleteSelectionCommand`、`splitBlockCommand`、`mergeBlockCommand`、`BOLD_COMMAND_NAME`、`ITALIC_COMMAND_NAME`、`UNDERLINE_COMMAND_NAME`、`INSERT_TEXT_COMMAND_NAME`、`DELETE_SELECTION_COMMAND_NAME`、`SPLIT_BLOCK_COMMAND_NAME`、`MERGE_BLOCK_COMMAND_NAME`。
 - History：`createHistorySnapshot`、`cloneHistorySnapshot`、`createHistoryEntry`、`cloneHistoryEntry`、`createHistoryState`、`clearHistory`、`recordHistory`、`canMergeHistoryEntries`、`mergeHistoryEntries`、`canUndo`、`canRedo`、`getUndoEntry`、`getRedoEntry`、`undoHistory`、`redoHistory`、`getHistoryShortcutAction`、`undoCommand`、`redoCommand`。
 
 ## 许可
