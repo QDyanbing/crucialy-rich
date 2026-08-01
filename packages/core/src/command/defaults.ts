@@ -1,5 +1,5 @@
 import { mergeBlockCommand, splitBlockCommand } from "./block";
-import { boldCommand, italicCommand } from "./mark";
+import { boldCommand, italicCommand, underlineCommand } from "./mark";
 import { createCommandRegistry, type CommandRegistry } from "./registry";
 import { deleteSelectionCommand, insertTextCommand } from "./text";
 import type { Command } from "./types";
@@ -11,6 +11,7 @@ export const DEFAULT_COMMANDS: readonly Command[] = [
   italicCommand,
   mergeBlockCommand,
   splitBlockCommand,
+  underlineCommand,
 ];
 
 export function createDefaultCommandRegistry(): CommandRegistry {
