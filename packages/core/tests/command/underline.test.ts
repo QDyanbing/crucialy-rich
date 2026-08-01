@@ -6,6 +6,7 @@ import {
   createDocument,
   createParagraph,
   createText,
+  insertTextCommand,
   underlineCommand,
 } from "../../src";
 
@@ -76,5 +77,40 @@ describe("underlineCommand", () => {
       text: "你好",
       marks: { bold: true },
     });
+  });
+
+  it("uses collapsed underline placeholders for later text input", () => {
+    const document = createDocument([createParagraph([createText("你好世界")])]);
+    const underlineResult = underlineCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 2 },
+          focus: { path: [0, 0], offset: 2 },
+        },
+      },
+    });
+    const underlineDocument = applyTransaction(document, underlineResult.transaction!);
+
+    if (!underlineResult.selection) {
+      throw new Error("Underline command should return a selection.");
+    }
+
+    const insertResult = insertTextCommand.execute({
+      context: {
+        document: underlineDocument,
+        selection: underlineResult.selection,
+      },
+      payload: { text: "线" },
+    });
+
+    expect(
+      applyTransaction(underlineDocument, insertResult.transaction!).children[0]
+        ?.children,
+    ).toEqual([
+      { type: "text", text: "你好" },
+      { type: "text", text: "线", marks: { underline: true } },
+      { type: "text", text: "世界" },
+    ]);
   });
 });
