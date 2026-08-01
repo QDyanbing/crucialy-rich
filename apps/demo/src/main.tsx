@@ -25,6 +25,7 @@ import {
   redoHistory,
   recordHistory,
   SPLIT_BLOCK_COMMAND_NAME,
+  UNDERLINE_COMMAND_NAME,
   undoHistory,
   validateDocument,
   type CommandName,
@@ -149,6 +150,7 @@ const demoCommandDescriptors: DemoCommandDescriptor[] = [
   { label: "加粗", name: BOLD_COMMAND_NAME },
   { label: "插入", name: INSERT_TEXT_COMMAND_NAME },
   { label: "斜体", name: ITALIC_COMMAND_NAME },
+  { label: "下划线", name: UNDERLINE_COMMAND_NAME },
   { label: "删除选区", name: DELETE_SELECTION_COMMAND_NAME },
   { label: "分段", name: SPLIT_BLOCK_COMMAND_NAME },
   { label: "合并段落", name: MERGE_BLOCK_COMMAND_NAME },
@@ -608,6 +610,17 @@ function DemoApp() {
     );
   }
 
+  function handleUnderline() {
+    applyCommandResult(
+      executeCommand(demoCommandRegistry, UNDERLINE_COMMAND_NAME, {
+        context: {
+          document: normalizedDocument,
+          selection: modelSelection,
+        },
+      }),
+    );
+  }
+
   function handleDeleteText() {
     applyCommandResult(
       executeCommand(demoCommandRegistry, DELETE_SELECTION_COMMAND_NAME, {
@@ -784,6 +797,14 @@ function DemoApp() {
               onClick={handleItalic}
             >
               斜体
+            </button>
+            <button
+              aria-pressed={isCommandActive(UNDERLINE_COMMAND_NAME)}
+              type="button"
+              disabled={isCommandDisabled(UNDERLINE_COMMAND_NAME)}
+              onClick={handleUnderline}
+            >
+              下划线
             </button>
             <button
               type="button"
