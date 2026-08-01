@@ -105,7 +105,13 @@ const modelExamples: ModelExample[] = [
         createText("，"),
         createText("斜体文本", { italic: true }),
         createText("，"),
-        createText("组合格式", { bold: true, italic: true }),
+        createText("下划线文本", { underline: true }),
+        createText("，"),
+        createText("组合格式", {
+          bold: true,
+          italic: true,
+          underline: true,
+        }),
         createText("。"),
       ]),
       createParagraph([
