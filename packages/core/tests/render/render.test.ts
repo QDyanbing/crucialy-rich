@@ -139,6 +139,21 @@ describe("renderDocument", () => {
     });
   });
 
+  it("renders underline text marks as u elements", () => {
+    const document = createDocument([
+      createParagraph([createText("Underline", { underline: true })]),
+    ]);
+
+    expect(renderDocument(document).children?.[0]?.children?.[0]).toEqual({
+      tagName: "u",
+      path: [0, 0],
+      attributes: {
+        [MODEL_PATH_ATTRIBUTE]: "[0,0]",
+      },
+      text: "Underline",
+    });
+  });
+
   it("renders combined bold and italic marks without nested text paths", () => {
     const document = createDocument([
       createParagraph([createText("Both", { bold: true, italic: true })]),
@@ -152,6 +167,28 @@ describe("renderDocument", () => {
         style: "font-style: italic;",
       },
       text: "Both",
+    });
+  });
+
+  it("renders underline with bold and italic on one text path", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("Stacked", {
+          bold: true,
+          italic: true,
+          underline: true,
+        }),
+      ]),
+    ]);
+
+    expect(renderDocument(document).children?.[0]?.children?.[0]).toEqual({
+      tagName: "strong",
+      path: [0, 0],
+      attributes: {
+        [MODEL_PATH_ATTRIBUTE]: "[0,0]",
+        style: "font-style: italic; text-decoration: underline;",
+      },
+      text: "Stacked",
     });
   });
 });
