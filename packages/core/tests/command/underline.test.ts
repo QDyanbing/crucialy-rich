@@ -7,6 +7,7 @@ import {
   createParagraph,
   createText,
   insertTextCommand,
+  isUnderlineCommandActive,
   underlineCommand,
 } from "../../src";
 
@@ -111,6 +112,45 @@ describe("underlineCommand", () => {
       { type: "text", text: "你好" },
       { type: "text", text: "线", marks: { underline: true } },
       { type: "text", text: "世界" },
+    ]);
+  });
+
+  it("reads active state and toggles underline across text nodes", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("你"),
+        createText("好", { bold: true, underline: true }),
+        createText("世界", { bold: true, underline: true }),
+      ]),
+    ]);
+    const input = {
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 1], offset: 0 },
+          focus: { path: [0, 2], offset: 1 },
+        },
+      },
+    };
+
+    expect(isUnderlineCommandActive(input)).toBe(true);
+
+    const result = underlineCommand.execute(input);
+
+    expect(result.selection).toEqual({
+      anchor: { path: [0, 1], offset: 0 },
+      focus: { path: [0, 1], offset: 2 },
+    });
+    expect(
+      applyTransaction(document, result.transaction!).children[0]?.children,
+    ).toEqual([
+      { type: "text", text: "你" },
+      { type: "text", text: "好世", marks: { bold: true } },
+      {
+        type: "text",
+        text: "界",
+        marks: { bold: true, underline: true },
+      },
     ]);
   });
 });
