@@ -42,6 +42,16 @@ describe("renderNodeToHtml", () => {
     );
   });
 
+  it("serializes underline text marks as u elements", () => {
+    const document = createDocument([
+      createParagraph([createText("Underline", { underline: true })]),
+    ]);
+
+    expect(renderNodeToHtml(renderDocument(document))).toContain(
+      '<u data-crucialy-path="[0,0]">Underline</u>',
+    );
+  });
+
   it("serializes combined bold and italic marks with italic style", () => {
     const document = createDocument([
       createParagraph([createText("Both", { bold: true, italic: true })]),
@@ -49,6 +59,22 @@ describe("renderNodeToHtml", () => {
 
     expect(renderNodeToHtml(renderDocument(document))).toContain(
       '<strong data-crucialy-path="[0,0]" style="font-style: italic;">Both</strong>',
+    );
+  });
+
+  it("serializes underline combined with bold and italic", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("Stacked", {
+          bold: true,
+          italic: true,
+          underline: true,
+        }),
+      ]),
+    ]);
+
+    expect(renderNodeToHtml(renderDocument(document))).toContain(
+      '<strong data-crucialy-path="[0,0]" style="font-style: italic; text-decoration: underline;">Stacked</strong>',
     );
   });
 });
