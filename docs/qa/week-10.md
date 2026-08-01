@@ -4,7 +4,9 @@
 
 第 10 周 Day 1「样式叠加规则」已完成。
 
-☑️ 当前指针：第 10 周 Day 2「Underline」待开始。
+第 10 周 Day 2「Underline」已完成。
+
+☑️ 当前指针：第 10 周 Day 3「Strike」待开始。
 
 ## 已完成范围
 
@@ -18,6 +20,10 @@
 - `toggle_mark` 可以修改 underline/strike，同时保留其他已启用 mark。
 - History 快照会深拷贝四种 boolean mark。
 - 功能文档已记录四种 mark 的叠加与合并规则。
+- 新增 `underlineCommand`，并接入默认 command registry。
+- Underline 支持选区应用、取消、collapsed 输入继承、跨 text 和 active 状态。
+- renderer 会输出 `<u>`，并支持 underline 与 bold/italic 组合渲染。
+- demo 新增“下划线”按钮、active 状态和中文验收样例。
 
 ## 自动化覆盖
 
@@ -27,16 +33,20 @@
 - `packages/core/tests/model/validate.test.ts`
 - `packages/core/tests/model/normalize.test.ts`
 - `packages/core/tests/operation/toggle-mark.test.ts`
+- `packages/core/tests/command/underline.test.ts`
+- `packages/core/tests/command/integration.test.ts`
+- `packages/core/tests/render/render.test.ts`
+- `packages/core/tests/render/html.test.ts`
 - `packages/core/tests/history/snapshot.test.ts`
 - `packages/core/tests/public-api.test.ts`
+- `tests/e2e/demo-shell.spec.ts`
 
 ## 当前边界
 
-- Underline command、renderer 和 demo 按钮尚未实现。
 - Strike command、renderer 和 demo 按钮尚未实现。
 - React 组件仍未提供内置 toolbar。
 - mark 应用范围仍限制在同一个 paragraph 内。
 
 ## 结论
 
-四种 boolean mark 已能在同一个 text 节点上稳定共存。下一步进入 Underline command 与 renderer。
+四种 boolean mark 已能稳定共存，Underline command、renderer 和 demo 已闭环。下一步进入 Strike。
