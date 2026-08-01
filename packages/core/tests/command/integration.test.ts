@@ -13,6 +13,7 @@ import {
   ITALIC_COMMAND_NAME,
   MERGE_BLOCK_COMMAND_NAME,
   SPLIT_BLOCK_COMMAND_NAME,
+  UNDERLINE_COMMAND_NAME,
 } from "../../src";
 
 describe("default command registry integration", () => {
@@ -107,6 +108,22 @@ describe("default command registry integration", () => {
     expect(italicized.ok).toBe(true);
     expect(italicized.transaction?.operations[0]).toMatchObject({
       mark: "italic",
+      type: "toggle_mark",
+    });
+
+    const underlined = executeCommand(registry, UNDERLINE_COMMAND_NAME, {
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [0, 0], offset: 1 },
+        },
+      },
+    });
+
+    expect(underlined.ok).toBe(true);
+    expect(underlined.transaction?.operations[0]).toMatchObject({
+      mark: "underline",
       type: "toggle_mark",
     });
   });
