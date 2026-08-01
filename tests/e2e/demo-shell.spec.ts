@@ -112,6 +112,38 @@ test("toggles italic from the demo controls", async ({ page }) => {
   await expect(page.getByLabel("斜体 Command 状态")).toContainText("激活");
 });
 
+test("toggles underline without changing bold", async ({ page }) => {
+  await page.goto("/");
+
+  const renderedDocument = page.getByLabel("已渲染文档");
+  const boldButton = page.getByRole("button", { name: "加粗" });
+  const underlineButton = page.getByRole("button", { name: "下划线" });
+
+  await expect(page.getByLabel("下划线 Command 状态")).toContainText("可用");
+  await expect(underlineButton).toHaveAttribute("aria-pressed", "false");
+
+  await underlineButton.click();
+
+  await expect(underlineButton).toHaveAttribute("aria-pressed", "true");
+  await expect(renderedDocument.locator('u[data-crucialy-path="[0,0]"]')).toContainText(
+    "你好，cr",
+  );
+
+  await boldButton.click();
+
+  const stackedText = renderedDocument.locator('strong[data-crucialy-path="[0,0]"]');
+
+  await expect(boldButton).toHaveAttribute("aria-pressed", "true");
+  await expect(underlineButton).toHaveAttribute("aria-pressed", "true");
+  await expect(stackedText).toHaveAttribute("style", "text-decoration: underline;");
+
+  await underlineButton.click();
+
+  await expect(boldButton).toHaveAttribute("aria-pressed", "true");
+  await expect(underlineButton).toHaveAttribute("aria-pressed", "false");
+  await expect(stackedText).not.toHaveAttribute("style");
+});
+
 test("completes the bold and italic acceptance loop", async ({ page }) => {
   await page.goto("/");
   await page.getByLabel("模型示例").selectOption("marks");
