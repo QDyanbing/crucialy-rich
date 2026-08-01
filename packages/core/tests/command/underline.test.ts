@@ -1,0 +1,80 @@
+import { describe, expect, it } from "vitest";
+
+import {
+  applyTransaction,
+  canExecuteUnderlineCommand,
+  createDocument,
+  createParagraph,
+  createText,
+  underlineCommand,
+} from "../../src";
+
+describe("underlineCommand", () => {
+  it("applies underline to a selected text range", () => {
+    const document = createDocument([
+      createParagraph([createText("你好世界", { bold: true })]),
+    ]);
+    const input = {
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 1 },
+          focus: { path: [0, 0], offset: 3 },
+        },
+      },
+    };
+    const result = underlineCommand.execute(input);
+
+    expect(canExecuteUnderlineCommand(input)).toBe(true);
+    expect(result.ok).toBe(true);
+    expect(result.transaction?.operations).toEqual([
+      {
+        mark: "underline",
+        range: {
+          anchor: { path: [0, 0], offset: 1 },
+          focus: { path: [0, 0], offset: 3 },
+        },
+        type: "toggle_mark",
+      },
+    ]);
+    expect(
+      applyTransaction(document, result.transaction!).children[0]?.children,
+    ).toEqual([
+      { type: "text", text: "你", marks: { bold: true } },
+      {
+        type: "text",
+        text: "好世",
+        marks: { bold: true, underline: true },
+      },
+      { type: "text", text: "界", marks: { bold: true } },
+    ]);
+  });
+
+  it("removes underline without changing other marks", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("你好", {
+          bold: true,
+          underline: true,
+        }),
+      ]),
+    ]);
+    const result = underlineCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [0, 0], offset: 2 },
+        },
+      },
+    });
+
+    expect(
+      applyTransaction(document, result.transaction!).children[0]?.children[0],
+    ).toEqual({
+      type: "text",
+      text: "你好",
+      marks: { bold: true },
+    });
+  });
+});
