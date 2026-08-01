@@ -24,20 +24,30 @@ function createRenderedNode(
 function renderTextNode(node: TextNode, path: Path): RenderedElementNode {
   const bold = hasTextMark(node.marks, "bold");
   const italic = hasTextMark(node.marks, "italic");
+  const underline = hasTextMark(node.marks, "underline");
+  const styles = [
+    bold && italic ? "font-style: italic;" : undefined,
+    underline && (bold || italic) ? "text-decoration: underline;" : undefined,
+  ].filter((style): style is string => style !== undefined);
+  const attributes =
+    styles.length > 0
+      ? {
+          ...createModelPathAttributes(path),
+          style: styles.join(" "),
+        }
+      : createModelPathAttributes(path);
 
   if (bold) {
     return createRenderedNode("strong", path, {
-      attributes: italic
-        ? {
-            ...createModelPathAttributes(path),
-            style: "font-style: italic;",
-          }
-        : createModelPathAttributes(path),
+      attributes,
       text: node.text,
     });
   }
 
-  return createRenderedNode(italic ? "em" : "span", path, { text: node.text });
+  return createRenderedNode(italic ? "em" : underline ? "u" : "span", path, {
+    attributes,
+    text: node.text,
+  });
 }
 
 function renderParagraphNode(node: ParagraphNode, path: Path): RenderedElementNode {

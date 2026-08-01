@@ -1,6 +1,6 @@
 import type { Path } from "../selection";
 
-export type RenderedTagName = "div" | "em" | "p" | "span" | "strong";
+export type RenderedTagName = "div" | "em" | "p" | "span" | "strong" | "u";
 
 export interface RenderedElementNode {
   tagName: RenderedTagName;
