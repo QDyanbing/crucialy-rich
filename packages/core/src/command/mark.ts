@@ -15,6 +15,7 @@ import type { Command, CommandInput } from "./types";
 
 export const BOLD_COMMAND_NAME = "bold";
 export const ITALIC_COMMAND_NAME = "italic";
+export const UNDERLINE_COMMAND_NAME = "underline";
 
 export interface TextMarkCommandConfig {
   commandName: string;
@@ -78,6 +79,10 @@ export function canExecuteItalicCommand(input: CommandInput): boolean {
   return canExecuteTextMarkCommand(input);
 }
 
+export function canExecuteUnderlineCommand(input: CommandInput): boolean {
+  return canExecuteTextMarkCommand(input);
+}
+
 export function isTextMarkCommandActive(
   input: CommandInput,
   mark: TextMarkType,
@@ -126,6 +131,10 @@ export function isItalicCommandActive(input: CommandInput): boolean {
   return isTextMarkCommandActive(input, "italic");
 }
 
+export function isUnderlineCommandActive(input: CommandInput): boolean {
+  return isTextMarkCommandActive(input, "underline");
+}
+
 export function createTextMarkCommand(config: TextMarkCommandConfig): Command {
   return {
     canExecute: canExecuteTextMarkCommand,
@@ -162,4 +171,10 @@ export const italicCommand: Command = createTextMarkCommand({
   commandName: ITALIC_COMMAND_NAME,
   label: "Italic",
   mark: "italic",
+});
+
+export const underlineCommand: Command = createTextMarkCommand({
+  commandName: UNDERLINE_COMMAND_NAME,
+  label: "Underline",
+  mark: "underline",
 });
