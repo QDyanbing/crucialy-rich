@@ -75,6 +75,6 @@ interface DocumentNode {
 ## 当前限制
 
 - 只支持 paragraph、text 和 text marks，不支持 heading、list 等。
-- text marks 已完成四种 boolean mark 的模型表达、helper、校验、规范化和编辑保留；Bold/Italic 已接入 command、demo 和 renderer，Underline/Strike 仍处于 schema 阶段。
+- text marks 已完成四种 boolean mark 的模型表达、helper、校验、规范化和编辑保留；Bold、Italic、Underline 和 Strike 均已接入 command、demo 和 renderer。
 - 第一版节点不包含 `attrs` 字段，后续新增 heading、link、image 等能力时再引入属性模型。
 - 规范化会丢弃非法节点而不尝试转换，转换策略留待后续。

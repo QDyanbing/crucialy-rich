@@ -1,6 +1,6 @@
 # 文字标记模型
 
-文字标记用于描述 text 节点上的内联格式。第 9 周 Bold 和 Italic 已闭环；第 10 周已完成 boolean mark 叠加规则和 Underline。当前覆盖数据结构、helper、校验、规范化、`toggle_mark` operation、可复用 mark command、renderer 加粗/斜体/下划线输出、demo 多节点验收、operation 保留和 history 快照保留。
+文字标记用于描述 text 节点上的内联格式。第 9 周 Bold 和 Italic 已闭环；第 10 周已完成 boolean mark 叠加规则、Underline 和 Strike。当前覆盖数据结构、helper、校验、规范化、`toggle_mark` operation、可复用 mark command、四种 boolean mark 渲染、demo 多节点验收、operation 保留和 history 快照保留。
 
 ## 数据结构
 
@@ -9,7 +9,7 @@
 - `bold`：加粗。
 - `italic`：斜体。
 - `underline`：下划线，已接入 command、renderer 和 demo。
-- `strike`：删除线，当前完成 schema，命令与渲染从 Day 3 接入。
+- `strike`：删除线，已接入 command、renderer 和 demo。
 
 ```ts
 const TEXT_MARK_TYPES = ["bold", "italic", "underline", "strike"] as const;
@@ -145,6 +145,20 @@ const underlineCommand: Command;
 
 `underlineCommand` 已加入默认 command registry，demo 操作区可通过“下划线”按钮调用，并会记录 history。
 
+## Strike Command
+
+`strikeCommand` 通过 `toggle_mark` 切换 `strike`。
+
+```ts
+const STRIKE_COMMAND_NAME = "strike";
+
+const strikeCommand: Command;
+```
+
+执行规则与其他 boolean mark command 一致，支持同一 paragraph 内的选区应用、取消、跨 text 切换、collapsed 后续输入继承和 active 状态读取。切换 strike 不会移除已有 bold、italic 或 underline。
+
+`strikeCommand` 已加入默认 command registry，demo 操作区可通过“删除线”按钮调用，并会记录 history。
+
 ## 通用 Mark Command
 
 `createTextMarkCommand`、`canExecuteTextMarkCommand` 和 `isTextMarkCommandActive` 已作为公共 API 导出。后续新增文字 mark 时可以复用相同的选区校验、transaction 创建和 active 状态计算。
@@ -156,14 +170,15 @@ renderer 遇到 text marks 时会根据标记输出内联元素，并继续保�
 - `marks.bold === true` 输出 `<strong>`。
 - `marks.italic === true` 输出 `<em>`。
 - `marks.underline === true` 输出 `<u>`。
+- `marks.strike === true` 输出 `<s>`。
 - `bold + italic` 组合输出 `<strong style="font-style: italic;">`，保持 text path 元素下仍是直接文本节点，便于当前 DOM 映射逻辑复用。
 - underline 与 bold/italic 叠加时通过同一个 text path 元素的 `text-decoration: underline;` 表达，避免嵌套模型路径元素。
-- `strike` 当前只进入模型，尚未映射为渲染标签或样式。
+- strike 与其他 mark 叠加时通过同一个 text path 元素的 `text-decoration: line-through;` 表达。
+- underline 与 strike 同时启用时合并为 `text-decoration: underline line-through;`，避免装饰属性互相覆盖。
 
-Demo 的“文字标记”样例覆盖普通、加粗、斜体、下划线、组合格式和跨 text 选区。加粗、斜体与下划线按钮通过 `aria-pressed` 同步当前 active 状态。
+Demo 的“文字标记”样例覆盖普通、加粗、斜体、下划线、删除线、四种组合格式和跨 text 选区。四个 mark 按钮通过 `aria-pressed` 同步当前 active 状态。
 
 ## 当前限制
 
 - 暂未实现编辑器内置 toolbar；当前只有 demo 操作区按钮。
 - 暂未实现跨 paragraph 的 mark 应用策略。
-- Strike command、renderer 和 demo 控件尚未实现。
