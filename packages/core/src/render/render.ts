@@ -24,10 +24,17 @@ function createRenderedNode(
 function renderTextNode(node: TextNode, path: Path): RenderedElementNode {
   const bold = hasTextMark(node.marks, "bold");
   const italic = hasTextMark(node.marks, "italic");
+  const strike = hasTextMark(node.marks, "strike");
   const underline = hasTextMark(node.marks, "underline");
+  const decorations = [
+    underline ? "underline" : undefined,
+    strike ? "line-through" : undefined,
+  ].filter((decoration): decoration is string => decoration !== undefined);
+  const needsDecorationStyle =
+    decorations.length > 0 && (bold || italic || decorations.length > 1);
   const styles = [
     bold && italic ? "font-style: italic;" : undefined,
-    underline && (bold || italic) ? "text-decoration: underline;" : undefined,
+    needsDecorationStyle ? `text-decoration: ${decorations.join(" ")};` : undefined,
   ].filter((style): style is string => style !== undefined);
   const attributes =
     styles.length > 0
@@ -44,10 +51,15 @@ function renderTextNode(node: TextNode, path: Path): RenderedElementNode {
     });
   }
 
-  return createRenderedNode(italic ? "em" : underline ? "u" : "span", path, {
-    attributes,
-    text: node.text,
-  });
+  const tagName = italic
+    ? "em"
+    : underline && !strike
+      ? "u"
+      : strike && !underline
+        ? "s"
+        : "span";
+
+  return createRenderedNode(tagName, path, { attributes, text: node.text });
 }
 
 function renderParagraphNode(node: ParagraphNode, path: Path): RenderedElementNode {
