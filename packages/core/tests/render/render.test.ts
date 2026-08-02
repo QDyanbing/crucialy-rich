@@ -154,6 +154,21 @@ describe("renderDocument", () => {
     });
   });
 
+  it("renders strike text marks as s elements", () => {
+    const document = createDocument([
+      createParagraph([createText("Strike", { strike: true })]),
+    ]);
+
+    expect(renderDocument(document).children?.[0]?.children?.[0]).toEqual({
+      tagName: "s",
+      path: [0, 0],
+      attributes: {
+        [MODEL_PATH_ATTRIBUTE]: "[0,0]",
+      },
+      text: "Strike",
+    });
+  });
+
   it("renders combined bold and italic marks without nested text paths", () => {
     const document = createDocument([
       createParagraph([createText("Both", { bold: true, italic: true })]),
@@ -189,6 +204,29 @@ describe("renderDocument", () => {
         style: "font-style: italic; text-decoration: underline;",
       },
       text: "Stacked",
+    });
+  });
+
+  it("renders all boolean marks on one text path", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("All", {
+          bold: true,
+          italic: true,
+          strike: true,
+          underline: true,
+        }),
+      ]),
+    ]);
+
+    expect(renderDocument(document).children?.[0]?.children?.[0]).toEqual({
+      tagName: "strong",
+      path: [0, 0],
+      attributes: {
+        [MODEL_PATH_ATTRIBUTE]: "[0,0]",
+        style: "font-style: italic; text-decoration: underline line-through;",
+      },
+      text: "All",
     });
   });
 });
