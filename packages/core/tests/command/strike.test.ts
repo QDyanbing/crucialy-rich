@@ -6,6 +6,7 @@ import {
   createDocument,
   createParagraph,
   createText,
+  insertTextCommand,
   strikeCommand,
 } from "../../src";
 
@@ -77,5 +78,39 @@ describe("strikeCommand", () => {
       text: "你好",
       marks: { bold: true, underline: true },
     });
+  });
+
+  it("uses collapsed strike placeholders for later text input", () => {
+    const document = createDocument([createParagraph([createText("你好世界")])]);
+    const strikeResult = strikeCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 2 },
+          focus: { path: [0, 0], offset: 2 },
+        },
+      },
+    });
+    const strikeDocument = applyTransaction(document, strikeResult.transaction!);
+
+    if (!strikeResult.selection) {
+      throw new Error("Strike command should return a selection.");
+    }
+
+    const insertResult = insertTextCommand.execute({
+      context: {
+        document: strikeDocument,
+        selection: strikeResult.selection,
+      },
+      payload: { text: "删" },
+    });
+
+    expect(
+      applyTransaction(strikeDocument, insertResult.transaction!).children[0]?.children,
+    ).toEqual([
+      { type: "text", text: "你好" },
+      { type: "text", text: "删", marks: { strike: true } },
+      { type: "text", text: "世界" },
+    ]);
   });
 });
