@@ -13,6 +13,7 @@ import {
   ITALIC_COMMAND_NAME,
   MERGE_BLOCK_COMMAND_NAME,
   SPLIT_BLOCK_COMMAND_NAME,
+  STRIKE_COMMAND_NAME,
   UNDERLINE_COMMAND_NAME,
 } from "../../src";
 
@@ -124,6 +125,22 @@ describe("default command registry integration", () => {
     expect(underlined.ok).toBe(true);
     expect(underlined.transaction?.operations[0]).toMatchObject({
       mark: "underline",
+      type: "toggle_mark",
+    });
+
+    const struck = executeCommand(registry, STRIKE_COMMAND_NAME, {
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [0, 0], offset: 1 },
+        },
+      },
+    });
+
+    expect(struck.ok).toBe(true);
+    expect(struck.transaction?.operations[0]).toMatchObject({
+      mark: "strike",
       type: "toggle_mark",
     });
   });

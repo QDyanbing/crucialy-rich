@@ -132,6 +132,7 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.ITALIC_COMMAND_NAME).toBe("string");
     expect(typeof core.MERGE_BLOCK_COMMAND_NAME).toBe("string");
     expect(typeof core.SPLIT_BLOCK_COMMAND_NAME).toBe("string");
+    expect(typeof core.STRIKE_COMMAND_NAME).toBe("string");
     expect(typeof core.UNDERLINE_COMMAND_NAME).toBe("string");
     expect(typeof core.canExecuteBoldCommand).toBe("function");
     expect(typeof core.canExecuteCommand).toBe("function");
@@ -140,6 +141,7 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.canExecuteItalicCommand).toBe("function");
     expect(typeof core.canExecuteMergeBlockCommand).toBe("function");
     expect(typeof core.canExecuteSplitBlockCommand).toBe("function");
+    expect(typeof core.canExecuteStrikeCommand).toBe("function");
     expect(typeof core.canExecuteTextMarkCommand).toBe("function");
     expect(typeof core.canExecuteUnderlineCommand).toBe("function");
     expect(typeof core.createCommandFailure).toBe("function");
@@ -155,6 +157,7 @@ describe("@crucialy-rich/core public API", () => {
       "italic",
       "mergeBlock",
       "splitBlock",
+      "strike",
       "underline",
     ]);
     expect(typeof core.boldCommand).toBe("object");
@@ -163,12 +166,14 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.insertTextCommand).toBe("object");
     expect(typeof core.isBoldCommandActive).toBe("function");
     expect(typeof core.isItalicCommandActive).toBe("function");
+    expect(typeof core.isStrikeCommandActive).toBe("function");
     expect(typeof core.isTextMarkCommandActive).toBe("function");
     expect(typeof core.isUnderlineCommandActive).toBe("function");
     expect(typeof core.italicCommand).toBe("object");
     expect(typeof core.mergeBlockCommand).toBe("object");
     expect(typeof core.queryCommandState).toBe("function");
     expect(typeof core.splitBlockCommand).toBe("object");
+    expect(typeof core.strikeCommand).toBe("object");
     expect(typeof core.underlineCommand).toBe("object");
   });
 });
