@@ -52,6 +52,16 @@ describe("renderNodeToHtml", () => {
     );
   });
 
+  it("serializes strike text marks as s elements", () => {
+    const document = createDocument([
+      createParagraph([createText("Strike", { strike: true })]),
+    ]);
+
+    expect(renderNodeToHtml(renderDocument(document))).toContain(
+      '<s data-crucialy-path="[0,0]">Strike</s>',
+    );
+  });
+
   it("serializes combined bold and italic marks with italic style", () => {
     const document = createDocument([
       createParagraph([createText("Both", { bold: true, italic: true })]),
@@ -75,6 +85,23 @@ describe("renderNodeToHtml", () => {
 
     expect(renderNodeToHtml(renderDocument(document))).toContain(
       '<strong data-crucialy-path="[0,0]" style="font-style: italic; text-decoration: underline;">Stacked</strong>',
+    );
+  });
+
+  it("serializes all boolean marks with combined decoration", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("All", {
+          bold: true,
+          italic: true,
+          strike: true,
+          underline: true,
+        }),
+      ]),
+    ]);
+
+    expect(renderNodeToHtml(renderDocument(document))).toContain(
+      '<strong data-crucialy-path="[0,0]" style="font-style: italic; text-decoration: underline line-through;">All</strong>',
     );
   });
 });
