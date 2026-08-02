@@ -144,6 +144,43 @@ test("toggles underline without changing bold", async ({ page }) => {
   await expect(stackedText).not.toHaveAttribute("style");
 });
 
+test("toggles strike without changing underline", async ({ page }) => {
+  await page.goto("/");
+
+  const renderedDocument = page.getByLabel("已渲染文档");
+  const strikeButton = page.getByRole("button", { name: "删除线" });
+  const underlineButton = page.getByRole("button", { name: "下划线" });
+
+  await expect(page.getByLabel("删除线 Command 状态")).toContainText("可用");
+  await expect(strikeButton).toHaveAttribute("aria-pressed", "false");
+
+  await strikeButton.click();
+
+  await expect(strikeButton).toHaveAttribute("aria-pressed", "true");
+  await expect(renderedDocument.locator('s[data-crucialy-path="[0,0]"]')).toContainText(
+    "你好，cr",
+  );
+
+  await underlineButton.click();
+
+  const stackedText = renderedDocument.locator('span[data-crucialy-path="[0,0]"]');
+
+  await expect(strikeButton).toHaveAttribute("aria-pressed", "true");
+  await expect(underlineButton).toHaveAttribute("aria-pressed", "true");
+  await expect(stackedText).toHaveAttribute(
+    "style",
+    "text-decoration: underline line-through;",
+  );
+
+  await strikeButton.click();
+
+  await expect(strikeButton).toHaveAttribute("aria-pressed", "false");
+  await expect(underlineButton).toHaveAttribute("aria-pressed", "true");
+  await expect(
+    renderedDocument.locator('u[data-crucialy-path="[0,0]"]'),
+  ).not.toHaveAttribute("style");
+});
+
 test("completes the bold and italic acceptance loop", async ({ page }) => {
   await page.goto("/");
   await page.getByLabel("模型示例").selectOption("marks");
