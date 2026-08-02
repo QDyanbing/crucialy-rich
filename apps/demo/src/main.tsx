@@ -108,9 +108,12 @@ const modelExamples: ModelExample[] = [
         createText("，"),
         createText("下划线文本", { underline: true }),
         createText("，"),
+        createText("删除线文本", { strike: true }),
+        createText("，"),
         createText("组合格式", {
           bold: true,
           italic: true,
+          strike: true,
           underline: true,
         }),
         createText("。"),
