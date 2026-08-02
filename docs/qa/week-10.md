@@ -6,7 +6,9 @@
 
 第 10 周 Day 2「Underline」已完成。
 
-☑️ 当前指针：第 10 周 Day 3「Strike」待开始。
+第 10 周 Day 3「Strike」已完成。
+
+☑️ 当前指针：第 10 周 Day 4「快捷键占位」待开始。
 
 ## 已完成范围
 
@@ -24,6 +26,10 @@
 - Underline 支持选区应用、取消、collapsed 输入继承、跨 text 和 active 状态。
 - renderer 会输出 `<u>`，并支持 underline 与 bold/italic 组合渲染。
 - demo 新增“下划线”按钮、active 状态和中文验收样例。
+- 新增 `strikeCommand`，并接入默认 command registry。
+- Strike 支持选区应用、取消、collapsed 输入继承、跨 text 和 active 状态。
+- renderer 会输出 `<s>`，underline 与 strike 会合并为同一组 `text-decoration`。
+- demo 新增“删除线”按钮、active 状态和中文验收样例。
 
 ## 自动化覆盖
 
@@ -34,6 +40,7 @@
 - `packages/core/tests/model/normalize.test.ts`
 - `packages/core/tests/operation/toggle-mark.test.ts`
 - `packages/core/tests/command/underline.test.ts`
+- `packages/core/tests/command/strike.test.ts`
 - `packages/core/tests/command/integration.test.ts`
 - `packages/core/tests/render/render.test.ts`
 - `packages/core/tests/render/html.test.ts`
@@ -43,10 +50,9 @@
 
 ## 当前边界
 
-- Strike command、renderer 和 demo 按钮尚未实现。
 - React 组件仍未提供内置 toolbar。
 - mark 应用范围仍限制在同一个 paragraph 内。
 
 ## 结论
 
-四种 boolean mark 已能稳定共存，Underline command、renderer 和 demo 已闭环。下一步进入 Strike。
+四种 boolean mark 已能稳定共存，Underline 与 Strike 的 command、renderer 和 demo 均已闭环。下一步进入快捷键占位。

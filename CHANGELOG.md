@@ -53,6 +53,7 @@
 - 新增 Bold/Italic 闭环验收，包含混合选区统一 mark 语义、通用 mark command API、中文多节点 demo 样例、toolbar active 状态、交互覆盖和 QA 文档。
 - 新增 Underline/Strike boolean mark schema，四种 marks 可在同一 text 节点共存，并由 helper、校验、规范化、Operation 和 History 完整保留。
 - 新增 Underline 第一版，包含 `underlineCommand`、默认 command 注册、`<u>` 与组合样式渲染、demo“下划线”按钮、中文样例、测试和文档。
+- 新增 Strike 第一版，包含 `strikeCommand`、默认 command 注册、`<s>` 与四种 mark 组合渲染、demo“删除线”按钮、中文样例、测试和文档。
 
 ### 变更
 
@@ -78,6 +79,7 @@
 - 更新文字标记、Command、QA、包说明和项目状态，使其匹配 Bold/Italic 闭环范围。
 - 更新文字标记、模型、QA、包说明和项目状态，使其匹配第 10 周样式叠加规则。
 - 更新文字标记、Command、渲染、QA、包说明和项目状态，使其匹配 Underline 范围。
+- 更新文字标记、Command、渲染、QA、包说明和项目状态，使其匹配 Strike 范围。
 
 ### 暂未包含
 
