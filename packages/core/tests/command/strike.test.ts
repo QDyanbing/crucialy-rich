@@ -7,6 +7,7 @@ import {
   createParagraph,
   createText,
   insertTextCommand,
+  isStrikeCommandActive,
   strikeCommand,
 } from "../../src";
 
@@ -111,6 +112,57 @@ describe("strikeCommand", () => {
       { type: "text", text: "你好" },
       { type: "text", text: "删", marks: { strike: true } },
       { type: "text", text: "世界" },
+    ]);
+  });
+
+  it("reads active state and toggles strike across text nodes", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("你"),
+        createText("好", {
+          italic: true,
+          strike: true,
+          underline: true,
+        }),
+        createText("世界", {
+          italic: true,
+          strike: true,
+          underline: true,
+        }),
+      ]),
+    ]);
+    const input = {
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 1], offset: 0 },
+          focus: { path: [0, 2], offset: 1 },
+        },
+      },
+    };
+
+    expect(isStrikeCommandActive(input)).toBe(true);
+
+    const result = strikeCommand.execute(input);
+
+    expect(result.selection).toEqual({
+      anchor: { path: [0, 1], offset: 0 },
+      focus: { path: [0, 1], offset: 2 },
+    });
+    expect(
+      applyTransaction(document, result.transaction!).children[0]?.children,
+    ).toEqual([
+      { type: "text", text: "你" },
+      {
+        type: "text",
+        text: "好世",
+        marks: { italic: true, underline: true },
+      },
+      {
+        type: "text",
+        text: "界",
+        marks: { italic: true, strike: true, underline: true },
+      },
     ]);
   });
 });
