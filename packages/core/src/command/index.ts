@@ -9,18 +9,22 @@ export {
 export {
   BOLD_COMMAND_NAME,
   ITALIC_COMMAND_NAME,
+  STRIKE_COMMAND_NAME,
   UNDERLINE_COMMAND_NAME,
   boldCommand,
   canExecuteBoldCommand,
   canExecuteItalicCommand,
+  canExecuteStrikeCommand,
   canExecuteTextMarkCommand,
   canExecuteUnderlineCommand,
   createTextMarkCommand,
   isBoldCommandActive,
   isItalicCommandActive,
+  isStrikeCommandActive,
   isTextMarkCommandActive,
   isUnderlineCommandActive,
   italicCommand,
+  strikeCommand,
   underlineCommand,
 } from "./mark";
 export type { TextMarkCommandConfig } from "./mark";
