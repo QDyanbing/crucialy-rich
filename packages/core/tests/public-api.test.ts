@@ -127,6 +127,12 @@ describe("@crucialy-rich/core public API", () => {
 
   it("exposes the command API", () => {
     expect(typeof core.BOLD_COMMAND_NAME).toBe("string");
+    expect(core.BOOLEAN_MARK_COMMANDS.map((command) => command.name)).toEqual([
+      "bold",
+      "italic",
+      "underline",
+      "strike",
+    ]);
     expect(Array.isArray(core.DEFAULT_COMMAND_SHORTCUTS)).toBe(true);
     expect(typeof core.DELETE_SELECTION_COMMAND_NAME).toBe("string");
     expect(typeof core.INSERT_TEXT_COMMAND_NAME).toBe("string");

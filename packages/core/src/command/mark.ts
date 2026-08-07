@@ -193,3 +193,10 @@ export const underlineCommand: Command = createTextMarkCommand({
   label: "Underline",
   mark: "underline",
 });
+
+export const BOOLEAN_MARK_COMMANDS: readonly Command[] = [
+  boldCommand,
+  italicCommand,
+  underlineCommand,
+  strikeCommand,
+];
