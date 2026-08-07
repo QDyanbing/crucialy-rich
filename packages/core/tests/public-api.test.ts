@@ -127,6 +127,7 @@ describe("@crucialy-rich/core public API", () => {
 
   it("exposes the command API", () => {
     expect(typeof core.BOLD_COMMAND_NAME).toBe("string");
+    expect(Array.isArray(core.DEFAULT_COMMAND_SHORTCUTS)).toBe(true);
     expect(typeof core.DELETE_SELECTION_COMMAND_NAME).toBe("string");
     expect(typeof core.INSERT_TEXT_COMMAND_NAME).toBe("string");
     expect(typeof core.ITALIC_COMMAND_NAME).toBe("string");
@@ -163,6 +164,8 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.boldCommand).toBe("object");
     expect(typeof core.deleteSelectionCommand).toBe("object");
     expect(typeof core.executeCommand).toBe("function");
+    expect(typeof core.getCommandNameFromShortcut).toBe("function");
+    expect(typeof core.getCommandShortcuts).toBe("function");
     expect(typeof core.insertTextCommand).toBe("object");
     expect(typeof core.isBoldCommandActive).toBe("function");
     expect(typeof core.isItalicCommandActive).toBe("function");
