@@ -23,3 +23,10 @@ export const DEFAULT_COMMAND_SHORTCUTS: readonly CommandShortcutBinding[] = [
   { commandName: ITALIC_COMMAND_NAME, key: "i" },
   { commandName: UNDERLINE_COMMAND_NAME, key: "u" },
 ];
+
+export function getCommandShortcuts(
+  commandName: CommandName,
+  shortcuts: readonly CommandShortcutBinding[] = DEFAULT_COMMAND_SHORTCUTS,
+): readonly CommandShortcutBinding[] {
+  return shortcuts.filter((shortcut) => shortcut.commandName === commandName);
+}
