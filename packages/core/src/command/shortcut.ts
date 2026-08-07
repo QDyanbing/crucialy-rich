@@ -30,3 +30,38 @@ export function getCommandShortcuts(
 ): readonly CommandShortcutBinding[] {
   return shortcuts.filter((shortcut) => shortcut.commandName === commandName);
 }
+
+function isShortcutKey(
+  input: CommandShortcutInput,
+  shortcut: CommandShortcutBinding,
+): boolean {
+  const shortcutKey = shortcut.key.toLowerCase();
+
+  return (
+    input.key.toLowerCase() === shortcutKey ||
+    input.code?.toLowerCase() === `key${shortcutKey}`
+  );
+}
+
+function matchesCommandShortcut(
+  input: CommandShortcutInput,
+  shortcut: CommandShortcutBinding,
+): boolean {
+  if (input.isComposing || (!input.ctrlKey && !input.metaKey)) {
+    return false;
+  }
+
+  return (
+    Boolean(input.altKey) === Boolean(shortcut.altKey) &&
+    Boolean(input.shiftKey) === Boolean(shortcut.shiftKey) &&
+    isShortcutKey(input, shortcut)
+  );
+}
+
+export function getCommandNameFromShortcut(
+  input: CommandShortcutInput,
+  shortcuts: readonly CommandShortcutBinding[] = DEFAULT_COMMAND_SHORTCUTS,
+): CommandName | undefined {
+  return shortcuts.find((shortcut) => matchesCommandShortcut(input, shortcut))
+    ?.commandName;
+}
