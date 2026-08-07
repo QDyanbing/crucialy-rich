@@ -39,6 +39,12 @@ export {
 export { queryCommandState, type CommandState } from "./state";
 export { createCommandRegistry, type CommandRegistry } from "./registry";
 export {
+  DEFAULT_COMMAND_SHORTCUTS,
+  getCommandNameFromShortcut,
+  getCommandShortcuts,
+} from "./shortcut";
+export type { CommandShortcutBinding, CommandShortcutInput } from "./shortcut";
+export {
   canExecuteInsertTextCommand,
   canExecuteDeleteSelectionCommand,
   DELETE_SELECTION_COMMAND_NAME,
