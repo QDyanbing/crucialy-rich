@@ -159,13 +159,13 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.createTextMarkCommand).toBe("function");
     expect(core.DEFAULT_COMMANDS.map((command) => command.name)).toEqual([
       "bold",
+      "italic",
+      "underline",
+      "strike",
       "deleteSelection",
       "insertText",
-      "italic",
       "mergeBlock",
       "splitBlock",
-      "strike",
-      "underline",
     ]);
     expect(typeof core.boldCommand).toBe("object");
     expect(typeof core.deleteSelectionCommand).toBe("object");
