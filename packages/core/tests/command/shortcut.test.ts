@@ -37,4 +37,34 @@ describe("command shortcut config", () => {
       UNDERLINE_COMMAND_NAME,
     );
   });
+
+  it("ignores unmatched modifiers and composing input", () => {
+    expect(getCommandNameFromShortcut({ key: "b" })).toBeUndefined();
+    expect(
+      getCommandNameFromShortcut({ altKey: true, ctrlKey: true, key: "b" }),
+    ).toBeUndefined();
+    expect(
+      getCommandNameFromShortcut({ ctrlKey: true, key: "b", shiftKey: true }),
+    ).toBeUndefined();
+    expect(
+      getCommandNameFromShortcut({ ctrlKey: true, isComposing: true, key: "b" }),
+    ).toBeUndefined();
+  });
+
+  it("supports host-provided shortcut tables", () => {
+    const shortcuts = [
+      { commandName: STRIKE_COMMAND_NAME, key: "x", shiftKey: true },
+    ] as const;
+
+    expect(getCommandShortcuts(STRIKE_COMMAND_NAME, shortcuts)).toEqual(shortcuts);
+    expect(
+      getCommandNameFromShortcut(
+        { key: "x", metaKey: true, shiftKey: true },
+        shortcuts,
+      ),
+    ).toBe(STRIKE_COMMAND_NAME);
+    expect(
+      getCommandNameFromShortcut({ key: "x", metaKey: true }, shortcuts),
+    ).toBeUndefined();
+  });
 });
