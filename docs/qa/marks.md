@@ -25,6 +25,8 @@
 - `insert_text`、`delete_text`、`split_block` 和 `merge_block` 已有 mark 保留测试。
 - `createHistorySnapshot` 会深拷贝 text marks。
 - Underline 与 Strike 均已完成 command、renderer 和 demo。
+- 四种 mark command 已由 `BOOLEAN_MARK_COMMANDS` 统一组织。
+- Bold、Italic 和 Underline 已提供可查询的默认快捷键配置。
 
 ## 自动化覆盖
 
@@ -43,6 +45,8 @@
 - `packages/core/tests/command/italic.test.ts`
 - `packages/core/tests/command/strike.test.ts`
 - `packages/core/tests/command/underline.test.ts`
+- `packages/core/tests/command/mark-interaction.test.ts`
+- `packages/core/tests/command/shortcut.test.ts`
 - `packages/core/tests/command/integration.test.ts`
 - `packages/core/tests/command/state.test.ts`
 - `packages/core/tests/render/render.test.ts`
@@ -54,8 +58,9 @@
 ## 当前限制
 
 - 暂未实现 React 组件内置 toolbar。
+- mark 快捷键尚未绑定编辑器键盘事件。
 - 暂未实现跨 paragraph 的 mark 应用策略。
 
 ## 结论
 
-四种 boolean mark 的 schema、Command、renderer 和 demo 已完成，下一步进入第 10 周 Day 4「快捷键占位」。
+四种 boolean mark 的 schema、Command、renderer、Demo、快捷键占位和 QA 已闭环，下一步进入第 11 周属性 Mark 设计。

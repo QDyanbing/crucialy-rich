@@ -26,6 +26,10 @@ interface RenderedElementNode {
   path: Path;
   attributes: Record<string, string>;
   children?: RenderedElementNode[];
+  style?: {
+    fontStyle?: "italic";
+    textDecoration?: string;
+  };
   text?: string;
 }
 ```
@@ -47,7 +51,7 @@ interface RenderedElementNode {
 
 ## HTML 序列化
 
-`renderNodeToHtml(node)` 用于把渲染树序列化为 HTML 字符串，主要用于测试和调试。序列化时会转义文本和属性值中的 HTML 特殊字符。
+`renderNodeToHtml(node)` 用于把渲染树序列化为 HTML 字符串，主要用于测试和调试。序列化时会转义文本和属性值中的 HTML 特殊字符，并把结构化 `style` 转换为 CSS 字符串；React 集成层则直接把该对象传给 React，避免把 HTML style 字符串误作组件属性。
 
 ## DOM 映射
 

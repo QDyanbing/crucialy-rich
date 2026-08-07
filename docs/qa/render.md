@@ -11,7 +11,7 @@
 - `packages/core/tests/render/render.test.ts`：document、paragraph、text、四种 mark、四种 mark 组合、空 document 和空 paragraph 的渲染树结构。
 - `packages/core/tests/render/html.test.ts`：HTML 序列化、四种 mark、四种 mark 组合序列化和文本转义。
 - `packages/core/tests/public-api.test.ts`：渲染公开 API 导出。
-- `packages/react/tests/public-api.test.ts`：React 组件渲染 value、defaultValue、空 document 和受控优先级。
+- `packages/react/tests/public-api.test.ts`：React 组件渲染 value、defaultValue、空 document、受控优先级和组合 mark 结构化样式。
 - `tests/e2e/demo-shell.spec.ts`：演示编辑区、组件示例和渲染边界示例。
 
 命令：
@@ -37,6 +37,7 @@ pnpm test:e2e
 | Underline 渲染 | 点击 demo“下划线”按钮        | 选区 text 渲染为 `u` 且保留 path        | 通过 |
 | Strike 渲染    | 点击 demo“删除线”按钮        | 选区 text 渲染为 `s` 且保留 path        | 通过 |
 | 组合样式渲染   | 对同一选区启用下划线和删除线 | text-decoration 同时保留两种样式        | 通过 |
+| React 组合样式 | 在组件中渲染四种 mark 组合   | style 对象被 React 接受且输出合法 CSS   | 通过 |
 | DOM 到模型     | 传入 text 节点和偏移         | 返回对应模型位置                        | 通过 |
 | 模型到 DOM     | 传入模型位置                 | 返回对应 DOM 节点和偏移                 | 通过 |
 

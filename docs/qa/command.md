@@ -2,7 +2,7 @@
 
 ## 验收范围
 
-Command 验收覆盖注册、查询、状态读取、执行结果、内置 Bold/Italic/Underline/Strike 命令、内置文本命令、内置块命令、React 输入层复用和 demo 调试区。
+Command 验收覆盖注册、查询、状态读取、执行结果、内置 Bold/Italic/Underline/Strike 命令、快捷键配置查询、内置文本命令、内置块命令、React 输入层复用和 demo 调试区。
 
 当前内置 command：
 
@@ -27,6 +27,8 @@ Command 验收覆盖注册、查询、状态读取、执行结果、内置 Bold/
 - `packages/core/tests/command/italic.test.ts`：选区斜体、取消斜体、collapsed 后续输入继承、active 状态和 bold+italic 叠加。
 - `packages/core/tests/command/underline.test.ts`：选区下划线、取消下划线、collapsed 后续输入继承、跨 text 和 active 状态。
 - `packages/core/tests/command/strike.test.ts`：选区删除线、取消删除线、collapsed 后续输入继承、跨 text、active 状态和多 mark 叠加。
+- `packages/core/tests/command/mark-interaction.test.ts`：四种 boolean mark 在混合选区中的独立切换。
+- `packages/core/tests/command/shortcut.test.ts`：默认映射、配置查询、按键匹配、自定义映射和边界输入。
 - `packages/core/tests/command/split-block.test.ts`：段落分裂 command。
 - `packages/core/tests/command/merge-block.test.ts`：段落合并 command。
 - `packages/core/tests/command/state.test.ts`：状态读取和默认命令状态矩阵。
@@ -50,6 +52,8 @@ Command 验收覆盖注册、查询、状态读取、执行结果、内置 Bold/
 | 状态读取     | 调整 selection 的 anchor/focus                      | Command 状态面板在可用/不可用/激活之间同步切换  | 通过 |
 | React 输入   | 在编辑器中输入、Enter、Backspace、Delete            | 输入层优先复用 command，文档和 selection 同步   | 通过 |
 | 默认注册表   | demo 和 React 使用默认 command registry             | 两侧内置 command 顺序和可执行状态保持一致       | 通过 |
+| 快捷键查询   | 查询 Bold、Italic、Underline 和 Strike 配置         | 前三种有默认映射，Strike 默认返回空             | 通过 |
+| 快捷键匹配   | 传入 Ctrl/Meta + B/I/U 和边界组合                   | 返回对应 command name，非法组合不匹配           | 通过 |
 
 ## 当前限制
 
@@ -57,8 +61,8 @@ Command 验收覆盖注册、查询、状态读取、执行结果、内置 Bold/
 - Mark command 当前只支持同一 paragraph 内的 selection。
 - block command 当前只支持 collapsed selection。
 - collapsed Backspace/Delete 的单字符删除仍保留 input helper；跨段合并路径会优先复用 block command。
-- 当前还没有 toolbar 分组和快捷键映射；history/undo/redo 已由 History 模块提供。
+- 当前还没有 React 内置 toolbar；mark 快捷键只提供配置和匹配，不绑定编辑器事件。
 
 ## 结论
 
-Command 系统已经完成默认注册表、内置编辑命令和四种 mark command 第一版：demo 和 React 复用同一套 registry，状态面板可验证 command 可用性和 active 状态，自动化测试覆盖默认注册、状态矩阵、综合执行和浏览器交互。
+Command 系统已经完成默认注册表、内置编辑命令、四种 mark command 和 mark 快捷键占位：demo 和 React 复用同一套 registry，状态面板可验证 command 可用性和 active 状态，自动化测试覆盖默认注册、状态矩阵、快捷键查询、综合执行和浏览器交互。

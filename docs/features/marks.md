@@ -173,6 +173,8 @@ const strikeCommand: Command;
 
 `createTextMarkCommand`、`canExecuteTextMarkCommand` 和 `isTextMarkCommandActive` 已作为公共 API 导出。后续新增文字 mark 时可以复用相同的选区校验、transaction 创建和 active 状态计算。
 
+`BOOLEAN_MARK_COMMANDS` 按 bold、italic、underline、strike 的模型顺序统一组织四种 command，默认 command registry 会直接复用该集合。
+
 ## 渲染
 
 renderer 遇到 text marks 时会根据标记输出内联元素，并继续保留 `data-crucialy-path`，因此 DOM 与模型选区映射仍能定位到同一个 text path：

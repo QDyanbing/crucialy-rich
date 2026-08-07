@@ -9,6 +9,7 @@ Command 系统负责把“可执行的编辑意图”包装成统一接口。当
 - 定义 `CommandResult`，统一表达成功、失败和不可执行。
 - 提供 `createCommandRegistry` 注册和查询 command。
 - 提供 `DEFAULT_COMMANDS` 和 `createDefaultCommandRegistry`，集中内置 command 注册顺序。
+- 提供 `BOOLEAN_MARK_COMMANDS`，按模型 mark 顺序统一组织四种 boolean mark command。
 - 提供 `canExecuteCommand` 判断 command 是否可执行。
 - 提供 `executeCommand` 按名称执行 command。
 - 提供 `queryCommandState` 读取 command 的 registered、disabled、active 和不可用原因。
@@ -54,6 +55,8 @@ interface CommandState {
 function createCommandRegistry(commands?: Command[]): CommandRegistry;
 
 const DEFAULT_COMMANDS: readonly Command[];
+
+const BOOLEAN_MARK_COMMANDS: readonly Command[];
 
 interface CommandShortcutBinding {
   readonly altKey?: boolean;
