@@ -159,6 +159,16 @@ const strikeCommand: Command;
 
 `strikeCommand` 已加入默认 command registry，demo 操作区可通过“删除线”按钮调用，并会记录 history。
 
+## 快捷键占位
+
+`DEFAULT_COMMAND_SHORTCUTS` 当前预留三组跨平台主修饰键映射：
+
+- Ctrl/Meta + B：`boldCommand`。
+- Ctrl/Meta + I：`italicCommand`。
+- Ctrl/Meta + U：`underlineCommand`。
+
+`getCommandShortcuts` 可以按 command name 查询配置，`getCommandNameFromShortcut` 可以把键盘输入匹配为 command name。当前不会在 React 组件中自动绑定或执行这些快捷键，Strike 也没有默认映射；宿主可以传入自定义表扩展。
+
 ## 通用 Mark Command
 
 `createTextMarkCommand`、`canExecuteTextMarkCommand` 和 `isTextMarkCommandActive` 已作为公共 API 导出。后续新增文字 mark 时可以复用相同的选区校验、transaction 创建和 active 状态计算。
@@ -181,4 +191,5 @@ Demo 的“文字标记”样例覆盖普通、加粗、斜体、下划线、删
 ## 当前限制
 
 - 暂未实现编辑器内置 toolbar；当前只有 demo 操作区按钮。
+- 快捷键当前只提供映射与查询，不包含编辑器事件绑定。
 - 暂未实现跨 paragraph 的 mark 应用策略。
