@@ -42,6 +42,27 @@ describe("@crucialy-rich/react public API", () => {
     expect(html).toContain('data-crucialy-path="[0,0]"');
   });
 
+  it("renders combined mark styles through React", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("Combined", {
+          bold: true,
+          italic: true,
+          strike: true,
+          underline: true,
+        }),
+      ]),
+    ]);
+
+    const html = renderToStaticMarkup(
+      createElement(RichTextEditor, { value: document }),
+    );
+
+    expect(html).toContain(
+      'style="font-style:italic;text-decoration:underline line-through"',
+    );
+  });
+
   it("marks editable renders as not readonly", () => {
     const html = renderToStaticMarkup(
       createElement(RichTextEditor, {

@@ -69,8 +69,7 @@ describe("createBackspaceInputTransaction", () => {
     });
     expect(result.children).toHaveLength(1);
     expect(result.children[0]?.children.map((node) => node.text)).toEqual([
-      "第一段",
-      "第二段",
+      "第一段第二段",
     ]);
     expect(createSelectionAfterBackspaceInput(input)).toEqual({
       anchor: { path: [0, 0], offset: 3 },

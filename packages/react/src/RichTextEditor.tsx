@@ -80,6 +80,7 @@ function createRenderedElement(node: RenderedElementNode): ReactElement {
     {
       ...node.attributes,
       key: node.path.join(".") || "root",
+      ...(node.style ? { style: node.style } : {}),
     },
     children,
   );

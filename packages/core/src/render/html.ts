@@ -8,7 +8,20 @@ function escapeHtml(value: string): string {
     .replaceAll('"', "&quot;");
 }
 
-function renderAttributes(attributes: Record<string, string>): string {
+function renderStyle(node: RenderedElementNode): string | undefined {
+  const declarations = [
+    node.style?.fontStyle ? `font-style: ${node.style.fontStyle};` : undefined,
+    node.style?.textDecoration
+      ? `text-decoration: ${node.style.textDecoration};`
+      : undefined,
+  ].filter((declaration): declaration is string => declaration !== undefined);
+
+  return declarations.length > 0 ? declarations.join(" ") : undefined;
+}
+
+function renderAttributes(node: RenderedElementNode): string {
+  const style = renderStyle(node);
+  const attributes = style ? { ...node.attributes, style } : node.attributes;
   const serialized = Object.entries(attributes)
     .map(([name, value]) => `${name}="${escapeHtml(value)}"`)
     .join(" ");
@@ -20,5 +33,5 @@ export function renderNodeToHtml(node: RenderedElementNode): string {
   const children = node.children?.map(renderNodeToHtml).join("") ?? "";
   const text = node.text ? escapeHtml(node.text) : "";
 
-  return `<${node.tagName}${renderAttributes(node.attributes)}>${text}${children}</${node.tagName}>`;
+  return `<${node.tagName}${renderAttributes(node)}>${text}${children}</${node.tagName}>`;
 }

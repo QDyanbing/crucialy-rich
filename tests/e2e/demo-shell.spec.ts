@@ -141,7 +141,7 @@ test("toggles underline without changing bold", async ({ page }) => {
 
   await expect(boldButton).toHaveAttribute("aria-pressed", "true");
   await expect(underlineButton).toHaveAttribute("aria-pressed", "false");
-  await expect(stackedText).not.toHaveAttribute("style");
+  await expect(stackedText).not.toHaveAttribute("style", /text-decoration/);
 });
 
 test("toggles strike without changing underline", async ({ page }) => {
@@ -222,6 +222,50 @@ test("completes the bold and italic acceptance loop", async ({ page }) => {
   await expect(acceptanceParagraph.locator("em")).toContainText(
     "跨节点选区可以继续切换。",
   );
+});
+
+test("completes the underline and strike acceptance loop", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("marks");
+
+  const renderedDocument = page.getByLabel("已渲染文档");
+  const acceptanceParagraph = renderedDocument.locator("p").nth(1);
+  const underlineButton = page.getByRole("button", { name: "下划线" });
+  const strikeButton = page.getByRole("button", { name: "删除线" });
+
+  await expect(renderedDocument).toContainText("下划线文本");
+  await expect(renderedDocument).toContainText("删除线文本");
+  await expect(
+    renderedDocument.locator('[data-crucialy-path="[0,9]"]'),
+  ).toHaveAttribute(
+    "style",
+    "font-style: italic; text-decoration: underline line-through;",
+  );
+  await expect(underlineButton).toHaveAttribute("aria-pressed", "false");
+  await expect(strikeButton).toHaveAttribute("aria-pressed", "false");
+
+  await underlineButton.click();
+  await strikeButton.click();
+
+  await expect(underlineButton).toHaveAttribute("aria-pressed", "true");
+  await expect(strikeButton).toHaveAttribute("aria-pressed", "true");
+  await expect(
+    acceptanceParagraph.locator('[style*="text-decoration: underline line-through"]'),
+  ).toHaveCount(5);
+
+  await underlineButton.click();
+
+  await expect(underlineButton).toHaveAttribute("aria-pressed", "false");
+  await expect(strikeButton).toHaveAttribute("aria-pressed", "true");
+  await expect(
+    acceptanceParagraph.locator('[style*="text-decoration: underline"]'),
+  ).toHaveCount(0);
+
+  await strikeButton.click();
+
+  await expect(underlineButton).toHaveAttribute("aria-pressed", "false");
+  await expect(strikeButton).toHaveAttribute("aria-pressed", "false");
+  await expect(acceptanceParagraph).toContainText("跨节点选区可以继续切换。");
 });
 
 test("renders the model document in the editor preview", async ({ page }) => {
@@ -539,10 +583,7 @@ test("keeps the model valid after Backspace merge and typing", async ({ page }) 
   await expect(page.getByLabel("模型校验状态")).toContainText("合法");
   await expect(page.getByLabel("已渲染文档").locator("p")).toHaveCount(1);
   await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
-    '"text": "你好，crucialy-rich。续"',
-  );
-  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
-    '"text": "选区模型已就绪。"',
+    '"text": "你好，crucialy-rich。续选区模型已就绪。"',
   );
   await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 18');
 });

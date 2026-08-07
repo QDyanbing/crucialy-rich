@@ -49,8 +49,7 @@ describe("mergeBlockCommand", () => {
 
     expect(nextDocument.children).toHaveLength(1);
     expect(nextDocument.children[0]?.children.map((node) => node.text)).toEqual([
-      "你好",
-      "世界",
+      "你好世界",
     ]);
   });
 

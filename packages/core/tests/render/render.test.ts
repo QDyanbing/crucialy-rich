@@ -179,8 +179,8 @@ describe("renderDocument", () => {
       path: [0, 0],
       attributes: {
         [MODEL_PATH_ATTRIBUTE]: "[0,0]",
-        style: "font-style: italic;",
       },
+      style: { fontStyle: "italic" },
       text: "Both",
     });
   });
@@ -201,8 +201,8 @@ describe("renderDocument", () => {
       path: [0, 0],
       attributes: {
         [MODEL_PATH_ATTRIBUTE]: "[0,0]",
-        style: "font-style: italic; text-decoration: underline;",
       },
+      style: { fontStyle: "italic", textDecoration: "underline" },
       text: "Stacked",
     });
   });
@@ -224,7 +224,10 @@ describe("renderDocument", () => {
       path: [0, 0],
       attributes: {
         [MODEL_PATH_ATTRIBUTE]: "[0,0]",
-        style: "font-style: italic; text-decoration: underline line-through;",
+      },
+      style: {
+        fontStyle: "italic",
+        textDecoration: "underline line-through",
       },
       text: "All",
     });

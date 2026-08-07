@@ -6,12 +6,14 @@ import {
 } from "../model";
 import type { Path } from "../selection";
 import { createModelPathAttributes } from "./attributes";
-import type { RenderedElementNode } from "./types";
+import type { RenderedElementNode, RenderedElementStyle } from "./types";
 
 function createRenderedNode(
   tagName: RenderedElementNode["tagName"],
   path: Path,
-  options: Partial<Pick<RenderedElementNode, "attributes" | "children" | "text">> = {},
+  options: Partial<
+    Pick<RenderedElementNode, "attributes" | "children" | "style" | "text">
+  > = {},
 ): RenderedElementNode {
   return {
     tagName,
@@ -32,23 +34,18 @@ function renderTextNode(node: TextNode, path: Path): RenderedElementNode {
   ].filter((decoration): decoration is string => decoration !== undefined);
   const needsDecorationStyle =
     decorations.length > 0 && (bold || italic || decorations.length > 1);
-  const styles = [
-    bold && italic ? "font-style: italic;" : undefined,
-    needsDecorationStyle ? `text-decoration: ${decorations.join(" ")};` : undefined,
-  ].filter((style): style is string => style !== undefined);
-  const attributes =
-    styles.length > 0
-      ? {
-          ...createModelPathAttributes(path),
-          style: styles.join(" "),
-        }
-      : createModelPathAttributes(path);
+  const style: RenderedElementStyle = {
+    ...(bold && italic ? { fontStyle: "italic" } : {}),
+    ...(needsDecorationStyle ? { textDecoration: decorations.join(" ") } : {}),
+  };
+  const options = {
+    attributes: createModelPathAttributes(path),
+    ...(Object.keys(style).length > 0 ? { style } : {}),
+    text: node.text,
+  };
 
   if (bold) {
-    return createRenderedNode("strong", path, {
-      attributes,
-      text: node.text,
-    });
+    return createRenderedNode("strong", path, options);
   }
 
   const tagName = italic
@@ -59,7 +56,7 @@ function renderTextNode(node: TextNode, path: Path): RenderedElementNode {
         ? "s"
         : "span";
 
-  return createRenderedNode(tagName, path, { attributes, text: node.text });
+  return createRenderedNode(tagName, path, options);
 }
 
 function renderParagraphNode(node: ParagraphNode, path: Path): RenderedElementNode {
