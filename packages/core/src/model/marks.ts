@@ -1,4 +1,5 @@
 import {
+  TEXT_MARK_ATTRIBUTE_TYPES,
   TEXT_MARK_TYPES,
   type TextMarkAttributes,
   type TextMarkAttributeType,
@@ -121,8 +122,13 @@ export function areTextMarksEqual(
   left: TextMarks | undefined,
   right: TextMarks | undefined,
 ): boolean {
-  return TEXT_MARK_TYPES.every(
-    (mark) => hasTextMark(left, mark) === hasTextMark(right, mark),
+  return (
+    TEXT_MARK_TYPES.every(
+      (mark) => hasTextMark(left, mark) === hasTextMark(right, mark),
+    ) &&
+    TEXT_MARK_ATTRIBUTE_TYPES.every(
+      (attribute) => left?.[attribute] === right?.[attribute],
+    )
   );
 }
 
