@@ -13,7 +13,12 @@ interface TextNode {
   marks?: TextMarks;
 }
 
-type TextMarks = Partial<Record<"bold" | "italic" | "underline" | "strike", true>>;
+type TextMarks = Partial<Record<"bold" | "italic" | "underline" | "strike", true>> &
+  Partial<{
+    fontSize: number;
+    textColor: string;
+    backgroundColor: string;
+  }>;
 
 interface ParagraphNode {
   type: "paragraph";
@@ -28,7 +33,7 @@ interface DocumentNode {
 
 `BlockNode` 现在等价于 `ParagraphNode`，后续加入 heading、quote、list 等块级节点时再扩展联合类型。
 
-`TextNode.marks` 当前支持 `bold`、`italic`、`underline` 和 `strike` 四个 boolean 内联格式标记。mark 只记录启用状态，值固定为 `true`；四种 mark 可以共存，没有任何启用 mark 时省略 `marks` 字段。
+`TextNode.marks` 当前支持 `bold`、`italic`、`underline` 和 `strike` 四个 boolean 标记，以及 `fontSize`、`textColor` 和 `backgroundColor` 三个属性标记。boolean mark 的值固定为 `true`，三种属性记录各自的数值或字符串；它们可以共存，没有任何有效 mark 时省略 `marks` 字段。
 
 ## 类型判断
 
@@ -56,7 +61,7 @@ interface DocumentNode {
 - 根节点必须是 `document`。
 - `document` 的 `children` 只能是块级节点。
 - `paragraph` 的 `children` 只能是 `text` 节点。
-- text marks 只能包含受支持的 `true` 值。
+- text marks 只能包含受支持的 boolean mark 或合法属性值。
 
 每条错误带 `path`（节点路径，root 为空数组）和 `message`，便于定位非法节点。
 
