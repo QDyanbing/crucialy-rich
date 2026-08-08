@@ -9,7 +9,7 @@
   - 工作区冒烟测试。
   - 包入口可导入。
   - 文档模型类型、创建、类型判断、校验和规范化。
-  - Bold/Italic/Underline/Strike boolean marks 类型、helper、校验、规范化、`toggle_mark`、跨 text mark 切分合并、四种 mark command、operation 保留和 history 快照保留。
+  - Bold/Italic/Underline/Strike boolean marks 与 fontSize/textColor/backgroundColor 属性 Mark 的类型、helper、校验、规范化、合并、operation 保留和 history 快照保留。
   - Path、Point、RangeSelection、段落 text offset 和文本切片工具。
   - 基础渲染器、四种 mark HTML 输出与组合样式、HTML 序列化、DOM 与模型位置映射和选区同步。
   - React 组件 `value`、`defaultValue`、`onChange` 和 `onTransaction` 初始渲染契约。

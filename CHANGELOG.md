@@ -56,6 +56,9 @@
 - 新增 Strike 第一版，包含 `strikeCommand`、默认 command 注册、`<s>` 与四种 mark 组合渲染、demo“删除线”按钮、中文样例、测试和文档。
 - 新增 mark 快捷键占位，包含 Bold/Italic/Underline 默认映射、配置查询、按键匹配、自定义映射和测试文档。
 - 新增 Underline/Strike 闭环验收，包含 boolean mark command 集合、混合选区交互、四种 mark Demo 验收和 QA 文档。
+- 新增 `fontSize`、`textColor` 和 `backgroundColor` 属性 Mark schema，支持与四种 boolean mark 共存。
+- 新增属性 Mark 值校验、读取、设置和移除 helper，并补齐规范化、合并、编辑保留、History 快照与公共导出测试。
+- 新增文字属性 Mark 设计文档和第 11 周进度记录。
 
 ### 变更
 
@@ -85,6 +88,7 @@
 - 更新默认 Command 注册表，统一复用 `BOOLEAN_MARK_COMMANDS`。
 - 更新 README、架构、Command、文字标记、测试策略和第 10 周进度，使其匹配 boolean marks 闭环状态。
 - 修正 React 渲染组合 mark 时错误传入 HTML style 字符串的问题，并整理 Demo 操作按钮布局与段落合并测试预期。
+- 更新 README、架构、文字标记、测试策略和项目进度，使其匹配第 11 周 Day 1 属性 Mark 设计范围。
 
 ### 暂未包含
 

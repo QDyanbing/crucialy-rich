@@ -14,7 +14,7 @@
 
 当前 React 组件已支持通过 `value` / `defaultValue` 展示文档模型，普通文本输入、非折叠删除选区、Enter 分段、段首 Backspace 合并和段尾 Delete 合并会优先复用 command；组件会通过 `onTransaction` 暴露真实输入 transaction。演示页按钮命令和真实输入都会记录 history，并支持撤销、重做、Ctrl/Meta + Z、Ctrl/Meta + Shift + Z、Ctrl/Meta + Y、连续 typing 合并和 undoStack/redoStack 状态查看。
 
-text marks schema 当前支持 `bold`、`italic`、`underline` 和 `strike` 共存，helper、校验、规范化、operation 和 history 会保留四种 boolean mark；四种 mark 均已具备 command、同一 paragraph 内跨 text 的统一 `toggle_mark`、相邻同 marks text 合并、renderer 输出、demo 中文验收样例、toolbar active 状态、JSON 映射展示和 history 记录。第 10 周 boolean marks 已闭环，并提供 Bold、Italic、Underline 的可查询快捷键配置；下一步进入第 11 周 Day 1「属性 Mark 设计」。
+text marks schema 当前支持 `bold`、`italic`、`underline` 和 `strike` 共存，四种 boolean mark 均已完成 command、renderer、demo 和 history 闭环。第 11 周 Day 1 已加入 `fontSize`、`textColor` 和 `backgroundColor` 属性 Mark，helper、校验、规范化、合并、operation 与 history 会保留合法属性，且属性可以与 boolean mark 共存；下一步进入第 11 周 Day 2「字号」。
 
 ## 技术栈
 
@@ -113,6 +113,7 @@ pnpm test:e2e
 - [脚手架补项清单](./docs/development/scaffold-checklist.md)
 - [文档模型](./docs/features/model.md)
 - [文字标记模型](./docs/features/marks.md)
+- [文字属性 Mark](./docs/features/text-style.md)
 - [选区](./docs/features/selection.md)
 - [基础渲染](./docs/features/render.md)
 - [选区双向同步](./docs/features/selection-sync.md)
@@ -134,6 +135,7 @@ pnpm test:e2e
 - [第 8 周 QA](./docs/qa/week-08.md)
 - [第 9 周 QA](./docs/qa/week-09.md)
 - [第 10 周 QA](./docs/qa/week-10.md)
+- [第 11 周 QA](./docs/qa/week-11.md)
 - [模型 QA](./docs/qa/model.md)
 - [文字标记 QA](./docs/qa/marks.md)
 - [Bold/Italic 闭环验收](./docs/qa/bold-italic.md)

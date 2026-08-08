@@ -1,6 +1,6 @@
 # QA：文字标记模型验收
 
-当前文字标记范围覆盖 bold / italic / underline / strike 的 boolean schema、helper、校验、规范化、编辑保留、command、renderer、demo 和同 paragraph 跨 text 切分合并。
+当前文字标记范围覆盖 bold / italic / underline / strike 的完整 boolean 闭环，以及 fontSize / textColor / backgroundColor 的属性 Mark 数据模型。
 
 ## 已完成范围
 
@@ -27,6 +27,9 @@
 - Underline 与 Strike 均已完成 command、renderer 和 demo。
 - 四种 mark command 已由 `BOOLEAN_MARK_COMMANDS` 统一组织。
 - Bold、Italic 和 Underline 已提供可查询的默认快捷键配置。
+- `TextMarks` 支持 `fontSize`、`textColor` 和 `backgroundColor`，并可与四种 boolean mark 共存。
+- 属性 Mark 已接入基础值校验、helper、规范化、合并判断、编辑保留和 History 快照。
+- core 公共入口已导出属性类型、常量和 helper。
 
 ## 自动化覆盖
 
@@ -60,7 +63,8 @@
 - 暂未实现 React 组件内置 toolbar。
 - mark 快捷键尚未绑定编辑器键盘事件。
 - 暂未实现跨 paragraph 的 mark 应用策略。
+- 属性 Mark 尚未接入 command、renderer 和 demo 控件。
 
 ## 结论
 
-四种 boolean mark 的 schema、Command、renderer、Demo、快捷键占位和 QA 已闭环，下一步进入第 11 周属性 Mark 设计。
+四种 boolean mark 已闭环，第 11 周 Day 1 属性 Mark 设计已通过模型验收，下一步实现字号闭环。
