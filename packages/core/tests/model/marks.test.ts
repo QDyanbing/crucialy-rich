@@ -151,6 +151,34 @@ describe("text mark helpers", () => {
     ]);
   });
 
+  it("merges text only when attribute marks are equal", () => {
+    const sharedMarks = {
+      bold: true as const,
+      fontSize: 16,
+      textColor: "#1c2520",
+    };
+
+    expect(areTextMarksEqual(sharedMarks, { ...sharedMarks })).toBe(true);
+    expect(areTextMarksEqual(sharedMarks, { ...sharedMarks, fontSize: 18 })).toBe(
+      false,
+    );
+    expect(
+      mergeAdjacentTextNodes([
+        { type: "text", text: "属", marks: sharedMarks },
+        { type: "text", text: "性", marks: { ...sharedMarks } },
+        { type: "text", text: "标", marks: { ...sharedMarks, fontSize: 18 } },
+        { type: "text", text: "记", marks: { ...sharedMarks, fontSize: 18 } },
+      ]),
+    ).toEqual([
+      { type: "text", text: "属性", marks: sharedMarks },
+      {
+        type: "text",
+        text: "标记",
+        marks: { ...sharedMarks, fontSize: 18 },
+      },
+    ]);
+  });
+
   it("normalizes marks while merging text nodes", () => {
     const original: TextNode = {
       type: "text",
