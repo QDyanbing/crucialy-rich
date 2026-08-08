@@ -3,11 +3,14 @@ import { describe, expect, it } from "vitest";
 import {
   addTextMark,
   areTextMarksEqual,
+  getTextMarkAttribute,
   hasTextMark,
   isValidTextMarkAttributeValue,
   mergeAdjacentTextNodes,
   normalizeTextMarks,
+  removeTextMarkAttribute,
   removeTextMark,
+  setTextMarkAttribute,
   setTextMark,
   toggleTextMark,
   type TextNode,
@@ -101,6 +104,26 @@ describe("text mark helpers", () => {
       bold: true,
       italic: true,
       underline: true,
+    });
+  });
+
+  it("gets, sets and removes attribute marks independently", () => {
+    const sized = setTextMarkAttribute({ bold: true }, "fontSize", 16);
+    const colored = setTextMarkAttribute(sized, "textColor", "#1c2520");
+    const highlighted = setTextMarkAttribute(colored, "backgroundColor", "#fff4cc");
+
+    expect(highlighted).toEqual({
+      backgroundColor: "#fff4cc",
+      bold: true,
+      fontSize: 16,
+      textColor: "#1c2520",
+    });
+    expect(getTextMarkAttribute(highlighted, "fontSize")).toBe(16);
+    expect(getTextMarkAttribute(highlighted, "textColor")).toBe("#1c2520");
+    expect(removeTextMarkAttribute(highlighted, "textColor")).toEqual({
+      backgroundColor: "#fff4cc",
+      bold: true,
+      fontSize: 16,
     });
   });
 
