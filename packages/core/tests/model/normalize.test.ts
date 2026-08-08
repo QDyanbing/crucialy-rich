@@ -68,9 +68,12 @@ describe("normalizeDocument", () => {
               type: "text",
               text: "keep",
               marks: {
+                backgroundColor: "#fff4cc",
                 bold: true,
+                fontSize: 16,
                 italic: true,
                 strike: true,
+                textColor: "#1c2520",
                 underline: true,
               },
             },
@@ -80,9 +83,12 @@ describe("normalizeDocument", () => {
     });
 
     expect(result.children[0]?.children[0]?.marks).toEqual({
+      backgroundColor: "#fff4cc",
       bold: true,
+      fontSize: 16,
       italic: true,
       strike: true,
+      textColor: "#1c2520",
       underline: true,
     });
     expect(validateDocument(result).valid).toBe(true);
@@ -99,10 +105,13 @@ describe("normalizeDocument", () => {
               type: "text",
               text: "keep",
               marks: {
+                backgroundColor: "",
                 bold: false,
+                fontSize: -1,
                 highlight: true,
                 italic: true,
                 strike: false,
+                textColor: 123,
                 underline: true,
               },
             },

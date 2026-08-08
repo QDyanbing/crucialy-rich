@@ -96,9 +96,12 @@ describe("applyToggleMark", () => {
     const document = createDocument([
       createParagraph([
         createText("你好", {
+          backgroundColor: "#fff4cc",
           bold: true,
+          fontSize: 16,
           italic: true,
           strike: true,
+          textColor: "#1c2520",
         }),
       ]),
     ]);
@@ -117,9 +120,12 @@ describe("applyToggleMark", () => {
       type: "text",
       text: "你好",
       marks: {
+        backgroundColor: "#fff4cc",
         bold: true,
+        fontSize: 16,
         italic: true,
         strike: true,
+        textColor: "#1c2520",
         underline: true,
       },
     });

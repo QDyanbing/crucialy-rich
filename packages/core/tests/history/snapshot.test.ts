@@ -12,9 +12,12 @@ describe("createHistorySnapshot", () => {
     const document = createDocument([
       createParagraph([
         createText("你好", {
+          backgroundColor: "#fff4cc",
           bold: true,
+          fontSize: 16,
           italic: true,
           strike: true,
+          textColor: "#1c2520",
           underline: true,
         }),
       ]),
@@ -32,9 +35,12 @@ describe("createHistorySnapshot", () => {
 
     expect(snapshot.document.children[0]?.children[0]?.text).toBe("你好");
     expect(snapshot.document.children[0]?.children[0]?.marks).toEqual({
+      backgroundColor: "#fff4cc",
       bold: true,
+      fontSize: 16,
       italic: true,
       strike: true,
+      textColor: "#1c2520",
       underline: true,
     });
     expect(snapshot.document.children[0]?.children[0]?.marks).not.toBe(

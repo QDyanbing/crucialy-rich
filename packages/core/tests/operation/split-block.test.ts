@@ -97,7 +97,15 @@ describe("applySplitBlock", () => {
 
   it("preserves marks on both split text nodes", () => {
     const document = createDocument([
-      createParagraph([createText("你好世界", { bold: true, italic: true })]),
+      createParagraph([
+        createText("你好世界", {
+          backgroundColor: "#fff4cc",
+          bold: true,
+          fontSize: 16,
+          italic: true,
+          textColor: "#1c2520",
+        }),
+      ]),
     ]);
     const result = applySplitBlock(
       document,
@@ -108,12 +116,18 @@ describe("applySplitBlock", () => {
     );
 
     expect(result.children[0]?.children[0]?.marks).toEqual({
+      backgroundColor: "#fff4cc",
       bold: true,
+      fontSize: 16,
       italic: true,
+      textColor: "#1c2520",
     });
     expect(result.children[1]?.children[0]?.marks).toEqual({
+      backgroundColor: "#fff4cc",
       bold: true,
+      fontSize: 16,
       italic: true,
+      textColor: "#1c2520",
     });
   });
 

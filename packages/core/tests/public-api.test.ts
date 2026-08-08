@@ -12,12 +12,21 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.createParagraph).toBe("function");
     expect(typeof core.createText).toBe("function");
     expect(core.TEXT_MARK_TYPES).toEqual(["bold", "italic", "underline", "strike"]);
+    expect(core.TEXT_MARK_ATTRIBUTE_TYPES).toEqual([
+      "fontSize",
+      "textColor",
+      "backgroundColor",
+    ]);
     expect(typeof core.addTextMark).toBe("function");
     expect(typeof core.areTextMarksEqual).toBe("function");
+    expect(typeof core.getTextMarkAttribute).toBe("function");
     expect(typeof core.hasTextMark).toBe("function");
+    expect(typeof core.isValidTextMarkAttributeValue).toBe("function");
     expect(typeof core.mergeAdjacentTextNodes).toBe("function");
     expect(typeof core.normalizeTextMarks).toBe("function");
     expect(typeof core.removeTextMark).toBe("function");
+    expect(typeof core.removeTextMarkAttribute).toBe("function");
+    expect(typeof core.setTextMarkAttribute).toBe("function");
     expect(typeof core.setTextMark).toBe("function");
     expect(typeof core.toggleTextMark).toBe("function");
     expect(typeof core.validateDocument).toBe("function");
