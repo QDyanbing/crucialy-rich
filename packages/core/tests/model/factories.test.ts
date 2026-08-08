@@ -36,6 +36,23 @@ describe("model factories", () => {
     expect(text.marks).not.toBe(marks);
   });
 
+  it("creates text with attribute and boolean marks", () => {
+    const marks = {
+      backgroundColor: "#fff4cc",
+      bold: true as const,
+      fontSize: 16,
+      textColor: "#1c2520",
+    };
+    const text = createText("styled", marks);
+
+    expect(text).toEqual({
+      type: "text",
+      text: "styled",
+      marks,
+    });
+    expect(text.marks).not.toBe(marks);
+  });
+
   it("creates a paragraph with a default empty text", () => {
     const paragraph = createParagraph();
     expect(isParagraphNode(paragraph)).toBe(true);
