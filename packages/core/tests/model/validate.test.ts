@@ -84,6 +84,61 @@ describe("validateDocument", () => {
     expect(validateDocument(document)).toEqual({ valid: true, errors: [] });
   });
 
+  it("accepts attribute and boolean marks together", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("styled", {
+          backgroundColor: "#fff4cc",
+          bold: true,
+          fontSize: 16,
+          textColor: "#1c2520",
+        }),
+      ]),
+    ]);
+
+    expect(validateDocument(document)).toEqual({ valid: true, errors: [] });
+  });
+
+  it("rejects invalid attribute mark values", () => {
+    const result = validateDocument({
+      type: "document",
+      children: [
+        {
+          type: "paragraph",
+          children: [
+            {
+              type: "text",
+              text: "x",
+              marks: {
+                backgroundColor: "",
+                fontSize: 0,
+                textColor: 123,
+              },
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(result).toEqual({
+      valid: false,
+      errors: [
+        {
+          path: [0, 0],
+          message: "text mark backgroundColor 的值必须是非空字符串",
+        },
+        {
+          path: [0, 0],
+          message: "text mark fontSize 的值必须是正有限数字",
+        },
+        {
+          path: [0, 0],
+          message: "text mark textColor 的值必须是非空字符串",
+        },
+      ],
+    });
+  });
+
   it("rejects non-object text marks", () => {
     const result = validateDocument({
       type: "document",
