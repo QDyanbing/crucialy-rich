@@ -1,5 +1,7 @@
 import {
   TEXT_MARK_TYPES,
+  type TextMarkAttributes,
+  type TextMarkAttributeType,
   type TextMarks,
   type TextMarkType,
   type TextNode,
@@ -7,6 +9,19 @@ import {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+export function isValidTextMarkAttributeValue<TAttribute extends TextMarkAttributeType>(
+  attribute: TAttribute,
+  value: unknown,
+): value is TextMarkAttributes[TAttribute] {
+  switch (attribute) {
+    case "fontSize":
+      return typeof value === "number" && Number.isFinite(value) && value > 0;
+    case "textColor":
+    case "backgroundColor":
+      return typeof value === "string" && value.trim().length > 0;
+  }
 }
 
 export function normalizeTextMarks(value: unknown): TextMarks | undefined {

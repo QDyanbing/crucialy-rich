@@ -16,6 +16,7 @@ export {
   addTextMark,
   areTextMarksEqual,
   hasTextMark,
+  isValidTextMarkAttributeValue,
   mergeAdjacentTextNodes,
   normalizeTextMarks,
   removeTextMark,
