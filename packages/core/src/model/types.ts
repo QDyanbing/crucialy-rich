@@ -2,14 +2,29 @@
  * 文档模型的第一版类型定义。
  *
  * 当前阶段支持 `document` -> `paragraph` -> `text` 三层结构，
- * text 节点可携带 bold / italic / underline / strike marks。
+ * text 节点可携带 boolean marks 和文字样式属性 marks。
  */
 
 export const TEXT_MARK_TYPES = ["bold", "italic", "underline", "strike"] as const;
 
+export const TEXT_MARK_ATTRIBUTE_TYPES = [
+  "fontSize",
+  "textColor",
+  "backgroundColor",
+] as const;
+
 export type TextMarkType = (typeof TEXT_MARK_TYPES)[number];
 
-export type TextMarks = Partial<Record<TextMarkType, true>>;
+export type TextMarkAttributeType = (typeof TEXT_MARK_ATTRIBUTE_TYPES)[number];
+
+export interface TextMarkAttributes {
+  fontSize: number;
+  textColor: string;
+  backgroundColor: string;
+}
+
+export type TextMarks = Partial<Record<TextMarkType, true>> &
+  Partial<TextMarkAttributes>;
 
 export interface TextNode {
   type: "text";
