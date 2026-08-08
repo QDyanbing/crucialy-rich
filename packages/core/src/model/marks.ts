@@ -37,6 +37,18 @@ export function normalizeTextMarks(value: unknown): TextMarks | undefined {
     }
   });
 
+  if (isValidTextMarkAttributeValue("fontSize", value.fontSize)) {
+    marks.fontSize = value.fontSize;
+  }
+
+  if (isValidTextMarkAttributeValue("textColor", value.textColor)) {
+    marks.textColor = value.textColor;
+  }
+
+  if (isValidTextMarkAttributeValue("backgroundColor", value.backgroundColor)) {
+    marks.backgroundColor = value.backgroundColor;
+  }
+
   return Object.keys(marks).length > 0 ? marks : undefined;
 }
 
