@@ -1,5 +1,10 @@
 import { isBlockNode, isDocumentNode, isTextNode } from "./guards";
-import { TEXT_MARK_TYPES } from "./types";
+import { isValidTextMarkAttributeValue } from "./marks";
+import {
+  TEXT_MARK_ATTRIBUTE_TYPES,
+  TEXT_MARK_TYPES,
+  type TextMarkAttributeType,
+} from "./types";
 
 export interface ValidationError {
   /** 出错节点的路径，root 为空数组。 */
@@ -13,6 +18,7 @@ export interface ValidationResult {
 }
 
 const TEXT_MARK_TYPE_SET = new Set<string>(TEXT_MARK_TYPES);
+const TEXT_MARK_ATTRIBUTE_TYPE_SET = new Set<string>(TEXT_MARK_ATTRIBUTE_TYPES);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -36,20 +42,35 @@ function validateTextMarks(
   }
 
   Object.entries(value.marks).forEach(([mark, enabled]) => {
-    if (!TEXT_MARK_TYPE_SET.has(mark)) {
-      errors.push({
-        path,
-        message: `text mark ${mark} 不受支持`,
-      });
+    if (TEXT_MARK_TYPE_SET.has(mark)) {
+      if (enabled !== true) {
+        errors.push({
+          path,
+          message: `text mark ${mark} 的值必须是 true`,
+        });
+      }
       return;
     }
 
-    if (enabled !== true) {
-      errors.push({
-        path,
-        message: `text mark ${mark} 的值必须是 true`,
-      });
+    if (TEXT_MARK_ATTRIBUTE_TYPE_SET.has(mark)) {
+      const attribute = mark as TextMarkAttributeType;
+
+      if (!isValidTextMarkAttributeValue(attribute, enabled)) {
+        errors.push({
+          path,
+          message:
+            attribute === "fontSize"
+              ? "text mark fontSize 的值必须是正有限数字"
+              : `text mark ${attribute} 的值必须是非空字符串`,
+        });
+      }
+      return;
     }
+
+    errors.push({
+      path,
+      message: `text mark ${mark} 不受支持`,
+    });
   });
 }
 
@@ -60,7 +81,7 @@ function validateTextMarks(
  * - 根节点必须是 document。
  * - document 的 children 只能是块级节点。
  * - paragraph 的 children 只能是 text 节点。
- * - text 节点的 marks 只能包含受支持的 true 值。
+ * - text 节点的 marks 只能包含受支持的 boolean 或属性值。
  */
 export function validateDocument(value: unknown): ValidationResult {
   const errors: ValidationError[] = [];
