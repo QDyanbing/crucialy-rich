@@ -15,11 +15,14 @@ export { createDocument, createParagraph, createText } from "./factories";
 export {
   addTextMark,
   areTextMarksEqual,
+  getTextMarkAttribute,
   hasTextMark,
   isValidTextMarkAttributeValue,
   mergeAdjacentTextNodes,
   normalizeTextMarks,
+  removeTextMarkAttribute,
   removeTextMark,
+  setTextMarkAttribute,
   setTextMark,
   toggleTextMark,
 } from "./marks";

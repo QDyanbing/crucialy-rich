@@ -90,6 +90,33 @@ export function setTextMark(
   return active ? addTextMark(marks, mark) : removeTextMark(marks, mark);
 }
 
+export function getTextMarkAttribute<TAttribute extends TextMarkAttributeType>(
+  marks: TextMarks | undefined,
+  attribute: TAttribute,
+): TextMarkAttributes[TAttribute] | undefined {
+  return normalizeTextMarks(marks)?.[attribute] as
+    | TextMarkAttributes[TAttribute]
+    | undefined;
+}
+
+export function setTextMarkAttribute<TAttribute extends TextMarkAttributeType>(
+  marks: TextMarks | undefined,
+  attribute: TAttribute,
+  value: TextMarkAttributes[TAttribute],
+): TextMarks | undefined {
+  return normalizeTextMarks({ ...(marks ?? {}), [attribute]: value });
+}
+
+export function removeTextMarkAttribute(
+  marks: TextMarks | undefined,
+  attribute: TextMarkAttributeType,
+): TextMarks | undefined {
+  const next = { ...(normalizeTextMarks(marks) ?? {}) };
+  Reflect.deleteProperty(next, attribute);
+
+  return normalizeTextMarks(next);
+}
+
 export function areTextMarksEqual(
   left: TextMarks | undefined,
   right: TextMarks | undefined,
