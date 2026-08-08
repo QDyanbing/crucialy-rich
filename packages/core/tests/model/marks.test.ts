@@ -4,6 +4,7 @@ import {
   addTextMark,
   areTextMarksEqual,
   hasTextMark,
+  isValidTextMarkAttributeValue,
   mergeAdjacentTextNodes,
   normalizeTextMarks,
   removeTextMark,
@@ -23,6 +24,36 @@ describe("text mark helpers", () => {
         highlight: true,
       }),
     ).toEqual({ bold: true, strike: true, underline: true });
+  });
+
+  it("normalizes valid attribute marks with boolean marks", () => {
+    expect(
+      normalizeTextMarks({
+        backgroundColor: "#fff4cc",
+        bold: true,
+        fontSize: 16,
+        textColor: "#1c2520",
+      }),
+    ).toEqual({
+      backgroundColor: "#fff4cc",
+      bold: true,
+      fontSize: 16,
+      textColor: "#1c2520",
+    });
+  });
+
+  it("drops invalid attribute mark values", () => {
+    expect(
+      normalizeTextMarks({
+        backgroundColor: "",
+        fontSize: Number.POSITIVE_INFINITY,
+        textColor: 123,
+      }),
+    ).toBeUndefined();
+    expect(isValidTextMarkAttributeValue("fontSize", 0)).toBe(false);
+    expect(isValidTextMarkAttributeValue("fontSize", 14)).toBe(true);
+    expect(isValidTextMarkAttributeValue("textColor", "  ")).toBe(false);
+    expect(isValidTextMarkAttributeValue("backgroundColor", "#fff")).toBe(true);
   });
 
   it("adds, removes and toggles marks", () => {
