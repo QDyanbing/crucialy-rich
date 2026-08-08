@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  TEXT_MARK_ATTRIBUTE_TYPES,
   TEXT_MARK_TYPES,
   type DocumentNode,
   type ParagraphNode,
+  type TextMarkAttributes,
+  type TextMarkAttributeType,
   type TextMarkType,
   type TextNode,
 } from "../../src/model/types";
@@ -38,5 +41,29 @@ describe("model node types", () => {
     expect(text.marks?.italic).toBe(true);
     expect(text.marks?.underline).toBe(true);
     expect(text.marks?.strike).toBe(true);
+  });
+
+  it("describes attribute and boolean marks together", () => {
+    const fontSizeAttribute: TextMarkAttributeType = "fontSize";
+    const attributes: TextMarkAttributes = {
+      backgroundColor: "#fff4cc",
+      fontSize: 16,
+      textColor: "#1c2520",
+    };
+    const text: TextNode = {
+      type: "text",
+      text: "styled",
+      marks: { bold: true, ...attributes },
+    };
+
+    expect(TEXT_MARK_ATTRIBUTE_TYPES).toEqual([
+      "fontSize",
+      "textColor",
+      "backgroundColor",
+    ]);
+    expect(text.marks?.[fontSizeAttribute]).toBe(16);
+    expect(text.marks?.bold).toBe(true);
+    expect(text.marks?.textColor).toBe("#1c2520");
+    expect(text.marks?.backgroundColor).toBe("#fff4cc");
   });
 });
