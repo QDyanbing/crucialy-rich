@@ -63,6 +63,18 @@ describe("@crucialy-rich/react public API", () => {
     );
   });
 
+  it("renders a safe font size through React", () => {
+    const document = createDocument([
+      createParagraph([createText("Sized", { fontSize: 18 })]),
+    ]);
+
+    const html = renderToStaticMarkup(
+      createElement(RichTextEditor, { value: document }),
+    );
+
+    expect(html).toContain('style="font-size:18px"');
+  });
+
   it("marks editable renders as not readonly", () => {
     const html = renderToStaticMarkup(
       createElement(RichTextEditor, {

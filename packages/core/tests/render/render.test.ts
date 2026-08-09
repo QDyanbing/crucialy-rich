@@ -232,4 +232,49 @@ describe("renderDocument", () => {
       text: "All",
     });
   });
+
+  it("renders a supported font size as a pixel style", () => {
+    const document = createDocument([
+      createParagraph([createText("Sized", { fontSize: 18 })]),
+    ]);
+
+    expect(renderDocument(document).children?.[0]?.children?.[0]).toEqual({
+      attributes: {
+        [MODEL_PATH_ATTRIBUTE]: "[0,0]",
+      },
+      path: [0, 0],
+      style: { fontSize: "18px" },
+      tagName: "span",
+      text: "Sized",
+    });
+  });
+
+  it("combines font size with boolean mark styles", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("Combined", {
+          bold: true,
+          fontSize: 24,
+          italic: true,
+          underline: true,
+        }),
+      ]),
+    ]);
+
+    expect(renderDocument(document).children?.[0]?.children?.[0]?.style).toEqual({
+      fontSize: "24px",
+      fontStyle: "italic",
+      textDecoration: "underline",
+    });
+  });
+
+  it("does not render an unsupported font size", () => {
+    const document = createDocument([
+      createParagraph([createText("Unsafe", { fontSize: 100 })]),
+    ]);
+
+    expect(
+      renderDocument(document).children?.[0]?.children?.[0]?.style,
+    ).toBeUndefined();
+  });
 });

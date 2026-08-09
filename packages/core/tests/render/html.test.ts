@@ -104,4 +104,31 @@ describe("renderNodeToHtml", () => {
       '<strong data-crucialy-path="[0,0]" style="font-style: italic; text-decoration: underline line-through;">All</strong>',
     );
   });
+
+  it("serializes a supported font size as pixels", () => {
+    const document = createDocument([
+      createParagraph([createText("Sized", { fontSize: 18 })]),
+    ]);
+
+    expect(renderNodeToHtml(renderDocument(document))).toContain(
+      '<span data-crucialy-path="[0,0]" style="font-size: 18px;">Sized</span>',
+    );
+  });
+
+  it("serializes font size with boolean mark styles", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("Combined", {
+          bold: true,
+          fontSize: 24,
+          italic: true,
+          underline: true,
+        }),
+      ]),
+    ]);
+
+    expect(renderNodeToHtml(renderDocument(document))).toContain(
+      '<strong data-crucialy-path="[0,0]" style="font-size: 24px; font-style: italic; text-decoration: underline;">Combined</strong>',
+    );
+  });
 });
