@@ -7,6 +7,12 @@ export {
   splitBlockCommand,
 } from "./block";
 export {
+  canExecuteSetFontSizeCommand,
+  SET_FONT_SIZE_COMMAND_NAME,
+  setFontSizeCommand,
+} from "./font-size";
+export type { SetFontSizeCommandPayload } from "./font-size";
+export {
   BOLD_COMMAND_NAME,
   BOOLEAN_MARK_COMMANDS,
   ITALIC_COMMAND_NAME,
