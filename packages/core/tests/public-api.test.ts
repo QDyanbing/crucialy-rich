@@ -84,6 +84,9 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.createToggleMarkOperation).toBe("function");
     expect(typeof core.applyToggleMark).toBe("function");
     expect(typeof core.createSelectionAfterToggleMark).toBe("function");
+    expect(typeof core.createSetMarkAttributeOperation).toBe("function");
+    expect(typeof core.applySetMarkAttribute).toBe("function");
+    expect(typeof core.createSelectionAfterSetMarkAttribute).toBe("function");
     expect(typeof core.createTransaction).toBe("function");
     expect(typeof core.applyOperation).toBe("function");
     expect(typeof core.applyTransaction).toBe("function");

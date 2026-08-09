@@ -5,6 +5,7 @@ import {
   createDeleteTextOperation,
   createInsertTextOperation,
   createMergeBlockOperation,
+  createSetMarkAttributeOperation,
   createSplitBlockOperation,
   createToggleMarkOperation,
   createTransaction,
@@ -53,10 +54,19 @@ describe("operation scope classification", () => {
       },
       "bold",
     );
+    const setMarkAttributeOperation = createSetMarkAttributeOperation(
+      {
+        anchor: { path: [0, 0], offset: 0 },
+        focus: { path: [0, 0], offset: 1 },
+      },
+      "fontSize",
+      18,
+    );
 
     expect(isTextOperation(insertOperation)).toBe(true);
     expect(isTextOperation(deleteOperation)).toBe(true);
     expect(isTextOperation(toggleMarkOperation)).toBe(true);
+    expect(isTextOperation(setMarkAttributeOperation)).toBe(true);
     expect(isBlockOperation(insertOperation)).toBe(false);
   });
 
@@ -145,6 +155,27 @@ describe("summarizeOperation", () => {
       type: "toggle_mark",
     });
   });
+
+  it("summarizes mark attribute operations", () => {
+    const operation = createSetMarkAttributeOperation(
+      {
+        anchor: { path: [0, 0], offset: 3 },
+        focus: { path: [0, 0], offset: 1 },
+      },
+      "fontSize",
+      18,
+    );
+
+    expect(summarizeOperation(operation)).toEqual({
+      attribute: "fontSize",
+      collapsedRange: false,
+      scope: "text",
+      targetPath: [0, 0],
+      textLength: 2,
+      type: "set_mark_attribute",
+      value: 18,
+    });
+  });
 });
 
 describe("summarizeTransaction", () => {
@@ -162,6 +193,14 @@ describe("summarizeTransaction", () => {
         },
         "bold",
       ),
+      createSetMarkAttributeOperation(
+        {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [0, 0], offset: 1 },
+        },
+        "fontSize",
+        18,
+      ),
       createSplitBlockOperation({ path: [0, 0], offset: 2 }),
       createMergeBlockOperation({ path: [1, 0], offset: 0 }),
     ]);
@@ -170,15 +209,16 @@ describe("summarizeTransaction", () => {
       blockOperationCount: 2,
       hasBlockOperations: true,
       hasTextOperations: true,
-      operationCount: 5,
+      operationCount: 6,
       operationTypes: [
         "insert_text",
         "delete_text",
         "toggle_mark",
+        "set_mark_attribute",
         "split_block",
         "merge_block",
       ],
-      textOperationCount: 3,
+      textOperationCount: 4,
     });
   });
 

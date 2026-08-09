@@ -12,6 +12,7 @@ import {
   createDeleteTextOperation,
   createInsertTextOperation,
   createMergeBlockOperation,
+  createSetMarkAttributeOperation,
   createSplitBlockOperation,
   createToggleMarkOperation,
   createTransaction,
@@ -184,6 +185,40 @@ describe("applyTransaction", () => {
       type: "text",
       text: "你好",
       marks: { bold: true },
+    });
+  });
+
+  it("clones and applies mark attribute operations", () => {
+    const document = createDocument([createParagraph([createText("你好")])]);
+    const anchorPath = [0, 0];
+    const focusPath = [0, 0];
+    const transaction = createTransaction([
+      createSetMarkAttributeOperation(
+        {
+          anchor: { path: anchorPath, offset: 0 },
+          focus: { path: focusPath, offset: 2 },
+        },
+        "fontSize",
+        18,
+      ),
+    ]);
+
+    anchorPath[0] = 9;
+    focusPath[0] = 8;
+
+    expect(transaction.operations[0]).toEqual({
+      attribute: "fontSize",
+      range: {
+        anchor: { path: [0, 0], offset: 0 },
+        focus: { path: [0, 0], offset: 2 },
+      },
+      type: "set_mark_attribute",
+      value: 18,
+    });
+    expect(applyTransaction(document, transaction).children[0]?.children[0]).toEqual({
+      marks: { fontSize: 18 },
+      text: "你好",
+      type: "text",
     });
   });
 
