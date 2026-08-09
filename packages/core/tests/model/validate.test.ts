@@ -129,7 +129,7 @@ describe("validateDocument", () => {
         },
         {
           path: [0, 0],
-          message: "text mark fontSize 的值必须是正有限数字",
+          message: "text mark fontSize 的值必须是 8 到 72 之间的整数",
         },
         {
           path: [0, 0],

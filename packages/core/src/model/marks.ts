@@ -8,8 +8,20 @@ import {
   type TextNode,
 } from "./types";
 
+export const MIN_FONT_SIZE = 8;
+export const MAX_FONT_SIZE = 72;
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+export function isValidFontSize(value: unknown): value is number {
+  return (
+    typeof value === "number" &&
+    Number.isInteger(value) &&
+    value >= MIN_FONT_SIZE &&
+    value <= MAX_FONT_SIZE
+  );
 }
 
 export function isValidTextMarkAttributeValue<TAttribute extends TextMarkAttributeType>(
@@ -18,7 +30,7 @@ export function isValidTextMarkAttributeValue<TAttribute extends TextMarkAttribu
 ): value is TextMarkAttributes[TAttribute] {
   switch (attribute) {
     case "fontSize":
-      return typeof value === "number" && Number.isFinite(value) && value > 0;
+      return isValidFontSize(value);
     case "textColor":
     case "backgroundColor":
       return typeof value === "string" && value.trim().length > 0;

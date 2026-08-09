@@ -60,7 +60,7 @@ function validateTextMarks(
           path,
           message:
             attribute === "fontSize"
-              ? "text mark fontSize 的值必须是正有限数字"
+              ? "text mark fontSize 的值必须是 8 到 72 之间的整数"
               : `text mark ${attribute} 的值必须是非空字符串`,
         });
       }
