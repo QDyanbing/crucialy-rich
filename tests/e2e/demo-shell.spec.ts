@@ -236,10 +236,10 @@ test("completes the underline and strike acceptance loop", async ({ page }) => {
   await expect(renderedDocument).toContainText("下划线文本");
   await expect(renderedDocument).toContainText("删除线文本");
   await expect(
-    renderedDocument.locator('[data-crucialy-path="[0,9]"]'),
+    renderedDocument.locator('[data-crucialy-path="[0,11]"]'),
   ).toHaveAttribute(
     "style",
-    "font-style: italic; text-decoration: underline line-through;",
+    "font-size: 18px; font-style: italic; text-decoration: underline line-through;",
   );
   await expect(underlineButton).toHaveAttribute("aria-pressed", "false");
   await expect(strikeButton).toHaveAttribute("aria-pressed", "false");
@@ -266,6 +266,43 @@ test("completes the underline and strike acceptance loop", async ({ page }) => {
   await expect(underlineButton).toHaveAttribute("aria-pressed", "false");
   await expect(strikeButton).toHaveAttribute("aria-pressed", "false");
   await expect(acceptanceParagraph).toContainText("跨节点选区可以继续切换。");
+});
+
+test("sets and cancels font size from the demo control", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("marks");
+
+  const renderedDocument = page.getByLabel("已渲染文档");
+  const acceptanceParagraph = renderedDocument.locator("p").nth(1);
+  const fontSizeSelect = page.getByLabel("字号", { exact: true });
+
+  await expect(renderedDocument).toContainText("大号文本");
+  await expect(
+    renderedDocument.locator('[data-crucialy-path="[0,9]"]'),
+  ).toHaveAttribute("style", "font-size: 24px;");
+  await expect(page.getByLabel("字号 Command 状态")).toContainText("可用");
+
+  await fontSizeSelect.selectOption("24");
+
+  await expect(acceptanceParagraph.locator('[style*="font-size: 24px"]')).toHaveCount(
+    5,
+  );
+  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
+    '"fontSize": 24',
+  );
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"type": "set_mark_attribute"',
+  );
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"value": 24',
+  );
+
+  await fontSizeSelect.selectOption("default");
+
+  await expect(acceptanceParagraph.locator('[style*="font-size"]')).toHaveCount(0);
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"value": null',
+  );
 });
 
 test("renders the model document in the editor preview", async ({ page }) => {
