@@ -21,6 +21,11 @@ export {
   createSplitBlockOperation,
 } from "./split-block";
 export {
+  applySetMarkAttribute,
+  createSelectionAfterSetMarkAttribute,
+  createSetMarkAttributeOperation,
+} from "./set-mark-attribute";
+export {
   applyToggleMark,
   createSelectionAfterToggleMark,
   createToggleMarkOperation,
@@ -50,6 +55,7 @@ export type {
   InsertTextOperation,
   MergeBlockOperation,
   Operation,
+  SetMarkAttributeOperation,
   SplitBlockOperation,
   ToggleMarkOperation,
   OperationType,

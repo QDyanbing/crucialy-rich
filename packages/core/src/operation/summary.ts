@@ -1,3 +1,4 @@
+import type { TextMarkAttributeType, TextMarkType } from "../model";
 import type { Path } from "../selection";
 import { isCollapsed, normalizeRange } from "../selection";
 import type {
@@ -6,26 +7,29 @@ import type {
   MergeBlockOperation,
   Operation,
   OperationType,
+  SetMarkAttributeOperation,
   SplitBlockOperation,
   ToggleMarkOperation,
   Transaction,
 } from "./types";
-import type { TextMarkType } from "../model";
 
 export type TextOperation =
   | DeleteTextOperation
   | InsertTextOperation
+  | SetMarkAttributeOperation
   | ToggleMarkOperation;
 
 export type BlockOperation = MergeBlockOperation | SplitBlockOperation;
 
 export interface OperationSummary {
   collapsedRange?: boolean;
+  attribute?: TextMarkAttributeType;
   mark?: TextMarkType;
   scope: "block" | "text";
   targetPath: Path;
   textLength?: number;
   type: OperationType;
+  value?: number | string | null;
 }
 
 export interface TransactionSummary {
@@ -41,6 +45,7 @@ export const TEXT_OPERATION_TYPES = [
   "insert_text",
   "delete_text",
   "toggle_mark",
+  "set_mark_attribute",
 ] as const satisfies readonly OperationType[];
 
 export const BLOCK_OPERATION_TYPES = [
@@ -52,6 +57,7 @@ export function isTextOperation(operation: Operation): operation is TextOperatio
   return (
     operation.type === "insert_text" ||
     operation.type === "delete_text" ||
+    operation.type === "set_mark_attribute" ||
     operation.type === "toggle_mark"
   );
 }
@@ -90,6 +96,19 @@ export function summarizeOperation(operation: Operation): OperationSummary {
         targetPath: [...range.anchor.path],
         textLength: range.focus.offset - range.anchor.offset,
         type: "toggle_mark",
+      };
+    }
+    case "set_mark_attribute": {
+      const range = normalizeRange(operation.range);
+
+      return {
+        attribute: operation.attribute,
+        collapsedRange: isCollapsed(range),
+        scope: "text",
+        targetPath: [...range.anchor.path],
+        textLength: range.focus.offset - range.anchor.offset,
+        type: "set_mark_attribute",
+        value: operation.value,
       };
     }
     case "merge_block":

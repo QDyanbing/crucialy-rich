@@ -88,6 +88,7 @@ export function createSelectionAfterBackspaceInput(
     case "merge_block":
       return createSelectionAfterMergeBlock(input.document, operation);
     case "insert_text":
+    case "set_mark_attribute":
     case "split_block":
     case "toggle_mark":
       return createCollapsedSelection(input.selection.anchor);

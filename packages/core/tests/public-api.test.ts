@@ -91,6 +91,7 @@ describe("@crucialy-rich/core public API", () => {
       "insert_text",
       "delete_text",
       "toggle_mark",
+      "set_mark_attribute",
       "split_block",
       "merge_block",
     ]);

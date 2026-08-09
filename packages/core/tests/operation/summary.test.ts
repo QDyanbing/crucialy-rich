@@ -22,10 +22,16 @@ describe("operation type registry", () => {
       "insert_text",
       "delete_text",
       "toggle_mark",
+      "set_mark_attribute",
       "split_block",
       "merge_block",
     ]);
-    expect(TEXT_OPERATION_TYPES).toEqual(["insert_text", "delete_text", "toggle_mark"]);
+    expect(TEXT_OPERATION_TYPES).toEqual([
+      "insert_text",
+      "delete_text",
+      "toggle_mark",
+      "set_mark_attribute",
+    ]);
     expect(BLOCK_OPERATION_TYPES).toEqual(["split_block", "merge_block"]);
   });
 });
