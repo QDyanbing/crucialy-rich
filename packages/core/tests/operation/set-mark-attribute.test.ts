@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { createDocument, createParagraph, createText } from "../../src/model";
 import {
   applySetMarkAttribute,
+  createSelectionAfterSetMarkAttribute,
   createSetMarkAttributeOperation,
   type SetMarkAttributeOperation,
 } from "../../src/operation";
@@ -135,6 +136,107 @@ describe("set mark attribute operation", () => {
     );
     expect(() => applySetMarkAttribute(document, invalidOperation)).toThrow(
       "invalid fontSize mark value",
+    );
+  });
+
+  it("creates a collapsed placeholder for later input", () => {
+    const document = createDocument([
+      createParagraph([createText("你好世界", { bold: true })]),
+    ]);
+    const operation = createSetMarkAttributeOperation(
+      {
+        anchor: { path: [0, 0], offset: 2 },
+        focus: { path: [0, 0], offset: 2 },
+      },
+      "fontSize",
+      18,
+    );
+
+    expect(applySetMarkAttribute(document, operation).children[0]?.children).toEqual([
+      { marks: { bold: true }, text: "你好", type: "text" },
+      { marks: { bold: true, fontSize: 18 }, text: "", type: "text" },
+      { marks: { bold: true }, text: "世界", type: "text" },
+    ]);
+    expect(createSelectionAfterSetMarkAttribute(document, operation)).toEqual({
+      anchor: { path: [0, 1], offset: 0 },
+      focus: { path: [0, 1], offset: 0 },
+    });
+  });
+
+  it("maps a selection after updating sibling text nodes", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("你"),
+        createText("好"),
+        createText("世"),
+        createText("界"),
+      ]),
+    ]);
+    const operation = createSetMarkAttributeOperation(
+      {
+        anchor: { path: [0, 1], offset: 0 },
+        focus: { path: [0, 2], offset: 1 },
+      },
+      "fontSize",
+      18,
+    );
+
+    expect(applySetMarkAttribute(document, operation).children[0]?.children).toEqual([
+      { text: "你", type: "text" },
+      { marks: { fontSize: 18 }, text: "好世", type: "text" },
+      { text: "界", type: "text" },
+    ]);
+    expect(createSelectionAfterSetMarkAttribute(document, operation)).toEqual({
+      anchor: { path: [0, 1], offset: 0 },
+      focus: { path: [0, 1], offset: 2 },
+    });
+  });
+
+  it("maps a selection after removing a size and merging neighbors", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("你"),
+        createText("好", { fontSize: 18 }),
+        createText("世界"),
+      ]),
+    ]);
+    const operation = createSetMarkAttributeOperation(
+      {
+        anchor: { path: [0, 1], offset: 0 },
+        focus: { path: [0, 1], offset: 1 },
+      },
+      "fontSize",
+      null,
+    );
+
+    expect(applySetMarkAttribute(document, operation).children[0]?.children).toEqual([
+      { text: "你好世界", type: "text" },
+    ]);
+    expect(createSelectionAfterSetMarkAttribute(document, operation)).toEqual({
+      anchor: { path: [0, 0], offset: 1 },
+      focus: { path: [0, 0], offset: 2 },
+    });
+  });
+
+  it("rejects a range that crosses paragraphs", () => {
+    const document = createDocument([
+      createParagraph([createText("第一段")]),
+      createParagraph([createText("第二段")]),
+    ]);
+    const operation = createSetMarkAttributeOperation(
+      {
+        anchor: { path: [0, 0], offset: 0 },
+        focus: { path: [1, 0], offset: 1 },
+      },
+      "fontSize",
+      18,
+    );
+
+    expect(() => applySetMarkAttribute(document, operation)).toThrow(
+      "set mark attribute range must stay inside one paragraph",
+    );
+    expect(() => createSelectionAfterSetMarkAttribute(document, operation)).toThrow(
+      "set mark attribute range must stay inside one paragraph",
     );
   });
 });
