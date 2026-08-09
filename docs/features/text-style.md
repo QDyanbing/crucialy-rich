@@ -1,6 +1,6 @@
 # 文字属性 Mark
 
-文字属性 Mark 用于描述 text 节点上的字号、文字颜色和背景颜色。第 11 周 Day 1 已完成数据模型设计；当前只建立可校验、可规范化、可组合的属性容器，不包含命令、渲染器和 demo 交互。
+文字属性 Mark 用于描述 text 节点上的字号、文字颜色和背景颜色。第 11 周 Day 1 已完成数据模型设计，Day 2 已完成字号命令、安全渲染和 demo 闭环。
 
 ## 数据结构
 
@@ -29,7 +29,7 @@ createText("示例", {
 
 ## 合法值
 
-- `fontSize` 必须是大于 `0` 的有限数值；单位、可选范围和渲染策略由字号功能继续约束。
+- `fontSize` 必须是 `8` 到 `72` 之间的整数，模型值不携带单位，renderer 统一输出像素。
 - `textColor` 必须是非空字符串；颜色格式白名单和安全过滤由文字颜色功能继续实现。
 - `backgroundColor` 必须是非空字符串；颜色格式白名单和安全过滤由背景颜色功能继续实现。
 - 非法属性会被 `normalizeTextMarks` 移除，并由 `validateDocument` 返回带节点路径的错误。
@@ -42,6 +42,7 @@ createText("示例", {
 - `removeTextMarkAttribute(marks, attribute)`：移除属性；没有剩余 mark 时返回 `undefined`。
 - `normalizeTextMarks(value)`：同时规范化 boolean mark 和属性 Mark。
 - `areTextMarksEqual(left, right)`：同时比较 boolean mark 与三个属性值。
+- `isValidFontSize(value)`：使用 `MIN_FONT_SIZE` 和 `MAX_FONT_SIZE` 判断字号是否受支持。
 
 ## 模型行为
 
@@ -50,9 +51,27 @@ createText("示例", {
 - 文档规范化、段落拆分和 History 快照会保留合法属性 Mark。
 - 工厂函数会复制传入的 marks，避免调用方后续修改原对象影响节点。
 
+## 字号命令
+
+`setFontSizeCommand` 已加入默认 Command 注册表，payload 为 `{ fontSize: number | null }`：
+
+- `8–72` 的整数会通过 `set_mark_attribute` operation 应用到同一 paragraph 内的选区。
+- `null` 会取消选区字号，同时保留 boolean mark 和其他属性 Mark。
+- 越界值、小数、缺失 payload、非法选区或跨 paragraph 选区会跳过执行。
+- 非折叠选区支持跨多个 text 节点切分与合并；折叠选区会创建可供后续输入继承字号的空 text 占位。
+- operation 应用后会按 paragraph text offset 重新映射 selection，并可进入 Transaction 与 History 管线。
+
+## 字号渲染与 Demo
+
+- renderer 只把通过 `isValidFontSize` 的模型值输出为 `font-size: <value>px`。
+- 字号与 bold、italic、underline、strike 共用同一个 text path 元素，不产生额外模型路径。
+- HTML 序列化与 React 渲染复用同一结构化 style。
+- 中文 demo 提供“默认字号”、12px、14px、16px、18px、24px 和 32px 选项。
+- demo 字号修改会记录 Transaction、History 和验收报告；浏览器测试覆盖设置与取消。
+
 ## 当前边界
 
-- 尚未提供 `setFontSize`、`setTextColor`、`setBackgroundColor` 命令。
-- renderer 尚未把三个属性输出为内联样式。
-- React 组件与 demo 尚未提供字号或颜色控件。
-- 颜色安全过滤和样式序列化将在各自功能闭环时确定。
+- 尚未提供 `setTextColor` 和 `setBackgroundColor` 命令。
+- renderer 尚未输出文字颜色和背景颜色。
+- React 组件与 demo 尚未提供颜色控件。
+- 颜色安全过滤和颜色样式序列化将在对应功能闭环时确定。

@@ -1,6 +1,6 @@
 # 基础渲染（第一版）
 
-基础渲染负责把当前文档模型转换为可展示的 DOM 结构描述。当前覆盖 `document`、`paragraph`、`text` 和四种 boolean text mark。
+基础渲染负责把当前文档模型转换为可展示的 DOM 结构描述。当前覆盖 `document`、`paragraph`、`text`、四种 boolean text mark 和安全字号。
 
 ## 渲染结构
 
@@ -17,6 +17,7 @@
 - underline 与 bold/italic 叠加 → 当前 text path 元素增加 `text-decoration: underline;`
 - strike 与其他 mark 叠加 → 当前 text path 元素增加 `text-decoration: line-through;`
 - underline 与 strike 叠加 → `text-decoration: underline line-through;`
+- 合法 `marks.fontSize` → 当前 text path 元素增加 `font-size: <value>px;`
 
 `renderDocument(document)` 返回 `RenderedElementNode` 树：
 
@@ -27,6 +28,7 @@ interface RenderedElementNode {
   attributes: Record<string, string>;
   children?: RenderedElementNode[];
   style?: {
+    fontSize?: `${number}px`;
     fontStyle?: "italic";
     textDecoration?: string;
   };
@@ -84,6 +86,7 @@ interface RenderedElementNode {
 - 同时带有加粗和斜体的 text 会渲染为 `strong style="font-style: italic;"`，保持 text path 元素下仍是直接文本节点。
 - 下划线与加粗或斜体叠加时写入同一个路径元素的 style，不产生嵌套路径元素。
 - 删除线与其他 mark 叠加时复用同一个路径元素；同时启用下划线时合并 text decoration。
+- `fontSize` 只有在 `8–72` 的整数范围内才会输出，且可以与四种 boolean mark 共用同一个路径元素。
 
 ## 演示验收
 
@@ -99,4 +102,4 @@ interface RenderedElementNode {
 
 - 浏览器选区同步当前只覆盖已验证的基础场景。
 - 不处理 `contentEditable`、`beforeinput` 或真实编辑行为。
-- 当前包含四种 boolean mark 渲染；标题和列表等扩展渲染尚未实现。
+- 当前包含四种 boolean mark 和字号渲染；文字颜色、背景颜色、标题和列表等扩展渲染尚未实现。

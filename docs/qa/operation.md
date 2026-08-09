@@ -2,13 +2,14 @@
 
 ## 范围
 
-验证 `insert_text`、`delete_text`、`toggle_mark`、`split_block`、`merge_block` operation 和 transaction 的创建、应用、边界处理、操作后选区计算、摘要、闭环验收报告和演示调试入口。
+验证 `insert_text`、`delete_text`、`toggle_mark`、`set_mark_attribute`、`split_block`、`merge_block` operation 和 transaction 的创建、应用、边界处理、操作后选区计算、摘要、闭环验收报告和演示调试入口。
 
 ## 自动化测试
 
 - `packages/core/tests/operation/insert-text.test.ts`：operation 创建、path 复制、段首/段中/段尾插入、非法 point、空文本 no-op 和插入后 selection。
 - `packages/core/tests/operation/delete-text.test.ts`：operation 创建、path 复制、段首/段中/段尾删除、反向 range、非法 range、折叠 range no-op 和删除后 selection。
 - `packages/core/tests/operation/toggle-mark.test.ts`：operation 创建、path 复制、同 paragraph range 切换、collapsed mark 占位、相邻同 marks text 合并、非法 range 和切换后 selection。
+- `packages/core/tests/operation/set-mark-attribute.test.ts`：属性设置、覆盖、取消、非法值、collapsed 占位、跨 text、合并和 selection 映射。
 - `packages/core/tests/operation/split-block.test.ts`：operation 创建、path 复制、段首/段中/段尾分段、多 text children、非法 point 和分段后 selection。
 - `packages/core/tests/operation/merge-block.test.ts`：operation 创建、path 复制、普通段落合并、空段落合并、非法 point 和合并后 selection。
 - `packages/core/tests/operation/transaction.test.ts`：transaction 创建、operation 分发、批量应用、结束 normalize 和失败不污染原文档。
@@ -52,6 +53,9 @@ pnpm test:e2e
 | mark 后选区      | 调用 `createSelectionAfterToggleMark`    | selection 落到被切换的 text 节点      | 通过 |
 | 演示加粗         | 设置选区后点击“加粗”                     | 最近 transaction 包含 `toggle_mark`   | 通过 |
 | 演示斜体         | 设置选区后点击“斜体”                     | 最近 transaction 包含 `toggle_mark`   | 通过 |
+| 创建属性操作     | 调用 `createSetMarkAttributeOperation`   | 返回 `set_mark_attribute` 操作对象    | 通过 |
+| 设置和取消字号   | 对选区设置字号或传入 `null`              | 只更新 `fontSize` 并保留其他 mark     | 通过 |
+| 属性操作后选区   | 调用对应 selection helper                | 切分与合并后 selection 仍覆盖原文字   | 通过 |
 | 创建 split 操作  | 调用 `createSplitBlockOperation`         | 返回 `type: "split_block"` 的操作对象 | 通过 |
 | 段中分段         | point 位于 text 中间                     | paragraph 拆成前后两个 paragraph      | 通过 |
 | 段首分段         | offset 为 `0`                            | 前一段为空，后一段保留原文本          | 通过 |
@@ -77,7 +81,7 @@ pnpm test:e2e
 
 ## 当前限制
 
-- 当前覆盖 `insert_text`、同 text 节点内的 `delete_text`、同 paragraph 内的 `toggle_mark`、paragraph 级 `split_block` 和 `merge_block`。
+- 当前覆盖 `insert_text`、同 text 节点内的 `delete_text`、同 paragraph 内的 `toggle_mark` 和 `set_mark_attribute`、paragraph 级 `split_block` 和 `merge_block`。
 - 非折叠选区不会替换选中内容。
 - 删除暂不支持跨 text 节点或跨 paragraph range。
 - 合并暂不支持批量跨多段合并。
@@ -87,4 +91,4 @@ pnpm test:e2e
 
 ## 结论
 
-`insert_text`、`delete_text`、`toggle_mark`、`split_block`、`merge_block` 和 transaction 的核心模型操作、测试、演示调试、摘要、闭环验收报告和 QA 记录已闭环；普通文本输入、Backspace、Delete、Enter 和 Bold/Italic demo 操作已经进入可验证管线。
+`insert_text`、`delete_text`、`toggle_mark`、`set_mark_attribute`、`split_block`、`merge_block` 和 transaction 的核心模型操作、测试、摘要与验收报告已闭环；基础输入、boolean mark 和字号 demo 操作均进入可验证管线。

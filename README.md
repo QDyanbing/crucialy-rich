@@ -14,7 +14,7 @@
 
 当前 React 组件已支持通过 `value` / `defaultValue` 展示文档模型，普通文本输入、非折叠删除选区、Enter 分段、段首 Backspace 合并和段尾 Delete 合并会优先复用 command；组件会通过 `onTransaction` 暴露真实输入 transaction。演示页按钮命令和真实输入都会记录 history，并支持撤销、重做、Ctrl/Meta + Z、Ctrl/Meta + Shift + Z、Ctrl/Meta + Y、连续 typing 合并和 undoStack/redoStack 状态查看。
 
-text marks schema 当前支持 `bold`、`italic`、`underline` 和 `strike` 共存，四种 boolean mark 均已完成 command、renderer、demo 和 history 闭环。第 11 周 Day 1 已加入 `fontSize`、`textColor` 和 `backgroundColor` 属性 Mark，helper、校验、规范化、合并、operation 与 history 会保留合法属性，且属性可以与 boolean mark 共存；下一步进入第 11 周 Day 2「字号」。
+text marks schema 当前支持 `bold`、`italic`、`underline` 和 `strike` 共存，四种 boolean mark 均已完成 command、renderer、demo 和 history 闭环。第 11 周 Day 2 已完成字号闭环：`fontSize` 限制为 `8–72` 的整数，新增通用 `set_mark_attribute` operation、`setFontSize` command、安全像素渲染、中文字号选择器和浏览器验收；下一步进入 Day 3「文字颜色」。
 
 ## 技术栈
 

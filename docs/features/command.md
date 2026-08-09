@@ -1,6 +1,6 @@
 # Command 系统（第一版）
 
-Command 系统负责把“可执行的编辑意图”包装成统一接口。当前阶段提供注册、查询、可执行判断、按名称执行、状态读取，并内置加粗、斜体、下划线、删除线、文本插入、删除选区、分段和合并段落 command。
+Command 系统负责把“可执行的编辑意图”包装成统一接口。当前阶段提供注册、查询、可执行判断、按名称执行、状态读取，并内置加粗、斜体、下划线、删除线、字号、文本插入、删除选区、分段和合并段落 command。
 
 ## 当前范围
 
@@ -18,6 +18,7 @@ Command 系统负责把“可执行的编辑意图”包装成统一接口。当
 - 提供 `italicCommand`，支持同一 paragraph 内的 range selection 斜体/取消斜体，以及 collapsed selection 的后续输入斜体占位。
 - 提供 `underlineCommand`，支持同一 paragraph 内的 range selection 下划线/取消下划线，以及 collapsed selection 的后续输入下划线占位。
 - 提供 `strikeCommand`，支持同一 paragraph 内的 range selection 删除线/取消删除线，以及 collapsed selection 的后续输入删除线占位。
+- 提供 `setFontSizeCommand`，支持同一 paragraph 内设置或取消 `8–72px` 字号，以及 collapsed selection 的后续输入字号占位。
 - 提供 `createTextMarkCommand`、`canExecuteTextMarkCommand` 和 `isTextMarkCommandActive`，供文字格式命令复用。
 - 提供 `insertTextCommand`，支持 collapsed selection 插入文本，也支持同一 text 节点内的 range selection 替换文本。
 - 提供 `deleteSelectionCommand`，支持同一 text 节点内的 range selection 删除文本。
@@ -113,6 +114,14 @@ const STRIKE_COMMAND_NAME = "strike";
 
 const strikeCommand: Command;
 
+const SET_FONT_SIZE_COMMAND_NAME = "setFontSize";
+
+interface SetFontSizeCommandPayload {
+  fontSize: number | null;
+}
+
+const setFontSizeCommand: Command;
+
 function createTextMarkCommand(config: TextMarkCommandConfig): Command;
 
 function canExecuteTextMarkCommand(input: CommandInput): boolean;
@@ -158,6 +167,8 @@ const mergeBlockCommand: Command;
 - `italicCommand` 成功时返回包含 `toggle_mark` 的 transaction，并根据当前 selection 覆盖的 text marks 返回 active 状态。
 - `underlineCommand` 成功时返回包含 `toggle_mark` 的 transaction，并根据当前 selection 覆盖的 text marks 返回 active 状态。
 - `strikeCommand` 成功时返回包含 `toggle_mark` 的 transaction，并根据当前 selection 覆盖的 text marks 返回 active 状态。
+- `setFontSizeCommand` 接受 `{ fontSize: number | null }`，成功时返回包含 `set_mark_attribute` 的 transaction；`null` 表示取消字号。
+- 字号只接受 `8–72` 的整数，非法值、缺失 payload 或跨 paragraph 选区不可执行。
 - Mark command 在混合 selection 中统一添加目标 mark，全部激活时统一移除。
 - `insertTextCommand` 成功时返回包含 `insert_text` 的 transaction；range selection 下会先生成 `delete_text`，再生成 `insert_text`。
 - `deleteSelectionCommand` 成功时返回包含 `delete_text` 的 transaction。
@@ -168,7 +179,7 @@ const mergeBlockCommand: Command;
 - React 编辑器的 Enter 会优先复用 `splitBlockCommand`。
 - React 编辑器的段首 Backspace 会优先复用 `mergeBlockCommand`。
 - React 编辑器的段尾 Delete 会优先复用 `mergeBlockCommand` 合并下一段。
-- demo 操作区的“加粗”“斜体”“下划线”“删除线”“插入”“删除选区”“分段”和“合并段落”按钮会通过 `executeCommand` 调用 command。
+- demo 操作区的“加粗”“斜体”“下划线”“删除线”“插入”“删除选区”“分段”和“合并段落”按钮，以及字号选择器，都会通过 `executeCommand` 调用 command。
 - demo 操作区会通过 `queryCommandState` 展示 command 可用状态，并用 disabled 状态控制按钮；四个 mark 按钮通过 `aria-pressed` 同步 active 状态。
 
 ## 当前限制

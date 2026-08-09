@@ -30,6 +30,7 @@
 - `TextMarks` 支持 `fontSize`、`textColor` 和 `backgroundColor`，并可与四种 boolean mark 共存。
 - 属性 Mark 已接入基础值校验、helper、规范化、合并判断、编辑保留和 History 快照。
 - core 公共入口已导出属性类型、常量和 helper。
+- `fontSize` 已限制为 `8–72` 的整数，并完成 operation、Command、安全渲染、中文 demo 与 E2E 闭环。
 
 ## 自动化覆盖
 
@@ -42,6 +43,7 @@
 - `packages/core/tests/operation/insert-text.test.ts`
 - `packages/core/tests/operation/delete-text.test.ts`
 - `packages/core/tests/operation/toggle-mark.test.ts`
+- `packages/core/tests/operation/set-mark-attribute.test.ts`
 - `packages/core/tests/operation/split-block.test.ts`
 - `packages/core/tests/operation/merge-block.test.ts`
 - `packages/core/tests/command/bold.test.ts`
@@ -51,6 +53,7 @@
 - `packages/core/tests/command/mark-interaction.test.ts`
 - `packages/core/tests/command/shortcut.test.ts`
 - `packages/core/tests/command/integration.test.ts`
+- `packages/core/tests/command/font-size.test.ts`
 - `packages/core/tests/command/state.test.ts`
 - `packages/core/tests/render/render.test.ts`
 - `packages/core/tests/render/html.test.ts`
@@ -63,8 +66,8 @@
 - 暂未实现 React 组件内置 toolbar。
 - mark 快捷键尚未绑定编辑器键盘事件。
 - 暂未实现跨 paragraph 的 mark 应用策略。
-- 属性 Mark 尚未接入 command、renderer 和 demo 控件。
+- textColor 和 backgroundColor 尚未接入 command、renderer 和 demo 控件。
 
 ## 结论
 
-四种 boolean mark 已闭环，第 11 周 Day 1 属性 Mark 设计已通过模型验收，下一步实现字号闭环。
+四种 boolean mark 和字号已闭环，下一步实现文字颜色。

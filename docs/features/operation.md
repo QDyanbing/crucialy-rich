@@ -2,7 +2,7 @@
 
 Operation 用于描述一次对文档模型的可复现修改。Transaction 用于把多个 operation 按顺序组合为一次批量模型变更。
 
-当前阶段已经实现 `insert_text`、`delete_text`、`toggle_mark`、`split_block`、`merge_block` 和第一版 transaction。
+当前阶段已经实现 `insert_text`、`delete_text`、`toggle_mark`、`set_mark_attribute`、`split_block`、`merge_block` 和第一版 transaction。
 
 ## 操作类型
 
@@ -21,6 +21,13 @@ interface DeleteTextOperation {
 interface ToggleMarkOperation {
   type: "toggle_mark";
   mark: TextMarkType;
+  range: RangeSelection;
+}
+
+interface SetMarkAttributeOperation {
+  type: "set_mark_attribute";
+  attribute: TextMarkAttributeType;
+  value: number | string | null;
   range: RangeSelection;
 }
 
@@ -49,11 +56,12 @@ interface TransactionAcceptanceReport {
 
 字段说明：
 
-- `type`：当前支持 `insert_text`、`delete_text`、`toggle_mark`、`split_block` 和 `merge_block`。
+- `type`：当前支持 `insert_text`、`delete_text`、`toggle_mark`、`set_mark_attribute`、`split_block` 和 `merge_block`。
 - `point`：插入、分段或合并位置，必须指向 text 节点内的合法偏移。
 - `text`：要插入的文本。
 - `range`：删除范围当前必须落在同一个 text 节点内；mark 范围当前必须落在同一个 paragraph 内。
 - `mark`：要切换的 text mark，当前用于 `toggle_mark`。
+- `attribute` / `value`：要设置的属性 Mark 和新值；`null` 表示移除属性。
 - `operations`：transaction 中按顺序执行的 operation 列表。
 - `TransactionSummary`：transaction 的只读摘要，包含操作总数、操作类型顺序、文本操作数量和块级操作数量。
 - `TransactionAcceptanceReport`：transaction 闭环验收报告，包含执行前校验、执行后校验、事务摘要和失败错误。
@@ -92,6 +100,19 @@ interface TransactionAcceptanceReport {
 - 不会修改传入的原始文档对象。
 - 折叠 range 返回原文档引用。
 - range 任一点不指向 text 节点、offset 越界或跨 text 节点时抛出 `RangeError`。
+
+## 创建和应用属性 Mark 操作
+
+使用 `createSetMarkAttributeOperation(range, attribute, value)` 创建操作，使用 `applySetMarkAttribute(document, operation)` 返回更新后的新文档。
+
+当前规则：
+
+- range 必须落在同一个 paragraph 内，支持跨多个 text 节点和反向选区。
+- 非折叠 range 会按边界切分 text，只更新选中部分，并合并相邻同 marks 节点。
+- collapsed range 会创建带目标属性的空 text，后续输入可继承属性。
+- `value: null` 会移除目标属性，同时保留其他 mark。
+- 非法属性值、非法 point 或跨 paragraph range 会抛出 `RangeError`。
+- `createSelectionAfterSetMarkAttribute` 会在切分和合并后重新映射选区。
 
 ## 创建分段操作
 
@@ -143,6 +164,8 @@ interface TransactionAcceptanceReport {
 
 - `applyInsertText`
 - `applyDeleteText`
+- `applyToggleMark`
+- `applySetMarkAttribute`
 - `applySplitBlock`
 - `applyMergeBlock`
 
@@ -247,10 +270,10 @@ interface TransactionAcceptanceReport {
 
 ## 当前限制
 
-- 当前只实现 `insert_text`、同 text 节点内的 `delete_text`、同 paragraph 内的 `toggle_mark`、paragraph 级 `split_block` 和 `merge_block`。
+- 当前实现 `insert_text`、同 text 节点内的 `delete_text`、同 paragraph 内的 `toggle_mark` 和 `set_mark_attribute`、paragraph 级 `split_block` 和 `merge_block`。
 - 插入非折叠选区时不会自动删除选中内容，当前插入点取 selection anchor。
 - 删除暂不支持跨 text 节点或跨 paragraph 范围。
 - 合并暂不支持跨多段批量合并。
 - transaction 当前只负责批量应用和结束 normalize；History 已使用快照策略提供撤销/重做，operation 层本身暂不生成 undo/redo inverse 信息。
-- text operation 会保留现有 text marks；`toggle_mark` 已支持同 paragraph 内跨 text 切分与相邻同 marks 合并，跨 paragraph mark 范围留到后续阶段。
+- text operation 会保留现有 text marks；`toggle_mark` 和 `set_mark_attribute` 已支持同 paragraph 内跨 text 切分与相邻同 marks 合并，跨 paragraph mark 范围留到后续阶段。
 - 普通 `beforeinput insertText`、collapsed selection 下的 Backspace、collapsed selection 下的 Delete 和 collapsed selection 下的 Enter 已接入输入事件管线，并复用当前 operation/transaction 更新模型。
