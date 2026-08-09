@@ -22,6 +22,9 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.getTextMarkAttribute).toBe("function");
     expect(typeof core.hasTextMark).toBe("function");
     expect(typeof core.isValidTextMarkAttributeValue).toBe("function");
+    expect(core.MIN_FONT_SIZE).toBe(8);
+    expect(core.MAX_FONT_SIZE).toBe(72);
+    expect(typeof core.isValidFontSize).toBe("function");
     expect(typeof core.mergeAdjacentTextNodes).toBe("function");
     expect(typeof core.normalizeTextMarks).toBe("function");
     expect(typeof core.removeTextMark).toBe("function");

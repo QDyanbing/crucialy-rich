@@ -5,7 +5,9 @@ import {
   areTextMarksEqual,
   getTextMarkAttribute,
   hasTextMark,
+  isValidFontSize,
   isValidTextMarkAttributeValue,
+  MAX_FONT_SIZE,
   mergeAdjacentTextNodes,
   normalizeTextMarks,
   removeTextMarkAttribute,
@@ -13,6 +15,7 @@ import {
   setTextMarkAttribute,
   setTextMark,
   toggleTextMark,
+  MIN_FONT_SIZE,
   type TextNode,
 } from "../../src/model";
 
@@ -194,5 +197,26 @@ describe("text mark helpers", () => {
 
     expect(result).toEqual([{ type: "text", text: "你好", marks: { bold: true } }]);
     expect(result[0]).not.toBe(original);
+  });
+});
+
+describe("font size constraints", () => {
+  it("accepts the supported range boundaries", () => {
+    expect(isValidFontSize(MIN_FONT_SIZE)).toBe(true);
+    expect(isValidFontSize(MAX_FONT_SIZE)).toBe(true);
+  });
+
+  it("rejects out of range and fractional values", () => {
+    expect(isValidFontSize(MIN_FONT_SIZE - 1)).toBe(false);
+    expect(isValidFontSize(MAX_FONT_SIZE + 1)).toBe(false);
+    expect(isValidFontSize(16.5)).toBe(false);
+    expect(isValidFontSize(Number.NaN)).toBe(false);
+  });
+
+  it("drops unsupported font sizes during normalization", () => {
+    expect(normalizeTextMarks({ bold: true, fontSize: 7 })).toEqual({
+      bold: true,
+    });
+    expect(normalizeTextMarks({ fontSize: 73 })).toBeUndefined();
   });
 });
