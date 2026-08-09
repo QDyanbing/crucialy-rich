@@ -24,6 +24,7 @@ import {
   queryCommandState,
   redoHistory,
   recordHistory,
+  SET_FONT_SIZE_COMMAND_NAME,
   SPLIT_BLOCK_COMMAND_NAME,
   STRIKE_COMMAND_NAME,
   UNDERLINE_COMMAND_NAME,
@@ -79,6 +80,12 @@ interface DemoCommandState extends CommandState {
   label: string;
 }
 
+const FONT_SIZE_OPTIONS = [12, 14, 16, 18, 24, 32] as const;
+
+function parseFontSizeOption(value: string): number | null {
+  return value === "default" ? null : Number(value);
+}
+
 const modelExamples: ModelExample[] = [
   {
     id: "regular",
@@ -110,8 +117,11 @@ const modelExamples: ModelExample[] = [
         createText("，"),
         createText("删除线文本", { strike: true }),
         createText("，"),
+        createText("大号文本", { fontSize: 24 }),
+        createText("，"),
         createText("组合格式", {
           bold: true,
+          fontSize: 18,
           italic: true,
           strike: true,
           underline: true,
@@ -162,6 +172,7 @@ const demoCommandDescriptors: DemoCommandDescriptor[] = [
   { label: "斜体", name: ITALIC_COMMAND_NAME },
   { label: "下划线", name: UNDERLINE_COMMAND_NAME },
   { label: "删除线", name: STRIKE_COMMAND_NAME },
+  { label: "字号", name: SET_FONT_SIZE_COMMAND_NAME },
   { label: "删除选区", name: DELETE_SELECTION_COMMAND_NAME },
   { label: "分段", name: SPLIT_BLOCK_COMMAND_NAME },
   { label: "合并段落", name: MERGE_BLOCK_COMMAND_NAME },
@@ -466,6 +477,7 @@ function DemoApp() {
     getModelExample("regular").selection,
   );
   const [insertTextValue, setInsertTextValue] = useState("插入文本");
+  const [fontSizeValue, setFontSizeValue] = useState("18");
   const [lastTransaction, setLastTransaction] = useState<Transaction | null>(null);
   const [lastTransactionReport, setLastTransactionReport] =
     useState<TransactionAcceptanceReport | null>(null);
@@ -507,11 +519,15 @@ function DemoApp() {
               ? {
                   text: insertTextValue,
                 }
-              : undefined,
+              : command.name === SET_FONT_SIZE_COMMAND_NAME
+                ? {
+                    fontSize: parseFontSizeOption(fontSizeValue),
+                  }
+                : undefined,
         }),
         label: command.label,
       })),
-    [insertTextValue, modelSelection, normalizedDocument],
+    [fontSizeValue, insertTextValue, modelSelection, normalizedDocument],
   );
 
   function isCommandDisabled(name: CommandName) {
@@ -638,6 +654,23 @@ function DemoApp() {
         context: {
           document: normalizedDocument,
           selection: modelSelection,
+        },
+      }),
+    );
+  }
+
+  function handleFontSizeChange(event: ChangeEvent<HTMLSelectElement>) {
+    const nextValue = event.target.value;
+
+    setFontSizeValue(nextValue);
+    applyCommandResult(
+      executeCommand(demoCommandRegistry, SET_FONT_SIZE_COMMAND_NAME, {
+        context: {
+          document: normalizedDocument,
+          selection: modelSelection,
+        },
+        payload: {
+          fontSize: parseFontSizeOption(nextValue),
         },
       }),
     );
@@ -836,6 +869,22 @@ function DemoApp() {
             >
               删除线
             </button>
+            <label>
+              <span>字号</span>
+              <select
+                aria-label="字号"
+                disabled={isCommandDisabled(SET_FONT_SIZE_COMMAND_NAME)}
+                value={fontSizeValue}
+                onChange={handleFontSizeChange}
+              >
+                <option value="default">默认字号</option>
+                {FONT_SIZE_OPTIONS.map((fontSize) => (
+                  <option key={fontSize} value={fontSize}>
+                    {fontSize}px
+                  </option>
+                ))}
+              </select>
+            </label>
             <button
               type="button"
               disabled={isCommandDisabled(DELETE_SELECTION_COMMAND_NAME)}
