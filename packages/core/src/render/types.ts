@@ -3,6 +3,7 @@ import type { Path } from "../selection";
 export type RenderedTagName = "div" | "em" | "p" | "s" | "span" | "strong" | "u";
 
 export interface RenderedElementStyle {
+  fontSize?: `${number}px`;
   fontStyle?: "italic";
   textDecoration?: string;
 }

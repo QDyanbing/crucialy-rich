@@ -10,6 +10,7 @@ function escapeHtml(value: string): string {
 
 function renderStyle(node: RenderedElementNode): string | undefined {
   const declarations = [
+    node.style?.fontSize ? `font-size: ${node.style.fontSize};` : undefined,
     node.style?.fontStyle ? `font-style: ${node.style.fontStyle};` : undefined,
     node.style?.textDecoration
       ? `text-decoration: ${node.style.textDecoration};`

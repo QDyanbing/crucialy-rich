@@ -1,4 +1,5 @@
 import {
+  getTextMarkAttribute,
   hasTextMark,
   type DocumentNode,
   type ParagraphNode,
@@ -25,6 +26,7 @@ function createRenderedNode(
 
 function renderTextNode(node: TextNode, path: Path): RenderedElementNode {
   const bold = hasTextMark(node.marks, "bold");
+  const fontSize = getTextMarkAttribute(node.marks, "fontSize");
   const italic = hasTextMark(node.marks, "italic");
   const strike = hasTextMark(node.marks, "strike");
   const underline = hasTextMark(node.marks, "underline");
@@ -35,6 +37,7 @@ function renderTextNode(node: TextNode, path: Path): RenderedElementNode {
   const needsDecorationStyle =
     decorations.length > 0 && (bold || italic || decorations.length > 1);
   const style: RenderedElementStyle = {
+    ...(fontSize === undefined ? {} : { fontSize: `${fontSize}px` as const }),
     ...(bold && italic ? { fontStyle: "italic" } : {}),
     ...(needsDecorationStyle ? { textDecoration: decorations.join(" ") } : {}),
   };
