@@ -239,4 +239,82 @@ describe("set mark attribute operation", () => {
       "set mark attribute range must stay inside one paragraph",
     );
   });
+
+  it("sets and sanitizes text color while preserving other marks", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("颜色", {
+          bold: true,
+          fontSize: 18,
+        }),
+      ]),
+    ]);
+    const operation = createSetMarkAttributeOperation(
+      {
+        anchor: { path: [0, 0], offset: 0 },
+        focus: { path: [0, 0], offset: 2 },
+      },
+      "textColor",
+      "#0AF",
+    );
+
+    expect(applySetMarkAttribute(document, operation).children[0]?.children[0]).toEqual(
+      {
+        marks: {
+          bold: true,
+          fontSize: 18,
+          textColor: "#00aaff",
+        },
+        text: "颜色",
+        type: "text",
+      },
+    );
+  });
+
+  it("removes text color across sibling nodes", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("文", { bold: true, textColor: "#1677ff" }),
+        createText("字", { textColor: "#1677ff" }),
+      ]),
+    ]);
+    const operation = createSetMarkAttributeOperation(
+      {
+        anchor: { path: [0, 0], offset: 0 },
+        focus: { path: [0, 1], offset: 1 },
+      },
+      "textColor",
+      null,
+    );
+
+    expect(applySetMarkAttribute(document, operation).children[0]?.children).toEqual([
+      { marks: { bold: true }, text: "文", type: "text" },
+      { text: "字", type: "text" },
+    ]);
+  });
+
+  it("rejects unsafe text color operations", () => {
+    const range = {
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 2 },
+    };
+    const document = createDocument([createParagraph([createText("颜色")])]);
+    const unsafeOperation: SetMarkAttributeOperation<"textColor"> = {
+      attribute: "textColor",
+      range,
+      type: "set_mark_attribute",
+      value: "#fff; display: none",
+    };
+
+    expect(() =>
+      createSetMarkAttributeOperation(range, "textColor", "rgb(0, 0, 0)"),
+    ).toThrow("invalid textColor mark value");
+    expect(() => applySetMarkAttribute(document, unsafeOperation)).toThrow(
+      "invalid textColor mark value",
+    );
+    expect(document.children[0]?.children[0]).toEqual({
+      text: "颜色",
+      type: "text",
+    });
+  });
 });
