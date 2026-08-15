@@ -75,6 +75,18 @@ describe("@crucialy-rich/react public API", () => {
     expect(html).toContain('style="font-size:18px"');
   });
 
+  it("renders a safe text color through React", () => {
+    const document = createDocument([
+      createParagraph([createText("Colored", { textColor: "#1677ff" })]),
+    ]);
+
+    const html = renderToStaticMarkup(
+      createElement(RichTextEditor, { value: document }),
+    );
+
+    expect(html).toContain('style="color:#1677ff"');
+  });
+
   it("marks editable renders as not readonly", () => {
     const html = renderToStaticMarkup(
       createElement(RichTextEditor, {

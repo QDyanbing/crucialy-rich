@@ -131,4 +131,32 @@ describe("renderNodeToHtml", () => {
       '<strong data-crucialy-path="[0,0]" style="font-size: 24px; font-style: italic; text-decoration: underline;">Combined</strong>',
     );
   });
+
+  it("serializes a safe text color", () => {
+    const document = createDocument([
+      createParagraph([createText("Colored", { textColor: "#0AF" })]),
+    ]);
+
+    expect(renderNodeToHtml(renderDocument(document))).toContain(
+      '<span data-crucialy-path="[0,0]" style="color: #00aaff;">Colored</span>',
+    );
+  });
+
+  it("serializes text color with font size and boolean mark styles", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("Combined", {
+          bold: true,
+          fontSize: 24,
+          italic: true,
+          textColor: "#1677ff",
+          underline: true,
+        }),
+      ]),
+    ]);
+
+    expect(renderNodeToHtml(renderDocument(document))).toContain(
+      '<strong data-crucialy-path="[0,0]" style="color: #1677ff; font-size: 24px; font-style: italic; text-decoration: underline;">Combined</strong>',
+    );
+  });
 });

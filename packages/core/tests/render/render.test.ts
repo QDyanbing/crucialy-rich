@@ -277,4 +277,51 @@ describe("renderDocument", () => {
       renderDocument(document).children?.[0]?.children?.[0]?.style,
     ).toBeUndefined();
   });
+
+  it("renders a safe text color", () => {
+    const document = createDocument([
+      createParagraph([createText("Colored", { textColor: "#0AF" })]),
+    ]);
+
+    expect(renderDocument(document).children?.[0]?.children?.[0]).toEqual({
+      attributes: {
+        [MODEL_PATH_ATTRIBUTE]: "[0,0]",
+      },
+      path: [0, 0],
+      style: { color: "#00aaff" },
+      tagName: "span",
+      text: "Colored",
+    });
+  });
+
+  it("combines text color with font size and boolean marks", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("Combined", {
+          bold: true,
+          fontSize: 24,
+          italic: true,
+          textColor: "#1677ff",
+          underline: true,
+        }),
+      ]),
+    ]);
+
+    expect(renderDocument(document).children?.[0]?.children?.[0]?.style).toEqual({
+      color: "#1677ff",
+      fontSize: "24px",
+      fontStyle: "italic",
+      textDecoration: "underline",
+    });
+  });
+
+  it("does not render an unsafe text color", () => {
+    const document = createDocument([
+      createParagraph([createText("Unsafe", { textColor: "red" })]),
+    ]);
+
+    expect(
+      renderDocument(document).children?.[0]?.children?.[0]?.style,
+    ).toBeUndefined();
+  });
 });
