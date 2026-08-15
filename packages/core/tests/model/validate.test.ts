@@ -133,7 +133,7 @@ describe("validateDocument", () => {
         },
         {
           path: [0, 0],
-          message: "text mark textColor 的值必须是非空字符串",
+          message: "text mark textColor 的值必须是 #RGB 或 #RRGGBB 十六进制颜色",
         },
       ],
     });

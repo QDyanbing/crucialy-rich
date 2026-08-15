@@ -55,6 +55,7 @@ export function isValidTextMarkAttributeValue<TAttribute extends TextMarkAttribu
     case "fontSize":
       return isValidFontSize(value);
     case "textColor":
+      return sanitizeHexColor(value) !== undefined;
     case "backgroundColor":
       return typeof value === "string" && value.trim().length > 0;
   }
@@ -77,8 +78,10 @@ export function normalizeTextMarks(value: unknown): TextMarks | undefined {
     marks.fontSize = value.fontSize;
   }
 
-  if (isValidTextMarkAttributeValue("textColor", value.textColor)) {
-    marks.textColor = value.textColor;
+  const textColor = sanitizeHexColor(value.textColor);
+
+  if (textColor !== undefined) {
+    marks.textColor = textColor;
   }
 
   if (isValidTextMarkAttributeValue("backgroundColor", value.backgroundColor)) {
@@ -157,12 +160,16 @@ export function areTextMarksEqual(
   left: TextMarks | undefined,
   right: TextMarks | undefined,
 ): boolean {
+  const normalizedLeft = normalizeTextMarks(left);
+  const normalizedRight = normalizeTextMarks(right);
+
   return (
     TEXT_MARK_TYPES.every(
-      (mark) => hasTextMark(left, mark) === hasTextMark(right, mark),
+      (mark) =>
+        hasTextMark(normalizedLeft, mark) === hasTextMark(normalizedRight, mark),
     ) &&
     TEXT_MARK_ATTRIBUTE_TYPES.every(
-      (attribute) => left?.[attribute] === right?.[attribute],
+      (attribute) => normalizedLeft?.[attribute] === normalizedRight?.[attribute],
     )
   );
 }
