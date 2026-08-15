@@ -128,6 +128,27 @@ describe("normalizeDocument", () => {
     expect(validateDocument(result).valid).toBe(true);
   });
 
+  it("normalizes safe text colors and removes unsafe colors", () => {
+    const result = normalizeDocument({
+      type: "document",
+      children: [
+        {
+          type: "paragraph",
+          children: [
+            { type: "text", text: "安全", marks: { textColor: "#0AF" } },
+            { type: "text", text: "非法", marks: { textColor: "red" } },
+          ],
+        },
+      ],
+    });
+
+    expect(result.children[0]?.children).toEqual([
+      { marks: { textColor: "#00aaff" }, text: "安全", type: "text" },
+      { text: "非法", type: "text" },
+    ]);
+    expect(validateDocument(result).valid).toBe(true);
+  });
+
   it("merges adjacent text nodes with equal marks", () => {
     const result = normalizeDocument({
       type: "document",

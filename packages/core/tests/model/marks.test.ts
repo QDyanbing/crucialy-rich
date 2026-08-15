@@ -245,3 +245,48 @@ describe("hex color sanitization", () => {
     expect(sanitizeHexColor(input)).toBeUndefined();
   });
 });
+
+describe("text color model rules", () => {
+  it("normalizes text colors while preserving other marks", () => {
+    expect(
+      normalizeTextMarks({
+        bold: true,
+        fontSize: 18,
+        textColor: "  #0AF  ",
+      }),
+    ).toEqual({
+      bold: true,
+      fontSize: 18,
+      textColor: "#00aaff",
+    });
+  });
+
+  it("drops unsafe text colors", () => {
+    expect(normalizeTextMarks({ textColor: "red" })).toBeUndefined();
+    expect(
+      normalizeTextMarks({ bold: true, textColor: "#fff; display: none" }),
+    ).toEqual({ bold: true });
+  });
+
+  it("sanitizes text colors through attribute helpers", () => {
+    const marks = setTextMarkAttribute({ italic: true }, "textColor", "#ABC");
+
+    expect(marks).toEqual({ italic: true, textColor: "#aabbcc" });
+    expect(getTextMarkAttribute(marks, "textColor")).toBe("#aabbcc");
+  });
+
+  it("compares canonical text colors when merging nodes", () => {
+    expect(
+      areTextMarksEqual(
+        { bold: true, textColor: "#fff" },
+        { bold: true, textColor: "#FFFFFF" },
+      ),
+    ).toBe(true);
+    expect(
+      mergeAdjacentTextNodes([
+        { marks: { textColor: "#fff" }, text: "文", type: "text" },
+        { marks: { textColor: "#FFFFFF" }, text: "字", type: "text" },
+      ]),
+    ).toEqual([{ marks: { textColor: "#ffffff" }, text: "文字", type: "text" }]);
+  });
+});

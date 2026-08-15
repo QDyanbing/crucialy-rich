@@ -139,6 +139,34 @@ describe("validateDocument", () => {
     });
   });
 
+  it("rejects unsafe text color strings", () => {
+    const result = validateDocument({
+      children: [
+        {
+          children: [
+            {
+              marks: { textColor: "rgb(0, 0, 0)" },
+              text: "unsafe",
+              type: "text",
+            },
+          ],
+          type: "paragraph",
+        },
+      ],
+      type: "document",
+    });
+
+    expect(result).toEqual({
+      errors: [
+        {
+          message: "text mark textColor 的值必须是 #RGB 或 #RRGGBB 十六进制颜色",
+          path: [0, 0],
+        },
+      ],
+      valid: false,
+    });
+  });
+
   it("rejects non-object text marks", () => {
     const result = validateDocument({
       type: "document",
