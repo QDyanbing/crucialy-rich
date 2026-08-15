@@ -235,11 +235,14 @@ test("completes the underline and strike acceptance loop", async ({ page }) => {
 
   await expect(renderedDocument).toContainText("下划线文本");
   await expect(renderedDocument).toContainText("删除线文本");
-  await expect(
-    renderedDocument.locator('[data-crucialy-path="[0,11]"]'),
-  ).toHaveAttribute(
-    "style",
-    "font-size: 18px; font-style: italic; text-decoration: underline line-through;",
+  const combinedText = renderedDocument.locator('[data-crucialy-path="[0,11]"]');
+
+  await expect(combinedText).toHaveCSS("color", "rgb(212, 56, 13)");
+  await expect(combinedText).toHaveCSS("font-size", "18px");
+  await expect(combinedText).toHaveCSS("font-style", "italic");
+  await expect(combinedText).toHaveCSS(
+    "text-decoration-line",
+    "underline line-through",
   );
   await expect(underlineButton).toHaveAttribute("aria-pressed", "false");
   await expect(strikeButton).toHaveAttribute("aria-pressed", "false");
@@ -276,10 +279,10 @@ test("sets and cancels font size from the demo control", async ({ page }) => {
   const acceptanceParagraph = renderedDocument.locator("p").nth(1);
   const fontSizeSelect = page.getByLabel("字号", { exact: true });
 
-  await expect(renderedDocument).toContainText("大号文本");
-  await expect(
-    renderedDocument.locator('[data-crucialy-path="[0,9]"]'),
-  ).toHaveAttribute("style", "font-size: 24px;");
+  await expect(renderedDocument).toContainText("彩色大号文本");
+  const coloredSizedText = renderedDocument.locator('[data-crucialy-path="[0,9]"]');
+  await expect(coloredSizedText).toHaveCSS("color", "rgb(22, 119, 255)");
+  await expect(coloredSizedText).toHaveCSS("font-size", "24px");
   await expect(page.getByLabel("字号 Command 状态")).toContainText("可用");
 
   await fontSizeSelect.selectOption("24");
@@ -300,6 +303,40 @@ test("sets and cancels font size from the demo control", async ({ page }) => {
   await fontSizeSelect.selectOption("default");
 
   await expect(acceptanceParagraph.locator('[style*="font-size"]')).toHaveCount(0);
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"value": null',
+  );
+});
+
+test("sets and cancels text color from the demo control", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("marks");
+
+  const acceptanceParagraph = page.getByLabel("已渲染文档").locator("p").nth(1);
+  const textColorInput = page.getByLabel("文字颜色", { exact: true });
+
+  await expect(page.getByLabel("文字颜色 Command 状态")).toContainText("可用");
+
+  await textColorInput.fill("#52c41a");
+
+  await expect(acceptanceParagraph.locator('[style*="color"]')).toHaveCount(5);
+  await expect(acceptanceParagraph.locator("span").first()).toHaveCSS(
+    "color",
+    "rgb(82, 196, 26)",
+  );
+  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
+    '"textColor": "#52c41a"',
+  );
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"attribute": "textColor"',
+  );
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"value": "#52c41a"',
+  );
+
+  await page.getByRole("button", { name: "取消文字颜色" }).click();
+
+  await expect(acceptanceParagraph.locator('[style*="color"]')).toHaveCount(0);
   await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
     '"value": null',
   );
