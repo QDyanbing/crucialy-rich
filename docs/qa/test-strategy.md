@@ -11,18 +11,19 @@
   - 文档模型类型、创建、类型判断、校验和规范化。
   - Bold/Italic/Underline/Strike boolean marks 与 fontSize/textColor/backgroundColor 属性 Mark 的类型、helper、校验、规范化、合并、operation 保留和 history 快照保留。
   - 字号 `8–72` 边界、属性 operation、`setFontSize` command、取消字号、安全 HTML/React 渲染和 selection 映射。
+  - 十六进制颜色 sanitize、`setTextColor` command、取消文字颜色、字号与 boolean mark 组合、安全 HTML/React 渲染和 selection 映射。
   - Path、Point、RangeSelection、段落 text offset 和文本切片工具。
-  - 基础渲染器、四种 boolean mark 与字号 HTML 输出、组合样式、HTML 序列化、DOM 与模型位置映射和选区同步。
+  - 基础渲染器、四种 boolean mark、字号与文字颜色 HTML 输出、组合样式、HTML 序列化、DOM 与模型位置映射和选区同步。
   - React 组件 `value`、`defaultValue`、`onChange` 和 `onTransaction` 初始渲染契约。
   - 输入 helper 的普通文本输入、Backspace、Delete 和 Enter transaction。
-  - Command 注册、执行、可执行判断、默认注册表、状态矩阵、四种 boolean mark command、`setFontSize`、mark 快捷键配置与匹配、文本编辑 command 和 block 编辑 command。
+  - Command 注册、执行、可执行判断、默认注册表、状态矩阵、四种 boolean mark command、`setFontSize`、`setTextColor`、mark 快捷键配置与匹配、文本编辑 command 和 block 编辑 command。
   - History 快照、entry 克隆、状态工厂、记录入口、batch 合并、查询 helper、undo/redo 栈转换、快捷键识别和 history command。
 - 命令：`pnpm test`。
 
 ## 浏览器测试
 
 - 工具：Playwright。
-- 范围：演示页面可打开，文档 JSON 面板、React 组件示例、渲染边界示例、选区调试面板、浏览器选区同步、基础编辑闭环、Bold/Italic/Underline/Strike 按钮、字号设置与取消、混合样例与组合切换、command 状态面板、真实输入 history、连续 typing 合并和撤销重做可验证。
+- 范围：演示页面可打开，文档 JSON 面板、React 组件示例、渲染边界示例、选区调试面板、浏览器选区同步、基础编辑闭环、Bold/Italic/Underline/Strike 按钮、字号与文字颜色设置/取消、混合样例与组合切换、command 状态面板、真实输入 history、连续 typing 合并和撤销重做可验证。
 - 命令：`pnpm test:e2e`。
 
 ## 类型检查

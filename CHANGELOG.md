@@ -62,6 +62,10 @@
 - 新增 `8–72` 整数字号约束、通用 `set_mark_attribute` operation 和 selection 映射。
 - 新增 `setFontSizeCommand`，支持选区设置、覆盖、取消字号和 collapsed 输入继承。
 - 新增安全字号 renderer、HTML/React 渲染测试、中文 demo 字号选择器和 Playwright 设置/取消验收。
+- 新增 `sanitizeHexColor`，只接受 `#RGB` / `#RRGGBB` 并输出小写六位十六进制颜色。
+- 新增 `setTextColorCommand`，支持选区设置、规范化、取消文字颜色和 collapsed 输入继承。
+- 新增安全文字颜色 renderer、HTML/React 渲染测试、中文 demo 颜色控件和 Playwright 设置/取消验收。
+- 新增字号、文字颜色和 boolean mark 连续应用与独立取消的组合回归测试。
 
 ### 变更
 
@@ -93,6 +97,7 @@
 - 修正 React 渲染组合 mark 时错误传入 HTML style 字符串的问题，并整理 Demo 操作按钮布局与段落合并测试预期。
 - 更新 README、架构、文字标记、测试策略和项目进度，使其匹配第 11 周 Day 1 属性 Mark 设计范围。
 - 更新项目、包、Operation、Command、渲染和 QA 文档，使其匹配第 11 周 Day 2 字号闭环。
+- 更新项目、包、文字属性、Command、渲染和 QA 文档，使其匹配第 11 周 Day 3 文字颜色闭环。
 
 ### 暂未包含
 
