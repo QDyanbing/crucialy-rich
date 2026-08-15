@@ -25,6 +25,7 @@ import {
   redoHistory,
   recordHistory,
   SET_FONT_SIZE_COMMAND_NAME,
+  SET_TEXT_COLOR_COMMAND_NAME,
   SPLIT_BLOCK_COMMAND_NAME,
   STRIKE_COMMAND_NAME,
   UNDERLINE_COMMAND_NAME,
@@ -117,13 +118,17 @@ const modelExamples: ModelExample[] = [
         createText("，"),
         createText("删除线文本", { strike: true }),
         createText("，"),
-        createText("大号文本", { fontSize: 24 }),
+        createText("彩色大号文本", {
+          fontSize: 24,
+          textColor: "#1677ff",
+        }),
         createText("，"),
         createText("组合格式", {
           bold: true,
           fontSize: 18,
           italic: true,
           strike: true,
+          textColor: "#d4380d",
           underline: true,
         }),
         createText("。"),
@@ -173,6 +178,7 @@ const demoCommandDescriptors: DemoCommandDescriptor[] = [
   { label: "下划线", name: UNDERLINE_COMMAND_NAME },
   { label: "删除线", name: STRIKE_COMMAND_NAME },
   { label: "字号", name: SET_FONT_SIZE_COMMAND_NAME },
+  { label: "文字颜色", name: SET_TEXT_COLOR_COMMAND_NAME },
   { label: "删除选区", name: DELETE_SELECTION_COMMAND_NAME },
   { label: "分段", name: SPLIT_BLOCK_COMMAND_NAME },
   { label: "合并段落", name: MERGE_BLOCK_COMMAND_NAME },
@@ -478,6 +484,7 @@ function DemoApp() {
   );
   const [insertTextValue, setInsertTextValue] = useState("插入文本");
   const [fontSizeValue, setFontSizeValue] = useState("18");
+  const [textColorValue, setTextColorValue] = useState("#1677ff");
   const [lastTransaction, setLastTransaction] = useState<Transaction | null>(null);
   const [lastTransactionReport, setLastTransactionReport] =
     useState<TransactionAcceptanceReport | null>(null);
@@ -523,11 +530,21 @@ function DemoApp() {
                 ? {
                     fontSize: parseFontSizeOption(fontSizeValue),
                   }
-                : undefined,
+                : command.name === SET_TEXT_COLOR_COMMAND_NAME
+                  ? {
+                      textColor: textColorValue,
+                    }
+                  : undefined,
         }),
         label: command.label,
       })),
-    [fontSizeValue, insertTextValue, modelSelection, normalizedDocument],
+    [
+      fontSizeValue,
+      insertTextValue,
+      modelSelection,
+      normalizedDocument,
+      textColorValue,
+    ],
   );
 
   function isCommandDisabled(name: CommandName) {
@@ -676,6 +693,29 @@ function DemoApp() {
     );
   }
 
+  function applyTextColor(textColor: string | null) {
+    applyCommandResult(
+      executeCommand(demoCommandRegistry, SET_TEXT_COLOR_COMMAND_NAME, {
+        context: {
+          document: normalizedDocument,
+          selection: modelSelection,
+        },
+        payload: { textColor },
+      }),
+    );
+  }
+
+  function handleTextColorChange(event: ChangeEvent<HTMLInputElement>) {
+    const nextValue = event.target.value;
+
+    setTextColorValue(nextValue);
+    applyTextColor(nextValue);
+  }
+
+  function handleClearTextColor() {
+    applyTextColor(null);
+  }
+
   function handleDeleteText() {
     applyCommandResult(
       executeCommand(demoCommandRegistry, DELETE_SELECTION_COMMAND_NAME, {
@@ -816,6 +856,23 @@ function DemoApp() {
                 ))}
               </select>
             </label>
+            <label className="color-control">
+              <span>文字颜色</span>
+              <input
+                aria-label="文字颜色"
+                disabled={isCommandDisabled(SET_TEXT_COLOR_COMMAND_NAME)}
+                type="color"
+                value={textColorValue}
+                onChange={handleTextColorChange}
+              />
+            </label>
+            <button
+              type="button"
+              disabled={isCommandDisabled(SET_TEXT_COLOR_COMMAND_NAME)}
+              onClick={handleClearTextColor}
+            >
+              取消文字颜色
+            </button>
             <button type="button" onClick={handleNormalize}>
               规范化
             </button>
