@@ -13,6 +13,12 @@ export {
 } from "./font-size";
 export type { SetFontSizeCommandPayload } from "./font-size";
 export {
+  canExecuteSetTextColorCommand,
+  SET_TEXT_COLOR_COMMAND_NAME,
+  setTextColorCommand,
+} from "./text-color";
+export type { SetTextColorCommandPayload } from "./text-color";
+export {
   BOLD_COMMAND_NAME,
   BOOLEAN_MARK_COMMANDS,
   ITALIC_COMMAND_NAME,

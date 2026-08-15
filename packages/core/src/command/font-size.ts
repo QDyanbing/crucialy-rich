@@ -1,12 +1,9 @@
 import { isValidFontSize } from "../model";
 import {
-  createSelectionAfterSetMarkAttribute,
-  createSetMarkAttributeOperation,
-  createTransaction,
-} from "../operation";
-import { normalizeRange } from "../selection";
-import { canExecuteTextMarkCommand } from "./mark";
-import { createCommandSkipped, createCommandSuccess } from "./result";
+  canExecuteTextMarkAttributeCommand,
+  createTextMarkAttributeCommand,
+  type TextMarkAttributeCommandConfig,
+} from "./attribute";
 import type { Command, CommandInput } from "./types";
 
 export const SET_FONT_SIZE_COMMAND_NAME = "setFontSize";
@@ -15,9 +12,7 @@ export interface SetFontSizeCommandPayload {
   fontSize: number | null;
 }
 
-function getFontSizePayload(
-  input: CommandInput,
-): SetFontSizeCommandPayload | undefined {
+function getFontSizeValue(input: CommandInput): number | null | undefined {
   if (
     typeof input.payload !== "object" ||
     input.payload === null ||
@@ -28,39 +23,21 @@ function getFontSizePayload(
 
   const fontSize = input.payload.fontSize;
 
-  return fontSize === null || isValidFontSize(fontSize) ? { fontSize } : undefined;
+  return fontSize === null || isValidFontSize(fontSize) ? fontSize : undefined;
 }
 
+const SET_FONT_SIZE_COMMAND_CONFIG: TextMarkAttributeCommandConfig<"fontSize"> = {
+  attribute: "fontSize",
+  commandName: SET_FONT_SIZE_COMMAND_NAME,
+  invalidReason: "Set font size command requires a valid size and text selection.",
+  resolveValue: getFontSizeValue,
+};
+
 export function canExecuteSetFontSizeCommand(input: CommandInput): boolean {
-  return canExecuteTextMarkCommand(input) && getFontSizePayload(input) !== undefined;
+  return canExecuteTextMarkAttributeCommand(input, SET_FONT_SIZE_COMMAND_CONFIG);
 }
 
 export const setFontSizeCommand: Command = {
+  ...createTextMarkAttributeCommand(SET_FONT_SIZE_COMMAND_CONFIG),
   canExecute: canExecuteSetFontSizeCommand,
-  execute(input) {
-    const payload = getFontSizePayload(input);
-    const selection = input.context.selection;
-
-    if (!selection || !payload || !canExecuteTextMarkCommand(input)) {
-      return createCommandSkipped(
-        SET_FONT_SIZE_COMMAND_NAME,
-        "Set font size command requires a valid size and text selection.",
-      );
-    }
-
-    const operation = createSetMarkAttributeOperation(
-      normalizeRange(selection),
-      "fontSize",
-      payload.fontSize,
-    );
-
-    return createCommandSuccess(SET_FONT_SIZE_COMMAND_NAME, {
-      selection: createSelectionAfterSetMarkAttribute(
-        input.context.document,
-        operation,
-      ),
-      transaction: createTransaction([operation]),
-    });
-  },
-  name: SET_FONT_SIZE_COMMAND_NAME,
 };

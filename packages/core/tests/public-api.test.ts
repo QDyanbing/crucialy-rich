@@ -158,6 +158,7 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.SPLIT_BLOCK_COMMAND_NAME).toBe("string");
     expect(typeof core.STRIKE_COMMAND_NAME).toBe("string");
     expect(typeof core.SET_FONT_SIZE_COMMAND_NAME).toBe("string");
+    expect(typeof core.SET_TEXT_COLOR_COMMAND_NAME).toBe("string");
     expect(typeof core.UNDERLINE_COMMAND_NAME).toBe("string");
     expect(typeof core.canExecuteBoldCommand).toBe("function");
     expect(typeof core.canExecuteCommand).toBe("function");
@@ -168,6 +169,7 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.canExecuteSplitBlockCommand).toBe("function");
     expect(typeof core.canExecuteStrikeCommand).toBe("function");
     expect(typeof core.canExecuteSetFontSizeCommand).toBe("function");
+    expect(typeof core.canExecuteSetTextColorCommand).toBe("function");
     expect(typeof core.canExecuteTextMarkCommand).toBe("function");
     expect(typeof core.canExecuteUnderlineCommand).toBe("function");
     expect(typeof core.createCommandFailure).toBe("function");
@@ -182,6 +184,7 @@ describe("@crucialy-rich/core public API", () => {
       "underline",
       "strike",
       "setFontSize",
+      "setTextColor",
       "deleteSelection",
       "insertText",
       "mergeBlock",
@@ -204,6 +207,7 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.splitBlockCommand).toBe("object");
     expect(typeof core.strikeCommand).toBe("object");
     expect(typeof core.setFontSizeCommand).toBe("object");
+    expect(typeof core.setTextColorCommand).toBe("object");
     expect(typeof core.underlineCommand).toBe("object");
   });
 });
