@@ -3,10 +3,14 @@ import { describe, expect, it } from "vitest";
 import {
   applyTransaction,
   canExecuteSetTextColorCommand,
+  createDefaultCommandRegistry,
   createDocument,
   createParagraph,
   createText,
+  executeCommand,
   insertTextCommand,
+  queryCommandState,
+  SET_TEXT_COLOR_COMMAND_NAME,
   setTextColorCommand,
 } from "../../src";
 
@@ -126,5 +130,113 @@ describe("setTextColorCommand", () => {
       { marks: { textColor: "#1677ff" }, text: "蓝", type: "text" },
       { text: "世界", type: "text" },
     ]);
+  });
+
+  it("cancels text color while preserving other marks", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("取消颜色", {
+          bold: true,
+          fontSize: 18,
+          textColor: "#1677ff",
+        }),
+      ]),
+    ]);
+    const result = setTextColorCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [0, 0], offset: 4 },
+        },
+      },
+      payload: { textColor: null },
+    });
+
+    expect(result.ok).toBe(true);
+    expect(
+      applyTransaction(document, result.transaction!).children[0]?.children[0],
+    ).toEqual({
+      marks: { bold: true, fontSize: 18 },
+      text: "取消颜色",
+      type: "text",
+    });
+  });
+
+  it.each([
+    { textColor: "red" },
+    { textColor: "#abcd" },
+    { textColor: "rgb(22, 119, 255)" },
+    { textColor: "#fff; display: none" },
+    {},
+  ])("skips an unsafe payload: $textColor", (payload) => {
+    const document = createDocument([createParagraph([createText("颜色")])]);
+    const input = {
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [0, 0], offset: 2 },
+        },
+      },
+      payload,
+    };
+
+    expect(canExecuteSetTextColorCommand(input)).toBe(false);
+    expect(setTextColorCommand.execute(input)).toEqual({
+      commandName: SET_TEXT_COLOR_COMMAND_NAME,
+      ok: false,
+      reason: "Set text color command requires a safe color and text selection.",
+      status: "skipped",
+    });
+  });
+
+  it("skips a selection that crosses paragraphs", () => {
+    const document = createDocument([
+      createParagraph([createText("第一段")]),
+      createParagraph([createText("第二段")]),
+    ]);
+    const input = {
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [1, 0], offset: 1 },
+        },
+      },
+      payload: { textColor: "#1677ff" },
+    };
+
+    expect(canExecuteSetTextColorCommand(input)).toBe(false);
+    expect(setTextColorCommand.execute(input).status).toBe("skipped");
+  });
+
+  it("executes through the default command registry", () => {
+    const registry = createDefaultCommandRegistry();
+    const document = createDocument([createParagraph([createText("颜色")])]);
+    const input = {
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [0, 0], offset: 2 },
+        },
+      },
+      payload: { textColor: "#1677ff" },
+    };
+
+    expect(queryCommandState(registry, SET_TEXT_COLOR_COMMAND_NAME, input)).toEqual({
+      active: false,
+      commandName: SET_TEXT_COLOR_COMMAND_NAME,
+      disabled: false,
+      registered: true,
+    });
+    expect(executeCommand(registry, SET_TEXT_COLOR_COMMAND_NAME, input).ok).toBe(true);
+    expect(
+      queryCommandState(registry, SET_TEXT_COLOR_COMMAND_NAME, {
+        ...input,
+        payload: { textColor: "blue" },
+      }).disabled,
+    ).toBe(true);
   });
 });
