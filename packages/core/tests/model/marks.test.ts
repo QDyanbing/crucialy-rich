@@ -12,6 +12,7 @@ import {
   normalizeTextMarks,
   removeTextMarkAttribute,
   removeTextMark,
+  sanitizeHexColor,
   setTextMarkAttribute,
   setTextMark,
   toggleTextMark,
@@ -218,5 +219,29 @@ describe("font size constraints", () => {
       bold: true,
     });
     expect(normalizeTextMarks({ fontSize: 73 })).toBeUndefined();
+  });
+});
+
+describe("hex color sanitization", () => {
+  it.each([
+    ["#1677ff", "#1677ff"],
+    ["#ABC", "#aabbcc"],
+    ["  #F5F5F5  ", "#f5f5f5"],
+  ])("normalizes %s to %s", (input, expected) => {
+    expect(sanitizeHexColor(input)).toBe(expected);
+  });
+
+  it.each([
+    "red",
+    "1677ff",
+    "#abcd",
+    "#12345678",
+    "rgb(22, 119, 255)",
+    "#fff; color: red",
+    "",
+    123,
+    null,
+  ])("rejects unsafe color value %s", (input) => {
+    expect(sanitizeHexColor(input)).toBeUndefined();
   });
 });
