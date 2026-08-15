@@ -1,6 +1,6 @@
 # 文字标记模型
 
-文字标记用于描述 text 节点上的内联格式。第 9 周 Bold 和 Italic 已闭环；第 10 周已完成 boolean mark 叠加规则、Underline 和 Strike；第 11 周 Day 1 已加入字号、文字颜色和背景颜色的属性 Mark 模型。属性设计详见[文字属性 Mark](./text-style.md)。
+文字标记用于描述 text 节点上的内联格式。第 9 周 Bold 和 Italic 已闭环；第 10 周已完成 boolean mark 叠加规则、Underline 和 Strike；第 11 周已完成属性 Mark 模型、字号和文字颜色闭环。属性设计详见[文字属性 Mark](./text-style.md)。
 
 ## 数据结构
 
@@ -65,6 +65,7 @@ boolean mark 只记录启用状态，值固定为 `true`；属性 Mark 记录具
 - `marks` 必须是普通对象。
 - boolean key 只能是 `bold`、`italic`、`underline` 或 `strike`，value 必须是 `true`。
 - 属性 key 只能是 `fontSize`、`textColor` 或 `backgroundColor`，value 必须满足对应的基础约束。
+- `textColor` 仅接受 `#RGB` / `#RRGGBB`，规范化后统一存储为小写六位十六进制。
 
 `normalizeDocument` 会保留合法 mark，丢弃未知 mark、非 `true` mark 和空 mark 集合，并合并相邻同 marks 的 text 节点。规范化后的文档仍能通过 `validateDocument`。
 
@@ -205,4 +206,4 @@ Demo 的“文字标记”样例覆盖普通、加粗、斜体、下划线、删
 - 暂未实现编辑器内置 toolbar；当前只有 demo 操作区按钮。
 - 快捷键当前只提供映射与查询，不包含编辑器事件绑定。
 - 暂未实现跨 paragraph 的 mark 应用策略。
-- 属性 Mark 当前只有数据模型，尚未接入命令、renderer 和 demo 控件。
+- backgroundColor 当前只有数据模型，尚未接入命令、renderer 和 demo 控件。

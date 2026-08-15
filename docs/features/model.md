@@ -33,7 +33,7 @@ interface DocumentNode {
 
 `BlockNode` 现在等价于 `ParagraphNode`，后续加入 heading、quote、list 等块级节点时再扩展联合类型。
 
-`TextNode.marks` 当前支持 `bold`、`italic`、`underline` 和 `strike` 四个 boolean 标记，以及 `fontSize`、`textColor` 和 `backgroundColor` 三个属性标记。boolean mark 的值固定为 `true`，三种属性记录各自的数值或字符串；它们可以共存，没有任何有效 mark 时省略 `marks` 字段。
+`TextNode.marks` 当前支持 `bold`、`italic`、`underline` 和 `strike` 四个 boolean 标记，以及 `fontSize`、`textColor` 和 `backgroundColor` 三个属性标记。boolean mark 的值固定为 `true`；字号使用 `8–72` 的整数，文字颜色使用规范化后的六位十六进制字符串；它们可以共存，没有任何有效 mark 时省略 `marks` 字段。
 
 ## 类型判断
 
@@ -80,6 +80,6 @@ interface DocumentNode {
 ## 当前限制
 
 - 只支持 paragraph、text 和 text marks，不支持 heading、list 等。
-- text marks 已完成四种 boolean mark 的模型表达、helper、校验、规范化和编辑保留；Bold、Italic、Underline 和 Strike 均已接入 command、demo 和 renderer。
+- text marks 已完成四种 boolean mark、字号和文字颜色的模型、command、demo 与 renderer；backgroundColor 当前只完成模型表达。
 - 第一版节点不包含 `attrs` 字段，后续新增 heading、link、image 等能力时再引入属性模型。
 - 规范化会丢弃非法节点而不尝试转换，转换策略留待后续。

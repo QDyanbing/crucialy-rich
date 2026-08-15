@@ -1,6 +1,6 @@
 # 文字属性 Mark
 
-文字属性 Mark 用于描述 text 节点上的字号、文字颜色和背景颜色。第 11 周 Day 1 已完成数据模型设计，Day 2 已完成字号命令、安全渲染和 demo 闭环。
+文字属性 Mark 用于描述 text 节点上的字号、文字颜色和背景颜色。第 11 周 Day 1 已完成数据模型设计，Day 2 已完成字号闭环，Day 3 已完成文字颜色闭环。
 
 ## 数据结构
 
@@ -30,7 +30,7 @@ createText("示例", {
 ## 合法值
 
 - `fontSize` 必须是 `8` 到 `72` 之间的整数，模型值不携带单位，renderer 统一输出像素。
-- `textColor` 必须是非空字符串；颜色格式白名单和安全过滤由文字颜色功能继续实现。
+- `textColor` 只接受 `#RGB` 或 `#RRGGBB`；规范化时去除首尾空白、转为小写，并把三位格式展开成六位。
 - `backgroundColor` 必须是非空字符串；颜色格式白名单和安全过滤由背景颜色功能继续实现。
 - 非法属性会被 `normalizeTextMarks` 移除，并由 `validateDocument` 返回带节点路径的错误。
 
@@ -43,6 +43,7 @@ createText("示例", {
 - `normalizeTextMarks(value)`：同时规范化 boolean mark 和属性 Mark。
 - `areTextMarksEqual(left, right)`：同时比较 boolean mark 与三个属性值。
 - `isValidFontSize(value)`：使用 `MIN_FONT_SIZE` 和 `MAX_FONT_SIZE` 判断字号是否受支持。
+- `sanitizeHexColor(value)`：返回规范化的六位十六进制颜色，非法值返回 `undefined`。
 
 ## 模型行为
 
@@ -69,9 +70,25 @@ createText("示例", {
 - 中文 demo 提供“默认字号”、12px、14px、16px、18px、24px 和 32px 选项。
 - demo 字号修改会记录 Transaction、History 和验收报告；浏览器测试覆盖设置与取消。
 
+## 文字颜色命令
+
+`setTextColorCommand` 已加入默认 Command 注册表，payload 为 `{ textColor: string | null }`：
+
+- `#RGB` 和 `#RRGGBB` 会先经过 `sanitizeHexColor`，再通过 `set_mark_attribute` operation 应用。
+- `null` 会取消选区文字颜色，同时保留字号、boolean mark 和其他属性。
+- CSS 颜色名、`rgb()`、带 alpha 的十六进制、缺失 `#` 和包含额外声明的字符串都会被拒绝。
+- 非折叠选区支持跨 text 节点；折叠选区的后续输入会继承已设置的文字颜色。
+
+## 文字颜色渲染与 Demo
+
+- renderer 只从规范化模型读取 `textColor`，并输出结构化 `style.color`。
+- HTML serializer 和 React renderer 不直接接收命令 payload，避免额外 CSS 声明污染结构。
+- 中文 demo 提供原生颜色选择器和“取消文字颜色”按钮。
+- demo 预置彩色字号与组合格式样例，浏览器测试覆盖应用、组合和取消。
+
 ## 当前边界
 
-- 尚未提供 `setTextColor` 和 `setBackgroundColor` 命令。
-- renderer 尚未输出文字颜色和背景颜色。
-- React 组件与 demo 尚未提供颜色控件。
-- 颜色安全过滤和颜色样式序列化将在对应功能闭环时确定。
+- 尚未提供 `setBackgroundColor` 命令。
+- renderer 尚未输出背景颜色。
+- React 组件与 demo 尚未提供背景颜色控件。
+- `backgroundColor` 的安全过滤和样式序列化将在 Day 4 闭环。
