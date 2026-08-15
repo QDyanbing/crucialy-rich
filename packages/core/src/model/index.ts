@@ -24,6 +24,7 @@ export {
   normalizeTextMarks,
   removeTextMarkAttribute,
   removeTextMark,
+  sanitizeHexColor,
   MIN_FONT_SIZE,
   setTextMarkAttribute,
   setTextMark,

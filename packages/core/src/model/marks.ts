@@ -11,6 +11,9 @@ import {
 export const MIN_FONT_SIZE = 8;
 export const MAX_FONT_SIZE = 72;
 
+const SHORT_HEX_COLOR_PATTERN = /^#[0-9a-f]{3}$/i;
+const FULL_HEX_COLOR_PATTERN = /^#[0-9a-f]{6}$/i;
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -22,6 +25,26 @@ export function isValidFontSize(value: unknown): value is number {
     value >= MIN_FONT_SIZE &&
     value <= MAX_FONT_SIZE
   );
+}
+
+export function sanitizeHexColor(value: unknown): string | undefined {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  const color = value.trim().toLowerCase();
+
+  if (FULL_HEX_COLOR_PATTERN.test(color)) {
+    return color;
+  }
+
+  if (SHORT_HEX_COLOR_PATTERN.test(color)) {
+    const [red, green, blue] = color.slice(1);
+
+    return `#${red}${red}${green}${green}${blue}${blue}`;
+  }
+
+  return undefined;
 }
 
 export function isValidTextMarkAttributeValue<TAttribute extends TextMarkAttributeType>(
