@@ -66,6 +66,10 @@
 - 新增 `setTextColorCommand`，支持选区设置、规范化、取消文字颜色和 collapsed 输入继承。
 - 新增安全文字颜色 renderer、HTML/React 渲染测试、中文 demo 颜色控件和 Playwright 设置/取消验收。
 - 新增字号、文字颜色和 boolean mark 连续应用与独立取消的组合回归测试。
+- 新增安全背景色模型约束，复用十六进制颜色 sanitize 并补齐规范化、校验和 operation 覆盖。
+- 新增 `setBackgroundColorCommand`，支持选区设置、取消、跨 text 应用和 collapsed 输入继承。
+- 新增安全背景色 renderer、HTML/React 渲染测试、中文 demo 背景色控件和 Playwright 设置/取消验收。
+- 新增字号、文字颜色、背景色和 boolean mark 连续应用与独立取消的组合回归测试。
 
 ### 变更
 
@@ -98,6 +102,7 @@
 - 更新 README、架构、文字标记、测试策略和项目进度，使其匹配第 11 周 Day 1 属性 Mark 设计范围。
 - 更新项目、包、Operation、Command、渲染和 QA 文档，使其匹配第 11 周 Day 2 字号闭环。
 - 更新项目、包、文字属性、Command、渲染和 QA 文档，使其匹配第 11 周 Day 3 文字颜色闭环。
+- 更新项目、包、文字属性、Command、渲染和 QA 文档，使其匹配第 11 周 Day 4 背景色闭环。
 
 ### 暂未包含
 

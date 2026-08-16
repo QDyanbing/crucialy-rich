@@ -1,6 +1,6 @@
 # QA：文字标记模型验收
 
-当前文字标记范围覆盖 bold / italic / underline / strike 的完整 boolean 闭环、fontSize 与 textColor 闭环，以及 backgroundColor 属性 Mark 数据模型。
+当前文字标记范围覆盖 bold / italic / underline / strike 的完整 boolean 闭环，以及 fontSize / textColor / backgroundColor 三种属性 Mark 闭环。
 
 ## 已完成范围
 
@@ -32,6 +32,7 @@
 - core 公共入口已导出属性类型、常量和 helper。
 - `fontSize` 已限制为 `8–72` 的整数，并完成 operation、Command、安全渲染、中文 demo 与 E2E 闭环。
 - `textColor` 已限制为安全十六进制颜色，并完成规范化、operation、Command、安全渲染、中文 demo 与 E2E 闭环。
+- `backgroundColor` 已限制为安全十六进制颜色，并完成规范化、operation、Command、安全渲染、中文 demo 与 E2E 闭环。
 
 ## 自动化覆盖
 
@@ -56,6 +57,7 @@
 - `packages/core/tests/command/integration.test.ts`
 - `packages/core/tests/command/font-size.test.ts`
 - `packages/core/tests/command/text-color.test.ts`
+- `packages/core/tests/command/background-color.test.ts`
 - `packages/core/tests/command/text-style-interaction.test.ts`
 - `packages/core/tests/command/state.test.ts`
 - `packages/core/tests/render/render.test.ts`
@@ -69,8 +71,8 @@
 - 暂未实现 React 组件内置 toolbar。
 - mark 快捷键尚未绑定编辑器键盘事件。
 - 暂未实现跨 paragraph 的 mark 应用策略。
-- backgroundColor 尚未接入 command、renderer 和 demo 控件。
+- 三种文字属性 command 尚未支持跨 paragraph 选区。
 
 ## 结论
 
-四种 boolean mark、字号和文字颜色已闭环，下一步实现背景色。
+四种 boolean mark 与三种文字属性已分别闭环，下一步完成文字属性综合验收。
