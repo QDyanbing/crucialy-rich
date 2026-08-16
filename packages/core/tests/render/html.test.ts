@@ -159,4 +159,33 @@ describe("renderNodeToHtml", () => {
       '<strong data-crucialy-path="[0,0]" style="color: #1677ff; font-size: 24px; font-style: italic; text-decoration: underline;">Combined</strong>',
     );
   });
+
+  it("serializes a safe background color", () => {
+    const document = createDocument([
+      createParagraph([createText("Highlighted", { backgroundColor: "#FC0" })]),
+    ]);
+
+    expect(renderNodeToHtml(renderDocument(document))).toContain(
+      '<span data-crucialy-path="[0,0]" style="background-color: #ffcc00;">Highlighted</span>',
+    );
+  });
+
+  it("serializes background color with text color and other styles", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("Combined", {
+          backgroundColor: "#fff4cc",
+          bold: true,
+          fontSize: 24,
+          italic: true,
+          textColor: "#1677ff",
+          underline: true,
+        }),
+      ]),
+    ]);
+
+    expect(renderNodeToHtml(renderDocument(document))).toContain(
+      '<strong data-crucialy-path="[0,0]" style="background-color: #fff4cc; color: #1677ff; font-size: 24px; font-style: italic; text-decoration: underline;">Combined</strong>',
+    );
+  });
 });

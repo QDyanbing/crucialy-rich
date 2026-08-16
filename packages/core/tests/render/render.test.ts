@@ -324,4 +324,53 @@ describe("renderDocument", () => {
       renderDocument(document).children?.[0]?.children?.[0]?.style,
     ).toBeUndefined();
   });
+
+  it("renders a safe background color", () => {
+    const document = createDocument([
+      createParagraph([createText("Highlighted", { backgroundColor: "#FC0" })]),
+    ]);
+
+    expect(renderDocument(document).children?.[0]?.children?.[0]).toEqual({
+      attributes: {
+        [MODEL_PATH_ATTRIBUTE]: "[0,0]",
+      },
+      path: [0, 0],
+      style: { backgroundColor: "#ffcc00" },
+      tagName: "span",
+      text: "Highlighted",
+    });
+  });
+
+  it("combines background color with text color and other marks", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("Combined", {
+          backgroundColor: "#fff4cc",
+          bold: true,
+          fontSize: 24,
+          italic: true,
+          textColor: "#1677ff",
+          underline: true,
+        }),
+      ]),
+    ]);
+
+    expect(renderDocument(document).children?.[0]?.children?.[0]?.style).toEqual({
+      backgroundColor: "#fff4cc",
+      color: "#1677ff",
+      fontSize: "24px",
+      fontStyle: "italic",
+      textDecoration: "underline",
+    });
+  });
+
+  it("does not render an unsafe background color", () => {
+    const document = createDocument([
+      createParagraph([createText("Unsafe", { backgroundColor: "yellow" })]),
+    ]);
+
+    expect(
+      renderDocument(document).children?.[0]?.children?.[0]?.style,
+    ).toBeUndefined();
+  });
 });

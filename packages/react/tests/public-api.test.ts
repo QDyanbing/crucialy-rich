@@ -87,6 +87,23 @@ describe("@crucialy-rich/react public API", () => {
     expect(html).toContain('style="color:#1677ff"');
   });
 
+  it("renders safe foreground and background colors through React", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("Highlighted", {
+          backgroundColor: "#fff4cc",
+          textColor: "#1677ff",
+        }),
+      ]),
+    ]);
+
+    const html = renderToStaticMarkup(
+      createElement(RichTextEditor, { value: document }),
+    );
+
+    expect(html).toContain('style="background-color:#fff4cc;color:#1677ff"');
+  });
+
   it("marks editable renders as not readonly", () => {
     const html = renderToStaticMarkup(
       createElement(RichTextEditor, {
