@@ -317,4 +317,88 @@ describe("set mark attribute operation", () => {
       type: "text",
     });
   });
+
+  it("sets and sanitizes background color while preserving other marks", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("高亮", {
+          bold: true,
+          textColor: "#1677ff",
+        }),
+      ]),
+    ]);
+    const operation = createSetMarkAttributeOperation(
+      {
+        anchor: { path: [0, 0], offset: 0 },
+        focus: { path: [0, 0], offset: 2 },
+      },
+      "backgroundColor",
+      "#FC0",
+    );
+
+    expect(applySetMarkAttribute(document, operation).children[0]?.children[0]).toEqual(
+      {
+        marks: {
+          backgroundColor: "#ffcc00",
+          bold: true,
+          textColor: "#1677ff",
+        },
+        text: "高亮",
+        type: "text",
+      },
+    );
+  });
+
+  it("removes background color without removing text color", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("背景", {
+          backgroundColor: "#fff4cc",
+          fontSize: 18,
+          textColor: "#1c2520",
+        }),
+      ]),
+    ]);
+    const operation = createSetMarkAttributeOperation(
+      {
+        anchor: { path: [0, 0], offset: 0 },
+        focus: { path: [0, 0], offset: 2 },
+      },
+      "backgroundColor",
+      null,
+    );
+
+    expect(applySetMarkAttribute(document, operation).children[0]?.children[0]).toEqual(
+      {
+        marks: { fontSize: 18, textColor: "#1c2520" },
+        text: "背景",
+        type: "text",
+      },
+    );
+  });
+
+  it("rejects unsafe background color operations", () => {
+    const range = {
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 2 },
+    };
+    const document = createDocument([createParagraph([createText("背景")])]);
+    const unsafeOperation: SetMarkAttributeOperation<"backgroundColor"> = {
+      attribute: "backgroundColor",
+      range,
+      type: "set_mark_attribute",
+      value: "#fff; color: red",
+    };
+
+    expect(() =>
+      createSetMarkAttributeOperation(range, "backgroundColor", "yellow"),
+    ).toThrow("invalid backgroundColor mark value");
+    expect(() => applySetMarkAttribute(document, unsafeOperation)).toThrow(
+      "invalid backgroundColor mark value",
+    );
+    expect(document.children[0]?.children[0]).toEqual({
+      text: "背景",
+      type: "text",
+    });
+  });
 });
