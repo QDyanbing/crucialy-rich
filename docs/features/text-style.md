@@ -1,6 +1,6 @@
 # 文字属性 Mark
 
-文字属性 Mark 用于描述 text 节点上的字号、文字颜色和背景颜色。第 11 周 Day 1 已完成数据模型设计，Day 2 已完成字号闭环，Day 3 已完成文字颜色闭环。
+文字属性 Mark 用于描述 text 节点上的字号、文字颜色和背景颜色。第 11 周 Day 1 已完成数据模型设计，Day 2 已完成字号闭环，Day 3 已完成文字颜色闭环，Day 4 已完成背景色闭环。
 
 ## 数据结构
 
@@ -31,7 +31,7 @@ createText("示例", {
 
 - `fontSize` 必须是 `8` 到 `72` 之间的整数，模型值不携带单位，renderer 统一输出像素。
 - `textColor` 只接受 `#RGB` 或 `#RRGGBB`；规范化时去除首尾空白、转为小写，并把三位格式展开成六位。
-- `backgroundColor` 必须是非空字符串；颜色格式白名单和安全过滤由背景颜色功能继续实现。
+- `backgroundColor` 与 `textColor` 使用同一套十六进制白名单和规范化规则。
 - 非法属性会被 `normalizeTextMarks` 移除，并由 `validateDocument` 返回带节点路径的错误。
 
 ## 公共 Helper
@@ -86,9 +86,24 @@ createText("示例", {
 - 中文 demo 提供原生颜色选择器和“取消文字颜色”按钮。
 - demo 预置彩色字号与组合格式样例，浏览器测试覆盖应用、组合和取消。
 
+## 背景色命令
+
+`setBackgroundColorCommand` 已加入默认 Command 注册表，payload 为 `{ backgroundColor: string | null }`：
+
+- `#RGB` 和 `#RRGGBB` 会先经过 `sanitizeHexColor`，再通过 `set_mark_attribute` operation 应用。
+- `null` 会取消选区背景色，同时保留文字颜色、字号和 boolean mark。
+- 非法颜色和 CSS 注入字符串会跳过执行，不会进入文档模型。
+- 非折叠选区支持跨 text 节点；折叠选区的后续输入会继承已设置的背景色。
+
+## 背景色渲染与 Demo
+
+- renderer 只从规范化模型读取 `backgroundColor`，并输出结构化 `style.backgroundColor`。
+- HTML serializer 输出独立的 `background-color` 声明，可与 `color`、字号和文字装饰叠加。
+- 中文 demo 提供原生背景色选择器和“取消背景色”按钮，操作进入 Transaction 与 History。
+- demo 混合样例和浏览器测试覆盖字色与背景色共存，以及取消背景色后保留字色。
+
 ## 当前边界
 
-- 尚未提供 `setBackgroundColor` 命令。
-- renderer 尚未输出背景颜色。
-- React 组件与 demo 尚未提供背景颜色控件。
-- `backgroundColor` 的安全过滤和样式序列化将在 Day 4 闭环。
+- 三种文字属性均只支持同一 paragraph 内的选区，跨 paragraph 策略尚未实现。
+- React 组件尚未内置文字属性 toolbar；当前由宿主或 demo 调用 command。
+- Day 5 将统一整理 text style command、跨选区测试、混合样例和闭环 QA。

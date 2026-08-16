@@ -1,6 +1,6 @@
 # 文字标记模型
 
-文字标记用于描述 text 节点上的内联格式。第 9 周 Bold 和 Italic 已闭环；第 10 周已完成 boolean mark 叠加规则、Underline 和 Strike；第 11 周已完成属性 Mark 模型、字号和文字颜色闭环。属性设计详见[文字属性 Mark](./text-style.md)。
+文字标记用于描述 text 节点上的内联格式。第 9 周 Bold 和 Italic 已闭环；第 10 周已完成 boolean mark 叠加规则、Underline 和 Strike；第 11 周已完成属性 Mark 模型、字号、文字颜色和背景色闭环。属性设计详见[文字属性 Mark](./text-style.md)。
 
 ## 数据结构
 
@@ -65,7 +65,7 @@ boolean mark 只记录启用状态，值固定为 `true`；属性 Mark 记录具
 - `marks` 必须是普通对象。
 - boolean key 只能是 `bold`、`italic`、`underline` 或 `strike`，value 必须是 `true`。
 - 属性 key 只能是 `fontSize`、`textColor` 或 `backgroundColor`，value 必须满足对应的基础约束。
-- `textColor` 仅接受 `#RGB` / `#RRGGBB`，规范化后统一存储为小写六位十六进制。
+- `textColor` 和 `backgroundColor` 仅接受 `#RGB` / `#RRGGBB`，规范化后统一存储为小写六位十六进制。
 
 `normalizeDocument` 会保留合法 mark，丢弃未知 mark、非 `true` mark 和空 mark 集合，并合并相邻同 marks 的 text 节点。规范化后的文档仍能通过 `validateDocument`。
 
@@ -198,6 +198,7 @@ renderer 遇到 text marks 时会根据标记输出内联元素，并继续保�
 - underline 与 bold/italic 叠加时通过同一个 text path 元素的 `text-decoration: underline;` 表达，避免嵌套模型路径元素。
 - strike 与其他 mark 叠加时通过同一个 text path 元素的 `text-decoration: line-through;` 表达。
 - underline 与 strike 同时启用时合并为 `text-decoration: underline line-through;`，避免装饰属性互相覆盖。
+- 合法字号、文字颜色和背景色会写入同一个 text path 元素的结构化 style，不增加额外模型路径。
 
 Demo 的“文字标记”样例覆盖普通、加粗、斜体、下划线、删除线、四种组合格式和跨 text 选区。四个 mark 按钮通过 `aria-pressed` 同步当前 active 状态。
 
@@ -206,4 +207,4 @@ Demo 的“文字标记”样例覆盖普通、加粗、斜体、下划线、删
 - 暂未实现编辑器内置 toolbar；当前只有 demo 操作区按钮。
 - 快捷键当前只提供映射与查询，不包含编辑器事件绑定。
 - 暂未实现跨 paragraph 的 mark 应用策略。
-- backgroundColor 当前只有数据模型，尚未接入命令、renderer 和 demo 控件。
+- 文字属性 command 当前只处理同一 paragraph 内的选区。
