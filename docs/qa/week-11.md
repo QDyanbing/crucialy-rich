@@ -8,14 +8,16 @@
 
 第 11 周 Day 3「文字颜色」已完成。
 
-☑️ 当前指针：第 11 周 Day 4「背景色」待开始。
+第 11 周 Day 4「背景色」已完成。
+
+☑️ 当前指针：第 11 周 Day 5「文字属性闭环验收」待开始。
 
 ## 已完成范围
 
 - `TextMarks` 新增 `fontSize`、`textColor` 和 `backgroundColor` 属性。
 - 属性 Mark 可以与 bold、italic、underline 和 strike 共存。
 - `fontSize` 接受 `8` 到 `72` 之间的整数，renderer 统一输出 px。
-- `textColor` 只接受 `#RGB` / `#RRGGBB`，规范化后统一存储为小写六位十六进制；`backgroundColor` 的过滤留在 Day 4 完成。
+- `textColor` 和 `backgroundColor` 只接受 `#RGB` / `#RRGGBB`，规范化后统一存储为小写六位十六进制。
 - 新增属性值校验、读取、设置和移除 helper。
 - 规范化会保留合法属性并丢弃非法属性。
 - 文档校验会区分 boolean mark 与属性 Mark 的值约束。
@@ -33,6 +35,10 @@
 - renderer、HTML serializer 和 React 渲染只输出规范化后的安全文字颜色。
 - 中文 demo 新增彩色样例、原生颜色选择器和“取消文字颜色”按钮，操作进入 Transaction 与 History。
 - Playwright 覆盖文字颜色设置、与字号组合和取消；单测覆盖字号、颜色与 boolean mark 的组合交互。
+- 新增 `setBackgroundColorCommand` 并接入默认 Command 注册表，支持设置、取消、跨 text 选区和 collapsed 输入继承。
+- renderer、HTML serializer 和 React 渲染只输出规范化后的安全背景色，并可与文字颜色及其他样式叠加。
+- 中文 demo 新增背景色混合样例、原生背景色选择器和“取消背景色”按钮，操作进入 Transaction 与 History。
+- Playwright 覆盖背景色设置、与文字颜色共存和独立取消；单测覆盖三种属性与 boolean mark 的组合交互。
 
 ## 自动化覆盖
 
@@ -47,6 +53,7 @@
 - `packages/core/tests/operation/transaction.test.ts`
 - `packages/core/tests/command/font-size.test.ts`
 - `packages/core/tests/command/text-color.test.ts`
+- `packages/core/tests/command/background-color.test.ts`
 - `packages/core/tests/command/text-style-interaction.test.ts`
 - `packages/core/tests/render/render.test.ts`
 - `packages/core/tests/render/html.test.ts`
@@ -58,10 +65,10 @@
 
 ## 当前边界
 
-- renderer 尚未输出背景颜色。
-- demo 尚未提供背景颜色控件。
-- `backgroundColor` 的颜色值 sanitize 将在 Day 4「背景色」实现。
+- 三种文字属性 command 当前只处理同一 paragraph 内的选区。
+- React 组件尚未内置文字属性 toolbar；当前由宿主或 demo 调用 command。
+- Day 5 尚需整理 text style command、补充闭环验收记录并新增 `docs/qa/text-style.md`。
 
 ## 结论
 
-第 11 周 Day 3 已达到“选中文字可安全修改和取消颜色”的验收要求。下一步实现 Day 4 背景色 command、颜色值 sanitize、安全渲染、测试和 demo 控件。
+第 11 周 Day 4 已达到“背景色和其他样式可叠加”的验收要求。下一步完成 Day 5 文字属性 command 整理、跨选区综合测试、混合样例复核和闭环 QA。
