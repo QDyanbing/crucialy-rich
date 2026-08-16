@@ -119,11 +119,13 @@ const modelExamples: ModelExample[] = [
         createText("删除线文本", { strike: true }),
         createText("，"),
         createText("彩色大号文本", {
+          backgroundColor: "#e6f4ff",
           fontSize: 24,
           textColor: "#1677ff",
         }),
         createText("，"),
         createText("组合格式", {
+          backgroundColor: "#fff1f0",
           bold: true,
           fontSize: 18,
           italic: true,
