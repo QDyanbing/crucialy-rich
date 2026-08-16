@@ -57,7 +57,7 @@ export function isValidTextMarkAttributeValue<TAttribute extends TextMarkAttribu
     case "textColor":
       return sanitizeHexColor(value) !== undefined;
     case "backgroundColor":
-      return typeof value === "string" && value.trim().length > 0;
+      return sanitizeHexColor(value) !== undefined;
   }
 }
 
@@ -84,8 +84,10 @@ export function normalizeTextMarks(value: unknown): TextMarks | undefined {
     marks.textColor = textColor;
   }
 
-  if (isValidTextMarkAttributeValue("backgroundColor", value.backgroundColor)) {
-    marks.backgroundColor = value.backgroundColor;
+  const backgroundColor = sanitizeHexColor(value.backgroundColor);
+
+  if (backgroundColor !== undefined) {
+    marks.backgroundColor = backgroundColor;
   }
 
   return Object.keys(marks).length > 0 ? marks : undefined;

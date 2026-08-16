@@ -61,9 +61,7 @@ function validateTextMarks(
           message:
             attribute === "fontSize"
               ? "text mark fontSize 的值必须是 8 到 72 之间的整数"
-              : attribute === "textColor"
-                ? "text mark textColor 的值必须是 #RGB 或 #RRGGBB 十六进制颜色"
-                : "text mark backgroundColor 的值必须是非空字符串",
+              : `text mark ${attribute} 的值必须是 #RGB 或 #RRGGBB 十六进制颜色`,
         });
       }
       return;
