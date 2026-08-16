@@ -24,6 +24,7 @@ import {
   queryCommandState,
   redoHistory,
   recordHistory,
+  SET_BACKGROUND_COLOR_COMMAND_NAME,
   SET_FONT_SIZE_COMMAND_NAME,
   SET_TEXT_COLOR_COMMAND_NAME,
   SPLIT_BLOCK_COMMAND_NAME,
@@ -181,6 +182,7 @@ const demoCommandDescriptors: DemoCommandDescriptor[] = [
   { label: "删除线", name: STRIKE_COMMAND_NAME },
   { label: "字号", name: SET_FONT_SIZE_COMMAND_NAME },
   { label: "文字颜色", name: SET_TEXT_COLOR_COMMAND_NAME },
+  { label: "背景色", name: SET_BACKGROUND_COLOR_COMMAND_NAME },
   { label: "删除选区", name: DELETE_SELECTION_COMMAND_NAME },
   { label: "分段", name: SPLIT_BLOCK_COMMAND_NAME },
   { label: "合并段落", name: MERGE_BLOCK_COMMAND_NAME },
@@ -487,6 +489,7 @@ function DemoApp() {
   const [insertTextValue, setInsertTextValue] = useState("插入文本");
   const [fontSizeValue, setFontSizeValue] = useState("18");
   const [textColorValue, setTextColorValue] = useState("#1677ff");
+  const [backgroundColorValue, setBackgroundColorValue] = useState("#fff4cc");
   const [lastTransaction, setLastTransaction] = useState<Transaction | null>(null);
   const [lastTransactionReport, setLastTransactionReport] =
     useState<TransactionAcceptanceReport | null>(null);
@@ -536,11 +539,16 @@ function DemoApp() {
                   ? {
                       textColor: textColorValue,
                     }
-                  : undefined,
+                  : command.name === SET_BACKGROUND_COLOR_COMMAND_NAME
+                    ? {
+                        backgroundColor: backgroundColorValue,
+                      }
+                    : undefined,
         }),
         label: command.label,
       })),
     [
+      backgroundColorValue,
       fontSizeValue,
       insertTextValue,
       modelSelection,
@@ -718,6 +726,29 @@ function DemoApp() {
     applyTextColor(null);
   }
 
+  function applyBackgroundColor(backgroundColor: string | null) {
+    applyCommandResult(
+      executeCommand(demoCommandRegistry, SET_BACKGROUND_COLOR_COMMAND_NAME, {
+        context: {
+          document: normalizedDocument,
+          selection: modelSelection,
+        },
+        payload: { backgroundColor },
+      }),
+    );
+  }
+
+  function handleBackgroundColorChange(event: ChangeEvent<HTMLInputElement>) {
+    const nextValue = event.target.value;
+
+    setBackgroundColorValue(nextValue);
+    applyBackgroundColor(nextValue);
+  }
+
+  function handleClearBackgroundColor() {
+    applyBackgroundColor(null);
+  }
+
   function handleDeleteText() {
     applyCommandResult(
       executeCommand(demoCommandRegistry, DELETE_SELECTION_COMMAND_NAME, {
@@ -874,6 +905,23 @@ function DemoApp() {
               onClick={handleClearTextColor}
             >
               取消文字颜色
+            </button>
+            <label className="color-control">
+              <span>背景色</span>
+              <input
+                aria-label="背景色"
+                disabled={isCommandDisabled(SET_BACKGROUND_COLOR_COMMAND_NAME)}
+                type="color"
+                value={backgroundColorValue}
+                onChange={handleBackgroundColorChange}
+              />
+            </label>
+            <button
+              type="button"
+              disabled={isCommandDisabled(SET_BACKGROUND_COLOR_COMMAND_NAME)}
+              onClick={handleClearBackgroundColor}
+            >
+              取消背景色
             </button>
             <button type="button" onClick={handleNormalize}>
               规范化
