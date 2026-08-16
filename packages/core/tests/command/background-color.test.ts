@@ -3,10 +3,14 @@ import { describe, expect, it } from "vitest";
 import {
   applyTransaction,
   canExecuteSetBackgroundColorCommand,
+  createDefaultCommandRegistry,
   createDocument,
   createParagraph,
   createText,
+  executeCommand,
   insertTextCommand,
+  queryCommandState,
+  SET_BACKGROUND_COLOR_COMMAND_NAME,
   setBackgroundColorCommand,
 } from "../../src";
 
@@ -140,5 +144,118 @@ describe("setBackgroundColorCommand", () => {
       { marks: { backgroundColor: "#fff4cc" }, text: "亮", type: "text" },
       { text: "世界", type: "text" },
     ]);
+  });
+
+  it("cancels background color while preserving other marks", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("取消背景", {
+          backgroundColor: "#fff4cc",
+          bold: true,
+          fontSize: 18,
+          textColor: "#1677ff",
+        }),
+      ]),
+    ]);
+    const result = setBackgroundColorCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [0, 0], offset: 4 },
+        },
+      },
+      payload: { backgroundColor: null },
+    });
+
+    expect(result.ok).toBe(true);
+    expect(
+      applyTransaction(document, result.transaction!).children[0]?.children[0],
+    ).toEqual({
+      marks: { bold: true, fontSize: 18, textColor: "#1677ff" },
+      text: "取消背景",
+      type: "text",
+    });
+  });
+
+  it.each([
+    { backgroundColor: "yellow" },
+    { backgroundColor: "#abcd" },
+    { backgroundColor: "rgb(255, 255, 0)" },
+    { backgroundColor: "#fff; display: none" },
+    {},
+  ])("skips an unsafe payload: $backgroundColor", (payload) => {
+    const document = createDocument([createParagraph([createText("背景")])]);
+    const input = {
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [0, 0], offset: 2 },
+        },
+      },
+      payload,
+    };
+
+    expect(canExecuteSetBackgroundColorCommand(input)).toBe(false);
+    expect(setBackgroundColorCommand.execute(input)).toEqual({
+      commandName: SET_BACKGROUND_COLOR_COMMAND_NAME,
+      ok: false,
+      reason: "Set background color command requires a safe color and text selection.",
+      status: "skipped",
+    });
+  });
+
+  it("skips a selection that crosses paragraphs", () => {
+    const document = createDocument([
+      createParagraph([createText("第一段")]),
+      createParagraph([createText("第二段")]),
+    ]);
+    const input = {
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [1, 0], offset: 1 },
+        },
+      },
+      payload: { backgroundColor: "#fff4cc" },
+    };
+
+    expect(canExecuteSetBackgroundColorCommand(input)).toBe(false);
+    expect(setBackgroundColorCommand.execute(input).status).toBe("skipped");
+  });
+
+  it("executes through the default command registry", () => {
+    const registry = createDefaultCommandRegistry();
+    const document = createDocument([createParagraph([createText("背景")])]);
+    const input = {
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [0, 0], offset: 2 },
+        },
+      },
+      payload: { backgroundColor: "#fff4cc" },
+    };
+
+    expect(
+      queryCommandState(registry, SET_BACKGROUND_COLOR_COMMAND_NAME, input),
+    ).toEqual({
+      active: false,
+      commandName: SET_BACKGROUND_COLOR_COMMAND_NAME,
+      disabled: false,
+      registered: true,
+    });
+    expect(executeCommand(registry, SET_BACKGROUND_COLOR_COMMAND_NAME, input).ok).toBe(
+      true,
+    );
+    expect(
+      queryCommandState(registry, SET_BACKGROUND_COLOR_COMMAND_NAME, {
+        ...input,
+        payload: { backgroundColor: "yellow" },
+      }).disabled,
+    ).toBe(true);
   });
 });
