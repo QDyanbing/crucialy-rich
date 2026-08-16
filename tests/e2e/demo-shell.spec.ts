@@ -342,6 +342,53 @@ test("sets and cancels text color from the demo control", async ({ page }) => {
   );
 });
 
+test("sets and cancels background color without removing text color", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("marks");
+
+  const acceptanceParagraph = page.getByLabel("已渲染文档").locator("p").nth(1);
+  const textColorInput = page.getByLabel("文字颜色", { exact: true });
+  const backgroundColorInput = page.getByLabel("背景色", { exact: true });
+
+  await expect(page.getByLabel("背景色 Command 状态")).toContainText("可用");
+
+  await textColorInput.fill("#52c41a");
+  await backgroundColorInput.fill("#ffe58f");
+
+  await expect(acceptanceParagraph.locator('[style*="background-color"]')).toHaveCount(
+    5,
+  );
+  await expect(acceptanceParagraph.locator("span").first()).toHaveCSS(
+    "background-color",
+    "rgb(255, 229, 143)",
+  );
+  await expect(acceptanceParagraph.locator("span").first()).toHaveCSS(
+    "color",
+    "rgb(82, 196, 26)",
+  );
+  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
+    '"backgroundColor": "#ffe58f"',
+  );
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"attribute": "backgroundColor"',
+  );
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"value": "#ffe58f"',
+  );
+
+  await page.getByRole("button", { name: "取消背景色" }).click();
+
+  await expect(acceptanceParagraph.locator('[style*="background-color"]')).toHaveCount(
+    0,
+  );
+  await expect(acceptanceParagraph.locator('[style*="color"]')).toHaveCount(5);
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"value": null',
+  );
+});
+
 test("renders the model document in the editor preview", async ({ page }) => {
   await page.goto("/");
 
