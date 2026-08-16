@@ -1,4 +1,10 @@
 export {
+  canExecuteSetBackgroundColorCommand,
+  SET_BACKGROUND_COLOR_COMMAND_NAME,
+  setBackgroundColorCommand,
+} from "./background-color";
+export type { SetBackgroundColorCommandPayload } from "./background-color";
+export {
   canExecuteMergeBlockCommand,
   canExecuteSplitBlockCommand,
   MERGE_BLOCK_COMMAND_NAME,

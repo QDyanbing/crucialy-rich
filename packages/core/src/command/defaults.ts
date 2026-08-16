@@ -1,3 +1,4 @@
+import { setBackgroundColorCommand } from "./background-color";
 import { mergeBlockCommand, splitBlockCommand } from "./block";
 import { setFontSizeCommand } from "./font-size";
 import { BOOLEAN_MARK_COMMANDS } from "./mark";
@@ -10,6 +11,7 @@ export const DEFAULT_COMMANDS: readonly Command[] = [
   ...BOOLEAN_MARK_COMMANDS,
   setFontSizeCommand,
   setTextColorCommand,
+  setBackgroundColorCommand,
   deleteSelectionCommand,
   insertTextCommand,
   mergeBlockCommand,
