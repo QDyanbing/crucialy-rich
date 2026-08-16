@@ -10,6 +10,9 @@ function escapeHtml(value: string): string {
 
 function renderStyle(node: RenderedElementNode): string | undefined {
   const declarations = [
+    node.style?.backgroundColor
+      ? `background-color: ${node.style.backgroundColor};`
+      : undefined,
     node.style?.color ? `color: ${node.style.color};` : undefined,
     node.style?.fontSize ? `font-size: ${node.style.fontSize};` : undefined,
     node.style?.fontStyle ? `font-style: ${node.style.fontStyle};` : undefined,

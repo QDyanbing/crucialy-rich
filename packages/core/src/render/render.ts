@@ -25,6 +25,7 @@ function createRenderedNode(
 }
 
 function renderTextNode(node: TextNode, path: Path): RenderedElementNode {
+  const backgroundColor = getTextMarkAttribute(node.marks, "backgroundColor");
   const bold = hasTextMark(node.marks, "bold");
   const fontSize = getTextMarkAttribute(node.marks, "fontSize");
   const textColor = getTextMarkAttribute(node.marks, "textColor");
@@ -38,6 +39,7 @@ function renderTextNode(node: TextNode, path: Path): RenderedElementNode {
   const needsDecorationStyle =
     decorations.length > 0 && (bold || italic || decorations.length > 1);
   const style: RenderedElementStyle = {
+    ...(backgroundColor === undefined ? {} : { backgroundColor }),
     ...(textColor === undefined ? {} : { color: textColor }),
     ...(fontSize === undefined ? {} : { fontSize: `${fontSize}px` as const }),
     ...(bold && italic ? { fontStyle: "italic" } : {}),
