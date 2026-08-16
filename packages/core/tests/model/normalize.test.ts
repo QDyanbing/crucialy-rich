@@ -149,6 +149,35 @@ describe("normalizeDocument", () => {
     expect(validateDocument(result).valid).toBe(true);
   });
 
+  it("normalizes safe background colors and removes unsafe colors", () => {
+    const result = normalizeDocument({
+      type: "document",
+      children: [
+        {
+          type: "paragraph",
+          children: [
+            {
+              type: "text",
+              text: "安全",
+              marks: { backgroundColor: "#FC0" },
+            },
+            {
+              type: "text",
+              text: "非法",
+              marks: { backgroundColor: "yellow" },
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(result.children[0]?.children).toEqual([
+      { marks: { backgroundColor: "#ffcc00" }, text: "安全", type: "text" },
+      { text: "非法", type: "text" },
+    ]);
+    expect(validateDocument(result).valid).toBe(true);
+  });
+
   it("merges adjacent text nodes with equal marks", () => {
     const result = normalizeDocument({
       type: "document",

@@ -125,7 +125,7 @@ describe("validateDocument", () => {
       errors: [
         {
           path: [0, 0],
-          message: "text mark backgroundColor 的值必须是非空字符串",
+          message: "text mark backgroundColor 的值必须是 #RGB 或 #RRGGBB 十六进制颜色",
         },
         {
           path: [0, 0],
@@ -160,6 +160,34 @@ describe("validateDocument", () => {
       errors: [
         {
           message: "text mark textColor 的值必须是 #RGB 或 #RRGGBB 十六进制颜色",
+          path: [0, 0],
+        },
+      ],
+      valid: false,
+    });
+  });
+
+  it("rejects unsafe background color strings", () => {
+    const result = validateDocument({
+      children: [
+        {
+          children: [
+            {
+              marks: { backgroundColor: "rgba(255, 255, 0, 0.5)" },
+              text: "unsafe",
+              type: "text",
+            },
+          ],
+          type: "paragraph",
+        },
+      ],
+      type: "document",
+    });
+
+    expect(result).toEqual({
+      errors: [
+        {
+          message: "text mark backgroundColor 的值必须是 #RGB 或 #RRGGBB 十六进制颜色",
           path: [0, 0],
         },
       ],

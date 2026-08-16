@@ -290,3 +290,68 @@ describe("text color model rules", () => {
     ).toEqual([{ marks: { textColor: "#ffffff" }, text: "文字", type: "text" }]);
   });
 });
+
+describe("background color model rules", () => {
+  it("normalizes background colors while preserving other marks", () => {
+    expect(
+      normalizeTextMarks({
+        backgroundColor: "  #FC0  ",
+        bold: true,
+        textColor: "#1c2520",
+      }),
+    ).toEqual({
+      backgroundColor: "#ffcc00",
+      bold: true,
+      textColor: "#1c2520",
+    });
+  });
+
+  it("drops unsafe background colors", () => {
+    expect(normalizeTextMarks({ backgroundColor: "yellow" })).toBeUndefined();
+    expect(
+      normalizeTextMarks({
+        backgroundColor: "#fff; display: none",
+        italic: true,
+      }),
+    ).toEqual({ italic: true });
+  });
+
+  it("sanitizes background colors through attribute helpers", () => {
+    const marks = setTextMarkAttribute(
+      { textColor: "#111111" },
+      "backgroundColor",
+      "#ABC",
+    );
+
+    expect(marks).toEqual({
+      backgroundColor: "#aabbcc",
+      textColor: "#111111",
+    });
+    expect(getTextMarkAttribute(marks, "backgroundColor")).toBe("#aabbcc");
+  });
+
+  it("compares canonical background colors when merging nodes", () => {
+    expect(
+      areTextMarksEqual(
+        { backgroundColor: "#fff", textColor: "#111111" },
+        { backgroundColor: "#FFFFFF", textColor: "#111111" },
+      ),
+    ).toBe(true);
+    expect(
+      mergeAdjacentTextNodes([
+        { marks: { backgroundColor: "#fff" }, text: "背", type: "text" },
+        {
+          marks: { backgroundColor: "#FFFFFF" },
+          text: "景",
+          type: "text",
+        },
+      ]),
+    ).toEqual([
+      {
+        marks: { backgroundColor: "#ffffff" },
+        text: "背景",
+        type: "text",
+      },
+    ]);
+  });
+});
