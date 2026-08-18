@@ -70,6 +70,7 @@
 - 新增 `setBackgroundColorCommand`，支持选区设置、取消、跨 text 应用和 collapsed 输入继承。
 - 新增安全背景色 renderer、HTML/React 渲染测试、中文 demo 背景色控件和 Playwright 设置/取消验收。
 - 新增字号、文字颜色、背景色和 boolean mark 连续应用与独立取消的组合回归测试。
+- 新增文字属性闭环验收，覆盖统一 command 集合、跨 text 与反向选区、默认注册表和 Demo 混合样例。
 
 ### 变更
 
@@ -103,6 +104,7 @@
 - 更新项目、包、Operation、Command、渲染和 QA 文档，使其匹配第 11 周 Day 2 字号闭环。
 - 更新项目、包、文字属性、Command、渲染和 QA 文档，使其匹配第 11 周 Day 3 文字颜色闭环。
 - 更新项目、包、文字属性、Command、渲染和 QA 文档，使其匹配第 11 周 Day 4 背景色闭环。
+- 更新项目、文字属性和 QA 文档，使其匹配第 11 周综合验收状态。
 
 ### 暂未包含
 

@@ -10,11 +10,11 @@
 
 ## 当前阶段
 
-已完成工程初始化、文档模型第一版、模型选区第一版、基础模型渲染第一版、DOM 与模型位置映射第一版、选区双向同步第一版、React 组件 API 第一版、渲染闭环验收、`insertText`、`deleteText`、`toggle_mark`、`splitBlock`、`mergeBlock` operation 第一版、Transaction 第一版、Operation 闭环验收、`beforeinput insertText` 第一版、Backspace 第一版、Delete 第一版、Enter 第一版、基础编辑闭环验收、Command 基础接口、文本编辑命令、Block 编辑命令、Bold 命令、Italic 命令、Underline 命令、Strike 命令、Mark 切分与合并第一版、Bold/Italic 闭环验收、Underline/Strike 闭环验收、四种 boolean mark 叠加规则、mark 快捷键映射、Command 状态读取、Command 闭环验收、History 撤销/重做第一版、连续输入合并第一版、撤销重做快捷键第一版、text marks 属性模型、字号闭环以及安全文字颜色与背景色闭环。
+已完成工程初始化、文档模型第一版、模型选区第一版、基础模型渲染第一版、DOM 与模型位置映射第一版、选区双向同步第一版、React 组件 API 第一版、渲染闭环验收、`insertText`、`deleteText`、`toggle_mark`、`splitBlock`、`mergeBlock` operation 第一版、Transaction 第一版、Operation 闭环验收、`beforeinput insertText` 第一版、Backspace 第一版、Delete 第一版、Enter 第一版、基础编辑闭环验收、Command 基础接口、文本编辑命令、Block 编辑命令、Bold 命令、Italic 命令、Underline 命令、Strike 命令、Mark 切分与合并第一版、Bold/Italic 闭环验收、Underline/Strike 闭环验收、四种 boolean mark 叠加规则、mark 快捷键映射、Command 状态读取、Command 闭环验收、History 撤销/重做第一版、连续输入合并第一版、撤销重做快捷键第一版、text marks 属性模型、字号闭环、安全文字颜色与背景色闭环以及文字属性综合验收。
 
 当前 React 组件已支持通过 `value` / `defaultValue` 展示文档模型，普通文本输入、非折叠删除选区、Enter 分段、段首 Backspace 合并和段尾 Delete 合并会优先复用 command；组件会通过 `onTransaction` 暴露真实输入 transaction。演示页按钮命令和真实输入都会记录 history，并支持撤销、重做、Ctrl/Meta + Z、Ctrl/Meta + Shift + Z、Ctrl/Meta + Y、连续 typing 合并和 undoStack/redoStack 状态查看。
 
-text marks schema 当前支持 `bold`、`italic`、`underline` 和 `strike` 共存，四种 boolean mark 均已完成 command、renderer、demo 和 history 闭环。第 11 周 Day 2 已完成 `8–72px` 字号闭环；Day 3 和 Day 4 已分别完成文字颜色与背景色闭环，两者只接受 `#RGB` / `#RRGGBB` 并统一规范化为小写六位颜色，均提供 command、安全渲染、中文颜色控件和浏览器验收。下一步进入 Day 5「文字属性闭环验收」。
+text marks schema 当前支持 `bold`、`italic`、`underline` 和 `strike` 共存，四种 boolean mark 均已完成 command、renderer、demo 和 history 闭环。第 11 周已完成 `8–72px` 字号、安全文字颜色与背景色，以及三种属性的跨 text、反向选区、默认注册表和混合样例验收；颜色只接受 `#RGB` / `#RRGGBB`，并统一规范化为小写六位格式。
 
 ## 技术栈
 
@@ -140,6 +140,7 @@ pnpm test:e2e
 - [文字标记 QA](./docs/qa/marks.md)
 - [Bold/Italic 闭环验收](./docs/qa/bold-italic.md)
 - [Underline/Strike 闭环验收](./docs/qa/underline-strike.md)
+- [文字属性闭环验收](./docs/qa/text-style.md)
 - [选区 QA](./docs/qa/selection.md)
 - [基础渲染 QA](./docs/qa/render.md)
 - [选区同步 QA](./docs/qa/selection-sync.md)

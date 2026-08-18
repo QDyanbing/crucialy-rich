@@ -1,6 +1,6 @@
 # 文字属性 Mark
 
-文字属性 Mark 用于描述 text 节点上的字号、文字颜色和背景颜色。第 11 周 Day 1 已完成数据模型设计，Day 2 已完成字号闭环，Day 3 已完成文字颜色闭环，Day 4 已完成背景色闭环。
+文字属性 Mark 用于描述 text 节点上的字号、文字颜色和背景颜色。第 11 周已完成数据模型、三种属性能力和综合验收。
 
 ## 数据结构
 
@@ -106,4 +106,4 @@ createText("示例", {
 
 - 三种文字属性均只支持同一 paragraph 内的选区，跨 paragraph 策略尚未实现。
 - React 组件尚未内置文字属性 toolbar；当前由宿主或 demo 调用 command。
-- Day 5 将统一整理 text style command、跨选区测试、混合样例和闭环 QA。
+- `TEXT_STYLE_COMMANDS` 按字号、文字颜色、背景色统一组织三种 command，综合验收记录见 `docs/qa/text-style.md`。

@@ -33,6 +33,7 @@
 - `fontSize` 已限制为 `8–72` 的整数，并完成 operation、Command、安全渲染、中文 demo 与 E2E 闭环。
 - `textColor` 已限制为安全十六进制颜色，并完成规范化、operation、Command、安全渲染、中文 demo 与 E2E 闭环。
 - `backgroundColor` 已限制为安全十六进制颜色，并完成规范化、operation、Command、安全渲染、中文 demo 与 E2E 闭环。
+- 三种属性 command 已由 `TEXT_STYLE_COMMANDS` 统一组织，并完成跨 text、反向选区、默认注册表和混合样例验收。
 
 ## 自动化覆盖
 
@@ -75,4 +76,4 @@
 
 ## 结论
 
-四种 boolean mark 与三种文字属性已分别闭环，下一步完成文字属性综合验收。
+四种 boolean mark 与三种文字属性均已完成独立能力和组合场景验收。

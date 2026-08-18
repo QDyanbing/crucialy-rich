@@ -10,7 +10,7 @@
 
 第 11 周 Day 4「背景色」已完成。
 
-☑️ 当前指针：第 11 周 Day 5「文字属性闭环验收」待开始。
+第 11 周 Day 5「文字属性闭环验收」已完成。
 
 ## 已完成范围
 
@@ -39,6 +39,9 @@
 - renderer、HTML serializer 和 React 渲染只输出规范化后的安全背景色，并可与文字颜色及其他样式叠加。
 - 中文 demo 新增背景色混合样例、原生背景色选择器和“取消背景色”按钮，操作进入 Transaction 与 History。
 - Playwright 覆盖背景色设置、与文字颜色共存和独立取消；单测覆盖三种属性与 boolean mark 的组合交互。
+- `TEXT_STYLE_COMMANDS` 统一组织三种文字属性 command，默认注册表直接复用该集合。
+- 综合测试覆盖跨 text、反向选区、默认注册表设置与取消，以及 Demo 组合样例。
+- 新增 `docs/qa/text-style.md`，记录文字属性闭环验收步骤与边界。
 
 ## 自动化覆盖
 
@@ -67,8 +70,7 @@
 
 - 三种文字属性 command 当前只处理同一 paragraph 内的选区。
 - React 组件尚未内置文字属性 toolbar；当前由宿主或 demo 调用 command。
-- Day 5 尚需整理 text style command、补充闭环验收记录并新增 `docs/qa/text-style.md`。
 
 ## 结论
 
-第 11 周 Day 4 已达到“背景色和其他样式可叠加”的验收要求。下一步完成 Day 5 文字属性 command 整理、跨选区综合测试、混合样例复核和闭环 QA。
+第 11 周已完成三种文字属性从模型、Operation、Command、渲染到 Demo 的闭环验收，当前边界仍为同一 paragraph 内的选区。
