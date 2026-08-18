@@ -271,6 +271,27 @@ test("completes the underline and strike acceptance loop", async ({ page }) => {
   await expect(acceptanceParagraph).toContainText("跨节点选区可以继续切换。");
 });
 
+test("renders the mixed text style acceptance sample", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("marks");
+
+  const combinedText = page
+    .getByLabel("已渲染文档")
+    .locator('[data-crucialy-path="[0,11]"]');
+
+  await expect(combinedText).toContainText("组合格式");
+  await expect(combinedText).toHaveCSS("background-color", "rgb(255, 241, 240)");
+  await expect(combinedText).toHaveCSS("color", "rgb(212, 56, 13)");
+  await expect(combinedText).toHaveCSS("font-size", "18px");
+  await expect(combinedText).toHaveCSS("font-style", "italic");
+  await expect(combinedText).toHaveCSS("font-weight", "700");
+  await expect(combinedText).toHaveCSS(
+    "text-decoration-line",
+    "underline line-through",
+  );
+  await expect(page.getByLabel("模型校验状态")).toContainText("合法");
+});
+
 test("sets and cancels font size from the demo control", async ({ page }) => {
   await page.goto("/");
   await page.getByLabel("模型示例").selectOption("marks");
