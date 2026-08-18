@@ -12,6 +12,9 @@ import {
   INSERT_TEXT_COMMAND_NAME,
   ITALIC_COMMAND_NAME,
   MERGE_BLOCK_COMMAND_NAME,
+  SET_BACKGROUND_COLOR_COMMAND_NAME,
+  SET_FONT_SIZE_COMMAND_NAME,
+  SET_TEXT_COLOR_COMMAND_NAME,
   SPLIT_BLOCK_COMMAND_NAME,
   STRIKE_COMMAND_NAME,
   UNDERLINE_COMMAND_NAME,
@@ -144,4 +147,61 @@ describe("default command registry integration", () => {
       type: "toggle_mark",
     });
   });
+
+  it.each([
+    [SET_FONT_SIZE_COMMAND_NAME, { fontSize: 20 }, "fontSize", 20],
+    [SET_TEXT_COLOR_COMMAND_NAME, { textColor: "#0AF" }, "textColor", "#00aaff"],
+    [
+      SET_BACKGROUND_COLOR_COMMAND_NAME,
+      { backgroundColor: "#FC0" },
+      "backgroundColor",
+      "#ffcc00",
+    ],
+  ] as const)(
+    "executes %s through the default registry",
+    (commandName, payload, attribute, value) => {
+      const registry = createDefaultCommandRegistry();
+      const document = createDocument([createParagraph([createText("样式")])]);
+      const context = {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [0, 0], offset: 2 },
+        },
+      };
+      const applied = executeCommand(registry, commandName, { context, payload });
+
+      expect(applied.ok).toBe(true);
+      expect(applied.transaction?.operations[0]).toMatchObject({
+        attribute,
+        type: "set_mark_attribute",
+        value,
+      });
+
+      const styledDocument = applyTransaction(document, applied.transaction!);
+
+      if (!applied.selection) {
+        throw new Error(`${commandName} should return a selection.`);
+      }
+
+      const removed = executeCommand(registry, commandName, {
+        context: {
+          document: styledDocument,
+          selection: applied.selection,
+        },
+        payload: { [attribute]: null },
+      });
+
+      expect(removed.ok).toBe(true);
+      expect(removed.transaction?.operations[0]).toMatchObject({
+        attribute,
+        type: "set_mark_attribute",
+        value: null,
+      });
+      expect(
+        applyTransaction(styledDocument, removed.transaction!).children[0]?.children[0]
+          ?.marks,
+      ).toBeUndefined();
+    },
+  );
 });

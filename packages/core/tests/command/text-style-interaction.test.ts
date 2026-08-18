@@ -170,11 +170,21 @@ describe("text style command interaction", () => {
       payload: { fontSize: 20 },
     });
     const sizedDocument = applyTransaction(document, sizeResult.transaction!);
+
+    if (!sizeResult.selection) {
+      throw new Error("Set font size command should return a selection.");
+    }
+
     const colorResult = setTextColorCommand.execute({
       context: { document: sizedDocument, selection: sizeResult.selection },
       payload: { textColor: "#52C41A" },
     });
     const coloredDocument = applyTransaction(sizedDocument, colorResult.transaction!);
+
+    if (!colorResult.selection) {
+      throw new Error("Set text color command should return a selection.");
+    }
+
     const backgroundResult = setBackgroundColorCommand.execute({
       context: { document: coloredDocument, selection: colorResult.selection },
       payload: { backgroundColor: "#FFF1B8" },
