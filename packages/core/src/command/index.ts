@@ -24,6 +24,7 @@ export {
   setTextColorCommand,
 } from "./text-color";
 export type { SetTextColorCommandPayload } from "./text-color";
+export { TEXT_STYLE_COMMANDS } from "./text-style";
 export {
   BOLD_COMMAND_NAME,
   BOOLEAN_MARK_COMMANDS,

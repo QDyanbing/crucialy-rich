@@ -150,6 +150,11 @@ describe("@crucialy-rich/core public API", () => {
       "underline",
       "strike",
     ]);
+    expect(core.TEXT_STYLE_COMMANDS.map((command) => command.name)).toEqual([
+      "setFontSize",
+      "setTextColor",
+      "setBackgroundColor",
+    ]);
     expect(Array.isArray(core.DEFAULT_COMMAND_SHORTCUTS)).toBe(true);
     expect(typeof core.DELETE_SELECTION_COMMAND_NAME).toBe("string");
     expect(typeof core.INSERT_TEXT_COMMAND_NAME).toBe("string");
