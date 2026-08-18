@@ -152,4 +152,118 @@ describe("text style command interaction", () => {
         ?.children[0]?.marks,
     ).toEqual({ bold: true, italic: true });
   });
+
+  it("applies all text style attributes across sibling text nodes", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("跨", { bold: true }),
+        createText("节点", { italic: true, textColor: "#1677ff" }),
+        createText("样式", { underline: true }),
+      ]),
+    ]);
+    const selection = {
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 2], offset: 2 },
+    };
+    const sizeResult = setFontSizeCommand.execute({
+      context: { document, selection },
+      payload: { fontSize: 20 },
+    });
+    const sizedDocument = applyTransaction(document, sizeResult.transaction!);
+    const colorResult = setTextColorCommand.execute({
+      context: { document: sizedDocument, selection: sizeResult.selection },
+      payload: { textColor: "#52C41A" },
+    });
+    const coloredDocument = applyTransaction(sizedDocument, colorResult.transaction!);
+    const backgroundResult = setBackgroundColorCommand.execute({
+      context: { document: coloredDocument, selection: colorResult.selection },
+      payload: { backgroundColor: "#FFF1B8" },
+    });
+    const styledDocument = applyTransaction(
+      coloredDocument,
+      backgroundResult.transaction!,
+    );
+
+    expect(styledDocument.children[0]?.children).toEqual([
+      {
+        marks: {
+          backgroundColor: "#fff1b8",
+          bold: true,
+          fontSize: 20,
+          textColor: "#52c41a",
+        },
+        text: "跨",
+        type: "text",
+      },
+      {
+        marks: {
+          backgroundColor: "#fff1b8",
+          fontSize: 20,
+          italic: true,
+          textColor: "#52c41a",
+        },
+        text: "节点",
+        type: "text",
+      },
+      {
+        marks: {
+          backgroundColor: "#fff1b8",
+          fontSize: 20,
+          textColor: "#52c41a",
+          underline: true,
+        },
+        text: "样式",
+        type: "text",
+      },
+    ]);
+    expect(validateDocument(styledDocument)).toEqual({ errors: [], valid: true });
+  });
+
+  it("normalizes a backward selection before setting an attribute", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("前"),
+        createText("跨节点", { bold: true }),
+        createText("后"),
+      ]),
+    ]);
+    const result = setBackgroundColorCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 2], offset: 1 },
+          focus: { path: [0, 0], offset: 0 },
+        },
+      },
+      payload: { backgroundColor: "#FFE58F" },
+    });
+    const styledDocument = applyTransaction(document, result.transaction!);
+
+    expect(result.transaction?.operations[0]).toMatchObject({
+      attribute: "backgroundColor",
+      range: {
+        anchor: { path: [0, 0], offset: 0 },
+        focus: { path: [0, 2], offset: 1 },
+      },
+      value: "#ffe58f",
+    });
+    expect(styledDocument.children[0]?.children).toEqual([
+      {
+        marks: { backgroundColor: "#ffe58f" },
+        text: "前",
+        type: "text",
+      },
+      {
+        marks: { backgroundColor: "#ffe58f", bold: true },
+        text: "跨节点",
+        type: "text",
+      },
+      {
+        marks: { backgroundColor: "#ffe58f" },
+        text: "后",
+        type: "text",
+      },
+    ]);
+    expect(validateDocument(styledDocument)).toEqual({ errors: [], valid: true });
+  });
 });
