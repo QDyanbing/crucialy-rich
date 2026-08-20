@@ -19,6 +19,7 @@ describe("@crucialy-rich/core public API", () => {
     ]);
     expect(core.LINK_TARGETS).toEqual(["_self", "_blank"]);
     expect(core.LINK_REL_TOKENS).toEqual(["nofollow", "noopener", "noreferrer"]);
+    expect(core.LINK_PROTOCOLS).toEqual(["http:", "https:", "mailto:"]);
     expect(typeof core.addTextMark).toBe("function");
     expect(typeof core.areTextMarksEqual).toBe("function");
     expect(typeof core.getTextMarkAttribute).toBe("function");
@@ -28,6 +29,7 @@ describe("@crucialy-rich/core public API", () => {
     expect(core.MAX_FONT_SIZE).toBe(72);
     expect(typeof core.isValidFontSize).toBe("function");
     expect(typeof core.sanitizeHexColor).toBe("function");
+    expect(typeof core.sanitizeLinkHref).toBe("function");
     expect(typeof core.mergeAdjacentTextNodes).toBe("function");
     expect(typeof core.normalizeTextMarks).toBe("function");
     expect(typeof core.removeTextMark).toBe("function");
