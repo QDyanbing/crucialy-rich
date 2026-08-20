@@ -1,4 +1,5 @@
 import { isBlockNode, isDocumentNode, isTextNode } from "./guards";
+import { isValidLinkMark } from "./link";
 import { isValidTextMarkAttributeValue } from "./marks";
 import {
   TEXT_MARK_ATTRIBUTE_TYPES,
@@ -52,6 +53,17 @@ function validateTextMarks(
       return;
     }
 
+    if (mark === "link") {
+      if (!isValidLinkMark(enabled)) {
+        errors.push({
+          path,
+          message:
+            "text mark link 必须包含安全 href，且 target 和 rel 必须使用受支持的值",
+        });
+      }
+      return;
+    }
+
     if (TEXT_MARK_ATTRIBUTE_TYPE_SET.has(mark)) {
       const attribute = mark as TextMarkAttributeType;
 
@@ -81,7 +93,7 @@ function validateTextMarks(
  * - 根节点必须是 document。
  * - document 的 children 只能是块级节点。
  * - paragraph 的 children 只能是 text 节点。
- * - text 节点的 marks 只能包含受支持的 boolean 或属性值。
+ * - text 节点的 marks 只能包含受支持的 boolean、文字属性或 Link Mark。
  */
 export function validateDocument(value: unknown): ValidationResult {
   const errors: ValidationError[] = [];

@@ -22,6 +22,7 @@ export { isBlockNode, isDocumentNode, isParagraphNode, isTextNode } from "./guar
 export { createDocument, createParagraph, createText } from "./factories";
 export {
   areLinkMarksEqual,
+  isValidLinkMark,
   LINK_PROTOCOLS,
   normalizeLinkMark,
   normalizeLinkRel,

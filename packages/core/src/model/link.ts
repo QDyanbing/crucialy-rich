@@ -10,6 +10,7 @@ export const LINK_PROTOCOLS = ["http:", "https:", "mailto:"] as const;
 const LINK_PROTOCOL_SET = new Set<string>(LINK_PROTOCOLS);
 const LINK_REL_TOKEN_SET = new Set<string>(LINK_REL_TOKENS);
 const LINK_TARGET_SET = new Set<string>(LINK_TARGETS);
+const LINK_MARK_ATTRIBUTE_SET = new Set(["href", "rel", "target"]);
 
 function hasControlCharacter(value: string): boolean {
   return Array.from(value).some((character) => {
@@ -96,6 +97,30 @@ export function normalizeLinkMark(value: unknown): LinkMarkAttributes | undefine
     ...(rel === undefined ? {} : { rel }),
     ...(target === undefined ? {} : { target }),
   };
+}
+
+export function isValidLinkMark(value: unknown): value is LinkMarkAttributes {
+  if (
+    !isRecord(value) ||
+    Object.keys(value).some((key) => !LINK_MARK_ATTRIBUTE_SET.has(key)) ||
+    sanitizeLinkHref(value.href) === undefined
+  ) {
+    return false;
+  }
+
+  if (
+    "target" in value &&
+    value.target !== undefined &&
+    normalizeLinkTarget(value.target) === undefined
+  ) {
+    return false;
+  }
+
+  return (
+    !("rel" in value) ||
+    value.rel === undefined ||
+    normalizeLinkRel(value.rel) !== undefined
+  );
 }
 
 export function areLinkMarksEqual(left: unknown, right: unknown): boolean {
