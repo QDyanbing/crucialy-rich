@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   areLinkMarksEqual,
+  isValidLinkMark,
   LINK_PROTOCOLS,
   normalizeLinkMark,
   normalizeLinkRel,
@@ -122,5 +123,30 @@ describe("normalizeLinkMark", () => {
         { href: "https://example.com/second" },
       ),
     ).toBe(false);
+  });
+});
+
+describe("isValidLinkMark", () => {
+  it.each([
+    { href: "https://example.com" },
+    { href: "mailto:user@example.com", target: "_self" },
+    {
+      href: "https://example.com/docs",
+      rel: "noreferrer noopener",
+      target: "_blank",
+    },
+  ])("accepts a safe link mark", (link) => {
+    expect(isValidLinkMark(link)).toBe(true);
+  });
+
+  it.each([
+    null,
+    {},
+    { href: "javascript:alert(1)" },
+    { href: "https://example.com", target: "popup" },
+    { href: "https://example.com", rel: "sponsored" },
+    { href: "https://example.com", download: true },
+  ])("rejects an invalid link mark: %j", (link) => {
+    expect(isValidLinkMark(link)).toBe(false);
   });
 });

@@ -99,6 +99,24 @@ describe("validateDocument", () => {
     expect(validateDocument(document)).toEqual({ valid: true, errors: [] });
   });
 
+  it("accepts a safe link with text styles", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("文档", {
+          bold: true,
+          link: {
+            href: "https://example.com/docs",
+            rel: "noopener noreferrer",
+            target: "_blank",
+          },
+          textColor: "#1677ff",
+        }),
+      ]),
+    ]);
+
+    expect(validateDocument(document)).toEqual({ errors: [], valid: true });
+  });
+
   it("rejects invalid attribute mark values", () => {
     const result = validateDocument({
       type: "document",
@@ -189,6 +207,51 @@ describe("validateDocument", () => {
         {
           message: "text mark backgroundColor 的值必须是 #RGB 或 #RRGGBB 十六进制颜色",
           path: [0, 0],
+        },
+      ],
+      valid: false,
+    });
+  });
+
+  it("rejects unsafe link href and unsupported attributes", () => {
+    const result = validateDocument({
+      children: [
+        {
+          children: [
+            {
+              marks: { link: { href: "javascript:alert(1)" } },
+              text: "unsafe",
+              type: "text",
+            },
+            {
+              marks: {
+                link: {
+                  href: "https://example.com",
+                  rel: "sponsored",
+                  target: "popup",
+                },
+              },
+              text: "unsupported",
+              type: "text",
+            },
+          ],
+          type: "paragraph",
+        },
+      ],
+      type: "document",
+    });
+
+    expect(result).toEqual({
+      errors: [
+        {
+          message:
+            "text mark link 必须包含安全 href，且 target 和 rel 必须使用受支持的值",
+          path: [0, 0],
+        },
+        {
+          message:
+            "text mark link 必须包含安全 href，且 target 和 rel 必须使用受支持的值",
+          path: [0, 1],
         },
       ],
       valid: false,

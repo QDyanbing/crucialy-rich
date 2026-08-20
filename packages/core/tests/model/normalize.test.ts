@@ -178,6 +178,53 @@ describe("normalizeDocument", () => {
     expect(validateDocument(result).valid).toBe(true);
   });
 
+  it("normalizes safe links and removes unsafe links", () => {
+    const result = normalizeDocument({
+      type: "document",
+      children: [
+        {
+          type: "paragraph",
+          children: [
+            {
+              type: "text",
+              text: "安全链接",
+              marks: {
+                bold: true,
+                link: {
+                  href: "HTTPS://Example.COM/docs",
+                  rel: "noreferrer noopener",
+                  target: "_BLANK",
+                },
+              },
+            },
+            {
+              type: "text",
+              text: "普通文本",
+              marks: { link: { href: "javascript:alert(1)" } },
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(result.children[0]?.children).toEqual([
+      {
+        marks: {
+          bold: true,
+          link: {
+            href: "https://example.com/docs",
+            rel: "noopener noreferrer",
+            target: "_blank",
+          },
+        },
+        text: "安全链接",
+        type: "text",
+      },
+      { text: "普通文本", type: "text" },
+    ]);
+    expect(validateDocument(result).valid).toBe(true);
+  });
+
   it("merges adjacent text nodes with equal marks", () => {
     const result = normalizeDocument({
       type: "document",
