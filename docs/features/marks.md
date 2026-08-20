@@ -1,6 +1,6 @@
 # 文字标记模型
 
-文字标记用于描述 text 节点上的内联格式。第 9 周 Bold 和 Italic 已闭环；第 10 周已完成 boolean mark 叠加规则、Underline 和 Strike；第 11 周已完成属性 Mark 模型、字号、文字颜色和背景色闭环。属性设计详见[文字属性 Mark](./text-style.md)。
+文字标记用于描述 text 节点上的内联格式。第 9 周 Bold 和 Italic 已闭环；第 10 周已完成 boolean mark 叠加规则、Underline 和 Strike；第 11 周已完成字号与颜色属性闭环；第 12 周 Day 1 已加入结构化 Link Mark。属性设计详见[文字属性 Mark](./text-style.md)与[Link Mark](./link.md)。
 
 ## 数据结构
 
@@ -21,7 +21,10 @@ interface TextMarkAttributes {
   backgroundColor: string;
 }
 
-type TextMarks = Partial<Record<TextMarkType, true>> & Partial<TextMarkAttributes>;
+type TextMarks = Partial<Record<TextMarkType, true>> &
+  Partial<TextMarkAttributes> & {
+    link?: LinkMarkAttributes;
+  };
 
 interface TextNode {
   type: "text";
@@ -31,6 +34,8 @@ interface TextNode {
 ```
 
 boolean mark 只记录启用状态，值固定为 `true`；属性 Mark 记录具体值。未启用或未设置的 mark 不写入节点。
+
+`TextMarks` 还包含可选的结构化 `link`，记录安全 href 和可选 target / rel。链接与 boolean mark、字号和颜色可以同时存在。
 
 ## 叠加规则
 
@@ -56,6 +61,8 @@ boolean mark 只记录启用状态，值固定为 `true`；属性 Mark 记录具
 - `getTextMarkAttribute(marks, attribute)`：读取属性值。
 - `setTextMarkAttribute(marks, attribute, value)`：设置属性值并保留其他 mark。
 - `removeTextMarkAttribute(marks, attribute)`：移除指定属性值。
+- `normalizeLinkMark(value)`、`isValidLinkMark(value)`：规范化和校验 Link Mark。
+- `getLinkMark(marks)`、`setLinkMark(marks, link)`、`removeLinkMark(marks)`：读取、设置和移除链接。
 
 ## 校验与规范化
 
@@ -66,6 +73,7 @@ boolean mark 只记录启用状态，值固定为 `true`；属性 Mark 记录具
 - boolean key 只能是 `bold`、`italic`、`underline` 或 `strike`，value 必须是 `true`。
 - 属性 key 只能是 `fontSize`、`textColor` 或 `backgroundColor`，value 必须满足对应的基础约束。
 - `textColor` 和 `backgroundColor` 仅接受 `#RGB` / `#RRGGBB`，规范化后统一存储为小写六位十六进制。
+- `link` 必须包含 HTTP、HTTPS 或 mailto href；target 与 rel 必须来自支持列表。
 
 `normalizeDocument` 会保留合法 mark，丢弃未知 mark、非 `true` mark 和空 mark 集合，并合并相邻同 marks 的 text 节点。规范化后的文档仍能通过 `validateDocument`。
 
@@ -208,3 +216,4 @@ Demo 的“文字标记”样例覆盖普通、加粗、斜体、下划线、删
 - 快捷键当前只提供映射与查询，不包含编辑器事件绑定。
 - 暂未实现跨 paragraph 的 mark 应用策略。
 - 文字属性 command 当前只处理同一 paragraph 内的选区。
+- Link Mark 尚未接入 command、renderer 和 demo。

@@ -18,7 +18,13 @@ type TextMarks = Partial<Record<"bold" | "italic" | "underline" | "strike", true
     fontSize: number;
     textColor: string;
     backgroundColor: string;
-  }>;
+  }> & {
+    link?: {
+      href: string;
+      rel?: string;
+      target?: "_self" | "_blank";
+    };
+  };
 
 interface ParagraphNode {
   type: "paragraph";
@@ -33,7 +39,7 @@ interface DocumentNode {
 
 `BlockNode` 现在等价于 `ParagraphNode`，后续加入 heading、quote、list 等块级节点时再扩展联合类型。
 
-`TextNode.marks` 当前支持 `bold`、`italic`、`underline` 和 `strike` 四个 boolean 标记，以及 `fontSize`、`textColor` 和 `backgroundColor` 三个属性标记。boolean mark 的值固定为 `true`；字号使用 `8–72` 的整数，文字颜色和背景色使用规范化后的六位十六进制字符串；它们可以共存，没有任何有效 mark 时省略 `marks` 字段。
+`TextNode.marks` 当前支持 `bold`、`italic`、`underline` 和 `strike` 四个 boolean 标记，`fontSize`、`textColor` 和 `backgroundColor` 三个文字属性，以及结构化 `link`。Link Mark 包含安全 href 和可选 target / rel；它可以与所有文字样式共存。没有任何有效 mark 时省略 `marks` 字段。
 
 ## 类型判断
 
@@ -80,6 +86,6 @@ interface DocumentNode {
 ## 当前限制
 
 - 只支持 paragraph、text 和 text marks，不支持 heading、list 等。
-- text marks 已完成四种 boolean mark、字号、文字颜色和背景色的模型、command、demo 与 renderer。
+- text marks 已完成四种 boolean mark 和三种文字属性闭环；Link Mark 当前完成模型、sanitize、规范化和校验。
 - 第一版节点不包含 `attrs` 字段，后续新增 heading、link、image 等能力时再引入属性模型。
 - 规范化会丢弃非法节点而不尝试转换，转换策略留待后续。
