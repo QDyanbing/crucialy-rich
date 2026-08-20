@@ -89,7 +89,12 @@ describe("applyInsertText", () => {
 
   it("preserves marks on the inserted text node", () => {
     const document = createDocument([
-      createParagraph([createText("你好", { bold: true })]),
+      createParagraph([
+        createText("你好", {
+          bold: true,
+          link: { href: "https://example.com/docs" },
+        }),
+      ]),
     ]);
     const result = applyInsertText(
       document,
@@ -102,7 +107,10 @@ describe("applyInsertText", () => {
       ),
     );
 
-    expect(result.children[0]?.children[0]?.marks).toEqual({ bold: true });
+    expect(result.children[0]?.children[0]?.marks).toEqual({
+      bold: true,
+      link: { href: "https://example.com/docs" },
+    });
   });
 
   it("throws when the point path does not reference text", () => {

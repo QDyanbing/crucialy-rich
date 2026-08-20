@@ -16,6 +16,11 @@ describe("createHistorySnapshot", () => {
           bold: true,
           fontSize: 16,
           italic: true,
+          link: {
+            href: "https://example.com/docs",
+            rel: "noopener noreferrer",
+            target: "_blank",
+          },
           strike: true,
           textColor: "#1c2520",
           underline: true,
@@ -26,8 +31,12 @@ describe("createHistorySnapshot", () => {
       anchor: { path: [0, 0], offset: 0 },
       focus: { path: [0, 0], offset: 2 },
     };
+    const originalLink = document.children[0]?.children[0]?.marks?.link;
     const snapshot = createHistorySnapshot(document, selection);
 
+    if (originalLink) {
+      originalLink.href = "https://example.com/changed";
+    }
     document.children[0]!.children[0]!.text = "已改";
     document.children[0]!.children[0]!.marks = { italic: true };
     selection.anchor.path[0] = 9;
@@ -39,12 +48,20 @@ describe("createHistorySnapshot", () => {
       bold: true,
       fontSize: 16,
       italic: true,
+      link: {
+        href: "https://example.com/docs",
+        rel: "noopener noreferrer",
+        target: "_blank",
+      },
       strike: true,
       textColor: "#1c2520",
       underline: true,
     });
     expect(snapshot.document.children[0]?.children[0]?.marks).not.toBe(
       document.children[0]?.children[0]?.marks,
+    );
+    expect(snapshot.document.children[0]?.children[0]?.marks?.link).not.toBe(
+      originalLink,
     );
     expect(snapshot.selection).toEqual({
       anchor: { path: [0, 0], offset: 0 },

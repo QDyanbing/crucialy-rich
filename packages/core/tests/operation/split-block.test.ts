@@ -103,6 +103,7 @@ describe("applySplitBlock", () => {
           bold: true,
           fontSize: 16,
           italic: true,
+          link: { href: "https://example.com/docs" },
           textColor: "#1c2520",
         }),
       ]),
@@ -120,6 +121,7 @@ describe("applySplitBlock", () => {
       bold: true,
       fontSize: 16,
       italic: true,
+      link: { href: "https://example.com/docs" },
       textColor: "#1c2520",
     });
     expect(result.children[1]?.children[0]?.marks).toEqual({
@@ -127,6 +129,7 @@ describe("applySplitBlock", () => {
       bold: true,
       fontSize: 16,
       italic: true,
+      link: { href: "https://example.com/docs" },
       textColor: "#1c2520",
     });
   });
