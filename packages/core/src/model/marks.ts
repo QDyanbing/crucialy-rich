@@ -7,6 +7,8 @@ import {
   type TextMarkType,
   type TextNode,
 } from "./types";
+import { areLinkMarksEqual, normalizeLinkMark } from "./link";
+import type { LinkMarkAttributes } from "./types";
 
 export const MIN_FONT_SIZE = 8;
 export const MAX_FONT_SIZE = 72;
@@ -90,6 +92,12 @@ export function normalizeTextMarks(value: unknown): TextMarks | undefined {
     marks.backgroundColor = backgroundColor;
   }
 
+  const link = normalizeLinkMark(value.link);
+
+  if (link !== undefined) {
+    marks.link = link;
+  }
+
   return Object.keys(marks).length > 0 ? marks : undefined;
 }
 
@@ -158,6 +166,26 @@ export function removeTextMarkAttribute(
   return normalizeTextMarks(next);
 }
 
+export function getLinkMark(
+  marks: TextMarks | undefined,
+): LinkMarkAttributes | undefined {
+  return normalizeLinkMark(marks?.link);
+}
+
+export function setLinkMark(
+  marks: TextMarks | undefined,
+  link: LinkMarkAttributes,
+): TextMarks | undefined {
+  return normalizeTextMarks({ ...(marks ?? {}), link });
+}
+
+export function removeLinkMark(marks: TextMarks | undefined): TextMarks | undefined {
+  const next = { ...(normalizeTextMarks(marks) ?? {}) };
+  Reflect.deleteProperty(next, "link");
+
+  return normalizeTextMarks(next);
+}
+
 export function areTextMarksEqual(
   left: TextMarks | undefined,
   right: TextMarks | undefined,
@@ -172,7 +200,8 @@ export function areTextMarksEqual(
     ) &&
     TEXT_MARK_ATTRIBUTE_TYPES.every(
       (attribute) => normalizedLeft?.[attribute] === normalizedRight?.[attribute],
-    )
+    ) &&
+    areLinkMarksEqual(normalizedLeft?.link, normalizedRight?.link)
   );
 }
 

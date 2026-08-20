@@ -21,7 +21,9 @@ export type {
 export { isBlockNode, isDocumentNode, isParagraphNode, isTextNode } from "./guards";
 export { createDocument, createParagraph, createText } from "./factories";
 export {
+  areLinkMarksEqual,
   LINK_PROTOCOLS,
+  normalizeLinkMark,
   normalizeLinkRel,
   normalizeLinkTarget,
   sanitizeLinkHref,
@@ -29,6 +31,7 @@ export {
 export {
   addTextMark,
   areTextMarksEqual,
+  getLinkMark,
   getTextMarkAttribute,
   hasTextMark,
   isValidFontSize,
@@ -36,10 +39,12 @@ export {
   MAX_FONT_SIZE,
   mergeAdjacentTextNodes,
   normalizeTextMarks,
+  removeLinkMark,
   removeTextMarkAttribute,
   removeTextMark,
   sanitizeHexColor,
   MIN_FONT_SIZE,
+  setLinkMark,
   setTextMarkAttribute,
   setTextMark,
   toggleTextMark,

@@ -1,4 +1,9 @@
-import { LINK_REL_TOKENS, LINK_TARGETS, type LinkTarget } from "./types";
+import {
+  LINK_REL_TOKENS,
+  LINK_TARGETS,
+  type LinkMarkAttributes,
+  type LinkTarget,
+} from "./types";
 
 export const LINK_PROTOCOLS = ["http:", "https:", "mailto:"] as const;
 
@@ -12,6 +17,10 @@ function hasControlCharacter(value: string): boolean {
 
     return codePoint !== undefined && (codePoint <= 31 || codePoint === 127);
   });
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 export function sanitizeLinkHref(value: unknown): string | undefined {
@@ -66,4 +75,36 @@ export function normalizeLinkRel(value: unknown): string | undefined {
   const selectedTokens = new Set(tokens);
 
   return LINK_REL_TOKENS.filter((token) => selectedTokens.has(token)).join(" ");
+}
+
+export function normalizeLinkMark(value: unknown): LinkMarkAttributes | undefined {
+  if (!isRecord(value)) {
+    return undefined;
+  }
+
+  const href = sanitizeLinkHref(value.href);
+
+  if (href === undefined) {
+    return undefined;
+  }
+
+  const rel = normalizeLinkRel(value.rel);
+  const target = normalizeLinkTarget(value.target);
+
+  return {
+    href,
+    ...(rel === undefined ? {} : { rel }),
+    ...(target === undefined ? {} : { target }),
+  };
+}
+
+export function areLinkMarksEqual(left: unknown, right: unknown): boolean {
+  const normalizedLeft = normalizeLinkMark(left);
+  const normalizedRight = normalizeLinkMark(right);
+
+  return (
+    normalizedLeft?.href === normalizedRight?.href &&
+    normalizedLeft?.rel === normalizedRight?.rel &&
+    normalizedLeft?.target === normalizedRight?.target
+  );
 }
