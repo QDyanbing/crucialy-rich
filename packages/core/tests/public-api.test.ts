@@ -32,6 +32,7 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.sanitizeLinkHref).toBe("function");
     expect(typeof core.mergeAdjacentTextNodes).toBe("function");
     expect(typeof core.normalizeTextMarks).toBe("function");
+    expect(typeof core.normalizeLinkRel).toBe("function");
     expect(typeof core.normalizeLinkTarget).toBe("function");
     expect(typeof core.removeTextMark).toBe("function");
     expect(typeof core.removeTextMarkAttribute).toBe("function");

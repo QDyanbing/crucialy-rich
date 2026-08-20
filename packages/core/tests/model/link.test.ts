@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { LINK_PROTOCOLS, normalizeLinkTarget, sanitizeLinkHref } from "../../src/model";
+import {
+  LINK_PROTOCOLS,
+  normalizeLinkRel,
+  normalizeLinkTarget,
+  sanitizeLinkHref,
+} from "../../src/model";
 
 describe("sanitizeLinkHref", () => {
   it.each([
@@ -45,6 +50,23 @@ describe("normalizeLinkTarget", () => {
     "rejects unsupported target %s",
     (input) => {
       expect(normalizeLinkTarget(input)).toBeUndefined();
+    },
+  );
+});
+
+describe("normalizeLinkRel", () => {
+  it.each([
+    ["noopener", "noopener"],
+    ["noreferrer   noopener", "noopener noreferrer"],
+    ["NoReferrer NOOPENER nofollow noopener", "nofollow noopener noreferrer"],
+  ])("normalizes %s", (input, expected) => {
+    expect(normalizeLinkRel(input)).toBe(expected);
+  });
+
+  it.each(["", "ugc", "noopener sponsored", 123, null])(
+    "rejects unsupported rel %s",
+    (input) => {
+      expect(normalizeLinkRel(input)).toBeUndefined();
     },
   );
 });
