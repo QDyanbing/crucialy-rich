@@ -53,6 +53,25 @@ describe("model factories", () => {
     expect(text.marks).not.toBe(marks);
   });
 
+  it("creates text with a normalized cloned link mark", () => {
+    const link = {
+      href: "HTTPS://Example.COM/docs",
+      rel: "noreferrer noopener",
+      target: "_blank" as const,
+    };
+    const text = createText("文档", { bold: true, link });
+
+    expect(text.marks).toEqual({
+      bold: true,
+      link: {
+        href: "https://example.com/docs",
+        rel: "noopener noreferrer",
+        target: "_blank",
+      },
+    });
+    expect(text.marks?.link).not.toBe(link);
+  });
+
   it("creates a paragraph with a default empty text", () => {
     const paragraph = createParagraph();
     expect(isParagraphNode(paragraph)).toBe(true);

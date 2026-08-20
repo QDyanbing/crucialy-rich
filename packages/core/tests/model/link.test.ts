@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  areLinkMarksEqual,
   LINK_PROTOCOLS,
+  normalizeLinkMark,
   normalizeLinkRel,
   normalizeLinkTarget,
   sanitizeLinkHref,
@@ -69,4 +71,56 @@ describe("normalizeLinkRel", () => {
       expect(normalizeLinkRel(input)).toBeUndefined();
     },
   );
+});
+
+describe("normalizeLinkMark", () => {
+  it("normalizes href, target, and rel together", () => {
+    expect(
+      normalizeLinkMark({
+        href: " HTTPS://Example.COM/docs ",
+        rel: "NoReferrer noopener noopener",
+        target: " _BLANK ",
+        unknown: true,
+      }),
+    ).toEqual({
+      href: "https://example.com/docs",
+      rel: "noopener noreferrer",
+      target: "_blank",
+    });
+  });
+
+  it("drops optional invalid values but rejects an unsafe href", () => {
+    expect(
+      normalizeLinkMark({
+        href: "mailto:user@example.com",
+        rel: "sponsored",
+        target: "popup",
+      }),
+    ).toEqual({ href: "mailto:user@example.com" });
+    expect(normalizeLinkMark({ href: "javascript:alert(1)" })).toBeUndefined();
+    expect(normalizeLinkMark(null)).toBeUndefined();
+  });
+
+  it("compares canonical link marks", () => {
+    expect(
+      areLinkMarksEqual(
+        {
+          href: "HTTPS://EXAMPLE.COM/docs",
+          rel: "noreferrer noopener",
+          target: "_BLANK",
+        },
+        {
+          href: "https://example.com/docs",
+          rel: "noopener noreferrer",
+          target: "_blank",
+        },
+      ),
+    ).toBe(true);
+    expect(
+      areLinkMarksEqual(
+        { href: "https://example.com/first" },
+        { href: "https://example.com/second" },
+      ),
+    ).toBe(false);
+  });
 });

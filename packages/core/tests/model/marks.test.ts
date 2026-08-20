@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   addTextMark,
   areTextMarksEqual,
+  getLinkMark,
   getTextMarkAttribute,
   hasTextMark,
   isValidFontSize,
@@ -10,9 +11,11 @@ import {
   MAX_FONT_SIZE,
   mergeAdjacentTextNodes,
   normalizeTextMarks,
+  removeLinkMark,
   removeTextMarkAttribute,
   removeTextMark,
   sanitizeHexColor,
+  setLinkMark,
   setTextMarkAttribute,
   setTextMark,
   toggleTextMark,
@@ -350,6 +353,88 @@ describe("background color model rules", () => {
       {
         marks: { backgroundColor: "#ffffff" },
         text: "背景",
+        type: "text",
+      },
+    ]);
+  });
+});
+
+describe("link mark model rules", () => {
+  it("sets, gets, and removes a link without changing other marks", () => {
+    const marks = setLinkMark(
+      { bold: true, fontSize: 18 },
+      {
+        href: "HTTPS://Example.COM/docs",
+        rel: "noreferrer noopener",
+        target: "_blank",
+      },
+    );
+
+    expect(marks).toEqual({
+      bold: true,
+      fontSize: 18,
+      link: {
+        href: "https://example.com/docs",
+        rel: "noopener noreferrer",
+        target: "_blank",
+      },
+    });
+    expect(getLinkMark(marks)).toEqual(marks?.link);
+    expect(removeLinkMark(marks)).toEqual({ bold: true, fontSize: 18 });
+  });
+
+  it("drops an unsafe link while preserving other marks", () => {
+    expect(
+      normalizeTextMarks({
+        italic: true,
+        link: { href: "javascript:alert(1)" },
+      }),
+    ).toEqual({ italic: true });
+  });
+
+  it("merges adjacent nodes only when normalized links match", () => {
+    expect(
+      mergeAdjacentTextNodes([
+        {
+          marks: {
+            link: {
+              href: "HTTPS://Example.COM/docs",
+              rel: "noreferrer noopener",
+            },
+          },
+          text: "链",
+          type: "text",
+        },
+        {
+          marks: {
+            link: {
+              href: "https://example.com/docs",
+              rel: "noopener noreferrer",
+            },
+          },
+          text: "接",
+          type: "text",
+        },
+        {
+          marks: { link: { href: "https://example.com/other" } },
+          text: "其他",
+          type: "text",
+        },
+      ]),
+    ).toEqual([
+      {
+        marks: {
+          link: {
+            href: "https://example.com/docs",
+            rel: "noopener noreferrer",
+          },
+        },
+        text: "链接",
+        type: "text",
+      },
+      {
+        marks: { link: { href: "https://example.com/other" } },
+        text: "其他",
         type: "text",
       },
     ]);

@@ -21,8 +21,10 @@ describe("@crucialy-rich/core public API", () => {
     expect(core.LINK_REL_TOKENS).toEqual(["nofollow", "noopener", "noreferrer"]);
     expect(core.LINK_PROTOCOLS).toEqual(["http:", "https:", "mailto:"]);
     expect(typeof core.addTextMark).toBe("function");
+    expect(typeof core.areLinkMarksEqual).toBe("function");
     expect(typeof core.areTextMarksEqual).toBe("function");
     expect(typeof core.getTextMarkAttribute).toBe("function");
+    expect(typeof core.getLinkMark).toBe("function");
     expect(typeof core.hasTextMark).toBe("function");
     expect(typeof core.isValidTextMarkAttributeValue).toBe("function");
     expect(core.MIN_FONT_SIZE).toBe(8);
@@ -33,10 +35,13 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.mergeAdjacentTextNodes).toBe("function");
     expect(typeof core.normalizeTextMarks).toBe("function");
     expect(typeof core.normalizeLinkRel).toBe("function");
+    expect(typeof core.normalizeLinkMark).toBe("function");
     expect(typeof core.normalizeLinkTarget).toBe("function");
     expect(typeof core.removeTextMark).toBe("function");
+    expect(typeof core.removeLinkMark).toBe("function");
     expect(typeof core.removeTextMarkAttribute).toBe("function");
     expect(typeof core.setTextMarkAttribute).toBe("function");
+    expect(typeof core.setLinkMark).toBe("function");
     expect(typeof core.setTextMark).toBe("function");
     expect(typeof core.toggleTextMark).toBe("function");
     expect(typeof core.validateDocument).toBe("function");
