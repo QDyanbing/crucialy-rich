@@ -13,6 +13,7 @@
   - 字号 `8–72` 边界、属性 operation、`setFontSize` command、取消字号、安全 HTML/React 渲染和 selection 映射。
   - 十六进制颜色 sanitize、`setTextColor` command、取消文字颜色、字号与 boolean mark 组合、安全 HTML/React 渲染和 selection 映射。
   - `setBackgroundColor` command、取消背景色、与文字颜色共存、非法背景色拒绝、安全 HTML/React 渲染和 selection 映射。
+  - Link Mark 类型、HTTP/HTTPS/mailto URL sanitize、target/rel 规范化、helper、校验、模型修复、节点合并、编辑保留和 History 深拷贝。
   - Path、Point、RangeSelection、段落 text offset 和文本切片工具。
   - 基础渲染器、四种 boolean mark、字号、文字颜色与背景色 HTML 输出、组合样式、HTML 序列化、DOM 与模型位置映射和选区同步。
   - React 组件 `value`、`defaultValue`、`onChange` 和 `onTransaction` 初始渲染契约。
