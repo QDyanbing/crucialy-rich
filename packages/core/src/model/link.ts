@@ -1,6 +1,9 @@
+import { LINK_TARGETS, type LinkTarget } from "./types";
+
 export const LINK_PROTOCOLS = ["http:", "https:", "mailto:"] as const;
 
 const LINK_PROTOCOL_SET = new Set<string>(LINK_PROTOCOLS);
+const LINK_TARGET_SET = new Set<string>(LINK_TARGETS);
 
 function hasControlCharacter(value: string): boolean {
   return Array.from(value).some((character) => {
@@ -36,4 +39,14 @@ export function sanitizeLinkHref(value: unknown): string | undefined {
   } catch {
     return undefined;
   }
+}
+
+export function normalizeLinkTarget(value: unknown): LinkTarget | undefined {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  const target = value.trim().toLowerCase();
+
+  return LINK_TARGET_SET.has(target) ? (target as LinkTarget) : undefined;
 }

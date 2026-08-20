@@ -20,7 +20,7 @@ export type {
 } from "./types";
 export { isBlockNode, isDocumentNode, isParagraphNode, isTextNode } from "./guards";
 export { createDocument, createParagraph, createText } from "./factories";
-export { LINK_PROTOCOLS, sanitizeLinkHref } from "./link";
+export { LINK_PROTOCOLS, normalizeLinkTarget, sanitizeLinkHref } from "./link";
 export {
   addTextMark,
   areTextMarksEqual,
