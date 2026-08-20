@@ -17,6 +17,8 @@ describe("@crucialy-rich/core public API", () => {
       "textColor",
       "backgroundColor",
     ]);
+    expect(core.LINK_TARGETS).toEqual(["_self", "_blank"]);
+    expect(core.LINK_REL_TOKENS).toEqual(["nofollow", "noopener", "noreferrer"]);
     expect(typeof core.addTextMark).toBe("function");
     expect(typeof core.areTextMarksEqual).toBe("function");
     expect(typeof core.getTextMarkAttribute).toBe("function");

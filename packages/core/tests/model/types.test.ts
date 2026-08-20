@@ -1,9 +1,14 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  LINK_REL_TOKENS,
+  LINK_TARGETS,
   TEXT_MARK_ATTRIBUTE_TYPES,
   TEXT_MARK_TYPES,
   type DocumentNode,
+  type LinkMarkAttributes,
+  type LinkRelToken,
+  type LinkTarget,
   type ParagraphNode,
   type TextMarkAttributes,
   type TextMarkAttributeType,
@@ -65,5 +70,25 @@ describe("model node types", () => {
     expect(text.marks?.bold).toBe(true);
     expect(text.marks?.textColor).toBe("#1c2520");
     expect(text.marks?.backgroundColor).toBe("#fff4cc");
+  });
+
+  it("describes a structured link mark", () => {
+    const target: LinkTarget = "_blank";
+    const relToken: LinkRelToken = "noopener";
+    const link: LinkMarkAttributes = {
+      href: "https://example.com/docs",
+      rel: `${relToken} noreferrer`,
+      target,
+    };
+    const text: TextNode = {
+      marks: { bold: true, link },
+      text: "Documentation",
+      type: "text",
+    };
+
+    expect(LINK_TARGETS).toEqual(["_self", "_blank"]);
+    expect(LINK_REL_TOKENS).toEqual(["nofollow", "noopener", "noreferrer"]);
+    expect(text.marks?.link).toEqual(link);
+    expect(text.marks?.bold).toBe(true);
   });
 });
