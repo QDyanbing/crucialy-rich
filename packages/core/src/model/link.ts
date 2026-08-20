@@ -1,8 +1,9 @@
-import { LINK_TARGETS, type LinkTarget } from "./types";
+import { LINK_REL_TOKENS, LINK_TARGETS, type LinkTarget } from "./types";
 
 export const LINK_PROTOCOLS = ["http:", "https:", "mailto:"] as const;
 
 const LINK_PROTOCOL_SET = new Set<string>(LINK_PROTOCOLS);
+const LINK_REL_TOKEN_SET = new Set<string>(LINK_REL_TOKENS);
 const LINK_TARGET_SET = new Set<string>(LINK_TARGETS);
 
 function hasControlCharacter(value: string): boolean {
@@ -49,4 +50,20 @@ export function normalizeLinkTarget(value: unknown): LinkTarget | undefined {
   const target = value.trim().toLowerCase();
 
   return LINK_TARGET_SET.has(target) ? (target as LinkTarget) : undefined;
+}
+
+export function normalizeLinkRel(value: unknown): string | undefined {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  const tokens = value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+
+  if (tokens.length === 0 || tokens.some((token) => !LINK_REL_TOKEN_SET.has(token))) {
+    return undefined;
+  }
+
+  const selectedTokens = new Set(tokens);
+
+  return LINK_REL_TOKENS.filter((token) => selectedTokens.has(token)).join(" ");
 }
