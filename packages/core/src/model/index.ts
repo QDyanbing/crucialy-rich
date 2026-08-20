@@ -1,7 +1,15 @@
-export { TEXT_MARK_ATTRIBUTE_TYPES, TEXT_MARK_TYPES } from "./types";
+export {
+  LINK_REL_TOKENS,
+  LINK_TARGETS,
+  TEXT_MARK_ATTRIBUTE_TYPES,
+  TEXT_MARK_TYPES,
+} from "./types";
 export type {
   BlockNode,
   DocumentNode,
+  LinkMarkAttributes,
+  LinkRelToken,
+  LinkTarget,
   Node,
   ParagraphNode,
   TextMarkAttributes,

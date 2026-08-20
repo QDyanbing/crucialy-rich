@@ -13,9 +13,23 @@ export const TEXT_MARK_ATTRIBUTE_TYPES = [
   "backgroundColor",
 ] as const;
 
+export const LINK_TARGETS = ["_self", "_blank"] as const;
+
+export const LINK_REL_TOKENS = ["nofollow", "noopener", "noreferrer"] as const;
+
 export type TextMarkType = (typeof TEXT_MARK_TYPES)[number];
 
 export type TextMarkAttributeType = (typeof TEXT_MARK_ATTRIBUTE_TYPES)[number];
+
+export type LinkTarget = (typeof LINK_TARGETS)[number];
+
+export type LinkRelToken = (typeof LINK_REL_TOKENS)[number];
+
+export interface LinkMarkAttributes {
+  href: string;
+  rel?: string;
+  target?: LinkTarget;
+}
 
 export interface TextMarkAttributes {
   fontSize: number;
@@ -24,7 +38,9 @@ export interface TextMarkAttributes {
 }
 
 export type TextMarks = Partial<Record<TextMarkType, true>> &
-  Partial<TextMarkAttributes>;
+  Partial<TextMarkAttributes> & {
+    link?: LinkMarkAttributes;
+  };
 
 export interface TextNode {
   type: "text";
