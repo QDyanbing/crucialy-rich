@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { LINK_PROTOCOLS, sanitizeLinkHref } from "../../src/model";
+import { LINK_PROTOCOLS, normalizeLinkTarget, sanitizeLinkHref } from "../../src/model";
 
 describe("sanitizeLinkHref", () => {
   it.each([
@@ -30,4 +30,21 @@ describe("sanitizeLinkHref", () => {
   it("exposes the supported protocols", () => {
     expect(LINK_PROTOCOLS).toEqual(["http:", "https:", "mailto:"]);
   });
+});
+
+describe("normalizeLinkTarget", () => {
+  it.each([
+    ["_self", "_self"],
+    ["_blank", "_blank"],
+    ["  _BLANK  ", "_blank"],
+  ])("normalizes %s", (input, expected) => {
+    expect(normalizeLinkTarget(input)).toBe(expected);
+  });
+
+  it.each(["_parent", "_top", "blank", "", 123, null])(
+    "rejects unsupported target %s",
+    (input) => {
+      expect(normalizeLinkTarget(input)).toBeUndefined();
+    },
+  );
 });
