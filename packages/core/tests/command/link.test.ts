@@ -7,6 +7,7 @@ import {
   createDocument,
   createParagraph,
   createText,
+  isLinkCommandActive,
   SET_LINK_COMMAND_NAME,
   setLinkCommand,
   UNSET_LINK_COMMAND_NAME,
@@ -204,5 +205,87 @@ describe("unsetLinkCommand", () => {
       reason: "Unset link command requires linked text in a non-collapsed selection.",
       status: "skipped",
     });
+  });
+});
+
+describe("link command state", () => {
+  it("is active only when every selected text part has a link", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("已链接", { link: { href: "https://example.com/" } }),
+        createText("普通"),
+      ]),
+    ]);
+
+    expect(
+      isLinkCommandActive({
+        context: {
+          document,
+          selection: {
+            anchor: { path: [0, 0], offset: 0 },
+            focus: { path: [0, 0], offset: 3 },
+          },
+        },
+      }),
+    ).toBe(true);
+    expect(
+      isLinkCommandActive({
+        context: {
+          document,
+          selection: {
+            anchor: { path: [0, 0], offset: 0 },
+            focus: { path: [0, 1], offset: 2 },
+          },
+        },
+      }),
+    ).toBe(false);
+  });
+
+  it("disables link commands for collapsed selections", () => {
+    const document = createDocument([
+      createParagraph([createText("链接", { link: { href: "https://example.com/" } })]),
+    ]);
+    const input = {
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 1 },
+          focus: { path: [0, 0], offset: 1 },
+        },
+      },
+      payload: { href: "https://example.com/next" },
+    };
+
+    expect(canExecuteSetLinkCommand(input)).toBe(false);
+    expect(canExecuteUnsetLinkCommand(input)).toBe(false);
+    expect(isLinkCommandActive(input)).toBe(false);
+    expect(setLinkCommand.execute(input).status).toBe("skipped");
+    expect(unsetLinkCommand.execute(input).status).toBe("skipped");
+  });
+
+  it("disables link commands across paragraphs", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("第一段", { link: { href: "https://example.com/" } }),
+      ]),
+      createParagraph([
+        createText("第二段", { link: { href: "https://example.com/" } }),
+      ]),
+    ]);
+    const input = {
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [1, 0], offset: 2 },
+        },
+      },
+      payload: { href: "https://example.com/next" },
+    };
+
+    expect(canExecuteSetLinkCommand(input)).toBe(false);
+    expect(canExecuteUnsetLinkCommand(input)).toBe(false);
+    expect(setLinkCommand.execute(input).status).toBe("skipped");
+    expect(unsetLinkCommand.execute(input).status).toBe("skipped");
   });
 });
