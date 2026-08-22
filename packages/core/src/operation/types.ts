@@ -1,4 +1,9 @@
-import type { TextMarkAttributes, TextMarkAttributeType, TextMarkType } from "../model";
+import type {
+  LinkMarkAttributes,
+  TextMarkAttributes,
+  TextMarkAttributeType,
+  TextMarkType,
+} from "../model";
 import type { Point, RangeSelection } from "../selection";
 
 export const OPERATION_TYPES = [
@@ -6,6 +11,7 @@ export const OPERATION_TYPES = [
   "delete_text",
   "toggle_mark",
   "set_mark_attribute",
+  "set_link",
   "split_block",
   "merge_block",
 ] as const;
@@ -38,6 +44,12 @@ export interface SetMarkAttributeOperation<
   value: TextMarkAttributes[TAttribute] | null;
 }
 
+export interface SetLinkOperation {
+  link: LinkMarkAttributes | null;
+  range: RangeSelection;
+  type: "set_link";
+}
+
 export interface SplitBlockOperation {
   point: Point;
   type: "split_block";
@@ -52,6 +64,7 @@ export type Operation =
   | DeleteTextOperation
   | InsertTextOperation
   | MergeBlockOperation
+  | SetLinkOperation
   | SetMarkAttributeOperation
   | SplitBlockOperation
   | ToggleMarkOperation;

@@ -7,6 +7,7 @@ import type {
   MergeBlockOperation,
   Operation,
   OperationType,
+  SetLinkOperation,
   SetMarkAttributeOperation,
   SplitBlockOperation,
   ToggleMarkOperation,
@@ -16,6 +17,7 @@ import type {
 export type TextOperation =
   | DeleteTextOperation
   | InsertTextOperation
+  | SetLinkOperation
   | SetMarkAttributeOperation
   | ToggleMarkOperation;
 
@@ -30,6 +32,7 @@ export interface OperationSummary {
   textLength?: number;
   type: OperationType;
   value?: number | string | null;
+  linkHref?: string | null;
 }
 
 export interface TransactionSummary {
@@ -46,6 +49,7 @@ export const TEXT_OPERATION_TYPES = [
   "delete_text",
   "toggle_mark",
   "set_mark_attribute",
+  "set_link",
 ] as const satisfies readonly OperationType[];
 
 export const BLOCK_OPERATION_TYPES = [
@@ -58,6 +62,7 @@ export function isTextOperation(operation: Operation): operation is TextOperatio
     operation.type === "insert_text" ||
     operation.type === "delete_text" ||
     operation.type === "set_mark_attribute" ||
+    operation.type === "set_link" ||
     operation.type === "toggle_mark"
   );
 }
@@ -109,6 +114,18 @@ export function summarizeOperation(operation: Operation): OperationSummary {
         textLength: range.focus.offset - range.anchor.offset,
         type: "set_mark_attribute",
         value: operation.value,
+      };
+    }
+    case "set_link": {
+      const range = normalizeRange(operation.range);
+
+      return {
+        collapsedRange: isCollapsed(range),
+        linkHref: operation.link?.href ?? null,
+        scope: "text",
+        targetPath: [...range.anchor.path],
+        textLength: range.focus.offset - range.anchor.offset,
+        type: "set_link",
       };
     }
     case "merge_block":

@@ -26,6 +26,11 @@ export {
   createSetMarkAttributeOperation,
 } from "./set-mark-attribute";
 export {
+  applySetLink,
+  createSelectionAfterSetLink,
+  createSetLinkOperation,
+} from "./set-link";
+export {
   applyToggleMark,
   createSelectionAfterToggleMark,
   createToggleMarkOperation,
@@ -55,6 +60,7 @@ export type {
   InsertTextOperation,
   MergeBlockOperation,
   Operation,
+  SetLinkOperation,
   SetMarkAttributeOperation,
   SplitBlockOperation,
   ToggleMarkOperation,
