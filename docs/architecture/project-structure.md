@@ -35,7 +35,7 @@
 
 ## 包职责
 
-- `packages/core`：富文本内核包，当前承载文档模型、四种 boolean marks、三种文字属性闭环、Link Mark 模型与 URL sanitize、mark 快捷键、同 paragraph 跨 text 的 Mark 切分与合并、规范化、模型选区、DOM 映射、选区同步、operation、Transaction、输入 helper、Command 系统和 History；后续继续实现链接 command/渲染、跨 paragraph mark、解析器和序列化器。
+- `packages/core`：富文本内核包，当前承载文档模型、四种 boolean marks、三种文字属性闭环、Link Mark 与 URL sanitize、链接设置/取消 command、mark 快捷键、同 paragraph 跨 text 的 Mark 切分与合并、规范化、模型选区、DOM 映射、选区同步、operation、Transaction、输入 helper、Command 系统和 History；后续继续实现链接渲染/交互、跨 paragraph mark、解析器和序列化器。
 - `packages/react`：React 集成层，当前提供可渲染 `value` / `defaultValue` 的 `RichTextEditor`，并接入普通文本输入、Backspace、Delete、Enter、command 复用和 `onTransaction` 回调；后续承载工具栏和菜单。
 - `apps/demo`：开发与验收入口，当前展示文档模型 JSON、React 组件示例、渲染边界、选区调试、基础编辑闭环、四种 boolean mark 中文样例和 active 状态、字号、文字颜色与背景色控件、command 状态、真实输入 History 与撤销重做验收。
 - `tests/e2e`：浏览器级冒烟测试、演示验收和后续关键交互测试。
