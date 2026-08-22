@@ -4,14 +4,24 @@ import {
   applyTransaction,
   canExecuteSetLinkCommand,
   canExecuteUnsetLinkCommand,
+  createDefaultCommandRegistry,
   createDocument,
+  createHistorySnapshot,
+  createHistoryState,
   createParagraph,
   createText,
+  createTransactionAcceptanceReport,
+  executeCommand,
   isLinkCommandActive,
+  queryCommandState,
+  recordHistory,
+  redoHistory,
   SET_LINK_COMMAND_NAME,
   setLinkCommand,
+  summarizeOperation,
   UNSET_LINK_COMMAND_NAME,
   unsetLinkCommand,
+  undoHistory,
 } from "../../src";
 
 describe("setLinkCommand", () => {
@@ -287,5 +297,76 @@ describe("link command state", () => {
     expect(canExecuteUnsetLinkCommand(input)).toBe(false);
     expect(setLinkCommand.execute(input).status).toBe("skipped");
     expect(unsetLinkCommand.execute(input).status).toBe("skipped");
+  });
+});
+
+describe("link command integration", () => {
+  it("runs through the default registry and history lifecycle", () => {
+    const registry = createDefaultCommandRegistry();
+    const document = createDocument([createParagraph([createText("项目文档")])]);
+    const selection = {
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 4 },
+    };
+    const input = {
+      context: { document, selection },
+      payload: { href: "https://example.com/docs" },
+    };
+
+    expect(queryCommandState(registry, SET_LINK_COMMAND_NAME, input)).toEqual({
+      active: false,
+      commandName: SET_LINK_COMMAND_NAME,
+      disabled: false,
+      registered: true,
+    });
+
+    const result = executeCommand(registry, SET_LINK_COMMAND_NAME, input);
+
+    if (!result.transaction || !result.selection) {
+      throw new Error("Set link command should return a transaction and selection.");
+    }
+
+    const linkedDocument = applyTransaction(document, result.transaction);
+    const acceptance = createTransactionAcceptanceReport(document, result.transaction);
+    const history = recordHistory({
+      after: createHistorySnapshot(linkedDocument, result.selection),
+      before: createHistorySnapshot(document, selection),
+      history: createHistoryState(),
+      transaction: result.transaction,
+    });
+    const undone = undoHistory(history);
+    const redone = undone ? redoHistory(undone.history) : undefined;
+
+    expect(acceptance).toMatchObject({
+      ok: true,
+      transaction: {
+        operationCount: 1,
+        operationTypes: ["set_link"],
+        textOperationCount: 1,
+      },
+    });
+    expect(summarizeOperation(result.transaction.operations[0]!)).toEqual({
+      collapsedRange: false,
+      linkHref: "https://example.com/docs",
+      scope: "text",
+      targetPath: [0, 0],
+      textLength: 4,
+      type: "set_link",
+    });
+    expect(undone?.document).toEqual(document);
+    expect(redone?.document).toEqual(linkedDocument);
+    expect(
+      queryCommandState(registry, UNSET_LINK_COMMAND_NAME, {
+        context: {
+          document: linkedDocument,
+          selection: result.selection,
+        },
+      }),
+    ).toEqual({
+      active: true,
+      commandName: UNSET_LINK_COMMAND_NAME,
+      disabled: false,
+      registered: true,
+    });
   });
 });

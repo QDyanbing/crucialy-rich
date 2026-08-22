@@ -100,6 +100,9 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.createSetMarkAttributeOperation).toBe("function");
     expect(typeof core.applySetMarkAttribute).toBe("function");
     expect(typeof core.createSelectionAfterSetMarkAttribute).toBe("function");
+    expect(typeof core.createSetLinkOperation).toBe("function");
+    expect(typeof core.applySetLink).toBe("function");
+    expect(typeof core.createSelectionAfterSetLink).toBe("function");
     expect(typeof core.createTransaction).toBe("function");
     expect(typeof core.applyOperation).toBe("function");
     expect(typeof core.applyTransaction).toBe("function");
@@ -108,6 +111,7 @@ describe("@crucialy-rich/core public API", () => {
       "delete_text",
       "toggle_mark",
       "set_mark_attribute",
+      "set_link",
       "split_block",
       "merge_block",
     ]);
@@ -167,17 +171,23 @@ describe("@crucialy-rich/core public API", () => {
       "setTextColor",
       "setBackgroundColor",
     ]);
+    expect(core.LINK_COMMANDS.map((command) => command.name)).toEqual([
+      "setLink",
+      "unsetLink",
+    ]);
     expect(Array.isArray(core.DEFAULT_COMMAND_SHORTCUTS)).toBe(true);
     expect(typeof core.DELETE_SELECTION_COMMAND_NAME).toBe("string");
     expect(typeof core.INSERT_TEXT_COMMAND_NAME).toBe("string");
     expect(typeof core.ITALIC_COMMAND_NAME).toBe("string");
     expect(typeof core.MERGE_BLOCK_COMMAND_NAME).toBe("string");
     expect(typeof core.SET_BACKGROUND_COLOR_COMMAND_NAME).toBe("string");
+    expect(typeof core.SET_LINK_COMMAND_NAME).toBe("string");
     expect(typeof core.SPLIT_BLOCK_COMMAND_NAME).toBe("string");
     expect(typeof core.STRIKE_COMMAND_NAME).toBe("string");
     expect(typeof core.SET_FONT_SIZE_COMMAND_NAME).toBe("string");
     expect(typeof core.SET_TEXT_COLOR_COMMAND_NAME).toBe("string");
     expect(typeof core.UNDERLINE_COMMAND_NAME).toBe("string");
+    expect(typeof core.UNSET_LINK_COMMAND_NAME).toBe("string");
     expect(typeof core.canExecuteBoldCommand).toBe("function");
     expect(typeof core.canExecuteCommand).toBe("function");
     expect(typeof core.canExecuteDeleteSelectionCommand).toBe("function");
@@ -185,12 +195,14 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.canExecuteItalicCommand).toBe("function");
     expect(typeof core.canExecuteMergeBlockCommand).toBe("function");
     expect(typeof core.canExecuteSetBackgroundColorCommand).toBe("function");
+    expect(typeof core.canExecuteSetLinkCommand).toBe("function");
     expect(typeof core.canExecuteSplitBlockCommand).toBe("function");
     expect(typeof core.canExecuteStrikeCommand).toBe("function");
     expect(typeof core.canExecuteSetFontSizeCommand).toBe("function");
     expect(typeof core.canExecuteSetTextColorCommand).toBe("function");
     expect(typeof core.canExecuteTextMarkCommand).toBe("function");
     expect(typeof core.canExecuteUnderlineCommand).toBe("function");
+    expect(typeof core.canExecuteUnsetLinkCommand).toBe("function");
     expect(typeof core.createCommandFailure).toBe("function");
     expect(typeof core.createDefaultCommandRegistry).toBe("function");
     expect(typeof core.createCommandRegistry).toBe("function");
@@ -205,6 +217,8 @@ describe("@crucialy-rich/core public API", () => {
       "setFontSize",
       "setTextColor",
       "setBackgroundColor",
+      "setLink",
+      "unsetLink",
       "deleteSelection",
       "insertText",
       "mergeBlock",
@@ -218,6 +232,7 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.insertTextCommand).toBe("object");
     expect(typeof core.isBoldCommandActive).toBe("function");
     expect(typeof core.isItalicCommandActive).toBe("function");
+    expect(typeof core.isLinkCommandActive).toBe("function");
     expect(typeof core.isStrikeCommandActive).toBe("function");
     expect(typeof core.isTextMarkCommandActive).toBe("function");
     expect(typeof core.isUnderlineCommandActive).toBe("function");
@@ -229,6 +244,8 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.setFontSizeCommand).toBe("object");
     expect(typeof core.setBackgroundColorCommand).toBe("object");
     expect(typeof core.setTextColorCommand).toBe("object");
+    expect(typeof core.setLinkCommand).toBe("object");
     expect(typeof core.underlineCommand).toBe("object");
+    expect(typeof core.unsetLinkCommand).toBe("object");
   });
 });

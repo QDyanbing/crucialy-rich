@@ -6,6 +6,7 @@ import {
   createInsertTextOperation,
   createMergeBlockOperation,
   createSetMarkAttributeOperation,
+  createSetLinkOperation,
   createSplitBlockOperation,
   createToggleMarkOperation,
   createTransaction,
@@ -24,6 +25,7 @@ describe("operation type registry", () => {
       "delete_text",
       "toggle_mark",
       "set_mark_attribute",
+      "set_link",
       "split_block",
       "merge_block",
     ]);
@@ -32,6 +34,7 @@ describe("operation type registry", () => {
       "delete_text",
       "toggle_mark",
       "set_mark_attribute",
+      "set_link",
     ]);
     expect(BLOCK_OPERATION_TYPES).toEqual(["split_block", "merge_block"]);
   });
@@ -62,11 +65,19 @@ describe("operation scope classification", () => {
       "fontSize",
       18,
     );
+    const setLinkOperation = createSetLinkOperation(
+      {
+        anchor: { path: [0, 0], offset: 0 },
+        focus: { path: [0, 0], offset: 1 },
+      },
+      { href: "https://example.com/docs" },
+    );
 
     expect(isTextOperation(insertOperation)).toBe(true);
     expect(isTextOperation(deleteOperation)).toBe(true);
     expect(isTextOperation(toggleMarkOperation)).toBe(true);
     expect(isTextOperation(setMarkAttributeOperation)).toBe(true);
+    expect(isTextOperation(setLinkOperation)).toBe(true);
     expect(isBlockOperation(insertOperation)).toBe(false);
   });
 
@@ -176,6 +187,25 @@ describe("summarizeOperation", () => {
       value: 18,
     });
   });
+
+  it("summarizes link operations", () => {
+    const operation = createSetLinkOperation(
+      {
+        anchor: { path: [0, 0], offset: 4 },
+        focus: { path: [0, 0], offset: 1 },
+      },
+      { href: "https://example.com/docs" },
+    );
+
+    expect(summarizeOperation(operation)).toEqual({
+      collapsedRange: false,
+      linkHref: "https://example.com/docs",
+      scope: "text",
+      targetPath: [0, 0],
+      textLength: 3,
+      type: "set_link",
+    });
+  });
 });
 
 describe("summarizeTransaction", () => {
@@ -201,6 +231,13 @@ describe("summarizeTransaction", () => {
         "fontSize",
         18,
       ),
+      createSetLinkOperation(
+        {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [0, 0], offset: 1 },
+        },
+        { href: "https://example.com/docs" },
+      ),
       createSplitBlockOperation({ path: [0, 0], offset: 2 }),
       createMergeBlockOperation({ path: [1, 0], offset: 0 }),
     ]);
@@ -209,16 +246,17 @@ describe("summarizeTransaction", () => {
       blockOperationCount: 2,
       hasBlockOperations: true,
       hasTextOperations: true,
-      operationCount: 6,
+      operationCount: 7,
       operationTypes: [
         "insert_text",
         "delete_text",
         "toggle_mark",
         "set_mark_attribute",
+        "set_link",
         "split_block",
         "merge_block",
       ],
-      textOperationCount: 4,
+      textOperationCount: 5,
     });
   });
 
