@@ -101,6 +101,7 @@ h3 {
 
 .editor-surface,
 .debug-panel {
+  min-width: 0;
   min-height: 560px;
   border: 1px solid #d9ded8;
   border-radius: 8px;
@@ -176,6 +177,53 @@ h3 {
 
 .operation-controls label {
   grid-column: 1 / -1;
+}
+
+.link-control {
+  position: relative;
+  min-width: 0;
+}
+
+.link-control > button {
+  width: 100%;
+}
+
+.link-control > button[aria-expanded="true"] {
+  border-color: #3c6e50;
+  background: #e9f4ed;
+  color: #173c25;
+}
+
+.link-popover {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 8px);
+  right: 0;
+  display: grid;
+  gap: 12px;
+  width: 320px;
+  max-width: calc(100vw - 48px);
+  border: 1px solid #b9c8bd;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 18px 40px rgb(26 36 30 / 18%);
+  padding: 16px;
+}
+
+.link-popover-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.link-popover-actions button:last-child:not(:disabled) {
+  border-color: #315c43;
+  background: #315c43;
+  color: #ffffff;
+}
+
+.link-popover-actions button:last-child:not(:disabled):hover {
+  background: #254b35;
 }
 
 .color-control input[type="color"] {
@@ -512,5 +560,13 @@ input {
   .editor-surface,
   .debug-panel {
     min-height: 360px;
+  }
+
+  .link-popover {
+    position: static;
+    width: 100%;
+    max-width: none;
+    margin-top: 8px;
+    box-shadow: none;
   }
 }
