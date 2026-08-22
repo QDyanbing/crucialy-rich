@@ -51,6 +51,22 @@ export function createSetLinkOperation(
   };
 }
 
+function normalizeOperationLink(
+  link: LinkMarkAttributes | null,
+): LinkMarkAttributes | null {
+  if (link === null) {
+    return null;
+  }
+
+  const normalizedLink = normalizeLinkMark(link);
+
+  if (normalizedLink === undefined) {
+    throw new RangeError("invalid link mark");
+  }
+
+  return normalizedLink;
+}
+
 function getUpdatedMarks(
   marks: TextMarks | undefined,
   link: LinkMarkAttributes | null,
@@ -135,6 +151,7 @@ export function applySetLink(
   operation: SetLinkOperation,
 ): DocumentNode {
   const target = getTextMarkRangeTarget(document, operation.range, "set link");
+  const link = normalizeOperationLink(operation.link);
 
   return {
     ...document,
@@ -144,7 +161,7 @@ export function applySetLink(
             ...block,
             children: mergeAdjacentTextNodes([
               ...block.children.slice(0, target.startTextIndex),
-              ...createRangeReplacement(block.children, target, operation.link),
+              ...createRangeReplacement(block.children, target, link),
               ...block.children.slice(target.endTextIndex + 1),
             ]),
           }
@@ -158,6 +175,7 @@ export function createSelectionAfterSetLink(
   operation: SetLinkOperation,
 ): RangeSelection {
   const target = getTextMarkRangeTarget(document, operation.range, "set link");
+  const link = normalizeOperationLink(operation.link);
   const textNode =
     document.children[target.blockIndex]?.children[target.startTextIndex];
 
@@ -169,7 +187,7 @@ export function createSelectionAfterSetLink(
     document,
     target,
     applySetLink(document, operation),
-    getUpdatedMarks(textNode.marks, operation.link),
+    getUpdatedMarks(textNode.marks, link),
     "set link",
   );
 }
