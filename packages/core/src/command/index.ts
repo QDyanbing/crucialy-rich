@@ -19,6 +19,17 @@ export {
 } from "./font-size";
 export type { SetFontSizeCommandPayload } from "./font-size";
 export {
+  canExecuteSetLinkCommand,
+  canExecuteUnsetLinkCommand,
+  isLinkCommandActive,
+  LINK_COMMANDS,
+  SET_LINK_COMMAND_NAME,
+  setLinkCommand,
+  UNSET_LINK_COMMAND_NAME,
+  unsetLinkCommand,
+} from "./link";
+export type { SetLinkCommandPayload } from "./link";
+export {
   canExecuteSetTextColorCommand,
   SET_TEXT_COLOR_COMMAND_NAME,
   setTextColorCommand,
