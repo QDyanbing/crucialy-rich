@@ -26,10 +26,12 @@ import {
   recordHistory,
   SET_BACKGROUND_COLOR_COMMAND_NAME,
   SET_FONT_SIZE_COMMAND_NAME,
+  SET_LINK_COMMAND_NAME,
   SET_TEXT_COLOR_COMMAND_NAME,
   SPLIT_BLOCK_COMMAND_NAME,
   STRIKE_COMMAND_NAME,
   UNDERLINE_COMMAND_NAME,
+  UNSET_LINK_COMMAND_NAME,
   undoHistory,
   validateDocument,
   type CommandName,
@@ -134,6 +136,14 @@ const modelExamples: ModelExample[] = [
           textColor: "#d4380d",
           underline: true,
         }),
+        createText("，"),
+        createText("链接文本", {
+          link: {
+            href: "https://example.com/docs",
+            rel: "noopener noreferrer",
+            target: "_blank",
+          },
+        }),
         createText("。"),
       ]),
       createParagraph([
@@ -183,6 +193,8 @@ const demoCommandDescriptors: DemoCommandDescriptor[] = [
   { label: "字号", name: SET_FONT_SIZE_COMMAND_NAME },
   { label: "文字颜色", name: SET_TEXT_COLOR_COMMAND_NAME },
   { label: "背景色", name: SET_BACKGROUND_COLOR_COMMAND_NAME },
+  { label: "设置链接", name: SET_LINK_COMMAND_NAME },
+  { label: "取消链接", name: UNSET_LINK_COMMAND_NAME },
   { label: "删除选区", name: DELETE_SELECTION_COMMAND_NAME },
   { label: "分段", name: SPLIT_BLOCK_COMMAND_NAME },
   { label: "合并段落", name: MERGE_BLOCK_COMMAND_NAME },
@@ -218,6 +230,18 @@ const renderBoundaryExamples: RenderBoundaryExample[] = [
 
 function cloneModelValue(value: unknown): unknown {
   return JSON.parse(JSON.stringify(value)) as unknown;
+}
+
+function createLinkCommandPayload(
+  href: string,
+  target: "_blank" | "_self",
+  rel: string,
+) {
+  return {
+    href,
+    target,
+    ...(rel.trim().length > 0 ? { rel } : {}),
+  };
 }
 
 function getModelExample(id: ModelExampleId): ModelExample {
@@ -490,6 +514,10 @@ function DemoApp() {
   const [fontSizeValue, setFontSizeValue] = useState("18");
   const [textColorValue, setTextColorValue] = useState("#1677ff");
   const [backgroundColorValue, setBackgroundColorValue] = useState("#fff4cc");
+  const [linkEditorOpen, setLinkEditorOpen] = useState(false);
+  const [linkHrefValue, setLinkHrefValue] = useState("https://example.com/docs");
+  const [linkRelValue, setLinkRelValue] = useState("noopener noreferrer");
+  const [linkTargetValue, setLinkTargetValue] = useState<"_blank" | "_self">("_blank");
   const [lastTransaction, setLastTransaction] = useState<Transaction | null>(null);
   const [lastTransactionReport, setLastTransactionReport] =
     useState<TransactionAcceptanceReport | null>(null);
@@ -543,7 +571,13 @@ function DemoApp() {
                     ? {
                         backgroundColor: backgroundColorValue,
                       }
-                    : undefined,
+                    : command.name === SET_LINK_COMMAND_NAME
+                      ? createLinkCommandPayload(
+                          linkHrefValue,
+                          linkTargetValue,
+                          linkRelValue,
+                        )
+                      : undefined,
         }),
         label: command.label,
       })),
@@ -551,6 +585,9 @@ function DemoApp() {
       backgroundColorValue,
       fontSizeValue,
       insertTextValue,
+      linkHrefValue,
+      linkRelValue,
+      linkTargetValue,
       modelSelection,
       normalizedDocument,
       textColorValue,
@@ -578,6 +615,7 @@ function DemoApp() {
     setHistoryState(createHistoryState());
     setLastTransaction(null);
     setLastTransactionReport(null);
+    setLinkEditorOpen(false);
   }
 
   function handleNormalize() {
@@ -747,6 +785,30 @@ function DemoApp() {
 
   function handleClearBackgroundColor() {
     applyBackgroundColor(null);
+  }
+
+  function handleSetLink() {
+    applyCommandResult(
+      executeCommand(demoCommandRegistry, SET_LINK_COMMAND_NAME, {
+        context: {
+          document: normalizedDocument,
+          selection: modelSelection,
+        },
+        payload: createLinkCommandPayload(linkHrefValue, linkTargetValue, linkRelValue),
+      }),
+    );
+    setLinkEditorOpen(false);
+  }
+
+  function handleUnsetLink() {
+    applyCommandResult(
+      executeCommand(demoCommandRegistry, UNSET_LINK_COMMAND_NAME, {
+        context: {
+          document: normalizedDocument,
+          selection: modelSelection,
+        },
+      }),
+    );
   }
 
   function handleDeleteText() {
@@ -975,6 +1037,71 @@ function DemoApp() {
               onClick={handleStrike}
             >
               删除线
+            </button>
+            <div className="link-control">
+              <button
+                aria-expanded={linkEditorOpen}
+                aria-haspopup="dialog"
+                type="button"
+                onClick={() => setLinkEditorOpen((open) => !open)}
+              >
+                链接
+              </button>
+              {linkEditorOpen ? (
+                <div aria-label="链接设置" className="link-popover" role="dialog">
+                  <label>
+                    <span>链接地址</span>
+                    <input
+                      aria-label="链接地址"
+                      inputMode="url"
+                      value={linkHrefValue}
+                      onChange={(event) => setLinkHrefValue(event.target.value)}
+                    />
+                  </label>
+                  <label>
+                    <span>打开方式</span>
+                    <select
+                      aria-label="链接打开方式"
+                      value={linkTargetValue}
+                      onChange={(event) =>
+                        setLinkTargetValue(
+                          event.target.value === "_self" ? "_self" : "_blank",
+                        )
+                      }
+                    >
+                      <option value="_self">当前窗口</option>
+                      <option value="_blank">新窗口</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>rel</span>
+                    <input
+                      aria-label="链接 rel"
+                      value={linkRelValue}
+                      onChange={(event) => setLinkRelValue(event.target.value)}
+                    />
+                  </label>
+                  <div className="link-popover-actions">
+                    <button type="button" onClick={() => setLinkEditorOpen(false)}>
+                      关闭
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isCommandDisabled(SET_LINK_COMMAND_NAME)}
+                      onClick={handleSetLink}
+                    >
+                      确认链接
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+            <button
+              type="button"
+              disabled={isCommandDisabled(UNSET_LINK_COMMAND_NAME)}
+              onClick={handleUnsetLink}
+            >
+              取消链接
             </button>
             <label>
               <span>字号</span>
