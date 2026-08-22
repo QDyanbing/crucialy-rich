@@ -136,4 +136,100 @@ describe("set link operation", () => {
       focus: { path: [0, 1], offset: 2 },
     });
   });
+
+  it("overwrites links across sibling text nodes", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("访问", { link: { href: "https://old.example.com/" } }),
+        createText("项目", {
+          bold: true,
+          link: { href: "https://other.example.com/" },
+        }),
+        createText("文档"),
+      ]),
+    ]);
+    const operation = createSetLinkOperation(
+      {
+        anchor: { path: [0, 0], offset: 1 },
+        focus: { path: [0, 2], offset: 1 },
+      },
+      {
+        href: "https://example.com/guide",
+        rel: "noopener noreferrer",
+        target: "_blank",
+      },
+    );
+
+    expect(applySetLink(document, operation).children[0]?.children).toEqual([
+      {
+        marks: { link: { href: "https://old.example.com/" } },
+        text: "访",
+        type: "text",
+      },
+      {
+        marks: {
+          link: {
+            href: "https://example.com/guide",
+            rel: "noopener noreferrer",
+            target: "_blank",
+          },
+        },
+        text: "问",
+        type: "text",
+      },
+      {
+        marks: {
+          bold: true,
+          link: {
+            href: "https://example.com/guide",
+            rel: "noopener noreferrer",
+            target: "_blank",
+          },
+        },
+        text: "项目",
+        type: "text",
+      },
+      {
+        marks: {
+          link: {
+            href: "https://example.com/guide",
+            rel: "noopener noreferrer",
+            target: "_blank",
+          },
+        },
+        text: "文",
+        type: "text",
+      },
+      { text: "档", type: "text" },
+    ]);
+    expect(createSelectionAfterSetLink(document, operation)).toEqual({
+      anchor: { path: [0, 1], offset: 0 },
+      focus: { path: [0, 3], offset: 1 },
+    });
+  });
+
+  it("removes links and merges compatible neighbors", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("前"),
+        createText("链接", { link: { href: "https://example.com/" } }),
+        createText("后"),
+      ]),
+    ]);
+    const operation = createSetLinkOperation(
+      {
+        anchor: { path: [0, 1], offset: 0 },
+        focus: { path: [0, 1], offset: 2 },
+      },
+      null,
+    );
+
+    expect(applySetLink(document, operation).children[0]?.children).toEqual([
+      { text: "前链接后", type: "text" },
+    ]);
+    expect(createSelectionAfterSetLink(document, operation)).toEqual({
+      anchor: { path: [0, 0], offset: 1 },
+      focus: { path: [0, 0], offset: 3 },
+    });
+  });
 });
