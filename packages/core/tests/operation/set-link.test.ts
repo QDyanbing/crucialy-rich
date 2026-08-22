@@ -4,6 +4,7 @@ import { createDocument, createParagraph, createText } from "../../src/model";
 import {
   applySetLink,
   cloneOperation,
+  createSelectionAfterSetLink,
   createSetLinkOperation,
   type SetLinkOperation,
 } from "../../src/operation";
@@ -82,5 +83,57 @@ describe("set link operation", () => {
       createSetLinkOperation(range, { href: "javascript:alert(1)" }),
     ).toThrow("invalid link mark");
     expect(() => applySetLink(document, unsafeOperation)).toThrow("invalid link mark");
+  });
+
+  it("sets a link on part of a text node and preserves other marks", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("你好世界", {
+          bold: true,
+          textColor: "#1677ff",
+        }),
+      ]),
+    ]);
+    const operation = createSetLinkOperation(
+      {
+        anchor: { path: [0, 0], offset: 1 },
+        focus: { path: [0, 0], offset: 3 },
+      },
+      { href: "https://example.com/docs" },
+    );
+    const result = applySetLink(document, operation);
+
+    expect(result.children[0]?.children).toEqual([
+      {
+        marks: { bold: true, textColor: "#1677ff" },
+        text: "你",
+        type: "text",
+      },
+      {
+        marks: {
+          bold: true,
+          link: { href: "https://example.com/docs" },
+          textColor: "#1677ff",
+        },
+        text: "好世",
+        type: "text",
+      },
+      {
+        marks: { bold: true, textColor: "#1677ff" },
+        text: "界",
+        type: "text",
+      },
+    ]);
+    expect(document.children[0]?.children).toEqual([
+      {
+        marks: { bold: true, textColor: "#1677ff" },
+        text: "你好世界",
+        type: "text",
+      },
+    ]);
+    expect(createSelectionAfterSetLink(document, operation)).toEqual({
+      anchor: { path: [0, 1], offset: 0 },
+      focus: { path: [0, 1], offset: 2 },
+    });
   });
 });
