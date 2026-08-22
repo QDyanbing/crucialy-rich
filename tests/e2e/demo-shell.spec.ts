@@ -292,6 +292,53 @@ test("renders the mixed text style acceptance sample", async ({ page }) => {
   await expect(page.getByLabel("模型校验状态")).toContainText("合法");
 });
 
+test("sets, replaces, and removes links from the demo popover", async ({ page }) => {
+  await page.goto("/");
+
+  const documentJson = page.getByLabel("文档 JSON", { exact: true });
+  const transaction = page.getByLabel("最近 Transaction", { exact: true });
+  const linkButton = page.getByRole("button", { name: "链接", exact: true });
+  const unsetLinkButton = page.getByRole("button", { name: "取消链接" });
+
+  await expect(page.getByLabel("设置链接 Command 状态")).toContainText("可用");
+  await expect(unsetLinkButton).toBeDisabled();
+
+  await linkButton.click();
+  await expect(page.getByLabel("链接设置")).toBeVisible();
+  await page.getByLabel("链接地址").fill("https://example.com/first");
+  await page.getByRole("button", { name: "确认链接" }).click();
+
+  await expect(documentJson).toContainText('"href": "https://example.com/first"');
+  await expect(documentJson).toContainText('"target": "_blank"');
+  await expect(transaction).toContainText('"type": "set_link"');
+  await expect(page.getByLabel("设置链接 Command 状态")).toContainText("激活");
+  await expect(unsetLinkButton).toBeEnabled();
+
+  await linkButton.click();
+  await page.getByLabel("链接地址").fill("https://example.com/latest");
+  await page.getByRole("button", { name: "确认链接" }).click();
+
+  await expect(documentJson).toContainText('"href": "https://example.com/latest"');
+  await expect(documentJson).not.toContainText("https://example.com/first");
+
+  await unsetLinkButton.click();
+
+  await expect(transaction).toContainText('"link": null');
+  await expect(documentJson).not.toContainText('"link": {');
+  await expect(unsetLinkButton).toBeDisabled();
+});
+
+test("blocks unsafe links in the demo popover", async ({ page }) => {
+  await page.goto("/");
+
+  await page.getByRole("button", { name: "链接", exact: true }).click();
+  await page.getByLabel("链接地址").fill("javascript:alert(1)");
+
+  await expect(page.getByRole("button", { name: "确认链接" })).toBeDisabled();
+  await expect(page.getByLabel("设置链接 Command 状态")).toContainText("不可用");
+  await expect(page.getByLabel("模型校验状态")).toContainText("合法");
+});
+
 test("sets and cancels font size from the demo control", async ({ page }) => {
   await page.goto("/");
   await page.getByLabel("模型示例").selectOption("marks");
