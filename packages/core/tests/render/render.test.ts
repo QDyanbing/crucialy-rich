@@ -215,6 +215,40 @@ describe("renderDocument", () => {
     ).not.toHaveProperty("target");
   });
 
+  it("renders links with composed text marks on one model path", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("Styled link", {
+          backgroundColor: "#fff4cc",
+          bold: true,
+          fontSize: 18,
+          italic: true,
+          link: { href: "https://example.com/docs" },
+          strike: true,
+          textColor: "#1677ff",
+        }),
+      ]),
+    ]);
+
+    expect(renderDocument(document).children?.[0]?.children?.[0]).toEqual({
+      attributes: {
+        href: "https://example.com/docs",
+        [MODEL_PATH_ATTRIBUTE]: "[0,0]",
+      },
+      path: [0, 0],
+      style: {
+        backgroundColor: "#fff4cc",
+        color: "#1677ff",
+        fontSize: "18px",
+        fontStyle: "italic",
+        fontWeight: "700",
+        textDecoration: "underline line-through",
+      },
+      tagName: "a",
+      text: "Styled link",
+    });
+  });
+
   it("renders combined bold and italic marks without nested text paths", () => {
     const document = createDocument([
       createParagraph([createText("Both", { bold: true, italic: true })]),

@@ -93,6 +93,26 @@ describe("renderNodeToHtml", () => {
     expect(html).toContain('<span data-crucialy-path="[0,0]">Unsafe</span>');
   });
 
+  it("serializes links with composed text mark styles", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("Styled link", {
+          backgroundColor: "#fff4cc",
+          bold: true,
+          fontSize: 18,
+          italic: true,
+          link: { href: "https://example.com/docs" },
+          strike: true,
+          textColor: "#1677ff",
+        }),
+      ]),
+    ]);
+
+    expect(renderNodeToHtml(renderDocument(document))).toContain(
+      '<a data-crucialy-path="[0,0]" href="https://example.com/docs" style="background-color: #fff4cc; color: #1677ff; font-size: 18px; font-style: italic; font-weight: 700; text-decoration: underline line-through;">Styled link</a>',
+    );
+  });
+
   it("serializes combined bold and italic marks with italic style", () => {
     const document = createDocument([
       createParagraph([createText("Both", { bold: true, italic: true })]),
