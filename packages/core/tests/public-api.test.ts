@@ -229,6 +229,7 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.executeCommand).toBe("function");
     expect(typeof core.getCommandNameFromShortcut).toBe("function");
     expect(typeof core.getCommandShortcuts).toBe("function");
+    expect(typeof core.getSelectedLinkMark).toBe("function");
     expect(typeof core.insertTextCommand).toBe("object");
     expect(typeof core.isBoldCommandActive).toBe("function");
     expect(typeof core.isItalicCommandActive).toBe("function");

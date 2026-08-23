@@ -12,6 +12,7 @@ import {
   createText,
   createTransactionAcceptanceReport,
   executeCommand,
+  getSelectedLinkMark,
   isLinkCommandActive,
   queryCommandState,
   recordHistory,
@@ -219,6 +220,84 @@ describe("unsetLinkCommand", () => {
 });
 
 describe("link command state", () => {
+  it("reads a link at a collapsed caret", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("链接文本", {
+          link: {
+            href: "https://example.com/docs",
+            rel: "noopener noreferrer",
+            target: "_blank",
+          },
+        }),
+      ]),
+    ]);
+
+    expect(
+      getSelectedLinkMark({
+        context: {
+          document,
+          selection: {
+            anchor: { path: [0, 0], offset: 2 },
+            focus: { path: [0, 0], offset: 2 },
+          },
+        },
+      }),
+    ).toEqual({
+      href: "https://example.com/docs",
+      rel: "noopener noreferrer",
+      target: "_blank",
+    });
+  });
+
+  it("reads one shared link across selected sibling nodes", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("项目", {
+          bold: true,
+          link: { href: "https://example.com/docs" },
+        }),
+        createText("文档", {
+          link: { href: "https://example.com/docs" },
+          underline: true,
+        }),
+      ]),
+    ]);
+
+    expect(
+      getSelectedLinkMark({
+        context: {
+          document,
+          selection: {
+            anchor: { path: [0, 1], offset: 2 },
+            focus: { path: [0, 0], offset: 0 },
+          },
+        },
+      }),
+    ).toEqual({ href: "https://example.com/docs" });
+  });
+
+  it("does not report a shared link for different destinations", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("项目", { link: { href: "https://example.com/project" } }),
+        createText("文档", { link: { href: "https://example.com/docs" } }),
+      ]),
+    ]);
+    const input = {
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [0, 1], offset: 2 },
+        },
+      },
+    };
+
+    expect(getSelectedLinkMark(input)).toBeUndefined();
+    expect(isLinkCommandActive(input)).toBe(false);
+  });
+
   it("is active only when every selected text part has a link", () => {
     const document = createDocument([
       createParagraph([
