@@ -33,6 +33,7 @@ import {
   type FormEvent,
   type HTMLAttributes,
   type KeyboardEvent,
+  type MouseEvent,
   type ReactElement,
 } from "react";
 
@@ -42,6 +43,7 @@ export interface RichTextEditorProps
     | "className"
     | "contentEditable"
     | "onBeforeInput"
+    | "onClick"
     | "onKeyDown"
     | "onKeyUp"
     | "onMouseUp"
@@ -302,6 +304,7 @@ export function RichTextEditor({
   defaultValue,
   label = "Rich text editor",
   onBeforeInput,
+  onClick,
   onKeyDown,
   onKeyUp,
   onMouseUp,
@@ -461,6 +464,20 @@ export function RichTextEditor({
     commitInputResult(input);
   }
 
+  function handleClick(event: MouseEvent<HTMLDivElement>) {
+    onClick?.(event);
+
+    if (!editable || !(event.target instanceof Element)) {
+      return;
+    }
+
+    const link = event.target.closest("a[href]");
+
+    if (link && event.currentTarget.contains(link)) {
+      event.preventDefault();
+    }
+  }
+
   return (
     <div
       {...renderedDocument.attributes}
@@ -471,6 +488,7 @@ export function RichTextEditor({
       contentEditable={contentEditable}
       data-crucialy-rich-editor="true"
       onBeforeInput={handleBeforeInput}
+      onClick={handleClick}
       onKeyDown={handleKeyDown}
       onKeyUp={onKeyUp}
       onMouseUp={onMouseUp}
