@@ -169,6 +169,52 @@ describe("renderDocument", () => {
     });
   });
 
+  it("renders link marks as anchors with safe attributes", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("Documentation", {
+          link: {
+            href: "https://example.com/docs",
+            rel: "noopener noreferrer",
+            target: "_blank",
+          },
+        }),
+      ]),
+    ]);
+
+    expect(renderDocument(document).children?.[0]?.children?.[0]).toEqual({
+      attributes: {
+        href: "https://example.com/docs",
+        [MODEL_PATH_ATTRIBUTE]: "[0,0]",
+        rel: "noopener noreferrer",
+        target: "_blank",
+      },
+      path: [0, 0],
+      style: { textDecoration: "underline" },
+      tagName: "a",
+      text: "Documentation",
+    });
+  });
+
+  it("omits absent optional link attributes", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("Email", { link: { href: "mailto:team@example.com" } }),
+      ]),
+    ]);
+
+    expect(renderDocument(document).children?.[0]?.children?.[0]).toMatchObject({
+      attributes: {
+        href: "mailto:team@example.com",
+        [MODEL_PATH_ATTRIBUTE]: "[0,0]",
+      },
+      tagName: "a",
+    });
+    expect(
+      renderDocument(document).children?.[0]?.children?.[0]?.attributes,
+    ).not.toHaveProperty("target");
+  });
+
   it("renders combined bold and italic marks without nested text paths", () => {
     const document = createDocument([
       createParagraph([createText("Both", { bold: true, italic: true })]),
