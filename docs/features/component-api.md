@@ -14,7 +14,7 @@
 | `onTransaction`     | `(event: RichTextEditorTransactionEvent) => void`               | 输入后输出 before、after、transaction 和选区。 |
 | `label`             | `string`                                                        | 编辑器区域的可访问名称。                       |
 | `className`         | `string`                                                        | 传给编辑器根节点的样式类名。                   |
-| DOM 事件属性        | `onBeforeInput`、`onKeyDown`、`onMouseUp`、`onKeyUp` 等基础事件 | 用于输入和选区同步。                           |
+| DOM 事件属性        | `onBeforeInput`、`onClick`、`onKeyDown`、`onMouseUp`、`onKeyUp` | 用于输入、链接交互和选区同步。                 |
 
 ## 受控用法
 
@@ -60,6 +60,8 @@ export function UncontrolledEditor() {
 - 宿主可在 `onKeyDown` 中用 `getHistoryShortcutAction` 接入撤销/重做快捷键；外部 `preventDefault` 后组件不会继续执行普通输入处理。
 - 输入、删除、分段和段落合并都不会直接信任浏览器默认修改后的 DOM。
 - 外部 `onBeforeInput` / `onKeyDown` 会先执行，若已 `preventDefault`，内部不再处理对应输入。
+- 编辑态点击 Link Mark 渲染的 `<a>` 时会先调用外部 `onClick`，再阻止浏览器默认跳转，文字仍可正常选择。
+- 只读态不会阻止 `<a>` 的默认行为，href、target 和 rel 由浏览器处理。
 - 初始渲染或浏览器选区变化不会触发 `onChange`。
 
 ## 当前边界

@@ -1,6 +1,6 @@
 # Link Mark
 
-Link Mark 用于描述 text 节点上的链接目标。第 12 周 Day 2 已完成模型、安全校验、`set_link` operation、设置/取消 command 和 demo 输入入口；`<a>` 渲染及编辑态交互留到 Day 3。
+Link Mark 用于描述 text 节点上的链接目标。第 12 周 Day 3 已完成模型、安全校验、`set_link` operation、设置/取消 command、`<a>` 渲染、选中状态读取以及编辑态/只读态交互。
 
 ## 数据结构
 
@@ -87,6 +87,7 @@ interface SetLinkOperation {
 - `setLinkCommand`、`unsetLinkCommand`：可直接注册或执行的 command 实例。
 - `canExecuteSetLinkCommand(input)`、`canExecuteUnsetLinkCommand(input)`：读取可执行状态。
 - `isLinkCommandActive(input)`：选区覆盖的所有有效文字均有链接时返回 `true`。
+- `getSelectedLinkMark(input)`：读取折叠光标所在位置或非折叠选区共享的 Link Mark。
 
 设置链接示例：
 
@@ -111,9 +112,28 @@ executeCommand(registry, UNSET_LINK_COMMAND_NAME, {
 
 两条命令当前要求非折叠、同一 paragraph 内的有效文字选区。`setLink` 会拒绝不安全 payload；`unsetLink` 仅在选区至少覆盖一个 Link Mark 时可用。成功结果包含 `set_link` transaction 和重映射后的 selection，可直接接入 History。
 
+`getSelectedLinkMark` 与 command 的执行条件不同：折叠光标位于链接文字中时也会返回 Link Mark。非折叠选区只有在所有有效文字节点拥有完全相同的 href、target 和 rel 时才返回结果；普通文字、不同目标链接、跨 paragraph 或非法选区均返回 `undefined`。
+
+## 渲染规则
+
+- Link Mark 渲染为 `<a>`，输出规范化后的 href 和可选 target / rel。
+- renderer 不读取原始不安全 href；模型规范化移除的 Link Mark 会退回普通文字元素。
+- 链接元素继续保留 text 节点唯一的 `data-crucialy-path`，DOM 与模型选区映射协议不变。
+- 链接与粗体、斜体、下划线、删除线、字号、文字颜色和背景色组合时，样式写入同一个 `<a>`，不创建重复模型路径。
+- HTML 序列化会转义 href 等属性中的特殊字符。
+
+## React 交互规则
+
+- `RichTextEditor` 在 `contentEditable` 为 `true` 或 `"true"` 时拦截当前编辑器内链接的默认点击跳转。
+- 编辑态只阻止导航，不阻止浏览器建立文字 selection，宿主仍会收到 `onClick`。
+- `contentEditable` 为 `false`、`"false"` 或未开启时不拦截链接，href、target 和 rel 保持浏览器原生行为。
+- 点击策略只作用于当前编辑器根节点内的 `a[href]`，不会影响页面其他链接。
+
 ## Demo 入口
 
 中文 demo 的“链接”弹层可输入 href、打开方式和 rel，并支持设置、覆盖和取消链接。弹层使用当前模型选区执行默认 registry 中的 command；危险协议会使“确认链接”不可用，最近 Transaction、验收报告和文档 JSON 会同步展示结果。
+
+“选中链接状态”会展示当前统一 href，打开弹层时回填已选链接的 href、target 和 rel。页面同时提供编辑态和只读态链接样例，用于核对选择文字与原生跳转差异。
 
 ## 编辑保留
 
@@ -124,6 +144,4 @@ executeCommand(registry, UNSET_LINK_COMMAND_NAME, {
 
 ## 当前边界
 
-- renderer 尚未输出 `<a>`，React 编辑器也没有链接点击行为。
-- 编辑态与只读态链接交互将在 Day 3 实现。
 - 弹层打开前保存浏览器 selection、确认后恢复 selection 的通用机制将在 Day 4 实现；当前 demo 依赖受控模型选区。

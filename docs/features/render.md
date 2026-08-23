@@ -1,6 +1,6 @@
 # 基础渲染（第一版）
 
-基础渲染负责把当前文档模型转换为可展示的 DOM 结构描述。当前覆盖 `document`、`paragraph`、`text`、四种 boolean text mark、安全字号、文字颜色和背景色。
+基础渲染负责把当前文档模型转换为可展示的 DOM 结构描述。当前覆盖 `document`、`paragraph`、`text`、四种 boolean text mark、安全字号、文字颜色、背景色和 Link Mark。
 
 ## 渲染结构
 
@@ -20,12 +20,14 @@
 - 合法 `marks.fontSize` → 当前 text path 元素增加 `font-size: <value>px;`
 - 合法 `marks.textColor` → 当前 text path 元素增加 `color: #rrggbb;`
 - 合法 `marks.backgroundColor` → 当前 text path 元素增加 `background-color: #rrggbb;`
+- 合法 `marks.link` → `a`，输出 href 和可选 target / rel
+- link 与其他 marks 叠加 → 当前 `a` 增加对应样式，不创建嵌套模型路径
 
 `renderDocument(document)` 返回 `RenderedElementNode` 树：
 
 ```ts
 interface RenderedElementNode {
-  tagName: "div" | "em" | "p" | "s" | "span" | "strong" | "u";
+  tagName: "a" | "div" | "em" | "p" | "s" | "span" | "strong" | "u";
   path: Path;
   attributes: Record<string, string>;
   children?: RenderedElementNode[];
@@ -34,6 +36,7 @@ interface RenderedElementNode {
     color?: string;
     fontSize?: `${number}px`;
     fontStyle?: "italic";
+    fontWeight?: "700";
     textDecoration?: string;
   };
   text?: string;
@@ -93,6 +96,8 @@ interface RenderedElementNode {
 - `fontSize` 只有在 `8–72` 的整数范围内才会输出，且可以与四种 boolean mark 共用同一个路径元素。
 - `textColor` 只有在 sanitize 后才会输出，并可与字号和四种 boolean mark 共用同一个路径元素。
 - `backgroundColor` 只有在 sanitize 后才会输出，并可与文字颜色、字号和四种 boolean mark 共用同一个路径元素。
+- Link Mark 只有在 href sanitize 成功后才输出 `<a>`；target / rel 只输出规范化值。
+- Link Mark 与其他 marks 叠加时复用同一个 `<a>` 和 text path，保持文本 DOM 节点可直接参与双向选区映射。
 
 ## 演示验收
 
@@ -108,4 +113,4 @@ interface RenderedElementNode {
 
 - 浏览器选区同步当前只覆盖已验证的基础场景。
 - 不处理 `contentEditable`、`beforeinput` 或真实编辑行为。
-- 当前包含四种 boolean mark、字号、文字颜色和背景色渲染；标题和列表等扩展渲染尚未实现。
+- 当前包含四种 boolean mark、字号、文字颜色、背景色和链接渲染；标题和列表等扩展渲染尚未实现。

@@ -16,7 +16,7 @@
 
 text marks schema 当前支持 `bold`、`italic`、`underline` 和 `strike` 共存，四种 boolean mark 均已完成 command、renderer、demo 和 history 闭环。第 11 周已完成 `8–72px` 字号、安全文字颜色与背景色，以及三种属性的跨 text、反向选区、默认注册表和混合样例验收；颜色只接受 `#RGB` / `#RRGGBB`，并统一规范化为小写六位格式。
 
-第 12 周 Day 2 已完成结构化 Link Mark、HTTP/HTTPS/mailto URL sanitize、target/rel 白名单、`set_link` operation、`setLink` / `unsetLink` command、默认 registry、History 生命周期以及中文 demo 链接输入弹层。下一步进入 Day 3「链接交互」，补齐 `<a>` 渲染、编辑态点击规则和只读态行为。
+第 12 周 Day 3 已完成结构化 Link Mark、HTTP/HTTPS/mailto URL sanitize、target/rel 白名单、`set_link` operation、`setLink` / `unsetLink` command、统一链接选区状态读取、安全 `<a>` 渲染、编辑态点击拦截、只读态原生跳转、History 生命周期以及中文 demo 链接输入与双模式样例。下一步进入 Day 4「选区恢复」。
 
 ## 技术栈
 
