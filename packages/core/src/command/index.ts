@@ -21,6 +21,7 @@ export type { SetFontSizeCommandPayload } from "./font-size";
 export {
   canExecuteSetLinkCommand,
   canExecuteUnsetLinkCommand,
+  getSelectedLinkMark,
   isLinkCommandActive,
   LINK_COMMANDS,
   SET_LINK_COMMAND_NAME,

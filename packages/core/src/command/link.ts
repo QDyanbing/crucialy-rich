@@ -1,4 +1,5 @@
 import {
+  areLinkMarksEqual,
   getLinkMark,
   normalizeLinkMark,
   type LinkMarkAttributes,
@@ -28,7 +29,10 @@ interface LinkCommandTarget {
   textNodes: TextNode[];
 }
 
-function getLinkCommandTarget(input: CommandInput): LinkCommandTarget | undefined {
+function getLinkSelectionTarget(
+  input: CommandInput,
+  includeCollapsed: boolean,
+): LinkCommandTarget | undefined {
   const selection = input.context.selection;
 
   if (!selection) {
@@ -38,7 +42,7 @@ function getLinkCommandTarget(input: CommandInput): LinkCommandTarget | undefine
   const range = normalizeRange(selection);
 
   if (
-    isCollapsed(range) ||
+    (!includeCollapsed && isCollapsed(range)) ||
     !isValidPoint(input.context.document, range.anchor) ||
     !isValidPoint(input.context.document, range.focus)
   ) {
@@ -58,6 +62,13 @@ function getLinkCommandTarget(input: CommandInput): LinkCommandTarget | undefine
     return undefined;
   }
 
+  if (isCollapsed(range)) {
+    const textNode =
+      input.context.document.children[anchorBlockIndex]?.children[anchorTextIndex];
+
+    return textNode ? { range, textNodes: [textNode] } : undefined;
+  }
+
   const textNodes = input.context.document.children[anchorBlockIndex]?.children
     .slice(anchorTextIndex, focusTextIndex + 1)
     .filter((node, index) => {
@@ -70,6 +81,10 @@ function getLinkCommandTarget(input: CommandInput): LinkCommandTarget | undefine
     });
 
   return textNodes && textNodes.length > 0 ? { range, textNodes } : undefined;
+}
+
+function getLinkCommandTarget(input: CommandInput): LinkCommandTarget | undefined {
+  return getLinkSelectionTarget(input, false);
 }
 
 function resolveLink(input: CommandInput): LinkMarkAttributes | undefined {
@@ -88,12 +103,27 @@ export function canExecuteUnsetLinkCommand(input: CommandInput): boolean {
   );
 }
 
-export function isLinkCommandActive(input: CommandInput): boolean {
-  const target = getLinkCommandTarget(input);
+export function getSelectedLinkMark(
+  input: CommandInput,
+): LinkMarkAttributes | undefined {
+  const target = getLinkSelectionTarget(input, true);
+  const firstLink = getLinkMark(target?.textNodes[0]?.marks);
 
+  if (!target || !firstLink) {
+    return undefined;
+  }
+
+  return target.textNodes.every((textNode) =>
+    areLinkMarksEqual(getLinkMark(textNode.marks), firstLink),
+  )
+    ? firstLink
+    : undefined;
+}
+
+export function isLinkCommandActive(input: CommandInput): boolean {
   return (
-    target !== undefined &&
-    target.textNodes.every((textNode) => getLinkMark(textNode.marks) !== undefined)
+    getLinkCommandTarget(input) !== undefined &&
+    getSelectedLinkMark(input) !== undefined
   );
 }
 
