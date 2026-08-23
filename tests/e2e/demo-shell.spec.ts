@@ -374,6 +374,20 @@ test("keeps editable links selectable without navigating", async ({ page }) => {
   expect(selectedText).toBe("打开 crucialy-rich 文档");
 });
 
+test("keeps native navigation for readonly links", async ({ page }) => {
+  await page.goto("/");
+
+  const editor = page.getByLabel("只读态链接示例");
+  const link = editor.getByRole("link", { name: "打开 crucialy-rich 文档" });
+
+  await expect(editor).toHaveAttribute("aria-readonly", "true");
+
+  const [popup] = await Promise.all([page.waitForEvent("popup"), link.click()]);
+
+  await expect.poll(() => popup.url()).toContain("https://example.com/crucialy-rich");
+  await popup.close();
+});
+
 test("sets and cancels font size from the demo control", async ({ page }) => {
   await page.goto("/");
   await page.getByLabel("模型示例").selectOption("marks");
