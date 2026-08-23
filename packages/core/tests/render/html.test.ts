@@ -62,6 +62,37 @@ describe("renderNodeToHtml", () => {
     );
   });
 
+  it("serializes safe link attributes", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("Search", {
+          link: {
+            href: "https://example.com/search?q=a&next=%22docs%22",
+            rel: "nofollow noopener",
+            target: "_blank",
+          },
+        }),
+      ]),
+    ]);
+
+    expect(renderNodeToHtml(renderDocument(document))).toContain(
+      '<a data-crucialy-path="[0,0]" href="https://example.com/search?q=a&amp;next=%22docs%22" rel="nofollow noopener" target="_blank" style="text-decoration: underline;">Search</a>',
+    );
+  });
+
+  it("does not serialize unsafe links as anchors", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("Unsafe", { link: { href: "javascript:alert(1)" } }),
+      ]),
+    ]);
+    const html = renderNodeToHtml(renderDocument(document));
+
+    expect(html).not.toContain("<a");
+    expect(html).not.toContain("javascript:");
+    expect(html).toContain('<span data-crucialy-path="[0,0]">Unsafe</span>');
+  });
+
   it("serializes combined bold and italic marks with italic style", () => {
     const document = createDocument([
       createParagraph([createText("Both", { bold: true, italic: true })]),
