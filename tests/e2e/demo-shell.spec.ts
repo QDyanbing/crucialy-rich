@@ -339,6 +339,41 @@ test("blocks unsafe links in the demo popover", async ({ page }) => {
   await expect(page.getByLabel("模型校验状态")).toContainText("合法");
 });
 
+test("keeps editable links selectable without navigating", async ({ page }) => {
+  await page.goto("/");
+
+  const editor = page.getByLabel("编辑态链接示例");
+  const link = editor.getByRole("link", { name: "打开 crucialy-rich 文档" });
+
+  await expect(link).toHaveAttribute("href", "https://example.com/crucialy-rich");
+  await expect(link).toHaveAttribute("rel", "noopener noreferrer");
+  await expect(link).toHaveAttribute("target", "_blank");
+
+  const popupPromise = page.waitForEvent("popup", { timeout: 500 }).catch(() => null);
+
+  await link.click();
+
+  expect(await popupPromise).toBeNull();
+  expect(page.url()).toMatch(/^http:\/\/(127\.0\.0\.1|localhost):\d+\/$/);
+
+  const selectedText = await link.evaluate((element) => {
+    const range = document.createRange();
+    const selection = window.getSelection();
+
+    if (!selection) {
+      throw new Error("Missing browser selection.");
+    }
+
+    range.selectNodeContents(element);
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    return selection.toString();
+  });
+
+  expect(selectedText).toBe("打开 crucialy-rich 文档");
+});
+
 test("sets and cancels font size from the demo control", async ({ page }) => {
   await page.goto("/");
   await page.getByLabel("模型示例").selectOption("marks");
