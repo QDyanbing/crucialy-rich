@@ -183,6 +183,18 @@ const uncontrolledPreviewDocument = createDocument([
   createParagraph([createText("非受控初始文档。")]),
 ]);
 
+const linkInteractionDocument = createDocument([
+  createParagraph([
+    createText("打开 crucialy-rich 文档", {
+      link: {
+        href: "https://example.com/crucialy-rich",
+        rel: "noopener noreferrer",
+        target: "_blank",
+      },
+    }),
+  ]),
+]);
+
 const demoCommandRegistry = createDefaultCommandRegistry();
 
 const demoCommandDescriptors: DemoCommandDescriptor[] = [
@@ -1234,6 +1246,31 @@ function DemoApp() {
 
           <pre aria-label="文档 JSON">{documentPreview}</pre>
         </aside>
+      </section>
+
+      <section className="link-interaction-examples" aria-label="链接交互示例">
+        <h2>链接交互</h2>
+        <div className="link-example-grid">
+          <div className="link-mode-example">
+            <h3>编辑态</h3>
+            <RichTextEditor
+              className="link-example-editor"
+              contentEditable
+              defaultValue={linkInteractionDocument}
+              label="编辑态链接示例"
+              suppressContentEditableWarning
+            />
+          </div>
+          <div className="link-mode-example">
+            <h3>只读态</h3>
+            <RichTextEditor
+              className="link-example-editor"
+              contentEditable={false}
+              defaultValue={linkInteractionDocument}
+              label="只读态链接示例"
+            />
+          </div>
+        </div>
       </section>
 
       <section className="component-examples" aria-label="组件 API 示例">
