@@ -388,6 +388,38 @@ test("keeps native navigation for readonly links", async ({ page }) => {
   await popup.close();
 });
 
+test("reads selected link state and restores link fields", async ({ page }) => {
+  await page.goto("/");
+
+  const linkButton = page.getByRole("button", { name: "链接", exact: true });
+  const selectedLinkState = page.getByLabel("选中链接状态");
+
+  await expect(selectedLinkState).toContainText("选区无统一链接");
+
+  await linkButton.click();
+  await page.getByLabel("链接地址").fill("https://example.com/original");
+  await page.getByRole("button", { name: "确认链接" }).click();
+
+  await expect(selectedLinkState).toContainText("https://example.com/original");
+
+  await page.getByLabel("锚点偏移").fill("2");
+  await page.getByLabel("焦点偏移").fill("2");
+
+  await expect(selectedLinkState).toContainText("https://example.com/original");
+
+  await linkButton.click();
+  await page.getByLabel("链接地址").fill("https://example.com/draft");
+  await page.getByLabel("链接打开方式").selectOption("_self");
+  await page.getByLabel("链接 rel").fill("");
+  await page.getByRole("button", { name: "关闭" }).click();
+
+  await linkButton.click();
+
+  await expect(page.getByLabel("链接地址")).toHaveValue("https://example.com/original");
+  await expect(page.getByLabel("链接打开方式")).toHaveValue("_blank");
+  await expect(page.getByLabel("链接 rel")).toHaveValue("noopener noreferrer");
+});
+
 test("sets and cancels font size from the demo control", async ({ page }) => {
   await page.goto("/");
   await page.getByLabel("模型示例").selectOption("marks");
