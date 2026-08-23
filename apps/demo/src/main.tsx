@@ -14,6 +14,7 @@ import {
   domSelectionToModelSelection,
   executeCommand,
   getNodeAtPath,
+  getSelectedLinkMark,
   getHistoryShortcutAction,
   getTextInRange,
   INSERT_TEXT_COMMAND_NAME,
@@ -530,6 +531,16 @@ function DemoApp() {
     () => normalizeDocument(documentValue),
     [documentValue],
   );
+  const selectedLink = useMemo(
+    () =>
+      getSelectedLinkMark({
+        context: {
+          document: normalizedDocument,
+          selection: modelSelection,
+        },
+      }),
+    [modelSelection, normalizedDocument],
+  );
   const documentPreview = useMemo(
     () => JSON.stringify(documentValue, null, 2),
     [documentValue],
@@ -800,6 +811,21 @@ function DemoApp() {
     setLinkEditorOpen(false);
   }
 
+  function handleToggleLinkEditor() {
+    if (linkEditorOpen) {
+      setLinkEditorOpen(false);
+      return;
+    }
+
+    if (selectedLink) {
+      setLinkHrefValue(selectedLink.href);
+      setLinkRelValue(selectedLink.rel ?? "");
+      setLinkTargetValue(selectedLink.target ?? "_self");
+    }
+
+    setLinkEditorOpen(true);
+  }
+
   function handleUnsetLink() {
     applyCommandResult(
       executeCommand(demoCommandRegistry, UNSET_LINK_COMMAND_NAME, {
@@ -1043,7 +1069,7 @@ function DemoApp() {
                 aria-expanded={linkEditorOpen}
                 aria-haspopup="dialog"
                 type="button"
-                onClick={() => setLinkEditorOpen((open) => !open)}
+                onClick={handleToggleLinkEditor}
               >
                 链接
               </button>
@@ -1103,6 +1129,14 @@ function DemoApp() {
             >
               取消链接
             </button>
+            <output
+              aria-label="选中链接状态"
+              aria-live="polite"
+              className="selected-link-status"
+              data-state={selectedLink ? "linked" : "unlinked"}
+            >
+              {selectedLink ? selectedLink.href : "选区无统一链接"}
+            </output>
             <label>
               <span>字号</span>
               <select
