@@ -328,6 +328,35 @@ test("sets, replaces, and removes links from the demo popover", async ({ page })
   await expect(unsetLinkButton).toBeDisabled();
 });
 
+test("restores the saved selection after confirming a link", async ({ page }) => {
+  await page.goto("/");
+
+  const editor = page.getByLabel("已渲染文档");
+  const linkButton = page.getByRole("button", { name: "链接", exact: true });
+
+  await linkButton.click();
+  await page.getByLabel("链接地址").fill("https://example.com/saved-selection");
+
+  await page.getByLabel("锚点偏移").fill("7");
+  await page.getByLabel("焦点偏移").fill("12");
+  await page.evaluate(() => window.getSelection()?.removeAllRanges());
+
+  await page.getByRole("button", { name: "确认链接" }).click();
+
+  const restoredLink = editor.getByRole("link", { name: "你好，cr" });
+
+  await expect(restoredLink).toHaveAttribute(
+    "href",
+    "https://example.com/saved-selection",
+  );
+  await expect(editor.locator("a")).toHaveCount(1);
+  await expect(page.getByLabel("锚点偏移")).toHaveValue("0");
+  await expect(page.getByLabel("焦点偏移")).toHaveValue("5");
+  await expect
+    .poll(() => page.evaluate(() => window.getSelection()?.toString()))
+    .toBe("你好，cr");
+});
+
 test("blocks unsafe links in the demo popover", async ({ page }) => {
   await page.goto("/");
 
