@@ -51,6 +51,7 @@ describe("@crucialy-rich/core public API", () => {
   });
 
   it("exposes the selection API", () => {
+    expect(typeof core.cloneRangeSelection).toBe("function");
     expect(typeof core.getNodeAtPath).toBe("function");
     expect(typeof core.hasNodeAtPath).toBe("function");
     expect(typeof core.isValidPoint).toBe("function");
