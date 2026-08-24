@@ -1,6 +1,19 @@
 import { comparePoint } from "./point";
 import type { RangeSelection } from "./types";
 
+export function cloneRangeSelection(selection: RangeSelection): RangeSelection {
+  return {
+    anchor: {
+      path: [...selection.anchor.path],
+      offset: selection.anchor.offset,
+    },
+    focus: {
+      path: [...selection.focus.path],
+      offset: selection.focus.offset,
+    },
+  };
+}
+
 export function isCollapsed(selection: RangeSelection): boolean {
   return comparePoint(selection.anchor, selection.focus) === 0;
 }

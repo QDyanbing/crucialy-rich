@@ -9,6 +9,11 @@ export type {
   TextOffsetAffinity,
 } from "./paragraph-offset";
 export { comparePoint, isValidPoint } from "./point";
-export { compareRange, isCollapsed, normalizeRange } from "./range";
+export {
+  cloneRangeSelection,
+  compareRange,
+  isCollapsed,
+  normalizeRange,
+} from "./range";
 export { getTextInRange, splitTextByRange } from "./text-range";
 export type { TextRangeSplit } from "./text-range";
