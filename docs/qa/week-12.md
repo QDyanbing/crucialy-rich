@@ -2,9 +2,9 @@
 
 ## 当前进度
 
-第 12 周 Day 1「Link Mark 设计」、Day 2「设置和取消链接」与 Day 3「链接交互」已完成。
+第 12 周 Day 1「Link Mark 设计」、Day 2「设置和取消链接」、Day 3「链接交互」与 Day 4「选区恢复」已完成。
 
-☑️ 当前指针：第 12 周 Day 4「选区恢复」待开始。
+☑️ 当前指针：第 12 周 Day 5「链接闭环验收」待开始。
 
 ## 已完成范围
 
@@ -30,7 +30,10 @@
 - 新增 `getSelectedLinkMark`，支持读取折叠光标所在链接和非折叠选区的统一链接状态。
 - React 编辑态拦截链接默认跳转并保留文字选择能力，只读态保留浏览器原生链接行为。
 - 中文 demo 新增选中链接状态、弹层字段回填以及编辑态/只读态链接样例。
-- `docs/features/link.md` 已记录模型、安全规则、operation/command API、渲染规则、交互规则和当前边界。
+- 新增 `cloneRangeSelection`，用于保存不共享 path 引用的菜单选区快照。
+- 链接弹层在按钮获得焦点前保存选区，确认时使用原选区执行 command 并记录 History。
+- 链接 command 完成后通过受控 selection 恢复 DOM 范围；关闭弹层或切换示例会清理快照。
+- `docs/features/link.md` 已记录模型、安全规则、operation/command API、渲染规则、交互规则、选区恢复和当前边界。
 
 ## 自动化覆盖
 
@@ -48,15 +51,15 @@
 - `packages/core/tests/render/attributes.test.ts`
 - `packages/core/tests/render/html.test.ts`
 - `packages/core/tests/render/render.test.ts`
+- `packages/core/tests/selection/range.test.ts`
 - `packages/core/tests/history/snapshot.test.ts`
 - `packages/core/tests/public-api.test.ts`
 - `tests/e2e/demo-shell.spec.ts`
 
 ## 当前边界
 
-- 弹层打开前保存浏览器 selection、确认后恢复 selection 留在 Day 4；当前 demo 使用受控模型选区执行 command。
 - 第 12 周 Day 5 的整周测试补齐、文档检查和链接手工验收尚未开始。
 
 ## 结论
 
-第 12 周 Day 3 已达到“编辑时可选中链接文本”的验收要求，并覆盖安全 `<a>` 渲染、组合 marks、统一链接状态、编辑态点击拦截、只读态导航和 demo 浏览器流程。下一步实现弹层交互中的浏览器选区保存与恢复。
+第 12 周 Day 4 已达到“弹层确认后链接应用到原选区”的验收要求，并覆盖菜单选区快照、弹层期间选区漂移、浏览器 Selection 丢失、History before selection 和 DOM 范围恢复。下一步完成链接模块导出整理与整周验收。

@@ -55,6 +55,7 @@ interface RangeSelection {
 
 API：
 
+- `cloneRangeSelection(selection)`：深拷贝 anchor/focus 及其 path，用于保存不共享引用的选区快照。
 - `isCollapsed(selection)`：判断 anchor/focus 是否为同一点。
 - `normalizeRange(selection)`：返回正向范围，保证 anchor 小于或等于 focus。
 - `compareRange(left, right)`：比较规范化后的范围。

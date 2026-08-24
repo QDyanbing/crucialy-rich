@@ -1,6 +1,6 @@
 # Link Mark
 
-Link Mark 用于描述 text 节点上的链接目标。第 12 周 Day 3 已完成模型、安全校验、`set_link` operation、设置/取消 command、`<a>` 渲染、选中状态读取以及编辑态/只读态交互。
+Link Mark 用于描述 text 节点上的链接目标。第 12 周 Day 4 已完成模型、安全校验、`set_link` operation、设置/取消 command、`<a>` 渲染、选中状态读取、编辑态/只读态交互以及菜单选区恢复。
 
 ## 数据结构
 
@@ -135,6 +135,14 @@ executeCommand(registry, UNSET_LINK_COMMAND_NAME, {
 
 “选中链接状态”会展示当前统一 href，打开弹层时回填已选链接的 href、target 和 rel。页面同时提供编辑态和只读态链接样例，用于核对选择文字与原生跳转差异。
 
+## 弹层选区恢复
+
+- 链接按钮在 pointer down 时保存当前模型 `RangeSelection` 的独立快照，键盘打开时使用当前受控选区作为后备。
+- 弹层输入获得焦点后，即使浏览器 `Selection` 丢失，设置链接仍使用打开前保存的范围。
+- History before snapshot 使用同一保存范围，撤销时不会记录弹层期间的临时选区。
+- command 成功后把重映射选区写回受控 `selection`，`RichTextEditor` 在新文档渲染后恢复 DOM 范围。
+- 关闭弹层、确认完成或切换模型示例会清除保存范围。
+
 ## 编辑保留
 
 - 文本插入、删除和段落拆分会保留 Link Mark。
@@ -144,4 +152,4 @@ executeCommand(registry, UNSET_LINK_COMMAND_NAME, {
 
 ## 当前边界
 
-- 弹层打开前保存浏览器 selection、确认后恢复 selection 的通用机制将在 Day 4 实现；当前 demo 依赖受控模型选区。
+- 第 12 周 Day 5 仍需整理 link 模块导出，并完成整周测试、手工验收和独立 QA 文档。

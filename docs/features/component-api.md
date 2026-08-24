@@ -62,6 +62,7 @@ export function UncontrolledEditor() {
 - 外部 `onBeforeInput` / `onKeyDown` 会先执行，若已 `preventDefault`，内部不再处理对应输入。
 - 编辑态点击 Link Mark 渲染的 `<a>` 时会先调用外部 `onClick`，再阻止浏览器默认跳转，文字仍可正常选择。
 - 只读态不会阻止 `<a>` 的默认行为，href、target 和 rel 由浏览器处理。
+- 受控 `selection` 会在文档或选区更新后的 layout effect 中回写 DOM，可用于菜单 command 完成后恢复浏览器选区。
 - 初始渲染或浏览器选区变化不会触发 `onChange`。
 
 ## 当前边界
