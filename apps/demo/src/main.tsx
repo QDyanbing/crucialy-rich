@@ -3,6 +3,7 @@ import {
   BOLD_COMMAND_NAME,
   canRedo,
   canUndo,
+  cloneRangeSelection,
   createDefaultCommandRegistry,
   createHistorySnapshot,
   createHistoryState,
@@ -53,6 +54,7 @@ import {
 import {
   StrictMode,
   useMemo,
+  useRef,
   useState,
   type ChangeEvent,
   type KeyboardEvent,
@@ -531,6 +533,7 @@ function DemoApp() {
   const [linkHrefValue, setLinkHrefValue] = useState("https://example.com/docs");
   const [linkRelValue, setLinkRelValue] = useState("noopener noreferrer");
   const [linkTargetValue, setLinkTargetValue] = useState<"_blank" | "_self">("_blank");
+  const savedLinkSelectionRef = useRef<RangeSelection | null>(null);
   const [lastTransaction, setLastTransaction] = useState<Transaction | null>(null);
   const [lastTransactionReport, setLastTransactionReport] =
     useState<TransactionAcceptanceReport | null>(null);
@@ -638,6 +641,7 @@ function DemoApp() {
     setHistoryState(createHistoryState());
     setLastTransaction(null);
     setLastTransactionReport(null);
+    savedLinkSelectionRef.current = null;
     setLinkEditorOpen(false);
   }
 
@@ -648,7 +652,7 @@ function DemoApp() {
     setLastTransactionReport(null);
   }
 
-  function applyCommandResult(result: CommandResult) {
+  function applyCommandResult(result: CommandResult, beforeSelection = modelSelection) {
     if (!result.ok || !result.transaction || !result.selection) {
       return;
     }
@@ -662,7 +666,7 @@ function DemoApp() {
     setHistoryState((currentHistory) =>
       recordHistory({
         after: createHistorySnapshot(nextDocument, nextSelection),
-        before: createHistorySnapshot(normalizedDocument, modelSelection),
+        before: createHistorySnapshot(normalizedDocument, beforeSelection),
         history: currentHistory,
         transaction,
       }),
@@ -811,28 +815,54 @@ function DemoApp() {
   }
 
   function handleSetLink() {
+    const linkSelection =
+      savedLinkSelectionRef.current ?? cloneRangeSelection(modelSelection);
+
     applyCommandResult(
       executeCommand(demoCommandRegistry, SET_LINK_COMMAND_NAME, {
         context: {
           document: normalizedDocument,
-          selection: modelSelection,
+          selection: linkSelection,
         },
         payload: createLinkCommandPayload(linkHrefValue, linkTargetValue, linkRelValue),
       }),
+      linkSelection,
     );
+    handleCloseLinkEditor();
+  }
+
+  function handleCloseLinkEditor() {
+    savedLinkSelectionRef.current = null;
     setLinkEditorOpen(false);
+  }
+
+  function handleSaveLinkSelection() {
+    if (!linkEditorOpen) {
+      savedLinkSelectionRef.current = cloneRangeSelection(modelSelection);
+    }
   }
 
   function handleToggleLinkEditor() {
     if (linkEditorOpen) {
-      setLinkEditorOpen(false);
+      handleCloseLinkEditor();
       return;
     }
 
-    if (selectedLink) {
-      setLinkHrefValue(selectedLink.href);
-      setLinkRelValue(selectedLink.rel ?? "");
-      setLinkTargetValue(selectedLink.target ?? "_self");
+    const linkSelection =
+      savedLinkSelectionRef.current ?? cloneRangeSelection(modelSelection);
+    const savedLink = getSelectedLinkMark({
+      context: {
+        document: normalizedDocument,
+        selection: linkSelection,
+      },
+    });
+
+    savedLinkSelectionRef.current = linkSelection;
+
+    if (savedLink) {
+      setLinkHrefValue(savedLink.href);
+      setLinkRelValue(savedLink.rel ?? "");
+      setLinkTargetValue(savedLink.target ?? "_self");
     }
 
     setLinkEditorOpen(true);
@@ -1082,6 +1112,7 @@ function DemoApp() {
                 aria-haspopup="dialog"
                 type="button"
                 onClick={handleToggleLinkEditor}
+                onPointerDown={handleSaveLinkSelection}
               >
                 链接
               </button>
@@ -1120,7 +1151,7 @@ function DemoApp() {
                     />
                   </label>
                   <div className="link-popover-actions">
-                    <button type="button" onClick={() => setLinkEditorOpen(false)}>
+                    <button type="button" onClick={handleCloseLinkEditor}>
                       关闭
                     </button>
                     <button
