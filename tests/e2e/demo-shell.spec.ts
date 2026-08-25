@@ -23,6 +23,18 @@ async function placeCaretInRenderedText(page: Page, path: string, offset: number
     }, offset);
 }
 
+async function setDebuggerSelection(
+  page: Page,
+  path: string,
+  anchorOffset: number,
+  focusOffset: number,
+) {
+  await page.getByLabel("锚点路径").fill(path);
+  await page.getByLabel("焦点路径").fill(path);
+  await page.getByLabel("锚点偏移").fill(String(anchorOffset));
+  await page.getByLabel("焦点偏移").fill(String(focusOffset));
+}
+
 test("renders the demo shell", async ({ page }) => {
   await page.goto("/");
 
@@ -326,6 +338,30 @@ test("sets, replaces, and removes links from the demo popover", async ({ page })
   await expect(transaction).toContainText('"link": null');
   await expect(documentJson).not.toContainText('"link": {');
   await expect(unsetLinkButton).toBeDisabled();
+});
+
+test("creates a link from the acceptance sample", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("links");
+  await setDebuggerSelection(page, "0,2", 1, 6);
+
+  await expect(page.getByLabel("选中文本")).toContainText("待创建链接");
+  await expect(page.getByLabel("选中链接状态")).toContainText("选区无统一链接");
+
+  await page.getByRole("button", { name: "链接", exact: true }).click();
+  await page.getByLabel("链接地址").fill("https://example.com/created");
+  await page.getByLabel("链接打开方式").selectOption("_self");
+  await page.getByLabel("链接 rel").fill("nofollow");
+  await page.getByRole("button", { name: "确认链接" }).click();
+
+  const createdLink = page
+    .getByLabel("已渲染文档")
+    .getByRole("link", { name: "待创建链接" });
+
+  await expect(createdLink).toHaveAttribute("href", "https://example.com/created");
+  await expect(createdLink).toHaveAttribute("target", "_self");
+  await expect(createdLink).toHaveAttribute("rel", "nofollow");
+  await expect(page.getByLabel("模型校验状态")).toContainText("合法");
 });
 
 test("restores the saved selection after confirming a link", async ({ page }) => {
