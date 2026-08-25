@@ -419,6 +419,35 @@ test("cancels the existing link in the acceptance sample", async ({ page }) => {
     .toBe("已有链接");
 });
 
+test("restores link selection when the menu opens from the keyboard", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("links");
+
+  const linkButton = page.getByRole("button", { name: "链接", exact: true });
+
+  await linkButton.focus();
+  await linkButton.press("Enter");
+  await expect(page.getByLabel("链接设置")).toBeVisible();
+  await page.getByLabel("链接地址").fill("https://example.com/keyboard");
+
+  await setDebuggerSelection(page, "0,2", 1, 6);
+  await page.evaluate(() => window.getSelection()?.removeAllRanges());
+  await page.getByRole("button", { name: "确认链接" }).click();
+
+  await expect(
+    page.getByLabel("已渲染文档").getByRole("link", { name: "已有链接" }),
+  ).toHaveAttribute("href", "https://example.com/keyboard");
+  await expect(page.getByLabel("锚点路径")).toHaveValue("0,1");
+  await expect(page.getByLabel("焦点路径")).toHaveValue("0,1");
+  await expect(page.getByLabel("锚点偏移")).toHaveValue("0");
+  await expect(page.getByLabel("焦点偏移")).toHaveValue("4");
+  await expect
+    .poll(() => page.evaluate(() => window.getSelection()?.toString()))
+    .toBe("已有链接");
+});
+
 test("restores the saved selection after confirming a link", async ({ page }) => {
   await page.goto("/");
 
