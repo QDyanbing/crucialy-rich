@@ -395,6 +395,30 @@ test("edits the existing link in the acceptance sample", async ({ page }) => {
   );
 });
 
+test("cancels the existing link in the acceptance sample", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("links");
+
+  const editor = page.getByLabel("已渲染文档");
+  const unsetLinkButton = page.getByRole("button", { name: "取消链接" });
+
+  await expect(editor.getByRole("link", { name: "已有链接" })).toBeVisible();
+  await expect(unsetLinkButton).toBeEnabled();
+
+  await unsetLinkButton.click();
+
+  await expect(editor).toContainText("已有链接");
+  await expect(editor.getByRole("link", { name: "已有链接" })).toHaveCount(0);
+  await expect(page.getByLabel("文档 JSON", { exact: true })).not.toContainText(
+    '"link": {',
+  );
+  await expect(page.getByLabel("选中链接状态")).toContainText("选区无统一链接");
+  await expect(unsetLinkButton).toBeDisabled();
+  await expect
+    .poll(() => page.evaluate(() => window.getSelection()?.toString()))
+    .toBe("已有链接");
+});
+
 test("restores the saved selection after confirming a link", async ({ page }) => {
   await page.goto("/");
 
