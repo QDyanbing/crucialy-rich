@@ -50,6 +50,27 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.isDocumentNode).toBe("function");
   });
 
+  it("exposes the complete link feature namespace", () => {
+    expect(core.link.LINK_PROTOCOLS).toEqual(["http:", "https:", "mailto:"]);
+    expect(core.link.LINK_TARGETS).toEqual(["_self", "_blank"]);
+    expect(core.link.LINK_REL_TOKENS).toEqual(["nofollow", "noopener", "noreferrer"]);
+    expect(typeof core.link.sanitizeLinkHref).toBe("function");
+    expect(typeof core.link.normalizeLinkMark).toBe("function");
+    expect(typeof core.link.getLinkMark).toBe("function");
+    expect(typeof core.link.setLinkMark).toBe("function");
+    expect(typeof core.link.removeLinkMark).toBe("function");
+    expect(typeof core.link.createSetLinkOperation).toBe("function");
+    expect(typeof core.link.applySetLink).toBe("function");
+    expect(typeof core.link.createSelectionAfterSetLink).toBe("function");
+    expect(core.link.LINK_COMMANDS.map((command) => command.name)).toEqual([
+      "setLink",
+      "unsetLink",
+    ]);
+    expect(typeof core.link.canExecuteSetLinkCommand).toBe("function");
+    expect(typeof core.link.canExecuteUnsetLinkCommand).toBe("function");
+    expect(typeof core.link.getSelectedLinkMark).toBe("function");
+  });
+
   it("exposes the selection API", () => {
     expect(typeof core.cloneRangeSelection).toBe("function");
     expect(typeof core.getNodeAtPath).toBe("function");
