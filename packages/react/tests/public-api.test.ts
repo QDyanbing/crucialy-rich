@@ -104,6 +104,33 @@ describe("@crucialy-rich/react public API", () => {
     expect(html).toContain('style="background-color:#fff4cc;color:#1677ff"');
   });
 
+  it("renders safe link attributes and combined marks through React", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("Linked", {
+          bold: true,
+          link: {
+            href: "https://example.com/docs",
+            rel: "noopener noreferrer",
+            target: "_blank",
+          },
+        }),
+      ]),
+    ]);
+
+    const html = renderToStaticMarkup(
+      createElement(RichTextEditor, { value: document }),
+    );
+
+    expect(html).toContain("<a");
+    expect(html).toContain('href="https://example.com/docs"');
+    expect(html).toContain('rel="noopener noreferrer"');
+    expect(html).toContain('target="_blank"');
+    expect(html).toContain('data-crucialy-path="[0,0]"');
+    expect(html).toContain('style="font-weight:700;text-decoration:underline"');
+    expect(html).toContain(">Linked</a>");
+  });
+
   it("marks editable renders as not readonly", () => {
     const html = renderToStaticMarkup(
       createElement(RichTextEditor, {
