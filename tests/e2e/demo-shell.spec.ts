@@ -364,6 +364,37 @@ test("creates a link from the acceptance sample", async ({ page }) => {
   await expect(page.getByLabel("模型校验状态")).toContainText("合法");
 });
 
+test("edits the existing link in the acceptance sample", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("links");
+
+  await expect(page.getByLabel("选中文本")).toContainText("已有链接");
+  await expect(page.getByLabel("选中链接状态")).toContainText(
+    "https://example.com/original",
+  );
+
+  await page.getByRole("button", { name: "链接", exact: true }).click();
+  await expect(page.getByLabel("链接地址")).toHaveValue("https://example.com/original");
+  await page.getByLabel("链接地址").fill("https://example.com/edited");
+  await page.getByLabel("链接打开方式").selectOption("_self");
+  await page.getByLabel("链接 rel").fill("nofollow");
+  await page.getByRole("button", { name: "确认链接" }).click();
+
+  const editedLink = page
+    .getByLabel("已渲染文档")
+    .getByRole("link", { name: "已有链接" });
+
+  await expect(editedLink).toHaveAttribute("href", "https://example.com/edited");
+  await expect(editedLink).toHaveAttribute("target", "_self");
+  await expect(editedLink).toHaveAttribute("rel", "nofollow");
+  await expect(page.getByLabel("文档 JSON", { exact: true })).not.toContainText(
+    "https://example.com/original",
+  );
+  await expect(page.getByLabel("选中链接状态")).toContainText(
+    "https://example.com/edited",
+  );
+});
+
 test("restores the saved selection after confirming a link", async ({ page }) => {
   await page.goto("/");
 
