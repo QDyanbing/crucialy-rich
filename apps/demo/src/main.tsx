@@ -63,7 +63,7 @@ import { createRoot } from "react-dom/client";
 
 import "./styles.css";
 
-type ModelExampleId = "regular" | "marks" | "empty" | "invalid";
+type ModelExampleId = "regular" | "marks" | "links" | "empty" | "invalid";
 
 interface ModelExample {
   id: ModelExampleId;
@@ -155,6 +155,29 @@ const modelExamples: ModelExample[] = [
         createText("可以"),
         createText("继续", { italic: true }),
         createText("切换。"),
+      ]),
+    ]),
+  },
+  {
+    id: "links",
+    label: "链接闭环",
+    selection: {
+      anchor: { path: [0, 1], offset: 0 },
+      focus: { path: [0, 1], offset: 4 },
+    },
+    value: createDocument([
+      createParagraph([
+        createText("链接验收："),
+        createText("已有链接", {
+          link: {
+            href: "https://example.com/original",
+            rel: "noopener noreferrer",
+            target: "_blank",
+          },
+        }),
+        createText("；"),
+        createText("待创建链接"),
+        createText("。"),
       ]),
     ]),
   },
