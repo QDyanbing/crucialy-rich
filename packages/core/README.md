@@ -189,6 +189,7 @@ const shortcutCommandName = getCommandNameFromShortcut({
 - 创建和判断：`createDocument`、`createParagraph`、`createText`、`isTextNode`、`isBlockNode`、`isDocumentNode`。
 - 文字标记：`normalizeTextMarks`、`hasTextMark`、`addTextMark`、`removeTextMark`、`setTextMark`、`toggleTextMark`、`isValidTextMarkAttributeValue`、`isValidFontSize`、`sanitizeHexColor`、`MIN_FONT_SIZE`、`MAX_FONT_SIZE`、`getTextMarkAttribute`、`setTextMarkAttribute`、`removeTextMarkAttribute`、`areTextMarksEqual`、`mergeAdjacentTextNodes`。
 - 链接标记：`LinkMarkAttributes`、`LinkTarget`、`LinkRelToken`、`LINK_PROTOCOLS`、`LINK_TARGETS`、`LINK_REL_TOKENS`、`sanitizeLinkHref`、`normalizeLinkTarget`、`normalizeLinkRel`、`normalizeLinkMark`、`isValidLinkMark`、`areLinkMarksEqual`、`getLinkMark`、`setLinkMark`、`removeLinkMark`。
+- 链接功能命名空间：`link` 集中提供 Link Mark、安全处理、`set_link` operation 和链接 command；原有平铺导出保持可用。
 - 校验和修复：`validateDocument`、`normalizeDocument`。
 - 选区：`Path`、`Point`、`RangeSelection`、`cloneRangeSelection`、`getNodeAtPath`、`isValidPoint`、`normalizeRange`、`getParagraphTextOffset`、`getPointAtParagraphTextOffset`、`getTextInRange`、`splitTextByRange`。
 - 基础渲染：`renderDocument`、`renderNodeToHtml`、`MODEL_PATH_ATTRIBUTE`、`encodeModelPath`、`decodeModelPath`。

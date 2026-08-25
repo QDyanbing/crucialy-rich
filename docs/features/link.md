@@ -1,6 +1,6 @@
 # Link Mark
 
-Link Mark 用于描述 text 节点上的链接目标。第 12 周 Day 4 已完成模型、安全校验、`set_link` operation、设置/取消 command、`<a>` 渲染、选中状态读取、编辑态/只读态交互以及菜单选区恢复。
+Link Mark 用于描述 text 节点上的链接目标。第 12 周已完成模型、安全校验、`set_link` operation、设置/取消 command、`<a>` 渲染、选中状态读取、编辑态/只读态交互、菜单选区恢复和闭环验收。
 
 ## 数据结构
 
@@ -58,6 +58,17 @@ interface TextMarks {
 - `getLinkMark(marks)`：读取规范化 Link Mark。
 - `setLinkMark(marks, link)`：设置链接并保留其他 marks。
 - `removeLinkMark(marks)`：移除链接并保留其他 marks。
+
+## 功能命名空间
+
+`@crucialy-rich/core` 提供 `link` 命名空间，集中导出 Link Mark 类型与 helper、URL 安全处理、`set_link` operation、链接 command 和状态读取 API。原有平铺导出保持兼容。
+
+```ts
+import { link } from "@crucialy-rich/core";
+
+const href = link.sanitizeLinkHref("https://example.com/docs");
+const commandName = link.SET_LINK_COMMAND_NAME;
+```
 
 ## Operation API
 
@@ -133,7 +144,7 @@ executeCommand(registry, UNSET_LINK_COMMAND_NAME, {
 
 中文 demo 的“链接”弹层可输入 href、打开方式和 rel，并支持设置、覆盖和取消链接。弹层使用当前模型选区执行默认 registry 中的 command；危险协议会使“确认链接”不可用，最近 Transaction、验收报告和文档 JSON 会同步展示结果。
 
-“选中链接状态”会展示当前统一 href，打开弹层时回填已选链接的 href、target 和 rel。页面同时提供编辑态和只读态链接样例，用于核对选择文字与原生跳转差异。
+“选中链接状态”会展示当前统一 href，打开弹层时回填已选链接的 href、target 和 rel。“模型示例”中的“链接闭环”同时提供已有链接和待创建链接，可独立验收创建、编辑和取消。页面还提供编辑态和只读态链接样例，用于核对选择文字与原生跳转差异。
 
 ## 弹层选区恢复
 
@@ -152,4 +163,6 @@ executeCommand(registry, UNSET_LINK_COMMAND_NAME, {
 
 ## 当前边界
 
-- 第 12 周 Day 5 仍需整理 link 模块导出，并完成整周测试、手工验收和独立 QA 文档。
+- 链接范围当前要求同一 paragraph 内的非折叠文字选区。
+- href 当前只接受绝对 HTTP、HTTPS 和 mailto 地址。
+- DOM 选区恢复不保留反向选择方向。
