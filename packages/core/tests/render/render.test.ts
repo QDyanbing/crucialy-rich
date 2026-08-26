@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import {
   createDocument,
+  createHeading,
   createParagraph,
+  createQuote,
   createText,
   type DocumentNode,
 } from "../../src/model";
@@ -106,6 +108,24 @@ describe("renderDocument", () => {
           ],
         },
       ],
+    });
+  });
+
+  it("keeps heading and quote content renderable before semantic renderers land", () => {
+    const document = createDocument([
+      createHeading(2, [createText("标题", { bold: true })]),
+      createQuote([createText("引用", { italic: true })]),
+    ]);
+    const rendered = renderDocument(document);
+
+    expect(rendered.children?.map((node) => node.tagName)).toEqual(["p", "p"]);
+    expect(rendered.children?.[0]).toMatchObject({
+      children: [{ tagName: "strong", text: "标题" }],
+      path: [0],
+    });
+    expect(rendered.children?.[1]).toMatchObject({
+      children: [{ tagName: "em", text: "引用" }],
+      path: [1],
     });
   });
 
