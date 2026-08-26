@@ -8,8 +8,12 @@ describe("@crucialy-rich/core public API", () => {
   });
 
   it("exposes the document model API", () => {
+    expect(core.BLOCK_TYPES).toEqual(["paragraph", "heading", "quote"]);
+    expect(core.HEADING_LEVELS).toEqual([1, 2, 3, 4, 5, 6]);
     expect(typeof core.createDocument).toBe("function");
+    expect(typeof core.createHeading).toBe("function");
     expect(typeof core.createParagraph).toBe("function");
+    expect(typeof core.createQuote).toBe("function");
     expect(typeof core.createText).toBe("function");
     expect(core.TEXT_MARK_TYPES).toEqual(["bold", "italic", "underline", "strike"]);
     expect(core.TEXT_MARK_ATTRIBUTE_TYPES).toEqual([
@@ -48,6 +52,9 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.validateDocument).toBe("function");
     expect(typeof core.normalizeDocument).toBe("function");
     expect(typeof core.isDocumentNode).toBe("function");
+    expect(typeof core.isHeadingLevel).toBe("function");
+    expect(typeof core.isHeadingNode).toBe("function");
+    expect(typeof core.isQuoteNode).toBe("function");
   });
 
   it("exposes the complete link feature namespace", () => {
@@ -125,6 +132,8 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.createSetLinkOperation).toBe("function");
     expect(typeof core.applySetLink).toBe("function");
     expect(typeof core.createSelectionAfterSetLink).toBe("function");
+    expect(typeof core.createSetBlockTypeOperation).toBe("function");
+    expect(typeof core.applySetBlockType).toBe("function");
     expect(typeof core.createTransaction).toBe("function");
     expect(typeof core.applyOperation).toBe("function");
     expect(typeof core.applyTransaction).toBe("function");

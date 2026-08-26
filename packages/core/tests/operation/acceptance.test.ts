@@ -4,6 +4,7 @@ import { createDocument, createParagraph, createText } from "../../src/model";
 import {
   createDeleteTextOperation,
   createInsertTextOperation,
+  createSetBlockTypeOperation,
   createTransaction,
   createTransactionAcceptanceReport,
 } from "../../src/operation";
@@ -36,6 +37,26 @@ describe("createTransactionAcceptanceReport", () => {
     expect(report.before.valid).toBe(true);
     expect(report.after?.valid).toBe(true);
     expect(report.transaction.operationCount).toBe(0);
+  });
+
+  it("reports a valid block type transaction", () => {
+    const document = createDocument([createParagraph([createText("引用")])]);
+    const transaction = createTransaction([
+      createSetBlockTypeOperation([0], { type: "quote" }),
+    ]);
+    const report = createTransactionAcceptanceReport(document, transaction);
+
+    expect(report).toMatchObject({
+      after: { errors: [], valid: true },
+      before: { errors: [], valid: true },
+      error: null,
+      ok: true,
+      transaction: {
+        blockOperationCount: 1,
+        operationCount: 1,
+        operationTypes: ["set_block_type"],
+      },
+    });
   });
 
   it("reports failed transactions without an after validation result", () => {

@@ -12,6 +12,7 @@ import {
   createDeleteTextOperation,
   createInsertTextOperation,
   createMergeBlockOperation,
+  createSetBlockTypeOperation,
   createSetMarkAttributeOperation,
   createSplitBlockOperation,
   createToggleMarkOperation,
@@ -106,6 +107,20 @@ describe("applyOperation", () => {
       "你好",
       "世界",
     ]);
+  });
+
+  it("applies a set block type operation", () => {
+    const document = createDocument([createParagraph([createText("标题")])]);
+    const result = applyOperation(
+      document,
+      createSetBlockTypeOperation([0], { level: 2, type: "heading" }),
+    );
+
+    expect(result.children[0]).toEqual({
+      children: [{ text: "标题", type: "text" }],
+      level: 2,
+      type: "heading",
+    });
   });
 
   it("applies a toggle mark operation", () => {
@@ -219,6 +234,29 @@ describe("applyTransaction", () => {
       marks: { fontSize: 18 },
       text: "你好",
       type: "text",
+    });
+  });
+
+  it("clones and applies set block type operations", () => {
+    const document = createDocument([createParagraph([createText("引用")])]);
+    const path = [0];
+    const block: { level: 3 | 4; type: "heading" } = {
+      level: 3,
+      type: "heading",
+    };
+    const transaction = createTransaction([createSetBlockTypeOperation(path, block)]);
+
+    path[0] = 9;
+    block.level = 4;
+
+    expect(transaction.operations[0]).toEqual({
+      block: { level: 3, type: "heading" },
+      path: [0],
+      type: "set_block_type",
+    });
+    expect(applyTransaction(document, transaction).children[0]).toMatchObject({
+      level: 3,
+      type: "heading",
     });
   });
 

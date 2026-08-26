@@ -5,6 +5,7 @@ import {
   createDeleteTextOperation,
   createInsertTextOperation,
   createMergeBlockOperation,
+  createSetBlockTypeOperation,
   createSetMarkAttributeOperation,
   createSetLinkOperation,
   createSplitBlockOperation,
@@ -87,9 +88,14 @@ describe("operation scope classification", () => {
   });
 
   it("detects block operations", () => {
+    const setBlockTypeOperation = createSetBlockTypeOperation([0], {
+      level: 2,
+      type: "heading",
+    });
     const splitOperation = createSplitBlockOperation({ path: [0, 0], offset: 1 });
     const mergeOperation = createMergeBlockOperation({ path: [1, 0], offset: 0 });
 
+    expect(isBlockOperation(setBlockTypeOperation)).toBe(true);
     expect(isBlockOperation(splitOperation)).toBe(true);
     expect(isBlockOperation(mergeOperation)).toBe(true);
     expect(isTextOperation(splitOperation)).toBe(false);
@@ -137,6 +143,17 @@ describe("summarizeOperation", () => {
   });
 
   it("summarizes block operations", () => {
+    expect(
+      summarizeOperation(
+        createSetBlockTypeOperation([0], { level: 2, type: "heading" }),
+      ),
+    ).toEqual({
+      blockType: "heading",
+      headingLevel: 2,
+      scope: "block",
+      targetPath: [0],
+      type: "set_block_type",
+    });
     expect(
       summarizeOperation(createSplitBlockOperation({ path: [0, 0], offset: 2 })),
     ).toEqual({
@@ -243,21 +260,23 @@ describe("summarizeTransaction", () => {
         },
         { href: "https://example.com/docs" },
       ),
+      createSetBlockTypeOperation([0], { type: "quote" }),
       createSplitBlockOperation({ path: [0, 0], offset: 2 }),
       createMergeBlockOperation({ path: [1, 0], offset: 0 }),
     ]);
 
     expect(summarizeTransaction(transaction)).toEqual({
-      blockOperationCount: 2,
+      blockOperationCount: 3,
       hasBlockOperations: true,
       hasTextOperations: true,
-      operationCount: 7,
+      operationCount: 8,
       operationTypes: [
         "insert_text",
         "delete_text",
         "toggle_mark",
         "set_mark_attribute",
         "set_link",
+        "set_block_type",
         "split_block",
         "merge_block",
       ],
