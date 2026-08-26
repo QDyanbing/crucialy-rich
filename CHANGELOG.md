@@ -75,6 +75,9 @@
 - 新增 HTTP、HTTPS、mailto URL sanitize，以及 target 和 rel 白名单规范化。
 - 新增 Link Mark helper、文档校验、规范化、节点合并、编辑保留和 History 深拷贝测试。
 - 新增 Link Mark 功能文档和第 12 周进度 QA。
+- 新增 paragraph、1–6 级 heading 和 quote Block Type schema、工厂、守卫、校验与规范化。
+- 新增 `set_block_type` operation，并接入 Transaction、operation 摘要、验收报告和公共 API。
+- 新增 Block Type 设计文档和第 13 周 Day 1 QA 记录。
 
 ### 变更
 

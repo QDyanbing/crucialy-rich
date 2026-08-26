@@ -2,7 +2,7 @@
 
 自研富文本编辑内核，不依赖 ProseMirror、Tiptap、Lexical、Slate 作为运行时内核。
 
-> 当前处于早期阶段，已提供文档模型、四种 boolean marks 闭环、三种文字属性闭环、结构化 Link Mark 与 URL sanitize、mark 快捷键配置查询、同一 paragraph 内跨 text 的 mark 切分与合并、模型选区、基础渲染器、DOM 与模型位置映射、选区双向同步、基础 operation 与 Transaction、输入 helper、Command 系统、默认 Command 注册表和 History 撤销重做第一版。
+> 当前处于早期阶段，已提供 paragraph、heading、quote 文档模型、四种 boolean marks 闭环、三种文字属性闭环、结构化 Link Mark 与 URL sanitize、mark 快捷键配置查询、同一 paragraph 内跨 text 的 mark 切分与合并、模型选区、基础渲染器、DOM 与模型位置映射、选区双向同步、基础 operation 与 Transaction、输入 helper、Command 系统、默认 Command 注册表和 History 撤销重做第一版。
 
 ## 安装
 
@@ -15,6 +15,7 @@ pnpm add @crucialy-rich/core
 ```ts
 import {
   createDocument,
+  createHeading,
   addTextMark,
   applyTransaction,
   BOLD_COMMAND_NAME,
@@ -28,6 +29,7 @@ import {
   createHistoryState,
   createInsertTextInputTransaction,
   createMergeBlockOperation,
+  createSetBlockTypeOperation,
   createTransaction,
   createTransactionAcceptanceReport,
   createText,
@@ -55,6 +57,10 @@ import {
 const document = createDocument([
   createParagraph([createText("你好，crucialy-rich。", { bold: true })]),
 ]);
+const headingOperation = createSetBlockTypeOperation([0], {
+  level: 2,
+  type: "heading",
+});
 const marks = toggleTextMark(
   addTextMark(normalizeTextMarks({ bold: true }), "italic"),
   "bold",
@@ -87,6 +93,7 @@ const transaction = createTransaction([
   operation,
   deleteOperation,
   boldOperation,
+  headingOperation,
   splitOperation,
   mergeOperation,
 ]);
@@ -185,8 +192,8 @@ const shortcutCommandName = getCommandNameFromShortcut({
 
 ## 当前 API 范围
 
-- 文档模型：`DocumentNode`、`BlockNode`、`ParagraphNode`、`TextNode`、`TextMarks`、`TextMarkType`、`TextMarkAttributeType`、`TextMarkAttributes`、`TEXT_MARK_TYPES`、`TEXT_MARK_ATTRIBUTE_TYPES`；属性 Mark 当前包含 `fontSize`、`textColor` 和 `backgroundColor`。
-- 创建和判断：`createDocument`、`createParagraph`、`createText`、`isTextNode`、`isBlockNode`、`isDocumentNode`。
+- 文档模型：`DocumentNode`、`BlockNode`、`ParagraphNode`、`HeadingNode`、`QuoteNode`、`BlockType`、`HeadingLevel`、`TextNode`、`TextMarks`、`BLOCK_TYPES`、`HEADING_LEVELS`、`TEXT_MARK_TYPES`、`TEXT_MARK_ATTRIBUTE_TYPES`。
+- 创建和判断：`createDocument`、`createParagraph`、`createHeading`、`createQuote`、`createText`、`isTextNode`、`isParagraphNode`、`isHeadingNode`、`isQuoteNode`、`isBlockNode`、`isDocumentNode`。
 - 文字标记：`normalizeTextMarks`、`hasTextMark`、`addTextMark`、`removeTextMark`、`setTextMark`、`toggleTextMark`、`isValidTextMarkAttributeValue`、`isValidFontSize`、`sanitizeHexColor`、`MIN_FONT_SIZE`、`MAX_FONT_SIZE`、`getTextMarkAttribute`、`setTextMarkAttribute`、`removeTextMarkAttribute`、`areTextMarksEqual`、`mergeAdjacentTextNodes`。
 - 链接标记：`LinkMarkAttributes`、`LinkTarget`、`LinkRelToken`、`LINK_PROTOCOLS`、`LINK_TARGETS`、`LINK_REL_TOKENS`、`sanitizeLinkHref`、`normalizeLinkTarget`、`normalizeLinkRel`、`normalizeLinkMark`、`isValidLinkMark`、`areLinkMarksEqual`、`getLinkMark`、`setLinkMark`、`removeLinkMark`。
 - 链接功能命名空间：`link` 集中提供 Link Mark、安全处理、`set_link` operation 和链接 command；原有平铺导出保持可用。
@@ -195,7 +202,7 @@ const shortcutCommandName = getCommandNameFromShortcut({
 - 基础渲染：`renderDocument`、`renderNodeToHtml`、`MODEL_PATH_ATTRIBUTE`、`encodeModelPath`、`decodeModelPath`。
 - DOM 映射：`domPointToModelPoint`、`modelPointToDomPoint`、`findElementByModelPath`、`findClosestModelPathElement`。
 - 选区同步：`domSelectionToModelSelection`、`createDomRangeFromModelSelection`、`applyModelSelectionToDom`。
-- Operation：`createInsertTextOperation`、`applyInsertText`、`createSelectionAfterInsertText`、`createDeleteTextOperation`、`applyDeleteText`、`createSelectionAfterDeleteText`、`createToggleMarkOperation`、`applyToggleMark`、`createSelectionAfterToggleMark`、`createSetMarkAttributeOperation`、`applySetMarkAttribute`、`createSelectionAfterSetMarkAttribute`、`createSplitBlockOperation`、`applySplitBlock`、`createSelectionAfterSplitBlock`、`createMergeBlockOperation`、`applyMergeBlock`、`createSelectionAfterMergeBlock`。
+- Operation：`createInsertTextOperation`、`applyInsertText`、`createDeleteTextOperation`、`applyDeleteText`、`createToggleMarkOperation`、`applyToggleMark`、`createSetMarkAttributeOperation`、`applySetMarkAttribute`、`createSetLinkOperation`、`applySetLink`、`createSetBlockTypeOperation`、`applySetBlockType`、`createSplitBlockOperation`、`applySplitBlock`、`createMergeBlockOperation`、`applyMergeBlock`。
 - Transaction：`createTransaction`、`applyOperation`、`applyTransaction`、`summarizeOperation`、`summarizeTransaction`、`createTransactionAcceptanceReport`。
 - 输入：`createInsertTextInputTransaction`、`createSelectionAfterInsertTextInput`、`createBackspaceInputTransaction`、`createSelectionAfterBackspaceInput`、`createDeleteInputTransaction`、`createSelectionAfterDeleteInput`、`createEnterInputTransaction`、`createSelectionAfterEnterInput`。
 - 当前输入 helper 覆盖普通文本插入、段中删除、段落合并、段落分裂和输入后 selection 落点。

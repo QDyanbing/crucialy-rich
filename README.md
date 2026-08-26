@@ -16,7 +16,9 @@
 
 text marks schema 当前支持 `bold`、`italic`、`underline` 和 `strike` 共存，四种 boolean mark 均已完成 command、renderer、demo 和 history 闭环。第 11 周已完成 `8–72px` 字号、安全文字颜色与背景色，以及三种属性的跨 text、反向选区、默认注册表和混合样例验收；颜色只接受 `#RGB` / `#RRGGBB`，并统一规范化为小写六位格式。
 
-第 12 周链接闭环已完成：包括结构化 Link Mark、HTTP/HTTPS/mailto URL sanitize、target/rel 白名单、`set_link` operation、`setLink` / `unsetLink` command、`core.link` 功能命名空间、统一链接选区状态读取、安全 `<a>` 渲染、编辑态点击拦截、只读态原生跳转、菜单选区快照与恢复、History 生命周期以及中文创建/编辑/取消验收样例。下一步进入第 13 周 Day 1「Block Type 设计」。
+第 12 周链接闭环已完成：包括结构化 Link Mark、HTTP/HTTPS/mailto URL sanitize、target/rel 白名单、`set_link` operation、`setLink` / `unsetLink` command、`core.link` 功能命名空间、统一链接选区状态读取、安全 `<a>` 渲染、编辑态点击拦截、只读态原生跳转、菜单选区快照与恢复、History 生命周期以及中文创建/编辑/取消验收样例。
+
+第 13 周 Day 1「Block Type 设计」已完成：文档模型可表达 paragraph、1–6 级 heading 和 quote，新增对应守卫、工厂、校验、规范化以及 `set_block_type` operation；切换会保留 text children 和 marks，并已进入 Transaction 与验收摘要。当前指针为第 13 周 Day 2「Heading」。
 
 ## 技术栈
 
@@ -117,6 +119,7 @@ pnpm test:e2e
 - [文字标记模型](./docs/features/marks.md)
 - [文字属性 Mark](./docs/features/text-style.md)
 - [Link Mark](./docs/features/link.md)
+- [Block Type 设计](./docs/features/block-type.md)
 - [选区](./docs/features/selection.md)
 - [基础渲染](./docs/features/render.md)
 - [选区双向同步](./docs/features/selection-sync.md)
@@ -140,6 +143,7 @@ pnpm test:e2e
 - [第 10 周 QA](./docs/qa/week-10.md)
 - [第 11 周 QA](./docs/qa/week-11.md)
 - [第 12 周 QA](./docs/qa/week-12.md)
+- [第 13 周 QA](./docs/qa/week-13.md)
 - [模型 QA](./docs/qa/model.md)
 - [文字标记 QA](./docs/qa/marks.md)
 - [Bold/Italic 闭环验收](./docs/qa/bold-italic.md)
