@@ -92,7 +92,7 @@ function validateTextMarks(
  * 当前规则：
  * - 根节点必须是 document。
  * - document 的 children 只能是块级节点。
- * - paragraph 的 children 只能是 text 节点。
+ * - 块级节点的 children 只能是 text 节点。
  * - text 节点的 marks 只能包含受支持的 boolean、文字属性或 Link Mark。
  */
 export function validateDocument(value: unknown): ValidationResult {
@@ -116,7 +116,7 @@ export function validateDocument(value: unknown): ValidationResult {
       if (!isTextNode(leaf)) {
         errors.push({
           path: [blockIndex, leafIndex],
-          message: "paragraph 子节点必须是 text 节点",
+          message: "块级节点子节点必须是 text 节点",
         });
         return;
       }

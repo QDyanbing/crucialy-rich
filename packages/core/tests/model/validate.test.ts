@@ -65,7 +65,7 @@ describe("validateDocument", () => {
     expect(result.valid).toBe(false);
     expect(result.errors[0]).toEqual({
       path: [0, 0],
-      message: "paragraph 子节点必须是 text 节点",
+      message: "块级节点子节点必须是 text 节点",
     });
   });
 

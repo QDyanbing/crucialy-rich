@@ -2,8 +2,8 @@ import {
   getTextMarkAttribute,
   getLinkMark,
   hasTextMark,
+  type BlockNode,
   type DocumentNode,
-  type ParagraphNode,
   type TextNode,
 } from "../model";
 import type { Path } from "../selection";
@@ -83,7 +83,7 @@ function renderTextNode(node: TextNode, path: Path): RenderedElementNode {
   return createRenderedNode(tagName, path, options);
 }
 
-function renderParagraphNode(node: ParagraphNode, path: Path): RenderedElementNode {
+function renderBlockNode(node: BlockNode, path: Path): RenderedElementNode {
   return createRenderedNode("p", path, {
     children: node.children.map((child, index) =>
       renderTextNode(child, [...path, index]),
@@ -93,8 +93,6 @@ function renderParagraphNode(node: ParagraphNode, path: Path): RenderedElementNo
 
 export function renderDocument(document: DocumentNode): RenderedElementNode {
   return createRenderedNode("div", [], {
-    children: document.children.map((child, index) =>
-      renderParagraphNode(child, [index]),
-    ),
+    children: document.children.map((child, index) => renderBlockNode(child, [index])),
   });
 }

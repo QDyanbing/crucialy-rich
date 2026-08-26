@@ -40,11 +40,8 @@ export function isQuoteNode(value: unknown): value is QuoteNode {
   return isRecord(value) && value.type === "quote" && Array.isArray(value.children);
 }
 
-/**
- * 块级节点判断。当前等价于 paragraph，后续随 schema 扩展。
- */
 export function isBlockNode(value: unknown): value is BlockNode {
-  return isParagraphNode(value);
+  return isHeadingNode(value) || isParagraphNode(value) || isQuoteNode(value);
 }
 
 export function isDocumentNode(value: unknown): value is DocumentNode {

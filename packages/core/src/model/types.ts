@@ -73,9 +73,9 @@ export interface QuoteNode {
 }
 
 /**
- * 块级节点联合类型。当前只有 paragraph，后续会加入 heading、quote 等。
+ * 块级节点联合类型。所有 block 直接包含 text children。
  */
-export type BlockNode = ParagraphNode;
+export type BlockNode = HeadingNode | ParagraphNode | QuoteNode;
 
 export interface DocumentNode {
   type: "document";

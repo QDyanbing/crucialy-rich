@@ -1,7 +1,7 @@
 import { createDocument, createParagraph, createText } from "./factories";
 import { isBlockNode, isDocumentNode, isTextNode } from "./guards";
 import { mergeAdjacentTextNodes, normalizeTextMarks } from "./marks";
-import type { DocumentNode, ParagraphNode, TextNode } from "./types";
+import type { BlockNode, DocumentNode, TextNode } from "./types";
 
 /**
  * 把任意输入修复为合法文档。
@@ -18,7 +18,7 @@ export function normalizeDocument(value: unknown): DocumentNode {
     return createDocument();
   }
 
-  const children = value.children.filter(isBlockNode).map(normalizeParagraph);
+  const children = value.children.filter(isBlockNode).map(normalizeBlock);
 
   return {
     type: "document",
@@ -26,15 +26,20 @@ export function normalizeDocument(value: unknown): DocumentNode {
   };
 }
 
-function normalizeParagraph(node: ParagraphNode): ParagraphNode {
+function normalizeBlock(node: BlockNode): BlockNode {
   const children = mergeAdjacentTextNodes(
     node.children.filter(isTextNode).map(normalizeTextNode),
   );
+  const normalizedChildren = children.length > 0 ? children : [createText()];
 
-  return {
-    type: "paragraph",
-    children: children.length > 0 ? children : [createText()],
-  };
+  switch (node.type) {
+    case "heading":
+      return { children: normalizedChildren, level: node.level, type: "heading" };
+    case "paragraph":
+      return { children: normalizedChildren, type: "paragraph" };
+    case "quote":
+      return { children: normalizedChildren, type: "quote" };
+  }
 }
 
 function normalizeTextNode(node: TextNode): TextNode {

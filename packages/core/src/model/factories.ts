@@ -1,5 +1,6 @@
 import { normalizeTextMarks } from "./marks";
 import type {
+  BlockNode,
   DocumentNode,
   HeadingLevel,
   HeadingNode,
@@ -53,7 +54,7 @@ export function createQuote(children: TextNode[] = [createText()]): QuoteNode {
  * 不传 children 时返回包含一个空段落的合法文档。
  */
 export function createDocument(
-  children: ParagraphNode[] = [createParagraph()],
+  children: BlockNode[] = [createParagraph()],
 ): DocumentNode {
   return { type: "document", children };
 }
