@@ -1,15 +1,21 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  BLOCK_TYPES,
+  HEADING_LEVELS,
   LINK_REL_TOKENS,
   LINK_TARGETS,
   TEXT_MARK_ATTRIBUTE_TYPES,
   TEXT_MARK_TYPES,
+  type BlockType,
   type DocumentNode,
+  type HeadingLevel,
+  type HeadingNode,
   type LinkMarkAttributes,
   type LinkRelToken,
   type LinkTarget,
   type ParagraphNode,
+  type QuoteNode,
   type TextMarkAttributes,
   type TextMarkAttributeType,
   type TextMarkType,
@@ -17,6 +23,25 @@ import {
 } from "../../src/model/types";
 
 describe("model node types", () => {
+  it("describes the supported block types", () => {
+    const blockType: BlockType = "heading";
+    const headingLevel: HeadingLevel = 2;
+    const heading: HeadingNode = {
+      children: [{ text: "标题", type: "text" }],
+      level: headingLevel,
+      type: blockType,
+    };
+    const quote: QuoteNode = {
+      children: [{ text: "引用", type: "text" }],
+      type: "quote",
+    };
+
+    expect(BLOCK_TYPES).toEqual(["paragraph", "heading", "quote"]);
+    expect(HEADING_LEVELS).toEqual([1, 2, 3, 4, 5, 6]);
+    expect(heading.level).toBe(2);
+    expect(quote.type).toBe("quote");
+  });
+
   it("describes a document with paragraph and text", () => {
     const text: TextNode = { type: "text", text: "hello" };
     const paragraph: ParagraphNode = { type: "paragraph", children: [text] };
