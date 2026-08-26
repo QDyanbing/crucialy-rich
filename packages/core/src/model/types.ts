@@ -1,9 +1,13 @@
 /**
  * 文档模型的第一版类型定义。
  *
- * 当前阶段支持 `document` -> `paragraph` -> `text` 三层结构，
+ * 当前阶段支持 `document` -> `block` -> `text` 三层结构，
  * text 节点可携带 boolean marks 和文字样式属性 marks。
  */
+
+export const BLOCK_TYPES = ["paragraph", "heading", "quote"] as const;
+
+export const HEADING_LEVELS = [1, 2, 3, 4, 5, 6] as const;
 
 export const TEXT_MARK_TYPES = ["bold", "italic", "underline", "strike"] as const;
 
@@ -18,6 +22,10 @@ export const LINK_TARGETS = ["_self", "_blank"] as const;
 export const LINK_REL_TOKENS = ["nofollow", "noopener", "noreferrer"] as const;
 
 export type TextMarkType = (typeof TEXT_MARK_TYPES)[number];
+
+export type BlockType = (typeof BLOCK_TYPES)[number];
+
+export type HeadingLevel = (typeof HEADING_LEVELS)[number];
 
 export type TextMarkAttributeType = (typeof TEXT_MARK_ATTRIBUTE_TYPES)[number];
 
@@ -50,6 +58,17 @@ export interface TextNode {
 
 export interface ParagraphNode {
   type: "paragraph";
+  children: TextNode[];
+}
+
+export interface HeadingNode {
+  type: "heading";
+  children: TextNode[];
+  level: HeadingLevel;
+}
+
+export interface QuoteNode {
+  type: "quote";
   children: TextNode[];
 }
 

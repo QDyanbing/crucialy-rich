@@ -1,17 +1,23 @@
 export {
+  BLOCK_TYPES,
+  HEADING_LEVELS,
   LINK_REL_TOKENS,
   LINK_TARGETS,
   TEXT_MARK_ATTRIBUTE_TYPES,
   TEXT_MARK_TYPES,
 } from "./types";
 export type {
+  BlockType,
   BlockNode,
   DocumentNode,
+  HeadingLevel,
+  HeadingNode,
   LinkMarkAttributes,
   LinkRelToken,
   LinkTarget,
   Node,
   ParagraphNode,
+  QuoteNode,
   TextMarkAttributes,
   TextMarkAttributeType,
   TextMarks,
