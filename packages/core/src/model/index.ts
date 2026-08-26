@@ -33,7 +33,13 @@ export {
   isQuoteNode,
   isTextNode,
 } from "./guards";
-export { createDocument, createParagraph, createText } from "./factories";
+export {
+  createDocument,
+  createHeading,
+  createParagraph,
+  createQuote,
+  createText,
+} from "./factories";
 export {
   areLinkMarksEqual,
   isValidLinkMark,

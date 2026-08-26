@@ -1,5 +1,13 @@
 import { normalizeTextMarks } from "./marks";
-import type { DocumentNode, ParagraphNode, TextMarks, TextNode } from "./types";
+import type {
+  DocumentNode,
+  HeadingLevel,
+  HeadingNode,
+  ParagraphNode,
+  QuoteNode,
+  TextMarks,
+  TextNode,
+} from "./types";
 
 /**
  * 创建一个 text 节点，默认空字符串。
@@ -20,6 +28,23 @@ export function createText(text = "", marks?: TextMarks): TextNode {
  */
 export function createParagraph(children: TextNode[] = [createText()]): ParagraphNode {
   return { type: "paragraph", children };
+}
+
+/**
+ * 创建一个 heading 节点，默认使用一级标题。
+ */
+export function createHeading(
+  level: HeadingLevel = 1,
+  children: TextNode[] = [createText()],
+): HeadingNode {
+  return { type: "heading", children, level };
+}
+
+/**
+ * 创建一个 quote 节点。
+ */
+export function createQuote(children: TextNode[] = [createText()]): QuoteNode {
+  return { type: "quote", children };
 }
 
 /**
