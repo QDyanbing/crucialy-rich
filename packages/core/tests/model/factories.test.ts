@@ -1,7 +1,19 @@
 import { describe, expect, it } from "vitest";
 
-import { createDocument, createParagraph, createText } from "../../src/model/factories";
-import { isDocumentNode, isParagraphNode, isTextNode } from "../../src/model/guards";
+import {
+  createDocument,
+  createHeading,
+  createParagraph,
+  createQuote,
+  createText,
+} from "../../src/model/factories";
+import {
+  isDocumentNode,
+  isHeadingNode,
+  isParagraphNode,
+  isQuoteNode,
+  isTextNode,
+} from "../../src/model/guards";
 
 describe("model factories", () => {
   it("creates an empty text node by default", () => {
@@ -82,6 +94,32 @@ describe("model factories", () => {
   it("creates a paragraph from given text nodes", () => {
     const paragraph = createParagraph([createText("a"), createText("b")]);
     expect(paragraph.children.map((node) => node.text)).toEqual(["a", "b"]);
+  });
+
+  it("creates headings with a default empty text", () => {
+    const defaultHeading = createHeading();
+    const heading = createHeading(3, [createText("三级标题")]);
+
+    expect(isHeadingNode(defaultHeading)).toBe(true);
+    expect(defaultHeading).toEqual({
+      children: [{ text: "", type: "text" }],
+      level: 1,
+      type: "heading",
+    });
+    expect(heading.level).toBe(3);
+    expect(heading.children[0]?.text).toBe("三级标题");
+  });
+
+  it("creates quotes with a default empty text", () => {
+    const defaultQuote = createQuote();
+    const quote = createQuote([createText("引用内容")]);
+
+    expect(isQuoteNode(defaultQuote)).toBe(true);
+    expect(defaultQuote).toEqual({
+      children: [{ text: "", type: "text" }],
+      type: "quote",
+    });
+    expect(quote.children[0]?.text).toBe("引用内容");
   });
 
   it("creates a document with a default empty paragraph", () => {
