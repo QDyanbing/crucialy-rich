@@ -24,7 +24,15 @@ export type {
   TextMarkType,
   TextNode,
 } from "./types";
-export { isBlockNode, isDocumentNode, isParagraphNode, isTextNode } from "./guards";
+export {
+  isBlockNode,
+  isDocumentNode,
+  isHeadingLevel,
+  isHeadingNode,
+  isParagraphNode,
+  isQuoteNode,
+  isTextNode,
+} from "./guards";
 export { createDocument, createParagraph, createText } from "./factories";
 export {
   areLinkMarksEqual,
