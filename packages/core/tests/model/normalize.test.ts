@@ -25,6 +25,88 @@ describe("normalizeDocument", () => {
     expect(result.children[0]?.children[0]?.text).toBe("");
   });
 
+  it("fills empty heading and quote blocks with empty text", () => {
+    const result = normalizeDocument({
+      children: [
+        { children: [], level: 2, type: "heading" },
+        { children: [], type: "quote" },
+      ],
+      type: "document",
+    });
+
+    expect(result.children).toEqual([
+      {
+        children: [{ text: "", type: "text" }],
+        level: 2,
+        type: "heading",
+      },
+      {
+        children: [{ text: "", type: "text" }],
+        type: "quote",
+      },
+    ]);
+  });
+
+  it("preserves block types while normalizing text children", () => {
+    const result = normalizeDocument({
+      children: [
+        {
+          children: [
+            { marks: { bold: true }, text: "主", type: "text" },
+            { marks: { bold: true }, text: "题", type: "text" },
+          ],
+          level: 1,
+          type: "heading",
+        },
+        {
+          children: [
+            { marks: { textColor: "#0AF" }, text: "引", type: "text" },
+            { marks: { textColor: "#0AF" }, text: "用", type: "text" },
+          ],
+          type: "quote",
+        },
+      ],
+      type: "document",
+    });
+
+    expect(result.children).toEqual([
+      {
+        children: [{ marks: { bold: true }, text: "主题", type: "text" }],
+        level: 1,
+        type: "heading",
+      },
+      {
+        children: [{ marks: { textColor: "#00aaff" }, text: "引用", type: "text" }],
+        type: "quote",
+      },
+    ]);
+    expect(validateDocument(result).valid).toBe(true);
+  });
+
+  it("drops headings with unsupported levels", () => {
+    const result = normalizeDocument({
+      children: [
+        {
+          children: [{ text: "非法标题", type: "text" }],
+          level: 7,
+          type: "heading",
+        },
+        {
+          children: [{ text: "保留引用", type: "text" }],
+          type: "quote",
+        },
+      ],
+      type: "document",
+    });
+
+    expect(result.children).toEqual([
+      {
+        children: [{ text: "保留引用", type: "text" }],
+        type: "quote",
+      },
+    ]);
+  });
+
   it("drops invalid document children", () => {
     const result = normalizeDocument({
       type: "document",
