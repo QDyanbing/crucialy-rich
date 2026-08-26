@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { createDocument, createParagraph, createText } from "../../src/model/factories";
+import {
+  createDocument,
+  createHeading,
+  createParagraph,
+  createQuote,
+  createText,
+} from "../../src/model/factories";
+import { HEADING_LEVELS } from "../../src/model/types";
 import { validateDocument } from "../../src/model/validate";
 
 describe("validateDocument", () => {
@@ -12,6 +19,55 @@ describe("validateDocument", () => {
   it("accepts an empty document", () => {
     const result = validateDocument({ type: "document", children: [] });
     expect(result.valid).toBe(true);
+  });
+
+  it("accepts heading and quote blocks", () => {
+    const document = createDocument([
+      ...HEADING_LEVELS.map((level) =>
+        createHeading(level, [createText(`标题 ${level}`, { bold: true })]),
+      ),
+      createQuote([createText("引用", { italic: true })]),
+      createParagraph([createText("正文")]),
+    ]);
+
+    expect(validateDocument(document)).toEqual({ errors: [], valid: true });
+  });
+
+  it("rejects headings with unsupported levels", () => {
+    for (const level of [0, 7, 1.5, "1"]) {
+      const result = validateDocument({
+        children: [{ children: [], level, type: "heading" }],
+        type: "document",
+      });
+
+      expect(result).toEqual({
+        errors: [
+          {
+            message: "document 子节点必须是块级节点",
+            path: [0],
+          },
+        ],
+        valid: false,
+      });
+    }
+  });
+
+  it("rejects non-text children inside heading and quote blocks", () => {
+    const result = validateDocument({
+      children: [
+        { children: [{ type: "inline" }], level: 2, type: "heading" },
+        { children: [{ type: "paragraph", children: [] }], type: "quote" },
+      ],
+      type: "document",
+    });
+
+    expect(result).toEqual({
+      errors: [
+        { message: "块级节点子节点必须是 text 节点", path: [0, 0] },
+        { message: "块级节点子节点必须是 text 节点", path: [1, 0] },
+      ],
+      valid: false,
+    });
   });
 
   it("rejects a non-document root", () => {
