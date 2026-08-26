@@ -3,7 +3,10 @@ import { describe, expect, it } from "vitest";
 import {
   isBlockNode,
   isDocumentNode,
+  isHeadingLevel,
+  isHeadingNode,
   isParagraphNode,
+  isQuoteNode,
   isTextNode,
 } from "../../src/model/guards";
 
@@ -19,6 +22,24 @@ describe("model type guards", () => {
     expect(isParagraphNode({ type: "paragraph", children: [] })).toBe(true);
     expect(isParagraphNode({ type: "paragraph" })).toBe(false);
     expect(isParagraphNode({ type: "text", text: "a" })).toBe(false);
+  });
+
+  it("recognizes heading levels and heading nodes", () => {
+    expect(isHeadingLevel(1)).toBe(true);
+    expect(isHeadingLevel(6)).toBe(true);
+    expect(isHeadingLevel(0)).toBe(false);
+    expect(isHeadingLevel(7)).toBe(false);
+    expect(isHeadingLevel(1.5)).toBe(false);
+    expect(isHeadingLevel("1")).toBe(false);
+    expect(isHeadingNode({ type: "heading", level: 2, children: [] })).toBe(true);
+    expect(isHeadingNode({ type: "heading", level: 7, children: [] })).toBe(false);
+    expect(isHeadingNode({ type: "heading", level: 2 })).toBe(false);
+  });
+
+  it("recognizes quote nodes", () => {
+    expect(isQuoteNode({ type: "quote", children: [] })).toBe(true);
+    expect(isQuoteNode({ type: "quote" })).toBe(false);
+    expect(isQuoteNode({ type: "paragraph", children: [] })).toBe(false);
   });
 
   it("treats paragraph as a block node", () => {
