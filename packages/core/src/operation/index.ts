@@ -20,6 +20,7 @@ export {
   createSelectionAfterSplitBlock,
   createSplitBlockOperation,
 } from "./split-block";
+export { applySetBlockType, createSetBlockTypeOperation } from "./set-block-type";
 export {
   applySetMarkAttribute,
   createSelectionAfterSetMarkAttribute,
@@ -56,10 +57,12 @@ export type {
   TransactionSummary,
 } from "./summary";
 export type {
+  BlockTypeSpec,
   DeleteTextOperation,
   InsertTextOperation,
   MergeBlockOperation,
   Operation,
+  SetBlockTypeOperation,
   SetLinkOperation,
   SetMarkAttributeOperation,
   SplitBlockOperation,

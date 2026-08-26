@@ -1,10 +1,16 @@
 import type {
+  HeadingLevel,
   LinkMarkAttributes,
   TextMarkAttributes,
   TextMarkAttributeType,
   TextMarkType,
 } from "../model";
-import type { Point, RangeSelection } from "../selection";
+import type { Path, Point, RangeSelection } from "../selection";
+
+export type BlockTypeSpec =
+  | { type: "heading"; level: HeadingLevel }
+  | { type: "paragraph" }
+  | { type: "quote" };
 
 export const OPERATION_TYPES = [
   "insert_text",
@@ -58,6 +64,12 @@ export interface SplitBlockOperation {
 export interface MergeBlockOperation {
   point: Point;
   type: "merge_block";
+}
+
+export interface SetBlockTypeOperation {
+  block: BlockTypeSpec;
+  path: Path;
+  type: "set_block_type";
 }
 
 export type Operation =
