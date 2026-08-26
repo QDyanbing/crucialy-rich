@@ -1,4 +1,9 @@
-import type { TextMarkAttributeType, TextMarkType } from "../model";
+import type {
+  BlockType,
+  HeadingLevel,
+  TextMarkAttributeType,
+  TextMarkType,
+} from "../model";
 import type { Path } from "../selection";
 import { isCollapsed, normalizeRange } from "../selection";
 import type {
@@ -7,6 +12,7 @@ import type {
   MergeBlockOperation,
   Operation,
   OperationType,
+  SetBlockTypeOperation,
   SetLinkOperation,
   SetMarkAttributeOperation,
   SplitBlockOperation,
@@ -21,11 +27,15 @@ export type TextOperation =
   | SetMarkAttributeOperation
   | ToggleMarkOperation;
 
-export type BlockOperation = MergeBlockOperation | SplitBlockOperation;
+export type BlockOperation =
+  | MergeBlockOperation
+  | SetBlockTypeOperation
+  | SplitBlockOperation;
 
 export interface OperationSummary {
   collapsedRange?: boolean;
   attribute?: TextMarkAttributeType;
+  blockType?: BlockType;
   mark?: TextMarkType;
   scope: "block" | "text";
   targetPath: Path;
@@ -33,6 +43,7 @@ export interface OperationSummary {
   type: OperationType;
   value?: number | string | null;
   linkHref?: string | null;
+  headingLevel?: HeadingLevel;
 }
 
 export interface TransactionSummary {
@@ -53,6 +64,7 @@ export const TEXT_OPERATION_TYPES = [
 ] as const satisfies readonly OperationType[];
 
 export const BLOCK_OPERATION_TYPES = [
+  "set_block_type",
   "split_block",
   "merge_block",
 ] as const satisfies readonly OperationType[];
@@ -68,7 +80,11 @@ export function isTextOperation(operation: Operation): operation is TextOperatio
 }
 
 export function isBlockOperation(operation: Operation): operation is BlockOperation {
-  return operation.type === "split_block" || operation.type === "merge_block";
+  return (
+    operation.type === "set_block_type" ||
+    operation.type === "split_block" ||
+    operation.type === "merge_block"
+  );
 }
 
 export function summarizeOperation(operation: Operation): OperationSummary {
@@ -128,6 +144,16 @@ export function summarizeOperation(operation: Operation): OperationSummary {
         type: "set_link",
       };
     }
+    case "set_block_type":
+      return {
+        blockType: operation.block.type,
+        ...(operation.block.type === "heading"
+          ? { headingLevel: operation.block.level }
+          : {}),
+        scope: "block",
+        targetPath: [...operation.path],
+        type: "set_block_type",
+      };
     case "merge_block":
       return {
         scope: "block",

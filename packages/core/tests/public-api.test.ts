@@ -134,6 +134,7 @@ describe("@crucialy-rich/core public API", () => {
       "toggle_mark",
       "set_mark_attribute",
       "set_link",
+      "set_block_type",
       "split_block",
       "merge_block",
     ]);

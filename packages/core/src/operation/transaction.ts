@@ -3,6 +3,7 @@ import type { Point, RangeSelection } from "../selection";
 import { applyDeleteText } from "./delete-text";
 import { applyInsertText } from "./insert-text";
 import { applyMergeBlock } from "./merge-block";
+import { applySetBlockType } from "./set-block-type";
 import { applySetLink } from "./set-link";
 import { applySetMarkAttribute } from "./set-mark-attribute";
 import { applySplitBlock } from "./split-block";
@@ -55,6 +56,15 @@ export function cloneOperation(operation: Operation): Operation {
         range: cloneRange(operation.range),
         type: "set_link",
       };
+    case "set_block_type":
+      return {
+        block:
+          operation.block.type === "heading"
+            ? { ...operation.block }
+            : { type: operation.block.type },
+        path: [...operation.path],
+        type: "set_block_type",
+      };
     case "merge_block":
       return {
         point: clonePoint(operation.point),
@@ -89,6 +99,8 @@ export function applyOperation(
       return applySetMarkAttribute(document, operation);
     case "set_link":
       return applySetLink(document, operation);
+    case "set_block_type":
+      return applySetBlockType(document, operation);
     case "merge_block":
       return applyMergeBlock(document, operation);
     case "split_block":

@@ -109,6 +109,7 @@ export function createSelectionAfterDeleteInput(input: DeleteInput): RangeSelect
     case "merge_block":
       return createCollapsedSelection(input.selection.anchor);
     case "insert_text":
+    case "set_block_type":
     case "set_link":
     case "set_mark_attribute":
     case "split_block":

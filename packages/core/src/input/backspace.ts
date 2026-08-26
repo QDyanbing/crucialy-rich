@@ -88,6 +88,7 @@ export function createSelectionAfterBackspaceInput(
     case "merge_block":
       return createSelectionAfterMergeBlock(input.document, operation);
     case "insert_text":
+    case "set_block_type":
     case "set_link":
     case "set_mark_attribute":
     case "split_block":

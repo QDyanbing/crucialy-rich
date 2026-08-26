@@ -18,6 +18,7 @@ export const OPERATION_TYPES = [
   "toggle_mark",
   "set_mark_attribute",
   "set_link",
+  "set_block_type",
   "split_block",
   "merge_block",
 ] as const;
@@ -76,6 +77,7 @@ export type Operation =
   | DeleteTextOperation
   | InsertTextOperation
   | MergeBlockOperation
+  | SetBlockTypeOperation
   | SetLinkOperation
   | SetMarkAttributeOperation
   | SplitBlockOperation

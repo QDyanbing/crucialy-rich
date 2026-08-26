@@ -26,6 +26,7 @@ describe("operation type registry", () => {
       "toggle_mark",
       "set_mark_attribute",
       "set_link",
+      "set_block_type",
       "split_block",
       "merge_block",
     ]);
@@ -36,7 +37,11 @@ describe("operation type registry", () => {
       "set_mark_attribute",
       "set_link",
     ]);
-    expect(BLOCK_OPERATION_TYPES).toEqual(["split_block", "merge_block"]);
+    expect(BLOCK_OPERATION_TYPES).toEqual([
+      "set_block_type",
+      "split_block",
+      "merge_block",
+    ]);
   });
 });
 
