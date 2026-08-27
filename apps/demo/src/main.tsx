@@ -9,6 +9,7 @@ import {
   createHistoryState,
   createTransactionAcceptanceReport,
   createDocument,
+  createHeading,
   createParagraph,
   createText,
   DELETE_SELECTION_COMMAND_NAME,
@@ -63,7 +64,7 @@ import { createRoot } from "react-dom/client";
 
 import "./styles.css";
 
-type ModelExampleId = "regular" | "marks" | "links" | "empty" | "invalid";
+type ModelExampleId = "regular" | "headings" | "marks" | "links" | "empty" | "invalid";
 
 interface ModelExample {
   id: ModelExampleId;
@@ -104,6 +105,23 @@ const modelExamples: ModelExample[] = [
     value: createDocument([
       createParagraph([createText("你好，crucialy-rich。")]),
       createParagraph([createText("选区模型已就绪。")]),
+    ]),
+  },
+  {
+    id: "headings",
+    label: "标题层级",
+    selection: {
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 4 },
+    },
+    value: createDocument([
+      createHeading(1, [createText("一级标题")]),
+      createHeading(2, [createText("二级标题")]),
+      createHeading(3, [createText("三级标题")]),
+      createHeading(4, [createText("四级标题")]),
+      createHeading(5, [createText("五级标题")]),
+      createHeading(6, [createText("六级标题")]),
+      createParagraph([createText("标题之后可以继续编辑正文。")]),
     ]),
   },
   {
