@@ -2,9 +2,9 @@
 
 ## 当前进度
 
-第 13 周 Day 1「Block Type 设计」已完成。
+第 13 周 Day 1「Block Type 设计」和 Day 2「Heading」已完成。
 
-☑️ 当前指针：第 13 周 Day 2「Heading」待开始。
+☑️ 当前指针：第 13 周 Day 3「Quote」待开始。
 
 ## Day 1 已完成范围
 
@@ -19,8 +19,19 @@
 - Block Type 切换保留 children、文本和 marks，并支持 heading level 更新。
 - `set_block_type` 已接入 Transaction、operation 摘要、block 作用域分类和验收报告。
 - 公共入口已导出 Block Type 模型与 operation API。
-- 现有 renderer 对新 block 使用 paragraph 兼容输出，语义标签留到 Day 2、Day 3。
+- renderer 对 quote 暂时使用 paragraph 兼容输出，语义标签留到 Day 3。
 - 新增 `docs/features/block-type.md`，记录模型协议、切换规则和阶段边界。
+
+## Day 2 已完成范围
+
+- renderer 按 heading level 输出 `h1`–`h6`，保留 block/text 模型路径和 marks。
+- 新增 `setHeading` command，支持 1–6 级标题设置、层级切换和恢复 paragraph。
+- command 接受 collapsed selection 和单个 block 内的 range selection，非法层级与跨 block 选区不可执行。
+- command 返回 `set_block_type` transaction 并克隆保留选区，切换后可继续输入。
+- 新增当前标题层级读取和 command active 状态判断，并进入默认 Command 注册表。
+- Demo 新增中文“标题层级”模型样例和“正文 / 1–6 级标题”选择器。
+- Playwright 已覆盖六级语义标签、层级切换、继续输入和恢复正文。
+- 新增 `docs/features/heading.md`，记录 Heading API、选区规则和阶段边界。
 
 ## 自动化覆盖
 
@@ -34,15 +45,19 @@
 - `packages/core/tests/operation/summary.test.ts`
 - `packages/core/tests/operation/acceptance.test.ts`
 - `packages/core/tests/render/render.test.ts`
+- `packages/core/tests/render/html.test.ts`
+- `packages/core/tests/command/heading.test.ts`
+- `packages/core/tests/command/state.test.ts`
 - `packages/core/tests/public-api.test.ts`
+- `tests/e2e/demo-shell.spec.ts`
 
 ## 当前边界
 
-- 尚未提供 heading/quote command。
-- renderer 尚未输出 `h1`–`h6` 或 `blockquote`。
-- Demo 尚未提供标题选择器或引用按钮。
+- 尚未提供 quote command。
+- renderer 尚未输出 `blockquote`。
+- Demo 尚未提供引用按钮。
 - 当前 `set_block_type` 一次只处理一个顶层 block path，跨 block 切换留到 Day 4。
 
 ## 结论
 
-第 13 周 Day 1 已达到“文档模型可表达 heading/quote”的验收目标，并具备可进入后续 command 与 renderer 开发的稳定 Block Type operation。
+第 13 周 Day 2 已达到“段落可切换成 1–6 级标题并继续编辑”的验收目标。Heading 的模型、operation、command、renderer、Demo、自动化测试和中文文档已闭环，下一步进入 Quote。

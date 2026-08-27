@@ -50,7 +50,7 @@ interface DocumentNode {
 }
 ```
 
-`HeadingNode.level` 只允许 1–6。三种 block 都直接包含 text children，因此 Block Type 切换不会丢失文本或 marks。详细规则见 [Block Type 设计](./block-type.md)。
+`HeadingNode.level` 只允许 1–6。三种 block 都直接包含 text children，因此 Block Type 切换不会丢失文本或 marks。详细规则见 [Block Type 设计](./block-type.md)，标题 command 和语义渲染见 [Heading 标题](./heading.md)。
 
 `TextNode.marks` 当前支持 `bold`、`italic`、`underline` 和 `strike` 四个 boolean 标记，`fontSize`、`textColor` 和 `backgroundColor` 三个文字属性，以及结构化 `link`。Link Mark 包含安全 href 和可选 target / rel；它可以与所有文字样式共存。没有任何有效 mark 时省略 `marks` 字段。
 

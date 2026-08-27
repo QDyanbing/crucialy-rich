@@ -79,9 +79,9 @@ interface SetBlockTypeOperation {
 
 ## 当前渲染边界
 
-Day 1 只完成模型和 operation。基础 renderer 会先以 `<p>` 兼容输出 heading 与 quote 内容，确保模型进入现有 React 和 DOM 映射链时不丢文本。
+Heading 已在 Day 2 完成语义渲染和 command：1–6 级标题分别输出 `<h1>`–`<h6>`，可在单个 block 内切换层级或恢复 paragraph。详细 API 见 [Heading 标题](./heading.md)。Quote 当前仍以 `<p>` 兼容输出，确保进入现有 React 和 DOM 映射链时不丢文本。
 
-- Day 2 实现 heading 1–6 级语义渲染和 command。
+- Day 2 已完成 heading 1–6 级语义渲染和 command。
 - Day 3 实现 quote 语义渲染和 command。
 - Day 4 扩展到跨多个 block 的切换。
 - Day 5 完成标题和引用闭环验收。

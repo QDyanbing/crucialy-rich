@@ -1,6 +1,6 @@
 # 基础渲染（第一版）
 
-基础渲染负责把当前文档模型转换为可展示的 DOM 结构描述。当前覆盖 `document`、`paragraph`、`text`、四种 boolean text mark、安全字号、文字颜色、背景色和 Link Mark。
+基础渲染负责把当前文档模型转换为可展示的 DOM 结构描述。当前覆盖 `document`、`paragraph`、1–6 级 `heading`、`text`、四种 boolean text mark、安全字号、文字颜色、背景色和 Link Mark。
 
 ## 渲染结构
 
@@ -8,6 +8,7 @@
 
 - `document` → `div`
 - `paragraph` → `p`
+- `heading level=1..6` → `h1`–`h6`
 - `text` → `span`
 - `text` + `marks.bold` → `strong`
 - `text` + `marks.italic` → `em`
@@ -27,7 +28,21 @@
 
 ```ts
 interface RenderedElementNode {
-  tagName: "a" | "div" | "em" | "p" | "s" | "span" | "strong" | "u";
+  tagName:
+    | "a"
+    | "div"
+    | "em"
+    | "h1"
+    | "h2"
+    | "h3"
+    | "h4"
+    | "h5"
+    | "h6"
+    | "p"
+    | "s"
+    | "span"
+    | "strong"
+    | "u";
   path: Path;
   attributes: Record<string, string>;
   children?: RenderedElementNode[];
@@ -87,6 +102,7 @@ interface RenderedElementNode {
 - 空 document 渲染为带根路径的空 `div`。
 - 空 paragraph 渲染为带路径的空 `p`。
 - 多段落按块顺序分配 `[0]`、`[1]`、`[2]` 等路径。
+- heading 按 level 输出 `h1`–`h6`，继续保留 block path 和 text path。
 - 加粗 text 渲染为带 text path 的 `strong`，斜体 text 渲染为带 text path 的 `em`，不改变 DOM 与模型路径对应关系。
 - 下划线 text 渲染为带 text path 的 `u`。
 - 删除线 text 渲染为带 text path 的 `s`。
@@ -113,4 +129,4 @@ interface RenderedElementNode {
 
 - 浏览器选区同步当前只覆盖已验证的基础场景。
 - 不处理 `contentEditable`、`beforeinput` 或真实编辑行为。
-- 当前包含四种 boolean mark、字号、文字颜色、背景色和链接渲染；标题和列表等扩展渲染尚未实现。
+- 当前包含标题、四种 boolean mark、字号、文字颜色、背景色和链接渲染；Quote 语义渲染、列表等扩展节点尚未实现。
