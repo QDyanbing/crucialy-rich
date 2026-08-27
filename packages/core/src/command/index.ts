@@ -19,6 +19,14 @@ export {
 } from "./font-size";
 export type { SetFontSizeCommandPayload } from "./font-size";
 export {
+  canExecuteSetHeadingCommand,
+  getSelectedHeadingLevel,
+  isHeadingCommandActive,
+  SET_HEADING_COMMAND_NAME,
+  setHeadingCommand,
+} from "./heading";
+export type { SetHeadingCommandPayload } from "./heading";
+export {
   canExecuteSetLinkCommand,
   canExecuteUnsetLinkCommand,
   getSelectedLinkMark,
