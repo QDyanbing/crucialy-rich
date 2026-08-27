@@ -5,6 +5,7 @@ import {
   createCommandSuccess,
   createDefaultCommandRegistry,
   createDocument,
+  createHeading,
   createParagraph,
   createText,
   BOLD_COMMAND_NAME,
@@ -13,6 +14,7 @@ import {
   ITALIC_COMMAND_NAME,
   MERGE_BLOCK_COMMAND_NAME,
   queryCommandState,
+  SET_HEADING_COMMAND_NAME,
   SPLIT_BLOCK_COMMAND_NAME,
   type Command,
 } from "../../src";
@@ -179,5 +181,38 @@ describe("queryCommandState", () => {
       disabled: false,
       registered: true,
     });
+  });
+
+  it("reads heading target state from the default registry", () => {
+    const registry = createDefaultCommandRegistry();
+    const document = createDocument([createHeading(3, [createText("三级标题")])]);
+    const input = {
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 1 },
+          focus: { path: [0, 0], offset: 1 },
+        },
+      },
+    };
+
+    expect(
+      queryCommandState(registry, SET_HEADING_COMMAND_NAME, {
+        ...input,
+        payload: { level: 3 },
+      }),
+    ).toMatchObject({ active: true, disabled: false, registered: true });
+    expect(
+      queryCommandState(registry, SET_HEADING_COMMAND_NAME, {
+        ...input,
+        payload: { level: 2 },
+      }),
+    ).toMatchObject({ active: false, disabled: false, registered: true });
+    expect(
+      queryCommandState(registry, SET_HEADING_COMMAND_NAME, {
+        ...input,
+        payload: { level: 7 },
+      }),
+    ).toMatchObject({ active: false, disabled: true, registered: true });
   });
 });
