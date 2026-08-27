@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { createDocument, createParagraph, createText } from "../../src/model";
+import {
+  createDocument,
+  createHeading,
+  createParagraph,
+  createText,
+} from "../../src/model";
 import { renderDocument, renderNodeToHtml } from "../../src/render";
 
 describe("renderNodeToHtml", () => {
@@ -12,6 +17,21 @@ describe("renderNodeToHtml", () => {
     expect(renderNodeToHtml(renderDocument(document))).toBe(
       '<div data-crucialy-path="[]"><p data-crucialy-path="[0]"><span data-crucialy-path="[0,0]">Hello</span><span data-crucialy-path="[0,1]"> world</span></p></div>',
     );
+  });
+
+  it("serializes all heading levels with semantic tags", () => {
+    const document = createDocument(
+      ([1, 2, 3, 4, 5, 6] as const).map((level) =>
+        createHeading(level, [createText(`标题 ${level}`)]),
+      ),
+    );
+    const html = renderNodeToHtml(renderDocument(document));
+
+    for (const level of [1, 2, 3, 4, 5, 6]) {
+      expect(html).toContain(
+        `<h${level} data-crucialy-path="[${level - 1}]"><span data-crucialy-path="[${level - 1},0]">标题 ${level}</span></h${level}>`,
+      );
+    }
   });
 
   it("escapes text and attribute values", () => {

@@ -111,14 +111,14 @@ describe("renderDocument", () => {
     });
   });
 
-  it("keeps heading and quote content renderable before semantic renderers land", () => {
+  it("renders headings semantically and keeps the quote fallback", () => {
     const document = createDocument([
       createHeading(2, [createText("标题", { bold: true })]),
       createQuote([createText("引用", { italic: true })]),
     ]);
     const rendered = renderDocument(document);
 
-    expect(rendered.children?.map((node) => node.tagName)).toEqual(["p", "p"]);
+    expect(rendered.children?.map((node) => node.tagName)).toEqual(["h2", "p"]);
     expect(rendered.children?.[0]).toMatchObject({
       children: [{ tagName: "strong", text: "标题" }],
       path: [0],
@@ -126,6 +126,36 @@ describe("renderDocument", () => {
     expect(rendered.children?.[1]).toMatchObject({
       children: [{ tagName: "em", text: "引用" }],
       path: [1],
+    });
+  });
+
+  it("maps every supported heading level to its semantic tag", () => {
+    const document = createDocument(
+      ([1, 2, 3, 4, 5, 6] as const).map((level) =>
+        createHeading(level, [createText(`Heading ${level}`)]),
+      ),
+    );
+    const rendered = renderDocument(document);
+
+    expect(rendered.children?.map((node) => node.tagName)).toEqual([
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "h5",
+      "h6",
+    ]);
+    expect(rendered.children?.map((node) => node.path)).toEqual([
+      [0],
+      [1],
+      [2],
+      [3],
+      [4],
+      [5],
+    ]);
+    expect(rendered.children?.[5]?.children?.[0]).toMatchObject({
+      path: [5, 0],
+      text: "Heading 6",
     });
   });
 
