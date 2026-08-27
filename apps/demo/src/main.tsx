@@ -16,6 +16,7 @@ import {
   domSelectionToModelSelection,
   executeCommand,
   getNodeAtPath,
+  getSelectedHeadingLevel,
   getSelectedLinkMark,
   getHistoryShortcutAction,
   getTextInRange,
@@ -29,6 +30,7 @@ import {
   recordHistory,
   SET_BACKGROUND_COLOR_COMMAND_NAME,
   SET_FONT_SIZE_COMMAND_NAME,
+  SET_HEADING_COMMAND_NAME,
   SET_LINK_COMMAND_NAME,
   SET_TEXT_COLOR_COMMAND_NAME,
   SPLIT_BLOCK_COMMAND_NAME,
@@ -42,6 +44,7 @@ import {
   type CommandState,
   type DocumentNode,
   type HistoryChange,
+  type HeadingLevel,
   type Path,
   type Point,
   type RangeSelection,
@@ -89,9 +92,16 @@ interface DemoCommandState extends CommandState {
 }
 
 const FONT_SIZE_OPTIONS = [12, 14, 16, 18, 24, 32] as const;
+const HEADING_LEVEL_OPTIONS = [1, 2, 3, 4, 5, 6] as const;
 
 function parseFontSizeOption(value: string): number | null {
   return value === "default" ? null : Number(value);
+}
+
+function parseHeadingLevelOption(value: string): HeadingLevel | null {
+  const level = Number(value);
+
+  return HEADING_LEVEL_OPTIONS.find((option) => option === level) ?? null;
 }
 
 const modelExamples: ModelExample[] = [
@@ -251,6 +261,7 @@ const demoCommandDescriptors: DemoCommandDescriptor[] = [
   { label: "背景色", name: SET_BACKGROUND_COLOR_COMMAND_NAME },
   { label: "设置链接", name: SET_LINK_COMMAND_NAME },
   { label: "取消链接", name: UNSET_LINK_COMMAND_NAME },
+  { label: "标题", name: SET_HEADING_COMMAND_NAME },
   { label: "删除选区", name: DELETE_SELECTION_COMMAND_NAME },
   { label: "分段", name: SPLIT_BLOCK_COMMAND_NAME },
   { label: "合并段落", name: MERGE_BLOCK_COMMAND_NAME },
@@ -597,6 +608,16 @@ function DemoApp() {
       }),
     [modelSelection, normalizedDocument],
   );
+  const selectedHeadingLevel = useMemo(
+    () =>
+      getSelectedHeadingLevel({
+        context: {
+          document: normalizedDocument,
+          selection: modelSelection,
+        },
+      }),
+    [modelSelection, normalizedDocument],
+  );
   const documentPreview = useMemo(
     () => JSON.stringify(documentValue, null, 2),
     [documentValue],
@@ -644,7 +665,9 @@ function DemoApp() {
                           linkTargetValue,
                           linkRelValue,
                         )
-                      : undefined,
+                      : command.name === SET_HEADING_COMMAND_NAME
+                        ? { level: selectedHeadingLevel ?? null }
+                        : undefined,
         }),
         label: command.label,
       })),
@@ -657,6 +680,7 @@ function DemoApp() {
       linkTargetValue,
       modelSelection,
       normalizedDocument,
+      selectedHeadingLevel,
       textColorValue,
     ],
   );
@@ -805,6 +829,18 @@ function DemoApp() {
         payload: {
           fontSize: parseFontSizeOption(nextValue),
         },
+      }),
+    );
+  }
+
+  function handleHeadingChange(event: ChangeEvent<HTMLSelectElement>) {
+    applyCommandResult(
+      executeCommand(demoCommandRegistry, SET_HEADING_COMMAND_NAME, {
+        context: {
+          document: normalizedDocument,
+          selection: modelSelection,
+        },
+        payload: { level: parseHeadingLevelOption(event.target.value) },
       }),
     );
   }
@@ -1221,6 +1257,22 @@ function DemoApp() {
             >
               {selectedLink ? selectedLink.href : "选区无统一链接"}
             </output>
+            <label>
+              <span>标题层级</span>
+              <select
+                aria-label="标题层级"
+                disabled={isCommandDisabled(SET_HEADING_COMMAND_NAME)}
+                value={selectedHeadingLevel ?? "paragraph"}
+                onChange={handleHeadingChange}
+              >
+                <option value="paragraph">正文</option>
+                {HEADING_LEVEL_OPTIONS.map((level) => (
+                  <option key={level} value={level}>
+                    {level} 级标题
+                  </option>
+                ))}
+              </select>
+            </label>
             <label>
               <span>字号</span>
               <select

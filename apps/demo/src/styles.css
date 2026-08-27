@@ -136,11 +136,45 @@ h3 {
   padding: 18px;
 }
 
-.rendered-document p {
+.rendered-document p,
+.rendered-document h1,
+.rendered-document h2,
+.rendered-document h3,
+.rendered-document h4,
+.rendered-document h5,
+.rendered-document h6 {
   margin: 0;
   color: #17211b;
+  line-height: 1.4;
+}
+
+.rendered-document p {
   font-size: 1rem;
   line-height: 1.6;
+}
+
+.rendered-document h1 {
+  font-size: 2rem;
+}
+
+.rendered-document h2 {
+  font-size: 1.7rem;
+}
+
+.rendered-document h3 {
+  font-size: 1.45rem;
+}
+
+.rendered-document h4 {
+  font-size: 1.25rem;
+}
+
+.rendered-document h5 {
+  font-size: 1.1rem;
+}
+
+.rendered-document h6 {
+  font-size: 1rem;
 }
 
 .rendered-document a,
