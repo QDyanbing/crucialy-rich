@@ -4,11 +4,25 @@ import {
   hasTextMark,
   type BlockNode,
   type DocumentNode,
+  type HeadingLevel,
   type TextNode,
 } from "../model";
 import type { Path } from "../selection";
 import { createModelPathAttributes } from "./attributes";
-import type { RenderedElementNode, RenderedElementStyle } from "./types";
+import type {
+  RenderedElementNode,
+  RenderedElementStyle,
+  RenderedTagName,
+} from "./types";
+
+const HEADING_TAG_NAMES = {
+  1: "h1",
+  2: "h2",
+  3: "h3",
+  4: "h4",
+  5: "h5",
+  6: "h6",
+} as const satisfies Record<HeadingLevel, RenderedTagName>;
 
 function createRenderedNode(
   tagName: RenderedElementNode["tagName"],
@@ -84,7 +98,9 @@ function renderTextNode(node: TextNode, path: Path): RenderedElementNode {
 }
 
 function renderBlockNode(node: BlockNode, path: Path): RenderedElementNode {
-  return createRenderedNode("p", path, {
+  const tagName = node.type === "heading" ? HEADING_TAG_NAMES[node.level] : "p";
+
+  return createRenderedNode(tagName, path, {
     children: node.children.map((child, index) =>
       renderTextNode(child, [...path, index]),
     ),

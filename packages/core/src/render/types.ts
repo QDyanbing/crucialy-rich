@@ -1,6 +1,20 @@
 import type { Path } from "../selection";
 
-export type RenderedTagName = "a" | "div" | "em" | "p" | "s" | "span" | "strong" | "u";
+export type RenderedTagName =
+  | "a"
+  | "div"
+  | "em"
+  | "h1"
+  | "h2"
+  | "h3"
+  | "h4"
+  | "h5"
+  | "h6"
+  | "p"
+  | "s"
+  | "span"
+  | "strong"
+  | "u";
 
 export interface RenderedElementStyle {
   backgroundColor?: string;
