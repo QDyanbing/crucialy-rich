@@ -47,6 +47,66 @@ test("renders the demo shell", async ({ page }) => {
   await expect(page.getByLabel("选中文本")).toContainText("你好");
 });
 
+test("renders every heading level from the demo example", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("headings");
+
+  const renderedDocument = page.getByLabel("已渲染文档");
+
+  for (const [level, text] of [
+    [1, "一级标题"],
+    [2, "二级标题"],
+    [3, "三级标题"],
+    [4, "四级标题"],
+    [5, "五级标题"],
+    [6, "六级标题"],
+  ] as const) {
+    await expect(
+      renderedDocument.locator(`h${level}[data-crucialy-path="[${level - 1}]"]`),
+    ).toHaveText(text);
+  }
+});
+
+test("switches heading levels and keeps editing before restoring a paragraph", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("headings");
+
+  const headingSelect = page.getByLabel("标题层级");
+  const renderedDocument = page.getByLabel("已渲染文档");
+
+  await expect(headingSelect).toHaveValue("1");
+  await headingSelect.selectOption("4");
+
+  await expect(renderedDocument.locator('h4[data-crucialy-path="[0]"]')).toHaveText(
+    "一级标题",
+  );
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"type": "set_block_type"',
+  );
+  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
+    '"level": 4',
+  );
+
+  await placeCaretInRenderedText(page, "[0,0]", 4);
+  await page.keyboard.type("续");
+
+  await expect(renderedDocument.locator('h4[data-crucialy-path="[0]"]')).toHaveText(
+    "一级标题续",
+  );
+
+  await headingSelect.selectOption("paragraph");
+
+  await expect(renderedDocument.locator('p[data-crucialy-path="[0]"]')).toHaveText(
+    "一级标题续",
+  );
+  await expect(renderedDocument.locator('h4[data-crucialy-path="[0]"]')).toHaveCount(0);
+  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
+    '"type": "paragraph"',
+  );
+});
+
 test("updates the selection debug preview", async ({ page }) => {
   await page.goto("/");
 
