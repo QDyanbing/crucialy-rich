@@ -27,6 +27,12 @@ export {
 } from "./heading";
 export type { SetHeadingCommandPayload } from "./heading";
 export {
+  canExecuteToggleQuoteCommand,
+  isQuoteCommandActive,
+  TOGGLE_QUOTE_COMMAND_NAME,
+  toggleQuoteCommand,
+} from "./quote";
+export {
   canExecuteSetLinkCommand,
   canExecuteUnsetLinkCommand,
   getSelectedLinkMark,
