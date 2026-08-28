@@ -107,6 +107,70 @@ test("switches heading levels and keeps editing before restoring a paragraph", a
   );
 });
 
+test("toggles quote blocks from the demo control", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("quotes");
+
+  const quoteButton = page.getByRole("button", { name: "引用", exact: true });
+  const renderedDocument = page.getByLabel("已渲染文档");
+
+  await expect(
+    renderedDocument.locator('blockquote[data-crucialy-path="[0]"]'),
+  ).toHaveText("引用内容");
+  await expect(quoteButton).toHaveAttribute("aria-pressed", "true");
+
+  await quoteButton.click();
+
+  await expect(renderedDocument.locator('p[data-crucialy-path="[0]"]')).toHaveText(
+    "引用内容",
+  );
+  await expect(quoteButton).toHaveAttribute("aria-pressed", "false");
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"type": "set_block_type"',
+  );
+
+  await quoteButton.click();
+
+  await expect(
+    renderedDocument.locator('blockquote[data-crucialy-path="[0]"]'),
+  ).toHaveText("引用内容");
+  await expect(quoteButton).toHaveAttribute("aria-pressed", "true");
+});
+
+test("keeps quote input deletion and line breaks stable", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("quotes");
+
+  const renderedDocument = page.getByLabel("已渲染文档");
+
+  await placeCaretInRenderedText(page, "[0,0]", 4);
+  await page.keyboard.type("续");
+
+  await expect(
+    renderedDocument.locator('blockquote[data-crucialy-path="[0]"]'),
+  ).toHaveText("引用内容续");
+
+  await page.keyboard.press("Backspace");
+
+  await expect(
+    renderedDocument.locator('blockquote[data-crucialy-path="[0]"]'),
+  ).toHaveText("引用内容");
+
+  await placeCaretInRenderedText(page, "[0,0]", 2);
+  await page.keyboard.press("Enter");
+
+  const quotes = renderedDocument.locator("blockquote");
+
+  await expect(quotes).toHaveCount(2);
+  await expect(quotes.nth(0)).toHaveText("引用");
+  await expect(quotes.nth(1)).toHaveText("内容");
+
+  await page.keyboard.type("新");
+
+  await expect(quotes.nth(1)).toHaveText("新内容");
+  await expect(page.getByLabel("模型校验状态")).toContainText("合法");
+});
+
 test("updates the selection debug preview", async ({ page }) => {
   await page.goto("/");
 
