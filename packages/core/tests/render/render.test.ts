@@ -111,14 +111,17 @@ describe("renderDocument", () => {
     });
   });
 
-  it("renders headings semantically and keeps the quote fallback", () => {
+  it("renders headings and quotes semantically", () => {
     const document = createDocument([
       createHeading(2, [createText("标题", { bold: true })]),
       createQuote([createText("引用", { italic: true })]),
     ]);
     const rendered = renderDocument(document);
 
-    expect(rendered.children?.map((node) => node.tagName)).toEqual(["h2", "p"]);
+    expect(rendered.children?.map((node) => node.tagName)).toEqual([
+      "h2",
+      "blockquote",
+    ]);
     expect(rendered.children?.[0]).toMatchObject({
       children: [{ tagName: "strong", text: "标题" }],
       path: [0],

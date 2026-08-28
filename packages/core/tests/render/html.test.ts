@@ -4,6 +4,7 @@ import {
   createDocument,
   createHeading,
   createParagraph,
+  createQuote,
   createText,
 } from "../../src/model";
 import { renderDocument, renderNodeToHtml } from "../../src/render";
@@ -32,6 +33,16 @@ describe("renderNodeToHtml", () => {
         `<h${level} data-crucialy-path="[${level - 1}]"><span data-crucialy-path="[${level - 1},0]">标题 ${level}</span></h${level}>`,
       );
     }
+  });
+
+  it("serializes quote blocks with their model paths", () => {
+    const document = createDocument([
+      createQuote([createText("引用内容", { italic: true })]),
+    ]);
+
+    expect(renderNodeToHtml(renderDocument(document))).toContain(
+      '<blockquote data-crucialy-path="[0]"><em data-crucialy-path="[0,0]">引用内容</em></blockquote>',
+    );
   });
 
   it("escapes text and attribute values", () => {
