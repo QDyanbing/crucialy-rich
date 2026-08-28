@@ -36,6 +36,7 @@ import {
   SET_TEXT_COLOR_COMMAND_NAME,
   SPLIT_BLOCK_COMMAND_NAME,
   STRIKE_COMMAND_NAME,
+  TOGGLE_QUOTE_COMMAND_NAME,
   UNDERLINE_COMMAND_NAME,
   UNSET_LINK_COMMAND_NAME,
   undoHistory,
@@ -276,6 +277,7 @@ const demoCommandDescriptors: DemoCommandDescriptor[] = [
   { label: "斜体", name: ITALIC_COMMAND_NAME },
   { label: "下划线", name: UNDERLINE_COMMAND_NAME },
   { label: "删除线", name: STRIKE_COMMAND_NAME },
+  { label: "引用", name: TOGGLE_QUOTE_COMMAND_NAME },
   { label: "字号", name: SET_FONT_SIZE_COMMAND_NAME },
   { label: "文字颜色", name: SET_TEXT_COLOR_COMMAND_NAME },
   { label: "背景色", name: SET_BACKGROUND_COLOR_COMMAND_NAME },
@@ -836,6 +838,17 @@ function DemoApp() {
     );
   }
 
+  function handleQuote() {
+    applyCommandResult(
+      executeCommand(demoCommandRegistry, TOGGLE_QUOTE_COMMAND_NAME, {
+        context: {
+          document: normalizedDocument,
+          selection: modelSelection,
+        },
+      }),
+    );
+  }
+
   function handleFontSizeChange(event: ChangeEvent<HTMLSelectElement>) {
     const nextValue = event.target.value;
 
@@ -1202,6 +1215,14 @@ function DemoApp() {
               onClick={handleStrike}
             >
               删除线
+            </button>
+            <button
+              aria-pressed={isCommandActive(TOGGLE_QUOTE_COMMAND_NAME)}
+              type="button"
+              disabled={isCommandDisabled(TOGGLE_QUOTE_COMMAND_NAME)}
+              onClick={handleQuote}
+            >
+              引用
             </button>
             <div className="link-control">
               <button

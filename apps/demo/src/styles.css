@@ -142,7 +142,8 @@ h3 {
 .rendered-document h3,
 .rendered-document h4,
 .rendered-document h5,
-.rendered-document h6 {
+.rendered-document h6,
+.rendered-document blockquote {
   margin: 0;
   color: #17211b;
   line-height: 1.4;
@@ -175,6 +176,14 @@ h3 {
 
 .rendered-document h6 {
   font-size: 1rem;
+}
+
+.rendered-document blockquote {
+  border-left: 3px solid #6b8b75;
+  color: #35483c;
+  font-size: 1rem;
+  line-height: 1.65;
+  padding: 2px 0 2px 14px;
 }
 
 .rendered-document a,
