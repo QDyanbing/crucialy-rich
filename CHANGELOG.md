@@ -81,6 +81,9 @@
 - 新增 Heading 第一版，包含 `h1`–`h6` 语义渲染、`setHeading` command、默认注册、标题层级状态读取和公共 API。
 - 新增中文标题 Demo 样例与层级选择器，并覆盖层级切换、继续输入和恢复正文的浏览器验收。
 - 新增 Heading API 文档并更新第 13 周 Day 2 QA 进度。
+- 新增 Quote 第一版，包含 `blockquote` 语义渲染、`toggleQuote` command、默认注册、active 状态和公共 API。
+- 新增中文 Quote Demo 样例与引用按钮，并覆盖切换、取消、输入、删除、Enter 和继续输入的浏览器验收。
+- 新增 Quote 行为文档并更新第 13 周 Day 3 QA 进度。
 
 ### 变更
 
@@ -117,6 +120,7 @@
 - 更新项目、文字属性和 QA 文档，使其匹配第 11 周综合验收状态。
 - 更新项目、模型、文字标记和测试策略文档，使其匹配第 12 周 Day 1 Link Mark 设计范围。
 - 更新项目、Core 包、架构、Block Type、Command 和渲染文档，使其匹配 Heading 闭环状态。
+- 更新项目、Core 包、架构、Block Type、Command 和渲染文档，使其匹配 Quote 闭环状态。
 
 ### 暂未包含
 

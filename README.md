@@ -18,7 +18,7 @@ text marks schema 当前支持 `bold`、`italic`、`underline` 和 `strike` 共�
 
 第 12 周链接闭环已完成：包括结构化 Link Mark、HTTP/HTTPS/mailto URL sanitize、target/rel 白名单、`set_link` operation、`setLink` / `unsetLink` command、`core.link` 功能命名空间、统一链接选区状态读取、安全 `<a>` 渲染、编辑态点击拦截、只读态原生跳转、菜单选区快照与恢复、History 生命周期以及中文创建/编辑/取消验收样例。
 
-第 13 周 Day 1「Block Type 设计」和 Day 2「Heading」已完成：文档模型可表达 paragraph、1–6 级 heading 和 quote；标题支持 `h1`–`h6` 语义渲染、默认 `setHeading` command、层级切换、恢复正文、切换后继续输入以及中文 Demo 验收。当前指针为第 13 周 Day 3「Quote」。
+第 13 周 Day 1「Block Type 设计」、Day 2「Heading」和 Day 3「Quote」已完成：文档模型可表达 paragraph、1–6 级 heading 和 quote；Heading 与 Quote 均完成语义渲染、默认 command、类型切换、中文 Demo 和浏览器验收，Quote 内输入、删除、Enter 与继续输入保持稳定。当前指针为第 13 周 Day 4「Block 切换边界」。
 
 ## 技术栈
 
@@ -121,6 +121,7 @@ pnpm test:e2e
 - [Link Mark](./docs/features/link.md)
 - [Block Type 设计](./docs/features/block-type.md)
 - [Heading 标题](./docs/features/heading.md)
+- [Quote 引用块](./docs/features/quote.md)
 - [选区](./docs/features/selection.md)
 - [基础渲染](./docs/features/render.md)
 - [选区双向同步](./docs/features/selection-sync.md)

@@ -126,6 +126,7 @@ h3 {
 }
 
 .rendered-document {
+  align-content: start;
   display: grid;
   gap: 12px;
   width: 100%;

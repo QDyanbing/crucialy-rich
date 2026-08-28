@@ -2,7 +2,7 @@
 
 自研富文本编辑内核，不依赖 ProseMirror、Tiptap、Lexical、Slate 作为运行时内核。
 
-> 当前处于早期阶段，已提供 paragraph、heading、quote 文档模型、1–6 级 heading 语义渲染与 command、四种 boolean marks 闭环、三种文字属性闭环、结构化 Link Mark 与 URL sanitize、mark 快捷键配置查询、同一 paragraph 内跨 text 的 mark 切分与合并、模型选区、基础渲染器、DOM 与模型位置映射、选区双向同步、基础 operation 与 Transaction、输入 helper、Command 系统、默认 Command 注册表和 History 撤销重做第一版。
+> 当前处于早期阶段，已提供 paragraph、heading、quote 文档模型、1–6 级 heading 与 quote 语义渲染和 command、四种 boolean marks 闭环、三种文字属性闭环、结构化 Link Mark 与 URL sanitize、mark 快捷键配置查询、同一 paragraph 内跨 text 的 mark 切分与合并、模型选区、基础渲染器、DOM 与模型位置映射、选区双向同步、基础 operation 与 Transaction、输入 helper、Command 系统、默认 Command 注册表和 History 撤销重做第一版。
 
 ## 安装
 
@@ -206,7 +206,7 @@ const shortcutCommandName = getCommandNameFromShortcut({
 - Transaction：`createTransaction`、`applyOperation`、`applyTransaction`、`summarizeOperation`、`summarizeTransaction`、`createTransactionAcceptanceReport`。
 - 输入：`createInsertTextInputTransaction`、`createSelectionAfterInsertTextInput`、`createBackspaceInputTransaction`、`createSelectionAfterBackspaceInput`、`createDeleteInputTransaction`、`createSelectionAfterDeleteInput`、`createEnterInputTransaction`、`createSelectionAfterEnterInput`。
 - 当前输入 helper 覆盖普通文本插入、段中删除、段落合并、段落分裂和输入后 selection 落点。
-- Command：`DEFAULT_COMMANDS`、`BOOLEAN_MARK_COMMANDS`、`DEFAULT_COMMAND_SHORTCUTS`、`createDefaultCommandRegistry`、`createCommandRegistry`、`canExecuteCommand`、`executeCommand`、`queryCommandState`、四种 boolean mark command、`setFontSizeCommand`、`setTextColorCommand`、`setBackgroundColorCommand`、`setHeadingCommand`、对应 canExecute/active/选中标题查询 helper、文本与 block command 和对应 command name 常量。
+- Command：`DEFAULT_COMMANDS`、`BOOLEAN_MARK_COMMANDS`、`DEFAULT_COMMAND_SHORTCUTS`、`createDefaultCommandRegistry`、`createCommandRegistry`、`canExecuteCommand`、`executeCommand`、`queryCommandState`、四种 boolean mark command、`setFontSizeCommand`、`setTextColorCommand`、`setBackgroundColorCommand`、`setHeadingCommand`、`toggleQuoteCommand`、对应 canExecute/active/选中标题查询 helper、文本与 block command 和对应 command name 常量。
 - History：`createHistorySnapshot`、`cloneHistorySnapshot`、`createHistoryEntry`、`cloneHistoryEntry`、`createHistoryState`、`clearHistory`、`recordHistory`、`canMergeHistoryEntries`、`mergeHistoryEntries`、`canUndo`、`canRedo`、`getUndoEntry`、`getRedoEntry`、`undoHistory`、`redoHistory`、`getHistoryShortcutAction`、`undoCommand`、`redoCommand`。
 
 ## 许可
