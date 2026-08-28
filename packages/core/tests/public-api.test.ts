@@ -214,6 +214,7 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.MERGE_BLOCK_COMMAND_NAME).toBe("string");
     expect(typeof core.SET_BACKGROUND_COLOR_COMMAND_NAME).toBe("string");
     expect(typeof core.SET_HEADING_COMMAND_NAME).toBe("string");
+    expect(typeof core.TOGGLE_QUOTE_COMMAND_NAME).toBe("string");
     expect(typeof core.SET_LINK_COMMAND_NAME).toBe("string");
     expect(typeof core.SPLIT_BLOCK_COMMAND_NAME).toBe("string");
     expect(typeof core.STRIKE_COMMAND_NAME).toBe("string");
@@ -229,6 +230,7 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.canExecuteMergeBlockCommand).toBe("function");
     expect(typeof core.canExecuteSetBackgroundColorCommand).toBe("function");
     expect(typeof core.canExecuteSetHeadingCommand).toBe("function");
+    expect(typeof core.canExecuteToggleQuoteCommand).toBe("function");
     expect(typeof core.canExecuteSetLinkCommand).toBe("function");
     expect(typeof core.canExecuteSplitBlockCommand).toBe("function");
     expect(typeof core.canExecuteStrikeCommand).toBe("function");
@@ -254,6 +256,7 @@ describe("@crucialy-rich/core public API", () => {
       "setLink",
       "unsetLink",
       "setHeading",
+      "toggleQuote",
       "deleteSelection",
       "insertText",
       "mergeBlock",
@@ -271,6 +274,7 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.isItalicCommandActive).toBe("function");
     expect(typeof core.isLinkCommandActive).toBe("function");
     expect(typeof core.isHeadingCommandActive).toBe("function");
+    expect(typeof core.isQuoteCommandActive).toBe("function");
     expect(typeof core.isStrikeCommandActive).toBe("function");
     expect(typeof core.isTextMarkCommandActive).toBe("function");
     expect(typeof core.isUnderlineCommandActive).toBe("function");
@@ -281,6 +285,7 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.strikeCommand).toBe("object");
     expect(typeof core.setFontSizeCommand).toBe("object");
     expect(typeof core.setHeadingCommand).toBe("object");
+    expect(typeof core.toggleQuoteCommand).toBe("object");
     expect(typeof core.setBackgroundColorCommand).toBe("object");
     expect(typeof core.setTextColorCommand).toBe("object");
     expect(typeof core.setLinkCommand).toBe("object");

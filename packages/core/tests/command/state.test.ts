@@ -7,6 +7,7 @@ import {
   createDocument,
   createHeading,
   createParagraph,
+  createQuote,
   createText,
   BOLD_COMMAND_NAME,
   DELETE_SELECTION_COMMAND_NAME,
@@ -16,6 +17,7 @@ import {
   queryCommandState,
   SET_HEADING_COMMAND_NAME,
   SPLIT_BLOCK_COMMAND_NAME,
+  TOGGLE_QUOTE_COMMAND_NAME,
   type Command,
 } from "../../src";
 
@@ -215,4 +217,33 @@ describe("queryCommandState", () => {
       }),
     ).toMatchObject({ active: false, disabled: true, registered: true });
   });
+
+  it("reads quote active state from the default registry", () => {
+    const registry = createDefaultCommandRegistry();
+    const selection = {
+      anchor: { path: [0, 0], offset: 1 },
+      focus: { path: [0, 0], offset: 1 },
+    };
+
+    expect(
+      queryCommandState(registry, TOGGLE_QUOTE_COMMAND_NAME, {
+        context: {
+          document: createQuoteDocument(),
+          selection,
+        },
+      }),
+    ).toMatchObject({ active: true, disabled: false, registered: true });
+    expect(
+      queryCommandState(registry, TOGGLE_QUOTE_COMMAND_NAME, {
+        context: {
+          document: createDocument([createParagraph([createText("正文")])]),
+          selection,
+        },
+      }),
+    ).toMatchObject({ active: false, disabled: false, registered: true });
+  });
 });
+
+function createQuoteDocument() {
+  return createDocument([createQuote([createText("引用")])]);
+}
