@@ -98,7 +98,12 @@ function renderTextNode(node: TextNode, path: Path): RenderedElementNode {
 }
 
 function renderBlockNode(node: BlockNode, path: Path): RenderedElementNode {
-  const tagName = node.type === "heading" ? HEADING_TAG_NAMES[node.level] : "p";
+  const tagName =
+    node.type === "heading"
+      ? HEADING_TAG_NAMES[node.level]
+      : node.type === "quote"
+        ? "blockquote"
+        : "p";
 
   return createRenderedNode(tagName, path, {
     children: node.children.map((child, index) =>
