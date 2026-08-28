@@ -1,6 +1,7 @@
 import { mergeBlockCommand, splitBlockCommand } from "./block";
 import { BOOLEAN_MARK_COMMANDS } from "./mark";
 import { setHeadingCommand } from "./heading";
+import { toggleQuoteCommand } from "./quote";
 import { createCommandRegistry, type CommandRegistry } from "./registry";
 import { LINK_COMMANDS } from "./link";
 import { deleteSelectionCommand, insertTextCommand } from "./text";
@@ -12,6 +13,7 @@ export const DEFAULT_COMMANDS: readonly Command[] = [
   ...TEXT_STYLE_COMMANDS,
   ...LINK_COMMANDS,
   setHeadingCommand,
+  toggleQuoteCommand,
   deleteSelectionCommand,
   insertTextCommand,
   mergeBlockCommand,
