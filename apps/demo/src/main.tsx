@@ -11,6 +11,7 @@ import {
   createDocument,
   createHeading,
   createParagraph,
+  createQuote,
   createText,
   DELETE_SELECTION_COMMAND_NAME,
   domSelectionToModelSelection,
@@ -67,7 +68,14 @@ import { createRoot } from "react-dom/client";
 
 import "./styles.css";
 
-type ModelExampleId = "regular" | "headings" | "marks" | "links" | "empty" | "invalid";
+type ModelExampleId =
+  | "regular"
+  | "headings"
+  | "quotes"
+  | "marks"
+  | "links"
+  | "empty"
+  | "invalid";
 
 interface ModelExample {
   id: ModelExampleId;
@@ -132,6 +140,18 @@ const modelExamples: ModelExample[] = [
       createHeading(5, [createText("五级标题")]),
       createHeading(6, [createText("六级标题")]),
       createParagraph([createText("标题之后可以继续编辑正文。")]),
+    ]),
+  },
+  {
+    id: "quotes",
+    label: "引用块",
+    selection: {
+      anchor: { path: [0, 0], offset: 4 },
+      focus: { path: [0, 0], offset: 4 },
+    },
+    value: createDocument([
+      createQuote([createText("引用内容")]),
+      createParagraph([createText("引用之后可以继续编辑正文。")]),
     ]),
   },
   {
