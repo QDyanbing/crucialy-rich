@@ -142,6 +142,43 @@ describe("toggleQuoteCommand", () => {
     ]);
   });
 
+  it("restores reverse-selected quotes without losing text marks", () => {
+    const document = createDocument([
+      createQuote([createText("第一段", { bold: true })]),
+      createQuote([createText("第二段", { italic: true })]),
+      createQuote([createText("第三段", { underline: true })]),
+    ]);
+    const selection = {
+      anchor: { path: [2, 0], offset: 2 },
+      focus: { path: [0, 0], offset: 1 },
+    };
+    const result = toggleQuoteCommand.execute({
+      context: { document, selection },
+    });
+
+    expect(result.transaction?.operations).toEqual([
+      { block: { type: "paragraph" }, path: [0], type: "set_block_type" },
+      { block: { type: "paragraph" }, path: [1], type: "set_block_type" },
+      { block: { type: "paragraph" }, path: [2], type: "set_block_type" },
+    ]);
+    expect(applyTransaction(document, result.transaction!).children).toEqual([
+      {
+        children: [{ marks: { bold: true }, text: "第一段", type: "text" }],
+        type: "paragraph",
+      },
+      {
+        children: [{ marks: { italic: true }, text: "第二段", type: "text" }],
+        type: "paragraph",
+      },
+      {
+        children: [{ marks: { underline: true }, text: "第三段", type: "text" }],
+        type: "paragraph",
+      },
+    ]);
+    expect(result.selection).toEqual(selection);
+    expect(result.selection).not.toBe(selection);
+  });
+
   it("skips missing and invalid selections", () => {
     const document = createDocument([createParagraph([createText("正文")])]);
 
