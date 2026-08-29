@@ -9,7 +9,6 @@ import {
   createQuote,
   createText,
   isQuoteCommandActive,
-  TOGGLE_QUOTE_COMMAND_NAME,
   toggleQuoteCommand,
 } from "../../src";
 
@@ -89,7 +88,7 @@ describe("toggleQuoteCommand", () => {
     );
   });
 
-  it("skips a selection that crosses blocks", () => {
+  it("accepts a selection that crosses blocks", () => {
     const document = createDocument([
       createParagraph([createText("第一段")]),
       createParagraph([createText("第二段")]),
@@ -104,13 +103,8 @@ describe("toggleQuoteCommand", () => {
       },
     };
 
-    expect(canExecuteToggleQuoteCommand(input)).toBe(false);
-    expect(toggleQuoteCommand.execute(input)).toEqual({
-      commandName: TOGGLE_QUOTE_COMMAND_NAME,
-      ok: false,
-      reason: "Toggle quote command requires a single-block text selection.",
-      status: "skipped",
-    });
+    expect(canExecuteToggleQuoteCommand(input)).toBe(true);
+    expect(toggleQuoteCommand.execute(input).status).toBe("success");
   });
 
   it("skips missing and invalid selections", () => {
