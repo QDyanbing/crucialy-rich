@@ -120,6 +120,7 @@ pnpm test:e2e
 - [文字属性 Mark](./docs/features/text-style.md)
 - [Link Mark](./docs/features/link.md)
 - [Block Type 设计](./docs/features/block-type.md)
+- [多块 Block Type 切换规则](./docs/features/block-type-boundaries.md)
 - [Heading 标题](./docs/features/heading.md)
 - [Quote 引用块](./docs/features/quote.md)
 - [选区](./docs/features/selection.md)

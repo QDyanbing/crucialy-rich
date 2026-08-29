@@ -1,6 +1,6 @@
 # Quote 引用块
 
-第 13 周 Day 3 已完成 Quote 第一版：模型使用 `QuoteNode` 表达引用块，renderer 输出语义化 `blockquote`，`toggleQuote` command 负责切换引用和恢复正文。
+第 13 周 Day 3 已完成 Quote 第一版，第 13 周 Day 4 已补齐多块切换边界：模型使用 `QuoteNode` 表达引用块，renderer 输出语义化 `blockquote`，`toggleQuote` command 负责切换引用和恢复正文。
 
 ## 模型与渲染
 
@@ -23,10 +23,10 @@ const TOGGLE_QUOTE_COMMAND_NAME = "toggleQuote";
 const toggleQuoteCommand: Command;
 ```
 
-- 当前 block 不是 Quote 时，command 创建目标为 `{ type: "quote" }` 的 `set_block_type` operation。
-- 当前 block 是 Quote 时，command 创建目标为 `{ type: "paragraph" }` 的 operation，表示取消引用。
-- `canExecuteToggleQuoteCommand(input)` 检查选区是否有效且位于同一个顶层 block。
-- `isQuoteCommandActive(input)` 在当前选区位于 Quote 时返回 `true`。
+- 选中范围存在非 Quote block 时，command 把全部命中 block 统一切换为 Quote。
+- 全部命中 block 都是 Quote 时，command 把它们统一恢复为 paragraph。
+- `canExecuteToggleQuoteCommand(input)` 检查选区两个端点是否都是合法模型位置。
+- `isQuoteCommandActive(input)` 仅在全部命中 block 都是 Quote 时返回 `true`。
 - `toggleQuoteCommand` 已进入 `DEFAULT_COMMANDS`。
 
 示例：
@@ -37,7 +37,7 @@ const result = executeCommand(registry, TOGGLE_QUOTE_COMMAND_NAME, {
 });
 ```
 
-成功结果包含一个 `set_block_type` transaction，并克隆保留原模型选区。
+成功结果包含一个 `set_block_type` transaction，每个命中 block 对应一条 operation，并克隆保留原模型选区。
 
 ## 输入行为
 
@@ -51,10 +51,11 @@ const result = executeCommand(registry, TOGGLE_QUOTE_COMMAND_NAME, {
 
 ## 选区规则
 
-- collapsed selection 和同一 block 内的 range selection 均可切换。
-- anchor、focus 必须是合法模型位置并位于同一个顶层 block。
-- 无选区、非法选区或跨 block 选区返回 `skipped`。
-- 跨多个 block 的批量切换留到第 13 周 Day 4。
+- collapsed selection、单块 range 和跨 block range 均可切换。
+- anchor、focus 必须是合法模型位置；两个端点所在 block 及其中间 block 都会命中。
+- operation 按文档顺序生成，反向 selection 的 anchor/focus 方向保持不变。
+- 无选区或非法选区返回 `skipped`。
+- 完整约束见[多块 Block Type 切换规则](./block-type-boundaries.md)。
 
 ## Demo 与验收
 
@@ -64,6 +65,7 @@ Demo 的“引用块”样例包含 Quote 和普通正文，操作区提供带 a
 - 引用按钮可切换 Quote 和 paragraph。
 - Quote 内可以输入和删除文字。
 - Quote 内 Enter 生成两个 Quote，并可在新块继续输入。
+- 跨段选区可以统一开启或取消 Quote，文字和模型选区保持稳定。
 - 整个操作过程中文档模型保持合法。
 
 对应自动化测试：
@@ -77,5 +79,4 @@ Demo 的“引用块”样例包含 Quote 和普通正文，操作区提供带 a
 
 ## 当前边界
 
-- 跨多个 block 的 heading/quote 批量切换留到第 13 周 Day 4。
 - 当前没有 Quote 快捷键；宿主可以通过 command API 自行绑定工具栏或键盘入口。

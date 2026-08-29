@@ -79,11 +79,11 @@ interface SetBlockTypeOperation {
 
 ## 当前渲染边界
 
-Heading 已在 Day 2 完成语义渲染和 command：1–6 级标题分别输出 `<h1>`–`<h6>`，可在单个 block 内切换层级或恢复 paragraph。Quote 已在 Day 3 输出 `<blockquote>`，并通过 `toggleQuote` 在引用和 paragraph 间切换。详细 API 见 [Heading 标题](./heading.md)和 [Quote 引用块](./quote.md)。
+Heading 已在 Day 2 完成语义渲染和 command：1–6 级标题分别输出 `<h1>`–`<h6>`。Quote 已在 Day 3 输出 `<blockquote>`，并通过 `toggleQuote` 在引用和 paragraph 间切换。Day 4 已让两个 command 支持跨多个连续 block 切换，详细 API 见 [Heading 标题](./heading.md)、[Quote 引用块](./quote.md)和[多块 Block Type 切换规则](./block-type-boundaries.md)。
 
 - Day 2 已完成 heading 1–6 级语义渲染和 command。
 - Day 3 已完成 quote 语义渲染和 command。
-- Day 4 扩展到跨多个 block 的切换。
+- Day 4 已扩展到跨多个 block 的切换。
 - Day 5 完成标题和引用闭环验收。
 
 ## 验收

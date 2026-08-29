@@ -1,6 +1,6 @@
 # Heading 标题
 
-第 13 周 Day 2 已完成 Heading 第一版：模型支持 1–6 级标题，renderer 输出语义化 `h1`–`h6`，`setHeading` command 负责标题层级切换和恢复正文。
+第 13 周 Day 2 已完成 Heading 第一版，第 13 周 Day 4 已补齐多块切换边界：模型支持 1–6 级标题，renderer 输出语义化 `h1`–`h6`，`setHeading` command 负责标题层级切换和恢复正文。
 
 ## 模型与渲染
 
@@ -26,11 +26,11 @@ interface SetHeadingCommandPayload {
 }
 ```
 
-- `level: 1`–`6`：把选区所在 block 设为对应标题层级。
-- `level: null`：把选区所在 block 恢复为 paragraph。
+- `level: 1`–`6`：把选区覆盖的全部 block 设为对应标题层级。
+- `level: null`：把选区覆盖的全部 block 恢复为 paragraph。
 - `canExecuteSetHeadingCommand(input)`：检查 payload、选区和 block 范围是否合法。
-- `getSelectedHeadingLevel(input)`：返回当前标题层级；非标题 block 返回 `null`，非法或跨 block 选区返回 `undefined`。
-- `isHeadingCommandActive(input)`：判断当前 block 是否与 payload 指定目标一致。
+- `getSelectedHeadingLevel(input)`：全部选中 block 为同级标题时返回该层级；混合状态返回 `null`，非法选区返回 `undefined`。
+- `isHeadingCommandActive(input)`：判断全部选中 block 是否与 payload 指定目标一致。
 - `setHeadingCommand` 已进入 `DEFAULT_COMMANDS`。
 
 示例：
@@ -47,14 +47,15 @@ const paragraphResult = executeCommand(registry, SET_HEADING_COMMAND_NAME, {
 });
 ```
 
-成功结果包含一个 `set_block_type` transaction，并克隆保留原模型选区。应用 transaction 后可以继续执行文本输入命令。
+成功结果包含一个 `set_block_type` transaction，每个命中 block 对应一条 operation，并克隆保留原模型选区。应用 transaction 后可以继续执行文本输入命令。
 
 ## 选区规则
 
-- collapsed selection 和同一 block 内的 range selection 均可执行。
-- anchor、focus 必须是合法模型位置并位于同一个顶层 block。
-- 目前不会一次切换多个 block；跨 block 标题切换留到第 13 周 Day 4。
-- 非法层级、缺失 payload、无选区或跨 block 选区返回 `skipped`。
+- collapsed selection、单块 range 和跨 block range 均可执行。
+- anchor、focus 必须是合法模型位置；两个端点所在 block 及其中间 block 都会命中。
+- operation 按文档顺序生成，反向 selection 的 anchor/focus 方向保持不变。
+- 非法层级、缺失 payload、无选区或非法选区返回 `skipped`。
+- 完整约束见[多块 Block Type 切换规则](./block-type-boundaries.md)。
 
 ## Demo 与验收
 
@@ -64,6 +65,7 @@ Demo 的“标题层级”样例包含一级到六级标题和正文，操作区
 - 标题可以切换到其他层级。
 - 切换后可继续输入文字。
 - 标题可以恢复为 paragraph。
+- 跨段选区可以统一切换到同一标题层级，文字和模型选区保持稳定。
 
 对应自动化测试：
 
@@ -77,5 +79,4 @@ Demo 的“标题层级”样例包含一级到六级标题和正文，操作区
 ## 当前边界
 
 - Quote command 与 `blockquote` 语义渲染已在第 13 周 Day 3 完成，详见 [Quote 引用块](./quote.md)。
-- 跨多个 block 的批量切换留到第 13 周 Day 4。
 - 当前没有标题快捷键；宿主可以通过 command API 自行绑定工具栏或键盘入口。
