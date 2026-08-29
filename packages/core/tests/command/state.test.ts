@@ -218,6 +218,51 @@ describe("queryCommandState", () => {
     ).toMatchObject({ active: false, disabled: true, registered: true });
   });
 
+  it("reads multi-block heading states from the default registry", () => {
+    const registry = createDefaultCommandRegistry();
+    const selection = {
+      anchor: { path: [0, 0], offset: 1 },
+      focus: { path: [1, 0], offset: 1 },
+    };
+
+    expect(
+      queryCommandState(registry, SET_HEADING_COMMAND_NAME, {
+        context: {
+          document: createDocument([
+            createHeading(3, [createText("标题一")]),
+            createHeading(3, [createText("标题二")]),
+          ]),
+          selection,
+        },
+        payload: { level: 3 },
+      }),
+    ).toMatchObject({ active: true, disabled: false, registered: true });
+    expect(
+      queryCommandState(registry, SET_HEADING_COMMAND_NAME, {
+        context: {
+          document: createDocument([
+            createHeading(3, [createText("标题一")]),
+            createHeading(2, [createText("标题二")]),
+          ]),
+          selection,
+        },
+        payload: { level: 3 },
+      }),
+    ).toMatchObject({ active: false, disabled: false, registered: true });
+    expect(
+      queryCommandState(registry, SET_HEADING_COMMAND_NAME, {
+        context: {
+          document: createDocument([
+            createParagraph([createText("正文一")]),
+            createParagraph([createText("正文二")]),
+          ]),
+          selection,
+        },
+        payload: { level: null },
+      }),
+    ).toMatchObject({ active: true, disabled: false, registered: true });
+  });
+
   it("reads quote active state from the default registry", () => {
     const registry = createDefaultCommandRegistry();
     const selection = {
@@ -237,6 +282,37 @@ describe("queryCommandState", () => {
       queryCommandState(registry, TOGGLE_QUOTE_COMMAND_NAME, {
         context: {
           document: createDocument([createParagraph([createText("正文")])]),
+          selection,
+        },
+      }),
+    ).toMatchObject({ active: false, disabled: false, registered: true });
+  });
+
+  it("reads multi-block quote states from the default registry", () => {
+    const registry = createDefaultCommandRegistry();
+    const selection = {
+      anchor: { path: [0, 0], offset: 1 },
+      focus: { path: [1, 0], offset: 1 },
+    };
+
+    expect(
+      queryCommandState(registry, TOGGLE_QUOTE_COMMAND_NAME, {
+        context: {
+          document: createDocument([
+            createQuote([createText("引用一")]),
+            createQuote([createText("引用二")]),
+          ]),
+          selection,
+        },
+      }),
+    ).toMatchObject({ active: true, disabled: false, registered: true });
+    expect(
+      queryCommandState(registry, TOGGLE_QUOTE_COMMAND_NAME, {
+        context: {
+          document: createDocument([
+            createQuote([createText("引用")]),
+            createParagraph([createText("正文")]),
+          ]),
           selection,
         },
       }),
