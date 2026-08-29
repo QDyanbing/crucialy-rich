@@ -2,9 +2,9 @@
 
 ## 当前进度
 
-第 13 周 Day 1「Block Type 设计」、Day 2「Heading」和 Day 3「Quote」已完成。
+第 13 周 Day 1「Block Type 设计」、Day 2「Heading」、Day 3「Quote」和 Day 4「Block 切换边界」已完成。
 
-☑️ 当前指针：第 13 周 Day 4「Block 切换边界」待开始。
+☑️ 当前指针：第 13 周 Day 5「标题和引用闭环验收」待开始。
 
 ## Day 1 已完成范围
 
@@ -26,7 +26,7 @@
 
 - renderer 按 heading level 输出 `h1`–`h6`，保留 block/text 模型路径和 marks。
 - 新增 `setHeading` command，支持 1–6 级标题设置、层级切换和恢复 paragraph。
-- command 接受 collapsed selection 和单个 block 内的 range selection，非法层级与跨 block 选区不可执行。
+- command 接受 collapsed selection、单块 range 和跨 block range，非法层级与非法选区不可执行。
 - command 返回 `set_block_type` transaction 并克隆保留选区，切换后可继续输入。
 - 新增当前标题层级读取和 command active 状态判断，并进入默认 Command 注册表。
 - Demo 新增中文“标题层级”模型样例和“正文 / 1–6 级标题”选择器。
@@ -37,11 +37,23 @@
 
 - renderer 把 quote 输出为 `blockquote`，保留 block/text 模型路径和 marks。
 - 新增 `toggleQuote` command，支持切换 Quote 和恢复 paragraph。
-- command 接受 collapsed selection 和单个 block 内的 range selection，跨 block 选区不可执行。
+- command 接受 collapsed selection、单块 range 和跨 block range，非法选区不可执行。
 - command 返回 `set_block_type` transaction，克隆保留选区并进入默认 Command 注册表。
 - Demo 新增中文“引用块”样例、带 active 状态的“引用”按钮和引用块样式。
 - Playwright 已覆盖 Quote 切换/取消、输入、Backspace 删除、Enter 拆分和新块继续输入。
 - 新增 `docs/features/quote.md`，记录 Quote API、输入行为和阶段边界。
+
+## Day 4 已完成范围
+
+- 新增 `getSelectedBlockIndexes`，统一把正向、反向和 collapsed selection 解析为连续顶层 block indexes。
+- `setHeadingCommand` 可把全部命中 block 统一设置为同一标题层级或恢复为 paragraph。
+- `toggleQuoteCommand` 在混合范围中统一应用 Quote，只有全部命中 block 都是 Quote 时才统一取消。
+- 两个 command 都按文档顺序生成 `set_block_type` operations，并克隆保留原 selection 方向。
+- 多块 command 状态仅在全部命中 block 与目标一致时激活，混合状态保持可执行。
+- 正向、反向和连续命令交互测试确认 text children、文字内容和 marks 不丢失。
+- Transaction 验收报告可正确统计多条 `set_block_type` block operations。
+- Playwright 已覆盖跨两段统一切换标题、统一开启和取消 Quote，以及最终模型合法性。
+- 新增 `docs/features/block-type-boundaries.md`，并同步 Heading、Quote、Command 和 Block Type 文档。
 
 ## 自动化覆盖
 
@@ -58,15 +70,17 @@
 - `packages/core/tests/render/html.test.ts`
 - `packages/core/tests/command/heading.test.ts`
 - `packages/core/tests/command/quote.test.ts`
+- `packages/core/tests/command/block-selection.test.ts`
+- `packages/core/tests/command/block-type-interaction.test.ts`
 - `packages/core/tests/command/state.test.ts`
 - `packages/core/tests/public-api.test.ts`
 - `tests/e2e/demo-shell.spec.ts`
 
 ## 当前边界
 
-- 当前 `set_block_type` 一次只处理一个顶层 block path，跨 block 切换留到 Day 4。
+- 单条 `set_block_type` operation 仍只处理一个顶层 block path；多块 command 会在同一 transaction 中为每个命中 block 生成一条 operation。
 - 当前没有空 Quote 按 Enter 自动退出引用的特殊规则。
 
 ## 结论
 
-第 13 周 Day 3 已达到“引用内输入、删除、换行稳定”的验收目标。Quote 的模型、operation、command、renderer、Demo、自动化测试和中文文档已闭环，下一步处理跨多个 block 的类型切换边界。
+第 13 周 Day 4 已达到“多段切换不丢文本和 marks”的验收目标。Heading 与 Quote 的跨块范围解析、命令状态、operation 生成、连续交互、Demo 自动化测试和中文规则文档均已对齐，下一步进入标题和引用闭环验收。

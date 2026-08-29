@@ -84,6 +84,9 @@
 - 新增 Quote 第一版，包含 `blockquote` 语义渲染、`toggleQuote` command、默认注册、active 状态和公共 API。
 - 新增中文 Quote Demo 样例与引用按钮，并覆盖切换、取消、输入、删除、Enter 和继续输入的浏览器验收。
 - 新增 Quote 行为文档并更新第 13 周 Day 3 QA 进度。
+- 新增多块选区解析 helper，统一处理 Heading 与 Quote command 的正向、反向和 collapsed block 范围。
+- 新增 Heading 与 Quote 多块切换能力，保留文字、marks 和原 selection 方向，并补齐命令状态、连续交互和 transaction 验收。
+- 新增多块标题与引用 Demo 浏览器验收、切换规则文档，并更新第 13 周 Day 4 QA 进度。
 
 ### 变更
 

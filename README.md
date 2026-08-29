@@ -18,7 +18,7 @@ text marks schema 当前支持 `bold`、`italic`、`underline` 和 `strike` 共�
 
 第 12 周链接闭环已完成：包括结构化 Link Mark、HTTP/HTTPS/mailto URL sanitize、target/rel 白名单、`set_link` operation、`setLink` / `unsetLink` command、`core.link` 功能命名空间、统一链接选区状态读取、安全 `<a>` 渲染、编辑态点击拦截、只读态原生跳转、菜单选区快照与恢复、History 生命周期以及中文创建/编辑/取消验收样例。
 
-第 13 周 Day 1「Block Type 设计」、Day 2「Heading」和 Day 3「Quote」已完成：文档模型可表达 paragraph、1–6 级 heading 和 quote；Heading 与 Quote 均完成语义渲染、默认 command、类型切换、中文 Demo 和浏览器验收，Quote 内输入、删除、Enter 与继续输入保持稳定。当前指针为第 13 周 Day 4「Block 切换边界」。
+第 13 周 Day 1「Block Type 设计」、Day 2「Heading」、Day 3「Quote」和 Day 4「Block 切换边界」已完成：文档模型可表达 paragraph、1–6 级 heading 和 quote；Heading 与 Quote 均完成语义渲染、默认 command、单块/多块类型切换、中文 Demo 和浏览器验收，跨块正向/反向选区不会丢失文字、marks 或选区方向。当前指针为第 13 周 Day 5「标题和引用闭环验收」。
 
 ## 技术栈
 
