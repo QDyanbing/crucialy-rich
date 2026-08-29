@@ -35,6 +35,19 @@ async function setDebuggerSelection(
   await page.getByLabel("焦点偏移").fill(String(focusOffset));
 }
 
+async function setDebuggerRange(
+  page: Page,
+  anchorPath: string,
+  anchorOffset: number,
+  focusPath: string,
+  focusOffset: number,
+) {
+  await page.getByLabel("锚点路径").fill(anchorPath);
+  await page.getByLabel("焦点路径").fill(focusPath);
+  await page.getByLabel("锚点偏移").fill(String(anchorOffset));
+  await page.getByLabel("焦点偏移").fill(String(focusOffset));
+}
+
 test("renders the demo shell", async ({ page }) => {
   await page.goto("/");
 
@@ -105,6 +118,25 @@ test("switches heading levels and keeps editing before restoring a paragraph", a
   await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
     '"type": "paragraph"',
   );
+});
+
+test("switches multiple selected blocks to one heading level", async ({ page }) => {
+  await page.goto("/");
+  await setDebuggerRange(page, "0,0", 1, "1,0", 3);
+
+  const renderedDocument = page.getByLabel("已渲染文档");
+
+  await page.getByLabel("标题层级").selectOption("2");
+
+  await expect(renderedDocument.locator('h2[data-crucialy-path="[0]"]')).toHaveText(
+    "你好，crucialy-rich。",
+  );
+  await expect(renderedDocument.locator('h2[data-crucialy-path="[1]"]')).toHaveText(
+    "选区模型已就绪。",
+  );
+  await expect(page.getByLabel("锚点路径")).toHaveValue("0,0");
+  await expect(page.getByLabel("焦点路径")).toHaveValue("1,0");
+  await expect(page.getByLabel("模型校验状态")).toContainText("合法");
 });
 
 test("toggles quote blocks from the demo control", async ({ page }) => {
