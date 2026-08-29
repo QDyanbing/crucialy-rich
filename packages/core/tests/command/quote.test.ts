@@ -107,6 +107,41 @@ describe("toggleQuoteCommand", () => {
     expect(toggleQuoteCommand.execute(input).status).toBe("success");
   });
 
+  it("changes mixed selected blocks into quotes without losing text marks", () => {
+    const document = createDocument([
+      createParagraph([createText("第一段", { bold: true })]),
+      createQuote([createText("原引用", { italic: true })]),
+      createHeading(3, [createText("原标题", { underline: true })]),
+    ]);
+    const selection = {
+      anchor: { path: [0, 0], offset: 1 },
+      focus: { path: [2, 0], offset: 2 },
+    };
+    const result = toggleQuoteCommand.execute({
+      context: { document, selection },
+    });
+
+    expect(result.transaction?.operations).toEqual([
+      { block: { type: "quote" }, path: [0], type: "set_block_type" },
+      { block: { type: "quote" }, path: [1], type: "set_block_type" },
+      { block: { type: "quote" }, path: [2], type: "set_block_type" },
+    ]);
+    expect(applyTransaction(document, result.transaction!).children).toEqual([
+      {
+        children: [{ marks: { bold: true }, text: "第一段", type: "text" }],
+        type: "quote",
+      },
+      {
+        children: [{ marks: { italic: true }, text: "原引用", type: "text" }],
+        type: "quote",
+      },
+      {
+        children: [{ marks: { underline: true }, text: "原标题", type: "text" }],
+        type: "quote",
+      },
+    ]);
+  });
+
   it("skips missing and invalid selections", () => {
     const document = createDocument([createParagraph([createText("正文")])]);
 
