@@ -59,6 +59,34 @@ describe("createTransactionAcceptanceReport", () => {
     });
   });
 
+  it("reports every operation in a multi-block type transaction", () => {
+    const document = createDocument([
+      createParagraph([createText("第一段")]),
+      createParagraph([createText("第二段")]),
+      createParagraph([createText("第三段")]),
+    ]);
+    const transaction = createTransaction([
+      createSetBlockTypeOperation([0], { level: 2, type: "heading" }),
+      createSetBlockTypeOperation([1], { level: 2, type: "heading" }),
+      createSetBlockTypeOperation([2], { level: 2, type: "heading" }),
+    ]);
+
+    expect(createTransactionAcceptanceReport(document, transaction)).toMatchObject({
+      after: { errors: [], valid: true },
+      before: { errors: [], valid: true },
+      error: null,
+      ok: true,
+      transaction: {
+        blockOperationCount: 3,
+        hasBlockOperations: true,
+        hasTextOperations: false,
+        operationCount: 3,
+        operationTypes: ["set_block_type", "set_block_type", "set_block_type"],
+        textOperationCount: 0,
+      },
+    });
+  });
+
   it("reports failed transactions without an after validation result", () => {
     const document = createDocument([createParagraph([createText("你好")])]);
     const transaction = createTransaction([
