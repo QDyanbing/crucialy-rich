@@ -168,6 +168,45 @@ describe("setHeadingCommand", () => {
     ]);
   });
 
+  it("restores a reverse heading selection without losing text marks", () => {
+    const document = createDocument([
+      createHeading(2, [createText("第一段", { bold: true })]),
+      createHeading(2, [createText("第二段", { italic: true })]),
+      createHeading(2, [createText("第三段", { underline: true })]),
+    ]);
+    const selection = {
+      anchor: { path: [2, 0], offset: 2 },
+      focus: { path: [0, 0], offset: 1 },
+    };
+    const result = setHeadingCommand.execute({
+      context: { document, selection },
+      payload: { level: null },
+    });
+    const nextDocument = applyTransaction(document, result.transaction!);
+
+    expect(result.transaction?.operations).toEqual([
+      { block: { type: "paragraph" }, path: [0], type: "set_block_type" },
+      { block: { type: "paragraph" }, path: [1], type: "set_block_type" },
+      { block: { type: "paragraph" }, path: [2], type: "set_block_type" },
+    ]);
+    expect(nextDocument.children).toEqual([
+      {
+        children: [{ marks: { bold: true }, text: "第一段", type: "text" }],
+        type: "paragraph",
+      },
+      {
+        children: [{ marks: { italic: true }, text: "第二段", type: "text" }],
+        type: "paragraph",
+      },
+      {
+        children: [{ marks: { underline: true }, text: "第三段", type: "text" }],
+        type: "paragraph",
+      },
+    ]);
+    expect(result.selection).toEqual(selection);
+    expect(result.selection).not.toBe(selection);
+  });
+
   it("reports the selected heading level and active target", () => {
     const document = createDocument([createHeading(4, [createText("状态")])]);
     const input = {
