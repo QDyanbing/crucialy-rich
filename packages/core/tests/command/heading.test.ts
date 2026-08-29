@@ -102,14 +102,13 @@ describe("setHeadingCommand", () => {
       expect(setHeadingCommand.execute(input)).toEqual({
         commandName: SET_HEADING_COMMAND_NAME,
         ok: false,
-        reason:
-          "Set heading command requires a valid level and single-block text selection.",
+        reason: "Set heading command requires a valid level and text selection.",
         status: "skipped",
       });
     },
   );
 
-  it("skips a selection that crosses blocks", () => {
+  it("accepts a selection that crosses blocks", () => {
     const document = createDocument([
       createParagraph([createText("第一段")]),
       createParagraph([createText("第二段")]),
@@ -125,8 +124,8 @@ describe("setHeadingCommand", () => {
       payload: { level: 2 as const },
     };
 
-    expect(canExecuteSetHeadingCommand(input)).toBe(false);
-    expect(setHeadingCommand.execute(input).status).toBe("skipped");
+    expect(canExecuteSetHeadingCommand(input)).toBe(true);
+    expect(setHeadingCommand.execute(input).status).toBe("success");
   });
 
   it("reports the selected heading level and active target", () => {
