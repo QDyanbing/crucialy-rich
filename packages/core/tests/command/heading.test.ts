@@ -6,6 +6,7 @@ import {
   createDocument,
   createHeading,
   createParagraph,
+  createQuote,
   createText,
   getSelectedHeadingLevel,
   insertTextCommand,
@@ -126,6 +127,45 @@ describe("setHeadingCommand", () => {
 
     expect(canExecuteSetHeadingCommand(input)).toBe(true);
     expect(setHeadingCommand.execute(input).status).toBe("success");
+  });
+
+  it("sets every block in a forward mixed selection to one heading level", () => {
+    const document = createDocument([
+      createParagraph([createText("第一段")]),
+      createHeading(1, [createText("原标题")]),
+      createQuote([createText("原引用")]),
+    ]);
+    const selection = {
+      anchor: { path: [0, 0], offset: 1 },
+      focus: { path: [2, 0], offset: 2 },
+    };
+    const result = setHeadingCommand.execute({
+      context: { document, selection },
+      payload: { level: 3 },
+    });
+
+    expect(result.transaction?.operations).toEqual([
+      {
+        block: { level: 3, type: "heading" },
+        path: [0],
+        type: "set_block_type",
+      },
+      {
+        block: { level: 3, type: "heading" },
+        path: [1],
+        type: "set_block_type",
+      },
+      {
+        block: { level: 3, type: "heading" },
+        path: [2],
+        type: "set_block_type",
+      },
+    ]);
+    expect(applyTransaction(document, result.transaction!).children).toEqual([
+      { children: [{ text: "第一段", type: "text" }], level: 3, type: "heading" },
+      { children: [{ text: "原标题", type: "text" }], level: 3, type: "heading" },
+      { children: [{ text: "原引用", type: "text" }], level: 3, type: "heading" },
+    ]);
   });
 
   it("reports the selected heading level and active target", () => {
