@@ -169,6 +169,37 @@ test("toggles quote blocks from the demo control", async ({ page }) => {
   await expect(quoteButton).toHaveAttribute("aria-pressed", "true");
 });
 
+test("toggles multiple selected blocks from the quote control", async ({ page }) => {
+  await page.goto("/");
+  await setDebuggerRange(page, "0,0", 1, "1,0", 3);
+
+  const quoteButton = page.getByRole("button", { name: "引用", exact: true });
+  const renderedDocument = page.getByLabel("已渲染文档");
+
+  await quoteButton.click();
+
+  await expect(renderedDocument.locator("blockquote")).toHaveCount(2);
+  await expect(
+    renderedDocument.locator('blockquote[data-crucialy-path="[0]"]'),
+  ).toHaveText("你好，crucialy-rich。");
+  await expect(
+    renderedDocument.locator('blockquote[data-crucialy-path="[1]"]'),
+  ).toHaveText("选区模型已就绪。");
+  await expect(quoteButton).toHaveAttribute("aria-pressed", "true");
+
+  await quoteButton.click();
+
+  await expect(renderedDocument.locator("blockquote")).toHaveCount(0);
+  await expect(renderedDocument.locator('p[data-crucialy-path="[0]"]')).toHaveText(
+    "你好，crucialy-rich。",
+  );
+  await expect(renderedDocument.locator('p[data-crucialy-path="[1]"]')).toHaveText(
+    "选区模型已就绪。",
+  );
+  await expect(quoteButton).toHaveAttribute("aria-pressed", "false");
+  await expect(page.getByLabel("模型校验状态")).toContainText("合法");
+});
+
 test("keeps quote input deletion and line breaks stable", async ({ page }) => {
   await page.goto("/");
   await page.getByLabel("模型示例").selectOption("quotes");
