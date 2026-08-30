@@ -1,7 +1,7 @@
 import { isHeadingLevel, type HeadingLevel } from "../model";
 import { createSetBlockTypeOperation, createTransaction } from "../operation";
 import { cloneRangeSelection } from "../selection";
-import { getSelectedBlockIndexes } from "./block-selection";
+import { doSelectedBlocksMatch, getSelectedBlockIndexes } from "./block-selection";
 import { createCommandSkipped, createCommandSuccess } from "./result";
 import type { Command, CommandInput } from "./types";
 
@@ -55,18 +55,15 @@ export function canExecuteSetHeadingCommand(input: CommandInput): boolean {
 
 export function isHeadingCommandActive(input: CommandInput): boolean {
   const level = getHeadingLevel(input);
-  const blockIndexes = getSelectedBlockIndexes(input);
 
-  if (level === undefined || !blockIndexes) {
+  if (level === undefined) {
     return false;
   }
 
-  return blockIndexes.every((blockIndex) => {
-    const block = input.context.document.children[blockIndex];
-
+  return doSelectedBlocksMatch(input, (block) => {
     return level === null
-      ? block?.type === "paragraph"
-      : block?.type === "heading" && block.level === level;
+      ? block.type === "paragraph"
+      : block.type === "heading" && block.level === level;
   });
 }
 
