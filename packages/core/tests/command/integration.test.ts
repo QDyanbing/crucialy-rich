@@ -5,7 +5,9 @@ import {
   BOLD_COMMAND_NAME,
   createDefaultCommandRegistry,
   createDocument,
+  createHeading,
   createParagraph,
+  createQuote,
   createText,
   DELETE_SELECTION_COMMAND_NAME,
   executeCommand,
@@ -14,9 +16,11 @@ import {
   MERGE_BLOCK_COMMAND_NAME,
   SET_BACKGROUND_COLOR_COMMAND_NAME,
   SET_FONT_SIZE_COMMAND_NAME,
+  SET_HEADING_COMMAND_NAME,
   SET_TEXT_COLOR_COMMAND_NAME,
   SPLIT_BLOCK_COMMAND_NAME,
   STRIKE_COMMAND_NAME,
+  TOGGLE_QUOTE_COMMAND_NAME,
   UNDERLINE_COMMAND_NAME,
 } from "../../src";
 
@@ -204,4 +208,50 @@ describe("default command registry integration", () => {
       ).toBeUndefined();
     },
   );
+
+  it("executes block type commands through the default registry", () => {
+    const registry = createDefaultCommandRegistry();
+    const document = createDocument([
+      createParagraph([createText("正文")]),
+      createHeading(2, [createText("标题")]),
+      createQuote([createText("引用")]),
+    ]);
+    const selection = {
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [2, 0], offset: 1 },
+    };
+    const headingResult = executeCommand(registry, SET_HEADING_COMMAND_NAME, {
+      context: { document, selection },
+      payload: { level: 3 },
+    });
+    const headingDocument = applyTransaction(document, headingResult.transaction!);
+
+    if (!headingResult.selection) {
+      throw new Error("Set heading command should return a selection.");
+    }
+
+    expect(headingDocument.children.map((block) => block.type)).toEqual([
+      "heading",
+      "heading",
+      "heading",
+    ]);
+    expect(
+      headingDocument.children.map((block) =>
+        block.type === "heading" ? block.level : null,
+      ),
+    ).toEqual([3, 3, 3]);
+
+    const quoteResult = executeCommand(registry, TOGGLE_QUOTE_COMMAND_NAME, {
+      context: {
+        document: headingDocument,
+        selection: headingResult.selection,
+      },
+    });
+
+    expect(
+      applyTransaction(headingDocument, quoteResult.transaction!).children.map(
+        (block) => block.type,
+      ),
+    ).toEqual(["quote", "quote", "quote"]);
+  });
 });
