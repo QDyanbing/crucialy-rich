@@ -73,6 +73,7 @@ type ModelExampleId =
   | "regular"
   | "headings"
   | "quotes"
+  | "block-types"
   | "marks"
   | "links"
   | "empty"
@@ -153,6 +154,22 @@ const modelExamples: ModelExample[] = [
     value: createDocument([
       createQuote([createText("引用内容")]),
       createParagraph([createText("引用之后可以继续编辑正文。")]),
+    ]),
+  },
+  {
+    id: "block-types",
+    label: "块类型混合",
+    selection: {
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [2, 0], offset: 6 },
+    },
+    value: createDocument([
+      createHeading(2, [createText("项目概览", { bold: true })]),
+      createParagraph([
+        createText("正文用于说明段落、标题与引用可以连续切换。", { italic: true }),
+      ]),
+      createQuote([createText("重要引用内容", { underline: true })]),
+      createParagraph([createText("未选中的结尾段落保持原样。")]),
     ]),
   },
   {
