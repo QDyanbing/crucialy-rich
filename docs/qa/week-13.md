@@ -2,9 +2,9 @@
 
 ## 当前进度
 
-第 13 周 Day 1「Block Type 设计」、Day 2「Heading」、Day 3「Quote」和 Day 4「Block 切换边界」已完成。
+第 13 周 Day 1「Block Type 设计」、Day 2「Heading」、Day 3「Quote」、Day 4「Block 切换边界」和 Day 5「标题和引用闭环验收」已完成。
 
-☑️ 当前指针：第 13 周 Day 5「标题和引用闭环验收」待开始。
+☑️ 当前指针：第 14 周 Day 1「CodeBlock 设计」待开始。
 
 ## Day 1 已完成范围
 
@@ -55,6 +55,16 @@
 - Playwright 已覆盖跨两段统一切换标题、统一开启和取消 Quote，以及最终模型合法性。
 - 新增 `docs/features/block-type-boundaries.md`，并同步 Heading、Quote、Command 和 Block Type 文档。
 
+## Day 5 已完成范围
+
+- 提取选中块匹配和 Block Type command 成功结果 helper，Heading/Quote 复用同一套范围、operation 与 selection 处理。
+- 新增 `BLOCK_TYPE_COMMANDS` 公共集合，默认注册表按功能集合装配 Heading 与 Quote。
+- 补齐默认注册表执行、Heading/Quote 连续交互和 History undo/redo 生命周期测试。
+- 修复 History 快照把 heading/quote 降级为 paragraph 的问题，快照现已保留全部当前 Block Type 和 heading level。
+- Demo 新增中文“块类型混合”样例，包含标题、正文、引用和未选中结尾段落。
+- Playwright 覆盖混合样例渲染、统一设置标题、统一开启/取消引用、marks 保留和未选中块稳定性。
+- 新增 `docs/qa/block-type.md` 独立闭环验收报告。
+
 ## 自动化覆盖
 
 - `packages/core/tests/model/types.test.ts`
@@ -72,7 +82,10 @@
 - `packages/core/tests/command/quote.test.ts`
 - `packages/core/tests/command/block-selection.test.ts`
 - `packages/core/tests/command/block-type-interaction.test.ts`
+- `packages/core/tests/command/block-type-history.test.ts`
+- `packages/core/tests/command/block-type-result.test.ts`
 - `packages/core/tests/command/state.test.ts`
+- `packages/core/tests/history/snapshot.test.ts`
 - `packages/core/tests/public-api.test.ts`
 - `tests/e2e/demo-shell.spec.ts`
 
@@ -83,4 +96,4 @@
 
 ## 结论
 
-第 13 周 Day 4 已达到“多段切换不丢文本和 marks”的验收目标。Heading 与 Quote 的跨块范围解析、命令状态、operation 生成、连续交互、Demo 自动化测试和中文规则文档均已对齐，下一步进入标题和引用闭环验收。
+第 13 周已达到“heading/quote 测试全过”的闭环目标。模型、Operation、Command、History、Renderer、中文混合块 Demo、自动化测试和独立 QA 报告均已对齐，下一步进入第 14 周 CodeBlock 与分割线闭环。

@@ -87,6 +87,8 @@
 - 新增多块选区解析 helper，统一处理 Heading 与 Quote command 的正向、反向和 collapsed block 范围。
 - 新增 Heading 与 Quote 多块切换能力，保留文字、marks 和原 selection 方向，并补齐命令状态、连续交互和 transaction 验收。
 - 新增多块标题与引用 Demo 浏览器验收、切换规则文档，并更新第 13 周 Day 4 QA 进度。
+- 新增 `BLOCK_TYPE_COMMANDS`、共享 Block Type command helper、默认注册表与 History 生命周期验收。
+- 新增中文“块类型混合”Demo、Heading/Quote 完整浏览器流程和独立 Block Type QA 报告。
 
 ### 变更
 
@@ -124,6 +126,11 @@
 - 更新项目、模型、文字标记和测试策略文档，使其匹配第 12 周 Day 1 Link Mark 设计范围。
 - 更新项目、Core 包、架构、Block Type、Command 和渲染文档，使其匹配 Heading 闭环状态。
 - 更新项目、Core 包、架构、Block Type、Command 和渲染文档，使其匹配 Quote 闭环状态。
+- 更新项目、Core 包、Operation、Command、History、渲染和第 13 周 QA 文档，使其匹配标题与引用闭环状态。
+
+### 修复
+
+- 修复 History 快照把 heading 和 quote 错误克隆为 paragraph，导致 Block Type 操作无法正确 undo/redo 的问题。
 
 ### 暂未包含
 

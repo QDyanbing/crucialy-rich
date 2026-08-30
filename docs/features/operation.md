@@ -311,7 +311,7 @@ interface TransactionAcceptanceReport {
 - 插入非折叠选区时不会自动删除选中内容，当前插入点取 selection anchor。
 - 删除暂不支持跨 text 节点或跨 paragraph 范围。
 - 合并暂不支持跨多段批量合并。
-- Block Type 切换暂不支持跨多个 block，command 和语义 renderer 留到第 13 周后续任务。
+- 单条 `set_block_type` 仍只处理一个顶层 block；Heading/Quote command 已能在同一 transaction 中组合多条 operation 完成跨块切换，语义 renderer 已支持 `h1`–`h6` 与 `blockquote`。
 - transaction 当前只负责批量应用和结束 normalize；History 已使用快照策略提供撤销/重做，operation 层本身暂不生成 undo/redo inverse 信息。
 - text operation 会保留现有 text marks；`toggle_mark` 和 `set_mark_attribute` 已支持同 paragraph 内跨 text 切分与相邻同 marks 合并，跨 paragraph mark 范围留到后续阶段。
 - 普通 `beforeinput insertText`、collapsed selection 下的 Backspace、collapsed selection 下的 Delete 和 collapsed selection 下的 Enter 已接入输入事件管线，并复用当前 operation/transaction 更新模型。

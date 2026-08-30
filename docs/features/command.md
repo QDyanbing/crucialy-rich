@@ -23,6 +23,7 @@ Command 系统负责把“可执行的编辑意图”包装成统一接口。当
 - 提供 `setBackgroundColorCommand`，支持同一 paragraph 内设置或取消安全十六进制背景色，以及 collapsed selection 的后续输入背景色占位。
 - 提供 `setHeadingCommand`，支持单块或多块设置 1–6 级标题、切换层级或恢复 paragraph，并保留模型选区。
 - 提供 `toggleQuoteCommand`，支持单块或多块统一切换 Quote 或恢复 paragraph，并保留模型选区。
+- 提供 `BLOCK_TYPE_COMMANDS`，集中暴露 Heading 与 Quote command，并由默认注册表统一装配。
 - 提供 `createTextMarkAttributeCommand` 内部工厂，统一字号和颜色的选区校验、operation 创建与 selection 映射。
 - 提供 `createTextMarkCommand`、`canExecuteTextMarkCommand` 和 `isTextMarkCommandActive`，供文字格式命令复用。
 - 提供 `insertTextCommand`，支持 collapsed selection 插入文本，也支持同一 text 节点内的 range selection 替换文本。

@@ -198,7 +198,7 @@ const shortcutCommandName = getCommandNameFromShortcut({
 - 链接标记：`LinkMarkAttributes`、`LinkTarget`、`LinkRelToken`、`LINK_PROTOCOLS`、`LINK_TARGETS`、`LINK_REL_TOKENS`、`sanitizeLinkHref`、`normalizeLinkTarget`、`normalizeLinkRel`、`normalizeLinkMark`、`isValidLinkMark`、`areLinkMarksEqual`、`getLinkMark`、`setLinkMark`、`removeLinkMark`。
 - 链接功能命名空间：`link` 集中提供 Link Mark、安全处理、`set_link` operation 和链接 command；原有平铺导出保持可用。
 - 校验和修复：`validateDocument`、`normalizeDocument`。
-- 选区：`Path`、`Point`、`RangeSelection`、`cloneRangeSelection`、`getNodeAtPath`、`isValidPoint`、`normalizeRange`、`getParagraphTextOffset`、`getPointAtParagraphTextOffset`、`getTextInRange`、`splitTextByRange`。
+- 选区：`Path`、`Point`、`RangeSelection`、`cloneRangeSelection`、`getNodeAtPath`、`isValidPoint`、`normalizeRange`、`getParagraphTextOffset`、`getPointAtParagraphTextOffset`、`getTextInRange`、`splitTextByRange`、`getSelectedBlockIndexes`、`doSelectedBlocksMatch`。
 - 基础渲染：`renderDocument`、`renderNodeToHtml`、`MODEL_PATH_ATTRIBUTE`、`encodeModelPath`、`decodeModelPath`。
 - DOM 映射：`domPointToModelPoint`、`modelPointToDomPoint`、`findElementByModelPath`、`findClosestModelPathElement`。
 - 选区同步：`domSelectionToModelSelection`、`createDomRangeFromModelSelection`、`applyModelSelectionToDom`。
@@ -206,7 +206,7 @@ const shortcutCommandName = getCommandNameFromShortcut({
 - Transaction：`createTransaction`、`applyOperation`、`applyTransaction`、`summarizeOperation`、`summarizeTransaction`、`createTransactionAcceptanceReport`。
 - 输入：`createInsertTextInputTransaction`、`createSelectionAfterInsertTextInput`、`createBackspaceInputTransaction`、`createSelectionAfterBackspaceInput`、`createDeleteInputTransaction`、`createSelectionAfterDeleteInput`、`createEnterInputTransaction`、`createSelectionAfterEnterInput`。
 - 当前输入 helper 覆盖普通文本插入、段中删除、段落合并、段落分裂和输入后 selection 落点。
-- Command：`DEFAULT_COMMANDS`、`BOOLEAN_MARK_COMMANDS`、`DEFAULT_COMMAND_SHORTCUTS`、`createDefaultCommandRegistry`、`createCommandRegistry`、`canExecuteCommand`、`executeCommand`、`queryCommandState`、四种 boolean mark command、`setFontSizeCommand`、`setTextColorCommand`、`setBackgroundColorCommand`、`setHeadingCommand`、`toggleQuoteCommand`、对应 canExecute/active/选中标题查询 helper、文本与 block command 和对应 command name 常量。
+- Command：`DEFAULT_COMMANDS`、`BOOLEAN_MARK_COMMANDS`、`TEXT_STYLE_COMMANDS`、`LINK_COMMANDS`、`BLOCK_TYPE_COMMANDS`、`DEFAULT_COMMAND_SHORTCUTS`、`createDefaultCommandRegistry`、`createCommandRegistry`、`canExecuteCommand`、`executeCommand`、`queryCommandState`、四种 boolean mark command、`setFontSizeCommand`、`setTextColorCommand`、`setBackgroundColorCommand`、`setHeadingCommand`、`toggleQuoteCommand`、对应 canExecute/active/选中标题查询 helper、文本与 block command 和对应 command name 常量。
 - History：`createHistorySnapshot`、`cloneHistorySnapshot`、`createHistoryEntry`、`cloneHistoryEntry`、`createHistoryState`、`clearHistory`、`recordHistory`、`canMergeHistoryEntries`、`mergeHistoryEntries`、`canUndo`、`canRedo`、`getUndoEntry`、`getRedoEntry`、`undoHistory`、`redoHistory`、`getHistoryShortcutAction`、`undoCommand`、`redoCommand`。
 
 ## 许可

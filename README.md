@@ -10,7 +10,7 @@
 
 ## 当前阶段
 
-已完成工程初始化、文档模型第一版、模型选区第一版、基础模型渲染第一版、DOM 与模型位置映射第一版、选区双向同步第一版、React 组件 API 第一版、渲染闭环验收、`insertText`、`deleteText`、`toggle_mark`、`set_link`、`splitBlock`、`mergeBlock` operation 第一版、Transaction 第一版、Operation 闭环验收、`beforeinput insertText` 第一版、Backspace 第一版、Delete 第一版、Enter 第一版、基础编辑闭环验收、Command 基础接口、文本编辑命令、Block 编辑命令、Bold 命令、Italic 命令、Underline 命令、Strike 命令、Mark 切分与合并第一版、Bold/Italic 闭环验收、Underline/Strike 闭环验收、四种 boolean mark 叠加规则、mark 快捷键映射、Command 状态读取、Command 闭环验收、History 撤销/重做第一版、连续输入合并第一版、撤销重做快捷键第一版、text marks 属性模型、字号闭环、安全文字颜色与背景色闭环、文字属性综合验收、Link Mark 模型以及链接设置/取消 command 第一版。
+已完成工程初始化、文档模型第一版、模型选区第一版、基础模型渲染第一版、DOM 与模型位置映射第一版、选区双向同步第一版、React 组件 API 第一版、渲染闭环验收、`insertText`、`deleteText`、`toggle_mark`、`set_link`、`set_block_type`、`splitBlock`、`mergeBlock` operation 第一版、Transaction 第一版、Operation 闭环验收、`beforeinput insertText` 第一版、Backspace 第一版、Delete 第一版、Enter 第一版、基础编辑闭环验收、Command 基础接口、文本编辑命令、Block 编辑命令、Bold 命令、Italic 命令、Underline 命令、Strike 命令、Heading 命令、Quote 命令、Mark 切分与合并第一版、Bold/Italic 闭环验收、Underline/Strike 闭环验收、标题和引用闭环验收、四种 boolean mark 叠加规则、mark 快捷键映射、Command 状态读取、Command 闭环验收、History 撤销/重做第一版、连续输入合并第一版、撤销重做快捷键第一版、text marks 属性模型、字号闭环、安全文字颜色与背景色闭环、文字属性综合验收、Link Mark 模型以及链接设置/取消 command 第一版。
 
 当前 React 组件已支持通过 `value` / `defaultValue` 展示文档模型，普通文本输入、非折叠删除选区、Enter 分段、段首 Backspace 合并和段尾 Delete 合并会优先复用 command；组件会通过 `onTransaction` 暴露真实输入 transaction。演示页按钮命令和真实输入都会记录 history，并支持撤销、重做、Ctrl/Meta + Z、Ctrl/Meta + Shift + Z、Ctrl/Meta + Y、连续 typing 合并和 undoStack/redoStack 状态查看。
 
@@ -18,7 +18,7 @@ text marks schema 当前支持 `bold`、`italic`、`underline` 和 `strike` 共�
 
 第 12 周链接闭环已完成：包括结构化 Link Mark、HTTP/HTTPS/mailto URL sanitize、target/rel 白名单、`set_link` operation、`setLink` / `unsetLink` command、`core.link` 功能命名空间、统一链接选区状态读取、安全 `<a>` 渲染、编辑态点击拦截、只读态原生跳转、菜单选区快照与恢复、History 生命周期以及中文创建/编辑/取消验收样例。
 
-第 13 周 Day 1「Block Type 设计」、Day 2「Heading」、Day 3「Quote」和 Day 4「Block 切换边界」已完成：文档模型可表达 paragraph、1–6 级 heading 和 quote；Heading 与 Quote 均完成语义渲染、默认 command、单块/多块类型切换、中文 Demo 和浏览器验收，跨块正向/反向选区不会丢失文字、marks 或选区方向。当前指针为第 13 周 Day 5「标题和引用闭环验收」。
+第 13 周“标题和引用闭环”已全部完成：文档模型可表达 paragraph、1–6 级 heading 和 quote；Heading 与 Quote 均完成语义渲染、默认 command、单块/多块类型切换、History 往返、中文混合块 Demo 和浏览器验收，跨块正向/反向选区不会丢失文字、marks 或选区方向。当前指针为第 14 周 Day 1「CodeBlock 设计」。
 
 ## 技术栈
 
@@ -147,6 +147,7 @@ pnpm test:e2e
 - [第 11 周 QA](./docs/qa/week-11.md)
 - [第 12 周 QA](./docs/qa/week-12.md)
 - [第 13 周 QA](./docs/qa/week-13.md)
+- [标题和引用闭环 QA](./docs/qa/block-type.md)
 - [模型 QA](./docs/qa/model.md)
 - [文字标记 QA](./docs/qa/marks.md)
 - [Bold/Italic 闭环验收](./docs/qa/bold-italic.md)
