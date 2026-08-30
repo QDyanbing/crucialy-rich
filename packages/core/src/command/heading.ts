@@ -1,8 +1,7 @@
 import { isHeadingLevel, type HeadingLevel } from "../model";
-import { createSetBlockTypeOperation, createTransaction } from "../operation";
-import { cloneRangeSelection } from "../selection";
 import { doSelectedBlocksMatch, getSelectedBlockIndexes } from "./block-selection";
-import { createCommandSkipped, createCommandSuccess } from "./result";
+import { createSelectedBlockTypeCommandSuccess } from "./block-type-result";
+import { createCommandSkipped } from "./result";
 import type { Command, CommandInput } from "./types";
 
 export const SET_HEADING_COMMAND_NAME = "setHeading";
@@ -71,27 +70,23 @@ export const setHeadingCommand: Command = {
   canExecute: canExecuteSetHeadingCommand,
   execute(input) {
     const level = getHeadingLevel(input);
-    const blockIndexes = getSelectedBlockIndexes(input);
-    const selection = input.context.selection;
 
-    if (level === undefined || !blockIndexes || !selection) {
-      return createCommandSkipped(
+    if (level !== undefined) {
+      const result = createSelectedBlockTypeCommandSuccess(
         SET_HEADING_COMMAND_NAME,
-        "Set heading command requires a valid level and text selection.",
+        input,
+        level === null ? { type: "paragraph" } : { level, type: "heading" },
       );
+
+      if (result) {
+        return result;
+      }
     }
 
-    const operations = blockIndexes.map((blockIndex) =>
-      createSetBlockTypeOperation(
-        [blockIndex],
-        level === null ? { type: "paragraph" } : { level, type: "heading" },
-      ),
+    return createCommandSkipped(
+      SET_HEADING_COMMAND_NAME,
+      "Set heading command requires a valid level and text selection.",
     );
-
-    return createCommandSuccess(SET_HEADING_COMMAND_NAME, {
-      selection: cloneRangeSelection(selection),
-      transaction: createTransaction(operations),
-    });
   },
   isActive: isHeadingCommandActive,
   name: SET_HEADING_COMMAND_NAME,
