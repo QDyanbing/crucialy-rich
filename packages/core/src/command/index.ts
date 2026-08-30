@@ -12,7 +12,7 @@ export {
   SPLIT_BLOCK_COMMAND_NAME,
   splitBlockCommand,
 } from "./block";
-export { getSelectedBlockIndexes } from "./block-selection";
+export { doSelectedBlocksMatch, getSelectedBlockIndexes } from "./block-selection";
 export {
   canExecuteSetFontSizeCommand,
   SET_FONT_SIZE_COMMAND_NAME,

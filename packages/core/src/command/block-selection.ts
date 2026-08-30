@@ -1,4 +1,5 @@
 import { isValidPoint } from "../selection";
+import type { BlockNode } from "../model";
 import type { CommandInput } from "./types";
 
 export function getSelectedBlockIndexes(input: CommandInput): number[] | undefined {
@@ -25,5 +26,21 @@ export function getSelectedBlockIndexes(input: CommandInput): number[] | undefin
   return Array.from(
     { length: endBlockIndex - startBlockIndex + 1 },
     (_, index) => startBlockIndex + index,
+  );
+}
+
+export function doSelectedBlocksMatch(
+  input: CommandInput,
+  predicate: (block: BlockNode, blockIndex: number) => boolean,
+): boolean {
+  const blockIndexes = getSelectedBlockIndexes(input);
+
+  return (
+    blockIndexes !== undefined &&
+    blockIndexes.every((blockIndex) => {
+      const block = input.context.document.children[blockIndex];
+
+      return block !== undefined && predicate(block, blockIndex);
+    })
   );
 }

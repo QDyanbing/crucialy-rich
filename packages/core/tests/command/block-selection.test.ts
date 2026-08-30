@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import {
   createDocument,
+  createHeading,
   createParagraph,
   createText,
+  doSelectedBlocksMatch,
   getSelectedBlockIndexes,
 } from "../../src";
 
@@ -83,5 +85,49 @@ describe("getSelectedBlockIndexes", () => {
         },
       }),
     ).toBeUndefined();
+  });
+});
+
+describe("doSelectedBlocksMatch", () => {
+  it("matches every block covered by the selection", () => {
+    expect(
+      doSelectedBlocksMatch(
+        {
+          context: {
+            document,
+            selection: {
+              anchor: { path: [0, 0], offset: 1 },
+              focus: { path: [2, 0], offset: 1 },
+            },
+          },
+        },
+        (block, blockIndex) => block.type === "paragraph" && blockIndex >= 0,
+      ),
+    ).toBe(true);
+  });
+
+  it("returns false for a mixed selection or invalid range", () => {
+    const mixedDocument = createDocument([
+      createParagraph([createText("正文")]),
+      createHeading(2, [createText("标题")]),
+    ]);
+
+    expect(
+      doSelectedBlocksMatch(
+        {
+          context: {
+            document: mixedDocument,
+            selection: {
+              anchor: { path: [0, 0], offset: 0 },
+              focus: { path: [1, 0], offset: 1 },
+            },
+          },
+        },
+        (block) => block.type === "paragraph",
+      ),
+    ).toBe(false);
+    expect(
+      doSelectedBlocksMatch({ context: { document: mixedDocument } }, () => true),
+    ).toBe(false);
   });
 });
