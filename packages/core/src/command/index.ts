@@ -13,6 +13,7 @@ export {
   splitBlockCommand,
 } from "./block";
 export { doSelectedBlocksMatch, getSelectedBlockIndexes } from "./block-selection";
+export { BLOCK_TYPE_COMMANDS } from "./block-type";
 export {
   canExecuteSetFontSizeCommand,
   SET_FONT_SIZE_COMMAND_NAME,

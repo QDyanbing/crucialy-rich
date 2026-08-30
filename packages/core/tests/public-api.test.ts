@@ -207,6 +207,10 @@ describe("@crucialy-rich/core public API", () => {
       "setLink",
       "unsetLink",
     ]);
+    expect(core.BLOCK_TYPE_COMMANDS.map((command) => command.name)).toEqual([
+      "setHeading",
+      "toggleQuote",
+    ]);
     expect(Array.isArray(core.DEFAULT_COMMAND_SHORTCUTS)).toBe(true);
     expect(typeof core.DELETE_SELECTION_COMMAND_NAME).toBe("string");
     expect(typeof core.INSERT_TEXT_COMMAND_NAME).toBe("string");
