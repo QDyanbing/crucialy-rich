@@ -105,6 +105,36 @@ test("renders the mixed block type acceptance sample", async ({ page }) => {
   );
 });
 
+test("turns the selected mixed blocks into headings", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("block-types");
+
+  const renderedDocument = page.getByLabel("已渲染文档");
+
+  await page.getByLabel("标题层级").selectOption("3");
+
+  await expect(
+    renderedDocument.locator('h3[data-crucialy-path="[0]"] strong'),
+  ).toHaveText("项目概览");
+  await expect(renderedDocument.locator('h3[data-crucialy-path="[1]"] em')).toHaveText(
+    "正文用于说明段落、标题与引用可以连续切换。",
+  );
+  await expect(renderedDocument.locator('h3[data-crucialy-path="[2]"] u')).toHaveText(
+    "重要引用内容",
+  );
+  await expect(renderedDocument.locator('p[data-crucialy-path="[3]"]')).toHaveText(
+    "未选中的结尾段落保持原样。",
+  );
+  await expect(page.getByLabel("标题层级")).toHaveValue("3");
+
+  const transactionText = await page
+    .getByLabel("最近 Transaction", { exact: true })
+    .textContent();
+
+  expect(transactionText?.match(/"set_block_type"/g)).toHaveLength(3);
+  await expect(page.getByLabel("模型校验状态")).toContainText("合法");
+});
+
 test("switches heading levels and keeps editing before restoring a paragraph", async ({
   page,
 }) => {
