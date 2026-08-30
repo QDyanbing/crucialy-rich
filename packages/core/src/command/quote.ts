@@ -1,6 +1,6 @@
 import { createSetBlockTypeOperation, createTransaction } from "../operation";
 import { cloneRangeSelection } from "../selection";
-import { getSelectedBlockIndexes } from "./block-selection";
+import { doSelectedBlocksMatch, getSelectedBlockIndexes } from "./block-selection";
 import { createCommandSkipped, createCommandSuccess } from "./result";
 import type { Command, CommandInput } from "./types";
 
@@ -11,14 +11,7 @@ export function canExecuteToggleQuoteCommand(input: CommandInput): boolean {
 }
 
 export function isQuoteCommandActive(input: CommandInput): boolean {
-  const blockIndexes = getSelectedBlockIndexes(input);
-
-  return (
-    blockIndexes !== undefined &&
-    blockIndexes.every(
-      (blockIndex) => input.context.document.children[blockIndex]?.type === "quote",
-    )
-  );
+  return doSelectedBlocksMatch(input, (block) => block.type === "quote");
 }
 
 export const toggleQuoteCommand: Command = {
@@ -34,9 +27,7 @@ export const toggleQuoteCommand: Command = {
       );
     }
 
-    const allSelectedBlocksAreQuotes = blockIndexes.every(
-      (blockIndex) => input.context.document.children[blockIndex]?.type === "quote",
-    );
+    const allSelectedBlocksAreQuotes = isQuoteCommandActive(input);
     const operations = blockIndexes.map((blockIndex) =>
       createSetBlockTypeOperation(
         [blockIndex],
