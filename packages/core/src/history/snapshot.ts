@@ -1,16 +1,25 @@
-import { createText, type DocumentNode } from "../model";
+import { createText, type BlockNode, type DocumentNode } from "../model";
 import type { Point, RangeSelection } from "../selection";
 import type { HistorySnapshot } from "./types";
 
+function cloneBlock(block: BlockNode): BlockNode {
+  const children = block.children.map((textNode) =>
+    createText(textNode.text, textNode.marks),
+  );
+
+  if (block.type === "heading") {
+    return { children, level: block.level, type: "heading" };
+  }
+
+  return block.type === "quote"
+    ? { children, type: "quote" }
+    : { children, type: "paragraph" };
+}
+
 function cloneDocument(document: DocumentNode): DocumentNode {
   return {
+    children: document.children.map(cloneBlock),
     type: "document",
-    children: document.children.map((block) => ({
-      type: "paragraph",
-      children: block.children.map((textNode) =>
-        createText(textNode.text, textNode.marks),
-      ),
-    })),
   };
 }
 

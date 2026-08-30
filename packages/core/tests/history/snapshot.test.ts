@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import {
   createDocument,
+  createHeading,
   createHistorySnapshot,
   createParagraph,
+  createQuote,
   createText,
 } from "../../src";
 
@@ -73,5 +75,25 @@ describe("createHistorySnapshot", () => {
     const snapshot = createHistorySnapshot(createDocument());
 
     expect(snapshot.selection).toBeUndefined();
+  });
+
+  it("preserves paragraph heading and quote block types", () => {
+    const snapshot = createHistorySnapshot(
+      createDocument([
+        createParagraph([createText("正文")]),
+        createHeading(3, [createText("标题")]),
+        createQuote([createText("引用")]),
+      ]),
+    );
+
+    expect(snapshot.document.children).toEqual([
+      { children: [{ text: "正文", type: "text" }], type: "paragraph" },
+      {
+        children: [{ text: "标题", type: "text" }],
+        level: 3,
+        type: "heading",
+      },
+      { children: [{ text: "引用", type: "text" }], type: "quote" },
+    ]);
   });
 });
