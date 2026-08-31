@@ -32,7 +32,7 @@ function getCollapsedPoint(selection: RangeSelection): Point | undefined {
   return isCollapsed(selection) ? selection.anchor : undefined;
 }
 
-function isParagraphStart(point: Point): boolean {
+function isBlockStart(point: Point): boolean {
   const [blockIndex, textIndex] = point.path;
 
   return blockIndex !== undefined && blockIndex > 0 && textIndex === 0;
@@ -50,7 +50,7 @@ function createDeletePreviousCharacterTransaction(point: Point): Transaction {
   ]);
 }
 
-function createMergePreviousParagraphTransaction(point: Point): Transaction {
+function createMergePreviousBlockTransaction(point: Point): Transaction {
   return createTransaction([createMergeBlockOperation(point)]);
 }
 
@@ -65,8 +65,8 @@ export function createBackspaceInputTransaction(input: BackspaceInput): Transact
     return createDeletePreviousCharacterTransaction(point);
   }
 
-  if (isParagraphStart(point)) {
-    return createMergePreviousParagraphTransaction(point);
+  if (isBlockStart(point)) {
+    return createMergePreviousBlockTransaction(point);
   }
 
   return createTransaction();

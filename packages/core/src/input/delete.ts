@@ -42,7 +42,7 @@ function getTextLength(document: DocumentNode, point: Point): number | undefined
   return isTextNode(node) ? node.text.length : undefined;
 }
 
-function hasNextParagraph(document: DocumentNode, point: Point): boolean {
+function hasNextBlock(document: DocumentNode, point: Point): boolean {
   const [blockIndex] = point.path;
 
   return blockIndex !== undefined && blockIndex < document.children.length - 1;
@@ -60,7 +60,7 @@ function createDeleteNextCharacterTransaction(point: Point): Transaction {
   ]);
 }
 
-function createMergeNextParagraphTransaction(point: Point): Transaction {
+function createMergeNextBlockTransaction(point: Point): Transaction {
   const [blockIndex] = point.path;
 
   return createTransaction([
@@ -88,8 +88,8 @@ export function createDeleteInputTransaction(input: DeleteInput): Transaction {
     return createDeleteNextCharacterTransaction(point);
   }
 
-  if (hasNextParagraph(input.document, point)) {
-    return createMergeNextParagraphTransaction(point);
+  if (hasNextBlock(input.document, point)) {
+    return createMergeNextBlockTransaction(point);
   }
 
   return createTransaction();
