@@ -8,7 +8,7 @@
 
 - `packages/core/tests/operation/insert-text.test.ts`：operation 创建、path 复制、段首/段中/段尾插入、非法 point、空文本 no-op 和插入后 selection。
 - `packages/core/tests/operation/delete-text.test.ts`：operation 创建、path 复制、段首/段中/段尾删除、反向 range、非法 range、折叠 range no-op 和删除后 selection。
-- `packages/core/tests/operation/toggle-mark.test.ts`：operation 创建、path 复制、同 paragraph range 切换、collapsed mark 占位、相邻同 marks text 合并、非法 range 和切换后 selection。
+- `packages/core/tests/operation/toggle-mark.test.ts`：operation 创建、path 复制、同 block range 切换、heading 内 mark、collapsed mark 占位、相邻同 marks text 合并、非法 range 和切换后 selection。
 - `packages/core/tests/operation/set-mark-attribute.test.ts`：属性设置、覆盖、取消、非法值、collapsed 占位、跨 text、合并和 selection 映射。
 - `packages/core/tests/operation/set-link.test.ts`：安全链接设置、覆盖、取消、跨 text、marks 保留和 selection 映射。
 - `packages/core/tests/operation/set-block-type.test.ts`：paragraph、heading、quote 切换、标题层级、path 校验和 children 保留。
@@ -50,7 +50,8 @@ pnpm test:e2e
 | 演示删除         | 设置选区后点击“删除选区”                 | 文档 JSON、渲染预览和最近操作同步更新 | 通过 |
 | 创建 mark 操作   | 调用 `createToggleMarkOperation`         | 返回 `type: "toggle_mark"` 的操作对象 | 通过 |
 | 选区加粗         | 同 text range 执行 toggle mark           | 被选文本带 `marks.bold`               | 通过 |
-| 跨 text 加粗     | 同 paragraph 跨 text 执行 toggle mark    | 被选文本切分加粗并合并同 marks text   | 通过 |
+| 跨 text 加粗     | 同 block 跨 text 执行 toggle mark        | 被选文本切分加粗并合并同 marks text   | 通过 |
+| 扩展块设置样式   | 在 heading/quote 内设置 mark             | 保留块类型并更新选中文字              | 通过 |
 | 折叠加粗         | collapsed selection 执行 toggle mark     | 生成空的 bold text 占位节点           | 通过 |
 | mark 后选区      | 调用 `createSelectionAfterToggleMark`    | selection 落到被切换的 text 节点      | 通过 |
 | 演示加粗         | 设置选区后点击“加粗”                     | 最近 transaction 包含 `toggle_mark`   | 通过 |
@@ -86,7 +87,7 @@ pnpm test:e2e
 ## 当前限制
 
 - 当前覆盖全部八种已注册 operation；单条 `set_block_type` 只处理一个顶层 block，多块命令会组合多条 operation。
-- 删除暂不支持跨 text 节点或跨 paragraph range。
+- 删除暂不支持跨 text 节点或跨 block range。
 - 合并暂不支持批量跨多段合并。
 - transaction 当前不生成 inverse；History 使用 before/after 快照提供撤销重做。
 - 普通 `beforeinput insertText`、collapsed selection 下的 Backspace、collapsed selection 下的 Delete 和 collapsed selection 下的 Enter 已接入输入事件管线，并已完成基础编辑闭环验收。

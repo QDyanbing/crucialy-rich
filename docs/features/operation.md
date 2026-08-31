@@ -76,7 +76,7 @@ interface TransactionAcceptanceReport {
 - `type`：当前支持 `insert_text`、`delete_text`、`toggle_mark`、`set_mark_attribute`、`set_link`、`set_block_type`、`split_block` 和 `merge_block`。
 - `point`：插入、分段或合并位置，必须指向 text 节点内的合法偏移。
 - `text`：要插入的文本。
-- `range`：删除范围当前必须落在同一个 text 节点内；mark 范围当前必须落在同一个 paragraph 内。
+- `range`：删除范围当前必须落在同一个 text 节点内；mark 范围当前必须落在同一个 block 内。
 - `mark`：要切换的 text mark，当前用于 `toggle_mark`。
 - `attribute` / `value`：要设置的属性 Mark 和新值；`null` 表示移除属性。
 - `link`：要设置的 Link Mark；`null` 表示取消链接。
@@ -126,10 +126,10 @@ interface TransactionAcceptanceReport {
 
 当前规则：
 
-- range 必须落在同一个 paragraph 内，支持跨多个 text 节点和反向选区。
+- range 必须落在同一个 block 内，支持 paragraph、heading、quote 中跨多个 text 节点和反向选区。
 - 非折叠 range 会按边界切分 text，统一切换目标 mark，并合并相邻同 marks 节点。
 - collapsed range 会创建带目标 mark 的空 text，后续输入可以继承该 mark。
-- 非法 mark、非法 point 或跨 paragraph range 会抛出 `RangeError`。
+- 非法 mark、非法 point 或跨 block range 会抛出 `RangeError`。
 - `createSelectionAfterToggleMark` 会在切分和合并后重新映射选区。
 
 ## 创建和应用属性 Mark 操作
@@ -138,11 +138,11 @@ interface TransactionAcceptanceReport {
 
 当前规则：
 
-- range 必须落在同一个 paragraph 内，支持跨多个 text 节点和反向选区。
+- range 必须落在同一个 block 内，支持 paragraph、heading、quote 中跨多个 text 节点和反向选区。
 - 非折叠 range 会按边界切分 text，只更新选中部分，并合并相邻同 marks 节点。
 - collapsed range 会创建带目标属性的空 text，后续输入可继承属性。
 - `value: null` 会移除目标属性，同时保留其他 mark。
-- 非法属性值、非法 point 或跨 paragraph range 会抛出 `RangeError`。
+- 非法属性值、非法 point 或跨 block range 会抛出 `RangeError`。
 - `createSelectionAfterSetMarkAttribute` 会在切分和合并后重新映射选区。
 
 ## 创建和应用链接操作
@@ -151,11 +151,11 @@ interface TransactionAcceptanceReport {
 
 当前规则：
 
-- range 必须是同一个 paragraph 内的非折叠文字选区，支持跨多个 text 节点和反向选区。
+- range 必须是同一个 block 内的非折叠文字选区，支持 paragraph、heading、quote 中跨多个 text 节点和反向选区。
 - `link` 会在创建和应用阶段执行 href、target 与 rel 安全校验；`null` 表示取消链接。
 - 设置、覆盖或取消链接时会保留其他 boolean mark 和文字属性。
 - 应用后会合并相邻同 marks 节点，并通过 `createSelectionAfterSetLink` 重新映射选区。
-- 非法链接、collapsed range、非法 point 或跨 paragraph range 会抛出 `RangeError`。
+- 非法链接、collapsed range、非法 point 或跨 block range 会抛出 `RangeError`。
 
 ## 创建和应用 Block Type 操作
 
@@ -332,10 +332,10 @@ interface TransactionAcceptanceReport {
 
 ## 当前限制
 
-- 当前实现 `insert_text`、同 text 节点内的 `delete_text`、同 paragraph 内的 `toggle_mark`、`set_mark_attribute` 和 `set_link`、单个顶层 block 的 `set_block_type`，以及 block 级 `split_block` 和 `merge_block`。
-- 删除暂不支持跨 text 节点或跨 paragraph 范围。
+- 当前实现 `insert_text`、同 text 节点内的 `delete_text`、同 block 内的 `toggle_mark`、`set_mark_attribute` 和 `set_link`、单个顶层 block 的 `set_block_type`，以及 block 级 `split_block` 和 `merge_block`。
+- 删除暂不支持跨 text 节点或跨 block 范围。
 - 合并暂不支持跨多段批量合并。
 - 单条 `set_block_type` 仍只处理一个顶层 block；Heading/Quote command 已能在同一 transaction 中组合多条 operation 完成跨块切换，语义 renderer 已支持 `h1`–`h6` 与 `blockquote`。
 - transaction 当前只负责批量应用和结束 normalize；History 已使用快照策略提供撤销/重做，operation 层本身暂不生成 undo/redo inverse 信息。
-- text operation 会保留现有 text marks；`toggle_mark` 和 `set_mark_attribute` 已支持同 paragraph 内跨 text 切分与相邻同 marks 合并，跨 paragraph mark 范围留到后续阶段。
+- text operation 会保留现有 text marks；`toggle_mark` 和 `set_mark_attribute` 已支持同 block 内跨 text 切分与相邻同 marks 合并，跨 block mark 范围留到后续阶段。
 - 普通 `beforeinput insertText`、同 text 非折叠选区替换、Backspace、Delete 和 collapsed selection 下的 Enter 已接入输入事件管线，并复用当前 command、operation 和 transaction 更新模型。
