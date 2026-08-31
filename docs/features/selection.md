@@ -1,6 +1,6 @@
-# 选区（第一版）
+# 选区
 
-选区用于在文档模型中表达位置和范围。当前阶段只覆盖模型选区，不绑定浏览器 DOM 选区。
+选区用于在文档模型中表达位置和范围。本文聚焦模型选区；浏览器 DOM 映射和双向同步已经接入，详见[渲染](./render.md)与[选区双向同步](./selection-sync.md)。
 
 ## Path
 
@@ -9,7 +9,7 @@
 当前模型路径规则：
 
 - `[]`：document。
-- `[blockIndex]`：paragraph。
+- `[blockIndex]`：顶层 block，当前支持 paragraph、heading 和 quote。
 - `[blockIndex, textIndex]`：text。
 
 API：
@@ -40,7 +40,7 @@ API：
 - `isValidPoint(document, point)`：point 必须指向 text 节点，偏移必须为 `0..text.length` 的整数。
 - `comparePoint(left, right)`：按路径和偏移比较，返回 `-1 | 0 | 1`。
 
-当前 point 不允许落在 document 或 paragraph 上。
+当前 point 不允许落在 document 或 block 上。
 
 ## RangeSelection
 
@@ -69,8 +69,8 @@ API：
 
 文本读取规则：
 
-- 同一 paragraph 内的 text 节点直接拼接。
-- 跨 paragraph 时用 `\n` 表示段落边界。
+- 同一 block 内的 text 节点直接拼接。
+- 跨 block 时用 `\n` 表示块边界。
 - 反向范围会先规范化。
 - 如果范围中任一点非法，会抛出 `RangeError`。
 
@@ -82,10 +82,10 @@ API：
 - 展示选区 JSON。
 - 展示 anchor 路径对应的模型节点。
 - 在文档 JSON 映射中高亮 anchor 路径对应节点。
+- 在渲染区改变浏览器选区时同步更新模型选区。
 
 ## 当前限制
 
-- 不包含浏览器选区同步。
-- 不包含 DOM 到模型的映射。
 - 不修改文档结构，只提供查询和纯文本切片。
-- 当前路径规则和第一版文档模型绑定，后续块类型扩展后需要同步更新。
+- 当前只支持顶层连续 block 及其直接 text 子节点。
+- Point 只能定位 text 节点，暂不支持图片、表格等未来非文本节点。
