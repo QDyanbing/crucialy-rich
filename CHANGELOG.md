@@ -95,6 +95,8 @@
 - 新增中文“块类型混合”Demo、Heading/Quote 完整浏览器流程和独立 Block Type QA 报告。
 - 新增 `typecheck:packages`，逐个验证 core、React 和 Demo 声明的类型检查脚本，并纳入 `pnpm check`。
 - 新增混合 Block Type 状态和直接恢复正文的浏览器回归测试。
+- 新增通用 `getBlockTextOffset` 和 `getPointAtBlockTextOffset`，并保留旧 Paragraph 命名作为兼容别名。
+- 新增 heading/quote 块边界 DOM 映射，以及扩展块内 boolean mark、文字属性和链接的回归测试。
 
 ### 变更
 
@@ -134,12 +136,14 @@
 - 更新项目、Core 包、架构、Block Type、Command 和渲染文档，使其匹配 Quote 闭环状态。
 - 更新项目、Core 包、Operation、Command、History、渲染和第 13 周 QA 文档，使其匹配标题与引用闭环状态。
 - 更新架构、模型、Marks、Operation、输入、Command、History、渲染和 QA 文档，使其统一描述第 13 周累计能力。
+- 更新 Selection、渲染、Operation、Mark、文字属性、链接和 Command 文档，统一使用 paragraph/heading/quote 的通用 Block 契约。
 
 ### 修复
 
 - 修复 History 快照把 heading 和 quote 错误克隆为 paragraph，导致 Block Type 操作无法正确 undo/redo 的问题。
 - 修复 Demo 独立类型检查因 `rootDir` 与 workspace 源码路径冲突而失败的问题。
 - 修复标题选择器把引用或混合选区错误显示为正文，导致无法直接恢复 paragraph 的问题。
+- 修复 heading 和 quote 元素边界无法映射为模型选区的问题。
 
 ### 暂未包含
 
