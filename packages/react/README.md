@@ -2,7 +2,7 @@
 
 crucialy-rich 编辑内核的 React 集成包，对外暴露可集成的 React 富文本组件。
 
-> 当前处于早期阶段，`RichTextEditor` 已支持通过 `value` / `defaultValue` 渲染文档模型，并接入普通文本输入、Backspace、Delete 和 Enter；输入会通过 transaction 更新文档，并可通过 `onTransaction` 暴露给宿主记录 history。
+> 当前已完成基础编辑与受控集成闭环，`RichTextEditor` 支持通过 `value` / `defaultValue` 渲染文档模型，并接入普通文本输入、Backspace、Delete 和 Enter；输入会通过 transaction 更新文档，并可通过 `onTransaction` 暴露给宿主记录 history。
 
 ## 安装
 
