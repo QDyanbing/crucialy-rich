@@ -30,9 +30,9 @@
 
 ## 类型检查
 
-- 工具：TypeScript project references。
-- 范围：根工程、packages 和演示应用。
-- 命令：`pnpm typecheck`。
+- 工具：TypeScript。
+- 全仓范围：根工程、packages 和演示应用，命令为 `pnpm typecheck`。
+- 包级契约：逐个运行工作区项目声明的类型检查脚本，命令为 `pnpm typecheck:packages`。
 
 ## 代码质量
 
