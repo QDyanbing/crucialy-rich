@@ -14,13 +14,13 @@ Command 系统负责把“可执行的编辑意图”包装成统一接口。当
 - 提供 `executeCommand` 按名称执行 command。
 - 提供 `queryCommandState` 读取 command 的 registered、disabled、active 和不可用原因。
 - 提供 `DEFAULT_COMMAND_SHORTCUTS`、`getCommandShortcuts` 和 `getCommandNameFromShortcut`，用于查询和匹配预留快捷键配置。
-- 提供 `boldCommand`，支持同一 paragraph 内的 range selection 加粗/取消加粗，以及 collapsed selection 的后续输入加粗占位。
-- 提供 `italicCommand`，支持同一 paragraph 内的 range selection 斜体/取消斜体，以及 collapsed selection 的后续输入斜体占位。
-- 提供 `underlineCommand`，支持同一 paragraph 内的 range selection 下划线/取消下划线，以及 collapsed selection 的后续输入下划线占位。
-- 提供 `strikeCommand`，支持同一 paragraph 内的 range selection 删除线/取消删除线，以及 collapsed selection 的后续输入删除线占位。
-- 提供 `setFontSizeCommand`，支持同一 paragraph 内设置或取消 `8–72px` 字号，以及 collapsed selection 的后续输入字号占位。
-- 提供 `setTextColorCommand`，支持同一 paragraph 内设置或取消安全十六进制文字颜色，以及 collapsed selection 的后续输入颜色占位。
-- 提供 `setBackgroundColorCommand`，支持同一 paragraph 内设置或取消安全十六进制背景色，以及 collapsed selection 的后续输入背景色占位。
+- 提供 `boldCommand`，支持同一 block 内的 range selection 加粗/取消加粗，以及 collapsed selection 的后续输入加粗占位。
+- 提供 `italicCommand`，支持同一 block 内的 range selection 斜体/取消斜体，以及 collapsed selection 的后续输入斜体占位。
+- 提供 `underlineCommand`，支持同一 block 内的 range selection 下划线/取消下划线，以及 collapsed selection 的后续输入下划线占位。
+- 提供 `strikeCommand`，支持同一 block 内的 range selection 删除线/取消删除线，以及 collapsed selection 的后续输入删除线占位。
+- 提供 `setFontSizeCommand`，支持同一 block 内设置或取消 `8–72px` 字号，以及 collapsed selection 的后续输入字号占位。
+- 提供 `setTextColorCommand`，支持同一 block 内设置或取消安全十六进制文字颜色，以及 collapsed selection 的后续输入颜色占位。
+- 提供 `setBackgroundColorCommand`，支持同一 block 内设置或取消安全十六进制背景色，以及 collapsed selection 的后续输入背景色占位。
 - 提供 `setHeadingCommand`，支持单块或多块设置 1–6 级标题、切换层级或恢复 paragraph，并保留模型选区。
 - 提供 `toggleQuoteCommand`，支持单块或多块统一切换 Quote 或恢复 paragraph，并保留模型选区。
 - 提供 `BLOCK_TYPE_COMMANDS`，集中暴露 Heading 与 Quote command，并由默认注册表统一装配。
@@ -202,7 +202,7 @@ const mergeBlockCommand: Command;
 - `underlineCommand` 成功时返回包含 `toggle_mark` 的 transaction，并根据当前 selection 覆盖的 text marks 返回 active 状态。
 - `strikeCommand` 成功时返回包含 `toggle_mark` 的 transaction，并根据当前 selection 覆盖的 text marks 返回 active 状态。
 - `setFontSizeCommand` 接受 `{ fontSize: number | null }`，成功时返回包含 `set_mark_attribute` 的 transaction；`null` 表示取消字号。
-- 字号只接受 `8–72` 的整数，非法值、缺失 payload 或跨 paragraph 选区不可执行。
+- 字号只接受 `8–72` 的整数，非法值、缺失 payload 或跨 block 选区不可执行。
 - `setTextColorCommand` 接受 `{ textColor: string | null }`；只允许 `#RGB` / `#RRGGBB`，`null` 表示取消文字颜色。
 - `setBackgroundColorCommand` 接受 `{ backgroundColor: string | null }`；使用相同颜色白名单，`null` 表示取消背景色。
 - `setHeadingCommand` 接受 `{ level: 1 | 2 | 3 | 4 | 5 | 6 | null }`；数字把全部命中 block 设为同级标题，`null` 恢复 paragraph，并返回 `set_block_type` transaction。
@@ -223,7 +223,7 @@ const mergeBlockCommand: Command;
 ## 当前限制
 
 - 文本插入和删除 command 当前只处理同一 text 节点内的 range selection。
-- Mark command 当前只处理同一 paragraph 内的 selection；跨 paragraph mark 应用留到后续阶段。
+- Mark command 当前处理 paragraph、heading、quote 中同一 block 内的 selection；跨 block mark 应用留到后续阶段。
 - split/merge block command 当前只处理 collapsed selection；heading/quote command 已支持 collapsed、单块 range 和跨 block range selection。
 - 当前没有快捷键事件绑定或权限系统；快捷键模块只提供可查询配置和纯匹配函数。
 - History 模块已提供 `undoCommand` 和 `redoCommand`；默认 Command 注册表暂不内置 history command。
