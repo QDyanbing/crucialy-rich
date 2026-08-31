@@ -5,7 +5,7 @@
 ## 已完成范围
 
 - `TEXT_STYLE_COMMANDS` 按字号、文字颜色、背景色统一组织三种 command，默认注册表直接复用该集合。
-- 三种属性可在同一 paragraph 内跨 text 节点设置和取消。
+- 三种属性可在 paragraph、heading、quote 中同一 block 内跨 text 节点设置和取消。
 - 反向选区会先规范化，再生成 `set_mark_attribute` operation。
 - 属性设置不会移除 bold、italic、underline 或 strike。
 - 单个属性取消时会保留其余文字属性。
@@ -43,5 +43,5 @@ pnpm test:e2e
 
 ## 当前边界
 
-- 三种文字属性 command 只处理同一个 paragraph 内的选区。
+- 三种文字属性 command 只处理同一个 block 内的选区。
 - React 组件不内置文字属性 toolbar，由宿主或 demo 调用 command。
