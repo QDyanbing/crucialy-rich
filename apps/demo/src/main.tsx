@@ -723,6 +723,12 @@ function DemoApp() {
       textColorValue,
     ],
   );
+  const selectedHeadingOption =
+    selectedHeadingLevel ??
+    (commandStates.find((command) => command.commandName === SET_HEADING_COMMAND_NAME)
+      ?.active
+      ? "paragraph"
+      : "mixed");
 
   function isCommandDisabled(name: CommandName) {
     return (
@@ -1320,9 +1326,12 @@ function DemoApp() {
               <select
                 aria-label="标题层级"
                 disabled={isCommandDisabled(SET_HEADING_COMMAND_NAME)}
-                value={selectedHeadingLevel ?? "paragraph"}
+                value={selectedHeadingOption}
                 onChange={handleHeadingChange}
               >
+                <option disabled value="mixed">
+                  引用或混合
+                </option>
                 <option value="paragraph">正文</option>
                 {HEADING_LEVEL_OPTIONS.map((level) => (
                   <option key={level} value={level}>

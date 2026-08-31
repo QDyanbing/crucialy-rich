@@ -98,11 +98,39 @@ test("renders the mixed block type acceptance sample", async ({ page }) => {
   await expect(renderedDocument.locator('p[data-crucialy-path="[3]"]')).toHaveText(
     "未选中的结尾段落保持原样。",
   );
-  await expect(page.getByLabel("标题层级")).toHaveValue("paragraph");
+  await expect(page.getByLabel("标题层级")).toHaveValue("mixed");
   await expect(page.getByRole("button", { name: "引用", exact: true })).toHaveAttribute(
     "aria-pressed",
     "false",
   );
+});
+
+test("restores the selected mixed blocks to paragraphs", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("block-types");
+
+  const headingSelect = page.getByLabel("标题层级");
+  const renderedDocument = page.getByLabel("已渲染文档");
+
+  await expect(headingSelect).toHaveValue("mixed");
+  await headingSelect.selectOption("paragraph");
+
+  await expect(renderedDocument.locator("h2")).toHaveCount(0);
+  await expect(renderedDocument.locator("blockquote")).toHaveCount(0);
+  await expect(
+    renderedDocument.locator('p[data-crucialy-path="[0]"] strong'),
+  ).toHaveText("项目概览");
+  await expect(renderedDocument.locator('p[data-crucialy-path="[1]"] em')).toHaveText(
+    "正文用于说明段落、标题与引用可以连续切换。",
+  );
+  await expect(renderedDocument.locator('p[data-crucialy-path="[2]"] u')).toHaveText(
+    "重要引用内容",
+  );
+  await expect(renderedDocument.locator('p[data-crucialy-path="[3]"]')).toHaveText(
+    "未选中的结尾段落保持原样。",
+  );
+  await expect(headingSelect).toHaveValue("paragraph");
+  await expect(page.getByLabel("模型校验状态")).toContainText("合法");
 });
 
 test("turns the selected mixed blocks into headings", async ({ page }) => {
