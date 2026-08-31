@@ -1,10 +1,13 @@
 export type { Path, Point, RangeSelection } from "./types";
 export { getNodeAtPath, hasNodeAtPath } from "./path";
 export {
+  getBlockTextOffset,
   getParagraphTextOffset,
+  getPointAtBlockTextOffset,
   getPointAtParagraphTextOffset,
 } from "./paragraph-offset";
 export type {
+  PointAtBlockTextOffsetOptions,
   PointAtParagraphTextOffsetOptions,
   TextOffsetAffinity,
 } from "./paragraph-offset";

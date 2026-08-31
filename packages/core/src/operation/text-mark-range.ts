@@ -6,8 +6,8 @@ import {
   type TextNode,
 } from "../model";
 import {
-  getParagraphTextOffset,
-  getPointAtParagraphTextOffset,
+  getBlockTextOffset,
+  getPointAtBlockTextOffset,
   isCollapsed,
   isValidPoint,
   normalizeRange,
@@ -42,7 +42,7 @@ export function getTextMarkRangeTarget(
     focusTextIndex === undefined ||
     anchorBlockIndex !== focusBlockIndex
   ) {
-    throw new RangeError(`${operationLabel} range must stay inside one paragraph`);
+    throw new RangeError(`${operationLabel} range must stay inside one block`);
   }
 
   return {
@@ -102,8 +102,8 @@ export function createSelectionAfterTextMarkChange(
   collapsedMarks: TextMarks | undefined,
   operationLabel: string,
 ): RangeSelection {
-  const startOffset = getParagraphTextOffset(document, target.range.anchor);
-  const endOffset = getParagraphTextOffset(document, target.range.focus);
+  const startOffset = getBlockTextOffset(document, target.range.anchor);
+  const endOffset = getBlockTextOffset(document, target.range.focus);
 
   if (startOffset === undefined || endOffset === undefined) {
     throw new RangeError(`${operationLabel} range must reference text nodes`);
@@ -117,7 +117,7 @@ export function createSelectionAfterTextMarkChange(
         startOffset,
         collapsedMarks,
       ) ??
-      getPointAtParagraphTextOffset(nextDocument, target.blockIndex, startOffset, {
+      getPointAtBlockTextOffset(nextDocument, target.blockIndex, startOffset, {
         affinity: "forward",
       });
 
@@ -134,18 +134,15 @@ export function createSelectionAfterTextMarkChange(
     };
   }
 
-  const anchor = getPointAtParagraphTextOffset(
+  const anchor = getPointAtBlockTextOffset(
     nextDocument,
     target.blockIndex,
     startOffset,
     { affinity: "forward" },
   );
-  const focus = getPointAtParagraphTextOffset(
-    nextDocument,
-    target.blockIndex,
-    endOffset,
-    { affinity: "backward" },
-  );
+  const focus = getPointAtBlockTextOffset(nextDocument, target.blockIndex, endOffset, {
+    affinity: "backward",
+  });
 
   if (!anchor || !focus) {
     throw new RangeError(`${operationLabel} selection cannot be mapped`);

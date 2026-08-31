@@ -3,15 +3,18 @@ import type { Point } from "./types";
 
 export type TextOffsetAffinity = "backward" | "forward";
 
-export interface PointAtParagraphTextOffsetOptions {
+export interface PointAtBlockTextOffsetOptions {
   affinity?: TextOffsetAffinity;
 }
+
+/** @deprecated Use PointAtBlockTextOffsetOptions. */
+export type PointAtParagraphTextOffsetOptions = PointAtBlockTextOffsetOptions;
 
 function isTextOffset(value: number): boolean {
   return Number.isInteger(value) && value >= 0;
 }
 
-export function getParagraphTextOffset(
+export function getBlockTextOffset(
   document: DocumentNode,
   point: Point,
 ): number | undefined {
@@ -34,11 +37,11 @@ export function getParagraphTextOffset(
   );
 }
 
-export function getPointAtParagraphTextOffset(
+export function getPointAtBlockTextOffset(
   document: DocumentNode,
   blockIndex: number,
   textOffset: number,
-  options: PointAtParagraphTextOffsetOptions = {},
+  options: PointAtBlockTextOffsetOptions = {},
 ): Point | undefined {
   if (!isTextOffset(textOffset)) {
     return undefined;
@@ -82,3 +85,9 @@ export function getPointAtParagraphTextOffset(
 
   return undefined;
 }
+
+/** @deprecated Use getBlockTextOffset. */
+export const getParagraphTextOffset = getBlockTextOffset;
+
+/** @deprecated Use getPointAtBlockTextOffset. */
+export const getPointAtParagraphTextOffset = getPointAtBlockTextOffset;

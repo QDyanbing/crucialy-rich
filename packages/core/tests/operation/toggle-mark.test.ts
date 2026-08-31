@@ -296,6 +296,6 @@ describe("applyToggleMark", () => {
           "bold",
         ),
       ),
-    ).toThrow("toggle mark range must stay inside one paragraph");
+    ).toThrow("toggle mark range must stay inside one block");
   });
 });

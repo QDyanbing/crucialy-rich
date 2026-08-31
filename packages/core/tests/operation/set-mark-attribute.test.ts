@@ -233,10 +233,10 @@ describe("set mark attribute operation", () => {
     );
 
     expect(() => applySetMarkAttribute(document, operation)).toThrow(
-      "set mark attribute range must stay inside one paragraph",
+      "set mark attribute range must stay inside one block",
     );
     expect(() => createSelectionAfterSetMarkAttribute(document, operation)).toThrow(
-      "set mark attribute range must stay inside one paragraph",
+      "set mark attribute range must stay inside one block",
     );
   });
 
