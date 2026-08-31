@@ -1,8 +1,8 @@
-# QA：输入事件（第一版）
+# QA：输入事件闭环
 
 ## 范围
 
-验证 `beforeinput insertText`、collapsed selection 下的 Backspace、collapsed selection 下的 Delete 和 collapsed selection 下的 Enter 能通过 transaction 更新模型，而不是直接信任浏览器 DOM 修改结果。
+验证 `beforeinput insertText`、Backspace、Delete 和 collapsed selection 下的 Enter 能通过 command/transaction 更新模型，而不是直接信任浏览器 DOM 修改结果；同时覆盖同一 text 内的 range 替换/删除、History 记录和 paragraph/heading/quote 类型保持。
 
 ## 自动化测试
 
@@ -10,8 +10,11 @@
 - `packages/core/tests/input/backspace.test.ts`：Backspace 转换为 `delete_text` 或 `merge_block` transaction、段中删除、段首合并、空段删除、首段开头 no-op 和 selection 落点。
 - `packages/core/tests/input/delete.test.ts`：Delete 转换为 `delete_text` 或 `merge_block` transaction、段中删除、段尾合并、空段删除、末段结尾 no-op 和 selection 落点。
 - `packages/core/tests/input/enter.test.ts`：Enter 转换为 `split_block` transaction、段首/段中/段尾/空段分裂、非折叠 selection no-op 和 selection 落点。
-- `packages/react/tests/public-api.test.ts`：可编辑状态会暴露为 `aria-readonly="false"`。
-- `tests/e2e/demo-shell.spec.ts`：演示页真实输入单字符、连续输入、Backspace 段中删除、Backspace 段首合并、Backspace 合并后继续输入、Delete 段中删除、Delete 段尾合并、Enter 分段、Enter 后继续输入、输入/Enter/Delete 组合编辑和空段 Enter 后，文档 JSON 与选区 JSON 同步更新。
+- `packages/core/tests/command/insert-text.test.ts`：collapsed 插入和同一 text range 替换。
+- `packages/core/tests/command/delete-selection.test.ts`：同一 text range 的 Backspace/Delete 共用删除命令。
+- `packages/core/tests/command/block-type-interaction.test.ts`：Block Type 切换后继续输入，文字、marks 和选区保持稳定。
+- `packages/react/tests/public-api.test.ts`：可编辑语义、输入 transaction 与组件回调契约。
+- `tests/e2e/demo-shell.spec.ts`：真实输入、range 删除、Backspace/Delete 合并、Enter 分段、Quote 内输入/删除/换行、History 和组合编辑。
 
 命令：
 
@@ -32,6 +35,8 @@ pnpm test:e2e
 | 非可编辑渲染   | 不传 `contentEditable`                 | 不处理输入，保持只读语义          | 通过 |
 | 可编辑语义     | 传入 `contentEditable`                 | 根节点 `aria-readonly` 为 `false` | 通过 |
 | 连续输入稳定性 | 输入两个中文字符                       | 第二个字符插入到第一个字符之后    | 通过 |
+| 选区替换       | 同一 text 内选中文字后输入             | 先删除选区，再插入输入文字        | 通过 |
+| 选区删除       | 同一 text 内选中文字后按删除键         | 删除选区并折叠到起点              | 通过 |
 | 段中 Backspace | 光标在 text 节点中间按 Backspace       | 删除光标前一个字符                | 通过 |
 | 段首 Backspace | 第二段开头按 Backspace                 | 当前段合并到上一段                | 通过 |
 | 空段 Backspace | 空段开头按 Backspace                   | 空段被并入上一段                  | 通过 |
@@ -47,18 +52,18 @@ pnpm test:e2e
 | Enter 后输入   | Enter 后继续输入文字                   | 文本进入新段开头                  | 通过 |
 | 组合编辑       | 输入文字后 Enter，再输入并按 Delete    | 文档分段、删除和选区都稳定        | 通过 |
 | 合并后输入     | 第二段段首 Backspace 后继续输入        | 合并段落保持合法并继续插入文本    | 通过 |
+| Quote 输入     | Quote 内输入、删除并按 Enter           | Quote 类型、文字和选区保持稳定    | 通过 |
+| History        | 执行真实输入后撤销和重做               | 文档、Block Type 和选区正确往返   | 通过 |
 
 ## 当前限制
 
-- 仅支持普通 `insertText`、collapsed selection 下的 Backspace、collapsed selection 下的 Delete 和 collapsed selection 下的 Enter。
-- 非折叠 selection 暂不替换选中内容。
+- 普通 `insertText` 和 Backspace/Delete 的非折叠 selection 当前要求落在同一 text 节点内。
 - 粘贴和 IME composition 尚未接入。
-- Backspace 暂不处理非折叠 selection、跨 text 删除或 inline text 节点合并。
-- Delete 暂不处理非折叠 selection、跨 text 删除或 inline text 节点合并。
-- Enter 暂不处理非折叠 selection，也不复制 marks 或 block attributes。
-- 当前不记录 undo/redo 或 history。
-- 输入行为暂只覆盖 paragraph 内 text 节点。
+- Backspace/Delete 暂不处理跨 text 或跨 block range 删除。
+- Enter 暂不处理非折叠 selection；collapsed Enter 会继承当前 Block Type、heading level 和 text marks。
+- React 组件通过 `onTransaction` 暴露记录入口，但 History 状态仍由宿主维护。
+- 空 Quote 自动退出、粘贴解析和 IME composition 完整生命周期仍未实现。
 
 ## 结论
 
-`beforeinput insertText`、Backspace、Delete 和 Enter 第一版已经闭环：真实输入会转换为 transaction，更新模型并同步选区；基础编辑闭环验收已经完成，下一步进入第 7 周 Day 1「Command 基础接口」。
+`beforeinput insertText`、Backspace、Delete 和 Enter 已经接入 Command、Transaction、History 和 Block Type 流程。当前已验证 paragraph、heading 和 quote 中的基础输入与选区稳定性，后续输入工作集中在跨节点删除、粘贴和 IME。

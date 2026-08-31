@@ -2,7 +2,7 @@
 
 ## 范围
 
-验证 `insert_text`、`delete_text`、`toggle_mark`、`set_mark_attribute`、`split_block`、`merge_block` operation 和 transaction 的创建、应用、边界处理、操作后选区计算、摘要、闭环验收报告和演示调试入口。
+验证 `insert_text`、`delete_text`、`toggle_mark`、`set_mark_attribute`、`set_link`、`set_block_type`、`split_block`、`merge_block` operation 和 transaction 的创建、应用、边界处理、操作后选区计算、摘要、闭环验收报告和演示调试入口。
 
 ## 自动化测试
 
@@ -10,6 +10,8 @@
 - `packages/core/tests/operation/delete-text.test.ts`：operation 创建、path 复制、段首/段中/段尾删除、反向 range、非法 range、折叠 range no-op 和删除后 selection。
 - `packages/core/tests/operation/toggle-mark.test.ts`：operation 创建、path 复制、同 paragraph range 切换、collapsed mark 占位、相邻同 marks text 合并、非法 range 和切换后 selection。
 - `packages/core/tests/operation/set-mark-attribute.test.ts`：属性设置、覆盖、取消、非法值、collapsed 占位、跨 text、合并和 selection 映射。
+- `packages/core/tests/operation/set-link.test.ts`：安全链接设置、覆盖、取消、跨 text、marks 保留和 selection 映射。
+- `packages/core/tests/operation/set-block-type.test.ts`：paragraph、heading、quote 切换、标题层级、path 校验和 children 保留。
 - `packages/core/tests/operation/split-block.test.ts`：operation 创建、path 复制、段首/段中/段尾分段、多 text children、非法 point 和分段后 selection。
 - `packages/core/tests/operation/merge-block.test.ts`：operation 创建、path 复制、普通段落合并、空段落合并、非法 point 和合并后 selection。
 - `packages/core/tests/operation/transaction.test.ts`：transaction 创建、operation 分发、批量应用、结束 normalize 和失败不污染原文档。
@@ -56,15 +58,17 @@ pnpm test:e2e
 | 创建属性操作     | 调用 `createSetMarkAttributeOperation`   | 返回 `set_mark_attribute` 操作对象    | 通过 |
 | 设置和取消字号   | 对选区设置字号或传入 `null`              | 只更新 `fontSize` 并保留其他 mark     | 通过 |
 | 属性操作后选区   | 调用对应 selection helper                | 切分与合并后 selection 仍覆盖原文字   | 通过 |
+| 设置和取消链接   | 对选区设置 Link Mark 或传入 `null`       | 链接更新且其他 marks 保持不变         | 通过 |
+| 切换 Block Type  | paragraph、heading、quote 互相切换       | 文字、marks 和 block path 保持不变    | 通过 |
 | 创建 split 操作  | 调用 `createSplitBlockOperation`         | 返回 `type: "split_block"` 的操作对象 | 通过 |
-| 段中分段         | point 位于 text 中间                     | paragraph 拆成前后两个 paragraph      | 通过 |
+| Block 中分段     | point 位于 text 中间                     | 拆成两个同类型 block                  | 通过 |
 | 段首分段         | offset 为 `0`                            | 前一段为空，后一段保留原文本          | 通过 |
 | 段尾分段         | offset 等于 `text.length`                | 前一段保留原文本，后一段为空          | 通过 |
 | 多 text 分段     | point 位于 paragraph 的中间 text         | point 左右 children 分配到两侧        | 通过 |
 | 分段后选区       | 调用 `createSelectionAfterSplitBlock`    | selection 折叠到新 paragraph 开头     | 通过 |
 | 演示分段         | 设置光标后点击“分段”                     | 文档 JSON、渲染预览和最近操作同步更新 | 通过 |
 | 创建 merge 操作  | 调用 `createMergeBlockOperation`         | 返回 `type: "merge_block"` 的操作对象 | 通过 |
-| 普通段落合并     | 第二段段首执行 merge                     | 第二段并入第一段                      | 通过 |
+| 普通 Block 合并  | 第二个 block 开头执行 merge              | 并入前一个 block 并保留前块类型       | 通过 |
 | 空段落合并       | 空段落和非空段落执行 merge               | 去掉无意义空 text                     | 通过 |
 | 非法 merge       | 首段或非段首 point 执行 merge            | 抛出 `RangeError`                     | 通过 |
 | 合并后选区       | 调用 `createSelectionAfterMergeBlock`    | selection 折叠到原上一段末尾          | 通过 |
@@ -81,14 +85,13 @@ pnpm test:e2e
 
 ## 当前限制
 
-- 当前覆盖 `insert_text`、同 text 节点内的 `delete_text`、同 paragraph 内的 `toggle_mark` 和 `set_mark_attribute`、paragraph 级 `split_block` 和 `merge_block`。
-- 非折叠选区不会替换选中内容。
+- 当前覆盖全部八种已注册 operation；单条 `set_block_type` 只处理一个顶层 block，多块命令会组合多条 operation。
 - 删除暂不支持跨 text 节点或跨 paragraph range。
 - 合并暂不支持批量跨多段合并。
-- transaction 当前不包含 inverse、撤销重做或回滚事件对象。
+- transaction 当前不生成 inverse；History 使用 before/after 快照提供撤销重做。
 - 普通 `beforeinput insertText`、collapsed selection 下的 Backspace、collapsed selection 下的 Delete 和 collapsed selection 下的 Enter 已接入输入事件管线，并已完成基础编辑闭环验收。
 - 失败保护依赖 operation 不可变返回新文档。
 
 ## 结论
 
-`insert_text`、`delete_text`、`toggle_mark`、`set_mark_attribute`、`split_block`、`merge_block` 和 transaction 的核心模型操作、测试、摘要与验收报告已闭环；基础输入、boolean mark 和字号 demo 操作均进入可验证管线。
+八种 operation 和 transaction 的核心模型操作、测试、摘要与验收报告已闭环；文本、marks、Link、Block Type、输入和 History 均进入同一条可验证管线。
