@@ -1,9 +1,9 @@
-# 脚手架验收
+# 脚手架验收基线
 
-本次初始化的验收目标：
+本文记录仓库初始化阶段的历史验收基线，不代表当前功能范围。初始化时的验收目标：
 
 - 工作区目录存在。
-- `packages/core` 和 `packages/react` 有可构建入口，但不包含编辑器实现逻辑。
+- `packages/core` 和 `packages/react` 有可构建入口，初始化阶段不包含编辑器实现逻辑。
 - `apps/demo` 可以启动调试页面。
 - TypeScript、Vitest、Playwright、ESLint、Prettier 和 commitlint 配置存在。
 - `pnpm check` 可以作为本地质量门禁。
@@ -23,4 +23,4 @@ pnpm test:e2e:install
 pnpm test:e2e
 ```
 
-最终结果以最近一次执行记录为准。
+当前累计能力与最新质量门禁以根目录 README、功能文档和对应 QA 文档为准。

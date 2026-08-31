@@ -135,7 +135,7 @@ pnpm test:e2e
 - [History 记录与撤销重做](./docs/features/history.md)
 - [提交规范](./docs/development/commit-convention.md)
 - [测试策略](./docs/qa/test-strategy.md)
-- [脚手架验收](./docs/qa/scaffold-acceptance.md)
+- [脚手架验收基线](./docs/qa/scaffold-acceptance.md)
 - [第 1 周 QA](./docs/qa/week-01.md)
 - [第 2 周 QA](./docs/qa/week-02.md)
 - [第 3 周 QA](./docs/qa/week-03.md)
