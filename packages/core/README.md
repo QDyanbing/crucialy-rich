@@ -2,7 +2,7 @@
 
 自研富文本编辑内核，不依赖 ProseMirror、Tiptap、Lexical、Slate 作为运行时内核。
 
-> 当前已完成第 1–13 周基础能力闭环，提供 paragraph、heading、quote 文档模型、1–6 级 heading 与 quote 语义渲染和单块/多块 command、四种 boolean marks 闭环、三种文字属性闭环、结构化 Link Mark、安全链接 operation/command/渲染与交互、mark 快捷键配置查询、同一 paragraph 内跨 text 的 mark 切分与合并、模型选区、基础渲染器、DOM 与模型位置映射、选区双向同步、基础 operation 与 Transaction、输入 helper、Command 系统、默认 Command 注册表和 History 撤销重做。
+> 当前已完成第 1–13 周基础能力闭环，提供 paragraph、heading、quote 文档模型、1–6 级 heading 与 quote 语义渲染和单块/多块 command、四种 boolean marks 闭环、三种文字属性闭环、结构化 Link Mark、安全链接 operation/command/渲染与交互、mark 快捷键配置查询、同一 block 内跨 text 的 mark 切分与合并、模型选区、基础渲染器、DOM 与模型位置映射、选区双向同步、基础 operation 与 Transaction、输入 helper、Command 系统、默认 Command 注册表和 History 撤销重做。
 
 ## 安装
 
@@ -198,7 +198,7 @@ const shortcutCommandName = getCommandNameFromShortcut({
 - 链接标记：`LinkMarkAttributes`、`LinkTarget`、`LinkRelToken`、`LINK_PROTOCOLS`、`LINK_TARGETS`、`LINK_REL_TOKENS`、`sanitizeLinkHref`、`normalizeLinkTarget`、`normalizeLinkRel`、`normalizeLinkMark`、`isValidLinkMark`、`areLinkMarksEqual`、`getLinkMark`、`setLinkMark`、`removeLinkMark`。
 - 链接功能命名空间：`link` 集中提供 Link Mark、安全处理、`set_link` operation 和链接 command；原有平铺导出保持可用。
 - 校验和修复：`validateDocument`、`normalizeDocument`。
-- 选区：`Path`、`Point`、`RangeSelection`、`cloneRangeSelection`、`getNodeAtPath`、`isValidPoint`、`normalizeRange`、`getParagraphTextOffset`、`getPointAtParagraphTextOffset`、`getTextInRange`、`splitTextByRange`、`getSelectedBlockIndexes`、`doSelectedBlocksMatch`。
+- 选区：`Path`、`Point`、`RangeSelection`、`cloneRangeSelection`、`getNodeAtPath`、`isValidPoint`、`normalizeRange`、`getBlockTextOffset`、`getPointAtBlockTextOffset`、`getTextInRange`、`splitTextByRange`、`getSelectedBlockIndexes`、`doSelectedBlocksMatch`；旧 `ParagraphTextOffset` 名称保留为兼容别名。
 - 基础渲染：`renderDocument`、`renderNodeToHtml`、`MODEL_PATH_ATTRIBUTE`、`encodeModelPath`、`decodeModelPath`。
 - DOM 映射：`domPointToModelPoint`、`modelPointToDomPoint`、`findElementByModelPath`、`findClosestModelPathElement`。
 - 选区同步：`domSelectionToModelSelection`、`createDomRangeFromModelSelection`、`applyModelSelectionToDom`。
