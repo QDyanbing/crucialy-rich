@@ -7,7 +7,7 @@
 ## 自动化测试
 
 - `packages/core/tests/render/attributes.test.ts`：模型路径属性编码、解码和非法输入。
-- `packages/core/tests/render/dom-mapping.test.ts`：DOM 位置和模型位置双向映射、非法输入和根节点 helper。
+- `packages/core/tests/render/dom-mapping.test.ts`：DOM 位置和模型位置双向映射、paragraph/heading/quote 块边界、非法输入和根节点 helper。
 - `packages/core/tests/render/render.test.ts`：document、paragraph、1–6 级 heading、quote、四种 boolean mark、文字属性、Link Mark、组合样式和渲染边界。
 - `packages/core/tests/render/html.test.ts`：语义标签、样式与链接 HTML 序列化、组合 marks 和文本转义。
 - `packages/core/tests/public-api.test.ts`：渲染公开 API 导出。
@@ -44,6 +44,7 @@ pnpm test:e2e
 | React 组合样式 | 在组件中渲染四种 mark 组合   | style 对象被 React 接受且输出合法 CSS   | 通过 |
 | DOM 到模型     | 传入 text 节点和偏移         | 返回对应模型位置                        | 通过 |
 | 模型到 DOM     | 传入模型位置                 | 返回对应 DOM 节点和偏移                 | 通过 |
+| Block 边界映射 | 传入段落、标题或引用元素边界 | 返回对应 block 的首尾模型位置           | 通过 |
 
 ## 当前限制
 

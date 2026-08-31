@@ -93,8 +93,8 @@ interface RenderedElementNode {
 
 - text 节点内的偏移映射到对应的 text 模型节点。
 - 空 text 没有文本 DOM 节点时，落在对应 `span` 元素的偏移 `0`。
-- paragraph 元素的偏移 `0` 映射到段首。
-- paragraph 元素的末尾偏移映射到段尾。
+- paragraph、heading 或 quote 元素的偏移 `0` 映射到块首。
+- paragraph、heading 或 quote 元素的末尾偏移映射到块尾。
 - 非法 DOM 偏移、没有模型路径的 DOM 节点、非法模型位置都返回 `undefined`。
 
 ## 边界渲染
@@ -103,7 +103,7 @@ interface RenderedElementNode {
 
 - 空 document 渲染为带根路径的空 `div`。
 - 空 paragraph 渲染为带路径的空 `p`。
-- 多段落按块顺序分配 `[0]`、`[1]`、`[2]` 等路径。
+- 多个 block 按文档顺序分配 `[0]`、`[1]`、`[2]` 等路径。
 - heading 按 level 输出 `h1`–`h6`，继续保留 block path 和 text path。
 - quote 输出 `blockquote`，继续保留 block path 和 text path。
 - 加粗 text 渲染为带 text path 的 `strong`，斜体 text 渲染为带 text path 的 `em`，不改变 DOM 与模型路径对应关系。
@@ -130,6 +130,6 @@ interface RenderedElementNode {
 
 ## 当前限制
 
-- 浏览器选区同步当前只覆盖已验证的基础场景。
-- 不处理 `contentEditable`、`beforeinput` 或真实编辑行为。
+- 浏览器选区同步覆盖当前 paragraph、heading、quote 的直接 text 结构；复杂内联节点留待后续节点扩展时验证。
+- 纯 renderer 不处理 `contentEditable`、`beforeinput` 或真实编辑行为；这些能力由 React 集成、输入 helper 和 command 层负责。
 - 当前包含标题、引用、四种 boolean mark、字号、文字颜色、背景色和链接渲染；列表等扩展节点尚未实现。

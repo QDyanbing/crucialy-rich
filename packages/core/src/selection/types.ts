@@ -3,7 +3,7 @@
  *
  * 当前模型层级为：
  * - []：document
- * - [blockIndex]：paragraph
+ * - [blockIndex]：block
  * - [blockIndex, textIndex]：text
  */
 export type Path = number[];
