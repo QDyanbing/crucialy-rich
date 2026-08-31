@@ -75,6 +75,10 @@
 - 新增 HTTP、HTTPS、mailto URL sanitize，以及 target 和 rel 白名单规范化。
 - 新增 Link Mark helper、文档校验、规范化、节点合并、编辑保留和 History 深拷贝测试。
 - 新增 Link Mark 功能文档和第 12 周进度 QA。
+- 新增 `set_link` operation、`setLink` / `unsetLink` command 和链接选中状态读取。
+- 新增安全 `<a>` 渲染、编辑态点击拦截、只读态原生跳转和编辑/只读链接样例。
+- 新增链接菜单选区保存与恢复，支持创建、编辑、取消和危险协议拦截。
+- 新增 `core.link` 功能命名空间、链接 History 生命周期、中文 Demo 与第 12 周闭环 QA。
 - 新增 paragraph、1–6 级 heading 和 quote Block Type schema、工厂、守卫、校验与规范化。
 - 新增 `set_block_type` operation，并接入 Transaction、operation 摘要、验收报告和公共 API。
 - 新增 Block Type 设计文档和第 13 周 Day 1 QA 记录。
@@ -89,6 +93,8 @@
 - 新增多块标题与引用 Demo 浏览器验收、切换规则文档，并更新第 13 周 Day 4 QA 进度。
 - 新增 `BLOCK_TYPE_COMMANDS`、共享 Block Type command helper、默认注册表与 History 生命周期验收。
 - 新增中文“块类型混合”Demo、Heading/Quote 完整浏览器流程和独立 Block Type QA 报告。
+- 新增 `typecheck:packages`，逐个验证 core、React 和 Demo 声明的类型检查脚本，并纳入 `pnpm check`。
+- 新增混合 Block Type 状态和直接恢复正文的浏览器回归测试。
 
 ### 变更
 
@@ -127,10 +133,13 @@
 - 更新项目、Core 包、架构、Block Type、Command 和渲染文档，使其匹配 Heading 闭环状态。
 - 更新项目、Core 包、架构、Block Type、Command 和渲染文档，使其匹配 Quote 闭环状态。
 - 更新项目、Core 包、Operation、Command、History、渲染和第 13 周 QA 文档，使其匹配标题与引用闭环状态。
+- 更新架构、模型、Marks、Operation、输入、Command、History、渲染和 QA 文档，使其统一描述第 13 周累计能力。
 
 ### 修复
 
 - 修复 History 快照把 heading 和 quote 错误克隆为 paragraph，导致 Block Type 操作无法正确 undo/redo 的问题。
+- 修复 Demo 独立类型检查因 `rootDir` 与 workspace 源码路径冲突而失败的问题。
+- 修复标题选择器把引用或混合选区错误显示为正文，导致无法直接恢复 paragraph 的问题。
 
 ### 暂未包含
 

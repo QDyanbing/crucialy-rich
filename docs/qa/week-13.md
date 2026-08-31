@@ -62,7 +62,7 @@
 - 补齐默认注册表执行、Heading/Quote 连续交互和 History undo/redo 生命周期测试。
 - 修复 History 快照把 heading/quote 降级为 paragraph 的问题，快照现已保留全部当前 Block Type 和 heading level。
 - Demo 新增中文“块类型混合”样例，包含标题、正文、引用和未选中结尾段落。
-- Playwright 覆盖混合样例渲染、统一设置标题、统一开启/取消引用、marks 保留和未选中块稳定性。
+- Playwright 覆盖混合样例状态表达、直接恢复正文、统一设置标题、统一开启/取消引用、marks 保留和未选中块稳定性。
 - 新增 `docs/qa/block-type.md` 独立闭环验收报告。
 
 ## 自动化覆盖
