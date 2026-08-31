@@ -1,26 +1,29 @@
 # 输入事件（第一版）
 
-输入事件负责把浏览器编辑意图转换为模型 transaction。当前阶段已接入 `beforeinput insertText`、collapsed selection 下的 Backspace、collapsed selection 下的 Delete 和 collapsed selection 下的 Enter。
+输入事件负责把浏览器编辑意图转换为模型 transaction。当前阶段已接入 `beforeinput insertText`、Backspace、Delete 和 collapsed selection 下的 Enter；同一个 text 节点内的非折叠选区可以通过输入或删除命令完成替换与删除。
 
 ## 当前范围
 
 - 监听 `beforeinput`。
 - 支持 `insertText` 文本输入。
+- collapsed selection 直接插入；同一 text 内的非折叠 selection 先删除选区再插入。
 - 使用 DOM Selection 转换得到模型 `RangeSelection`。
 - 使用 `createInsertTextInputTransaction` 创建 transaction。
 - 使用 `applyTransaction` 更新文档模型。
 - 通过 `onChange` 输出最新 `DocumentNode`。
 - 输入后通过 `createSelectionAfterInsertTextInput` 计算新的折叠选区。
 - 支持 collapsed selection 下的 Backspace。
+- 支持同一 text 内非折叠 selection 的 Backspace 删除。
 - 段中 Backspace 会删除光标前一个字符。
 - 段首 Backspace 会合并上一段。
 - Backspace 后通过 `createSelectionAfterBackspaceInput` 计算新的折叠选区。
 - 支持 collapsed selection 下的 Delete。
+- 支持同一 text 内非折叠 selection 的 Delete 删除。
 - 段中 Delete 会删除光标后一个字符。
 - 段尾 Delete 会合并下一段。
 - Delete 后通过 `createSelectionAfterDeleteInput` 计算新的折叠选区。
 - 支持 collapsed selection 下的 Enter。
-- 段首、段中、段尾和空段 Enter 会分裂 paragraph。
+- block 首部、中间、尾部和空 block Enter 会分裂当前 block，并保留 block type、heading level 和 text marks。
 - Enter 后通过 `createSelectionAfterEnterInput` 计算新的折叠选区。
 
 ## 数据流
@@ -111,7 +114,7 @@ function createSelectionAfterEnterInput(input: EnterInput): RangeSelection;
 
 当前 `createEnterInputTransaction` 会根据 collapsed selection 位置创建：
 
-- `split_block`：在当前 text 节点 offset 处分裂 paragraph。
+- `split_block`：在当前 text 节点 offset 处分裂 block，并保留原 block 类型和 text marks。
 - 空 transaction：selection 非折叠时。
 
 ## React 行为
@@ -126,6 +129,7 @@ function createSelectionAfterEnterInput(input: EnterInput): RangeSelection;
 - `onKeyDown`：宿主可先拦截撤销/重做快捷键；若外部已 `preventDefault`，内部不再执行普通输入处理。
 - `onBeforeInput`：仍会先调用外部回调，若外部已 `preventDefault`，内部不再处理。
 - 普通文本输入复用 `insertTextCommand`。
+- 同一 text 内的非折叠普通文本输入会先删除选区，再插入输入文本。
 - 非折叠 selection 下的 Backspace/Delete 复用 `deleteSelectionCommand`。
 - Enter 复用 `splitBlockCommand`。
 - 段首 Backspace 复用 `mergeBlockCommand`。
@@ -164,11 +168,9 @@ function createSelectionAfterEnterInput(input: EnterInput): RangeSelection;
 
 ## 当前限制
 
-- 仅支持普通 `insertText`、collapsed selection 下的 Backspace、collapsed selection 下的 Delete 和 collapsed selection 下的 Enter。
-- 非折叠选区当前不会替换选中内容，只使用规范化后的起点插入。
+- 普通 `insertText` 支持 collapsed selection 和同一 text 节点内的非折叠 selection；跨 text 或跨 block 替换尚未实现。
 - 暂不处理粘贴、拖拽或格式输入。
-- Backspace 暂不处理非折叠 selection、跨 text 删除或 inline text 节点合并。
-- Delete 暂不处理非折叠 selection、跨 text 删除或 inline text 节点合并。
-- Enter 暂不处理非折叠 selection，也不复制 marks 或 block attributes。
+- Backspace 和 Delete 支持同一 text 内的非折叠 selection，暂不处理跨 text 或跨 block 删除。
+- Enter 暂不处理非折叠 selection；collapsed Enter 会保留当前 block type、heading level 和 text marks。
 - 暂不处理 IME composition 的完整生命周期。
 - 组件本身不持有 history 状态，撤销重做快捷键需要宿主接入 history 状态。

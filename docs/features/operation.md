@@ -120,6 +120,18 @@ interface TransactionAcceptanceReport {
 - 折叠 range 返回原文档引用。
 - range 任一点不指向 text 节点、offset 越界或跨 text 节点时抛出 `RangeError`。
 
+## 创建和应用 Boolean Mark 操作
+
+使用 `createToggleMarkOperation(range, mark)` 创建操作，使用 `applyToggleMark(document, operation)` 返回更新后的文档。
+
+当前规则：
+
+- range 必须落在同一个 paragraph 内，支持跨多个 text 节点和反向选区。
+- 非折叠 range 会按边界切分 text，统一切换目标 mark，并合并相邻同 marks 节点。
+- collapsed range 会创建带目标 mark 的空 text，后续输入可以继承该 mark。
+- 非法 mark、非法 point 或跨 paragraph range 会抛出 `RangeError`。
+- `createSelectionAfterToggleMark` 会在切分和合并后重新映射选区。
+
 ## 创建和应用属性 Mark 操作
 
 使用 `createSetMarkAttributeOperation(range, attribute, value)` 创建操作，使用 `applySetMarkAttribute(document, operation)` 返回更新后的新文档。
@@ -132,6 +144,18 @@ interface TransactionAcceptanceReport {
 - `value: null` 会移除目标属性，同时保留其他 mark。
 - 非法属性值、非法 point 或跨 paragraph range 会抛出 `RangeError`。
 - `createSelectionAfterSetMarkAttribute` 会在切分和合并后重新映射选区。
+
+## 创建和应用链接操作
+
+使用 `createSetLinkOperation(range, link)` 创建操作，使用 `applySetLink(document, operation)` 返回更新后的文档。
+
+当前规则：
+
+- range 必须是同一个 paragraph 内的非折叠文字选区，支持跨多个 text 节点和反向选区。
+- `link` 会在创建和应用阶段执行 href、target 与 rel 安全校验；`null` 表示取消链接。
+- 设置、覆盖或取消链接时会保留其他 boolean mark 和文字属性。
+- 应用后会合并相邻同 marks 节点，并通过 `createSelectionAfterSetLink` 重新映射选区。
+- 非法链接、collapsed range、非法 point 或跨 paragraph range 会抛出 `RangeError`。
 
 ## 创建和应用 Block Type 操作
 
@@ -161,7 +185,8 @@ interface TransactionAcceptanceReport {
 当前规则：
 
 - 支持在 text 节点段首、段中和段尾分段。
-- 支持 paragraph 内有多个 text 节点，分段点左侧留在原 paragraph，右侧进入新 paragraph。
+- 支持 paragraph、heading 和 quote 内有多个 text 节点，分段点左侧留在原 block，右侧进入同类型的新 block。
+- 分段会保留原 block type、heading level、text marks 和文字顺序。
 - 不会修改传入的原始文档对象。
 - `point` 不指向 text 节点或 offset 越界时抛出 `RangeError`。
 
@@ -177,10 +202,10 @@ interface TransactionAcceptanceReport {
 
 当前规则：
 
-- 当前 paragraph 合并到前一个 paragraph。
+- 当前 block 合并到前一个 block，合并结果保留前一个 block 的类型和 heading level。
 - `point` 必须位于非首段第一个 text 节点的 offset `0`。
-- 空 paragraph 与非空 paragraph 合并时，会去掉无意义的空 text。
-- 两个空 paragraph 合并后保留一个空 text，保证 paragraph 可继续表达光标位置。
+- 空 block 与非空 block 合并时，会去掉无意义的空 text。
+- 两个空 block 合并后保留一个空 text，保证 block 可继续表达光标位置。
 - 不会修改传入的原始文档对象。
 - 首段、非段首 point 或非法 point 会抛出 `RangeError`。
 
@@ -276,7 +301,7 @@ interface TransactionAcceptanceReport {
 
 规则：
 
-- path 落到新 paragraph 的第一个 text 节点。
+- path 落到新 block 的第一个 text 节点。
 - offset 为 `0`。
 - anchor 和 focus 落在同一点。
 
@@ -286,9 +311,9 @@ interface TransactionAcceptanceReport {
 
 规则：
 
-- path 落到原前一个 paragraph 的最后一个 text 节点。
-- offset 落在原前一个 paragraph 的末尾。
-- 前一个 paragraph 为空时，offset 为 `0`。
+- path 落到原前一个 block 的最后一个 text 节点。
+- offset 落在原前一个 block 的末尾。
+- 前一个 block 为空时，offset 为 `0`。
 - anchor 和 focus 落在同一点。
 
 ## 演示调试入口
@@ -308,10 +333,9 @@ interface TransactionAcceptanceReport {
 ## 当前限制
 
 - 当前实现 `insert_text`、同 text 节点内的 `delete_text`、同 paragraph 内的 `toggle_mark`、`set_mark_attribute` 和 `set_link`、单个顶层 block 的 `set_block_type`，以及 block 级 `split_block` 和 `merge_block`。
-- 插入非折叠选区时不会自动删除选中内容，当前插入点取 selection anchor。
 - 删除暂不支持跨 text 节点或跨 paragraph 范围。
 - 合并暂不支持跨多段批量合并。
 - 单条 `set_block_type` 仍只处理一个顶层 block；Heading/Quote command 已能在同一 transaction 中组合多条 operation 完成跨块切换，语义 renderer 已支持 `h1`–`h6` 与 `blockquote`。
 - transaction 当前只负责批量应用和结束 normalize；History 已使用快照策略提供撤销/重做，operation 层本身暂不生成 undo/redo inverse 信息。
 - text operation 会保留现有 text marks；`toggle_mark` 和 `set_mark_attribute` 已支持同 paragraph 内跨 text 切分与相邻同 marks 合并，跨 paragraph mark 范围留到后续阶段。
-- 普通 `beforeinput insertText`、collapsed selection 下的 Backspace、collapsed selection 下的 Delete 和 collapsed selection 下的 Enter 已接入输入事件管线，并复用当前 operation/transaction 更新模型。
+- 普通 `beforeinput insertText`、同 text 非折叠选区替换、Backspace、Delete 和 collapsed selection 下的 Enter 已接入输入事件管线，并复用当前 command、operation 和 transaction 更新模型。
