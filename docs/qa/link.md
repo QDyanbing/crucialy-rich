@@ -62,7 +62,7 @@ pnpm check:all
 
 ## 当前边界
 
-- 链接范围当前要求同一 paragraph 内的非折叠文字选区。
+- 链接范围当前要求同一 block 内的非折叠文字选区，当前支持 paragraph、heading 和 quote。
 - href 当前只接受绝对 HTTP、HTTPS 和 mailto 地址。
 - DOM 选区恢复使用规范化后的正向范围，不保留反向选择方向。
 - 通用浮层组件、站内相对链接和复杂跨 block 链接不在本周范围。

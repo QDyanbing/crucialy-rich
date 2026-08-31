@@ -84,7 +84,7 @@ interface SetLinkOperation {
 
 - 传入 Link Mark 时会先规范化，危险 href 会抛出 `RangeError`。
 - 传入 `null` 会取消选区内的链接。
-- 支持同一 paragraph 内跨多个 text 节点设置、覆盖和取消。
+- 支持 paragraph、heading、quote 中同一 block 内跨多个 text 节点设置、覆盖和取消。
 - 只修改选区覆盖的文字，并保留 boolean mark、字号和颜色。
 - `applySetLink` 会再次校验手工构造的 operation，不能绕过 href 安全规则。
 - `createSelectionAfterSetLink` 会在节点切分或合并后返回等价模型选区。
@@ -121,9 +121,9 @@ executeCommand(registry, UNSET_LINK_COMMAND_NAME, {
 });
 ```
 
-两条命令当前要求非折叠、同一 paragraph 内的有效文字选区。`setLink` 会拒绝不安全 payload；`unsetLink` 仅在选区至少覆盖一个 Link Mark 时可用。成功结果包含 `set_link` transaction 和重映射后的 selection，可直接接入 History。
+两条命令当前要求非折叠、同一 block 内的有效文字选区。`setLink` 会拒绝不安全 payload；`unsetLink` 仅在选区至少覆盖一个 Link Mark 时可用。成功结果包含 `set_link` transaction 和重映射后的 selection，可直接接入 History。
 
-`getSelectedLinkMark` 与 command 的执行条件不同：折叠光标位于链接文字中时也会返回 Link Mark。非折叠选区只有在所有有效文字节点拥有完全相同的 href、target 和 rel 时才返回结果；普通文字、不同目标链接、跨 paragraph 或非法选区均返回 `undefined`。
+`getSelectedLinkMark` 与 command 的执行条件不同：折叠光标位于链接文字中时也会返回 Link Mark。非折叠选区只有在所有有效文字节点拥有完全相同的 href、target 和 rel 时才返回结果；普通文字、不同目标链接、跨 block 或非法选区均返回 `undefined`。
 
 ## 渲染规则
 
@@ -163,6 +163,6 @@ executeCommand(registry, UNSET_LINK_COMMAND_NAME, {
 
 ## 当前边界
 
-- 链接范围当前要求同一 paragraph 内的非折叠文字选区。
+- 链接范围当前要求同一 block 内的非折叠文字选区，当前支持 paragraph、heading 和 quote。
 - href 当前只接受绝对 HTTP、HTTPS 和 mailto 地址。
 - DOM 选区恢复不保留反向选择方向。
