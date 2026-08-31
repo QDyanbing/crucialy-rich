@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { createDocument, createParagraph, createText } from "../../src/model";
+import {
+  createDocument,
+  createParagraph,
+  createQuote,
+  createText,
+} from "../../src/model";
 import {
   applySetMarkAttribute,
   createSelectionAfterSetMarkAttribute,
@@ -269,6 +274,27 @@ describe("set mark attribute operation", () => {
         type: "text",
       },
     );
+  });
+
+  it("sets a text color inside a quote", () => {
+    const document = createDocument([createQuote([createText("引用内容")])]);
+    const result = applySetMarkAttribute(
+      document,
+      createSetMarkAttributeOperation(
+        {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [0, 0], offset: 2 },
+        },
+        "textColor",
+        "#1677FF",
+      ),
+    );
+
+    expect(result.children[0]).toMatchObject({ type: "quote" });
+    expect(result.children[0]?.children).toEqual([
+      { marks: { textColor: "#1677ff" }, text: "引用", type: "text" },
+      { text: "内容", type: "text" },
+    ]);
   });
 
   it("removes text color across sibling nodes", () => {

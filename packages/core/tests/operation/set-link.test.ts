@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { createDocument, createParagraph, createText } from "../../src/model";
+import {
+  createDocument,
+  createHeading,
+  createParagraph,
+  createText,
+} from "../../src/model";
 import {
   applySetLink,
   cloneOperation,
@@ -206,6 +211,28 @@ describe("set link operation", () => {
       anchor: { path: [0, 1], offset: 0 },
       focus: { path: [0, 3], offset: 1 },
     });
+  });
+
+  it("sets a link inside a heading", () => {
+    const document = createDocument([createHeading(3, [createText("标题链接")])]);
+    const operation = createSetLinkOperation(
+      {
+        anchor: { path: [0, 0], offset: 2 },
+        focus: { path: [0, 0], offset: 4 },
+      },
+      { href: "https://example.com/heading" },
+    );
+    const result = applySetLink(document, operation);
+
+    expect(result.children[0]).toMatchObject({ level: 3, type: "heading" });
+    expect(result.children[0]?.children).toEqual([
+      { text: "标题", type: "text" },
+      {
+        marks: { link: { href: "https://example.com/heading" } },
+        text: "链接",
+        type: "text",
+      },
+    ]);
   });
 
   it("removes links and merges compatible neighbors", () => {

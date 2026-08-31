@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { createDocument, createParagraph, createText } from "../../src/model";
+import {
+  createDocument,
+  createHeading,
+  createParagraph,
+  createText,
+} from "../../src/model";
 import {
   applyToggleMark,
   createSelectionAfterToggleMark,
@@ -174,6 +179,26 @@ describe("applyToggleMark", () => {
       { type: "text", text: "你" },
       { type: "text", text: "好世", marks: { bold: true } },
       { type: "text", text: "界。" },
+    ]);
+  });
+
+  it("toggles a mark inside a heading", () => {
+    const document = createDocument([createHeading(2, [createText("标题内容")])]);
+    const result = applyToggleMark(
+      document,
+      createToggleMarkOperation(
+        {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [0, 0], offset: 2 },
+        },
+        "bold",
+      ),
+    );
+
+    expect(result.children[0]).toMatchObject({ level: 2, type: "heading" });
+    expect(result.children[0]?.children).toEqual([
+      { marks: { bold: true }, text: "标题", type: "text" },
+      { text: "内容", type: "text" },
     ]);
   });
 
