@@ -47,6 +47,6 @@ pnpm test:e2e
 
 ## 当前边界
 
-- mark 选区必须位于同一个 paragraph 内。
+- mark 选区必须位于同一个 block 内，当前支持 paragraph、heading 和 quote。
 - 本文仅记录 Bold/Italic 闭环；Underline 与 Strike 的后续验收见 `docs/qa/week-10.md`。
 - collapsed selection 通过空 text 占位继承后续输入格式，完整输入法组合流程仍按后续计划推进。

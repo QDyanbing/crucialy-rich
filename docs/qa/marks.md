@@ -12,13 +12,13 @@
 - 新增 `mergeAdjacentTextNodes`，用于合并相邻同 marks text 节点。
 - `validateDocument` 会拒绝非对象、未知 mark 和非 `true` mark 值。
 - `normalizeDocument` 会保留合法 marks，丢弃未知或未启用 marks，并合并相邻同 marks text 节点。
-- 新增 `toggle_mark` operation，支持同一个 paragraph 内切换 mark。
+- 新增 `toggle_mark` operation，支持同一个 block 内切换 mark。
 - mark 切换后 selection 会按 paragraph text offset 映射到合并后的 text 节点。
 - 新增 `boldCommand`，支持选区加粗、取消加粗和 collapsed 后续输入继承 bold。
 - 新增 `italicCommand`，支持选区斜体、取消斜体、collapsed 后续输入继承 italic，并覆盖 bold+italic 叠加。
 - 新增 `underlineCommand`，支持选区下划线、取消、collapsed 输入继承、跨 text 切换和 active 状态。
 - 新增 `strikeCommand`，支持选区删除线、取消、collapsed 输入继承、跨 text 切换和 active 状态。
-- Bold/Italic command 支持同一个 paragraph 内跨 text selection。
+- Bold/Italic command 支持 paragraph、heading、quote 中同一个 block 内跨 text selection。
 - renderer 会把 bold text 渲染为 `<strong>`，italic text 渲染为 `<em>`，underline text 渲染为 `<u>`，strike text 渲染为 `<s>`，并覆盖四种 mark 组合渲染。
 - demo 操作区新增“加粗”“斜体”“下划线”和“删除线”按钮，并记录 history。
 - demo 文档 JSON 选区映射会展示当前 text marks。
@@ -75,8 +75,8 @@
 
 - 暂未实现 React 组件内置 toolbar。
 - mark 快捷键尚未绑定编辑器键盘事件。
-- 暂未实现跨 paragraph 的 mark 应用策略。
-- 三种文字属性 command 尚未支持跨 paragraph 选区。
+- 暂未实现跨 block 的 mark 应用策略。
+- 三种文字属性 command 尚未支持跨 block 选区。
 
 ## 结论
 

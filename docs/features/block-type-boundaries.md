@@ -36,7 +36,7 @@
 
 - Heading 和 Quote 已支持连续顶层 block 范围，不支持非连续 block 集合。
 - 多块切换不会插入、删除或移动 block，因此现有顶层 path 保持稳定。
-- Mark command 的跨 paragraph 规则独立演进，不因 Block Type command 支持多块而自动扩大范围。
+- Mark command 的跨 block 规则独立演进，不因 Block Type command 支持多块而自动扩大范围。
 - 空 Quote 的退出策略、标题快捷键和 Quote 快捷键仍未实现。
 
 ## 自动化验收

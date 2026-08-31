@@ -90,7 +90,7 @@ History snapshot 现在会深拷贝 text marks，撤销/重做记录不会丢失
 
 ## Toggle Mark Operation
 
-`toggle_mark` 用于在同一 paragraph 内切换 mark。
+`toggle_mark` 用于在同一 block 内切换 mark，当前 block 可以是 paragraph、heading 或 quote。
 
 ```ts
 interface ToggleMarkOperation {
@@ -102,10 +102,10 @@ interface ToggleMarkOperation {
 
 当前规则：
 
-- range 必须落在同一个 paragraph 内。
+- range 必须落在同一个 block 内。
 - 非折叠 range 会按 text 边界切分 before / selected / after，只修改 selected 覆盖到的 text 片段。
 - 选区内存在未激活的目标 mark 时会统一添加；全部已激活时会统一移除，避免混合选区逐节点反转。
-- 同一 paragraph 内跨多个 text 节点时会统一修改目标 mark，并合并相邻同 marks 的 text 节点。
+- 同一 block 内跨多个 text 节点时会统一修改目标 mark，并合并相邻同 marks 的 text 节点。
 - selection 会在合并后的文档中按 paragraph text offset 重新映射。
 - collapsed range 会在光标处创建一个空 text 节点，并把切换后的 marks 写到该空节点上。
 - collapsed 后续输入会插入到该空 text 节点内，从而继承 mark。
@@ -124,7 +124,7 @@ const boldCommand: Command;
 
 - selection 必须存在。
 - anchor 和 focus 必须都指向合法 text point。
-- 当前支持同一个 paragraph 内的 selection。
+- 当前支持同一个 block 内的 selection。
 - 成功时返回包含 `toggle_mark` 的 transaction。
 - `queryCommandState` 会通过 `isActive` 返回当前 selection 所在 text 节点是否已经加粗。
 
@@ -144,7 +144,7 @@ const italicCommand: Command;
 
 - selection 必须存在。
 - anchor 和 focus 必须都指向合法 text point。
-- 当前支持同一个 paragraph 内的 selection。
+- 当前支持同一个 block 内的 selection。
 - 成功时返回包含 `toggle_mark` 的 transaction。
 - `queryCommandState` 会通过 `isActive` 返回当前 selection 所在 text 节点是否已经斜体。
 
@@ -160,7 +160,7 @@ const UNDERLINE_COMMAND_NAME = "underline";
 const underlineCommand: Command;
 ```
 
-执行规则与 Bold/Italic 一致，支持同一 paragraph 内的选区应用、取消、跨 text 切换、collapsed 后续输入继承和 active 状态读取。切换 underline 不会移除已有 bold、italic 或 strike。
+执行规则与 Bold/Italic 一致，支持同一 block 内的选区应用、取消、跨 text 切换、collapsed 后续输入继承和 active 状态读取。切换 underline 不会移除已有 bold、italic 或 strike。
 
 `underlineCommand` 已加入默认 command registry，demo 操作区可通过“下划线”按钮调用，并会记录 history。
 
@@ -174,7 +174,7 @@ const STRIKE_COMMAND_NAME = "strike";
 const strikeCommand: Command;
 ```
 
-执行规则与其他 boolean mark command 一致，支持同一 paragraph 内的选区应用、取消、跨 text 切换、collapsed 后续输入继承和 active 状态读取。切换 strike 不会移除已有 bold、italic 或 underline。
+执行规则与其他 boolean mark command 一致，支持同一 block 内的选区应用、取消、跨 text 切换、collapsed 后续输入继承和 active 状态读取。切换 strike 不会移除已有 bold、italic 或 underline。
 
 `strikeCommand` 已加入默认 command registry，demo 操作区可通过“删除线”按钮调用，并会记录 history。
 
@@ -214,5 +214,5 @@ Demo 的“文字标记”样例覆盖普通、加粗、斜体、下划线、删
 
 - 暂未实现编辑器内置 toolbar；当前只有 demo 操作区按钮。
 - 快捷键当前只提供映射与查询，不包含编辑器事件绑定。
-- 暂未实现跨 paragraph 的 mark 应用策略。
-- 文字属性 command 当前只处理同一 paragraph 内的选区。
+- 暂未实现跨 block 的 mark 应用策略。
+- 文字属性 command 当前只处理同一 block 内的选区。

@@ -42,7 +42,7 @@
 
 ## 当前边界
 
-- mark command 仍限制在同一个 paragraph 内。
+- mark command 仍限制在同一个 block 内，当前支持 paragraph、heading 和 quote。
 - React 组件仍不内置 toolbar。
 - mark 快捷键只提供配置和匹配纯函数，尚未绑定编辑器键盘事件。
 
