@@ -1,4 +1,4 @@
-import { createText, type DocumentNode, type ParagraphNode } from "../model";
+import { createText, type BlockNode, type DocumentNode } from "../model";
 import type { Point, RangeSelection } from "../selection";
 import { isValidPoint } from "../selection";
 import type { SplitBlockOperation } from "./types";
@@ -30,7 +30,7 @@ function getSplitBlockIndexes(
   return [blockIndex, textIndex];
 }
 
-function ensureTextChildren(children: ParagraphNode["children"]) {
+function ensureTextChildren(children: BlockNode["children"]) {
   return children.length > 0 ? children : [createText()];
 }
 

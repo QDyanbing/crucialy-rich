@@ -1,4 +1,4 @@
-import { createText, type DocumentNode, type ParagraphNode } from "../model";
+import { createText, type BlockNode, type DocumentNode } from "../model";
 import type { Point, RangeSelection } from "../selection";
 import { isValidPoint } from "../selection";
 import type { MergeBlockOperation } from "./types";
@@ -35,16 +35,16 @@ function getMergeBlockIndex(
   return blockIndex;
 }
 
-function isEmptyParagraphChildren(children: ParagraphNode["children"]): boolean {
+function isEmptyBlockChildren(children: BlockNode["children"]): boolean {
   return children.length === 0 || (children.length === 1 && children[0]?.text === "");
 }
 
-function mergeParagraphChildren(
-  previousChildren: ParagraphNode["children"],
-  currentChildren: ParagraphNode["children"],
-): ParagraphNode["children"] {
-  const previousEmpty = isEmptyParagraphChildren(previousChildren);
-  const currentEmpty = isEmptyParagraphChildren(currentChildren);
+function mergeBlockChildren(
+  previousChildren: BlockNode["children"],
+  currentChildren: BlockNode["children"],
+): BlockNode["children"] {
+  const previousEmpty = isEmptyBlockChildren(previousChildren);
+  const currentEmpty = isEmptyBlockChildren(currentChildren);
 
   if (previousEmpty && currentEmpty) {
     return [createText()];
@@ -71,7 +71,7 @@ export function applyMergeBlock(
   const currentBlock = document.children[blockIndex]!;
   const mergedBlock = {
     ...previousBlock,
-    children: mergeParagraphChildren(previousBlock.children, currentBlock.children),
+    children: mergeBlockChildren(previousBlock.children, currentBlock.children),
   };
 
   return {
@@ -91,7 +91,7 @@ export function createSelectionAfterMergeBlock(
   const blockIndex = getMergeBlockIndex(document, operation);
   const previousBlockIndex = blockIndex - 1;
   const previousChildren = document.children[previousBlockIndex]?.children ?? [];
-  const previousEmpty = isEmptyParagraphChildren(previousChildren);
+  const previousEmpty = isEmptyBlockChildren(previousChildren);
   const lastTextIndex = previousEmpty ? 0 : previousChildren.length - 1;
   const lastText = previousEmpty ? createText() : previousChildren[lastTextIndex]!;
   const point = {
