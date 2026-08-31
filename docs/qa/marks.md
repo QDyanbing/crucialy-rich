@@ -1,6 +1,6 @@
 # QA：文字标记模型验收
 
-当前文字标记范围覆盖 bold / italic / underline / strike 的完整 boolean 闭环，以及 fontSize / textColor / backgroundColor 三种属性 Mark 闭环。
+当前文字标记范围覆盖 bold / italic / underline / strike 的完整 boolean 闭环，fontSize / textColor / backgroundColor 三种属性 Mark 闭环，以及结构化 Link Mark 闭环。
 
 ## 已完成范围
 
@@ -34,12 +34,14 @@
 - `textColor` 已限制为安全十六进制颜色，并完成规范化、operation、Command、安全渲染、中文 demo 与 E2E 闭环。
 - `backgroundColor` 已限制为安全十六进制颜色，并完成规范化、operation、Command、安全渲染、中文 demo 与 E2E 闭环。
 - 三种属性 command 已由 `TEXT_STYLE_COMMANDS` 统一组织，并完成跨 text、反向选区、默认注册表和混合样例验收。
+- Link Mark 已完成安全校验、helper、`set_link` operation、设置/取消 command、渲染、选区恢复、History 和中文 Demo 验收。
 
 ## 自动化覆盖
 
 - `packages/core/tests/model/types.test.ts`
 - `packages/core/tests/model/factories.test.ts`
 - `packages/core/tests/model/marks.test.ts`
+- `packages/core/tests/model/link.test.ts`
 - `packages/core/tests/model/validate.test.ts`
 - `packages/core/tests/model/normalize.test.ts`
 - `packages/core/tests/selection/paragraph-offset.test.ts`
@@ -47,6 +49,7 @@
 - `packages/core/tests/operation/delete-text.test.ts`
 - `packages/core/tests/operation/toggle-mark.test.ts`
 - `packages/core/tests/operation/set-mark-attribute.test.ts`
+- `packages/core/tests/operation/set-link.test.ts`
 - `packages/core/tests/operation/split-block.test.ts`
 - `packages/core/tests/operation/merge-block.test.ts`
 - `packages/core/tests/command/bold.test.ts`
@@ -60,6 +63,7 @@
 - `packages/core/tests/command/text-color.test.ts`
 - `packages/core/tests/command/background-color.test.ts`
 - `packages/core/tests/command/text-style-interaction.test.ts`
+- `packages/core/tests/command/link.test.ts`
 - `packages/core/tests/command/state.test.ts`
 - `packages/core/tests/render/render.test.ts`
 - `packages/core/tests/render/html.test.ts`
@@ -76,4 +80,4 @@
 
 ## 结论
 
-四种 boolean mark 与三种文字属性均已完成独立能力和组合场景验收。
+四种 boolean mark、三种文字属性与 Link Mark 均已完成独立能力、组合场景和 History 验收。
