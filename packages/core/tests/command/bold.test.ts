@@ -5,6 +5,7 @@ import {
   boldCommand,
   canExecuteBoldCommand,
   createDocument,
+  createHeading,
   createParagraph,
   createText,
   insertTextCommand,
@@ -150,6 +151,27 @@ describe("boldCommand", () => {
       anchor: { path: [0, 1], offset: 0 },
       focus: { path: [0, 1], offset: 2 },
     });
+  });
+
+  it("toggles bold inside a heading", () => {
+    const document = createDocument([createHeading(2, [createText("标题内容")])]);
+    const result = boldCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [0, 0], offset: 2 },
+        },
+      },
+    });
+    const nextDocument = applyTransaction(document, result.transaction!);
+
+    expect(result.ok).toBe(true);
+    expect(nextDocument.children[0]).toMatchObject({ level: 2, type: "heading" });
+    expect(nextDocument.children[0]?.children).toEqual([
+      { marks: { bold: true }, text: "标题", type: "text" },
+      { text: "内容", type: "text" },
+    ]);
   });
 
   it("reports active state across marked sibling text nodes", () => {

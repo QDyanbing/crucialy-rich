@@ -8,6 +8,7 @@ import {
   createDocument,
   createHistorySnapshot,
   createHistoryState,
+  createHeading,
   createParagraph,
   createText,
   createTransactionAcceptanceReport,
@@ -123,6 +124,32 @@ describe("setLinkCommand", () => {
       anchor: { path: [0, 0], offset: 0 },
       focus: { path: [0, 1], offset: 2 },
     });
+  });
+
+  it("sets a link inside a heading", () => {
+    const document = createDocument([createHeading(3, [createText("标题链接")])]);
+    const result = setLinkCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 2 },
+          focus: { path: [0, 0], offset: 4 },
+        },
+      },
+      payload: { href: "https://example.com/heading" },
+    });
+    const nextDocument = applyTransaction(document, result.transaction!);
+
+    expect(result.ok).toBe(true);
+    expect(nextDocument.children[0]).toMatchObject({ level: 3, type: "heading" });
+    expect(nextDocument.children[0]?.children).toEqual([
+      { text: "标题", type: "text" },
+      {
+        marks: { link: { href: "https://example.com/heading" } },
+        text: "链接",
+        type: "text",
+      },
+    ]);
   });
 
   it.each([

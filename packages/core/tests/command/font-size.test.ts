@@ -6,6 +6,7 @@ import {
   createDefaultCommandRegistry,
   createDocument,
   createParagraph,
+  createQuote,
   createText,
   executeCommand,
   insertTextCommand,
@@ -86,6 +87,28 @@ describe("setFontSizeCommand", () => {
       anchor: { path: [0, 0], offset: 0 },
       focus: { path: [0, 2], offset: 1 },
     });
+  });
+
+  it("sets a font size inside a quote", () => {
+    const document = createDocument([createQuote([createText("引用内容")])]);
+    const result = setFontSizeCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [0, 0], offset: 2 },
+        },
+      },
+      payload: { fontSize: 20 },
+    });
+    const nextDocument = applyTransaction(document, result.transaction!);
+
+    expect(result.ok).toBe(true);
+    expect(nextDocument.children[0]).toMatchObject({ type: "quote" });
+    expect(nextDocument.children[0]?.children).toEqual([
+      { marks: { fontSize: 20 }, text: "引用", type: "text" },
+      { text: "内容", type: "text" },
+    ]);
   });
 
   it("uses a collapsed sized placeholder for later input", () => {
