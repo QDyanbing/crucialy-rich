@@ -2,7 +2,7 @@
 
 自研富文本编辑内核，不依赖 ProseMirror、Tiptap、Lexical、Slate 作为运行时内核。
 
-> 当前处于早期阶段，已提供 paragraph、heading、quote 文档模型、1–6 级 heading 与 quote 语义渲染和 command、四种 boolean marks 闭环、三种文字属性闭环、结构化 Link Mark 与 URL sanitize、mark 快捷键配置查询、同一 paragraph 内跨 text 的 mark 切分与合并、模型选区、基础渲染器、DOM 与模型位置映射、选区双向同步、基础 operation 与 Transaction、输入 helper、Command 系统、默认 Command 注册表和 History 撤销重做第一版。
+> 当前处于早期阶段，已提供 paragraph、heading、quote 文档模型、1–6 级 heading 与 quote 语义渲染和单块/多块 command、四种 boolean marks 闭环、三种文字属性闭环、结构化 Link Mark、安全链接 operation/command/渲染与交互、mark 快捷键配置查询、同一 paragraph 内跨 text 的 mark 切分与合并、模型选区、基础渲染器、DOM 与模型位置映射、选区双向同步、基础 operation 与 Transaction、输入 helper、Command 系统、默认 Command 注册表和 History 撤销重做第一版。
 
 ## 安装
 
