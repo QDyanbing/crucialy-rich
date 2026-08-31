@@ -2,7 +2,7 @@
 
 ## 验收范围
 
-Command 验收覆盖注册、查询、状态读取、执行结果、内置 Bold/Italic/Underline/Strike 命令、快捷键配置查询、内置文本命令、内置块命令、React 输入层复用和 demo 调试区。
+Command 验收覆盖注册、查询、状态读取、执行结果、文本编辑、四种 boolean mark、三种文字属性、Link、Heading、Quote、Block 编辑、快捷键配置查询、React 输入层复用和 demo 调试区。
 
 当前内置 command：
 
@@ -12,6 +12,13 @@ Command 验收覆盖注册、查询、状态读取、执行结果、内置 Bold/
 - `italicCommand`
 - `underlineCommand`
 - `strikeCommand`
+- `setFontSizeCommand`
+- `setTextColorCommand`
+- `setBackgroundColorCommand`
+- `setLinkCommand`
+- `unsetLinkCommand`
+- `setHeadingCommand`
+- `toggleQuoteCommand`
 - `splitBlockCommand`
 - `mergeBlockCommand`
 
@@ -28,6 +35,11 @@ Command 验收覆盖注册、查询、状态读取、执行结果、内置 Bold/
 - `packages/core/tests/command/underline.test.ts`：选区下划线、取消下划线、collapsed 后续输入继承、跨 text 和 active 状态。
 - `packages/core/tests/command/strike.test.ts`：选区删除线、取消删除线、collapsed 后续输入继承、跨 text、active 状态和多 mark 叠加。
 - `packages/core/tests/command/mark-interaction.test.ts`：四种 boolean mark 在混合选区中的独立切换。
+- `packages/core/tests/command/text-style-interaction.test.ts`：字号、文字颜色、背景色与 boolean mark 组合应用。
+- `packages/core/tests/command/link.test.ts`：链接设置、覆盖、取消、状态读取和安全 payload。
+- `packages/core/tests/command/heading.test.ts`：1–6 级标题、恢复正文、多块范围和状态读取。
+- `packages/core/tests/command/quote.test.ts`：引用切换、取消、多块范围和状态读取。
+- `packages/core/tests/command/block-type-interaction.test.ts`：Heading/Quote 连续切换与 marks 保留。
 - `packages/core/tests/command/shortcut.test.ts`：默认映射、配置查询、按键匹配、自定义映射和边界输入。
 - `packages/core/tests/command/split-block.test.ts`：段落分裂 command。
 - `packages/core/tests/command/merge-block.test.ts`：段落合并 command。
@@ -45,6 +57,10 @@ Command 验收覆盖注册、查询、状态读取、执行结果、内置 Bold/
 | 斜体         | 设置同 text 选区后点击“斜体”                        | 文档 JSON 出现 italic marks，渲染输出 em        | 通过 |
 | 下划线       | 设置同 text 选区后点击“下划线”                      | 文档 JSON 出现 underline marks，渲染输出 u      | 通过 |
 | 删除线       | 设置同 text 选区后点击“删除线”                      | 文档 JSON 出现 strike marks，渲染输出 s         | 通过 |
+| 文字属性     | 设置字号、文字颜色和背景色                          | 属性独立更新并保留其他 marks                    | 通过 |
+| 链接         | 创建、编辑或取消当前选区链接                        | 安全链接更新，选区与其他 marks 保持             | 通过 |
+| 标题         | 选择正文或 1–6 级标题                               | 选中 block 统一切换并保留文字                   | 通过 |
+| 引用         | 点击“引用”                                          | 选中 block 统一切换 Quote 或恢复正文            | 通过 |
 | 跨 text 加粗 | 设置同 paragraph 跨 text 选区后执行 `boldCommand`   | 选中文本被切分加粗并合并同 marks text           | 通过 |
 | 跨 text 斜体 | 设置同 paragraph 跨 text 选区后执行 `italicCommand` | 选中文本被切分斜体并合并同 marks text           | 通过 |
 | 分段         | 设置 collapsed selection 后点击“分段”               | 文档新增 paragraph，最近 transaction 包含 split | 通过 |
@@ -59,10 +75,11 @@ Command 验收覆盖注册、查询、状态读取、执行结果、内置 Bold/
 
 - 文本 command 当前只支持同一 text 节点内的 range selection。
 - Mark command 当前只支持同一 paragraph 内的 selection。
-- block command 当前只支持 collapsed selection。
+- `splitBlockCommand` / `mergeBlockCommand` 当前只支持 collapsed selection。
+- Heading/Quote command 支持连续顶层 block 范围，不支持非连续多选。
 - collapsed Backspace/Delete 的单字符删除仍保留 input helper；跨段合并路径会优先复用 block command。
 - 当前还没有 React 内置 toolbar；mark 快捷键只提供配置和匹配，不绑定编辑器事件。
 
 ## 结论
 
-Command 系统已经完成默认注册表、内置编辑命令、四种 mark command 和 mark 快捷键占位：demo 和 React 复用同一套 registry，状态面板可验证 command 可用性和 active 状态，自动化测试覆盖默认注册、状态矩阵、快捷键查询、综合执行和浏览器交互。
+Command 系统已经完成默认注册表、文本与 Block 编辑、四种 boolean mark、三种文字属性、Link、Heading、Quote 和快捷键占位：demo 和 React 复用同一套 registry，状态面板可验证 command 可用性和 active 状态，自动化测试覆盖默认注册、状态矩阵、综合执行和浏览器交互。

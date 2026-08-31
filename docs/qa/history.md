@@ -34,20 +34,20 @@
 - `packages/core/tests/history/redo.test.ts`：重做到 after 快照并把 entry 移回 undoStack。
 - `packages/core/tests/history/shortcut.test.ts`：撤销重做快捷键识别和忽略场景。
 - `packages/core/tests/history/command.test.ts`：通过 command registry 执行撤销和重做。
+- `packages/core/tests/command/block-type-history.test.ts`：Heading/Quote 连续切换的 undo/redo 生命周期。
 - `packages/core/tests/public-api.test.ts`：History API 包出口。
 - `tests/e2e/demo-shell.spec.ts`：demo 操作区插入、真实输入、连续 typing 合并、快捷键触发撤销重做和 History 状态展示。
 
 ## 本地验证记录
 
-- 已通过提交钩子的 Prettier 和 ESLint 校验。
-- 已执行 `pnpm typecheck`，全仓类型检查通过。
-- 未启动 demo 或运行 Playwright；当前项目协作规则要求没有明确要求时不启动项目和完整测试。
+- `pnpm check:all` 已覆盖 Prettier、ESLint、全仓与包级 TypeScript 检查、Vitest、生产构建和 Playwright。
+- History、真实输入、Link 和 Block Type 的浏览器流程均已纳入 Playwright 回归。
 
 ## 当前限制
 
 - 暂未实现按时间间隔、选区跳变或输入类型细分的复杂合并策略。
-- 快照复制只覆盖当前 document -> paragraph -> text 模型。
+- 快照复制覆盖 document、paragraph、heading、quote、text 和完整 text marks；Block Type 与 heading level 在 undo/redo 中保持不变。
 
 ## 结论
 
-History 已推进到可用的撤销重做闭环：core 具备快照记录、栈转换、command 包装、batch 合并和快捷键识别，React 可通过 `onTransaction` 暴露真实输入，demo 具备真实输入记录、连续 typing 合并、快捷键撤销重做和状态展示。下一步建议处理更细粒度的合并边界。
+History 已形成可用的撤销重做闭环：core 具备快照记录、栈转换、command 包装、batch 合并和快捷键识别，React 可通过 `onTransaction` 暴露真实输入，demo 具备真实输入、Link、Block Type、连续 typing、快捷键撤销重做和状态展示。更细粒度的合并边界仍按后续计划演进。
