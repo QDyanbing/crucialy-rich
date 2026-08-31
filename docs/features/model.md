@@ -105,6 +105,6 @@ interface DocumentNode {
 ## 当前限制
 
 - 当前 Block Type 只支持 paragraph、heading 和 quote，尚不支持 list、codeBlock 等。
-- text marks 已完成四种 boolean mark 和三种文字属性闭环；Link Mark 当前完成模型、sanitize、规范化和校验。
+- text marks 已完成四种 boolean mark、三种文字属性和 Link Mark 闭环；链接已经接入 operation、command、安全渲染、编辑态/只读态交互、选区恢复和 Demo。
 - heading level 直接存储在 `level` 字段；其他 block 暂不包含属性字段。
 - 规范化会丢弃非法节点而不尝试转换，转换策略留待后续。

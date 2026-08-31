@@ -1,6 +1,6 @@
 # 文字标记模型
 
-文字标记用于描述 text 节点上的内联格式。第 9 周 Bold 和 Italic 已闭环；第 10 周已完成 boolean mark 叠加规则、Underline 和 Strike；第 11 周已完成字号与颜色属性闭环；第 12 周 Day 1 已加入结构化 Link Mark。属性设计详见[文字属性 Mark](./text-style.md)与[Link Mark](./link.md)。
+文字标记用于描述 text 节点上的内联格式。第 9 周 Bold 和 Italic 已闭环；第 10 周已完成 boolean mark 叠加规则、Underline 和 Strike；第 11 周已完成字号与颜色属性闭环；第 12 周已完成结构化 Link Mark、链接 command、安全渲染和交互闭环。属性设计详见[文字属性 Mark](./text-style.md)与[Link Mark](./link.md)。
 
 ## 数据结构
 
@@ -216,4 +216,3 @@ Demo 的“文字标记”样例覆盖普通、加粗、斜体、下划线、删
 - 快捷键当前只提供映射与查询，不包含编辑器事件绑定。
 - 暂未实现跨 paragraph 的 mark 应用策略。
 - 文字属性 command 当前只处理同一 paragraph 内的选区。
-- Link Mark 尚未接入 command、renderer 和 demo。
