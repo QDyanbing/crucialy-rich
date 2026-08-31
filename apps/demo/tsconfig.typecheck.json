@@ -1,10 +1,11 @@
 {
-  "extends": "./tsconfig.json",
-  "compilerOptions": {
-    "composite": false,
-    "declaration": false,
-    "declarationMap": false,
-    "noEmit": true
-  },
-  "references": []
+  "extends": "../../tsconfig.typecheck.json",
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "vite.config.ts",
+    "../../packages/core/src/**/*.ts",
+    "../../packages/react/src/**/*.ts",
+    "../../packages/react/src/**/*.tsx"
+  ]
 }
