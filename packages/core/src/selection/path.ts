@@ -8,7 +8,7 @@ function isPathIndex(value: number): boolean {
 /**
  * 根据 path 读取文档树节点。
  *
- * 当前只支持 document / paragraph / text 三层，非法路径返回 undefined。
+ * 当前只支持 document / block / text 三层，非法路径返回 undefined。
  */
 export function getNodeAtPath(document: DocumentNode, path: Path): Node | undefined {
   if (path.length === 0) {

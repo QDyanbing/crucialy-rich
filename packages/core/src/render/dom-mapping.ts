@@ -1,4 +1,4 @@
-import { isParagraphNode, isTextNode, type DocumentNode } from "../model";
+import { isBlockNode, isTextNode, type DocumentNode } from "../model";
 import { getNodeAtPath, isValidPoint, type Path, type Point } from "../selection";
 import { decodeModelPath, encodeModelPath, MODEL_PATH_ATTRIBUTE } from "./attributes";
 
@@ -32,14 +32,14 @@ function createValidPoint(
   return isValidPoint(document, point) ? point : undefined;
 }
 
-function createParagraphBoundaryPoint(
+function createBlockBoundaryPoint(
   document: DocumentNode,
   path: Path,
   offset: number,
 ): Point | undefined {
   const node = getNodeAtPath(document, path);
 
-  if (!isParagraphNode(node) || node.children.length === 0) {
+  if (!isBlockNode(node) || node.children.length === 0) {
     return undefined;
   }
 
@@ -127,7 +127,7 @@ export function domPointToModelPoint(
     return createValidPoint(document, path, domPoint.offset);
   }
 
-  return createParagraphBoundaryPoint(document, path, domPoint.offset);
+  return createBlockBoundaryPoint(document, path, domPoint.offset);
 }
 
 export function modelPointToDomPoint(

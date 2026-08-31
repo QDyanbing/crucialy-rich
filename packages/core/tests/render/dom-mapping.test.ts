@@ -3,7 +3,13 @@
  */
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { createDocument, createParagraph, createText } from "../../src/model";
+import {
+  createDocument,
+  createHeading,
+  createParagraph,
+  createQuote,
+  createText,
+} from "../../src/model";
 import {
   domPointToModelPoint,
   findClosestModelPathElement,
@@ -131,6 +137,29 @@ describe("dom model path helpers", () => {
     expect(domPointToModelPoint(model, { node: paragraph!, offset: 2 })).toEqual({
       path: [0, 1],
       offset: 6,
+    });
+  });
+
+  it.each([
+    ["heading", createHeading(2, [createText("Title")]), "h2"],
+    ["quote", createQuote([createText("Quote")]), "blockquote"],
+  ] as const)("maps %s dom boundaries to model points", (_name, block, tagName) => {
+    const model = createDocument([block]);
+    document.body.innerHTML = `
+      <${tagName} data-crucialy-path="[0]">
+        <span data-crucialy-path="[0,0]">${block.children[0]?.text}</span>
+      </${tagName}>
+    `;
+    const element = document.querySelector(tagName);
+
+    expect(element).not.toBeNull();
+    expect(domPointToModelPoint(model, { node: element!, offset: 0 })).toEqual({
+      path: [0, 0],
+      offset: 0,
+    });
+    expect(domPointToModelPoint(model, { node: element!, offset: 1 })).toEqual({
+      path: [0, 0],
+      offset: block.children[0]?.text.length,
     });
   });
 
