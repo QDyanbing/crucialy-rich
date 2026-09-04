@@ -1,6 +1,9 @@
-import type { DocumentNode } from "../model";
+import { isTextNode, type DocumentNode } from "../model";
 import {
+  createInsertTextOperation,
+  createSelectionAfterInsertText,
   createSelectionAfterSplitBlock,
+  createSetBlockTypeOperation,
   createSplitBlockOperation,
   createTransaction,
   type Transaction,
@@ -30,17 +33,64 @@ function getCollapsedPoint(selection: RangeSelection): Point | undefined {
   return isCollapsed(selection) ? selection.anchor : undefined;
 }
 
+function getCodeBlockText(document: DocumentNode, point: Point) {
+  const [blockIndex, textIndex] = point.path;
+
+  if (blockIndex === undefined || textIndex === undefined) {
+    return undefined;
+  }
+
+  const block = document.children[blockIndex];
+  const text = block?.children[textIndex];
+
+  return block?.type === "codeBlock" && isTextNode(text)
+    ? { block, blockIndex, text, textIndex }
+    : undefined;
+}
+
+function shouldExitCodeBlock(document: DocumentNode, point: Point): boolean {
+  const target = getCodeBlockText(document, point);
+
+  return (
+    target !== undefined &&
+    target.textIndex === target.block.children.length - 1 &&
+    point.offset === target.text.text.length &&
+    target.text.text.endsWith("\n")
+  );
+}
+
 export function createEnterInputTransaction(input: EnterInput): Transaction {
   const point = getCollapsedPoint(input.selection);
 
-  return point
-    ? createTransaction([createSplitBlockOperation(point)])
-    : createTransaction();
+  if (!point) {
+    return createTransaction();
+  }
+
+  const codeBlock = getCodeBlockText(input.document, point);
+
+  if (!codeBlock) {
+    return createTransaction([createSplitBlockOperation(point)]);
+  }
+
+  if (shouldExitCodeBlock(input.document, point)) {
+    return createTransaction([
+      createSplitBlockOperation(point),
+      createSetBlockTypeOperation([codeBlock.blockIndex + 1], {
+        type: "paragraph",
+      }),
+    ]);
+  }
+
+  return createTransaction([createInsertTextOperation(point, "\n")]);
 }
 
 export function createSelectionAfterEnterInput(input: EnterInput): RangeSelection {
   const transaction = createEnterInputTransaction(input);
   const operation = transaction.operations[0];
+
+  if (operation?.type === "insert_text") {
+    return createSelectionAfterInsertText(operation);
+  }
 
   return operation?.type === "split_block"
     ? createSelectionAfterSplitBlock(operation)

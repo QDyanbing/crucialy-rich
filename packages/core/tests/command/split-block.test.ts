@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   applyTransaction,
   canExecuteSplitBlockCommand,
+  createCodeBlock,
   createDocument,
   createParagraph,
   createText,
@@ -68,5 +69,40 @@ describe("splitBlockCommand", () => {
       reason: "Split block command requires a collapsed text selection.",
       status: "skipped",
     });
+  });
+
+  it("inserts newlines and exits code blocks through the same command", () => {
+    const document = createDocument([createCodeBlock([createText("code")])]);
+    const newlineResult = splitBlockCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 4 },
+          focus: { path: [0, 0], offset: 4 },
+        },
+      },
+    });
+    const multilineDocument = applyTransaction(document, newlineResult.transaction!);
+
+    if (!newlineResult.selection) {
+      throw new Error("Code block newline should return a selection.");
+    }
+
+    const exitResult = splitBlockCommand.execute({
+      context: {
+        document: multilineDocument,
+        selection: newlineResult.selection,
+      },
+    });
+
+    expect(multilineDocument.children[0]?.children[0]?.text).toBe("code\n");
+    expect(
+      exitResult.transaction?.operations.map((operation) => operation.type),
+    ).toEqual(["split_block", "set_block_type"]);
+    expect(
+      applyTransaction(multilineDocument, exitResult.transaction!).children.map(
+        (block) => block.type,
+      ),
+    ).toEqual(["codeBlock", "paragraph"]);
   });
 });

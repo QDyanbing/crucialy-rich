@@ -1,10 +1,9 @@
 import {
   createMergeBlockOperation,
   createSelectionAfterMergeBlock,
-  createSelectionAfterSplitBlock,
-  createSplitBlockOperation,
   createTransaction,
 } from "../operation";
+import { createEnterInputTransaction, createSelectionAfterEnterInput } from "../input";
 import { isCollapsed, isValidPoint, type Point } from "../selection";
 import { createCommandSkipped, createCommandSuccess } from "./result";
 import type { Command, CommandInput } from "./types";
@@ -60,11 +59,14 @@ export const splitBlockCommand: Command = {
       );
     }
 
-    const operation = createSplitBlockOperation(point);
+    const enterInput = {
+      document: input.context.document,
+      selection: input.context.selection!,
+    };
 
     return createCommandSuccess(SPLIT_BLOCK_COMMAND_NAME, {
-      selection: createSelectionAfterSplitBlock(operation),
-      transaction: createTransaction([operation]),
+      selection: createSelectionAfterEnterInput(enterInput),
+      transaction: createEnterInputTransaction(enterInput),
     });
   },
   name: SPLIT_BLOCK_COMMAND_NAME,
