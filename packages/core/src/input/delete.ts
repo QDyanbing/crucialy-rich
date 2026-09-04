@@ -1,7 +1,8 @@
-import { isTextNode, type DocumentNode } from "../model";
+import { isTextNode, isVoidBlockNode, type DocumentNode } from "../model";
 import {
   createDeleteTextOperation,
   createMergeBlockOperation,
+  createRemoveBlockOperation,
   createSelectionAfterDeleteText,
   createTransaction,
   type Transaction,
@@ -89,6 +90,13 @@ export function createDeleteInputTransaction(input: DeleteInput): Transaction {
   }
 
   if (hasNextBlock(input.document, point)) {
+    const [blockIndex] = point.path;
+    const nextBlockIndex = (blockIndex ?? 0) + 1;
+
+    if (isVoidBlockNode(input.document.children[nextBlockIndex])) {
+      return createTransaction([createRemoveBlockOperation([nextBlockIndex])]);
+    }
+
     return createMergeNextBlockTransaction(point);
   }
 
@@ -107,6 +115,7 @@ export function createSelectionAfterDeleteInput(input: DeleteInput): RangeSelect
     case "delete_text":
       return createSelectionAfterDeleteText(operation);
     case "merge_block":
+    case "remove_block":
       return createCollapsedSelection(input.selection.anchor);
     case "insert_text":
     case "insert_block":

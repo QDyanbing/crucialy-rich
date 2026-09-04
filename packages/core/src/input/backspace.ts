@@ -1,7 +1,8 @@
-import type { DocumentNode } from "../model";
+import { isVoidBlockNode, type DocumentNode } from "../model";
 import {
   createDeleteTextOperation,
   createMergeBlockOperation,
+  createRemoveBlockOperation,
   createSelectionAfterDeleteText,
   createSelectionAfterMergeBlock,
   createTransaction,
@@ -54,6 +55,12 @@ function createMergePreviousBlockTransaction(point: Point): Transaction {
   return createTransaction([createMergeBlockOperation(point)]);
 }
 
+function getPreviousBlockIndex(point: Point): number | undefined {
+  const [blockIndex] = point.path;
+
+  return blockIndex === undefined || blockIndex === 0 ? undefined : blockIndex - 1;
+}
+
 export function createBackspaceInputTransaction(input: BackspaceInput): Transaction {
   const point = getCollapsedPoint(input.selection);
 
@@ -66,6 +73,16 @@ export function createBackspaceInputTransaction(input: BackspaceInput): Transact
   }
 
   if (isBlockStart(point)) {
+    const previousBlockIndex = getPreviousBlockIndex(point);
+    const previousBlock =
+      previousBlockIndex === undefined
+        ? undefined
+        : input.document.children[previousBlockIndex];
+
+    if (previousBlockIndex !== undefined && isVoidBlockNode(previousBlock)) {
+      return createTransaction([createRemoveBlockOperation([previousBlockIndex])]);
+    }
+
     return createMergePreviousBlockTransaction(point);
   }
 
@@ -87,6 +104,15 @@ export function createSelectionAfterBackspaceInput(
       return createSelectionAfterDeleteText(operation);
     case "merge_block":
       return createSelectionAfterMergeBlock(input.document, operation);
+    case "remove_block": {
+      const [blockIndex, ...rest] = input.selection.anchor.path;
+      const point = {
+        offset: input.selection.anchor.offset,
+        path: [Math.max(0, (blockIndex ?? 0) - 1), ...rest],
+      };
+
+      return createCollapsedSelection(point);
+    }
     case "insert_text":
     case "insert_block":
     case "set_block_type":

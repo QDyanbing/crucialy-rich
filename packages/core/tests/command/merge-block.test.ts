@@ -4,6 +4,7 @@ import {
   applyTransaction,
   canExecuteMergeBlockCommand,
   createDocument,
+  createDivider,
   createParagraph,
   createText,
   mergeBlockCommand,
@@ -85,6 +86,25 @@ describe("mergeBlockCommand", () => {
         selection: {
           anchor: { path: [1, 0], offset: 0 },
           focus: { path: [1, 0], offset: 1 },
+        },
+      },
+    };
+
+    expect(canExecuteMergeBlockCommand(input)).toBe(false);
+    expect(mergeBlockCommand.execute(input).status).toBe("skipped");
+  });
+
+  it("skips a text block preceded by a void block", () => {
+    const document = createDocument([
+      createDivider(),
+      createParagraph([createText("正文")]),
+    ]);
+    const input = {
+      context: {
+        document,
+        selection: {
+          anchor: { path: [1, 0], offset: 0 },
+          focus: { path: [1, 0], offset: 0 },
         },
       },
     };

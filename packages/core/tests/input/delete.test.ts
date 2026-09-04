@@ -4,6 +4,7 @@ import {
   applyTransaction,
   createDeleteInputTransaction,
   createDocument,
+  createDivider,
   createParagraph,
   createSelectionAfterDeleteInput,
   createText,
@@ -93,6 +94,28 @@ describe("createDeleteInputTransaction", () => {
 
     expect(result.children).toHaveLength(1);
     expect(result.children[0]?.children[0]?.text).toBe("第一段");
+  });
+
+  it("removes a following divider and keeps the current selection", () => {
+    const document = createDocument([
+      createParagraph([createText("上")]),
+      createDivider(),
+      createParagraph([createText("下")]),
+    ]);
+    const input = {
+      document,
+      selection: {
+        anchor: { offset: 1, path: [0, 0] },
+        focus: { offset: 1, path: [0, 0] },
+      },
+    };
+    const transaction = createDeleteInputTransaction(input);
+
+    expect(transaction.operations).toEqual([{ path: [1], type: "remove_block" }]);
+    expect(
+      applyTransaction(document, transaction).children.map((block) => block.type),
+    ).toEqual(["paragraph", "paragraph"]);
+    expect(createSelectionAfterDeleteInput(input)).toEqual(input.selection);
   });
 
   it("does nothing at the end of the final paragraph", () => {

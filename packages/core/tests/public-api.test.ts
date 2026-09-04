@@ -129,6 +129,8 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.createInsertTextOperation).toBe("function");
     expect(typeof core.createInsertBlockOperation).toBe("function");
     expect(typeof core.applyInsertBlock).toBe("function");
+    expect(typeof core.createRemoveBlockOperation).toBe("function");
+    expect(typeof core.applyRemoveBlock).toBe("function");
     expect(typeof core.applyInsertText).toBe("function");
     expect(typeof core.createSelectionAfterInsertText).toBe("function");
     expect(typeof core.createDeleteTextOperation).toBe("function");
@@ -164,6 +166,7 @@ describe("@crucialy-rich/core public API", () => {
       "split_block",
       "merge_block",
       "insert_block",
+      "remove_block",
     ]);
     expect(typeof core.isTextOperation).toBe("function");
     expect(typeof core.isBlockOperation).toBe("function");

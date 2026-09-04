@@ -13,6 +13,7 @@ import type {
   MergeBlockOperation,
   Operation,
   OperationType,
+  RemoveBlockOperation,
   SetBlockTypeOperation,
   SetLinkOperation,
   SetMarkAttributeOperation,
@@ -31,6 +32,7 @@ export type TextOperation =
 export type BlockOperation =
   | InsertBlockOperation
   | MergeBlockOperation
+  | RemoveBlockOperation
   | SetBlockTypeOperation
   | SplitBlockOperation;
 
@@ -67,6 +69,7 @@ export const TEXT_OPERATION_TYPES = [
 
 export const BLOCK_OPERATION_TYPES = [
   "insert_block",
+  "remove_block",
   "set_block_type",
   "split_block",
   "merge_block",
@@ -85,6 +88,7 @@ export function isTextOperation(operation: Operation): operation is TextOperatio
 export function isBlockOperation(operation: Operation): operation is BlockOperation {
   return (
     operation.type === "insert_block" ||
+    operation.type === "remove_block" ||
     operation.type === "set_block_type" ||
     operation.type === "split_block" ||
     operation.type === "merge_block"
@@ -99,6 +103,12 @@ export function summarizeOperation(operation: Operation): OperationSummary {
         scope: "block",
         targetPath: [...operation.path],
         type: "insert_block",
+      };
+    case "remove_block":
+      return {
+        scope: "block",
+        targetPath: [...operation.path],
+        type: "remove_block",
       };
     case "delete_text": {
       const range = normalizeRange(operation.range);

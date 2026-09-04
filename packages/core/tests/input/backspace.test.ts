@@ -4,6 +4,7 @@ import {
   applyTransaction,
   createBackspaceInputTransaction,
   createDocument,
+  createDivider,
   createParagraph,
   createSelectionAfterBackspaceInput,
   createText,
@@ -93,6 +94,31 @@ describe("createBackspaceInputTransaction", () => {
 
     expect(result.children).toHaveLength(1);
     expect(result.children[0]?.children[0]?.text).toBe("第一段");
+  });
+
+  it("removes a preceding divider and moves the selection with its block", () => {
+    const document = createDocument([
+      createParagraph([createText("上")]),
+      createDivider(),
+      createParagraph([createText("下")]),
+    ]);
+    const input = {
+      document,
+      selection: {
+        anchor: { offset: 0, path: [2, 0] },
+        focus: { offset: 0, path: [2, 0] },
+      },
+    };
+    const transaction = createBackspaceInputTransaction(input);
+
+    expect(transaction.operations).toEqual([{ path: [1], type: "remove_block" }]);
+    expect(
+      applyTransaction(document, transaction).children.map((block) => block.type),
+    ).toEqual(["paragraph", "paragraph"]);
+    expect(createSelectionAfterBackspaceInput(input)).toEqual({
+      anchor: { offset: 0, path: [1, 0] },
+      focus: { offset: 0, path: [1, 0] },
+    });
   });
 
   it("does nothing at the start of the first paragraph", () => {

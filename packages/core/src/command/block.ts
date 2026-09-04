@@ -3,6 +3,7 @@ import {
   createSelectionAfterMergeBlock,
   createTransaction,
 } from "../operation";
+import { isTextBlockNode } from "../model";
 import { createEnterInputTransaction, createSelectionAfterEnterInput } from "../input";
 import { isCollapsed, isValidPoint, type Point } from "../selection";
 import { createCommandSkipped, createCommandSuccess } from "./result";
@@ -37,9 +38,17 @@ function canMergeBlockAt(input: CommandInput, point: Point | undefined): boolean
   }
 
   const [blockIndex, textIndex] = point.path;
+  const previousBlock =
+    blockIndex === undefined
+      ? undefined
+      : input.context.document.children[blockIndex - 1];
 
   return (
-    blockIndex !== undefined && blockIndex > 0 && textIndex === 0 && point.offset === 0
+    blockIndex !== undefined &&
+    blockIndex > 0 &&
+    textIndex === 0 &&
+    point.offset === 0 &&
+    isTextBlockNode(previousBlock)
   );
 }
 

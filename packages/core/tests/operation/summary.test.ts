@@ -8,6 +8,7 @@ import {
   createInsertTextOperation,
   createInsertBlockOperation,
   createMergeBlockOperation,
+  createRemoveBlockOperation,
   createSetBlockTypeOperation,
   createSetMarkAttributeOperation,
   createSetLinkOperation,
@@ -34,6 +35,7 @@ describe("operation type registry", () => {
       "split_block",
       "merge_block",
       "insert_block",
+      "remove_block",
     ]);
     expect(TEXT_OPERATION_TYPES).toEqual([
       "insert_text",
@@ -44,6 +46,7 @@ describe("operation type registry", () => {
     ]);
     expect(BLOCK_OPERATION_TYPES).toEqual([
       "insert_block",
+      "remove_block",
       "set_block_type",
       "split_block",
       "merge_block",
@@ -100,8 +103,10 @@ describe("operation scope classification", () => {
     const splitOperation = createSplitBlockOperation({ path: [0, 0], offset: 1 });
     const mergeOperation = createMergeBlockOperation({ path: [1, 0], offset: 0 });
     const insertOperation = createInsertBlockOperation([1], createDivider());
+    const removeOperation = createRemoveBlockOperation([1]);
 
     expect(isBlockOperation(insertOperation)).toBe(true);
+    expect(isBlockOperation(removeOperation)).toBe(true);
     expect(isBlockOperation(setBlockTypeOperation)).toBe(true);
     expect(isBlockOperation(splitOperation)).toBe(true);
     expect(isBlockOperation(mergeOperation)).toBe(true);
@@ -157,6 +162,11 @@ describe("summarizeOperation", () => {
       scope: "block",
       targetPath: [1],
       type: "insert_block",
+    });
+    expect(summarizeOperation(createRemoveBlockOperation([1]))).toEqual({
+      scope: "block",
+      targetPath: [1],
+      type: "remove_block",
     });
     expect(
       summarizeOperation(

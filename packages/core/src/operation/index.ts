@@ -16,6 +16,7 @@ export {
   createMergeBlockOperation,
   createSelectionAfterMergeBlock,
 } from "./merge-block";
+export { applyRemoveBlock, createRemoveBlockOperation } from "./remove-block";
 export {
   applySplitBlock,
   createSelectionAfterSplitBlock,
@@ -63,6 +64,7 @@ export type {
   InsertTextOperation,
   InsertBlockOperation,
   MergeBlockOperation,
+  RemoveBlockOperation,
   Operation,
   SetBlockTypeOperation,
   SetLinkOperation,

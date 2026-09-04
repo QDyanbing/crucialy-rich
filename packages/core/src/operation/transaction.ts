@@ -4,6 +4,7 @@ import { applyDeleteText } from "./delete-text";
 import { applyInsertText } from "./insert-text";
 import { applyInsertBlock, createInsertBlockOperation } from "./insert-block";
 import { applyMergeBlock } from "./merge-block";
+import { applyRemoveBlock } from "./remove-block";
 import { applySetBlockType } from "./set-block-type";
 import { applySetLink } from "./set-link";
 import { applySetMarkAttribute } from "./set-mark-attribute";
@@ -29,6 +30,8 @@ export function cloneOperation(operation: Operation): Operation {
   switch (operation.type) {
     case "insert_block":
       return createInsertBlockOperation(operation.path, operation.block);
+    case "remove_block":
+      return { path: [...operation.path], type: "remove_block" };
     case "delete_text":
       return {
         range: cloneRange(operation.range),
@@ -94,6 +97,8 @@ export function applyOperation(
   switch (operation.type) {
     case "insert_block":
       return applyInsertBlock(document, operation);
+    case "remove_block":
+      return applyRemoveBlock(document, operation);
     case "delete_text":
       return applyDeleteText(document, operation);
     case "insert_text":
