@@ -4,6 +4,7 @@ import {
   canRedo,
   canUndo,
   cloneRangeSelection,
+  createCodeBlock,
   createDefaultCommandRegistry,
   createHistorySnapshot,
   createHistoryState,
@@ -30,6 +31,7 @@ import {
   redoHistory,
   recordHistory,
   SET_BACKGROUND_COLOR_COMMAND_NAME,
+  SET_CODE_BLOCK_COMMAND_NAME,
   SET_FONT_SIZE_COMMAND_NAME,
   SET_HEADING_COMMAND_NAME,
   SET_LINK_COMMAND_NAME,
@@ -74,6 +76,7 @@ type ModelExampleId =
   | "headings"
   | "quotes"
   | "block-types"
+  | "code-block"
   | "marks"
   | "links"
   | "empty"
@@ -170,6 +173,18 @@ const modelExamples: ModelExample[] = [
       ]),
       createQuote([createText("重要引用内容", { underline: true })]),
       createParagraph([createText("未选中的结尾段落保持原样。")]),
+    ]),
+  },
+  {
+    id: "code-block",
+    label: "代码块",
+    selection: {
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 16 },
+    },
+    value: createDocument([
+      createCodeBlock([createText("const value = 1;\nreturn value;")]),
+      createParagraph([createText("代码块后可以继续编辑正文。")]),
     ]),
   },
   {
@@ -295,6 +310,7 @@ const demoCommandDescriptors: DemoCommandDescriptor[] = [
   { label: "下划线", name: UNDERLINE_COMMAND_NAME },
   { label: "删除线", name: STRIKE_COMMAND_NAME },
   { label: "引用", name: TOGGLE_QUOTE_COMMAND_NAME },
+  { label: "代码块", name: SET_CODE_BLOCK_COMMAND_NAME },
   { label: "字号", name: SET_FONT_SIZE_COMMAND_NAME },
   { label: "文字颜色", name: SET_TEXT_COLOR_COMMAND_NAME },
   { label: "背景色", name: SET_BACKGROUND_COLOR_COMMAND_NAME },
@@ -382,14 +398,23 @@ function createDocumentJsonLines(document: DocumentNode): JsonLine[] {
       {
         key: `block-${blockIndex}-type`,
         path: blockPath,
-        text: '      "type": "paragraph",',
-      },
-      {
-        key: `block-${blockIndex}-children-open`,
-        path: blockPath,
-        text: '      "children": [',
+        text: `      "type": ${JSON.stringify(block.type)},`,
       },
     );
+
+    if (block.type === "heading") {
+      lines.push({
+        key: `block-${blockIndex}-level`,
+        path: blockPath,
+        text: `      "level": ${block.level},`,
+      });
+    }
+
+    lines.push({
+      key: `block-${blockIndex}-children-open`,
+      path: blockPath,
+      text: '      "children": [',
+    });
 
     block.children.forEach((node, textIndex) => {
       const textPath = [blockIndex, textIndex];
@@ -706,7 +731,9 @@ function DemoApp() {
                         )
                       : command.name === SET_HEADING_COMMAND_NAME
                         ? { level: selectedHeadingLevel ?? null }
-                        : undefined,
+                        : command.name === SET_CODE_BLOCK_COMMAND_NAME
+                          ? { enabled: true }
+                          : undefined,
         }),
         label: command.label,
       })),
@@ -867,6 +894,20 @@ function DemoApp() {
         context: {
           document: normalizedDocument,
           selection: modelSelection,
+        },
+      }),
+    );
+  }
+
+  function handleCodeBlock() {
+    applyCommandResult(
+      executeCommand(demoCommandRegistry, SET_CODE_BLOCK_COMMAND_NAME, {
+        context: {
+          document: normalizedDocument,
+          selection: modelSelection,
+        },
+        payload: {
+          enabled: !isCommandActive(SET_CODE_BLOCK_COMMAND_NAME),
         },
       }),
     );
@@ -1246,6 +1287,14 @@ function DemoApp() {
               onClick={handleQuote}
             >
               引用
+            </button>
+            <button
+              aria-pressed={isCommandActive(SET_CODE_BLOCK_COMMAND_NAME)}
+              type="button"
+              disabled={isCommandDisabled(SET_CODE_BLOCK_COMMAND_NAME)}
+              onClick={handleCodeBlock}
+            >
+              代码块
             </button>
             <div className="link-control">
               <button

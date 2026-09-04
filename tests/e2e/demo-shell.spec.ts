@@ -80,6 +80,55 @@ test("renders every heading level from the demo example", async ({ page }) => {
   }
 });
 
+test("edits and exits a multiline code block", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("code-block");
+
+  const editor = page.getByLabel("已渲染文档");
+  const codeButton = page.getByRole("button", { name: "代码块", exact: true });
+
+  await expect(editor.locator('pre[data-crucialy-path="[0]"] code')).toHaveText(
+    "const value = 1;\nreturn value;",
+  );
+  await expect(codeButton).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("button", { name: "加粗", exact: true })).toBeDisabled();
+
+  await placeCaretInRenderedText(page, "[0,0]", 16);
+  await page.keyboard.press("Enter");
+  await page.keyboard.type("console.log(value);");
+
+  await expect(editor.locator("pre code")).toContainText(
+    "const value = 1;\nconsole.log(value);",
+  );
+
+  await placeCaretInRenderedText(page, "[0,0]", 50);
+  await page.keyboard.press("Enter");
+  await page.keyboard.press("Enter");
+
+  await expect(editor.locator("pre")).toHaveCount(1);
+  await expect(editor.locator("p")).toHaveCount(2);
+  await expect(page.getByLabel("模型校验状态")).toContainText("合法");
+});
+
+test("toggles a paragraph code block from the demo control", async ({ page }) => {
+  await page.goto("/");
+
+  const editor = page.getByLabel("已渲染文档");
+  const codeButton = page.getByRole("button", { name: "代码块", exact: true });
+
+  await codeButton.click();
+  await expect(editor.locator('pre[data-crucialy-path="[0]"]')).toHaveCount(1);
+  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
+    '"type": "codeBlock"',
+  );
+
+  await codeButton.click();
+  await expect(editor.locator('p[data-crucialy-path="[0]"]')).toHaveCount(1);
+  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
+    '"type": "paragraph"',
+  );
+});
+
 test("renders the mixed block type acceptance sample", async ({ page }) => {
   await page.goto("/");
   await page.getByLabel("模型示例").selectOption("block-types");

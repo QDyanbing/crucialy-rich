@@ -52,4 +52,4 @@ CodeBlock 使用 `pre > code` 语义结构：
 
 ## 当前边界
 
-Demo 在后续提交接入。
+Demo 提供“代码块”样例和切换按钮，可验证多行输入、退出、active 状态、marks 禁用和 History 记录。
