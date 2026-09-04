@@ -1,4 +1,4 @@
-import type { DocumentNode } from "../model";
+import { isTextBlockNode, type DocumentNode } from "../model";
 import type { RangeSelection } from "../selection";
 import { isCollapsed, isValidPoint, normalizeRange } from "../selection";
 import type { DeleteTextOperation } from "./types";
@@ -59,7 +59,7 @@ export function applyDeleteText(
   return {
     ...document,
     children: document.children.map((block, currentBlockIndex) =>
-      currentBlockIndex === blockIndex
+      currentBlockIndex === blockIndex && isTextBlockNode(block)
         ? {
             ...block,
             children: block.children.map((textNode, currentTextIndex) =>

@@ -102,6 +102,10 @@ function renderCodeTextNode(node: TextNode, path: Path): RenderedElementNode {
 }
 
 function renderBlockNode(node: BlockNode, path: Path): RenderedElementNode {
+  if (node.type === "divider") {
+    return createRenderedNode("hr", path);
+  }
+
   if (node.type === "codeBlock") {
     return createRenderedNode("pre", path, {
       children: node.children.map((child, index) =>

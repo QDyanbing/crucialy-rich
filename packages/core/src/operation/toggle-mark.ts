@@ -1,6 +1,7 @@
 import {
   createText,
   hasTextMark,
+  isTextBlockNode,
   mergeAdjacentTextNodes,
   setTextMark,
   toggleTextMark,
@@ -150,7 +151,7 @@ export function applyToggleMark(
   return {
     ...document,
     children: document.children.map((block, currentBlockIndex) =>
-      currentBlockIndex === target.blockIndex
+      currentBlockIndex === target.blockIndex && isTextBlockNode(block)
         ? {
             ...block,
             children: mergeAdjacentTextNodes([

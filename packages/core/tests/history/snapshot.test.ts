@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   createCodeBlock,
   createDocument,
+  createDivider,
   createHeading,
   createHistorySnapshot,
   createParagraph,
@@ -85,6 +86,7 @@ describe("createHistorySnapshot", () => {
         createHeading(3, [createText("标题")]),
         createQuote([createText("引用")]),
         createCodeBlock([createText("const value = 1;")]),
+        createDivider(),
       ]),
     );
 
@@ -100,6 +102,7 @@ describe("createHistorySnapshot", () => {
         children: [{ text: "const value = 1;", type: "text" }],
         type: "codeBlock",
       },
+      { children: [], type: "divider" },
     ]);
   });
 });

@@ -1,4 +1,9 @@
-import { createText, type BlockNode, type DocumentNode } from "../model";
+import {
+  createText,
+  isTextBlockNode,
+  type DocumentNode,
+  type TextBlockNode,
+} from "../model";
 import type { Point, RangeSelection } from "../selection";
 import { isValidPoint } from "../selection";
 import type { SplitBlockOperation } from "./types";
@@ -30,7 +35,7 @@ function getSplitBlockIndexes(
   return [blockIndex, textIndex];
 }
 
-function ensureTextChildren(children: BlockNode["children"]) {
+function ensureTextChildren(children: TextBlockNode["children"]) {
   return children.length > 0 ? children : [createText()];
 }
 
@@ -40,6 +45,11 @@ export function applySplitBlock(
 ): DocumentNode {
   const [blockIndex, textIndex] = getSplitBlockIndexes(document, operation);
   const block = document.children[blockIndex]!;
+
+  if (!isTextBlockNode(block)) {
+    throw new RangeError("split block point must reference a text block");
+  }
+
   const textNode = block.children[textIndex]!;
   const leftText = {
     ...textNode,

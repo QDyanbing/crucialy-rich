@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { createDocument, createParagraph, createText } from "../../src/model";
+import {
+  createDivider,
+  createDocument,
+  createParagraph,
+  createText,
+} from "../../src/model";
 import {
   applyMergeBlock,
   createMergeBlockOperation,
@@ -152,6 +157,21 @@ describe("applyMergeBlock", () => {
         }),
       ),
     ).toThrow("merge block point must be at the start of a non-first block");
+  });
+
+  it("rejects merging text across a void block", () => {
+    const document = createDocument([
+      createDivider(),
+      createParagraph([createText("正文")]),
+    ]);
+    const operation = createMergeBlockOperation({ path: [1, 0], offset: 0 });
+
+    expect(() => applyMergeBlock(document, operation)).toThrow(
+      "merge block cannot cross a void block",
+    );
+    expect(() => createSelectionAfterMergeBlock(document, operation)).toThrow(
+      "merge block cannot cross a void block",
+    );
   });
 });
 

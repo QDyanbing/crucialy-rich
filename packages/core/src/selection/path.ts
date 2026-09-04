@@ -1,4 +1,4 @@
-import type { DocumentNode, Node } from "../model";
+import { isTextBlockNode, type DocumentNode, type Node } from "../model";
 import type { Path } from "./types";
 
 function isPathIndex(value: number): boolean {
@@ -31,7 +31,7 @@ export function getNodeAtPath(document: DocumentNode, path: Path): Node | undefi
     return block;
   }
 
-  return block.children[textIndex];
+  return isTextBlockNode(block) ? block.children[textIndex] : undefined;
 }
 
 export function hasNodeAtPath(document: DocumentNode, path: Path): boolean {

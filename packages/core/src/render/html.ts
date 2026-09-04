@@ -36,6 +36,10 @@ function renderAttributes(node: RenderedElementNode): string {
 }
 
 export function renderNodeToHtml(node: RenderedElementNode): string {
+  if (node.tagName === "hr") {
+    return `<hr${renderAttributes(node)}>`;
+  }
+
   const children = node.children?.map(renderNodeToHtml).join("") ?? "";
   const text = node.text ? escapeHtml(node.text) : "";
 

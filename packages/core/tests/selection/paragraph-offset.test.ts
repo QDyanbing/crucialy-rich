@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   createDocument,
+  createDivider,
   createHeading,
   createParagraph,
   createQuote,
@@ -80,5 +81,14 @@ describe("block text offsets", () => {
       offset: 2,
       path: [0, 1],
     });
+  });
+
+  it("does not create text points inside void blocks", () => {
+    const dividerDocument = createDocument([createDivider()]);
+
+    expect(getBlockTextOffset(dividerDocument, { offset: 0, path: [0, 0] })).toBe(
+      undefined,
+    );
+    expect(getPointAtBlockTextOffset(dividerDocument, 0, 0)).toBeUndefined();
   });
 });

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   createCodeBlock,
   createDocument,
+  createDivider,
   createHeading,
   createParagraph,
   createQuote,
@@ -150,6 +151,16 @@ describe("renderDocument", () => {
       ],
       path: [0],
       tagName: "pre",
+    });
+  });
+
+  it("renders dividers as void elements with model paths", () => {
+    const document = createDocument([createDivider()]);
+
+    expect(renderDocument(document).children?.[0]).toEqual({
+      attributes: { [MODEL_PATH_ATTRIBUTE]: "[0]" },
+      path: [0],
+      tagName: "hr",
     });
   });
 

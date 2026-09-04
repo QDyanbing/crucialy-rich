@@ -7,6 +7,7 @@ import {
   LINK_TARGETS,
   TEXT_MARK_ATTRIBUTE_TYPES,
   TEXT_MARK_TYPES,
+  VOID_BLOCK_TYPES,
   type BlockType,
   type DocumentNode,
   type HeadingLevel,
@@ -36,7 +37,14 @@ describe("model node types", () => {
       type: "quote",
     };
 
-    expect(BLOCK_TYPES).toEqual(["paragraph", "heading", "quote", "codeBlock"]);
+    expect(BLOCK_TYPES).toEqual([
+      "paragraph",
+      "heading",
+      "quote",
+      "codeBlock",
+      "divider",
+    ]);
+    expect(VOID_BLOCK_TYPES).toEqual(["divider"]);
     expect(HEADING_LEVELS).toEqual([1, 2, 3, 4, 5, 6]);
     expect(heading.level).toBe(2);
     expect(quote.type).toBe("quote");

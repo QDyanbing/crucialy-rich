@@ -5,7 +5,15 @@
  * text 节点可携带 boolean marks 和文字样式属性 marks。
  */
 
-export const BLOCK_TYPES = ["paragraph", "heading", "quote", "codeBlock"] as const;
+export const BLOCK_TYPES = [
+  "paragraph",
+  "heading",
+  "quote",
+  "codeBlock",
+  "divider",
+] as const;
+
+export const VOID_BLOCK_TYPES = ["divider"] as const;
 
 export const HEADING_LEVELS = [1, 2, 3, 4, 5, 6] as const;
 
@@ -77,10 +85,19 @@ export interface CodeBlockNode {
   children: TextNode[];
 }
 
+export interface DividerNode {
+  type: "divider";
+  children: [];
+}
+
 /**
- * 块级节点联合类型。所有 block 直接包含 text children。
+ * 文本块直接包含 text children，空块不包含可编辑文本。
  */
-export type BlockNode = CodeBlockNode | HeadingNode | ParagraphNode | QuoteNode;
+export type TextBlockNode = CodeBlockNode | HeadingNode | ParagraphNode | QuoteNode;
+
+export type VoidBlockNode = DividerNode;
+
+export type BlockNode = TextBlockNode | VoidBlockNode;
 
 export interface DocumentNode {
   type: "document";

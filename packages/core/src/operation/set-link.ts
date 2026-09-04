@@ -1,5 +1,6 @@
 import {
   createText,
+  isTextBlockNode,
   mergeAdjacentTextNodes,
   normalizeLinkMark,
   removeLinkMark,
@@ -156,7 +157,7 @@ export function applySetLink(
   return {
     ...document,
     children: document.children.map((block, blockIndex) =>
-      blockIndex === target.blockIndex
+      blockIndex === target.blockIndex && isTextBlockNode(block)
         ? {
             ...block,
             children: mergeAdjacentTextNodes([

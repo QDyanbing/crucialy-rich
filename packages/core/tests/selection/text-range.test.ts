@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { createDocument, createParagraph, createText } from "../../src/model";
+import {
+  createDivider,
+  createDocument,
+  createParagraph,
+  createText,
+} from "../../src/model";
 import { getTextInRange, splitTextByRange } from "../../src/selection/text-range";
 
 const document = createDocument([
@@ -52,6 +57,21 @@ describe("getTextInRange", () => {
         focus: { path: [0, 0], offset: 1 },
       }),
     ).toThrow(RangeError);
+  });
+
+  it("skips void children while preserving block separators", () => {
+    const documentWithDivider = createDocument([
+      createParagraph([createText("上")]),
+      createDivider(),
+      createParagraph([createText("下")]),
+    ]);
+
+    expect(
+      getTextInRange(documentWithDivider, {
+        anchor: { offset: 0, path: [0, 0] },
+        focus: { offset: 1, path: [2, 0] },
+      }),
+    ).toBe("上\n\n下");
   });
 });
 

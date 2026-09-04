@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   createCodeBlock,
   createDocument,
+  createDivider,
   createHeading,
   createParagraph,
   createQuote,
@@ -50,6 +51,24 @@ describe("validateDocument", () => {
       }),
     ).toEqual({
       errors: [{ message: "codeBlock text 不支持 marks", path: [0, 0] }],
+      valid: false,
+    });
+  });
+
+  it("accepts empty dividers and rejects divider children", () => {
+    expect(validateDocument(createDocument([createDivider()]))).toEqual({
+      errors: [],
+      valid: true,
+    });
+    expect(
+      validateDocument({
+        children: [
+          { children: [{ text: "unexpected", type: "text" }], type: "divider" },
+        ],
+        type: "document",
+      }),
+    ).toEqual({
+      errors: [{ message: "divider 不能包含子节点", path: [0] }],
       valid: false,
     });
   });

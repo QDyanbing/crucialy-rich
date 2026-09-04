@@ -3,6 +3,10 @@ import type { Point, RangeSelection } from "../selection";
 import type { HistorySnapshot } from "./types";
 
 function cloneBlock(block: BlockNode): BlockNode {
+  if (block.type === "divider") {
+    return { children: [], type: "divider" };
+  }
+
   const children = block.children.map((textNode) =>
     createText(textNode.text, textNode.marks),
   );

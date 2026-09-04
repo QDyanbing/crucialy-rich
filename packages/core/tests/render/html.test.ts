@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   createCodeBlock,
   createDocument,
+  createDivider,
   createHeading,
   createParagraph,
   createQuote,
@@ -53,6 +54,14 @@ describe("renderNodeToHtml", () => {
 
     expect(renderNodeToHtml(renderDocument(document))).toContain(
       '<pre data-crucialy-path="[0]"><code data-crucialy-path="[0,0]">const value = &quot;&lt;safe&gt;&quot;;\nreturn value;</code></pre>',
+    );
+  });
+
+  it("serializes dividers as void hr elements", () => {
+    const document = createDocument([createDivider()]);
+
+    expect(renderNodeToHtml(renderDocument(document))).toBe(
+      '<div data-crucialy-path="[]"><hr data-crucialy-path="[0]"></div>',
     );
   });
 

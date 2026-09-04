@@ -4,11 +4,14 @@ import {
   isBlockNode,
   isCodeBlockNode,
   isDocumentNode,
+  isDividerNode,
   isHeadingLevel,
   isHeadingNode,
   isParagraphNode,
   isQuoteNode,
   isTextNode,
+  isTextBlockNode,
+  isVoidBlockNode,
 } from "../../src/model/guards";
 
 describe("model type guards", () => {
@@ -47,6 +50,16 @@ describe("model type guards", () => {
     expect(isCodeBlockNode({ type: "codeBlock", children: [] })).toBe(true);
     expect(isCodeBlockNode({ type: "codeBlock" })).toBe(false);
     expect(isBlockNode({ type: "codeBlock", children: [] })).toBe(true);
+  });
+
+  it("distinguishes text blocks from void blocks", () => {
+    const divider = { children: [], type: "divider" };
+
+    expect(isDividerNode(divider)).toBe(true);
+    expect(isVoidBlockNode(divider)).toBe(true);
+    expect(isTextBlockNode(divider)).toBe(false);
+    expect(isBlockNode(divider)).toBe(true);
+    expect(isDividerNode({ type: "divider" })).toBe(false);
   });
 
   it("treats paragraph as a block node", () => {

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   createCodeBlock,
   createDocument,
+  createDivider,
   createHeading,
   createParagraph,
   createQuote,
@@ -11,6 +12,7 @@ import {
 import {
   isCodeBlockNode,
   isDocumentNode,
+  isDividerNode,
   isHeadingNode,
   isParagraphNode,
   isQuoteNode,
@@ -136,6 +138,13 @@ describe("model factories", () => {
       children: [{ text: "const answer = 42;", type: "text" }],
       type: "codeBlock",
     });
+  });
+
+  it("creates dividers without editable children", () => {
+    const divider = createDivider();
+
+    expect(isDividerNode(divider)).toBe(true);
+    expect(divider).toEqual({ children: [], type: "divider" });
   });
 
   it("creates a document with a default empty paragraph", () => {

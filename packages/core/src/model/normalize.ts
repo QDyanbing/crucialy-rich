@@ -1,5 +1,5 @@
 import { createDocument, createParagraph, createText } from "./factories";
-import { isBlockNode, isDocumentNode, isTextNode } from "./guards";
+import { isBlockNode, isDocumentNode, isTextBlockNode, isTextNode } from "./guards";
 import { mergeAdjacentTextNodes, normalizeTextMarks } from "./marks";
 import type { BlockNode, DocumentNode, TextNode } from "./types";
 
@@ -27,6 +27,10 @@ export function normalizeDocument(value: unknown): DocumentNode {
 }
 
 function normalizeBlock(node: BlockNode): BlockNode {
+  if (!isTextBlockNode(node)) {
+    return { children: [], type: "divider" };
+  }
+
   const children = mergeAdjacentTextNodes(
     node.children
       .filter(isTextNode)

@@ -1,4 +1,4 @@
-import type { DocumentNode } from "../model";
+import { isTextBlockNode, type DocumentNode } from "../model";
 import { isValidPoint } from "./point";
 import { normalizeRange } from "./range";
 import type { Path, Point, RangeSelection } from "./types";
@@ -27,6 +27,14 @@ function createLinearSegments(document: DocumentNode): LinearSegment[] {
   let cursor = 0;
 
   document.children.forEach((block, blockIndex) => {
+    if (!isTextBlockNode(block)) {
+      if (blockIndex < document.children.length - 1) {
+        segments.push({ start: cursor, end: cursor + 1, text: "\n" });
+        cursor += 1;
+      }
+      return;
+    }
+
     block.children.forEach((node, textIndex) => {
       segments.push({
         path: [blockIndex, textIndex],

@@ -1,6 +1,7 @@
 import {
   createText,
   isValidTextMarkAttributeValue,
+  isTextBlockNode,
   mergeAdjacentTextNodes,
   normalizeTextMarks,
   removeTextMarkAttribute,
@@ -151,7 +152,7 @@ export function applySetMarkAttribute(
   return {
     ...document,
     children: document.children.map((block, blockIndex) =>
-      blockIndex === target.blockIndex
+      blockIndex === target.blockIndex && isTextBlockNode(block)
         ? {
             ...block,
             children: mergeAdjacentTextNodes([

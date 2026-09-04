@@ -2,6 +2,7 @@ import { normalizeTextMarks } from "./marks";
 import type {
   BlockNode,
   CodeBlockNode,
+  DividerNode,
   DocumentNode,
   HeadingLevel,
   HeadingNode,
@@ -57,6 +58,11 @@ export function createCodeBlock(children: TextNode[] = [createText()]): CodeBloc
     type: "codeBlock",
     children: children.map((child) => createText(child.text)),
   };
+}
+
+/** 创建一个不可编辑的分隔线节点。 */
+export function createDivider(): DividerNode {
+  return { children: [], type: "divider" };
 }
 
 /**

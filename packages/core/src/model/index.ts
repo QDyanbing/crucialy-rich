@@ -5,12 +5,14 @@ export {
   LINK_TARGETS,
   TEXT_MARK_ATTRIBUTE_TYPES,
   TEXT_MARK_TYPES,
+  VOID_BLOCK_TYPES,
 } from "./types";
 export type {
   BlockType,
   BlockNode,
   CodeBlockNode,
   DocumentNode,
+  DividerNode,
   HeadingLevel,
   HeadingNode,
   LinkMarkAttributes,
@@ -24,20 +26,26 @@ export type {
   TextMarks,
   TextMarkType,
   TextNode,
+  TextBlockNode,
+  VoidBlockNode,
 } from "./types";
 export {
   isBlockNode,
   isCodeBlockNode,
   isDocumentNode,
+  isDividerNode,
   isHeadingLevel,
   isHeadingNode,
   isParagraphNode,
   isQuoteNode,
   isTextNode,
+  isTextBlockNode,
+  isVoidBlockNode,
 } from "./guards";
 export {
   createCodeBlock,
   createDocument,
+  createDivider,
   createHeading,
   createParagraph,
   createQuote,

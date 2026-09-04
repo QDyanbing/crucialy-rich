@@ -1,4 +1,4 @@
-import { isBlockNode, isDocumentNode, isTextNode } from "./guards";
+import { isBlockNode, isDocumentNode, isTextBlockNode, isTextNode } from "./guards";
 import { isValidLinkMark } from "./link";
 import { isValidTextMarkAttributeValue } from "./marks";
 import {
@@ -109,6 +109,16 @@ export function validateDocument(value: unknown): ValidationResult {
         path: [blockIndex],
         message: "document 子节点必须是块级节点",
       });
+      return;
+    }
+
+    if (!isTextBlockNode(child)) {
+      if (child.children.length > 0) {
+        errors.push({
+          path: [blockIndex],
+          message: "divider 不能包含子节点",
+        });
+      }
       return;
     }
 

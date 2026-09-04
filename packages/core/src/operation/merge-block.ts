@@ -1,4 +1,9 @@
-import { createText, type BlockNode, type DocumentNode } from "../model";
+import {
+  createText,
+  isTextBlockNode,
+  type DocumentNode,
+  type TextBlockNode,
+} from "../model";
 import type { Point, RangeSelection } from "../selection";
 import { isValidPoint } from "../selection";
 import type { MergeBlockOperation } from "./types";
@@ -35,14 +40,14 @@ function getMergeBlockIndex(
   return blockIndex;
 }
 
-function isEmptyBlockChildren(children: BlockNode["children"]): boolean {
+function isEmptyBlockChildren(children: TextBlockNode["children"]): boolean {
   return children.length === 0 || (children.length === 1 && children[0]?.text === "");
 }
 
 function mergeBlockChildren(
-  previousChildren: BlockNode["children"],
-  currentChildren: BlockNode["children"],
-): BlockNode["children"] {
+  previousChildren: TextBlockNode["children"],
+  currentChildren: TextBlockNode["children"],
+): TextBlockNode["children"] {
   const previousEmpty = isEmptyBlockChildren(previousChildren);
   const currentEmpty = isEmptyBlockChildren(currentChildren);
 
@@ -69,6 +74,11 @@ export function applyMergeBlock(
   const previousBlockIndex = blockIndex - 1;
   const previousBlock = document.children[previousBlockIndex]!;
   const currentBlock = document.children[blockIndex]!;
+
+  if (!isTextBlockNode(previousBlock) || !isTextBlockNode(currentBlock)) {
+    throw new RangeError("merge block cannot cross a void block");
+  }
+
   const mergedBlock = {
     ...previousBlock,
     children: mergeBlockChildren(previousBlock.children, currentBlock.children),
@@ -90,7 +100,13 @@ export function createSelectionAfterMergeBlock(
 ): RangeSelection {
   const blockIndex = getMergeBlockIndex(document, operation);
   const previousBlockIndex = blockIndex - 1;
-  const previousChildren = document.children[previousBlockIndex]?.children ?? [];
+  const previousBlock = document.children[previousBlockIndex];
+
+  if (!isTextBlockNode(previousBlock)) {
+    throw new RangeError("merge block cannot cross a void block");
+  }
+
+  const previousChildren = previousBlock.children;
   const previousEmpty = isEmptyBlockChildren(previousChildren);
   const lastTextIndex = previousEmpty ? 0 : previousChildren.length - 1;
   const lastText = previousEmpty ? createText() : previousChildren[lastTextIndex]!;

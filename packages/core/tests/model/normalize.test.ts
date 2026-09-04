@@ -70,6 +70,21 @@ describe("normalizeDocument", () => {
     expect(validateDocument(result).valid).toBe(true);
   });
 
+  it("normalizes divider children to an empty list", () => {
+    const result = normalizeDocument({
+      children: [
+        {
+          children: [{ text: "不能保留", type: "text" }],
+          type: "divider",
+        },
+      ],
+      type: "document",
+    });
+
+    expect(result.children).toEqual([{ children: [], type: "divider" }]);
+    expect(validateDocument(result).valid).toBe(true);
+  });
+
   it("preserves block types while normalizing text children", () => {
     const result = normalizeDocument({
       children: [

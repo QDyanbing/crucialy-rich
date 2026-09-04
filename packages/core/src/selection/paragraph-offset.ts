@@ -1,4 +1,4 @@
-import type { DocumentNode } from "../model";
+import { isTextBlockNode, type DocumentNode } from "../model";
 import type { Point } from "./types";
 
 export type TextOffsetAffinity = "backward" | "forward";
@@ -24,9 +24,12 @@ export function getBlockTextOffset(
 
   const [blockIndex, textIndex] = point.path;
   const block = blockIndex === undefined ? undefined : document.children[blockIndex];
-  const text = textIndex === undefined ? undefined : block?.children[textIndex];
+  const text =
+    textIndex === undefined || !isTextBlockNode(block)
+      ? undefined
+      : block.children[textIndex];
 
-  if (!block || !text || point.offset > text.text.length) {
+  if (!isTextBlockNode(block) || !text || point.offset > text.text.length) {
     return undefined;
   }
 
@@ -49,7 +52,7 @@ export function getPointAtBlockTextOffset(
 
   const block = document.children[blockIndex];
 
-  if (!block) {
+  if (!isTextBlockNode(block)) {
     return undefined;
   }
 
