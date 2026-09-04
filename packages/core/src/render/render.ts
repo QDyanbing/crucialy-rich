@@ -97,7 +97,19 @@ function renderTextNode(node: TextNode, path: Path): RenderedElementNode {
   return createRenderedNode(tagName, path, options);
 }
 
+function renderCodeTextNode(node: TextNode, path: Path): RenderedElementNode {
+  return createRenderedNode("code", path, { text: node.text });
+}
+
 function renderBlockNode(node: BlockNode, path: Path): RenderedElementNode {
+  if (node.type === "codeBlock") {
+    return createRenderedNode("pre", path, {
+      children: node.children.map((child, index) =>
+        renderCodeTextNode(child, [...path, index]),
+      ),
+    });
+  }
+
   const tagName =
     node.type === "heading"
       ? HEADING_TAG_NAMES[node.level]

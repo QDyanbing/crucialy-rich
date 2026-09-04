@@ -3,6 +3,7 @@ import type { Path } from "../selection";
 export type RenderedTagName =
   | "a"
   | "blockquote"
+  | "code"
   | "div"
   | "em"
   | "h1"
@@ -12,6 +13,7 @@ export type RenderedTagName =
   | "h5"
   | "h6"
   | "p"
+  | "pre"
   | "s"
   | "span"
   | "strong"

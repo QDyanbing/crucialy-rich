@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  createCodeBlock,
   createDocument,
   createHeading,
   createParagraph,
@@ -129,6 +130,26 @@ describe("renderDocument", () => {
     expect(rendered.children?.[1]).toMatchObject({
       children: [{ tagName: "em", text: "引用" }],
       path: [1],
+    });
+  });
+
+  it("renders code blocks as pre and code with model paths", () => {
+    const document = createDocument([
+      createCodeBlock([createText("const value = 1;\nreturn value;")]),
+    ]);
+
+    expect(renderDocument(document).children?.[0]).toEqual({
+      attributes: { [MODEL_PATH_ATTRIBUTE]: "[0]" },
+      children: [
+        {
+          attributes: { [MODEL_PATH_ATTRIBUTE]: "[0,0]" },
+          path: [0, 0],
+          tagName: "code",
+          text: "const value = 1;\nreturn value;",
+        },
+      ],
+      path: [0],
+      tagName: "pre",
     });
   });
 

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  createCodeBlock,
   createDocument,
   createHeading,
   createParagraph,
@@ -42,6 +43,16 @@ describe("renderNodeToHtml", () => {
 
     expect(renderNodeToHtml(renderDocument(document))).toContain(
       '<blockquote data-crucialy-path="[0]"><em data-crucialy-path="[0,0]">引用内容</em></blockquote>',
+    );
+  });
+
+  it("serializes code blocks with escaped multiline text", () => {
+    const document = createDocument([
+      createCodeBlock([createText('const value = "<safe>";\nreturn value;')]),
+    ]);
+
+    expect(renderNodeToHtml(renderDocument(document))).toContain(
+      '<pre data-crucialy-path="[0]"><code data-crucialy-path="[0,0]">const value = &quot;&lt;safe&gt;&quot;;\nreturn value;</code></pre>',
     );
   });
 

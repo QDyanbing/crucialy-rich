@@ -1,4 +1,5 @@
 import {
+  createCodeBlock,
   createDocument,
   createParagraph,
   createText,
@@ -40,6 +41,19 @@ describe("@crucialy-rich/react public API", () => {
 
     expect(html).toContain("Controlled value.");
     expect(html).toContain('data-crucialy-path="[0,0]"');
+  });
+
+  it("renders multiline code blocks through React", () => {
+    const document = createDocument([
+      createCodeBlock([createText("const value = 1;\nreturn value;")]),
+    ]);
+    const html = renderToStaticMarkup(
+      createElement(RichTextEditor, { value: document }),
+    );
+
+    expect(html).toContain('<pre data-crucialy-path="[0]">');
+    expect(html).toContain('<code data-crucialy-path="[0,0]">');
+    expect(html).toContain("const value = 1;\nreturn value;");
   });
 
   it("renders combined mark styles through React", () => {

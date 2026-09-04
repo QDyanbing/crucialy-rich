@@ -21,6 +21,14 @@ interface CodeBlockNode {
 - `normalizeDocument` 会移除 CodeBlock 中的全部 marks，并合并相邻 text。
 - 文本中的 `\n` 作为代码块内部换行保留。
 
+## 渲染
+
+CodeBlock 使用 `pre > code` 语义结构：
+
+- `pre` 保存 block path。
+- `code` 保存 text path，DOM 与模型选区映射继续使用同一协议。
+- 文本和 HTML 特殊字符由 serializer 安全转义，换行原样保留。
+
 ## 当前边界
 
-当前提交只建立模型契约；语义渲染、切换命令、输入行为和 Demo 在后续提交接入。
+切换命令、输入行为和 Demo 在后续提交接入。
