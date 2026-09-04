@@ -92,6 +92,29 @@ describe("set block type operation", () => {
     ]);
   });
 
+  it("switches to a plain code block and back to a paragraph", () => {
+    const document = createDocument([
+      createParagraph([createText("const value = 1;", { bold: true })]),
+    ]);
+    const codeDocument = applySetBlockType(
+      document,
+      createSetBlockTypeOperation([0], { type: "codeBlock" }),
+    );
+    const paragraphDocument = applySetBlockType(
+      codeDocument,
+      createSetBlockTypeOperation([0], { type: "paragraph" }),
+    );
+
+    expect(codeDocument.children[0]).toEqual({
+      children: [{ text: "const value = 1;", type: "text" }],
+      type: "codeBlock",
+    });
+    expect(paragraphDocument.children[0]).toEqual({
+      children: [{ text: "const value = 1;", type: "text" }],
+      type: "paragraph",
+    });
+  });
+
   it("updates only the block at the target path", () => {
     const document = createDocument([
       createParagraph([createText("第一段")]),

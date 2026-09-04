@@ -1,4 +1,9 @@
-import { isHeadingLevel, type BlockNode, type DocumentNode } from "../model";
+import {
+  createCodeBlock,
+  isHeadingLevel,
+  type BlockNode,
+  type DocumentNode,
+} from "../model";
 import type { Path } from "../selection";
 import type { BlockTypeSpec, SetBlockTypeOperation } from "./types";
 
@@ -10,6 +15,7 @@ function isValidBlockTypeSpec(block: BlockTypeSpec): boolean {
   switch (block.type) {
     case "heading":
       return isHeadingLevel(block.level);
+    case "codeBlock":
     case "paragraph":
     case "quote":
       return true;
@@ -36,6 +42,8 @@ function getBlockIndex(document: DocumentNode, path: Path): number {
 
 function createBlockWithType(source: BlockNode, target: BlockTypeSpec): BlockNode {
   switch (target.type) {
+    case "codeBlock":
+      return createCodeBlock(source.children);
     case "heading":
       return { children: source.children, level: target.level, type: "heading" };
     case "paragraph":

@@ -1,8 +1,10 @@
+import { setCodeBlockCommand } from "./code-block";
 import { setHeadingCommand } from "./heading";
 import { toggleQuoteCommand } from "./quote";
 import type { Command } from "./types";
 
 export const BLOCK_TYPE_COMMANDS: readonly Command[] = [
+  setCodeBlockCommand,
   setHeadingCommand,
   toggleQuoteCommand,
 ];

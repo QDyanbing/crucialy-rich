@@ -8,6 +8,7 @@ import type {
 import type { Path, Point, RangeSelection } from "../selection";
 
 export type BlockTypeSpec =
+  | { type: "codeBlock" }
   | { type: "heading"; level: HeadingLevel }
   | { type: "paragraph" }
   | { type: "quote" };

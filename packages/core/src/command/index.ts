@@ -15,6 +15,13 @@ export {
 export { doSelectedBlocksMatch, getSelectedBlockIndexes } from "./block-selection";
 export { BLOCK_TYPE_COMMANDS } from "./block-type";
 export {
+  canExecuteSetCodeBlockCommand,
+  isCodeBlockCommandActive,
+  SET_CODE_BLOCK_COMMAND_NAME,
+  setCodeBlockCommand,
+} from "./code-block";
+export type { SetCodeBlockCommandPayload } from "./code-block";
+export {
   canExecuteSetFontSizeCommand,
   SET_FONT_SIZE_COMMAND_NAME,
   setFontSizeCommand,

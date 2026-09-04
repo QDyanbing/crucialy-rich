@@ -26,6 +26,15 @@ interface CodeBlockNode {
 
 History 快照会按 CodeBlock 类型深拷贝文本和选区，撤销、重做不会把代码块降级为 paragraph。
 
+## Command
+
+`setCodeBlockCommand` 注册名为 `setCodeBlock`：
+
+- 默认或 `{ enabled: true }` 把连续选中的 block 转为 CodeBlock。
+- `{ enabled: false }` 把连续选中的 CodeBlock 恢复为 paragraph。
+- 转换时保留文字和选区方向，进入 CodeBlock 时移除 rich marks。
+- `isCodeBlockCommandActive` 仅在选中 block 全部为 CodeBlock 时返回 `true`。
+
 ## 渲染
 
 CodeBlock 使用 `pre > code` 语义结构：
@@ -36,4 +45,4 @@ CodeBlock 使用 `pre > code` 语义结构：
 
 ## 当前边界
 
-切换命令、输入行为和 Demo 在后续提交接入。
+输入行为和 Demo 在后续提交接入。
