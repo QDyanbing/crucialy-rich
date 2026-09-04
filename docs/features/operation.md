@@ -2,7 +2,7 @@
 
 Operation 用于描述一次对文档模型的可复现修改。Transaction 用于把多个 operation 按顺序组合为一次批量模型变更。
 
-当前阶段已经实现 `insert_text`、`delete_text`、`toggle_mark`、`set_mark_attribute`、`set_link`、`set_block_type`、`split_block`、`merge_block` 和第一版 transaction。
+当前已实现文本、Mark、链接和 Block Type operation，以及 `split_block`、`merge_block`、`insert_block`、`remove_block` 和第一版 Transaction。
 
 ## 操作类型
 
@@ -40,7 +40,8 @@ interface SetLinkOperation {
 type BlockTypeSpec =
   | { type: "paragraph" }
   | { type: "heading"; level: 1 | 2 | 3 | 4 | 5 | 6 }
-  | { type: "quote" };
+  | { type: "quote" }
+  | { type: "codeBlock" };
 
 interface SetBlockTypeOperation {
   type: "set_block_type";
@@ -58,6 +59,17 @@ interface MergeBlockOperation {
   point: Point;
 }
 
+interface InsertBlockOperation {
+  type: "insert_block";
+  path: Path;
+  block: BlockNode;
+}
+
+interface RemoveBlockOperation {
+  type: "remove_block";
+  path: Path;
+}
+
 interface Transaction {
   operations: Operation[];
 }
@@ -73,7 +85,7 @@ interface TransactionAcceptanceReport {
 
 字段说明：
 
-- `type`：当前支持 `insert_text`、`delete_text`、`toggle_mark`、`set_mark_attribute`、`set_link`、`set_block_type`、`split_block` 和 `merge_block`。
+- `type`：当前支持十种已注册 operation，包含通用 `insert_block` 和 `remove_block`。
 - `point`：插入、分段或合并位置，必须指向 text 节点内的合法偏移。
 - `text`：要插入的文本。
 - `range`：删除范围当前必须落在同一个 text 节点内；mark 范围当前必须落在同一个 block 内。
@@ -81,6 +93,7 @@ interface TransactionAcceptanceReport {
 - `attribute` / `value`：要设置的属性 Mark 和新值；`null` 表示移除属性。
 - `link`：要设置的 Link Mark；`null` 表示取消链接。
 - `path` / `block`：要切换的顶层 block path 和目标 Block Type。
+- `insert_block` 的 path 表示插入位置，`remove_block` 的 path 必须精确指向现有顶层 block。
 - `operations`：transaction 中按顺序执行的 operation 列表。
 - `TransactionSummary`：transaction 的只读摘要，包含操作总数、操作类型顺序、文本操作数量和块级操作数量。
 - `TransactionAcceptanceReport`：transaction 闭环验收报告，包含执行前校验、执行后校验、事务摘要和失败错误。
@@ -164,8 +177,8 @@ interface TransactionAcceptanceReport {
 当前规则：
 
 - path 必须是精确指向顶层 block 的 `[blockIndex]`。
-- 支持 paragraph、heading 和 quote 互相切换，以及 heading level 更新。
-- 切换保留目标 block 的 children、文本和 marks。
+- 支持 paragraph、heading、quote 和 codeBlock 互相切换，以及 heading level 更新。
+- 切换保留目标 block 的文本；富文本 block 之间保留 marks，切换到 codeBlock 时移除 marks。
 - 目标类型未改变时返回原文档引用；heading 还要求 level 相同。
 - 创建和应用阶段都会校验目标类型，应用阶段会再次校验 path。
 - operation 已进入 Transaction 克隆、执行、block 作用域分类和验收报告。
@@ -185,7 +198,7 @@ interface TransactionAcceptanceReport {
 当前规则：
 
 - 支持在 text 节点段首、段中和段尾分段。
-- 支持 paragraph、heading 和 quote 内有多个 text 节点，分段点左侧留在原 block，右侧进入同类型的新 block。
+- 支持 paragraph、heading、quote 和 codeBlock 内有多个 text 节点，分段点左侧留在原 block，右侧进入同类型的新 block。
 - 分段会保留原 block type、heading level、text marks 和文字顺序。
 - 不会修改传入的原始文档对象。
 - `point` 不指向 text 节点或 offset 越界时抛出 `RangeError`。
@@ -203,11 +216,21 @@ interface TransactionAcceptanceReport {
 当前规则：
 
 - 当前 block 合并到前一个 block，合并结果保留前一个 block 的类型和 heading level。
+- 合并仅发生在相邻文本 block 之间，不跨越 Divider 等 void block。
 - `point` 必须位于非首段第一个 text 节点的 offset `0`。
 - 空 block 与非空 block 合并时，会去掉无意义的空 text。
 - 两个空 block 合并后保留一个空 text，保证 block 可继续表达光标位置。
 - 不会修改传入的原始文档对象。
 - 首段、非段首 point 或非法 point 会抛出 `RangeError`。
+
+## 插入和删除 Block
+
+- `createInsertBlockOperation(path, block)` 创建不可变的块插入操作；`applyInsertBlock` 允许从 `0` 到 `children.length` 的 document 位置。
+- `createRemoveBlockOperation(path)` 创建块删除操作；`applyRemoveBlock` 要求 path 指向现有顶层 block。
+- 两种操作都会克隆 path，插入操作还会克隆 block；Transaction 结束后的 normalize 保证空文档恢复一个可编辑 paragraph。
+- Divider 的 `insertDividerCommand` 组合 `split_block` 与 `insert_block`，Backspace/Delete 使用 `remove_block` 删除相邻 void block。
+
+详细行为见 [Divider 分隔线](./divider.md)。
 
 ## 创建 Transaction
 
@@ -229,6 +252,8 @@ interface TransactionAcceptanceReport {
 - `applySetBlockType`
 - `applySplitBlock`
 - `applyMergeBlock`
+- `applyInsertBlock`
+- `applyRemoveBlock`
 
 ## 应用 Transaction
 
@@ -332,9 +357,9 @@ interface TransactionAcceptanceReport {
 
 ## 当前限制
 
-- 当前实现 `insert_text`、同 text 节点内的 `delete_text`、同 block 内的 `toggle_mark`、`set_mark_attribute` 和 `set_link`、单个顶层 block 的 `set_block_type`，以及 block 级 `split_block` 和 `merge_block`。
+- 当前实现文本、Mark、链接、Block Type、block split/merge 和通用 block insert/remove。
 - 删除暂不支持跨 text 节点或跨 block 范围。
-- 合并暂不支持跨多段批量合并。
+- 合并暂不支持跨多段批量合并，也不会跨 void block。
 - 单条 `set_block_type` 仍只处理一个顶层 block；Heading/Quote command 已能在同一 transaction 中组合多条 operation 完成跨块切换，语义 renderer 已支持 `h1`–`h6` 与 `blockquote`。
 - transaction 当前只负责批量应用和结束 normalize；History 已使用快照策略提供撤销/重做，operation 层本身暂不生成 undo/redo inverse 信息。
 - text operation 会保留现有 text marks；`toggle_mark` 和 `set_mark_attribute` 已支持同 block 内跨 text 切分与相邻同 marks 合并，跨 block mark 范围留到后续阶段。

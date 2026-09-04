@@ -4,7 +4,7 @@
 
 第 13 周 Day 1「Block Type 设计」、Day 2「Heading」、Day 3「Quote」、Day 4「Block 切换边界」和 Day 5「标题和引用闭环验收」已完成。
 
-☑️ 当前指针：第 14 周 Day 1「CodeBlock 设计」待开始。
+☑️ 该周收口指针：第 14 周 Day 1「CodeBlock 设计」；最新进度见 [第 14 周 QA](./week-14.md)。
 
 ## Day 1 已完成范围
 
@@ -96,4 +96,4 @@
 
 ## 结论
 
-第 13 周已达到“heading/quote 测试全过”的闭环目标。模型、Operation、Command、History、Renderer、中文混合块 Demo、自动化测试和独立 QA 报告均已对齐，下一步进入第 14 周 CodeBlock 与分割线闭环。
+第 13 周已达到“heading/quote 测试全过”的闭环目标。模型、Operation、Command、History、Renderer、中文混合块 Demo、自动化测试和独立 QA 报告均已对齐。后续进度见 [第 14 周 QA](./week-14.md)。

@@ -46,8 +46,8 @@
 ## 当前限制
 
 - 暂未实现按时间间隔、选区跳变或输入类型细分的复杂合并策略。
-- 快照复制覆盖 document、paragraph、heading、quote、text 和完整 text marks；Block Type 与 heading level 在 undo/redo 中保持不变。
+- 快照复制覆盖 document、所有文本 block、Divider、text 和完整 text marks；CodeBlock 与 Divider 在 undo/redo 中保持不变。
 
 ## 结论
 
-History 已形成可用的撤销重做闭环：core 具备快照记录、栈转换、command 包装、batch 合并和快捷键识别，React 可通过 `onTransaction` 暴露真实输入，demo 具备真实输入、Link、Block Type、连续 typing、快捷键撤销重做和状态展示。更细粒度的合并边界仍按后续计划演进。
+History 已形成可用闭环：core 具备快照、栈转换、command 包装、batch 合并和快捷键识别，Demo 已覆盖文本、Link、Block Type、CodeBlock 与 Divider 插入的撤销重做。更细粒度的合并边界仍按后续计划演进。

@@ -14,7 +14,9 @@
   - 十六进制颜色 sanitize、`setTextColor` command、取消文字颜色、字号与 boolean mark 组合、安全 HTML/React 渲染和 selection 映射。
   - `setBackgroundColor` command、取消背景色、与文字颜色共存、非法背景色拒绝、安全 HTML/React 渲染和 selection 映射。
   - Link Mark 类型、HTTP/HTTPS/mailto URL sanitize、target/rel 规范化、helper、校验、模型修复、节点合并、`set_link` operation、链接 command、安全渲染、选区恢复、编辑保留和 History 深拷贝。
-  - paragraph、1–6 级 heading、quote 模型，`set_block_type` operation，多块 Heading/Quote command、History 往返和语义渲染。
+  - paragraph、1–6 级 heading、quote、codeBlock 和 divider 模型，文本/void block 守卫、校验、规范化和 History 快照。
+  - CodeBlock 纯文本约束、`setCodeBlock`、多行输入、退出与 `pre > code` 渲染。
+  - Divider 的 `insert_block` / `remove_block`、`insertDivider`、前后光标删除、`hr` 渲染和选区边界。
   - Path、Point、RangeSelection、段落 text offset 和文本切片工具。
   - 基础渲染器、paragraph/heading/quote 语义标签、四种 boolean mark、字号、文字颜色、背景色与安全链接 HTML 输出、组合样式、HTML 序列化、DOM 与模型位置映射和选区同步。
   - React 组件 `value`、`defaultValue`、`onChange` 和 `onTransaction` 初始渲染契约。
@@ -26,7 +28,7 @@
 ## 浏览器测试
 
 - 工具：Playwright。
-- 范围：演示页面可打开，文档 JSON 面板、React 组件示例、渲染边界示例、选区调试面板、浏览器选区同步、基础编辑闭环、Bold/Italic/Underline/Strike 按钮、字号、文字颜色与背景色设置/取消、链接创建/编辑/取消与交互、Heading/Quote 单块和多块切换、混合样例与组合切换、command 状态面板、真实输入 history、连续 typing 合并和撤销重做可验证。
+- 范围：演示页面、模型/选区/command 调试、基础编辑、文字样式、链接、Heading/Quote、CodeBlock 多行与退出、Divider 插入/删除/继续输入、混合样例和 History 往返。
 - 命令：`pnpm test:e2e`。
 
 ## 类型检查

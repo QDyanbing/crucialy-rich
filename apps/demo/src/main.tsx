@@ -10,6 +10,7 @@ import {
   createHistoryState,
   createTransactionAcceptanceReport,
   createDocument,
+  createDivider,
   createHeading,
   createParagraph,
   createQuote,
@@ -23,6 +24,7 @@ import {
   getHistoryShortcutAction,
   getTextInRange,
   INSERT_TEXT_COMMAND_NAME,
+  INSERT_DIVIDER_COMMAND_NAME,
   ITALIC_COMMAND_NAME,
   isValidPoint,
   MERGE_BLOCK_COMMAND_NAME,
@@ -77,6 +79,7 @@ type ModelExampleId =
   | "quotes"
   | "block-types"
   | "code-block"
+  | "code-divider"
   | "marks"
   | "links"
   | "empty"
@@ -185,6 +188,19 @@ const modelExamples: ModelExample[] = [
     value: createDocument([
       createCodeBlock([createText("const value = 1;\nreturn value;")]),
       createParagraph([createText("代码块后可以继续编辑正文。")]),
+    ]),
+  },
+  {
+    id: "code-divider",
+    label: "代码块与分隔线",
+    selection: {
+      anchor: { path: [2, 0], offset: 0 },
+      focus: { path: [2, 0], offset: 0 },
+    },
+    value: createDocument([
+      createCodeBlock([createText("const total = 3;\nreturn total;")]),
+      createDivider(),
+      createParagraph([createText("分隔线后可以继续编辑正文。")]),
     ]),
   },
   {
@@ -306,6 +322,7 @@ const demoCommandRegistry = createDefaultCommandRegistry();
 const demoCommandDescriptors: DemoCommandDescriptor[] = [
   { label: "加粗", name: BOLD_COMMAND_NAME },
   { label: "插入", name: INSERT_TEXT_COMMAND_NAME },
+  { label: "分隔线", name: INSERT_DIVIDER_COMMAND_NAME },
   { label: "斜体", name: ITALIC_COMMAND_NAME },
   { label: "下划线", name: UNDERLINE_COMMAND_NAME },
   { label: "删除线", name: STRIKE_COMMAND_NAME },
@@ -844,6 +861,17 @@ function DemoApp() {
     );
   }
 
+  function handleInsertDivider() {
+    applyCommandResult(
+      executeCommand(demoCommandRegistry, INSERT_DIVIDER_COMMAND_NAME, {
+        context: {
+          document: normalizedDocument,
+          selection: modelSelection,
+        },
+      }),
+    );
+  }
+
   function handleBold() {
     applyCommandResult(
       executeCommand(demoCommandRegistry, BOLD_COMMAND_NAME, {
@@ -1146,7 +1174,7 @@ function DemoApp() {
           <p className="eyebrow">调试工作台</p>
           <h1 id="page-title">crucialy-rich</h1>
         </div>
-        <span className="status-pill">脚手架就绪</span>
+        <span className="status-pill">第 14 周已完成</span>
       </header>
 
       <section className="workspace-grid" aria-label="编辑器工作区">
@@ -1247,6 +1275,13 @@ function DemoApp() {
               onClick={handleInsertText}
             >
               插入
+            </button>
+            <button
+              type="button"
+              disabled={isCommandDisabled(INSERT_DIVIDER_COMMAND_NAME)}
+              onClick={handleInsertDivider}
+            >
+              分隔线
             </button>
             <button
               aria-pressed={isCommandActive(BOLD_COMMAND_NAME)}

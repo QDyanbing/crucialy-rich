@@ -135,7 +135,7 @@ const redoCommand: Command;
 ## 当前限制
 
 - 暂未实现按时间间隔、选区跳变或输入类型细分的复杂合并策略。
-- 当前快照克隆覆盖 document、paragraph、heading、quote、text 和 text marks；标题层级与引用类型在 undo/redo 中保持不变。
+- 当前快照克隆覆盖 document、所有文本 block、Divider、text 和 text marks；CodeBlock 纯文本、Divider void 结构和 block path 在 undo/redo 中保持不变。
 
 ## 验收
 

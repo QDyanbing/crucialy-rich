@@ -1,6 +1,6 @@
 # Command 系统（第一版）
 
-Command 系统负责把“可执行的编辑意图”包装成统一接口。当前阶段提供注册、查询、可执行判断、按名称执行、状态读取，并内置加粗、斜体、下划线、删除线、字号、文字颜色、背景色、链接设置/取消、标题、引用、文本插入、删除选区、分段和合并段落 command。
+Command 系统负责把“可执行的编辑意图”包装成统一接口。当前提供注册、执行与状态读取，并内置文字样式、链接、标题、引用、代码块、分隔线插入、文本编辑和 block 编辑 command。
 
 ## 当前范围
 
@@ -23,13 +23,15 @@ Command 系统负责把“可执行的编辑意图”包装成统一接口。当
 - 提供 `setBackgroundColorCommand`，支持同一 block 内设置或取消安全十六进制背景色，以及 collapsed selection 的后续输入背景色占位。
 - 提供 `setHeadingCommand`，支持单块或多块设置 1–6 级标题、切换层级或恢复 paragraph，并保留模型选区。
 - 提供 `toggleQuoteCommand`，支持单块或多块统一切换 Quote 或恢复 paragraph，并保留模型选区。
+- 提供 `setCodeBlockCommand`，支持单块或多块切换纯文本 CodeBlock，并可恢复 paragraph。
+- 提供 `insertDividerCommand`，在折叠文本选区处分裂当前 block，并在两部分之间插入 Divider。
 - 提供 `BLOCK_TYPE_COMMANDS`，集中暴露 Heading 与 Quote command，并由默认注册表统一装配。
 - 提供 `createTextMarkAttributeCommand` 内部工厂，统一字号和颜色的选区校验、operation 创建与 selection 映射。
 - 提供 `createTextMarkCommand`、`canExecuteTextMarkCommand` 和 `isTextMarkCommandActive`，供文字格式命令复用。
 - 提供 `insertTextCommand`，支持 collapsed selection 插入文本，也支持同一 text 节点内的 range selection 替换文本。
 - 提供 `deleteSelectionCommand`，支持同一 text 节点内的 range selection 删除文本。
-- 提供 `splitBlockCommand`，支持 collapsed selection 下分裂 paragraph。
-- 提供 `mergeBlockCommand`，支持 collapsed selection 位于非首段段首时合并上一段。
+- 提供 `splitBlockCommand`，支持 collapsed selection 下分裂文本 block，并复用 CodeBlock Enter/退出规则。
+- 提供 `mergeBlockCommand`，支持 collapsed selection 位于非首文本块开头时合并上一文本块，遇到 void block 时跳过。
 
 ## Core API
 
@@ -207,6 +209,8 @@ const mergeBlockCommand: Command;
 - `setBackgroundColorCommand` 接受 `{ backgroundColor: string | null }`；使用相同颜色白名单，`null` 表示取消背景色。
 - `setHeadingCommand` 接受 `{ level: 1 | 2 | 3 | 4 | 5 | 6 | null }`；数字把全部命中 block 设为同级标题，`null` 恢复 paragraph，并返回 `set_block_type` transaction。
 - `toggleQuoteCommand` 无需 payload；混合范围统一切换为 Quote，全部为 Quote 时统一恢复 paragraph，并返回 `set_block_type` transaction。
+- `setCodeBlockCommand` 接受可选 `{ enabled }`，进入 CodeBlock 时移除 marks，退出时恢复 paragraph。
+- `insertDividerCommand` 返回按顺序包含 `split_block` 和 `insert_block` 的 transaction，选区落在 Divider 后方。
 - Mark command 在混合 selection 中统一添加目标 mark，全部激活时统一移除。
 - `insertTextCommand` 成功时返回包含 `insert_text` 的 transaction；range selection 下会先生成 `delete_text`，再生成 `insert_text`。
 - `deleteSelectionCommand` 成功时返回包含 `delete_text` 的 transaction。
@@ -217,13 +221,13 @@ const mergeBlockCommand: Command;
 - React 编辑器的 Enter 会优先复用 `splitBlockCommand`。
 - React 编辑器的段首 Backspace 会优先复用 `mergeBlockCommand`。
 - React 编辑器的段尾 Delete 会优先复用 `mergeBlockCommand` 合并下一段。
-- demo 操作区的格式按钮、Quote 按钮、字号和标题选择器、文字颜色与背景色选择器及取消按钮都会通过 `executeCommand` 调用 command。
+- demo 操作区的格式、链接、Block Type、代码块和分隔线控件都通过 `executeCommand` 调用 command。
 - demo 操作区会通过 `queryCommandState` 展示 command 可用状态，并用 disabled 状态控制按钮；四个 mark 按钮通过 `aria-pressed` 同步 active 状态。
 
 ## 当前限制
 
 - 文本插入和删除 command 当前只处理同一 text 节点内的 range selection。
-- Mark command 当前处理 paragraph、heading、quote 中同一 block 内的 selection；跨 block mark 应用留到后续阶段。
+- Mark command 当前处理 paragraph、heading、quote 中同一 block 内的 selection；CodeBlock 和 Divider 不接受 marks，跨 block mark 应用留到后续阶段。
 - split/merge block command 当前只处理 collapsed selection；heading/quote command 已支持 collapsed、单块 range 和跨 block range selection。
 - 当前没有快捷键事件绑定或权限系统；快捷键模块只提供可查询配置和纯匹配函数。
 - History 模块已提供 `undoCommand` 和 `redoCommand`；默认 Command 注册表暂不内置 history command。

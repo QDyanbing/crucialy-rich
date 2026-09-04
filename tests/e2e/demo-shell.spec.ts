@@ -129,6 +129,90 @@ test("toggles a paragraph code block from the demo control", async ({ page }) =>
   );
 });
 
+test("renders the code block and divider acceptance sample", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("code-divider");
+
+  const editor = page.getByLabel("已渲染文档");
+
+  await expect(editor.locator('pre[data-crucialy-path="[0]"] code')).toHaveText(
+    "const total = 3;\nreturn total;",
+  );
+  await expect(editor.locator('hr[data-crucialy-path="[1]"]')).toHaveCount(1);
+  await expect(editor.locator('p[data-crucialy-path="[2]"]')).toHaveText(
+    "分隔线后可以继续编辑正文。",
+  );
+  await expect(page.getByLabel("模型校验状态")).toContainText("合法");
+});
+
+test("inserts a divider and restores it through history", async ({ page }) => {
+  await page.goto("/");
+  await setDebuggerSelection(page, "0,0", 3, 3);
+
+  const editor = page.getByLabel("已渲染文档");
+  const dividerButton = page.getByRole("button", {
+    name: "分隔线",
+    exact: true,
+  });
+
+  await expect(dividerButton).toBeEnabled();
+  await dividerButton.click();
+
+  await expect(editor.locator('p[data-crucialy-path="[0]"]')).toHaveText("你好，");
+  await expect(editor.locator('hr[data-crucialy-path="[1]"]')).toHaveCount(1);
+  await expect(editor.locator('p[data-crucialy-path="[2]"]')).toHaveText(
+    "crucialy-rich。",
+  );
+  await expect(page.getByLabel("锚点路径")).toHaveValue("2,0");
+  await expect(page.getByLabel("锚点偏移")).toHaveValue("0");
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"type": "insert_block"',
+  );
+
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect(editor.locator("hr")).toHaveCount(0);
+  await expect(editor.locator('p[data-crucialy-path="[0]"]')).toHaveText(
+    "你好，crucialy-rich。",
+  );
+
+  await page.getByRole("button", { name: "重做", exact: true }).click();
+  await expect(editor.locator('hr[data-crucialy-path="[1]"]')).toHaveCount(1);
+
+  await placeCaretInRenderedText(page, "[2,0]", 0);
+  await page.keyboard.type("继续");
+  await expect(editor.locator('p[data-crucialy-path="[2]"]')).toHaveText(
+    "继续crucialy-rich。",
+  );
+});
+
+test("deletes a divider from both adjacent text boundaries", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("code-divider");
+
+  const editor = page.getByLabel("已渲染文档");
+  const code = editor.locator('code[data-crucialy-path="[0,0]"]');
+  const codeLength = (await code.textContent())?.length ?? 0;
+
+  await placeCaretInRenderedText(page, "[0,0]", codeLength);
+  await page.keyboard.press("Delete");
+  await expect(editor.locator("hr")).toHaveCount(0);
+  await expect(editor.locator('p[data-crucialy-path="[1]"]')).toHaveText(
+    "分隔线后可以继续编辑正文。",
+  );
+
+  await page.getByLabel("模型示例").selectOption("regular");
+  await page.getByLabel("模型示例").selectOption("code-divider");
+  await placeCaretInRenderedText(page, "[2,0]", 0);
+  await page.keyboard.press("Backspace");
+
+  await expect(editor.locator("hr")).toHaveCount(0);
+  await expect(editor.locator('p[data-crucialy-path="[1]"]')).toHaveText(
+    "分隔线后可以继续编辑正文。",
+  );
+  await expect(page.getByLabel("锚点路径")).toHaveValue("1,0");
+  await expect(page.getByLabel("模型校验状态")).toContainText("合法");
+});
+
 test("renders the mixed block type acceptance sample", async ({ page }) => {
   await page.goto("/");
   await page.getByLabel("模型示例").selectOption("block-types");

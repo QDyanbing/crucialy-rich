@@ -150,6 +150,13 @@ h3 {
   line-height: 1.4;
 }
 
+.rendered-document hr {
+  width: 100%;
+  margin: 6px 0;
+  border: 0;
+  border-top: 2px solid #a9b5ad;
+}
+
 .rendered-document pre {
   margin: 0;
   overflow-x: auto;

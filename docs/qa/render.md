@@ -2,7 +2,7 @@
 
 ## 范围
 
-验证模型到渲染树、paragraph/heading/quote 语义标签、四种 boolean mark、三种文字属性、Link Mark、HTML 序列化、路径属性绑定、DOM 与模型映射、React 组件渲染和演示渲染入口。
+验证 paragraph/heading/quote/codeBlock/divider 的语义渲染、文字样式、Link Mark、HTML 序列化、路径绑定、DOM 映射、React 和演示入口。
 
 ## 自动化测试
 
@@ -38,6 +38,8 @@ pnpm test:e2e
 | Strike 渲染    | 点击 demo“删除线”按钮        | 选区 text 渲染为 `s` 且保留 path        | 通过 |
 | Heading 渲染   | 切换 1–6 级标题              | 分别输出 `h1`–`h6` 且保留 path          | 通过 |
 | Quote 渲染     | 切换引用块                   | 输出 `blockquote` 且保留 path           | 通过 |
+| CodeBlock 渲染 | 查看代码块样例               | 输出 `pre > code` 并保留换行和 path     | 通过 |
+| Divider 渲染   | 查看混合样例                 | 输出 void `hr`，只绑定 block path       | 通过 |
 | 文字属性渲染   | 设置字号、字色和背景色       | 输出安全结构化 style                    | 通过 |
 | Link 渲染      | 对选区设置安全链接           | 输出带白名单属性的 `a`                  | 通过 |
 | 组合样式渲染   | 对同一选区启用下划线和删除线 | text-decoration 同时保留两种样式        | 通过 |
@@ -48,7 +50,7 @@ pnpm test:e2e
 
 ## 当前限制
 
-- 四种 boolean mark、1–6 级标题和引用块已支持；列表、代码块等后续扩展节点尚未实现。
+- 列表与图片尚未实现；Divider 内部不产生 text Point。
 
 ## 结论
 

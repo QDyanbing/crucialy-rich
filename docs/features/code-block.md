@@ -50,6 +50,6 @@ CodeBlock 使用 `pre > code` 语义结构：
 - `code` 保存 text path，DOM 与模型选区映射继续使用同一协议。
 - 文本和 HTML 特殊字符由 serializer 安全转义，换行原样保留。
 
-## 当前边界
+## Demo 与验收
 
-Demo 提供“代码块”样例和切换按钮，可验证多行输入、退出、active 状态、marks 禁用和 History 记录。
+Demo 提供“代码块”和“代码块与分隔线”中文样例，可验证多行输入、退出、active 状态、marks 禁用、Divider 相邻行为和 History 记录。完整验收见 [代码块和分割线闭环](../qa/code-block-divider.md)。

@@ -81,8 +81,8 @@ pnpm check:all
 - 单条 `set_block_type` operation 仍只描述一个顶层 block；多块 command 会组合多条 operation。
 - 当前只支持连续顶层 block 范围，不支持非连续多选。
 - 空 Quote 按 Enter 自动退出、标题快捷键和 Quote 快捷键尚未实现。
-- codeBlock、divider、list 等 Block Type 按后续周计划继续扩展。
+- CodeBlock 与 Divider 已在第 14 周完成；List 按第 15 周计划继续扩展。
 
 ## 结论
 
-Heading 与 Quote 已达到“测试全过、Demo 可验收”的闭环标准，可以进入第 14 周 CodeBlock 与分割线工作。
+Heading 与 Quote 已达到“测试全过、Demo 可验收”的闭环标准；后续进度见 [代码块和分割线闭环验收](./code-block-divider.md)。

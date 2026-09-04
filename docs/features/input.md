@@ -16,14 +16,17 @@
 - 支持同一 text 内非折叠 selection 的 Backspace 删除。
 - 段中 Backspace 会删除光标前一个字符。
 - 段首 Backspace 会合并上一段。
+- 文本块开头的 Backspace 会删除紧邻的前一个 void block，并修正 block path。
 - Backspace 后通过 `createSelectionAfterBackspaceInput` 计算新的折叠选区。
 - 支持 collapsed selection 下的 Delete。
 - 支持同一 text 内非折叠 selection 的 Delete 删除。
 - 段中 Delete 会删除光标后一个字符。
 - 段尾 Delete 会合并下一段。
+- 文本块末尾的 Delete 会删除紧邻的后一个 void block，并保持当前 Point。
 - Delete 后通过 `createSelectionAfterDeleteInput` 计算新的折叠选区。
 - 支持 collapsed selection 下的 Enter。
 - block 首部、中间、尾部和空 block Enter 会分裂当前 block，并保留 block type、heading level 和 text marks。
+- CodeBlock 内 Enter 插入换行；末尾已有换行时再次 Enter 会退出到 paragraph。
 - Enter 后通过 `createSelectionAfterEnterInput` 计算新的折叠选区。
 
 ## 数据流
@@ -133,6 +136,7 @@ function createSelectionAfterEnterInput(input: EnterInput): RangeSelection;
 - 非折叠 selection 下的 Backspace/Delete 复用 `deleteSelectionCommand`。
 - Enter 复用 `splitBlockCommand`。
 - 段首 Backspace 复用 `mergeBlockCommand`。
+- merge command 遇到 void block 会跳过，随后输入 helper 使用 `remove_block` 删除相邻 Divider。
 
 ## 基础编辑闭环
 
@@ -158,6 +162,8 @@ function createSelectionAfterEnterInput(input: EnterInput): RangeSelection;
 - 在段中按 Delete 删除后一个字符。
 - 在第一段段尾按 Delete 合并下一段。
 - 在段首、段中、段尾或空段按 Enter 分裂段落。
+- 在 CodeBlock 内输入多行，并通过连续两次 Enter 退出。
+- 从 Divider 后方按 Backspace 或前方按 Delete 删除分隔线。
 - Enter 后可以继续在新段落输入文本。
 - 文档 JSON 会跟随输入更新。
 - 渲染预览会使用最新模型重渲染。
@@ -171,6 +177,6 @@ function createSelectionAfterEnterInput(input: EnterInput): RangeSelection;
 - 普通 `insertText` 支持 collapsed selection 和同一 text 节点内的非折叠 selection；跨 text 或跨 block 替换尚未实现。
 - 暂不处理粘贴、拖拽或格式输入。
 - Backspace 和 Delete 支持同一 text 内的非折叠 selection，暂不处理跨 text 或跨 block 删除。
-- Enter 暂不处理非折叠 selection；collapsed Enter 会保留当前 block type、heading level 和 text marks。
+- Enter 暂不处理非折叠 selection；collapsed Enter 会保留文本 block 类型，CodeBlock 使用纯文本换行与退出规则。
 - 暂不处理 IME composition 的完整生命周期。
 - 组件本身不持有 history 状态，撤销重做快捷键需要宿主接入 history 状态。

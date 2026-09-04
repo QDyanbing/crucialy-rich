@@ -2,7 +2,7 @@
 
 自研富文本编辑内核，不依赖 ProseMirror、Tiptap、Lexical、Slate 作为运行时内核。
 
-> 当前已完成第 1–13 周基础能力闭环，提供 paragraph、heading、quote 文档模型、1–6 级 heading 与 quote 语义渲染和单块/多块 command、四种 boolean marks 闭环、三种文字属性闭环、结构化 Link Mark、安全链接 operation/command/渲染与交互、mark 快捷键配置查询、同一 block 内跨 text 的 mark 切分与合并、模型选区、基础渲染器、DOM 与模型位置映射、选区双向同步、基础 operation 与 Transaction、输入 helper、Command 系统、默认 Command 注册表和 History 撤销重做。
+> 当前已完成第 1–14 周基础能力闭环，提供 paragraph、heading、quote、codeBlock 和 divider 文档模型、CodeBlock 多行输入与退出、Divider void block 插入与删除、语义渲染、四种 boolean marks、三种文字属性、结构化 Link Mark、模型选区、基础 operation 与 Transaction、输入 helper、Command 系统、默认 Command 注册表和 History 撤销重做。
 
 ## 安装
 
@@ -192,8 +192,8 @@ const shortcutCommandName = getCommandNameFromShortcut({
 
 ## 当前 API 范围
 
-- 文档模型：`DocumentNode`、`BlockNode`、`ParagraphNode`、`HeadingNode`、`QuoteNode`、`BlockType`、`HeadingLevel`、`TextNode`、`TextMarks`、`BLOCK_TYPES`、`HEADING_LEVELS`、`TEXT_MARK_TYPES`、`TEXT_MARK_ATTRIBUTE_TYPES`。
-- 创建和判断：`createDocument`、`createParagraph`、`createHeading`、`createQuote`、`createText`、`isTextNode`、`isParagraphNode`、`isHeadingNode`、`isQuoteNode`、`isBlockNode`、`isDocumentNode`。
+- 文档模型：`DocumentNode`、`BlockNode`、`TextBlockNode`、`VoidBlockNode`、`ParagraphNode`、`HeadingNode`、`QuoteNode`、`CodeBlockNode`、`DividerNode`、`BlockType`、`HeadingLevel`、`TextNode`、`TextMarks`、`BLOCK_TYPES`、`VOID_BLOCK_TYPES`、`HEADING_LEVELS`、`TEXT_MARK_TYPES`、`TEXT_MARK_ATTRIBUTE_TYPES`。
+- 创建和判断：`createDocument`、`createParagraph`、`createHeading`、`createQuote`、`createCodeBlock`、`createDivider`、`createText` 及对应 text/block/void 类型守卫。
 - 文字标记：`normalizeTextMarks`、`hasTextMark`、`addTextMark`、`removeTextMark`、`setTextMark`、`toggleTextMark`、`isValidTextMarkAttributeValue`、`isValidFontSize`、`sanitizeHexColor`、`MIN_FONT_SIZE`、`MAX_FONT_SIZE`、`getTextMarkAttribute`、`setTextMarkAttribute`、`removeTextMarkAttribute`、`areTextMarksEqual`、`mergeAdjacentTextNodes`。
 - 链接标记：`LinkMarkAttributes`、`LinkTarget`、`LinkRelToken`、`LINK_PROTOCOLS`、`LINK_TARGETS`、`LINK_REL_TOKENS`、`sanitizeLinkHref`、`normalizeLinkTarget`、`normalizeLinkRel`、`normalizeLinkMark`、`isValidLinkMark`、`areLinkMarksEqual`、`getLinkMark`、`setLinkMark`、`removeLinkMark`。
 - 链接功能命名空间：`link` 集中提供 Link Mark、安全处理、`set_link` operation 和链接 command；原有平铺导出保持可用。
@@ -202,11 +202,11 @@ const shortcutCommandName = getCommandNameFromShortcut({
 - 基础渲染：`renderDocument`、`renderNodeToHtml`、`MODEL_PATH_ATTRIBUTE`、`encodeModelPath`、`decodeModelPath`。
 - DOM 映射：`domPointToModelPoint`、`modelPointToDomPoint`、`findElementByModelPath`、`findClosestModelPathElement`。
 - 选区同步：`domSelectionToModelSelection`、`createDomRangeFromModelSelection`、`applyModelSelectionToDom`。
-- Operation：`createInsertTextOperation`、`applyInsertText`、`createDeleteTextOperation`、`applyDeleteText`、`createToggleMarkOperation`、`applyToggleMark`、`createSetMarkAttributeOperation`、`applySetMarkAttribute`、`createSetLinkOperation`、`applySetLink`、`createSetBlockTypeOperation`、`applySetBlockType`、`createSplitBlockOperation`、`applySplitBlock`、`createMergeBlockOperation`、`applyMergeBlock`。
+- Operation：文本、Mark、链接和 Block Type operation，以及 `split_block`、`merge_block`、通用 `insert_block` 与 `remove_block`。
 - Transaction：`createTransaction`、`applyOperation`、`applyTransaction`、`summarizeOperation`、`summarizeTransaction`、`createTransactionAcceptanceReport`。
 - 输入：`createInsertTextInputTransaction`、`createSelectionAfterInsertTextInput`、`createBackspaceInputTransaction`、`createSelectionAfterBackspaceInput`、`createDeleteInputTransaction`、`createSelectionAfterDeleteInput`、`createEnterInputTransaction`、`createSelectionAfterEnterInput`。
-- 当前输入 helper 覆盖普通文本插入、段中删除、段落合并、段落分裂和输入后 selection 落点。
-- Command：`DEFAULT_COMMANDS`、`BOOLEAN_MARK_COMMANDS`、`TEXT_STYLE_COMMANDS`、`LINK_COMMANDS`、`BLOCK_TYPE_COMMANDS`、`DEFAULT_COMMAND_SHORTCUTS`、`createDefaultCommandRegistry`、`createCommandRegistry`、`canExecuteCommand`、`executeCommand`、`queryCommandState`、四种 boolean mark command、`setFontSizeCommand`、`setTextColorCommand`、`setBackgroundColorCommand`、`setHeadingCommand`、`toggleQuoteCommand`、对应 canExecute/active/选中标题查询 helper、文本与 block command 和对应 command name 常量。
+- 当前输入 helper 覆盖普通文本插入、段中删除、文本块合并/分裂、CodeBlock 换行/退出、相邻 void block 删除和输入后 selection 落点。
+- Command：默认注册表、状态查询、文字样式、链接、Heading、Quote、CodeBlock、Divider 插入、文本与 block command 及对应 helper/name 常量。
 - History：`createHistorySnapshot`、`cloneHistorySnapshot`、`createHistoryEntry`、`cloneHistoryEntry`、`createHistoryState`、`clearHistory`、`recordHistory`、`canMergeHistoryEntries`、`mergeHistoryEntries`、`canUndo`、`canRedo`、`getUndoEntry`、`getRedoEntry`、`undoHistory`、`redoHistory`、`getHistoryShortcutAction`、`undoCommand`、`redoCommand`。
 
 ## 许可

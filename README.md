@@ -18,7 +18,9 @@ text marks schema 当前支持 `bold`、`italic`、`underline` 和 `strike` 共�
 
 第 12 周链接闭环已完成：包括结构化 Link Mark、HTTP/HTTPS/mailto URL sanitize、target/rel 白名单、`set_link` operation、`setLink` / `unsetLink` command、`core.link` 功能命名空间、统一链接选区状态读取、安全 `<a>` 渲染、编辑态点击拦截、只读态原生跳转、菜单选区快照与恢复、History 生命周期以及中文创建/编辑/取消验收样例。
 
-第 13 周“标题和引用闭环”已全部完成：文档模型可表达 paragraph、1–6 级 heading 和 quote；Heading 与 Quote 均完成语义渲染、默认 command、单块/多块类型切换、History 往返、中文混合块 Demo 和浏览器验收，跨块正向/反向选区不会丢失文字、marks 或选区方向。当前指针为第 14 周 Day 1「CodeBlock 设计」。
+第 13 周“标题和引用闭环”已全部完成：文档模型可表达 paragraph、1–6 级 heading 和 quote；Heading 与 Quote 均完成语义渲染、默认 command、单块/多块类型切换、History 往返、中文混合块 Demo 和浏览器验收，跨块正向/反向选区不会丢失文字、marks 或选区方向。
+
+第 14 周“代码块和分割线闭环”已全部完成：CodeBlock 使用纯文本模型与 `pre > code` 语义渲染，支持 command 切换、多行输入和双 Enter 退出；Divider 使用 void block 模型与 `hr` 渲染，支持在光标处分割并插入、相邻 Backspace/Delete 删除、History 往返和中文混合样例。通用 `insert_block` / `remove_block` 为后续 Image 等 void block 提供基础能力。当前指针为第 15 周 Day 1「List 模型设计」。
 
 ## 技术栈
 
@@ -125,6 +127,8 @@ pnpm test:e2e
 - [多块 Block Type 切换规则](./docs/features/block-type-boundaries.md)
 - [Heading 标题](./docs/features/heading.md)
 - [Quote 引用块](./docs/features/quote.md)
+- [CodeBlock 代码块](./docs/features/code-block.md)
+- [Divider 分隔线](./docs/features/divider.md)
 - [选区](./docs/features/selection.md)
 - [基础渲染](./docs/features/render.md)
 - [选区双向同步](./docs/features/selection-sync.md)
@@ -149,6 +153,8 @@ pnpm test:e2e
 - [第 11 周 QA](./docs/qa/week-11.md)
 - [第 12 周 QA](./docs/qa/week-12.md)
 - [第 13 周 QA](./docs/qa/week-13.md)
+- [第 14 周 QA](./docs/qa/week-14.md)
+- [代码块和分割线闭环验收](./docs/qa/code-block-divider.md)
 - [标题和引用闭环 QA](./docs/qa/block-type.md)
 - [模型 QA](./docs/qa/model.md)
 - [文字标记 QA](./docs/qa/marks.md)

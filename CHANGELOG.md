@@ -97,6 +97,11 @@
 - 新增混合 Block Type 状态和直接恢复正文的浏览器回归测试。
 - 新增通用 `getBlockTextOffset` 和 `getPointAtBlockTextOffset`，并保留旧 Paragraph 命名作为兼容别名。
 - 新增 heading/quote 块边界 DOM 映射，以及扩展块内 boolean mark、文字属性和链接的回归测试。
+- 新增 CodeBlock 纯文本模型、`setCodeBlock` command、`pre > code` 渲染、多行输入和双 Enter 退出。
+- 新增 Divider void block 模型、`hr` 渲染、`insertDivider` command 和中文混合验收样例。
+- 新增通用 `insert_block` / `remove_block` operation，为 Divider 和后续 Image 等 void block 提供复用基础。
+- 新增 Divider 相邻 Backspace/Delete 删除、merge 边界、History 往返和浏览器交互覆盖。
+- 新增第 14 周 QA、代码块与分隔线独立闭环报告，并将进度推进到第 15 周 List 模型设计。
 
 ### 变更
 

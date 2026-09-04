@@ -2,7 +2,7 @@
 
 ## 验收范围
 
-Command 验收覆盖注册、查询、状态读取、执行结果、文本编辑、四种 boolean mark、三种文字属性、Link、Heading、Quote、Block 编辑、快捷键配置查询、React 输入层复用和 demo 调试区。
+Command 验收覆盖注册、查询、状态读取、执行结果、文本编辑、四种 boolean mark、三种文字属性、Link、Heading、Quote、CodeBlock、Divider、Block 编辑、快捷键配置查询、React 输入层复用和 demo 调试区。
 
 当前内置 command：
 
@@ -19,6 +19,8 @@ Command 验收覆盖注册、查询、状态读取、执行结果、文本编辑
 - `unsetLinkCommand`
 - `setHeadingCommand`
 - `toggleQuoteCommand`
+- `setCodeBlockCommand`
+- `insertDividerCommand`
 - `splitBlockCommand`
 - `mergeBlockCommand`
 
@@ -39,6 +41,8 @@ Command 验收覆盖注册、查询、状态读取、执行结果、文本编辑
 - `packages/core/tests/command/link.test.ts`：链接设置、覆盖、取消、状态读取和安全 payload。
 - `packages/core/tests/command/heading.test.ts`：1–6 级标题、恢复正文、多块范围和状态读取。
 - `packages/core/tests/command/quote.test.ts`：引用切换、取消、多块范围和状态读取。
+- `packages/core/tests/command/code-block.test.ts`：代码块切换、恢复正文、marks 清理和状态读取。
+- `packages/core/tests/command/divider.test.ts`：分隔线插入、两侧内容保留和选区落点。
 - `packages/core/tests/command/block-type-interaction.test.ts`：Heading/Quote 连续切换与 marks 保留。
 - `packages/core/tests/command/shortcut.test.ts`：默认映射、配置查询、按键匹配、自定义映射和边界输入。
 - `packages/core/tests/command/split-block.test.ts`：段落分裂 command。
@@ -61,6 +65,8 @@ Command 验收覆盖注册、查询、状态读取、执行结果、文本编辑
 | 链接         | 创建、编辑或取消当前选区链接                    | 安全链接更新，选区与其他 marks 保持             | 通过 |
 | 标题         | 选择正文或 1–6 级标题                           | 选中 block 统一切换并保留文字                   | 通过 |
 | 引用         | 点击“引用”                                      | 选中 block 统一切换 Quote 或恢复正文            | 通过 |
+| 代码块       | 点击“代码块”，输入多行后再次关闭                | CodeBlock 保持纯文本并可恢复正文                | 通过 |
+| 分隔线       | 在段落中间点击“分隔线”                          | 当前块分裂，Divider 插入两侧文本之间            | 通过 |
 | 跨 text 加粗 | 设置同 block 跨 text 选区后执行 `boldCommand`   | 选中文本被切分加粗并合并同 marks text           | 通过 |
 | 跨 text 斜体 | 设置同 block 跨 text 选区后执行 `italicCommand` | 选中文本被切分斜体并合并同 marks text           | 通过 |
 | 扩展块 Mark  | 在 heading/quote 内执行 Mark command            | 保留 block 类型并更新选中文字                   | 通过 |
@@ -76,11 +82,11 @@ Command 验收覆盖注册、查询、状态读取、执行结果、文本编辑
 
 - 文本 command 当前只支持同一 text 节点内的 range selection。
 - Mark command 当前支持 paragraph、heading、quote 中同一 block 内的 selection。
-- `splitBlockCommand` / `mergeBlockCommand` 当前只支持 collapsed selection。
+- `splitBlockCommand` / `mergeBlockCommand` / `insertDividerCommand` 当前只支持 collapsed selection。
 - Heading/Quote command 支持连续顶层 block 范围，不支持非连续多选。
 - collapsed Backspace/Delete 的单字符删除仍保留 input helper；跨段合并路径会优先复用 block command。
 - 当前还没有 React 内置 toolbar；mark 快捷键只提供配置和匹配，不绑定编辑器事件。
 
 ## 结论
 
-Command 系统已经完成默认注册表、文本与 Block 编辑、四种 boolean mark、三种文字属性、Link、Heading、Quote 和快捷键占位：demo 和 React 复用同一套 registry，状态面板可验证 command 可用性和 active 状态，自动化测试覆盖默认注册、状态矩阵、综合执行和浏览器交互。
+Command 系统已经完成默认注册表、文本与 Block 编辑、四种 boolean mark、三种文字属性、Link、Heading、Quote、CodeBlock、Divider 和快捷键占位：demo 和 React 复用同一套 registry，状态面板可验证 command 可用性和 active 状态，自动化测试覆盖默认注册、状态矩阵、综合执行和浏览器交互。

@@ -27,6 +27,7 @@ pnpm test:e2e
 | --------------- | ------------------------------------------- | ------------------------------ | ---- |
 | Path 定位根节点 | `getNodeAtPath(document, [])`               | 返回 document                  | 通过 |
 | Path 定位 text  | `getNodeAtPath(document, [0, 0])`           | 返回 text 节点                 | 通过 |
+| Path 定位 void  | `getNodeAtPath(document, [1])`              | 返回 Divider，不产生内部 Point | 通过 |
 | Point 偏移边界  | `isValidPoint` 校验 `0..text.length`        | 合法偏移通过，越界失败         | 通过 |
 | 反向范围规范化  | anchor 在 focus 后面                        | 规范化后 anchor/focus 对调     | 通过 |
 | 同段文本读取    | 输入 `[0,0] 0 -> [0,0] 5`                   | 演示显示 `你好`                | 通过 |
@@ -39,9 +40,9 @@ pnpm test:e2e
 
 - 文本切片只返回纯文本，不修改文档结构。
 - 跨 block 文本用 `\n` 表示块边界。
-- 当前只支持 text Point，以及 paragraph、heading、quote 的直接文本结构。
+- 当前只支持 text Point；paragraph、heading、quote 和 codeBlock 可包含 Point，Divider 只能通过 block path 定位。
 - 不支持非连续选区和图片、表格等未来非文本节点。
 
 ## 结论
 
-选区模型、DOM 映射和浏览器双向同步已闭环，演示可验证文本读取、路径高亮、浏览器同步和受控选区恢复。
+选区模型、DOM 映射和浏览器双向同步已闭环，演示可验证文本读取、路径高亮、浏览器同步和受控选区恢复；Divider 的删除由相邻文本 Point 表达。

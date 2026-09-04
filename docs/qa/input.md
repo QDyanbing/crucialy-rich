@@ -2,7 +2,7 @@
 
 ## 范围
 
-验证 `beforeinput insertText`、Backspace、Delete 和 collapsed selection 下的 Enter 能通过 command/transaction 更新模型，而不是直接信任浏览器 DOM 修改结果；同时覆盖同一 text 内的 range 替换/删除、History 记录和 paragraph/heading/quote 类型保持。
+验证输入、Backspace、Delete 和 Enter 通过 command/transaction 更新模型，同时覆盖 CodeBlock 换行/退出与 Divider 前后删除。
 
 ## 自动化测试
 
@@ -10,6 +10,7 @@
 - `packages/core/tests/input/backspace.test.ts`：Backspace 转换为 `delete_text` 或 `merge_block` transaction、段中删除、段首合并、空段删除、首段开头 no-op 和 selection 落点。
 - `packages/core/tests/input/delete.test.ts`：Delete 转换为 `delete_text` 或 `merge_block` transaction、段中删除、段尾合并、空段删除、末段结尾 no-op 和 selection 落点。
 - `packages/core/tests/input/enter.test.ts`：Enter 转换为 `split_block` transaction、段首/段中/段尾/空段分裂、非折叠 selection no-op 和 selection 落点。
+- CodeBlock 与 Divider 测试：代码块换行/退出、void block 相邻 Backspace/Delete 和选区 path 调整。
 - `packages/core/tests/command/insert-text.test.ts`：collapsed 插入和同一 text range 替换。
 - `packages/core/tests/command/delete-selection.test.ts`：同一 text range 的 Backspace/Delete 共用删除命令。
 - `packages/core/tests/command/block-type-interaction.test.ts`：Block Type 切换后继续输入，文字、marks 和选区保持稳定。
@@ -53,6 +54,8 @@ pnpm test:e2e
 | 组合编辑       | 输入文字后 Enter，再输入并按 Delete    | 文档分段、删除和选区都稳定        | 通过 |
 | 合并后输入     | 第二段段首 Backspace 后继续输入        | 合并段落保持合法并继续插入文本    | 通过 |
 | Quote 输入     | Quote 内输入、删除并按 Enter           | Quote 类型、文字和选区保持稳定    | 通过 |
+| CodeBlock 输入 | 输入、Enter 换行、连续 Enter 退出      | 纯文本和后续 paragraph 稳定       | 通过 |
+| Divider 删除   | 从前后文本边界按 Delete/Backspace      | Divider 删除且选区保持合法        | 通过 |
 | History        | 执行真实输入后撤销和重做               | 文档、Block Type 和选区正确往返   | 通过 |
 
 ## 当前限制
@@ -66,4 +69,4 @@ pnpm test:e2e
 
 ## 结论
 
-`beforeinput insertText`、Backspace、Delete 和 Enter 已经接入 Command、Transaction、History 和 Block Type 流程。当前已验证 paragraph、heading 和 quote 中的基础输入与选区稳定性，后续输入工作集中在跨节点删除、粘贴和 IME。
+输入已接入 Command、Transaction、History 和文本/void block 流程。当前已验证普通文本块、CodeBlock 与 Divider 边界，后续集中在跨节点删除、粘贴和 IME。

@@ -38,6 +38,6 @@ interface DividerNode {
 
 `remove_block` 与 `insert_block` 一样是通用块 Operation，未来的图片等 void block 可复用相同删除行为。
 
-## 当前边界
+## Demo 与验收
 
-模型、渲染、插入命令和 Backspace / Delete 边界已经接通。Demo 场景与里程碑验收记录将在下一步补齐。
+Demo 提供“分隔线”命令按钮和“代码块与分隔线”中文混合样例。浏览器测试覆盖插入、后方继续输入、撤销/重做，以及两侧 Backspace/Delete 删除。完整记录见 [代码块和分割线闭环](../qa/code-block-divider.md)。

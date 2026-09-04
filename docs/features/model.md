@@ -4,7 +4,7 @@
 
 ## 节点结构
 
-当前支持的层级：`document` → `block` → `text`。Block 当前包含 paragraph、heading 和 quote。
+当前支持的层级为 `document` → `block`，可编辑文本块继续包含 `text`。Block 包含 paragraph、heading、quote、codeBlock 和 divider。
 
 ```ts
 interface TextNode {
@@ -42,7 +42,19 @@ interface QuoteNode {
   children: TextNode[];
 }
 
-type BlockNode = ParagraphNode | HeadingNode | QuoteNode;
+interface CodeBlockNode {
+  type: "codeBlock";
+  children: TextNode[];
+}
+
+interface DividerNode {
+  type: "divider";
+  children: [];
+}
+
+type TextBlockNode = ParagraphNode | HeadingNode | QuoteNode | CodeBlockNode;
+type VoidBlockNode = DividerNode;
+type BlockNode = TextBlockNode | VoidBlockNode;
 
 interface DocumentNode {
   type: "document";
@@ -50,7 +62,7 @@ interface DocumentNode {
 }
 ```
 
-`HeadingNode.level` 只允许 1–6。三种 block 都直接包含 text children，因此 Block Type 切换不会丢失文本或 marks。详细规则见 [Block Type 设计](./block-type.md)，标题与引用的 command 和语义渲染见 [Heading 标题](./heading.md)、[Quote 引用块](./quote.md)。
+`HeadingNode.level` 只允许 1–6。paragraph、heading、quote 和 codeBlock 是文本块；Divider 是 `children: []` 的 void block。CodeBlock 只保留纯文本，不接受 marks。详细规则见 [Block Type 设计](./block-type.md)、[CodeBlock 代码块](./code-block.md)和[Divider 分隔线](./divider.md)。
 
 `TextNode.marks` 当前支持 `bold`、`italic`、`underline` 和 `strike` 四个 boolean 标记，`fontSize`、`textColor` 和 `backgroundColor` 三个文字属性，以及结构化 `link`。Link Mark 包含安全 href 和可选 target / rel；它可以与所有文字样式共存。没有任何有效 mark 时省略 `marks` 字段。
 
@@ -63,6 +75,10 @@ interface DocumentNode {
 - `isHeadingLevel(value)`
 - `isHeadingNode(value)`
 - `isQuoteNode(value)`
+- `isCodeBlockNode(value)`
+- `isDividerNode(value)`
+- `isTextBlockNode(value)`
+- `isVoidBlockNode(value)`
 - `isBlockNode(value)`
 - `isDocumentNode(value)`
 
@@ -74,6 +90,8 @@ interface DocumentNode {
 - `createParagraph(children = [createText()])`：创建段落，默认含一个空 text。
 - `createHeading(level = 1, children = [createText()])`：创建标题。
 - `createQuote(children = [createText()])`：创建引用。
+- `createCodeBlock(children = [createText()])`：创建纯文本代码块。
+- `createDivider()`：创建无文本子节点的分隔线。
 - `createDocument(children = [createParagraph()])`：创建文档，默认含一个空段落。
 
 工厂函数对传入的 `children` 原样保留，是否合法由 `validateDocument` / `normalizeDocument` 负责。
@@ -84,8 +102,9 @@ interface DocumentNode {
 
 - 根节点必须是 `document`。
 - `document` 的 `children` 只能是块级节点。
-- paragraph、heading 和 quote 的 `children` 只能是 `text` 节点。
+- 文本块的 `children` 只能是 `text` 节点；Divider 的 `children` 必须为空。
 - heading level 必须是 1–6。
+- CodeBlock text 不能携带 marks。
 - text marks 只能包含受支持的 boolean mark 或合法属性值。
 
 每条错误带 `path`（节点路径，root 为空数组）和 `message`，便于定位非法节点。
@@ -98,13 +117,13 @@ interface DocumentNode {
 - 空 `document` 自动补一个空段落。
 - block 里的非法 `children` 被丢弃。
 - text marks 会被规范化为受支持的 `true` 值。
-- 空 block 自动补一个空 `text`。
+- 空文本 block 自动补一个空 `text`；Divider 始终规范化为 `children: []`。
 
 修复后的结果一定能通过 `validateDocument`。
 
 ## 当前限制
 
-- 当前 Block Type 只支持 paragraph、heading 和 quote，尚不支持 list、codeBlock 等。
+- 当前 Block Type 支持 paragraph、heading、quote、codeBlock 和 divider，列表与图片尚未实现。
 - text marks 已完成四种 boolean mark、三种文字属性和 Link Mark 闭环；链接已经接入 operation、command、安全渲染、编辑态/只读态交互、选区恢复和 Demo。
-- heading level 直接存储在 `level` 字段；其他 block 暂不包含属性字段。
+- heading level 直接存储在 `level` 字段；CodeBlock 和 Divider 当前不包含额外属性。
 - 规范化会丢弃非法节点而不尝试转换，转换策略留待后续。

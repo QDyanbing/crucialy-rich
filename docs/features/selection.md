@@ -9,8 +9,8 @@
 当前模型路径规则：
 
 - `[]`：document。
-- `[blockIndex]`：顶层 block，当前支持 paragraph、heading 和 quote。
-- `[blockIndex, textIndex]`：text。
+- `[blockIndex]`：顶层 block，支持文本块和 void block。
+- `[blockIndex, textIndex]`：文本块内的 text；Divider 下不存在该路径。
 
 API：
 
@@ -71,6 +71,7 @@ API：
 
 - 同一 block 内的 text 节点直接拼接。
 - 跨 block 时用 `\n` 表示块边界。
+- 文本范围跳过 void block 的 children，并保留其两侧 block 边界。
 - 反向范围会先规范化。
 - 如果范围中任一点非法，会抛出 `RangeError`。
 
@@ -88,4 +89,4 @@ API：
 
 - 不修改文档结构，只提供查询和纯文本切片。
 - 当前只支持顶层连续 block 及其直接 text 子节点。
-- Point 只能定位 text 节点，暂不支持图片、表格等未来非文本节点。
+- Point 只能定位 text 节点，不能落入 Divider；void block 的插入和删除通过相邻文本 Point 完成。
