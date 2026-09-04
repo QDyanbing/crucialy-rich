@@ -45,6 +45,10 @@ export function getTextMarkRangeTarget(
     throw new RangeError(`${operationLabel} range must stay inside one block`);
   }
 
+  if (document.children[anchorBlockIndex]?.type === "codeBlock") {
+    throw new RangeError(`${operationLabel} does not support code blocks`);
+  }
+
   return {
     blockIndex: anchorBlockIndex,
     endTextIndex: focusTextIndex,

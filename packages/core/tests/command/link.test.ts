@@ -4,6 +4,7 @@ import {
   applyTransaction,
   canExecuteSetLinkCommand,
   canExecuteUnsetLinkCommand,
+  createCodeBlock,
   createDefaultCommandRegistry,
   createDocument,
   createHistorySnapshot,
@@ -377,6 +378,23 @@ describe("link command state", () => {
     expect(isLinkCommandActive(input)).toBe(false);
     expect(setLinkCommand.execute(input).status).toBe("skipped");
     expect(unsetLinkCommand.execute(input).status).toBe("skipped");
+  });
+
+  it("disables link commands inside code blocks", () => {
+    const document = createDocument([createCodeBlock([createText("code")])]);
+    const input = {
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [0, 0], offset: 4 },
+        },
+      },
+      payload: { href: "https://example.com" },
+    };
+
+    expect(canExecuteSetLinkCommand(input)).toBe(false);
+    expect(canExecuteUnsetLinkCommand(input)).toBe(false);
   });
 
   it("disables link commands across paragraphs", () => {

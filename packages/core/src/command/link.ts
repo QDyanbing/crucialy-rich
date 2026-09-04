@@ -62,6 +62,10 @@ function getLinkSelectionTarget(
     return undefined;
   }
 
+  if (input.context.document.children[anchorBlockIndex]?.type === "codeBlock") {
+    return undefined;
+  }
+
   if (isCollapsed(range)) {
     const textNode =
       input.context.document.children[anchorBlockIndex]?.children[anchorTextIndex];

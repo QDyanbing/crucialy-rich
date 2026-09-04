@@ -11,9 +11,17 @@ function cloneBlock(block: BlockNode): BlockNode {
     return { children, level: block.level, type: "heading" };
   }
 
-  return block.type === "quote"
-    ? { children, type: "quote" }
-    : { children, type: "paragraph" };
+  switch (block.type) {
+    case "codeBlock":
+      return {
+        children: block.children.map((textNode) => createText(textNode.text)),
+        type: "codeBlock",
+      };
+    case "paragraph":
+      return { children, type: "paragraph" };
+    case "quote":
+      return { children, type: "quote" };
+  }
 }
 
 function cloneDocument(document: DocumentNode): DocumentNode {

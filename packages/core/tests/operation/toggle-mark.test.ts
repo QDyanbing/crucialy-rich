@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  createCodeBlock,
   createDocument,
   createHeading,
   createParagraph,
@@ -322,5 +323,22 @@ describe("applyToggleMark", () => {
         ),
       ),
     ).toThrow("toggle mark range must stay inside one block");
+  });
+
+  it("rejects marks inside code blocks", () => {
+    const document = createDocument([createCodeBlock([createText("code")])]);
+
+    expect(() =>
+      applyToggleMark(
+        document,
+        createToggleMarkOperation(
+          {
+            anchor: { path: [0, 0], offset: 0 },
+            focus: { path: [0, 0], offset: 4 },
+          },
+          "bold",
+        ),
+      ),
+    ).toThrow("toggle mark does not support code blocks");
   });
 });

@@ -60,6 +60,10 @@ function getTextCommandRange(input: CommandInput): TextCommandRange | undefined 
     return undefined;
   }
 
+  if (input.context.document.children[anchorBlockIndex]?.type === "codeBlock") {
+    return undefined;
+  }
+
   return {
     blockIndex: anchorBlockIndex,
     endTextIndex: focusTextIndex,

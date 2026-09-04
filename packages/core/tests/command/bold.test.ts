@@ -4,6 +4,7 @@ import {
   applyTransaction,
   boldCommand,
   canExecuteBoldCommand,
+  createCodeBlock,
   createDocument,
   createHeading,
   createParagraph,
@@ -218,5 +219,21 @@ describe("boldCommand", () => {
       reason: "Bold command requires a text selection.",
       status: "skipped",
     });
+  });
+
+  it("skips code block selections", () => {
+    const document = createDocument([createCodeBlock([createText("code")])]);
+    const input = {
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [0, 0], offset: 4 },
+        },
+      },
+    };
+
+    expect(canExecuteBoldCommand(input)).toBe(false);
+    expect(boldCommand.execute(input).status).toBe("skipped");
   });
 });

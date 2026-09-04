@@ -19,7 +19,12 @@ interface CodeBlockNode {
 - `createCodeBlock` 会移除传入 text 的 marks。
 - `validateDocument` 会拒绝带 marks 的 CodeBlock text。
 - `normalizeDocument` 会移除 CodeBlock 中的全部 marks，并合并相邻 text。
+- boolean mark、文字属性和链接 Operation/Command 会拒绝 CodeBlock 选区。
 - 文本中的 `\n` 作为代码块内部换行保留。
+
+## History
+
+History 快照会按 CodeBlock 类型深拷贝文本和选区，撤销、重做不会把代码块降级为 paragraph。
 
 ## 渲染
 

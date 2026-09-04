@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  createCodeBlock,
   createDocument,
   createHeading,
   createHistorySnapshot,
@@ -77,12 +78,13 @@ describe("createHistorySnapshot", () => {
     expect(snapshot.selection).toBeUndefined();
   });
 
-  it("preserves paragraph heading and quote block types", () => {
+  it("preserves every text block type", () => {
     const snapshot = createHistorySnapshot(
       createDocument([
         createParagraph([createText("正文")]),
         createHeading(3, [createText("标题")]),
         createQuote([createText("引用")]),
+        createCodeBlock([createText("const value = 1;")]),
       ]),
     );
 
@@ -94,6 +96,10 @@ describe("createHistorySnapshot", () => {
         type: "heading",
       },
       { children: [{ text: "引用", type: "text" }], type: "quote" },
+      {
+        children: [{ text: "const value = 1;", type: "text" }],
+        type: "codeBlock",
+      },
     ]);
   });
 });
