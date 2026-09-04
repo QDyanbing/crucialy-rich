@@ -8,8 +8,9 @@ describe("@crucialy-rich/core public API", () => {
   });
 
   it("exposes the document model API", () => {
-    expect(core.BLOCK_TYPES).toEqual(["paragraph", "heading", "quote"]);
+    expect(core.BLOCK_TYPES).toEqual(["paragraph", "heading", "quote", "codeBlock"]);
     expect(core.HEADING_LEVELS).toEqual([1, 2, 3, 4, 5, 6]);
+    expect(typeof core.createCodeBlock).toBe("function");
     expect(typeof core.createDocument).toBe("function");
     expect(typeof core.createHeading).toBe("function");
     expect(typeof core.createParagraph).toBe("function");
@@ -51,6 +52,7 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.toggleTextMark).toBe("function");
     expect(typeof core.validateDocument).toBe("function");
     expect(typeof core.normalizeDocument).toBe("function");
+    expect(typeof core.isCodeBlockNode).toBe("function");
     expect(typeof core.isDocumentNode).toBe("function");
     expect(typeof core.isHeadingLevel).toBe("function");
     expect(typeof core.isHeadingNode).toBe("function");

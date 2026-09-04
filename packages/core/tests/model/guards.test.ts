@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   isBlockNode,
+  isCodeBlockNode,
   isDocumentNode,
   isHeadingLevel,
   isHeadingNode,
@@ -40,6 +41,12 @@ describe("model type guards", () => {
     expect(isQuoteNode({ type: "quote", children: [] })).toBe(true);
     expect(isQuoteNode({ type: "quote" })).toBe(false);
     expect(isQuoteNode({ type: "paragraph", children: [] })).toBe(false);
+  });
+
+  it("recognizes code block nodes", () => {
+    expect(isCodeBlockNode({ type: "codeBlock", children: [] })).toBe(true);
+    expect(isCodeBlockNode({ type: "codeBlock" })).toBe(false);
+    expect(isBlockNode({ type: "codeBlock", children: [] })).toBe(true);
   });
 
   it("treats paragraph as a block node", () => {

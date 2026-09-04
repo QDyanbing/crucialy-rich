@@ -28,11 +28,15 @@ export function normalizeDocument(value: unknown): DocumentNode {
 
 function normalizeBlock(node: BlockNode): BlockNode {
   const children = mergeAdjacentTextNodes(
-    node.children.filter(isTextNode).map(normalizeTextNode),
+    node.children
+      .filter(isTextNode)
+      .map(node.type === "codeBlock" ? normalizeCodeTextNode : normalizeTextNode),
   );
   const normalizedChildren = children.length > 0 ? children : [createText()];
 
   switch (node.type) {
+    case "codeBlock":
+      return { children: normalizedChildren, type: "codeBlock" };
     case "heading":
       return { children: normalizedChildren, level: node.level, type: "heading" };
     case "paragraph":
@@ -40,6 +44,10 @@ function normalizeBlock(node: BlockNode): BlockNode {
     case "quote":
       return { children: normalizedChildren, type: "quote" };
   }
+}
+
+function normalizeCodeTextNode(node: TextNode): TextNode {
+  return createText(node.text);
 }
 
 function normalizeTextNode(node: TextNode): TextNode {

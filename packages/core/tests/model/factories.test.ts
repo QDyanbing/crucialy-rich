@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  createCodeBlock,
   createDocument,
   createHeading,
   createParagraph,
@@ -8,6 +9,7 @@ import {
   createText,
 } from "../../src/model/factories";
 import {
+  isCodeBlockNode,
   isDocumentNode,
   isHeadingNode,
   isParagraphNode,
@@ -120,6 +122,20 @@ describe("model factories", () => {
       type: "quote",
     });
     expect(quote.children[0]?.text).toBe("引用内容");
+  });
+
+  it("creates code blocks as plain text", () => {
+    const defaultCodeBlock = createCodeBlock();
+    const codeBlock = createCodeBlock([
+      createText("const answer = 42;", { bold: true }),
+    ]);
+
+    expect(isCodeBlockNode(defaultCodeBlock)).toBe(true);
+    expect(defaultCodeBlock.children).toEqual([{ text: "", type: "text" }]);
+    expect(codeBlock).toEqual({
+      children: [{ text: "const answer = 42;", type: "text" }],
+      type: "codeBlock",
+    });
   });
 
   it("creates a document with a default empty paragraph", () => {

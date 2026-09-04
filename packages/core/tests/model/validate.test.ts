@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  createCodeBlock,
   createDocument,
   createHeading,
   createParagraph,
@@ -31,6 +32,26 @@ describe("validateDocument", () => {
     ]);
 
     expect(validateDocument(document)).toEqual({ errors: [], valid: true });
+  });
+
+  it("accepts plain code blocks and rejects rich marks", () => {
+    expect(
+      validateDocument(createDocument([createCodeBlock([createText("a\nb")])])),
+    ).toEqual({ errors: [], valid: true });
+    expect(
+      validateDocument({
+        children: [
+          {
+            children: [{ marks: { bold: true }, text: "code", type: "text" }],
+            type: "codeBlock",
+          },
+        ],
+        type: "document",
+      }),
+    ).toEqual({
+      errors: [{ message: "codeBlock text 不支持 marks", path: [0, 0] }],
+      valid: false,
+    });
   });
 
   it("rejects headings with unsupported levels", () => {

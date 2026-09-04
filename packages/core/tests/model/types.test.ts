@@ -36,7 +36,7 @@ describe("model node types", () => {
       type: "quote",
     };
 
-    expect(BLOCK_TYPES).toEqual(["paragraph", "heading", "quote"]);
+    expect(BLOCK_TYPES).toEqual(["paragraph", "heading", "quote", "codeBlock"]);
     expect(HEADING_LEVELS).toEqual([1, 2, 3, 4, 5, 6]);
     expect(heading.level).toBe(2);
     expect(quote.type).toBe("quote");

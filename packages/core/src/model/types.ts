@@ -5,7 +5,7 @@
  * text 节点可携带 boolean marks 和文字样式属性 marks。
  */
 
-export const BLOCK_TYPES = ["paragraph", "heading", "quote"] as const;
+export const BLOCK_TYPES = ["paragraph", "heading", "quote", "codeBlock"] as const;
 
 export const HEADING_LEVELS = [1, 2, 3, 4, 5, 6] as const;
 
@@ -72,10 +72,15 @@ export interface QuoteNode {
   children: TextNode[];
 }
 
+export interface CodeBlockNode {
+  type: "codeBlock";
+  children: TextNode[];
+}
+
 /**
  * 块级节点联合类型。所有 block 直接包含 text children。
  */
-export type BlockNode = HeadingNode | ParagraphNode | QuoteNode;
+export type BlockNode = CodeBlockNode | HeadingNode | ParagraphNode | QuoteNode;
 
 export interface DocumentNode {
   type: "document";

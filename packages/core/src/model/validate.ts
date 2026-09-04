@@ -121,6 +121,14 @@ export function validateDocument(value: unknown): ValidationResult {
         return;
       }
 
+      if (child.type === "codeBlock" && leaf.marks !== undefined) {
+        errors.push({
+          path: [blockIndex, leafIndex],
+          message: "codeBlock text 不支持 marks",
+        });
+        return;
+      }
+
       validateTextMarks(leaf, [blockIndex, leafIndex], errors);
     });
   });

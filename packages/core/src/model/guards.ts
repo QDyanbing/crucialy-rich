@@ -1,6 +1,7 @@
 import {
   HEADING_LEVELS,
   type BlockNode,
+  type CodeBlockNode,
   type DocumentNode,
   type HeadingLevel,
   type HeadingNode,
@@ -40,8 +41,17 @@ export function isQuoteNode(value: unknown): value is QuoteNode {
   return isRecord(value) && value.type === "quote" && Array.isArray(value.children);
 }
 
+export function isCodeBlockNode(value: unknown): value is CodeBlockNode {
+  return isRecord(value) && value.type === "codeBlock" && Array.isArray(value.children);
+}
+
 export function isBlockNode(value: unknown): value is BlockNode {
-  return isHeadingNode(value) || isParagraphNode(value) || isQuoteNode(value);
+  return (
+    isCodeBlockNode(value) ||
+    isHeadingNode(value) ||
+    isParagraphNode(value) ||
+    isQuoteNode(value)
+  );
 }
 
 export function isDocumentNode(value: unknown): value is DocumentNode {

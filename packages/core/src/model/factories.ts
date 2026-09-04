@@ -1,6 +1,7 @@
 import { normalizeTextMarks } from "./marks";
 import type {
   BlockNode,
+  CodeBlockNode,
   DocumentNode,
   HeadingLevel,
   HeadingNode,
@@ -46,6 +47,16 @@ export function createHeading(
  */
 export function createQuote(children: TextNode[] = [createText()]): QuoteNode {
   return { type: "quote", children };
+}
+
+/**
+ * 创建一个只包含纯文本的 codeBlock 节点。
+ */
+export function createCodeBlock(children: TextNode[] = [createText()]): CodeBlockNode {
+  return {
+    type: "codeBlock",
+    children: children.map((child) => createText(child.text)),
+  };
 }
 
 /**

@@ -9,6 +9,7 @@ export {
 export type {
   BlockType,
   BlockNode,
+  CodeBlockNode,
   DocumentNode,
   HeadingLevel,
   HeadingNode,
@@ -26,6 +27,7 @@ export type {
 } from "./types";
 export {
   isBlockNode,
+  isCodeBlockNode,
   isDocumentNode,
   isHeadingLevel,
   isHeadingNode,
@@ -34,6 +36,7 @@ export {
   isTextNode,
 } from "./guards";
 export {
+  createCodeBlock,
   createDocument,
   createHeading,
   createParagraph,

@@ -47,6 +47,29 @@ describe("normalizeDocument", () => {
     ]);
   });
 
+  it("normalizes code blocks to plain text", () => {
+    const result = normalizeDocument({
+      children: [
+        {
+          children: [
+            { marks: { bold: true }, text: "const ", type: "text" },
+            { marks: { italic: true }, text: "value = 1;", type: "text" },
+          ],
+          type: "codeBlock",
+        },
+      ],
+      type: "document",
+    });
+
+    expect(result.children).toEqual([
+      {
+        children: [{ text: "const value = 1;", type: "text" }],
+        type: "codeBlock",
+      },
+    ]);
+    expect(validateDocument(result).valid).toBe(true);
+  });
+
   it("preserves block types while normalizing text children", () => {
     const result = normalizeDocument({
       children: [
