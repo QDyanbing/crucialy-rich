@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 
+import { createDivider } from "../../src/model";
+
 import {
   BLOCK_OPERATION_TYPES,
   createDeleteTextOperation,
   createInsertTextOperation,
+  createInsertBlockOperation,
   createMergeBlockOperation,
   createSetBlockTypeOperation,
   createSetMarkAttributeOperation,
@@ -30,6 +33,7 @@ describe("operation type registry", () => {
       "set_block_type",
       "split_block",
       "merge_block",
+      "insert_block",
     ]);
     expect(TEXT_OPERATION_TYPES).toEqual([
       "insert_text",
@@ -39,6 +43,7 @@ describe("operation type registry", () => {
       "set_link",
     ]);
     expect(BLOCK_OPERATION_TYPES).toEqual([
+      "insert_block",
       "set_block_type",
       "split_block",
       "merge_block",
@@ -94,7 +99,9 @@ describe("operation scope classification", () => {
     });
     const splitOperation = createSplitBlockOperation({ path: [0, 0], offset: 1 });
     const mergeOperation = createMergeBlockOperation({ path: [1, 0], offset: 0 });
+    const insertOperation = createInsertBlockOperation([1], createDivider());
 
+    expect(isBlockOperation(insertOperation)).toBe(true);
     expect(isBlockOperation(setBlockTypeOperation)).toBe(true);
     expect(isBlockOperation(splitOperation)).toBe(true);
     expect(isBlockOperation(mergeOperation)).toBe(true);
@@ -143,6 +150,14 @@ describe("summarizeOperation", () => {
   });
 
   it("summarizes block operations", () => {
+    expect(
+      summarizeOperation(createInsertBlockOperation([1], createDivider())),
+    ).toEqual({
+      blockType: "divider",
+      scope: "block",
+      targetPath: [1],
+      type: "insert_block",
+    });
     expect(
       summarizeOperation(
         createSetBlockTypeOperation([0], { level: 2, type: "heading" }),

@@ -20,6 +20,15 @@ interface DividerNode {
 - HTML 序列化不会为 void 元素生成结束标签。
 - React 渲染层复用同一 RenderedNode 结果。
 
+## 插入
+
+`insertDividerCommand` 注册名为 `insertDivider`。命令要求折叠的文本选区，并在当前 Point 执行两个原子 Operation：
+
+1. `split_block` 把当前文本块一分为二。
+2. `insert_block` 在两部分之间插入 Divider。
+
+命令完成后，选区折叠在分隔线后的文本块起点。`insert_block` 是通用块插入 Operation，会克隆传入节点并校验目标 document path，后续图片等 void block 可以复用同一基础能力。
+
 ## 当前边界
 
-本阶段先完成模型、校验、规范化、快照和渲染契约。插入命令以及 Backspace / Delete 边界行为将在后续小步提交中接入。
+模型、渲染和插入命令已经接通。Backspace / Delete 边界行为将在后续小步提交中接入。

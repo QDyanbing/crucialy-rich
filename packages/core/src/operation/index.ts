@@ -1,5 +1,6 @@
 export { createTransactionAcceptanceReport } from "./acceptance";
 export type { TransactionAcceptanceReport } from "./acceptance";
+export { applyInsertBlock, createInsertBlockOperation } from "./insert-block";
 export {
   applyDeleteText,
   createDeleteTextOperation,
@@ -60,6 +61,7 @@ export type {
   BlockTypeSpec,
   DeleteTextOperation,
   InsertTextOperation,
+  InsertBlockOperation,
   MergeBlockOperation,
   Operation,
   SetBlockTypeOperation,

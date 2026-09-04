@@ -4,6 +4,7 @@ import { BOOLEAN_MARK_COMMANDS } from "./mark";
 import { createCommandRegistry, type CommandRegistry } from "./registry";
 import { LINK_COMMANDS } from "./link";
 import { deleteSelectionCommand, insertTextCommand } from "./text";
+import { insertDividerCommand } from "./divider";
 import { TEXT_STYLE_COMMANDS } from "./text-style";
 import type { Command } from "./types";
 
@@ -14,6 +15,7 @@ export const DEFAULT_COMMANDS: readonly Command[] = [
   ...BLOCK_TYPE_COMMANDS,
   deleteSelectionCommand,
   insertTextCommand,
+  insertDividerCommand,
   mergeBlockCommand,
   splitBlockCommand,
 ];

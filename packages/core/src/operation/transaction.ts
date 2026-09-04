@@ -2,6 +2,7 @@ import { normalizeDocument, type DocumentNode } from "../model";
 import type { Point, RangeSelection } from "../selection";
 import { applyDeleteText } from "./delete-text";
 import { applyInsertText } from "./insert-text";
+import { applyInsertBlock, createInsertBlockOperation } from "./insert-block";
 import { applyMergeBlock } from "./merge-block";
 import { applySetBlockType } from "./set-block-type";
 import { applySetLink } from "./set-link";
@@ -26,6 +27,8 @@ function cloneRange(range: RangeSelection): RangeSelection {
 
 export function cloneOperation(operation: Operation): Operation {
   switch (operation.type) {
+    case "insert_block":
+      return createInsertBlockOperation(operation.path, operation.block);
     case "delete_text":
       return {
         range: cloneRange(operation.range),
@@ -89,6 +92,8 @@ export function applyOperation(
   operation: Operation,
 ): DocumentNode {
   switch (operation.type) {
+    case "insert_block":
+      return applyInsertBlock(document, operation);
     case "delete_text":
       return applyDeleteText(document, operation);
     case "insert_text":

@@ -1,4 +1,5 @@
 import type {
+  BlockNode,
   HeadingLevel,
   LinkMarkAttributes,
   TextMarkAttributes,
@@ -22,6 +23,7 @@ export const OPERATION_TYPES = [
   "set_block_type",
   "split_block",
   "merge_block",
+  "insert_block",
 ] as const;
 
 export type OperationType = (typeof OPERATION_TYPES)[number];
@@ -74,9 +76,16 @@ export interface SetBlockTypeOperation {
   type: "set_block_type";
 }
 
+export interface InsertBlockOperation {
+  block: BlockNode;
+  path: Path;
+  type: "insert_block";
+}
+
 export type Operation =
   | DeleteTextOperation
   | InsertTextOperation
+  | InsertBlockOperation
   | MergeBlockOperation
   | SetBlockTypeOperation
   | SetLinkOperation

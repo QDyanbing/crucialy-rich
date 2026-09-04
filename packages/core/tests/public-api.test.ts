@@ -127,6 +127,8 @@ describe("@crucialy-rich/core public API", () => {
 
   it("exposes the operation API", () => {
     expect(typeof core.createInsertTextOperation).toBe("function");
+    expect(typeof core.createInsertBlockOperation).toBe("function");
+    expect(typeof core.applyInsertBlock).toBe("function");
     expect(typeof core.applyInsertText).toBe("function");
     expect(typeof core.createSelectionAfterInsertText).toBe("function");
     expect(typeof core.createDeleteTextOperation).toBe("function");
@@ -161,6 +163,7 @@ describe("@crucialy-rich/core public API", () => {
       "set_block_type",
       "split_block",
       "merge_block",
+      "insert_block",
     ]);
     expect(typeof core.isTextOperation).toBe("function");
     expect(typeof core.isBlockOperation).toBe("function");
@@ -231,6 +234,7 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.DELETE_SELECTION_COMMAND_NAME).toBe("string");
     expect(typeof core.INSERT_TEXT_COMMAND_NAME).toBe("string");
     expect(typeof core.ITALIC_COMMAND_NAME).toBe("string");
+    expect(typeof core.INSERT_DIVIDER_COMMAND_NAME).toBe("string");
     expect(typeof core.MERGE_BLOCK_COMMAND_NAME).toBe("string");
     expect(typeof core.SET_BACKGROUND_COLOR_COMMAND_NAME).toBe("string");
     expect(typeof core.SET_CODE_BLOCK_COMMAND_NAME).toBe("string");
@@ -248,6 +252,7 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.canExecuteDeleteSelectionCommand).toBe("function");
     expect(typeof core.canExecuteInsertTextCommand).toBe("function");
     expect(typeof core.canExecuteItalicCommand).toBe("function");
+    expect(typeof core.canExecuteInsertDividerCommand).toBe("function");
     expect(typeof core.canExecuteMergeBlockCommand).toBe("function");
     expect(typeof core.canExecuteSetBackgroundColorCommand).toBe("function");
     expect(typeof core.canExecuteSetCodeBlockCommand).toBe("function");
@@ -282,6 +287,7 @@ describe("@crucialy-rich/core public API", () => {
       "toggleQuote",
       "deleteSelection",
       "insertText",
+      "insertDivider",
       "mergeBlock",
       "splitBlock",
     ]);
@@ -293,6 +299,7 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.getSelectedLinkMark).toBe("function");
     expect(typeof core.getSelectedHeadingLevel).toBe("function");
     expect(typeof core.insertTextCommand).toBe("object");
+    expect(typeof core.insertDividerCommand).toBe("object");
     expect(typeof core.isBoldCommandActive).toBe("function");
     expect(typeof core.isCodeBlockCommandActive).toBe("function");
     expect(typeof core.isItalicCommandActive).toBe("function");

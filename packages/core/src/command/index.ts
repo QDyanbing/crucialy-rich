@@ -22,6 +22,11 @@ export {
 } from "./code-block";
 export type { SetCodeBlockCommandPayload } from "./code-block";
 export {
+  canExecuteInsertDividerCommand,
+  INSERT_DIVIDER_COMMAND_NAME,
+  insertDividerCommand,
+} from "./divider";
+export {
   canExecuteSetFontSizeCommand,
   SET_FONT_SIZE_COMMAND_NAME,
   setFontSizeCommand,

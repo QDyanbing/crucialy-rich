@@ -9,6 +9,7 @@ import { isCollapsed, normalizeRange } from "../selection";
 import type {
   DeleteTextOperation,
   InsertTextOperation,
+  InsertBlockOperation,
   MergeBlockOperation,
   Operation,
   OperationType,
@@ -28,6 +29,7 @@ export type TextOperation =
   | ToggleMarkOperation;
 
 export type BlockOperation =
+  | InsertBlockOperation
   | MergeBlockOperation
   | SetBlockTypeOperation
   | SplitBlockOperation;
@@ -64,6 +66,7 @@ export const TEXT_OPERATION_TYPES = [
 ] as const satisfies readonly OperationType[];
 
 export const BLOCK_OPERATION_TYPES = [
+  "insert_block",
   "set_block_type",
   "split_block",
   "merge_block",
@@ -81,6 +84,7 @@ export function isTextOperation(operation: Operation): operation is TextOperatio
 
 export function isBlockOperation(operation: Operation): operation is BlockOperation {
   return (
+    operation.type === "insert_block" ||
     operation.type === "set_block_type" ||
     operation.type === "split_block" ||
     operation.type === "merge_block"
@@ -89,6 +93,13 @@ export function isBlockOperation(operation: Operation): operation is BlockOperat
 
 export function summarizeOperation(operation: Operation): OperationSummary {
   switch (operation.type) {
+    case "insert_block":
+      return {
+        blockType: operation.block.type,
+        scope: "block",
+        targetPath: [...operation.path],
+        type: "insert_block",
+      };
     case "delete_text": {
       const range = normalizeRange(operation.range);
 
