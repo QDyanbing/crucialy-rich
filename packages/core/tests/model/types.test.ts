@@ -46,6 +46,8 @@ describe("model node types", () => {
       "quote",
       "codeBlock",
       "divider",
+      "bulletList",
+      "orderedList",
     ]);
     expect(VOID_BLOCK_TYPES).toEqual(["divider"]);
     expect(HEADING_LEVELS).toEqual([1, 2, 3, 4, 5, 6]);

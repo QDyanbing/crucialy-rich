@@ -1,6 +1,7 @@
 import {
   areLinkMarksEqual,
   getLinkMark,
+  isTextBlockNode,
   normalizeLinkMark,
   type LinkMarkAttributes,
   type TextNode,
@@ -62,18 +63,19 @@ function getLinkSelectionTarget(
     return undefined;
   }
 
-  if (input.context.document.children[anchorBlockIndex]?.type === "codeBlock") {
+  const block = input.context.document.children[anchorBlockIndex];
+
+  if (!isTextBlockNode(block) || block.type === "codeBlock") {
     return undefined;
   }
 
   if (isCollapsed(range)) {
-    const textNode =
-      input.context.document.children[anchorBlockIndex]?.children[anchorTextIndex];
+    const textNode = block.children[anchorTextIndex];
 
     return textNode ? { range, textNodes: [textNode] } : undefined;
   }
 
-  const textNodes = input.context.document.children[anchorBlockIndex]?.children
+  const textNodes = block.children
     .slice(anchorTextIndex, focusTextIndex + 1)
     .filter((node, index) => {
       const textIndex = anchorTextIndex + index;

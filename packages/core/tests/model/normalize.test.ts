@@ -4,6 +4,46 @@ import { normalizeDocument } from "../../src/model/normalize";
 import { validateDocument } from "../../src/model/validate";
 
 describe("normalizeDocument", () => {
+  it("normalizes list items and repairs empty lists", () => {
+    const result = normalizeDocument({
+      children: [
+        {
+          children: [
+            {
+              children: [
+                { marks: { bold: true }, text: "项目", type: "text" },
+                { marks: { bold: true }, text: "一", type: "text" },
+              ],
+              type: "listItem",
+            },
+          ],
+          type: "bulletList",
+        },
+        { children: [], type: "orderedList" },
+      ],
+      type: "document",
+    });
+
+    expect(result).toEqual({
+      children: [
+        {
+          children: [
+            {
+              children: [{ marks: { bold: true }, text: "项目一", type: "text" }],
+              type: "listItem",
+            },
+          ],
+          type: "bulletList",
+        },
+        {
+          children: [{ children: [{ text: "", type: "text" }], type: "listItem" }],
+          type: "orderedList",
+        },
+      ],
+      type: "document",
+    });
+  });
+
   it("replaces a non-document root with an empty document", () => {
     const result = normalizeDocument({ type: "text", text: "loose" });
     expect(result.type).toBe("document");

@@ -1,7 +1,25 @@
-import { createDocument, createParagraph, createText } from "./factories";
-import { isBlockNode, isDocumentNode, isTextBlockNode, isTextNode } from "./guards";
+import {
+  createDocument,
+  createListItem,
+  createParagraph,
+  createText,
+} from "./factories";
+import {
+  isBlockNode,
+  isDocumentNode,
+  isListItemNode,
+  isListNode,
+  isTextBlockNode,
+  isTextNode,
+} from "./guards";
 import { mergeAdjacentTextNodes, normalizeTextMarks } from "./marks";
-import type { BlockNode, DocumentNode, TextNode } from "./types";
+import type {
+  BlockNode,
+  DocumentNode,
+  ListItemNode,
+  ListNode,
+  TextNode,
+} from "./types";
 
 /**
  * 把任意输入修复为合法文档。
@@ -27,6 +45,10 @@ export function normalizeDocument(value: unknown): DocumentNode {
 }
 
 function normalizeBlock(node: BlockNode): BlockNode {
+  if (isListNode(node)) {
+    return normalizeList(node);
+  }
+
   if (!isTextBlockNode(node)) {
     return { children: [], type: "divider" };
   }
@@ -48,6 +70,23 @@ function normalizeBlock(node: BlockNode): BlockNode {
     case "quote":
       return { children: normalizedChildren, type: "quote" };
   }
+}
+
+function normalizeList(node: ListNode): ListNode {
+  const children = node.children.filter(isListItemNode).map(normalizeListItem);
+
+  return {
+    children: children.length > 0 ? children : [createListItem()],
+    type: node.type,
+  };
+}
+
+function normalizeListItem(node: ListItemNode): ListItemNode {
+  const children = mergeAdjacentTextNodes(
+    node.children.filter(isTextNode).map(normalizeTextNode),
+  );
+
+  return createListItem(children.length > 0 ? children : [createText()]);
 }
 
 function normalizeCodeTextNode(node: TextNode): TextNode {

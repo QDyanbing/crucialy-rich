@@ -1,7 +1,10 @@
 import {
   createCodeBlock,
+  createBulletList,
   createDivider,
   createHeading,
+  createListItem,
+  createOrderedList,
   createParagraph,
   createQuote,
   createText,
@@ -14,6 +17,16 @@ import type { InsertBlockOperation } from "./types";
 function cloneBlock(block: BlockNode): BlockNode {
   if (block.type === "divider") {
     return createDivider();
+  }
+
+  if (block.type === "bulletList" || block.type === "orderedList") {
+    const items = block.children.map((item) =>
+      createListItem(item.children.map((node) => createText(node.text, node.marks))),
+    );
+
+    return block.type === "bulletList"
+      ? createBulletList(items)
+      : createOrderedList(items);
   }
 
   const children = block.children.map((node) => createText(node.text, node.marks));

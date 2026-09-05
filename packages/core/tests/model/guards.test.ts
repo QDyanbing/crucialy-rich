@@ -80,6 +80,7 @@ describe("model type guards", () => {
     expect(isOrderedListNode(orderedList)).toBe(true);
     expect(isListNode(bulletList)).toBe(true);
     expect(isListNode(orderedList)).toBe(true);
+    expect(isBlockNode(bulletList)).toBe(true);
   });
 
   it("treats paragraph as a block node", () => {

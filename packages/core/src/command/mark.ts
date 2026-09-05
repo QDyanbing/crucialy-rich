@@ -1,4 +1,4 @@
-import { hasTextMark, type TextMarkType } from "../model";
+import { hasTextMark, isTextBlockNode, type TextMarkType } from "../model";
 import {
   createSelectionAfterToggleMark,
   createToggleMarkOperation,
@@ -102,7 +102,8 @@ export function isTextMarkCommandActive(
     return false;
   }
 
-  const textNodes = input.context.document.children[target.blockIndex]?.children;
+  const block = input.context.document.children[target.blockIndex];
+  const textNodes = isTextBlockNode(block) ? block.children : undefined;
 
   if (!textNodes) {
     return false;

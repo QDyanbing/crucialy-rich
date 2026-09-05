@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  createBulletList,
   createCodeBlock,
   createDocument,
   createDivider,
   createHeading,
+  createListItem,
+  createOrderedList,
   createParagraph,
   createQuote,
   createText,
@@ -13,6 +16,36 @@ import { HEADING_LEVELS } from "../../src/model/types";
 import { validateDocument } from "../../src/model/validate";
 
 describe("validateDocument", () => {
+  it("accepts bullet and ordered list structures", () => {
+    const document = createDocument([
+      createBulletList([createListItem([createText("无序项")])]),
+      createOrderedList([createListItem([createText("有序项", { bold: true })])]),
+    ]);
+
+    expect(validateDocument(document)).toEqual({ errors: [], valid: true });
+  });
+
+  it("rejects empty lists and list items", () => {
+    const result = validateDocument({
+      children: [
+        { children: [], type: "bulletList" },
+        {
+          children: [{ children: [], type: "listItem" }],
+          type: "orderedList",
+        },
+      ],
+      type: "document",
+    });
+
+    expect(result).toEqual({
+      errors: [
+        { message: "list 至少需要一个 listItem", path: [0] },
+        { message: "listItem 至少需要一个 text", path: [1, 0] },
+      ],
+      valid: false,
+    });
+  });
+
   it("accepts a well-formed document", () => {
     const document = createDocument([createParagraph([createText("hi")])]);
     expect(validateDocument(document)).toEqual({ valid: true, errors: [] });

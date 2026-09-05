@@ -1,4 +1,11 @@
-import { isBlockNode, isDocumentNode, isTextBlockNode, isTextNode } from "./guards";
+import {
+  isBlockNode,
+  isDocumentNode,
+  isListItemNode,
+  isListNode,
+  isTextBlockNode,
+  isTextNode,
+} from "./guards";
 import { isValidLinkMark } from "./link";
 import { isValidTextMarkAttributeValue } from "./marks";
 import {
@@ -108,6 +115,40 @@ export function validateDocument(value: unknown): ValidationResult {
       errors.push({
         path: [blockIndex],
         message: "document 子节点必须是块级节点",
+      });
+      return;
+    }
+
+    if (isListNode(child)) {
+      if (child.children.length === 0) {
+        errors.push({
+          path: [blockIndex],
+          message: "list 至少需要一个 listItem",
+        });
+      }
+
+      child.children.forEach((item, itemIndex) => {
+        const itemPath = [blockIndex, itemIndex];
+
+        if (!isListItemNode(item)) {
+          errors.push({ path: itemPath, message: "list 子节点必须是 listItem" });
+          return;
+        }
+
+        if (item.children.length === 0) {
+          errors.push({ path: itemPath, message: "listItem 至少需要一个 text" });
+        }
+
+        item.children.forEach((leaf, leafIndex) => {
+          const leafPath = [...itemPath, leafIndex];
+
+          if (!isTextNode(leaf)) {
+            errors.push({ path: leafPath, message: "listItem 子节点必须是 text" });
+            return;
+          }
+
+          validateTextMarks(leaf, leafPath, errors);
+        });
       });
       return;
     }

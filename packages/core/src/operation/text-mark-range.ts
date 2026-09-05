@@ -1,6 +1,7 @@
 import {
   areTextMarksEqual,
   createText,
+  isTextBlockNode,
   type DocumentNode,
   type TextMarks,
   type TextNode,
@@ -73,7 +74,7 @@ function findCollapsedMarkPlaceholder(
 ) {
   const block = document.children[blockIndex];
 
-  if (!block) {
+  if (!isTextBlockNode(block)) {
     return undefined;
   }
 

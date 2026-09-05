@@ -13,11 +13,14 @@ export type RenderedTagName =
   | "h5"
   | "h6"
   | "hr"
+  | "li"
+  | "ol"
   | "p"
   | "pre"
   | "s"
   | "span"
   | "strong"
+  | "ul"
   | "u";
 
 export interface RenderedElementStyle {

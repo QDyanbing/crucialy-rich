@@ -114,6 +114,20 @@ function renderBlockNode(node: BlockNode, path: Path): RenderedElementNode {
     });
   }
 
+  if (node.type === "bulletList" || node.type === "orderedList") {
+    return createRenderedNode(node.type === "bulletList" ? "ul" : "ol", path, {
+      children: node.children.map((item, itemIndex) => {
+        const itemPath = [...path, itemIndex];
+
+        return createRenderedNode("li", itemPath, {
+          children: item.children.map((child, textIndex) =>
+            renderTextNode(child, [...itemPath, textIndex]),
+          ),
+        });
+      }),
+    });
+  }
+
   const tagName =
     node.type === "heading"
       ? HEADING_TAG_NAMES[node.level]

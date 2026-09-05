@@ -97,7 +97,7 @@ export function isVoidBlockNode(value: unknown): value is VoidBlockNode {
 }
 
 export function isBlockNode(value: unknown): value is BlockNode {
-  return isTextBlockNode(value) || isVoidBlockNode(value);
+  return isListNode(value) || isTextBlockNode(value) || isVoidBlockNode(value);
 }
 
 export function isDocumentNode(value: unknown): value is DocumentNode {

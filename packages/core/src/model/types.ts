@@ -11,6 +11,8 @@ export const BLOCK_TYPES = [
   "quote",
   "codeBlock",
   "divider",
+  "bulletList",
+  "orderedList",
 ] as const;
 
 export const VOID_BLOCK_TYPES = ["divider"] as const;
@@ -97,6 +99,8 @@ export interface DividerNode {
 export interface ListItemNode {
   type: "listItem";
   children: TextNode[];
+  marks?: never;
+  text?: never;
 }
 
 export interface BulletListNode {
@@ -118,7 +122,7 @@ export type TextBlockNode = CodeBlockNode | HeadingNode | ParagraphNode | QuoteN
 
 export type VoidBlockNode = DividerNode;
 
-export type BlockNode = TextBlockNode | VoidBlockNode;
+export type BlockNode = ListNode | TextBlockNode | VoidBlockNode;
 
 export interface DocumentNode {
   type: "document";
@@ -128,4 +132,4 @@ export interface DocumentNode {
 /**
  * 文档树中可能出现的所有节点类型。
  */
-export type Node = DocumentNode | BlockNode | TextNode;
+export type Node = DocumentNode | BlockNode | ListItemNode | TextNode;

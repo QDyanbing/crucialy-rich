@@ -1,8 +1,10 @@
 import {
   createCodeBlock,
   isHeadingLevel,
+  isTextBlockNode,
   type BlockNode,
   type DocumentNode,
+  type TextBlockNode,
 } from "../model";
 import type { Path } from "../selection";
 import type { BlockTypeSpec, SetBlockTypeOperation } from "./types";
@@ -40,7 +42,10 @@ function getBlockIndex(document: DocumentNode, path: Path): number {
   return blockIndex;
 }
 
-function createBlockWithType(source: BlockNode, target: BlockTypeSpec): BlockNode {
+function createBlockWithType(
+  source: TextBlockNode,
+  target: BlockTypeSpec,
+): TextBlockNode {
   switch (target.type) {
     case "codeBlock":
       return createCodeBlock(source.children);
@@ -88,6 +93,10 @@ export function applySetBlockType(
 
   const block = document.children[blockIndex]!;
 
+  if (!isTextBlockNode(block)) {
+    throw new RangeError("set block type path must reference a text block");
+  }
+
   if (hasBlockType(block, operation.block)) {
     return document;
   }
@@ -95,7 +104,7 @@ export function applySetBlockType(
   return {
     ...document,
     children: document.children.map((child, index) =>
-      index === blockIndex ? createBlockWithType(child, operation.block) : child,
+      index === blockIndex ? createBlockWithType(block, operation.block) : child,
     ),
   };
 }

@@ -1,10 +1,29 @@
-import { createText, type BlockNode, type DocumentNode } from "../model";
+import {
+  createBulletList,
+  createListItem,
+  createOrderedList,
+  createText,
+  type BlockNode,
+  type DocumentNode,
+} from "../model";
 import type { Point, RangeSelection } from "../selection";
 import type { HistorySnapshot } from "./types";
 
 function cloneBlock(block: BlockNode): BlockNode {
   if (block.type === "divider") {
     return { children: [], type: "divider" };
+  }
+
+  if (block.type === "bulletList" || block.type === "orderedList") {
+    const items = block.children.map((item) =>
+      createListItem(
+        item.children.map((textNode) => createText(textNode.text, textNode.marks)),
+      ),
+    );
+
+    return block.type === "bulletList"
+      ? createBulletList(items)
+      : createOrderedList(items);
   }
 
   const children = block.children.map((textNode) =>
