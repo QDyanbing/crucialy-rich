@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  createBulletList,
   createDivider,
   createDocument,
+  createListItem,
   createParagraph,
   createText,
 } from "../../src/model";
@@ -72,6 +74,24 @@ describe("getTextInRange", () => {
         focus: { offset: 1, path: [2, 0] },
       }),
     ).toBe("上\n\n下");
+  });
+
+  it("reads text across list items and surrounding blocks", () => {
+    const listDocument = createDocument([
+      createParagraph([createText("前")]),
+      createBulletList([
+        createListItem([createText("项目一")]),
+        createListItem([createText("项目二")]),
+      ]),
+      createParagraph([createText("后")]),
+    ]);
+
+    expect(
+      getTextInRange(listDocument, {
+        anchor: { offset: 0, path: [0, 0] },
+        focus: { offset: 1, path: [2, 0] },
+      }),
+    ).toBe("前\n项目一\n项目二\n后");
   });
 });
 
