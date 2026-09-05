@@ -18,6 +18,7 @@ import {
   SET_HEADING_COMMAND_NAME,
   SPLIT_BLOCK_COMMAND_NAME,
   TOGGLE_QUOTE_COMMAND_NAME,
+  TOGGLE_BULLET_LIST_COMMAND_NAME,
   type Command,
 } from "../../src";
 
@@ -137,6 +138,9 @@ describe("queryCommandState", () => {
     expect(
       queryCommandState(registry, MERGE_BLOCK_COMMAND_NAME, collapsedInput).disabled,
     ).toBe(true);
+    expect(
+      queryCommandState(registry, TOGGLE_BULLET_LIST_COMMAND_NAME, collapsedInput),
+    ).toMatchObject({ active: false, disabled: false, registered: true });
   });
 
   it("reads active bold state from the default registry", () => {

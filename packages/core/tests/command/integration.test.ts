@@ -21,10 +21,30 @@ import {
   SPLIT_BLOCK_COMMAND_NAME,
   STRIKE_COMMAND_NAME,
   TOGGLE_QUOTE_COMMAND_NAME,
+  TOGGLE_BULLET_LIST_COMMAND_NAME,
   UNDERLINE_COMMAND_NAME,
 } from "../../src";
 
 describe("default command registry integration", () => {
+  it("executes list commands through the default registry", () => {
+    const registry = createDefaultCommandRegistry();
+    const document = createDocument([createParagraph([createText("项目")])]);
+    const result = executeCommand(registry, TOGGLE_BULLET_LIST_COMMAND_NAME, {
+      context: {
+        document,
+        selection: {
+          anchor: { offset: 0, path: [0, 0] },
+          focus: { offset: 2, path: [0, 0] },
+        },
+      },
+    });
+
+    expect(result.ok).toBe(true);
+    expect(applyTransaction(document, result.transaction!).children[0]?.type).toBe(
+      "bulletList",
+    );
+  });
+
   it("executes text and block commands through one registry", () => {
     const registry = createDefaultCommandRegistry();
     const document = createDocument([

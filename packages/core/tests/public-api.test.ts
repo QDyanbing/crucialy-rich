@@ -14,6 +14,8 @@ describe("@crucialy-rich/core public API", () => {
       "quote",
       "codeBlock",
       "divider",
+      "bulletList",
+      "orderedList",
     ]);
     expect(core.VOID_BLOCK_TYPES).toEqual(["divider"]);
     expect(core.HEADING_LEVELS).toEqual([1, 2, 3, 4, 5, 6]);
@@ -21,6 +23,9 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.createDocument).toBe("function");
     expect(typeof core.createDivider).toBe("function");
     expect(typeof core.createHeading).toBe("function");
+    expect(typeof core.createBulletList).toBe("function");
+    expect(typeof core.createListItem).toBe("function");
+    expect(typeof core.createOrderedList).toBe("function");
     expect(typeof core.createParagraph).toBe("function");
     expect(typeof core.createQuote).toBe("function");
     expect(typeof core.createText).toBe("function");
@@ -65,6 +70,9 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.isDividerNode).toBe("function");
     expect(typeof core.isHeadingLevel).toBe("function");
     expect(typeof core.isHeadingNode).toBe("function");
+    expect(typeof core.isListItemNode).toBe("function");
+    expect(typeof core.isListNode).toBe("function");
+    expect(core.LIST_TYPES).toEqual(["bulletList", "orderedList"]);
     expect(typeof core.isQuoteNode).toBe("function");
     expect(typeof core.isTextBlockNode).toBe("function");
     expect(typeof core.isVoidBlockNode).toBe("function");
@@ -123,6 +131,15 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.applyModelSelectionToDom).toBe("function");
     expect(typeof core.renderDocument).toBe("function");
     expect(typeof core.renderNodeToHtml).toBe("function");
+  });
+
+  it("exposes list commands", () => {
+    expect(core.LIST_COMMANDS.map((command) => command.name)).toEqual([
+      "toggleBulletList",
+      "toggleOrderedList",
+    ]);
+    expect(typeof core.toggleBulletListCommand).toBe("object");
+    expect(typeof core.toggleOrderedListCommand).toBe("object");
   });
 
   it("exposes the operation API", () => {
@@ -288,6 +305,8 @@ describe("@crucialy-rich/core public API", () => {
       "setCodeBlock",
       "setHeading",
       "toggleQuote",
+      "toggleBulletList",
+      "toggleOrderedList",
       "deleteSelection",
       "insertText",
       "insertDivider",

@@ -5,6 +5,7 @@ import { createCommandRegistry, type CommandRegistry } from "./registry";
 import { LINK_COMMANDS } from "./link";
 import { deleteSelectionCommand, insertTextCommand } from "./text";
 import { insertDividerCommand } from "./divider";
+import { LIST_COMMANDS } from "./list";
 import { TEXT_STYLE_COMMANDS } from "./text-style";
 import type { Command } from "./types";
 
@@ -13,6 +14,7 @@ export const DEFAULT_COMMANDS: readonly Command[] = [
   ...TEXT_STYLE_COMMANDS,
   ...LINK_COMMANDS,
   ...BLOCK_TYPE_COMMANDS,
+  ...LIST_COMMANDS,
   deleteSelectionCommand,
   insertTextCommand,
   insertDividerCommand,

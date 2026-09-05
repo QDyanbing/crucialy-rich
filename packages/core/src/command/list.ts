@@ -223,3 +223,8 @@ export const toggleOrderedListCommand: Command = {
   },
   name: TOGGLE_ORDERED_LIST_COMMAND_NAME,
 };
+
+export const LIST_COMMANDS: readonly Command[] = [
+  toggleBulletListCommand,
+  toggleOrderedListCommand,
+];

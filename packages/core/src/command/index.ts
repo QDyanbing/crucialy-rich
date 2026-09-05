@@ -63,6 +63,7 @@ export {
   canExecuteToggleOrderedListCommand,
   isBulletListCommandActive,
   isOrderedListCommandActive,
+  LIST_COMMANDS,
   TOGGLE_BULLET_LIST_COMMAND_NAME,
   TOGGLE_ORDERED_LIST_COMMAND_NAME,
   toggleBulletListCommand,
