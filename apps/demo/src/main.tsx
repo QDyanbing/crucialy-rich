@@ -4,6 +4,7 @@ import {
   canRedo,
   canUndo,
   cloneRangeSelection,
+  createBulletList,
   createCodeBlock,
   createDefaultCommandRegistry,
   createHistorySnapshot,
@@ -12,6 +13,8 @@ import {
   createDocument,
   createDivider,
   createHeading,
+  createListItem,
+  createOrderedList,
   createParagraph,
   createQuote,
   createText,
@@ -41,6 +44,8 @@ import {
   SPLIT_BLOCK_COMMAND_NAME,
   STRIKE_COMMAND_NAME,
   TOGGLE_QUOTE_COMMAND_NAME,
+  TOGGLE_BULLET_LIST_COMMAND_NAME,
+  TOGGLE_ORDERED_LIST_COMMAND_NAME,
   UNDERLINE_COMMAND_NAME,
   UNSET_LINK_COMMAND_NAME,
   undoHistory,
@@ -80,6 +85,7 @@ type ModelExampleId =
   | "block-types"
   | "code-block"
   | "code-divider"
+  | "lists"
   | "marks"
   | "links"
   | "empty"
@@ -201,6 +207,25 @@ const modelExamples: ModelExample[] = [
       createCodeBlock([createText("const total = 3;\nreturn total;")]),
       createDivider(),
       createParagraph([createText("分隔线后可以继续编辑正文。")]),
+    ]),
+  },
+  {
+    id: "lists",
+    label: "有序与无序列表",
+    selection: {
+      anchor: { path: [0, 0, 0], offset: 0 },
+      focus: { path: [0, 1, 0], offset: 7 },
+    },
+    value: createDocument([
+      createBulletList([
+        createListItem([createText("无序列表第一项", { bold: true })]),
+        createListItem([createText("无序列表第二项")]),
+      ]),
+      createOrderedList([
+        createListItem([createText("有序列表第一项")]),
+        createListItem([createText("有序列表第二项", { italic: true })]),
+      ]),
+      createParagraph([createText("列表后可以继续编辑正文。")]),
     ]),
   },
   {
@@ -327,6 +352,8 @@ const demoCommandDescriptors: DemoCommandDescriptor[] = [
   { label: "下划线", name: UNDERLINE_COMMAND_NAME },
   { label: "删除线", name: STRIKE_COMMAND_NAME },
   { label: "引用", name: TOGGLE_QUOTE_COMMAND_NAME },
+  { label: "无序列表", name: TOGGLE_BULLET_LIST_COMMAND_NAME },
+  { label: "有序列表", name: TOGGLE_ORDERED_LIST_COMMAND_NAME },
   { label: "代码块", name: SET_CODE_BLOCK_COMMAND_NAME },
   { label: "字号", name: SET_FONT_SIZE_COMMAND_NAME },
   { label: "文字颜色", name: SET_TEXT_COLOR_COMMAND_NAME },
@@ -872,6 +899,17 @@ function DemoApp() {
     );
   }
 
+  function handleToggleList(commandName: CommandName) {
+    applyCommandResult(
+      executeCommand(demoCommandRegistry, commandName, {
+        context: {
+          document: normalizedDocument,
+          selection: modelSelection,
+        },
+      }),
+    );
+  }
+
   function handleBold() {
     applyCommandResult(
       executeCommand(demoCommandRegistry, BOLD_COMMAND_NAME, {
@@ -1174,7 +1212,7 @@ function DemoApp() {
           <p className="eyebrow">调试工作台</p>
           <h1 id="page-title">crucialy-rich</h1>
         </div>
-        <span className="status-pill">第 14 周已完成</span>
+        <span className="status-pill">第 15 周已完成</span>
       </header>
 
       <section className="workspace-grid" aria-label="编辑器工作区">
@@ -1322,6 +1360,22 @@ function DemoApp() {
               onClick={handleQuote}
             >
               引用
+            </button>
+            <button
+              aria-pressed={isCommandActive(TOGGLE_BULLET_LIST_COMMAND_NAME)}
+              type="button"
+              disabled={isCommandDisabled(TOGGLE_BULLET_LIST_COMMAND_NAME)}
+              onClick={() => handleToggleList(TOGGLE_BULLET_LIST_COMMAND_NAME)}
+            >
+              无序列表
+            </button>
+            <button
+              aria-pressed={isCommandActive(TOGGLE_ORDERED_LIST_COMMAND_NAME)}
+              type="button"
+              disabled={isCommandDisabled(TOGGLE_ORDERED_LIST_COMMAND_NAME)}
+              onClick={() => handleToggleList(TOGGLE_ORDERED_LIST_COMMAND_NAME)}
+            >
+              有序列表
             </button>
             <button
               aria-pressed={isCommandActive(SET_CODE_BLOCK_COMMAND_NAME)}

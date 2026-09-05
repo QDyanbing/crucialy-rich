@@ -171,6 +171,18 @@ h3 {
   white-space: pre-wrap;
 }
 
+.rendered-document ul,
+.rendered-document ol {
+  width: 100%;
+  margin: 0;
+  padding-left: 24px;
+}
+
+.rendered-document li {
+  min-height: 24px;
+  padding-left: 4px;
+}
+
 .rendered-document p {
   font-size: 1rem;
   line-height: 1.6;

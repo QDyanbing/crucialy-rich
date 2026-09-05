@@ -145,6 +145,60 @@ test("renders the code block and divider acceptance sample", async ({ page }) =>
   await expect(page.getByLabel("模型校验状态")).toContainText("合法");
 });
 
+test("renders the ordered and unordered list sample", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("lists");
+
+  const editor = page.getByLabel("已渲染文档");
+
+  await expect(editor.locator('ul[data-crucialy-path="[0]"] > li')).toHaveCount(2);
+  await expect(editor.locator('ol[data-crucialy-path="[1]"] > li')).toHaveCount(2);
+  await expect(editor.locator('[data-crucialy-path="[0,0,0]"]')).toHaveText(
+    "无序列表第一项",
+  );
+  await expect(page.getByLabel("模型校验状态")).toContainText("合法");
+});
+
+test("switches paragraphs between ordered and unordered lists", async ({ page }) => {
+  await page.goto("/");
+  await setDebuggerSelection(page, "0,0", 0, 2);
+
+  const editor = page.getByLabel("已渲染文档");
+
+  await page.getByRole("button", { name: "无序列表", exact: true }).click();
+  await expect(editor.locator('ul[data-crucialy-path="[0]"]')).toHaveCount(1);
+  await expect(page.getByLabel("锚点路径")).toHaveValue("0,0,0");
+
+  await page.getByRole("button", { name: "有序列表", exact: true }).click();
+  await expect(editor.locator('ol[data-crucialy-path="[0]"]')).toHaveCount(1);
+  await expect(editor.locator("ul")).toHaveCount(0);
+
+  await page.getByRole("button", { name: "有序列表", exact: true }).click();
+  await expect(editor.locator('p[data-crucialy-path="[0]"]')).toHaveText(
+    "你好，crucialy-rich。",
+  );
+});
+
+test("splits and exits list items with Enter", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("lists");
+
+  const editor = page.getByLabel("已渲染文档");
+  const firstItem = editor.locator('ul[data-crucialy-path="[0]"] > li');
+
+  await placeCaretInRenderedText(page, "[0,0,0]", 4);
+  await page.keyboard.press("Enter");
+  await expect(firstItem).toHaveCount(3);
+  await expect(editor.locator('[data-crucialy-path="[0,1,0]"]')).toHaveText("第一项");
+
+  await placeCaretInRenderedText(page, "[0,2,0]", 7);
+  await page.keyboard.press("Enter");
+  await page.keyboard.press("Enter");
+
+  await expect(editor.locator('p[data-crucialy-path="[1]"]')).toHaveCount(1);
+  await expect(page.getByLabel("模型校验状态")).toContainText("合法");
+});
+
 test("inserts a divider and restores it through history", async ({ page }) => {
   await page.goto("/");
   await setDebuggerSelection(page, "0,0", 3, 3);
