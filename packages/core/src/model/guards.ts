@@ -1,11 +1,17 @@
 import {
   HEADING_LEVELS,
+  LIST_TYPES,
   type BlockNode,
+  type BulletListNode,
   type CodeBlockNode,
   type DividerNode,
   type DocumentNode,
   type HeadingLevel,
   type HeadingNode,
+  type ListItemNode,
+  type ListNode,
+  type ListType,
+  type OrderedListNode,
   type ParagraphNode,
   type QuoteNode,
   type TextNode,
@@ -14,6 +20,7 @@ import {
 } from "./types";
 
 const HEADING_LEVEL_SET = new Set<number>(HEADING_LEVELS);
+const LIST_TYPE_SET = new Set<string>(LIST_TYPES);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -50,6 +57,30 @@ export function isCodeBlockNode(value: unknown): value is CodeBlockNode {
 
 export function isDividerNode(value: unknown): value is DividerNode {
   return isRecord(value) && value.type === "divider" && Array.isArray(value.children);
+}
+
+export function isListType(value: unknown): value is ListType {
+  return typeof value === "string" && LIST_TYPE_SET.has(value);
+}
+
+export function isListItemNode(value: unknown): value is ListItemNode {
+  return isRecord(value) && value.type === "listItem" && Array.isArray(value.children);
+}
+
+export function isBulletListNode(value: unknown): value is BulletListNode {
+  return (
+    isRecord(value) && value.type === "bulletList" && Array.isArray(value.children)
+  );
+}
+
+export function isOrderedListNode(value: unknown): value is OrderedListNode {
+  return (
+    isRecord(value) && value.type === "orderedList" && Array.isArray(value.children)
+  );
+}
+
+export function isListNode(value: unknown): value is ListNode {
+  return isBulletListNode(value) || isOrderedListNode(value);
 }
 
 export function isTextBlockNode(value: unknown): value is TextBlockNode {

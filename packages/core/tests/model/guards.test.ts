@@ -2,11 +2,16 @@ import { describe, expect, it } from "vitest";
 
 import {
   isBlockNode,
+  isBulletListNode,
   isCodeBlockNode,
   isDocumentNode,
   isDividerNode,
   isHeadingLevel,
   isHeadingNode,
+  isListItemNode,
+  isListNode,
+  isListType,
+  isOrderedListNode,
   isParagraphNode,
   isQuoteNode,
   isTextNode,
@@ -60,6 +65,21 @@ describe("model type guards", () => {
     expect(isTextBlockNode(divider)).toBe(false);
     expect(isBlockNode(divider)).toBe(true);
     expect(isDividerNode({ type: "divider" })).toBe(false);
+  });
+
+  it("recognizes list types and list nodes", () => {
+    const item = { children: [{ text: "项目", type: "text" }], type: "listItem" };
+    const bulletList = { children: [item], type: "bulletList" };
+    const orderedList = { children: [item], type: "orderedList" };
+
+    expect(isListType("bulletList")).toBe(true);
+    expect(isListType("orderedList")).toBe(true);
+    expect(isListType("taskList")).toBe(false);
+    expect(isListItemNode(item)).toBe(true);
+    expect(isBulletListNode(bulletList)).toBe(true);
+    expect(isOrderedListNode(orderedList)).toBe(true);
+    expect(isListNode(bulletList)).toBe(true);
+    expect(isListNode(orderedList)).toBe(true);
   });
 
   it("treats paragraph as a block node", () => {

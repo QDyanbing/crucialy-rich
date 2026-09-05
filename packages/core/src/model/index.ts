@@ -36,12 +36,17 @@ export type {
   VoidBlockNode,
 } from "./types";
 export {
+  isBulletListNode,
   isBlockNode,
   isCodeBlockNode,
   isDocumentNode,
   isDividerNode,
   isHeadingLevel,
   isHeadingNode,
+  isListItemNode,
+  isListNode,
+  isListType,
+  isOrderedListNode,
   isParagraphNode,
   isQuoteNode,
   isTextNode,
