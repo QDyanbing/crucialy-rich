@@ -4,7 +4,7 @@
 
 ## 节点结构
 
-当前支持的层级为 `document` → `block`，可编辑文本块继续包含 `text`。Block 包含 paragraph、heading、quote、codeBlock 和 divider。
+当前支持 `document → text/void block → text` 和 `document → list → listItem → text` 两种层级。
 
 ```ts
 interface TextNode {
@@ -123,7 +123,7 @@ interface DocumentNode {
 
 ## 当前限制
 
-- 当前 Block Type 支持 paragraph、heading、quote、codeBlock 和 divider，列表与图片尚未实现。
+- 当前 Block Type 还支持 bulletList 和 orderedList；图片尚未实现。
 - text marks 已完成四种 boolean mark、三种文字属性和 Link Mark 闭环；链接已经接入 operation、command、安全渲染、编辑态/只读态交互、选区恢复和 Demo。
 - heading level 直接存储在 `level` 字段；CodeBlock 和 Divider 当前不包含额外属性。
 - 规范化会丢弃非法节点而不尝试转换，转换策略留待后续。

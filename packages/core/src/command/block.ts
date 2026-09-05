@@ -32,6 +32,7 @@ function canMergeBlockAt(input: CommandInput, point: Point | undefined): boolean
   if (
     !hasCollapsedSelection(input) ||
     !point ||
+    point.path.length !== 2 ||
     !isValidPoint(input.context.document, point)
   ) {
     return false;

@@ -12,7 +12,11 @@ export {
   SPLIT_BLOCK_COMMAND_NAME,
   splitBlockCommand,
 } from "./block";
-export { doSelectedBlocksMatch, getSelectedBlockIndexes } from "./block-selection";
+export {
+  doSelectedBlocksMatch,
+  getSelectedBlockIndexes,
+  getSelectedTextBlockIndexes,
+} from "./block-selection";
 export { BLOCK_TYPE_COMMANDS } from "./block-type";
 export {
   canExecuteSetCodeBlockCommand,

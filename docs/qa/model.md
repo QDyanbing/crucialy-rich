@@ -34,4 +34,4 @@
 
 ## 结论
 
-模型相关单测覆盖五种 block、text/void 分类、text marks 和 Link Mark。演示可通过中文 CodeBlock/Divider 样例验证当前结构。
+模型相关单测覆盖文本、void 和 list block、listItem、text marks 与 Link Mark。演示可通过中文混合样例验证当前结构。

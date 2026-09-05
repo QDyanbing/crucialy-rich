@@ -1,6 +1,6 @@
 # Block Type 设计
 
-Block Type 用于描述块级节点语义。当前模型支持 paragraph、heading、quote、codeBlock 和 divider；`set_block_type` 仅用于四种可编辑文本块，Divider 通过块插入/删除 operation 管理。
+Block Type 用于描述块级节点语义。当前还包含 bulletList 和 orderedList；`set_block_type` 仅用于四种顶层文本块，Divider 与 List 使用各自的结构 Operation 管理。
 
 ## 模型结构
 
@@ -56,7 +56,7 @@ type BlockNode = TextBlockNode | VoidBlockNode;
 
 ## 校验和规范化
 
-- `validateDocument` 接受五种 block，并要求 Divider children 为空、CodeBlock 不含 marks。
+- `validateDocument` 接受文本、void 和 list block，并要求 Divider children 为空、CodeBlock 不含 marks、List 只包含 ListItem。
 - block children 只能是 text 节点。
 - 非法 heading level 会使该节点校验失败。
 - `normalizeDocument` 保留合法 Block Type，并继续规范化 text marks、合并相邻同 marks text。

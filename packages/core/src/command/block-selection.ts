@@ -1,5 +1,5 @@
 import { isValidPoint } from "../selection";
-import type { BlockNode } from "../model";
+import { isTextBlockNode, type BlockNode } from "../model";
 import type { CommandInput } from "./types";
 
 export function getSelectedBlockIndexes(input: CommandInput): number[] | undefined {
@@ -27,6 +27,16 @@ export function getSelectedBlockIndexes(input: CommandInput): number[] | undefin
     { length: endBlockIndex - startBlockIndex + 1 },
     (_, index) => startBlockIndex + index,
   );
+}
+
+export function getSelectedTextBlockIndexes(input: CommandInput): number[] | undefined {
+  const blockIndexes = getSelectedBlockIndexes(input);
+
+  return blockIndexes?.every((blockIndex) =>
+    isTextBlockNode(input.context.document.children[blockIndex]),
+  )
+    ? blockIndexes
+    : undefined;
 }
 
 export function doSelectedBlocksMatch(

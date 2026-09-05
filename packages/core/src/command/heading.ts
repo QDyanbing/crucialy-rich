@@ -1,5 +1,5 @@
 import { isHeadingLevel, type HeadingLevel } from "../model";
-import { doSelectedBlocksMatch, getSelectedBlockIndexes } from "./block-selection";
+import { doSelectedBlocksMatch, getSelectedTextBlockIndexes } from "./block-selection";
 import { createSelectedBlockTypeCommandSuccess } from "./block-type-result";
 import { createCommandSkipped } from "./result";
 import type { Command, CommandInput } from "./types";
@@ -27,7 +27,7 @@ function getHeadingLevel(input: CommandInput): HeadingLevel | null | undefined {
 export function getSelectedHeadingLevel(
   input: CommandInput,
 ): HeadingLevel | null | undefined {
-  const blockIndexes = getSelectedBlockIndexes(input);
+  const blockIndexes = getSelectedTextBlockIndexes(input);
 
   if (!blockIndexes) {
     return undefined;
@@ -48,7 +48,8 @@ export function getSelectedHeadingLevel(
 
 export function canExecuteSetHeadingCommand(input: CommandInput): boolean {
   return (
-    getHeadingLevel(input) !== undefined && getSelectedBlockIndexes(input) !== undefined
+    getHeadingLevel(input) !== undefined &&
+    getSelectedTextBlockIndexes(input) !== undefined
   );
 }
 

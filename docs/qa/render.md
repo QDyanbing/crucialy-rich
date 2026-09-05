@@ -50,7 +50,7 @@ pnpm test:e2e
 
 ## 当前限制
 
-- 列表与图片尚未实现；Divider 内部不产生 text Point。
+- 图片尚未实现；Divider 内部不产生 text Point，列表使用三层 model path。
 
 ## 结论
 

@@ -10,7 +10,8 @@
 
 - `[]`：document。
 - `[blockIndex]`：顶层 block，支持文本块和 void block。
-- `[blockIndex, textIndex]`：文本块内的 text；Divider 下不存在该路径。
+- `[blockIndex, textIndex]`：普通文本块内的 text；Divider 下不存在该路径。
+- `[blockIndex, itemIndex, textIndex]`：列表项内的 text。
 
 API：
 

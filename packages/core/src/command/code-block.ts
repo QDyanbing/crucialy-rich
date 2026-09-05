@@ -1,4 +1,4 @@
-import { doSelectedBlocksMatch, getSelectedBlockIndexes } from "./block-selection";
+import { doSelectedBlocksMatch, getSelectedTextBlockIndexes } from "./block-selection";
 import { createSelectedBlockTypeCommandSuccess } from "./block-type-result";
 import { createCommandSkipped } from "./result";
 import type { Command, CommandInput } from "./types";
@@ -28,7 +28,8 @@ function resolveEnabled(input: CommandInput): boolean | undefined {
 
 export function canExecuteSetCodeBlockCommand(input: CommandInput): boolean {
   return (
-    resolveEnabled(input) !== undefined && getSelectedBlockIndexes(input) !== undefined
+    resolveEnabled(input) !== undefined &&
+    getSelectedTextBlockIndexes(input) !== undefined
   );
 }
 

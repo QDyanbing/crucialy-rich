@@ -2,7 +2,7 @@
 
 crucialy-rich 编辑内核的 React 集成包，对外暴露可集成的 React 富文本组件。
 
-> 当前已完成基础编辑与受控集成闭环，`RichTextEditor` 支持渲染 paragraph、heading、quote、codeBlock 和 divider，并接入普通文本输入、Backspace、Delete 和 Enter；CodeBlock 可输入多行并退出，文本光标可从前后删除 Divider，所有输入都通过 transaction 更新文档。
+> 当前已完成基础编辑与受控集成闭环，`RichTextEditor` 支持文本块、Divider 和有序/无序列表；列表项可输入文字、按 Enter 创建下一项，并从空项按 Enter 退出列表。所有输入都通过 transaction 更新文档。
 
 ## 安装
 

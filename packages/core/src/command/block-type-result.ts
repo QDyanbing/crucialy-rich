@@ -4,7 +4,7 @@ import {
   type BlockTypeSpec,
 } from "../operation";
 import { cloneRangeSelection } from "../selection";
-import { getSelectedBlockIndexes } from "./block-selection";
+import { getSelectedTextBlockIndexes } from "./block-selection";
 import { createCommandSuccess } from "./result";
 import type { CommandInput, CommandName, CommandResult } from "./types";
 
@@ -13,7 +13,7 @@ export function createSelectedBlockTypeCommandSuccess(
   input: CommandInput,
   block: BlockTypeSpec,
 ): CommandResult | undefined {
-  const blockIndexes = getSelectedBlockIndexes(input);
+  const blockIndexes = getSelectedTextBlockIndexes(input);
   const selection = input.context.selection;
 
   if (!blockIndexes || !selection) {

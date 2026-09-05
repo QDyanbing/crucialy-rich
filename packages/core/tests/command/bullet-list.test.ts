@@ -8,6 +8,11 @@ import {
   createListItem,
   createParagraph,
   createText,
+  createDefaultCommandRegistry,
+  BOLD_COMMAND_NAME,
+  INSERT_DIVIDER_COMMAND_NAME,
+  queryCommandState,
+  SET_HEADING_COMMAND_NAME,
   isBulletListCommandActive,
   toggleBulletListCommand,
 } from "../../src";
@@ -84,5 +89,30 @@ describe("toggleBulletListCommand", () => {
 
     expect(canExecuteToggleBulletListCommand(input)).toBe(false);
     expect(toggleBulletListCommand.execute(input).status).toBe("skipped");
+  });
+
+  it("disables commands that only support top-level text blocks", () => {
+    const document = createDocument([
+      createBulletList([createListItem([createText("项目")])]),
+    ]);
+    const input = {
+      context: {
+        document,
+        selection: {
+          anchor: { offset: 0, path: [0, 0, 0] },
+          focus: { offset: 2, path: [0, 0, 0] },
+        },
+      },
+      payload: { level: 2 },
+    };
+    const registry = createDefaultCommandRegistry();
+
+    expect(queryCommandState(registry, BOLD_COMMAND_NAME, input).disabled).toBe(true);
+    expect(queryCommandState(registry, SET_HEADING_COMMAND_NAME, input).disabled).toBe(
+      true,
+    );
+    expect(
+      queryCommandState(registry, INSERT_DIVIDER_COMMAND_NAME, input).disabled,
+    ).toBe(true);
   });
 });

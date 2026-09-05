@@ -16,6 +16,7 @@ function getInsertionPoint(input: CommandInput): Point | undefined {
   if (
     !selection ||
     !isCollapsed(selection) ||
+    selection.anchor.path.length !== 2 ||
     !isValidPoint(input.context.document, selection.anchor)
   ) {
     return undefined;

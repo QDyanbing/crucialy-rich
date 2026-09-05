@@ -17,6 +17,7 @@
   - paragraph、1–6 级 heading、quote、codeBlock 和 divider 模型，文本/void block 守卫、校验、规范化和 History 快照。
   - CodeBlock 纯文本约束、`setCodeBlock`、多行输入、退出与 `pre > code` 渲染。
   - Divider 的 `insert_block` / `remove_block`、`insertDivider`、前后光标删除、`hr` 渲染和选区边界。
+  - 有序/无序列表 schema、三层 Path、语义渲染、切换 Command、列表项输入、Enter 分裂和空项退出。
   - Path、Point、RangeSelection、段落 text offset 和文本切片工具。
   - 基础渲染器、paragraph/heading/quote 语义标签、四种 boolean mark、字号、文字颜色、背景色与安全链接 HTML 输出、组合样式、HTML 序列化、DOM 与模型位置映射和选区同步。
   - React 组件 `value`、`defaultValue`、`onChange` 和 `onTransaction` 初始渲染契约。

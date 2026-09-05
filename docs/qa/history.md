@@ -46,7 +46,7 @@
 ## 当前限制
 
 - 暂未实现按时间间隔、选区跳变或输入类型细分的复杂合并策略。
-- 快照复制覆盖 document、所有文本 block、Divider、text 和完整 text marks；CodeBlock 与 Divider 在 undo/redo 中保持不变。
+- 快照复制覆盖 document、文本/void/list block、ListItem、text 和完整 marks；列表类型、项目与三层 selection 在 undo/redo 中保持不变。
 
 ## 结论
 

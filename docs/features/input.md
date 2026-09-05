@@ -27,6 +27,7 @@
 - 支持 collapsed selection 下的 Enter。
 - block 首部、中间、尾部和空 block Enter 会分裂当前 block，并保留 block type、heading level 和 text marks。
 - CodeBlock 内 Enter 插入换行；末尾已有换行时再次 Enter 会退出到 paragraph。
+- 列表项内 Enter 分裂当前项；空列表项 Enter 退出为 paragraph。
 - Enter 后通过 `createSelectionAfterEnterInput` 计算新的折叠选区。
 
 ## 数据流

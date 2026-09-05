@@ -56,6 +56,7 @@ pnpm test:e2e
 | Quote 输入     | Quote 内输入、删除并按 Enter           | Quote 类型、文字和选区保持稳定    | 通过 |
 | CodeBlock 输入 | 输入、Enter 换行、连续 Enter 退出      | 纯文本和后续 paragraph 稳定       | 通过 |
 | Divider 删除   | 从前后文本边界按 Delete/Backspace      | Divider 删除且选区保持合法        | 通过 |
+| 列表 Enter     | 非空项分裂，空项退出                   | 项目和三层选区保持合法            | 通过 |
 | History        | 执行真实输入后撤销和重做               | 文档、Block Type 和选区正确往返   | 通过 |
 
 ## 当前限制

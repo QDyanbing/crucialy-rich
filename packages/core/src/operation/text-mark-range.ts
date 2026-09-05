@@ -37,6 +37,8 @@ export function getTextMarkRangeTarget(
   const [focusBlockIndex, focusTextIndex] = range.focus.path;
 
   if (
+    range.anchor.path.length !== 2 ||
+    range.focus.path.length !== 2 ||
     anchorBlockIndex === undefined ||
     anchorTextIndex === undefined ||
     focusBlockIndex === undefined ||

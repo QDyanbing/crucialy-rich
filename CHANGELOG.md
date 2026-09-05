@@ -102,6 +102,11 @@
 - 新增通用 `insert_block` / `remove_block` operation，为 Divider 和后续 Image 等 void block 提供复用基础。
 - 新增 Divider 相邻 Backspace/Delete 删除、merge 边界、History 往返和浏览器交互覆盖。
 - 新增第 14 周 QA、代码块与分隔线独立闭环报告，并将进度推进到第 15 周 List 模型设计。
+- 新增 bulletList、orderedList 和 listItem 模型、校验、规范化、工厂、守卫与 History 克隆。
+- 新增三层列表 Path、文本读取、DOM 映射及 `ul/ol/li` 语义渲染。
+- 新增 `toggleBulletList`、`toggleOrderedList`、列表类型互换和默认 Command 注册。
+- 新增 `split_list_item`、`exit_list_item`，支持列表项输入、Enter 分裂与空项退出。
+- 新增中文列表 Demo、浏览器综合验收、第 15 周 QA 和基础列表独立报告。
 
 ### 变更
 

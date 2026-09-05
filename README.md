@@ -20,7 +20,9 @@ text marks schema 当前支持 `bold`、`italic`、`underline` 和 `strike` 共�
 
 第 13 周“标题和引用闭环”已全部完成：文档模型可表达 paragraph、1–6 级 heading 和 quote；Heading 与 Quote 均完成语义渲染、默认 command、单块/多块类型切换、History 往返、中文混合块 Demo 和浏览器验收，跨块正向/反向选区不会丢失文字、marks 或选区方向。
 
-第 14 周“代码块和分割线闭环”已全部完成：CodeBlock 使用纯文本模型与 `pre > code` 语义渲染，支持 command 切换、多行输入和双 Enter 退出；Divider 使用 void block 模型与 `hr` 渲染，支持在光标处分割并插入、相邻 Backspace/Delete 删除、History 往返和中文混合样例。通用 `insert_block` / `remove_block` 为后续 Image 等 void block 提供基础能力。当前指针为第 15 周 Day 1「List 模型设计」。
+第 14 周“代码块和分割线闭环”已全部完成：CodeBlock 使用纯文本模型与 `pre > code` 语义渲染，支持 command 切换、多行输入和双 Enter 退出；Divider 使用 void block 模型与 `hr` 渲染，支持在光标处分割并插入、相邻 Backspace/Delete 删除、History 往返和中文混合样例。
+
+第 15 周“有序和无序列表闭环”已全部完成：模型支持 bulletList、orderedList 和 listItem，渲染输出 `ul/ol/li`，支持段落与列表切换、列表类型互换、列表项输入、Enter 分裂、空项 Enter 退出、History 和中文浏览器验收。当前指针为第 16 周 Day 1「列表缩进设计」。
 
 ## 技术栈
 
@@ -129,6 +131,7 @@ pnpm test:e2e
 - [Quote 引用块](./docs/features/quote.md)
 - [CodeBlock 代码块](./docs/features/code-block.md)
 - [Divider 分隔线](./docs/features/divider.md)
+- [有序和无序列表](./docs/features/list.md)
 - [选区](./docs/features/selection.md)
 - [基础渲染](./docs/features/render.md)
 - [选区双向同步](./docs/features/selection-sync.md)
@@ -154,6 +157,8 @@ pnpm test:e2e
 - [第 12 周 QA](./docs/qa/week-12.md)
 - [第 13 周 QA](./docs/qa/week-13.md)
 - [第 14 周 QA](./docs/qa/week-14.md)
+- [第 15 周 QA](./docs/qa/week-15.md)
+- [基础列表闭环验收](./docs/qa/list-basic.md)
 - [代码块和分割线闭环验收](./docs/qa/code-block-divider.md)
 - [标题和引用闭环 QA](./docs/qa/block-type.md)
 - [模型 QA](./docs/qa/model.md)

@@ -1,4 +1,4 @@
-import { doSelectedBlocksMatch, getSelectedBlockIndexes } from "./block-selection";
+import { doSelectedBlocksMatch, getSelectedTextBlockIndexes } from "./block-selection";
 import { createSelectedBlockTypeCommandSuccess } from "./block-type-result";
 import { createCommandSkipped } from "./result";
 import type { Command, CommandInput } from "./types";
@@ -6,7 +6,7 @@ import type { Command, CommandInput } from "./types";
 export const TOGGLE_QUOTE_COMMAND_NAME = "toggleQuote";
 
 export function canExecuteToggleQuoteCommand(input: CommandInput): boolean {
-  return getSelectedBlockIndexes(input) !== undefined;
+  return getSelectedTextBlockIndexes(input) !== undefined;
 }
 
 export function isQuoteCommandActive(input: CommandInput): boolean {

@@ -41,6 +41,7 @@ pnpm test:e2e
 - 文本切片只返回纯文本，不修改文档结构。
 - 跨 block 文本用 `\n` 表示块边界。
 - 当前只支持 text Point；paragraph、heading、quote 和 codeBlock 可包含 Point，Divider 只能通过 block path 定位。
+- ListItem text 使用 `[blockIndex, itemIndex, textIndex]` 三层 Point。
 - 不支持非连续选区和图片、表格等未来非文本节点。
 
 ## 结论

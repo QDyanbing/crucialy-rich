@@ -36,7 +36,12 @@ function getCollapsedPoint(selection: RangeSelection): Point | undefined {
 function isBlockStart(point: Point): boolean {
   const [blockIndex, textIndex] = point.path;
 
-  return blockIndex !== undefined && blockIndex > 0 && textIndex === 0;
+  return (
+    point.path.length === 2 &&
+    blockIndex !== undefined &&
+    blockIndex > 0 &&
+    textIndex === 0
+  );
 }
 
 function createDeletePreviousCharacterTransaction(point: Point): Transaction {

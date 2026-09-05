@@ -46,7 +46,11 @@ function getTextLength(document: DocumentNode, point: Point): number | undefined
 function hasNextBlock(document: DocumentNode, point: Point): boolean {
   const [blockIndex] = point.path;
 
-  return blockIndex !== undefined && blockIndex < document.children.length - 1;
+  return (
+    point.path.length === 2 &&
+    blockIndex !== undefined &&
+    blockIndex < document.children.length - 1
+  );
 }
 
 function createDeleteNextCharacterTransaction(point: Point): Transaction {

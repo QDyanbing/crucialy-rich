@@ -85,7 +85,7 @@ interface TransactionAcceptanceReport {
 
 字段说明：
 
-- `type`：当前支持十种已注册 operation，包含通用 `insert_block` 和 `remove_block`。
+- `type`：当前支持十二种已注册 operation，包含通用块操作以及 `split_list_item`、`exit_list_item`。
 - `point`：插入、分段或合并位置，必须指向 text 节点内的合法偏移。
 - `text`：要插入的文本。
 - `range`：删除范围当前必须落在同一个 text 节点内；mark 范围当前必须落在同一个 block 内。
@@ -231,6 +231,14 @@ interface TransactionAcceptanceReport {
 - Divider 的 `insertDividerCommand` 组合 `split_block` 与 `insert_block`，Backspace/Delete 使用 `remove_block` 删除相邻 void block。
 
 详细行为见 [Divider 分隔线](./divider.md)。
+
+## 列表项 Operation
+
+- `split_list_item` 在三层 text Point 处分裂当前 ListItem，并把选区落到新项开头。
+- `exit_list_item` 只接受空 ListItem；它会插入 paragraph，必要时把列表拆成前后两段。
+- 两种 Operation 都进入 Transaction 克隆、摘要、验收和 History 流程。
+
+详细行为见 [有序和无序列表](./list.md)。
 
 ## 创建 Transaction
 
