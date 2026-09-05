@@ -5,6 +5,7 @@ import {
   HEADING_LEVELS,
   LINK_REL_TOKENS,
   LINK_TARGETS,
+  LIST_TYPES,
   TEXT_MARK_ATTRIBUTE_TYPES,
   TEXT_MARK_TYPES,
   VOID_BLOCK_TYPES,
@@ -15,6 +16,8 @@ import {
   type LinkMarkAttributes,
   type LinkRelToken,
   type LinkTarget,
+  type ListNode,
+  type ListType,
   type ParagraphNode,
   type QuoteNode,
   type TextMarkAttributes,
@@ -48,6 +51,22 @@ describe("model node types", () => {
     expect(HEADING_LEVELS).toEqual([1, 2, 3, 4, 5, 6]);
     expect(heading.level).toBe(2);
     expect(quote.type).toBe("quote");
+  });
+
+  it("describes ordered and unordered lists", () => {
+    const listType: ListType = "bulletList";
+    const list: ListNode = {
+      children: [
+        {
+          children: [{ text: "第一项", type: "text" }],
+          type: "listItem",
+        },
+      ],
+      type: listType,
+    };
+
+    expect(LIST_TYPES).toEqual(["bulletList", "orderedList"]);
+    expect(list.children[0]?.type).toBe("listItem");
   });
 
   it("describes a document with paragraph and text", () => {

@@ -15,6 +15,8 @@ export const BLOCK_TYPES = [
 
 export const VOID_BLOCK_TYPES = ["divider"] as const;
 
+export const LIST_TYPES = ["bulletList", "orderedList"] as const;
+
 export const HEADING_LEVELS = [1, 2, 3, 4, 5, 6] as const;
 
 export const TEXT_MARK_TYPES = ["bold", "italic", "underline", "strike"] as const;
@@ -32,6 +34,8 @@ export const LINK_REL_TOKENS = ["nofollow", "noopener", "noreferrer"] as const;
 export type TextMarkType = (typeof TEXT_MARK_TYPES)[number];
 
 export type BlockType = (typeof BLOCK_TYPES)[number];
+
+export type ListType = (typeof LIST_TYPES)[number];
 
 export type HeadingLevel = (typeof HEADING_LEVELS)[number];
 
@@ -89,6 +93,23 @@ export interface DividerNode {
   type: "divider";
   children: [];
 }
+
+export interface ListItemNode {
+  type: "listItem";
+  children: TextNode[];
+}
+
+export interface BulletListNode {
+  type: "bulletList";
+  children: ListItemNode[];
+}
+
+export interface OrderedListNode {
+  type: "orderedList";
+  children: ListItemNode[];
+}
+
+export type ListNode = BulletListNode | OrderedListNode;
 
 /**
  * 文本块直接包含 text children，空块不包含可编辑文本。
