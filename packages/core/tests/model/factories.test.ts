@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  createBulletList,
   createCodeBlock,
   createDocument,
   createDivider,
   createHeading,
+  createListItem,
+  createOrderedList,
   createParagraph,
   createQuote,
   createText,
@@ -145,6 +148,21 @@ describe("model factories", () => {
 
     expect(isDividerNode(divider)).toBe(true);
     expect(divider).toEqual({ children: [], type: "divider" });
+  });
+
+  it("creates list items and both list types", () => {
+    const item = createListItem([createText("第一项", { bold: true })]);
+    const bulletList = createBulletList([item]);
+    const orderedList = createOrderedList([createListItem()]);
+
+    expect(bulletList).toEqual({
+      children: [item],
+      type: "bulletList",
+    });
+    expect(orderedList).toEqual({
+      children: [{ children: [{ text: "", type: "text" }], type: "listItem" }],
+      type: "orderedList",
+    });
   });
 
   it("creates a document with a default empty paragraph", () => {

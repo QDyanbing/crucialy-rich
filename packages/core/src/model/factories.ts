@@ -1,11 +1,14 @@
 import { normalizeTextMarks } from "./marks";
 import type {
   BlockNode,
+  BulletListNode,
   CodeBlockNode,
   DividerNode,
   DocumentNode,
   HeadingLevel,
   HeadingNode,
+  ListItemNode,
+  OrderedListNode,
   ParagraphNode,
   QuoteNode,
   TextMarks,
@@ -63,6 +66,22 @@ export function createCodeBlock(children: TextNode[] = [createText()]): CodeBloc
 /** 创建一个不可编辑的分隔线节点。 */
 export function createDivider(): DividerNode {
   return { children: [], type: "divider" };
+}
+
+export function createListItem(children: TextNode[] = [createText()]): ListItemNode {
+  return { children, type: "listItem" };
+}
+
+export function createBulletList(
+  children: ListItemNode[] = [createListItem()],
+): BulletListNode {
+  return { children, type: "bulletList" };
+}
+
+export function createOrderedList(
+  children: ListItemNode[] = [createListItem()],
+): OrderedListNode {
+  return { children, type: "orderedList" };
 }
 
 /**
