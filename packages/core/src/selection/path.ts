@@ -1,4 +1,10 @@
-import { isTextBlockNode, type DocumentNode, type Node } from "../model";
+import {
+  isListItemNode,
+  isListNode,
+  isTextBlockNode,
+  type DocumentNode,
+  type Node,
+} from "../model";
 import type { Path } from "./types";
 
 function isPathIndex(value: number): boolean {
@@ -8,7 +14,7 @@ function isPathIndex(value: number): boolean {
 /**
  * 根据 path 读取文档树节点。
  *
- * 当前只支持 document / block / text 三层，非法路径返回 undefined。
+ * 支持 document / block / listItem / text，非法路径返回 undefined。
  */
 export function getNodeAtPath(document: DocumentNode, path: Path): Node | undefined {
   if (path.length === 0) {
@@ -19,7 +25,7 @@ export function getNodeAtPath(document: DocumentNode, path: Path): Node | undefi
     return undefined;
   }
 
-  const [blockIndex, textIndex, ...rest] = path;
+  const [blockIndex, childIndex, textIndex, ...rest] = path;
 
   if (rest.length > 0 || blockIndex === undefined) {
     return undefined;
@@ -27,11 +33,25 @@ export function getNodeAtPath(document: DocumentNode, path: Path): Node | undefi
 
   const block = document.children[blockIndex];
 
-  if (!block || textIndex === undefined) {
+  if (!block || childIndex === undefined) {
     return block;
   }
 
-  return isTextBlockNode(block) ? block.children[textIndex] : undefined;
+  if (isTextBlockNode(block)) {
+    return textIndex === undefined ? block.children[childIndex] : undefined;
+  }
+
+  if (!isListNode(block)) {
+    return undefined;
+  }
+
+  const item = block.children[childIndex];
+
+  if (!item || textIndex === undefined) {
+    return item;
+  }
+
+  return isListItemNode(item) ? item.children[textIndex] : undefined;
 }
 
 export function hasNodeAtPath(document: DocumentNode, path: Path): boolean {

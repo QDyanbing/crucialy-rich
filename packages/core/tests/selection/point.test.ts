@@ -1,17 +1,25 @@
 import { describe, expect, it } from "vitest";
 
-import { createDocument, createParagraph, createText } from "../../src/model";
+import {
+  createBulletList,
+  createDocument,
+  createListItem,
+  createParagraph,
+  createText,
+} from "../../src/model";
 import { comparePoint, isValidPoint } from "../../src/selection/point";
 
 const document = createDocument([
   createParagraph([createText("alpha"), createText("beta")]),
   createParagraph([createText("gamma")]),
+  createBulletList([createListItem([createText("item")])]),
 ]);
 
 describe("selection point", () => {
   it("accepts offsets inside text nodes", () => {
     expect(isValidPoint(document, { path: [0, 0], offset: 0 })).toBe(true);
     expect(isValidPoint(document, { path: [0, 0], offset: 5 })).toBe(true);
+    expect(isValidPoint(document, { path: [2, 0, 0], offset: 4 })).toBe(true);
   });
 
   it("rejects offsets outside text nodes", () => {
