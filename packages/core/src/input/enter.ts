@@ -1,14 +1,23 @@
-import { isTextNode, type DocumentNode } from "../model";
+import { isListItemNode, isTextNode, type DocumentNode } from "../model";
 import {
+  createExitListItemOperation,
   createInsertTextOperation,
   createSelectionAfterInsertText,
+  createSelectionAfterExitListItem,
+  createSelectionAfterSplitListItem,
   createSelectionAfterSplitBlock,
   createSetBlockTypeOperation,
   createSplitBlockOperation,
+  createSplitListItemOperation,
   createTransaction,
   type Transaction,
 } from "../operation";
-import { isCollapsed, type Point, type RangeSelection } from "../selection";
+import {
+  getNodeAtPath,
+  isCollapsed,
+  type Point,
+  type RangeSelection,
+} from "../selection";
 
 export interface EnterInput {
   document: DocumentNode;
@@ -59,6 +68,16 @@ function shouldExitCodeBlock(document: DocumentNode, point: Point): boolean {
   );
 }
 
+function getListItem(document: DocumentNode, point: Point) {
+  if (point.path.length !== 3) {
+    return undefined;
+  }
+
+  const item = getNodeAtPath(document, point.path.slice(0, -1));
+
+  return isListItemNode(item) ? item : undefined;
+}
+
 export function createEnterInputTransaction(input: EnterInput): Transaction {
   const point = getCollapsedPoint(input.selection);
 
@@ -67,6 +86,15 @@ export function createEnterInputTransaction(input: EnterInput): Transaction {
   }
 
   const codeBlock = getCodeBlockText(input.document, point);
+  const listItem = getListItem(input.document, point);
+
+  if (listItem) {
+    return createTransaction([
+      listItem.children.every((text) => text.text.length === 0)
+        ? createExitListItemOperation(point)
+        : createSplitListItemOperation(point),
+    ]);
+  }
 
   if (!codeBlock) {
     return createTransaction([createSplitBlockOperation(point)]);
@@ -90,6 +118,14 @@ export function createSelectionAfterEnterInput(input: EnterInput): RangeSelectio
 
   if (operation?.type === "insert_text") {
     return createSelectionAfterInsertText(operation);
+  }
+
+  if (operation?.type === "split_list_item") {
+    return createSelectionAfterSplitListItem(operation);
+  }
+
+  if (operation?.type === "exit_list_item") {
+    return createSelectionAfterExitListItem(input.document, operation);
   }
 
   return operation?.type === "split_block"

@@ -37,6 +37,7 @@ describe("operation type registry", () => {
       "insert_block",
       "remove_block",
       "split_list_item",
+      "exit_list_item",
     ]);
     expect(TEXT_OPERATION_TYPES).toEqual([
       "insert_text",
@@ -46,6 +47,7 @@ describe("operation type registry", () => {
       "set_link",
     ]);
     expect(BLOCK_OPERATION_TYPES).toEqual([
+      "exit_list_item",
       "insert_block",
       "remove_block",
       "set_block_type",

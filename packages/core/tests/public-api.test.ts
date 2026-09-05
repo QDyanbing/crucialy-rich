@@ -162,6 +162,9 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.createSplitListItemOperation).toBe("function");
     expect(typeof core.applySplitListItem).toBe("function");
     expect(typeof core.createSelectionAfterSplitListItem).toBe("function");
+    expect(typeof core.createExitListItemOperation).toBe("function");
+    expect(typeof core.applyExitListItem).toBe("function");
+    expect(typeof core.createSelectionAfterExitListItem).toBe("function");
     expect(typeof core.createToggleMarkOperation).toBe("function");
     expect(typeof core.applyToggleMark).toBe("function");
     expect(typeof core.createSelectionAfterToggleMark).toBe("function");
@@ -188,6 +191,7 @@ describe("@crucialy-rich/core public API", () => {
       "insert_block",
       "remove_block",
       "split_list_item",
+      "exit_list_item",
     ]);
     expect(typeof core.isTextOperation).toBe("function");
     expect(typeof core.isBlockOperation).toBe("function");

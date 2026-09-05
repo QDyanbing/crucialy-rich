@@ -114,6 +114,7 @@ export function createSelectionAfterBackspaceInput(
       return createCollapsedSelection(point);
     }
     case "insert_text":
+    case "exit_list_item":
     case "insert_block":
     case "set_block_type":
     case "set_link":

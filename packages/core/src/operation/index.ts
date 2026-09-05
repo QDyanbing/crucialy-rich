@@ -1,4 +1,9 @@
 export { createTransactionAcceptanceReport } from "./acceptance";
+export {
+  applyExitListItem,
+  createExitListItemOperation,
+  createSelectionAfterExitListItem,
+} from "./exit-list-item";
 export type { TransactionAcceptanceReport } from "./acceptance";
 export { applyInsertBlock, createInsertBlockOperation } from "./insert-block";
 export {
@@ -66,6 +71,7 @@ export type {
 export type {
   BlockTypeSpec,
   DeleteTextOperation,
+  ExitListItemOperation,
   InsertTextOperation,
   InsertBlockOperation,
   MergeBlockOperation,

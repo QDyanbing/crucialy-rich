@@ -118,6 +118,7 @@ export function createSelectionAfterDeleteInput(input: DeleteInput): RangeSelect
     case "remove_block":
       return createCollapsedSelection(input.selection.anchor);
     case "insert_text":
+    case "exit_list_item":
     case "insert_block":
     case "set_block_type":
     case "set_link":

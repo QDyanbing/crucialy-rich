@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import {
   applyTransaction,
+  createBulletList,
   createCodeBlock,
   createDocument,
   createEnterInputTransaction,
+  createListItem,
   createParagraph,
   createSelectionAfterEnterInput,
   createText,
@@ -164,6 +166,55 @@ describe("createEnterInputTransaction", () => {
     expect(createSelectionAfterEnterInput(input)).toEqual({
       anchor: { path: [1, 0], offset: 0 },
       focus: { path: [1, 0], offset: 0 },
+    });
+  });
+
+  it("splits a non-empty list item", () => {
+    const document = createDocument([
+      createBulletList([createListItem([createText("项目")])]),
+    ]);
+    const input = {
+      document,
+      selection: {
+        anchor: { offset: 1, path: [0, 0, 0] },
+        focus: { offset: 1, path: [0, 0, 0] },
+      },
+    };
+    const transaction = createEnterInputTransaction(input);
+
+    expect(transaction.operations[0]?.type).toBe("split_list_item");
+    expect(applyTransaction(document, transaction).children[0]).toEqual(
+      createBulletList([
+        createListItem([createText("项")]),
+        createListItem([createText("目")]),
+      ]),
+    );
+    expect(createSelectionAfterEnterInput(input)).toEqual({
+      anchor: { offset: 0, path: [0, 1, 0] },
+      focus: { offset: 0, path: [0, 1, 0] },
+    });
+  });
+
+  it("exits an empty list item into a paragraph", () => {
+    const document = createDocument([
+      createBulletList([createListItem([createText("项目")]), createListItem()]),
+    ]);
+    const input = {
+      document,
+      selection: {
+        anchor: { offset: 0, path: [0, 1, 0] },
+        focus: { offset: 0, path: [0, 1, 0] },
+      },
+    };
+    const transaction = createEnterInputTransaction(input);
+
+    expect(transaction.operations[0]?.type).toBe("exit_list_item");
+    expect(
+      applyTransaction(document, transaction).children.map((node) => node.type),
+    ).toEqual(["bulletList", "paragraph"]);
+    expect(createSelectionAfterEnterInput(input)).toEqual({
+      anchor: { offset: 0, path: [1, 0] },
+      focus: { offset: 0, path: [1, 0] },
     });
   });
 });

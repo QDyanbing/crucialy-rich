@@ -8,6 +8,7 @@ import type { Path } from "../selection";
 import { isCollapsed, normalizeRange } from "../selection";
 import type {
   DeleteTextOperation,
+  ExitListItemOperation,
   InsertTextOperation,
   InsertBlockOperation,
   MergeBlockOperation,
@@ -31,6 +32,7 @@ export type TextOperation =
   | ToggleMarkOperation;
 
 export type BlockOperation =
+  | ExitListItemOperation
   | InsertBlockOperation
   | MergeBlockOperation
   | RemoveBlockOperation
@@ -70,6 +72,7 @@ export const TEXT_OPERATION_TYPES = [
 ] as const satisfies readonly OperationType[];
 
 export const BLOCK_OPERATION_TYPES = [
+  "exit_list_item",
   "insert_block",
   "remove_block",
   "set_block_type",
@@ -90,6 +93,7 @@ export function isTextOperation(operation: Operation): operation is TextOperatio
 
 export function isBlockOperation(operation: Operation): operation is BlockOperation {
   return (
+    operation.type === "exit_list_item" ||
     operation.type === "insert_block" ||
     operation.type === "remove_block" ||
     operation.type === "set_block_type" ||
@@ -101,6 +105,12 @@ export function isBlockOperation(operation: Operation): operation is BlockOperat
 
 export function summarizeOperation(operation: Operation): OperationSummary {
   switch (operation.type) {
+    case "exit_list_item":
+      return {
+        scope: "block",
+        targetPath: [...operation.point.path],
+        type: "exit_list_item",
+      };
     case "insert_block":
       return {
         blockType: operation.block.type,

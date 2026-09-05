@@ -26,6 +26,7 @@ export const OPERATION_TYPES = [
   "insert_block",
   "remove_block",
   "split_list_item",
+  "exit_list_item",
 ] as const;
 
 export type OperationType = (typeof OPERATION_TYPES)[number];
@@ -94,8 +95,14 @@ export interface SplitListItemOperation {
   type: "split_list_item";
 }
 
+export interface ExitListItemOperation {
+  point: Point;
+  type: "exit_list_item";
+}
+
 export type Operation =
   | DeleteTextOperation
+  | ExitListItemOperation
   | InsertTextOperation
   | InsertBlockOperation
   | MergeBlockOperation
