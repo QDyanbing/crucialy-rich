@@ -1,4 +1,9 @@
-import { isTextBlockNode, isTextNode, type DocumentNode } from "../model";
+import {
+  isListItemNode,
+  isTextBlockNode,
+  isTextNode,
+  type DocumentNode,
+} from "../model";
 import { getNodeAtPath, isValidPoint, type Path, type Point } from "../selection";
 import { decodeModelPath, encodeModelPath, MODEL_PATH_ATTRIBUTE } from "./attributes";
 
@@ -39,7 +44,7 @@ function createBlockBoundaryPoint(
 ): Point | undefined {
   const node = getNodeAtPath(document, path);
 
-  if (!isTextBlockNode(node) || node.children.length === 0) {
+  if ((!isTextBlockNode(node) && !isListItemNode(node)) || node.children.length === 0) {
     return undefined;
   }
 

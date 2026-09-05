@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  createBulletList,
   createCodeBlock,
   createDocument,
   createDivider,
   createHeading,
+  createListItem,
+  createOrderedList,
   createParagraph,
   createQuote,
   createText,
@@ -161,6 +164,39 @@ describe("renderDocument", () => {
       attributes: { [MODEL_PATH_ATTRIBUTE]: "[0]" },
       path: [0],
       tagName: "hr",
+    });
+  });
+
+  it("renders ordered and unordered lists with nested model paths", () => {
+    const document = createDocument([
+      createBulletList([
+        createListItem([createText("无序一", { bold: true })]),
+        createListItem([createText("无序二")]),
+      ]),
+      createOrderedList([createListItem([createText("有序一")])]),
+    ]);
+    const rendered = renderDocument(document);
+
+    expect(rendered.children?.[0]).toMatchObject({
+      children: [
+        {
+          children: [{ path: [0, 0, 0], tagName: "strong", text: "无序一" }],
+          path: [0, 0],
+          tagName: "li",
+        },
+        {
+          children: [{ path: [0, 1, 0], tagName: "span", text: "无序二" }],
+          path: [0, 1],
+          tagName: "li",
+        },
+      ],
+      path: [0],
+      tagName: "ul",
+    });
+    expect(rendered.children?.[1]).toMatchObject({
+      children: [{ path: [1, 0], tagName: "li" }],
+      path: [1],
+      tagName: "ol",
     });
   });
 

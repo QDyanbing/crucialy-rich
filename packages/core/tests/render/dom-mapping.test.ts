@@ -4,8 +4,10 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
 import {
+  createBulletList,
   createDocument,
   createHeading,
+  createListItem,
   createParagraph,
   createQuote,
   createText,
@@ -160,6 +162,29 @@ describe("dom model path helpers", () => {
     expect(domPointToModelPoint(model, { node: element!, offset: 1 })).toEqual({
       path: [0, 0],
       offset: block.children[0]?.text.length,
+    });
+  });
+
+  it("maps list item dom boundaries to nested model points", () => {
+    const model = createDocument([
+      createBulletList([createListItem([createText("项目")])]),
+    ]);
+    document.body.innerHTML = `
+      <ul data-crucialy-path="[0]">
+        <li data-crucialy-path="[0,0]">
+          <span data-crucialy-path="[0,0,0]">项目</span>
+        </li>
+      </ul>
+    `;
+    const item = document.querySelector("li");
+
+    expect(domPointToModelPoint(model, { node: item!, offset: 0 })).toEqual({
+      offset: 0,
+      path: [0, 0, 0],
+    });
+    expect(domPointToModelPoint(model, { node: item!, offset: 1 })).toEqual({
+      offset: 2,
+      path: [0, 0, 0],
     });
   });
 

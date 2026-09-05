@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  createBulletList,
   createCodeBlock,
   createDocument,
   createDivider,
   createHeading,
+  createListItem,
+  createOrderedList,
   createParagraph,
   createQuote,
   createText,
@@ -62,6 +65,17 @@ describe("renderNodeToHtml", () => {
 
     expect(renderNodeToHtml(renderDocument(document))).toBe(
       '<div data-crucialy-path="[]"><hr data-crucialy-path="[0]"></div>',
+    );
+  });
+
+  it("serializes ordered and unordered lists", () => {
+    const document = createDocument([
+      createBulletList([createListItem([createText("无序")])]),
+      createOrderedList([createListItem([createText("有序")])]),
+    ]);
+
+    expect(renderNodeToHtml(renderDocument(document))).toBe(
+      '<div data-crucialy-path="[]"><ul data-crucialy-path="[0]"><li data-crucialy-path="[0,0]"><span data-crucialy-path="[0,0,0]">无序</span></li></ul><ol data-crucialy-path="[1]"><li data-crucialy-path="[1,0]"><span data-crucialy-path="[1,0,0]">有序</span></li></ol></div>',
     );
   });
 
