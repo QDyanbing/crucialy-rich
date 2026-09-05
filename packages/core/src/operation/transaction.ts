@@ -9,6 +9,7 @@ import { applySetBlockType } from "./set-block-type";
 import { applySetLink } from "./set-link";
 import { applySetMarkAttribute } from "./set-mark-attribute";
 import { applySplitBlock } from "./split-block";
+import { applySplitListItem } from "./split-list-item";
 import { applyToggleMark } from "./toggle-mark";
 import type { Operation, Transaction } from "./types";
 
@@ -81,6 +82,11 @@ export function cloneOperation(operation: Operation): Operation {
         point: clonePoint(operation.point),
         type: "split_block",
       };
+    case "split_list_item":
+      return {
+        point: clonePoint(operation.point),
+        type: "split_list_item",
+      };
   }
 }
 
@@ -115,6 +121,8 @@ export function applyOperation(
       return applyMergeBlock(document, operation);
     case "split_block":
       return applySplitBlock(document, operation);
+    case "split_list_item":
+      return applySplitListItem(document, operation);
   }
 }
 

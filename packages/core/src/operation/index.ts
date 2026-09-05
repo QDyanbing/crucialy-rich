@@ -22,6 +22,11 @@ export {
   createSelectionAfterSplitBlock,
   createSplitBlockOperation,
 } from "./split-block";
+export {
+  applySplitListItem,
+  createSelectionAfterSplitListItem,
+  createSplitListItemOperation,
+} from "./split-list-item";
 export { applySetBlockType, createSetBlockTypeOperation } from "./set-block-type";
 export {
   applySetMarkAttribute,
@@ -70,6 +75,7 @@ export type {
   SetLinkOperation,
   SetMarkAttributeOperation,
   SplitBlockOperation,
+  SplitListItemOperation,
   ToggleMarkOperation,
   OperationType,
   Transaction,

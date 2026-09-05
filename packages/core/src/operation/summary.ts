@@ -18,6 +18,7 @@ import type {
   SetLinkOperation,
   SetMarkAttributeOperation,
   SplitBlockOperation,
+  SplitListItemOperation,
   ToggleMarkOperation,
   Transaction,
 } from "./types";
@@ -34,7 +35,8 @@ export type BlockOperation =
   | MergeBlockOperation
   | RemoveBlockOperation
   | SetBlockTypeOperation
-  | SplitBlockOperation;
+  | SplitBlockOperation
+  | SplitListItemOperation;
 
 export interface OperationSummary {
   collapsedRange?: boolean;
@@ -73,6 +75,7 @@ export const BLOCK_OPERATION_TYPES = [
   "set_block_type",
   "split_block",
   "merge_block",
+  "split_list_item",
 ] as const satisfies readonly OperationType[];
 
 export function isTextOperation(operation: Operation): operation is TextOperation {
@@ -91,6 +94,7 @@ export function isBlockOperation(operation: Operation): operation is BlockOperat
     operation.type === "remove_block" ||
     operation.type === "set_block_type" ||
     operation.type === "split_block" ||
+    operation.type === "split_list_item" ||
     operation.type === "merge_block"
   );
 }
@@ -186,6 +190,12 @@ export function summarizeOperation(operation: Operation): OperationSummary {
         scope: "block",
         targetPath: [...operation.point.path],
         type: "split_block",
+      };
+    case "split_list_item":
+      return {
+        scope: "block",
+        targetPath: [...operation.point.path],
+        type: "split_list_item",
       };
   }
 }

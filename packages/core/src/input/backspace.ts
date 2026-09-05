@@ -119,6 +119,7 @@ export function createSelectionAfterBackspaceInput(
     case "set_link":
     case "set_mark_attribute":
     case "split_block":
+    case "split_list_item":
     case "toggle_mark":
       return createCollapsedSelection(input.selection.anchor);
   }
