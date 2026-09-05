@@ -19,6 +19,7 @@ import { createCommandSkipped, createCommandSuccess } from "./result";
 import type { Command, CommandInput, CommandName, CommandResult } from "./types";
 
 export const TOGGLE_BULLET_LIST_COMMAND_NAME = "toggleBulletList";
+export const TOGGLE_ORDERED_LIST_COMMAND_NAME = "toggleOrderedList";
 
 interface ParagraphListTarget {
   blockIndexes: number[];
@@ -203,4 +204,22 @@ export const toggleBulletListCommand: Command = {
     return executeToggleList(TOGGLE_BULLET_LIST_COMMAND_NAME, "bulletList", input);
   },
   name: TOGGLE_BULLET_LIST_COMMAND_NAME,
+};
+
+export function canExecuteToggleOrderedListCommand(input: CommandInput): boolean {
+  return getListCommandTarget(input) !== undefined;
+}
+
+export function isOrderedListCommandActive(input: CommandInput): boolean {
+  const target = getListCommandTarget(input);
+
+  return target?.kind === "list" && target.list.type === "orderedList";
+}
+
+export const toggleOrderedListCommand: Command = {
+  canExecute: canExecuteToggleOrderedListCommand,
+  execute(input) {
+    return executeToggleList(TOGGLE_ORDERED_LIST_COMMAND_NAME, "orderedList", input);
+  },
+  name: TOGGLE_ORDERED_LIST_COMMAND_NAME,
 };

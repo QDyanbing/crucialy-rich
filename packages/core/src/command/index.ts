@@ -60,9 +60,13 @@ export {
 export type { SetLinkCommandPayload } from "./link";
 export {
   canExecuteToggleBulletListCommand,
+  canExecuteToggleOrderedListCommand,
   isBulletListCommandActive,
+  isOrderedListCommandActive,
   TOGGLE_BULLET_LIST_COMMAND_NAME,
+  TOGGLE_ORDERED_LIST_COMMAND_NAME,
   toggleBulletListCommand,
+  toggleOrderedListCommand,
 } from "./list";
 export {
   canExecuteSetTextColorCommand,
