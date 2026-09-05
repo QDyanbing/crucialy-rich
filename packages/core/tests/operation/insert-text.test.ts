@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { createDocument, createParagraph, createText } from "../../src/model";
+import {
+  createBulletList,
+  createDocument,
+  createListItem,
+  createParagraph,
+  createText,
+} from "../../src/model";
 import {
   applyInsertText,
   createInsertTextOperation,
@@ -38,6 +44,17 @@ describe("createInsertTextOperation", () => {
 });
 
 describe("applyInsertText", () => {
+  it("inserts text inside a list item", () => {
+    const document = createDocument([
+      createBulletList([createListItem([createText("项目")])]),
+    ]);
+    const operation = createInsertTextOperation({ offset: 1, path: [0, 0, 0] }, "新");
+
+    expect(applyInsertText(document, operation)).toEqual(
+      createDocument([createBulletList([createListItem([createText("项新目")])])]),
+    );
+  });
+
   it("inserts text at the start of a text node", () => {
     const document = createDocument([createParagraph([createText("世界")])]);
     const result = applyInsertText(

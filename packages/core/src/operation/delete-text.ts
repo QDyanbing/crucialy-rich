@@ -1,7 +1,8 @@
-import { isTextBlockNode, type DocumentNode } from "../model";
+import type { DocumentNode } from "../model";
 import type { RangeSelection } from "../selection";
 import { isCollapsed, isValidPoint, normalizeRange } from "../selection";
 import type { DeleteTextOperation } from "./types";
+import { getTextTarget, replaceTextContainer } from "./text-target";
 
 export function createDeleteTextOperation(range: RangeSelection): DeleteTextOperation {
   return {
@@ -22,61 +23,47 @@ export function createDeleteTextOperation(range: RangeSelection): DeleteTextOper
 function getDeleteTextIndexes(
   document: DocumentNode,
   operation: DeleteTextOperation,
-): [number, number, RangeSelection] {
+): [NonNullable<ReturnType<typeof getTextTarget>>, RangeSelection] {
   const range = normalizeRange(operation.range);
 
   if (!isValidPoint(document, range.anchor) || !isValidPoint(document, range.focus)) {
     throw new RangeError("delete text range must reference text nodes");
   }
 
-  const [anchorBlockIndex, anchorTextIndex] = range.anchor.path;
-  const [focusBlockIndex, focusTextIndex] = range.focus.path;
+  const target = getTextTarget(document, range.anchor);
 
   if (
-    anchorBlockIndex === undefined ||
-    anchorTextIndex === undefined ||
-    focusBlockIndex === undefined ||
-    focusTextIndex === undefined ||
-    anchorBlockIndex !== focusBlockIndex ||
-    anchorTextIndex !== focusTextIndex
+    !target ||
+    range.anchor.path.length !== range.focus.path.length ||
+    !range.anchor.path.every((part, index) => part === range.focus.path[index])
   ) {
     throw new RangeError("delete text range must stay inside one text node");
   }
 
-  return [anchorBlockIndex, anchorTextIndex, range];
+  return [target, range];
 }
 
 export function applyDeleteText(
   document: DocumentNode,
   operation: DeleteTextOperation,
 ): DocumentNode {
-  const [blockIndex, textIndex, range] = getDeleteTextIndexes(document, operation);
+  const [target, range] = getDeleteTextIndexes(document, operation);
 
   if (isCollapsed(range)) {
     return document;
   }
 
-  return {
-    ...document,
-    children: document.children.map((block, currentBlockIndex) =>
-      currentBlockIndex === blockIndex && isTextBlockNode(block)
+  return replaceTextContainer(document, target.containerPath, {
+    ...target.container,
+    children: target.container.children.map((textNode, currentTextIndex) =>
+      currentTextIndex === target.textIndex
         ? {
-            ...block,
-            children: block.children.map((textNode, currentTextIndex) =>
-              currentTextIndex === textIndex
-                ? {
-                    ...textNode,
-                    text: `${textNode.text.slice(
-                      0,
-                      range.anchor.offset,
-                    )}${textNode.text.slice(range.focus.offset)}`,
-                  }
-                : textNode,
-            ),
+            ...textNode,
+            text: `${textNode.text.slice(0, range.anchor.offset)}${textNode.text.slice(range.focus.offset)}`,
           }
-        : block,
+        : textNode,
     ),
-  };
+  });
 }
 
 export function createSelectionAfterDeleteText(

@@ -1,7 +1,8 @@
-import { isTextBlockNode, type DocumentNode } from "../model";
+import type { DocumentNode } from "../model";
 import type { Point, RangeSelection } from "../selection";
 import { isValidPoint } from "../selection";
 import type { InsertTextOperation } from "./types";
+import { getTextTarget, replaceTextContainer } from "./text-target";
 
 export function createInsertTextOperation(
   point: Point,
@@ -17,54 +18,41 @@ export function createInsertTextOperation(
   };
 }
 
-function getInsertTextIndexes(
-  document: DocumentNode,
-  operation: InsertTextOperation,
-): [number, number] {
+function getInsertTextTarget(document: DocumentNode, operation: InsertTextOperation) {
   if (!isValidPoint(document, operation.point)) {
     throw new RangeError("insert text point must reference a text node");
   }
 
-  const [blockIndex, textIndex] = operation.point.path;
+  const target = getTextTarget(document, operation.point);
 
-  if (blockIndex === undefined || textIndex === undefined) {
+  if (!target) {
     throw new RangeError("insert text point must reference a text node");
   }
 
-  return [blockIndex, textIndex];
+  return target;
 }
 
 export function applyInsertText(
   document: DocumentNode,
   operation: InsertTextOperation,
 ): DocumentNode {
-  const [blockIndex, textIndex] = getInsertTextIndexes(document, operation);
+  const target = getInsertTextTarget(document, operation);
 
   if (operation.text.length === 0) {
     return document;
   }
 
-  return {
-    ...document,
-    children: document.children.map((block, currentBlockIndex) =>
-      currentBlockIndex === blockIndex && isTextBlockNode(block)
+  return replaceTextContainer(document, target.containerPath, {
+    ...target.container,
+    children: target.container.children.map((textNode, currentTextIndex) =>
+      currentTextIndex === target.textIndex
         ? {
-            ...block,
-            children: block.children.map((textNode, currentTextIndex) =>
-              currentTextIndex === textIndex
-                ? {
-                    ...textNode,
-                    text: `${textNode.text.slice(
-                      0,
-                      operation.point.offset,
-                    )}${operation.text}${textNode.text.slice(operation.point.offset)}`,
-                  }
-                : textNode,
-            ),
+            ...textNode,
+            text: `${textNode.text.slice(0, operation.point.offset)}${operation.text}${textNode.text.slice(operation.point.offset)}`,
           }
-        : block,
+        : textNode,
     ),
-  };
+  });
 }
 
 export function createSelectionAfterInsertText(

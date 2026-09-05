@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { createDocument, createParagraph, createText } from "../../src/model";
+import {
+  createBulletList,
+  createDocument,
+  createListItem,
+  createParagraph,
+  createText,
+} from "../../src/model";
 import {
   applyDeleteText,
   createDeleteTextOperation,
@@ -52,6 +58,20 @@ describe("createDeleteTextOperation", () => {
 });
 
 describe("applyDeleteText", () => {
+  it("deletes text inside a list item", () => {
+    const document = createDocument([
+      createBulletList([createListItem([createText("项目一")])]),
+    ]);
+    const operation = createDeleteTextOperation({
+      anchor: { offset: 2, path: [0, 0, 0] },
+      focus: { offset: 3, path: [0, 0, 0] },
+    });
+
+    expect(applyDeleteText(document, operation)).toEqual(
+      createDocument([createBulletList([createListItem([createText("项目")])])]),
+    );
+  });
+
   it("deletes text from the start of a text node", () => {
     const document = createDocument([createParagraph([createText("你好世界")])]);
     const result = applyDeleteText(
