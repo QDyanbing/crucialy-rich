@@ -165,6 +165,16 @@ describe("model factories", () => {
     });
   });
 
+  it("creates a list item with a nested list", () => {
+    const nested = createBulletList([createListItem([createText("子项")])]);
+
+    expect(createListItem([createText("父项")], nested)).toEqual({
+      children: [createText("父项")],
+      nested,
+      type: "listItem",
+    });
+  });
+
   it("creates a document with a default empty paragraph", () => {
     const document = createDocument();
     expect(isDocumentNode(document)).toBe(true);

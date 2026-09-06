@@ -19,6 +19,8 @@ export const VOID_BLOCK_TYPES = ["divider"] as const;
 
 export const LIST_TYPES = ["bulletList", "orderedList"] as const;
 
+export const MAX_LIST_DEPTH = 3;
+
 export const HEADING_LEVELS = [1, 2, 3, 4, 5, 6] as const;
 
 export const TEXT_MARK_TYPES = ["bold", "italic", "underline", "strike"] as const;
@@ -99,6 +101,7 @@ export interface DividerNode {
 export interface ListItemNode {
   type: "listItem";
   children: TextNode[];
+  nested?: ListNode;
   marks?: never;
   text?: never;
 }

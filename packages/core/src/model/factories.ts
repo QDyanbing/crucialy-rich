@@ -8,6 +8,7 @@ import type {
   HeadingLevel,
   HeadingNode,
   ListItemNode,
+  ListNode,
   OrderedListNode,
   ParagraphNode,
   QuoteNode,
@@ -68,8 +69,13 @@ export function createDivider(): DividerNode {
   return { children: [], type: "divider" };
 }
 
-export function createListItem(children: TextNode[] = [createText()]): ListItemNode {
-  return { children, type: "listItem" };
+export function createListItem(
+  children: TextNode[] = [createText()],
+  nested?: ListNode,
+): ListItemNode {
+  return nested
+    ? { children, nested, type: "listItem" }
+    : { children, type: "listItem" };
 }
 
 export function createBulletList(

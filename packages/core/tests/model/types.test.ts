@@ -6,6 +6,7 @@ import {
   LINK_REL_TOKENS,
   LINK_TARGETS,
   LIST_TYPES,
+  MAX_LIST_DEPTH,
   TEXT_MARK_ATTRIBUTE_TYPES,
   TEXT_MARK_TYPES,
   VOID_BLOCK_TYPES,
@@ -68,6 +69,7 @@ describe("model node types", () => {
     };
 
     expect(LIST_TYPES).toEqual(["bulletList", "orderedList"]);
+    expect(MAX_LIST_DEPTH).toBe(3);
     expect(list.children[0]?.type).toBe("listItem");
   });
 
