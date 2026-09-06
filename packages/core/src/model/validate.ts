@@ -11,6 +11,8 @@ import { isValidTextMarkAttributeValue } from "./marks";
 import {
   TEXT_MARK_ATTRIBUTE_TYPES,
   TEXT_MARK_TYPES,
+  MAX_LIST_DEPTH,
+  type ListNode,
   type TextMarkAttributeType,
 } from "./types";
 
@@ -93,6 +95,60 @@ function validateTextMarks(
   });
 }
 
+function validateList(
+  list: ListNode,
+  path: number[],
+  depth: number,
+  errors: ValidationError[],
+): void {
+  if (list.children.length === 0) {
+    errors.push({ path, message: "list 至少需要一个 listItem" });
+  }
+
+  list.children.forEach((item, itemIndex) => {
+    const itemPath = [...path, itemIndex];
+
+    if (!isListItemNode(item)) {
+      errors.push({ path: itemPath, message: "list 子节点必须是 listItem" });
+      return;
+    }
+
+    if (item.children.length === 0) {
+      errors.push({ path: itemPath, message: "listItem 至少需要一个 text" });
+    }
+
+    item.children.forEach((leaf, leafIndex) => {
+      const leafPath = [...itemPath, leafIndex];
+
+      if (!isTextNode(leaf)) {
+        errors.push({ path: leafPath, message: "listItem 子节点必须是 text" });
+        return;
+      }
+
+      validateTextMarks(leaf, leafPath, errors);
+    });
+
+    if (item.nested === undefined) {
+      return;
+    }
+
+    if (!isListNode(item.nested)) {
+      errors.push({ path: itemPath, message: "listItem nested 必须是 list" });
+      return;
+    }
+
+    if (depth >= MAX_LIST_DEPTH) {
+      errors.push({
+        path: itemPath,
+        message: `list 最多支持 ${MAX_LIST_DEPTH} 层嵌套`,
+      });
+      return;
+    }
+
+    validateList(item.nested, itemPath, depth + 1, errors);
+  });
+}
+
 /**
  * 校验一个值是否为合法文档。
  *
@@ -120,36 +176,7 @@ export function validateDocument(value: unknown): ValidationResult {
     }
 
     if (isListNode(child)) {
-      if (child.children.length === 0) {
-        errors.push({
-          path: [blockIndex],
-          message: "list 至少需要一个 listItem",
-        });
-      }
-
-      child.children.forEach((item, itemIndex) => {
-        const itemPath = [blockIndex, itemIndex];
-
-        if (!isListItemNode(item)) {
-          errors.push({ path: itemPath, message: "list 子节点必须是 listItem" });
-          return;
-        }
-
-        if (item.children.length === 0) {
-          errors.push({ path: itemPath, message: "listItem 至少需要一个 text" });
-        }
-
-        item.children.forEach((leaf, leafIndex) => {
-          const leafPath = [...itemPath, leafIndex];
-
-          if (!isTextNode(leaf)) {
-            errors.push({ path: leafPath, message: "listItem 子节点必须是 text" });
-            return;
-          }
-
-          validateTextMarks(leaf, leafPath, errors);
-        });
-      });
+      validateList(child, [blockIndex], 1, errors);
       return;
     }
 

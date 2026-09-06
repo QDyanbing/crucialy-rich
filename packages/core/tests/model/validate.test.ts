@@ -25,6 +25,69 @@ describe("validateDocument", () => {
     expect(validateDocument(document)).toEqual({ errors: [], valid: true });
   });
 
+  it("accepts nested lists up to the maximum depth", () => {
+    const document = createDocument([
+      createBulletList([
+        createListItem(
+          [createText("一级")],
+          createOrderedList([
+            createListItem(
+              [createText("二级")],
+              createBulletList([createListItem([createText("三级")])]),
+            ),
+          ]),
+        ),
+      ]),
+    ]);
+
+    expect(validateDocument(document)).toEqual({ errors: [], valid: true });
+  });
+
+  it("rejects lists beyond the maximum depth", () => {
+    const fourthLevel = createBulletList([createListItem([createText("四级")])]);
+    const document = createDocument([
+      createBulletList([
+        createListItem(
+          [createText("一级")],
+          createBulletList([
+            createListItem(
+              [createText("二级")],
+              createBulletList([createListItem([createText("三级")], fourthLevel)]),
+            ),
+          ]),
+        ),
+      ]),
+    ]);
+
+    expect(validateDocument(document)).toEqual({
+      errors: [{ message: "list 最多支持 3 层嵌套", path: [0, 0, 0, 0] }],
+      valid: false,
+    });
+  });
+
+  it("rejects invalid nested list values", () => {
+    const result = validateDocument({
+      children: [
+        {
+          children: [
+            {
+              children: [{ text: "项目", type: "text" }],
+              nested: { children: [], type: "paragraph" },
+              type: "listItem",
+            },
+          ],
+          type: "bulletList",
+        },
+      ],
+      type: "document",
+    });
+
+    expect(result).toEqual({
+      errors: [{ message: "listItem nested 必须是 list", path: [0, 0] }],
+      valid: false,
+    });
+  });
+
   it("rejects empty lists and list items", () => {
     const result = validateDocument({
       children: [
