@@ -9,6 +9,7 @@ import { isCollapsed, normalizeRange } from "../selection";
 import type {
   DeleteTextOperation,
   ExitListItemOperation,
+  IndentListItemOperation,
   InsertTextOperation,
   InsertBlockOperation,
   MergeBlockOperation,
@@ -33,6 +34,7 @@ export type TextOperation =
 
 export type BlockOperation =
   | ExitListItemOperation
+  | IndentListItemOperation
   | InsertBlockOperation
   | MergeBlockOperation
   | RemoveBlockOperation
@@ -73,6 +75,7 @@ export const TEXT_OPERATION_TYPES = [
 
 export const BLOCK_OPERATION_TYPES = [
   "exit_list_item",
+  "indent_list_item",
   "insert_block",
   "remove_block",
   "set_block_type",
@@ -94,6 +97,7 @@ export function isTextOperation(operation: Operation): operation is TextOperatio
 export function isBlockOperation(operation: Operation): operation is BlockOperation {
   return (
     operation.type === "exit_list_item" ||
+    operation.type === "indent_list_item" ||
     operation.type === "insert_block" ||
     operation.type === "remove_block" ||
     operation.type === "set_block_type" ||
@@ -110,6 +114,12 @@ export function summarizeOperation(operation: Operation): OperationSummary {
         scope: "block",
         targetPath: [...operation.point.path],
         type: "exit_list_item",
+      };
+    case "indent_list_item":
+      return {
+        scope: "block",
+        targetPath: [...operation.point.path],
+        type: "indent_list_item",
       };
     case "insert_block":
       return {

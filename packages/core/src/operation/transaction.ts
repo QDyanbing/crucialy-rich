@@ -3,6 +3,7 @@ import type { Point, RangeSelection } from "../selection";
 import { applyDeleteText } from "./delete-text";
 import { applyExitListItem } from "./exit-list-item";
 import { applyInsertText } from "./insert-text";
+import { applyIndentListItem } from "./indent-list-item";
 import { applyInsertBlock, createInsertBlockOperation } from "./insert-block";
 import { applyMergeBlock } from "./merge-block";
 import { applyRemoveBlock } from "./remove-block";
@@ -37,6 +38,11 @@ export function cloneOperation(operation: Operation): Operation {
       };
     case "insert_block":
       return createInsertBlockOperation(operation.path, operation.block);
+    case "indent_list_item":
+      return {
+        point: clonePoint(operation.point),
+        type: "indent_list_item",
+      };
     case "remove_block":
       return { path: [...operation.path], type: "remove_block" };
     case "delete_text":
@@ -111,6 +117,8 @@ export function applyOperation(
       return applyExitListItem(document, operation);
     case "insert_block":
       return applyInsertBlock(document, operation);
+    case "indent_list_item":
+      return applyIndentListItem(document, operation);
     case "remove_block":
       return applyRemoveBlock(document, operation);
     case "delete_text":

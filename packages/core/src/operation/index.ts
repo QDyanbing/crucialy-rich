@@ -5,6 +5,11 @@ export {
   createSelectionAfterExitListItem,
 } from "./exit-list-item";
 export type { TransactionAcceptanceReport } from "./acceptance";
+export {
+  applyIndentListItem,
+  createIndentListItemOperation,
+  createSelectionAfterIndentListItem,
+} from "./indent-list-item";
 export { applyInsertBlock, createInsertBlockOperation } from "./insert-block";
 export {
   applyDeleteText,
@@ -72,6 +77,7 @@ export type {
   BlockTypeSpec,
   DeleteTextOperation,
   ExitListItemOperation,
+  IndentListItemOperation,
   InsertTextOperation,
   InsertBlockOperation,
   MergeBlockOperation,
