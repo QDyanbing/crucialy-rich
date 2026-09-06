@@ -104,19 +104,41 @@ function renderCodeTextNode(node: TextNode, path: Path): RenderedElementNode {
 
 function renderListNode(node: ListNode, path: Path): RenderedElementNode {
   return createRenderedNode(node.type === "orderedList" ? "ol" : "ul", path, {
+    attributes: {
+      ...createModelPathAttributes(path),
+      ...(node.type === "taskList" ? { "data-crucialy-list-type": "task" } : {}),
+    },
     children: node.children.map((item, itemIndex) => {
       const itemPath = [...path, itemIndex];
       const textChildren = item.children.map((child, textIndex) =>
         renderTextNode(child, [...itemPath, textIndex]),
       );
+      const taskControl =
+        item.type === "taskItem"
+          ? createRenderedNode("input", itemPath, {
+              attributes: {
+                "aria-label": item.checked ? "标记任务为未完成" : "标记任务为已完成",
+                checked: item.checked,
+                contentEditable: "false",
+                "data-crucialy-task-item": "true",
+                readOnly: true,
+                type: "checkbox",
+              },
+            })
+          : undefined;
+      const content = taskControl ? [taskControl, ...textChildren] : textChildren;
 
       return createRenderedNode("li", itemPath, {
+        attributes: {
+          ...createModelPathAttributes(itemPath),
+          ...(item.type === "taskItem" ? { "data-checked": String(item.checked) } : {}),
+        },
         children: item.nested
           ? [
-              ...textChildren,
+              ...content,
               renderListNode(item.nested, [...itemPath, item.children.length]),
             ]
-          : textChildren,
+          : content,
       });
     }),
   });

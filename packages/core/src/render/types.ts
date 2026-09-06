@@ -13,6 +13,7 @@ export type RenderedTagName =
   | "h5"
   | "h6"
   | "hr"
+  | "input"
   | "li"
   | "ol"
   | "p"
@@ -35,7 +36,7 @@ export interface RenderedElementStyle {
 export interface RenderedElementNode {
   tagName: RenderedTagName;
   path: Path;
-  attributes: Record<string, string>;
+  attributes: Record<string, boolean | string>;
   children?: RenderedElementNode[];
   style?: RenderedElementStyle;
   text?: string;

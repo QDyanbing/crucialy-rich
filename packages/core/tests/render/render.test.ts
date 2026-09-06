@@ -11,6 +11,8 @@ import {
   createParagraph,
   createQuote,
   createText,
+  createTaskItem,
+  createTaskList,
   type DocumentNode,
 } from "../../src/model";
 import { MODEL_PATH_ATTRIBUTE, renderDocument } from "../../src/render";
@@ -228,6 +230,37 @@ describe("renderDocument", () => {
       ],
       path: [0, 0],
       tagName: "li",
+    });
+  });
+
+  it("renders task items with checkbox state", () => {
+    const document = createDocument([
+      createTaskList([
+        createTaskItem([createText("待办")]),
+        createTaskItem([createText("完成")], true),
+      ]),
+    ]);
+    const rendered = renderDocument(document).children?.[0];
+
+    expect(rendered).toMatchObject({
+      attributes: { "data-crucialy-list-type": "task" },
+      children: [
+        {
+          attributes: { "data-checked": "false" },
+          children: [
+            { attributes: { checked: false, type: "checkbox" }, tagName: "input" },
+            { text: "待办" },
+          ],
+        },
+        {
+          attributes: { "data-checked": "true" },
+          children: [
+            { attributes: { checked: true, type: "checkbox" }, tagName: "input" },
+            { text: "完成" },
+          ],
+        },
+      ],
+      tagName: "ul",
     });
   });
 

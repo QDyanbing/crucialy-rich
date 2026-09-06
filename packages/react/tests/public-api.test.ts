@@ -4,6 +4,8 @@ import {
   createDivider,
   createParagraph,
   createText,
+  createTaskItem,
+  createTaskList,
   type DocumentNode,
 } from "@crucialy-rich/core";
 import { describe, expect, it, vi } from "vitest";
@@ -65,6 +67,20 @@ describe("@crucialy-rich/react public API", () => {
     );
 
     expect(html).toContain('<hr data-crucialy-path="[0]"/>');
+  });
+
+  it("renders task list checkboxes through React", () => {
+    const html = renderToStaticMarkup(
+      createElement(RichTextEditor, {
+        value: createDocument([
+          createTaskList([createTaskItem([createText("完成")], true)]),
+        ]),
+      }),
+    );
+
+    expect(html).toContain('data-crucialy-list-type="task"');
+    expect(html).toContain('type="checkbox"');
+    expect(html).toContain("checked");
   });
 
   it("renders combined mark styles through React", () => {

@@ -29,15 +29,18 @@ function renderAttributes(node: RenderedElementNode): string {
   const style = renderStyle(node);
   const attributes = style ? { ...node.attributes, style } : node.attributes;
   const serialized = Object.entries(attributes)
-    .map(([name, value]) => `${name}="${escapeHtml(value)}"`)
+    .filter(([, value]) => value !== false)
+    .map(([name, value]) =>
+      value === true ? name : `${name}="${escapeHtml(String(value))}"`,
+    )
     .join(" ");
 
   return serialized ? ` ${serialized}` : "";
 }
 
 export function renderNodeToHtml(node: RenderedElementNode): string {
-  if (node.tagName === "hr") {
-    return `<hr${renderAttributes(node)}>`;
+  if (node.tagName === "hr" || node.tagName === "input") {
+    return `<${node.tagName}${renderAttributes(node)}>`;
   }
 
   const children = node.children?.map(renderNodeToHtml).join("") ?? "";

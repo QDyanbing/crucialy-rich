@@ -11,6 +11,8 @@ import {
   createParagraph,
   createQuote,
   createText,
+  createTaskItem,
+  createTaskList,
 } from "../../src/model";
 import { renderDocument, renderNodeToHtml } from "../../src/render";
 
@@ -92,6 +94,20 @@ describe("renderNodeToHtml", () => {
     expect(renderNodeToHtml(renderDocument(document))).toBe(
       '<div data-crucialy-path="[]"><ul data-crucialy-path="[0]"><li data-crucialy-path="[0,0]"><span data-crucialy-path="[0,0,0]">父项</span><ol data-crucialy-path="[0,0,1]"><li data-crucialy-path="[0,0,1,0]"><span data-crucialy-path="[0,0,1,0,0]">子项</span></li></ol></li></ul></div>',
     );
+  });
+
+  it("serializes task checkbox state", () => {
+    const html = renderNodeToHtml(
+      renderDocument(
+        createDocument([createTaskList([createTaskItem([createText("完成")], true)])]),
+      ),
+    );
+
+    expect(html).toContain('data-crucialy-list-type="task"');
+    expect(html).toContain('data-checked="true"');
+    expect(html).toContain("<input");
+    expect(html).toContain(" checked ");
+    expect(html).toContain('type="checkbox"');
   });
 
   it("escapes text and attribute values", () => {
