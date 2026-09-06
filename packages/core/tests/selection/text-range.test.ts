@@ -93,6 +93,25 @@ describe("getTextInRange", () => {
       }),
     ).toBe("前\n项目一\n项目二\n后");
   });
+
+  it("reads text through nested list items", () => {
+    const listDocument = createDocument([
+      createBulletList([
+        createListItem(
+          [createText("父级")],
+          createBulletList([createListItem([createText("子级")])]),
+        ),
+        createListItem([createText("同级")]),
+      ]),
+    ]);
+
+    expect(
+      getTextInRange(listDocument, {
+        anchor: { offset: 1, path: [0, 0, 0] },
+        focus: { offset: 1, path: [0, 1, 0] },
+      }),
+    ).toBe("级\n子级\n同");
+  });
 });
 
 describe("splitTextByRange", () => {

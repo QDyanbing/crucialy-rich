@@ -199,6 +199,67 @@ test("splits and exits list items with Enter", async ({ page }) => {
   await expect(page.getByLabel("模型校验状态")).toContainText("合法");
 });
 
+test("indents and outdents list items with Tab", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("advanced-lists");
+
+  const editor = page.getByLabel("已渲染文档");
+
+  await placeCaretInRenderedText(page, "[0,1,0]", 0);
+  await page.keyboard.press("Tab");
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    "indent_list_item",
+  );
+  await expect(editor.locator('[data-crucialy-path="[0,0,1,1,0]"]')).toHaveText(
+    "可缩进项目",
+  );
+
+  await page.keyboard.press("Shift+Tab");
+  await expect(editor.locator('[data-crucialy-path="[0,1,0]"]')).toHaveText(
+    "可缩进项目",
+  );
+  await expect(page.getByLabel("模型校验状态")).toContainText("合法");
+});
+
+test("outdents a nested list item with Backspace", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("advanced-lists");
+
+  const editor = page.getByLabel("已渲染文档");
+
+  await placeCaretInRenderedText(page, "[0,0,1,0,0]", 0);
+  await page.keyboard.press("Backspace");
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    "outdent_list_item",
+  );
+
+  await expect(editor.locator('[data-crucialy-path="[0,1,0]"]')).toHaveText("已有子项");
+  await expect(page.getByLabel("模型校验状态")).toContainText("合法");
+});
+
+test("toggles and restores task item state", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("advanced-lists");
+
+  const editor = page.getByLabel("已渲染文档");
+  const taskItem = editor.getByRole("listitem").filter({
+    hasText: "编写列表测试",
+  });
+  const checkbox = taskItem.getByRole("checkbox", { name: "标记任务为已完成" });
+
+  await expect(checkbox).not.toBeChecked();
+  await checkbox.click();
+  await expect(
+    taskItem.getByRole("checkbox", { name: "标记任务为未完成" }),
+  ).toBeChecked();
+
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect(
+    taskItem.getByRole("checkbox", { name: "标记任务为已完成" }),
+  ).not.toBeChecked();
+  await expect(page.getByLabel("模型校验状态")).toContainText("合法");
+});
+
 test("inserts a divider and restores it through history", async ({ page }) => {
   await page.goto("/");
   await setDebuggerSelection(page, "0,0", 3, 3);

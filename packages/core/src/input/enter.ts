@@ -5,10 +5,14 @@ import {
   createSelectionAfterInsertText,
   createSelectionAfterExitListItem,
   createSelectionAfterSplitListItem,
+  createSelectionAfterOutdentListItem,
+  createSelectionAfterUnwrapListItem,
   createSelectionAfterSplitBlock,
   createSetBlockTypeOperation,
   createSplitBlockOperation,
   createSplitListItemOperation,
+  createOutdentListItemOperation,
+  createUnwrapListItemOperation,
   createTransaction,
   type Transaction,
 } from "../operation";
@@ -69,10 +73,6 @@ function shouldExitCodeBlock(document: DocumentNode, point: Point): boolean {
 }
 
 function getListItem(document: DocumentNode, point: Point) {
-  if (point.path.length !== 3) {
-    return undefined;
-  }
-
   const item = getNodeAtPath(document, point.path.slice(0, -1));
 
   return isListEntryNode(item) ? item : undefined;
@@ -89,10 +89,16 @@ export function createEnterInputTransaction(input: EnterInput): Transaction {
   const listItem = getListItem(input.document, point);
 
   if (listItem) {
+    const empty = listItem.children.every((text) => text.text.length === 0);
+
     return createTransaction([
-      listItem.children.every((text) => text.text.length === 0)
-        ? createExitListItemOperation(point)
-        : createSplitListItemOperation(point),
+      empty && point.path.length > 3
+        ? createOutdentListItemOperation(point)
+        : empty && listItem.nested
+          ? createUnwrapListItemOperation(point)
+          : empty
+            ? createExitListItemOperation(point)
+            : createSplitListItemOperation(point),
     ]);
   }
 
@@ -126,6 +132,14 @@ export function createSelectionAfterEnterInput(input: EnterInput): RangeSelectio
 
   if (operation?.type === "exit_list_item") {
     return createSelectionAfterExitListItem(input.document, operation);
+  }
+
+  if (operation?.type === "outdent_list_item") {
+    return createSelectionAfterOutdentListItem(input.document, operation);
+  }
+
+  if (operation?.type === "unwrap_list_item") {
+    return createSelectionAfterUnwrapListItem(input.document, operation);
   }
 
   return operation?.type === "split_block"

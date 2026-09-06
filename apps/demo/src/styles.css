@@ -183,6 +183,33 @@ h3 {
   padding-left: 4px;
 }
 
+.rendered-document ul[data-crucialy-list-type="task"] {
+  list-style: none;
+  padding-left: 4px;
+}
+
+.rendered-document ul[data-crucialy-list-type="task"] > li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 6px;
+  padding-left: 0;
+}
+
+.rendered-document input[data-crucialy-task-item="true"] {
+  flex: 0 0 18px;
+  width: 18px;
+  min-height: 18px;
+  margin: 3px 0 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.rendered-document ul[data-crucialy-list-type="task"] > li > ul {
+  flex-basis: 100%;
+  margin-left: 20px;
+}
+
 .rendered-document p {
   font-size: 1rem;
   line-height: 1.6;

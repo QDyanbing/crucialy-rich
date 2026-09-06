@@ -1,14 +1,14 @@
 import {
-  isListItemNode,
-  isListNode,
+  isListEntryNode,
   isTextBlockNode,
   type DocumentNode,
-  type ListItemNode,
+  type ListEntryNode,
   type TextBlockNode,
 } from "../model";
 import { getNodeAtPath, type Path, type Point } from "../selection";
+import { updateListAtPath } from "./list-item-path";
 
-export type TextContainerNode = ListItemNode | TextBlockNode;
+export type TextContainerNode = ListEntryNode | TextBlockNode;
 
 export interface TextTarget {
   container: TextContainerNode;
@@ -26,7 +26,7 @@ export function getTextTarget(
 
   if (
     textIndex === undefined ||
-    (!isTextBlockNode(container) && !isListItemNode(container)) ||
+    (!isTextBlockNode(container) && !isListEntryNode(container)) ||
     container.children[textIndex] === undefined
   ) {
     return undefined;
@@ -40,7 +40,7 @@ export function replaceTextContainer(
   path: Path,
   container: TextContainerNode,
 ): DocumentNode {
-  const [blockIndex, itemIndex] = path;
+  const [blockIndex] = path;
 
   if (path.length === 1 && blockIndex !== undefined) {
     return {
@@ -51,30 +51,18 @@ export function replaceTextContainer(
     };
   }
 
-  const list = blockIndex === undefined ? undefined : document.children[blockIndex];
+  const itemIndex = path.at(-1);
 
-  if (
-    path.length !== 2 ||
-    itemIndex === undefined ||
-    !isListNode(list) ||
-    !isListItemNode(container)
-  ) {
+  if (itemIndex === undefined || !isListEntryNode(container)) {
     throw new RangeError(
       "text container path must reference a text block or list item",
     );
   }
 
-  return {
-    ...document,
-    children: document.children.map((block, index) =>
-      index === blockIndex
-        ? {
-            ...list,
-            children: list.children.map((item, currentItemIndex) =>
-              currentItemIndex === itemIndex ? container : item,
-            ),
-          }
-        : block,
+  return updateListAtPath(document, path.slice(0, -1), (list) => ({
+    ...list,
+    children: list.children.map((item, currentItemIndex) =>
+      currentItemIndex === itemIndex ? container : item,
     ),
-  };
+  }));
 }

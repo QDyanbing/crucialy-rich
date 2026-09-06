@@ -6,6 +6,8 @@ import {
   createListItem,
   createParagraph,
   createText,
+  createTaskItem,
+  createTaskList,
 } from "../../src/model";
 import {
   applyInsertText,
@@ -14,6 +16,26 @@ import {
 } from "../../src/operation";
 
 describe("createInsertTextOperation", () => {
+  it("inserts text in nested task items", () => {
+    const document = createDocument([
+      createTaskList([
+        createTaskItem(
+          [createText("父")],
+          false,
+          createTaskList([createTaskItem([createText("子项")])]),
+        ),
+      ]),
+    ]);
+    const result = applyInsertText(
+      document,
+      createInsertTextOperation({ offset: 1, path: [0, 0, 1, 0, 0] }, "任务"),
+    );
+
+    expect(result.children[0]).toMatchObject({
+      children: [{ nested: { children: [{ children: [{ text: "子任务项" }] }] } }],
+    });
+  });
+
   it("creates an insert text operation from a point and text", () => {
     expect(
       createInsertTextOperation(

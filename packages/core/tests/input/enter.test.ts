@@ -10,9 +10,52 @@ import {
   createParagraph,
   createSelectionAfterEnterInput,
   createText,
+  createTaskItem,
+  createTaskList,
 } from "../../src";
 
 describe("createEnterInputTransaction", () => {
+  it("splits task items and keeps the next item unchecked", () => {
+    const document = createDocument([
+      createTaskList([createTaskItem([createText("任务项")], true)]),
+    ]);
+    const input = {
+      document,
+      selection: {
+        anchor: { offset: 2, path: [0, 0, 0] },
+        focus: { offset: 2, path: [0, 0, 0] },
+      },
+    };
+    const result = applyTransaction(document, createEnterInputTransaction(input));
+
+    expect(result.children[0]).toMatchObject({
+      children: [
+        { checked: true, children: [{ text: "任务" }] },
+        { checked: false, children: [{ text: "项" }] },
+      ],
+    });
+  });
+
+  it("outdents an empty nested item", () => {
+    const document = createDocument([
+      createBulletList([
+        createListItem([createText("父项")], createBulletList([createListItem()])),
+      ]),
+    ]);
+    const input = {
+      document,
+      selection: {
+        anchor: { offset: 0, path: [0, 0, 1, 0, 0] },
+        focus: { offset: 0, path: [0, 0, 1, 0, 0] },
+      },
+    };
+
+    expect(createEnterInputTransaction(input).operations[0]?.type).toBe(
+      "outdent_list_item",
+    );
+    expect(createSelectionAfterEnterInput(input).anchor.path).toEqual([0, 1, 0]);
+  });
+
   it("splits a paragraph at the collapsed selection", () => {
     const document = createDocument([createParagraph([createText("你好世界")])]);
     const input = {

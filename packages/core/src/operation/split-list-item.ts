@@ -1,5 +1,6 @@
-import { createListItem, isListNode, type DocumentNode } from "../model";
-import { isValidPoint, type Point, type RangeSelection } from "../selection";
+import { createListItem, createTaskItem, type DocumentNode } from "../model";
+import type { Point, RangeSelection } from "../selection";
+import { getListItemTarget, updateListAtPath } from "./list-item-path";
 import type { SplitListItemOperation } from "./types";
 
 export function createSplitListItemOperation(point: Point): SplitListItemOperation {
@@ -10,63 +11,53 @@ export function createSplitListItemOperation(point: Point): SplitListItemOperati
 }
 
 function getTarget(document: DocumentNode, operation: SplitListItemOperation) {
-  const [blockIndex, itemIndex, textIndex] = operation.point.path;
-  const list = blockIndex === undefined ? undefined : document.children[blockIndex];
-  const item =
-    isListNode(list) && itemIndex !== undefined ? list.children[itemIndex] : undefined;
+  const target = getListItemTarget(document, operation.point);
 
-  if (
-    operation.point.path.length !== 3 ||
-    !isValidPoint(document, operation.point) ||
-    blockIndex === undefined ||
-    itemIndex === undefined ||
-    textIndex === undefined ||
-    !isListNode(list) ||
-    !item
-  ) {
+  if (!target) {
     throw new RangeError("split list item point must reference list item text");
   }
 
-  return { blockIndex, item, itemIndex, list, textIndex };
+  return target;
 }
 
 export function applySplitListItem(
   document: DocumentNode,
   operation: SplitListItemOperation,
 ): DocumentNode {
-  const { blockIndex, item, itemIndex, list, textIndex } = getTarget(
-    document,
-    operation,
-  );
+  const { item, itemIndex, listPath, textIndex } = getTarget(document, operation);
   const text = item.children[textIndex]!;
   const left = { ...text, text: text.text.slice(0, operation.point.offset) };
   const right = { ...text, text: text.text.slice(operation.point.offset) };
-  const leftItem = createListItem([...item.children.slice(0, textIndex), left]);
-  const rightItem = createListItem([right, ...item.children.slice(textIndex + 1)]);
+  const leftChildren = [...item.children.slice(0, textIndex), left];
+  const rightChildren = [right, ...item.children.slice(textIndex + 1)];
+  const leftItem =
+    item.type === "taskItem"
+      ? createTaskItem(leftChildren, item.checked)
+      : createListItem(leftChildren);
+  const rightItem =
+    item.type === "taskItem"
+      ? createTaskItem(rightChildren, false, item.nested)
+      : createListItem(rightChildren, item.nested);
 
-  return {
-    ...document,
-    children: document.children.map((block, index) =>
-      index === blockIndex
-        ? {
-            ...list,
-            children: [
-              ...list.children.slice(0, itemIndex),
-              leftItem,
-              rightItem,
-              ...list.children.slice(itemIndex + 1),
-            ],
-          }
-        : block,
-    ),
-  };
+  return updateListAtPath(document, listPath, (list) => ({
+    ...list,
+    children: [
+      ...list.children.slice(0, itemIndex),
+      leftItem,
+      rightItem,
+      ...list.children.slice(itemIndex + 1),
+    ],
+  }));
 }
 
 export function createSelectionAfterSplitListItem(
   operation: SplitListItemOperation,
 ): RangeSelection {
-  const [blockIndex = 0, itemIndex = 0] = operation.point.path;
-  const point = { offset: 0, path: [blockIndex, itemIndex + 1, 0] };
+  const itemIndex = operation.point.path.at(-2) ?? 0;
+  const point = {
+    offset: 0,
+    path: [...operation.point.path.slice(0, -2), itemIndex + 1, 0],
+  };
 
   return {
     anchor: point,

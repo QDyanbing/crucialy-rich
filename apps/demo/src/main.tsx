@@ -18,6 +18,8 @@ import {
   createParagraph,
   createQuote,
   createText,
+  createTaskItem,
+  createTaskList,
   DELETE_SELECTION_COMMAND_NAME,
   domSelectionToModelSelection,
   executeCommand,
@@ -46,6 +48,7 @@ import {
   TOGGLE_QUOTE_COMMAND_NAME,
   TOGGLE_BULLET_LIST_COMMAND_NAME,
   TOGGLE_ORDERED_LIST_COMMAND_NAME,
+  TOGGLE_TASK_LIST_COMMAND_NAME,
   UNDERLINE_COMMAND_NAME,
   UNSET_LINK_COMMAND_NAME,
   undoHistory,
@@ -86,6 +89,7 @@ type ModelExampleId =
   | "code-block"
   | "code-divider"
   | "lists"
+  | "advanced-lists"
   | "marks"
   | "links"
   | "empty"
@@ -229,6 +233,29 @@ const modelExamples: ModelExample[] = [
     ]),
   },
   {
+    id: "advanced-lists",
+    label: "嵌套与任务列表",
+    selection: {
+      anchor: { path: [0, 1, 0], offset: 0 },
+      focus: { path: [0, 1, 0], offset: 0 },
+    },
+    value: createDocument([
+      createBulletList([
+        createListItem(
+          [createText("父级项目")],
+          createBulletList([createListItem([createText("已有子项")])]),
+        ),
+        createListItem([createText("可缩进项目")]),
+        createListItem([createText("尾部项目")]),
+      ]),
+      createTaskList([
+        createTaskItem([createText("编写列表测试")]),
+        createTaskItem([createText("完成中文文档")], true),
+      ]),
+      createParagraph([createText("增强列表后仍可继续编辑正文。")]),
+    ]),
+  },
+  {
     id: "marks",
     label: "文字标记",
     selection: {
@@ -354,6 +381,7 @@ const demoCommandDescriptors: DemoCommandDescriptor[] = [
   { label: "引用", name: TOGGLE_QUOTE_COMMAND_NAME },
   { label: "无序列表", name: TOGGLE_BULLET_LIST_COMMAND_NAME },
   { label: "有序列表", name: TOGGLE_ORDERED_LIST_COMMAND_NAME },
+  { label: "任务列表", name: TOGGLE_TASK_LIST_COMMAND_NAME },
   { label: "代码块", name: SET_CODE_BLOCK_COMMAND_NAME },
   { label: "字号", name: SET_FONT_SIZE_COMMAND_NAME },
   { label: "文字颜色", name: SET_TEXT_COLOR_COMMAND_NAME },
@@ -1212,7 +1240,7 @@ function DemoApp() {
           <p className="eyebrow">调试工作台</p>
           <h1 id="page-title">crucialy-rich</h1>
         </div>
-        <span className="status-pill">第 15 周已完成</span>
+        <span className="status-pill">第 16 周已完成</span>
       </header>
 
       <section className="workspace-grid" aria-label="编辑器工作区">
@@ -1376,6 +1404,14 @@ function DemoApp() {
               onClick={() => handleToggleList(TOGGLE_ORDERED_LIST_COMMAND_NAME)}
             >
               有序列表
+            </button>
+            <button
+              aria-pressed={isCommandActive(TOGGLE_TASK_LIST_COMMAND_NAME)}
+              type="button"
+              disabled={isCommandDisabled(TOGGLE_TASK_LIST_COMMAND_NAME)}
+              onClick={() => handleToggleList(TOGGLE_TASK_LIST_COMMAND_NAME)}
+            >
+              任务列表
             </button>
             <button
               aria-pressed={isCommandActive(SET_CODE_BLOCK_COMMAND_NAME)}

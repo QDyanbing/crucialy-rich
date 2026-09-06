@@ -1,5 +1,10 @@
-import type { DocumentNode, ListEntryNode, ListNode } from "../model";
-import type { Point, RangeSelection } from "../selection";
+import {
+  isListNode,
+  type DocumentNode,
+  type ListEntryNode,
+  type ListNode,
+} from "../model";
+import { getNodeAtPath, type Point, type RangeSelection } from "../selection";
 import { getListItemTarget, updateListAtPath } from "./list-item-path";
 import type { OutdentListItemOperation } from "./types";
 
@@ -26,6 +31,14 @@ function getOutdentTarget(document: DocumentNode, operation: OutdentListItemOper
 
   const parentListPath = target.listPath.slice(0, -2);
   const parentItemIndex = target.listPath.at(-2)!;
+  const parentList = getNodeAtPath(document, parentListPath);
+
+  if (
+    !isListNode(parentList) ||
+    (parentList.type === "taskList") !== (target.item.type === "taskItem")
+  ) {
+    throw new RangeError("outdent list item requires a compatible parent list");
+  }
 
   return { ...target, parentItemIndex, parentListPath };
 }
@@ -33,7 +46,16 @@ function getOutdentTarget(document: DocumentNode, operation: OutdentListItemOper
 export function canOutdentListItem(document: DocumentNode, point: Point): boolean {
   const target = getListItemTarget(document, point);
 
-  return Boolean(target && target.listPath.length > 1);
+  if (!target || target.listPath.length === 1) {
+    return false;
+  }
+
+  const parentList = getNodeAtPath(document, target.listPath.slice(0, -2));
+
+  return (
+    isListNode(parentList) &&
+    (parentList.type === "taskList") === (target.item.type === "taskItem")
+  );
 }
 
 function outdentListItem(

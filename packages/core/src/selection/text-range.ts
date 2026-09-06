@@ -1,4 +1,10 @@
-import { isListNode, isTextBlockNode, type DocumentNode } from "../model";
+import {
+  isListNode,
+  isTextBlockNode,
+  type DocumentNode,
+  type ListNode,
+  type TextNode,
+} from "../model";
 import { isValidPoint } from "./point";
 import { normalizeRange } from "./range";
 import type { Path, Point, RangeSelection } from "./types";
@@ -26,55 +32,49 @@ function createLinearSegments(document: DocumentNode): LinearSegment[] {
   const segments: LinearSegment[] = [];
   let cursor = 0;
 
-  document.children.forEach((block, blockIndex) => {
-    if (isListNode(block)) {
-      block.children.forEach((item, itemIndex) => {
-        item.children.forEach((node, textIndex) => {
-          segments.push({
-            path: [blockIndex, itemIndex, textIndex],
-            start: cursor,
-            end: cursor + node.text.length,
-            text: node.text,
-          });
-          cursor += node.text.length;
-        });
+  function appendSeparator() {
+    segments.push({ start: cursor, end: cursor + 1, text: "\n" });
+    cursor += 1;
+  }
 
-        if (
-          itemIndex < block.children.length - 1 ||
-          blockIndex < document.children.length - 1
-        ) {
-          segments.push({ start: cursor, end: cursor + 1, text: "\n" });
-          cursor += 1;
-        }
-      });
-      return;
-    }
-
-    if (!isTextBlockNode(block)) {
-      if (blockIndex < document.children.length - 1) {
-        segments.push({ start: cursor, end: cursor + 1, text: "\n" });
-        cursor += 1;
-      }
-      return;
-    }
-
-    block.children.forEach((node, textIndex) => {
+  function appendTextNodes(nodes: TextNode[], path: Path) {
+    nodes.forEach((node, textIndex) => {
       segments.push({
-        path: [blockIndex, textIndex],
+        path: [...path, textIndex],
         start: cursor,
         end: cursor + node.text.length,
         text: node.text,
       });
       cursor += node.text.length;
     });
+  }
+
+  function appendList(list: ListNode, path: Path) {
+    list.children.forEach((item, itemIndex) => {
+      const itemPath = [...path, itemIndex];
+
+      appendTextNodes(item.children, itemPath);
+
+      if (item.nested) {
+        appendSeparator();
+        appendList(item.nested, [...itemPath, item.children.length]);
+      }
+
+      if (itemIndex < list.children.length - 1) {
+        appendSeparator();
+      }
+    });
+  }
+
+  document.children.forEach((block, blockIndex) => {
+    if (isListNode(block)) {
+      appendList(block, [blockIndex]);
+    } else if (isTextBlockNode(block)) {
+      appendTextNodes(block.children, [blockIndex]);
+    }
 
     if (blockIndex < document.children.length - 1) {
-      segments.push({
-        start: cursor,
-        end: cursor + 1,
-        text: "\n",
-      });
-      cursor += 1;
+      appendSeparator();
     }
   });
 
