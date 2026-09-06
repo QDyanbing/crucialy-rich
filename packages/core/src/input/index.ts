@@ -15,3 +15,5 @@ export {
   createSelectionAfterInsertTextInput,
 } from "./insert-text";
 export type { InsertTextInput } from "./insert-text";
+export { createSelectionAfterTabInput, createTabInputTransaction } from "./tab";
+export type { TabInput } from "./tab";

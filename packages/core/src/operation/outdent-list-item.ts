@@ -30,6 +30,12 @@ function getOutdentTarget(document: DocumentNode, operation: OutdentListItemOper
   return { ...target, parentItemIndex, parentListPath };
 }
 
+export function canOutdentListItem(document: DocumentNode, point: Point): boolean {
+  const target = getListItemTarget(document, point);
+
+  return Boolean(target && target.listPath.length > 1);
+}
+
 function outdentListItem(
   parentList: ListNode,
   parentItemIndex: number,

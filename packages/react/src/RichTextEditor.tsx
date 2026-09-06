@@ -7,6 +7,8 @@ import {
   createDeleteInputTransaction,
   createSelectionAfterBackspaceInput,
   createSelectionAfterDeleteInput,
+  createSelectionAfterTabInput,
+  createTabInputTransaction,
   DELETE_SELECTION_COMMAND_NAME,
   domSelectionToModelSelection,
   executeCommand,
@@ -62,7 +64,9 @@ export type RichTextEditorInputType =
   | "deleteBackward"
   | "deleteForward"
   | "insertParagraph"
-  | "insertText";
+  | "insertText"
+  | "indentListItem"
+  | "outdentListItem";
 
 export interface RichTextEditorTransactionEvent {
   after: DocumentNode;
@@ -147,7 +151,22 @@ function createKeyboardInputResult(
   key: string,
   document: DocumentNode,
   selection: RangeSelection,
+  shiftKey = false,
 ): KeyboardInputResult | undefined {
+  if (key === "Tab") {
+    const input = { document, selection, shiftKey };
+    const transaction = createTabInputTransaction(input);
+
+    return transaction.operations.length > 0
+      ? {
+          beforeSelection: selection,
+          inputType: shiftKey ? "outdentListItem" : "indentListItem",
+          selection: createSelectionAfterTabInput(input),
+          transaction,
+        }
+      : undefined;
+  }
+
   if (key === "Backspace") {
     const input = {
       document,
@@ -454,7 +473,12 @@ export function RichTextEditor({
       }
     }
 
-    const input = createKeyboardInputResult(event.key, document, modelSelection);
+    const input = createKeyboardInputResult(
+      event.key,
+      document,
+      modelSelection,
+      event.shiftKey,
+    );
 
     if (!input) {
       return;

@@ -26,6 +26,13 @@ function getIndentTarget(document: DocumentNode, operation: IndentListItemOperat
   return { ...target, nestedItemIndex, previousItem };
 }
 
+export function canIndentListItem(document: DocumentNode, point: Point): boolean {
+  const target = getListItemTarget(document, point);
+  const depth = target ? (target.listPath.length + 1) / 2 : 0;
+
+  return Boolean(target && target.itemIndex > 0 && depth < MAX_LIST_DEPTH);
+}
+
 function indentListItem(list: ListNode, itemIndex: number): ListNode {
   const item = list.children[itemIndex]!;
   const previousItem = list.children[itemIndex - 1]!;

@@ -217,6 +217,8 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.createSelectionAfterEnterInput).toBe("function");
     expect(typeof core.createInsertTextInputTransaction).toBe("function");
     expect(typeof core.createSelectionAfterInsertTextInput).toBe("function");
+    expect(typeof core.createTabInputTransaction).toBe("function");
+    expect(typeof core.createSelectionAfterTabInput).toBe("function");
   });
 
   it("exposes the history API", () => {

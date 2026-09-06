@@ -7,6 +7,7 @@ export {
 export type { TransactionAcceptanceReport } from "./acceptance";
 export {
   applyIndentListItem,
+  canIndentListItem,
   createIndentListItemOperation,
   createSelectionAfterIndentListItem,
 } from "./indent-list-item";
@@ -29,6 +30,7 @@ export {
 export { applyRemoveBlock, createRemoveBlockOperation } from "./remove-block";
 export {
   applyOutdentListItem,
+  canOutdentListItem,
   createOutdentListItemOperation,
   createSelectionAfterOutdentListItem,
 } from "./outdent-list-item";
