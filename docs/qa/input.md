@@ -10,6 +10,7 @@
 - `packages/core/tests/input/backspace.test.ts`：Backspace 转换为 `delete_text` 或 `merge_block` transaction、段中删除、段首合并、空段删除、首段开头 no-op 和 selection 落点。
 - `packages/core/tests/input/delete.test.ts`：Delete 转换为 `delete_text` 或 `merge_block` transaction、段中删除、段尾合并、空段删除、末段结尾 no-op 和 selection 落点。
 - `packages/core/tests/input/enter.test.ts`：Enter 转换为 `split_block` transaction、段首/段中/段尾/空段分裂、非折叠 selection no-op 和 selection 落点。
+- `packages/core/tests/input/tab.test.ts`：列表 Tab/Shift+Tab、首项 no-op、三层上限和 selection 落点。
 - CodeBlock 与 Divider 测试：代码块换行/退出、void block 相邻 Backspace/Delete 和选区 path 调整。
 - `packages/core/tests/command/insert-text.test.ts`：collapsed 插入和同一 text range 替换。
 - `packages/core/tests/command/delete-selection.test.ts`：同一 text range 的 Backspace/Delete 共用删除命令。
@@ -57,6 +58,8 @@ pnpm test:e2e
 | CodeBlock 输入 | 输入、Enter 换行、连续 Enter 退出      | 纯文本和后续 paragraph 稳定       | 通过 |
 | Divider 删除   | 从前后文本边界按 Delete/Backspace      | Divider 删除且选区保持合法        | 通过 |
 | 列表 Enter     | 非空项分裂，空项退出                   | 项目和三层选区保持合法            | 通过 |
+| 列表缩进       | 按 Tab、Shift+Tab 或项目开头 Backspace | nested 结构、内容和选区保持合法   | 通过 |
+| 任务勾选       | 点击任务项 checkbox                    | checked 写回模型并可撤销          | 通过 |
 | History        | 执行真实输入后撤销和重做               | 文档、Block Type 和选区正确往返   | 通过 |
 
 ## 当前限制

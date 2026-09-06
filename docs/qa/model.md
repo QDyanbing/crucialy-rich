@@ -2,7 +2,7 @@
 
 ## 范围
 
-验证 document、文本 block、void block 和 text 的创建、类型判断、结构校验与规范化。当前 block 包含 paragraph、1–6 级 heading、quote、codeBlock 和 divider。
+验证 document、文本 block、void block、list block 和 text 的创建、类型判断、结构校验与规范化。当前列表包含 bulletList、orderedList、taskList、listItem、taskItem 与最多三层 nested list。
 
 ## 自动化测试
 
@@ -16,22 +16,24 @@
 
 ## 手测场景
 
-| 场景                 | 操作                                               | 期望                             | 结果 |
-| -------------------- | -------------------------------------------------- | -------------------------------- | ---- |
-| 初始文档由 core 生成 | 打开演示，查看文档 JSON 面板                       | 显示 `createDocument` 生成的文档 | 通过 |
-| 示例切换             | 在演示中切换“模型示例”                             | JSON 面板切换到对应示例          | 通过 |
-| 非法示例校验         | 选择“非法文档”                                     | 校验状态显示“非法”               | 通过 |
-| 演示规范化           | 选择非法示例后点击“规范化”                         | 文档修复为合法 paragraph         | 通过 |
-| 合法文档校验         | `validateDocument(createDocument())`               | `valid: true`                    | 通过 |
-| 非法根节点           | 校验 `{ type: "text", text: "x" }`                 | `valid: false`，path 为 `[]`     | 通过 |
-| 空文档修复           | `normalizeDocument({type:"document",children:[]})` | 补一个空段落                     | 通过 |
-| 空段落修复           | normalize 含空段落的文档                           | 段落补一个空 text                | 通过 |
-| 标题校验             | 创建 1–6 级 heading                                | 合法层级通过，非法层级被拒绝     | 通过 |
-| 引用校验             | 创建 quote 并执行 normalize                        | Quote 类型和 text children 保留  | 通过 |
-| 代码块校验           | 创建带 marks 的 CodeBlock 并 normalize             | 只保留纯文本                     | 通过 |
-| 分隔线校验           | 创建含意外 children 的 Divider                     | 校验拒绝，normalize 清空         | 通过 |
-| Marks 校验           | 创建样式与链接组合 text                            | 合法 marks 保留，非法值被拒绝    | 通过 |
+| 场景                 | 操作                                               | 期望                              | 结果 |
+| -------------------- | -------------------------------------------------- | --------------------------------- | ---- |
+| 初始文档由 core 生成 | 打开演示，查看文档 JSON 面板                       | 显示 `createDocument` 生成的文档  | 通过 |
+| 示例切换             | 在演示中切换“模型示例”                             | JSON 面板切换到对应示例           | 通过 |
+| 非法示例校验         | 选择“非法文档”                                     | 校验状态显示“非法”                | 通过 |
+| 演示规范化           | 选择非法示例后点击“规范化”                         | 文档修复为合法 paragraph          | 通过 |
+| 合法文档校验         | `validateDocument(createDocument())`               | `valid: true`                     | 通过 |
+| 非法根节点           | 校验 `{ type: "text", text: "x" }`                 | `valid: false`，path 为 `[]`      | 通过 |
+| 空文档修复           | `normalizeDocument({type:"document",children:[]})` | 补一个空段落                      | 通过 |
+| 空段落修复           | normalize 含空段落的文档                           | 段落补一个空 text                 | 通过 |
+| 标题校验             | 创建 1–6 级 heading                                | 合法层级通过，非法层级被拒绝      | 通过 |
+| 引用校验             | 创建 quote 并执行 normalize                        | Quote 类型和 text children 保留   | 通过 |
+| 代码块校验           | 创建带 marks 的 CodeBlock 并 normalize             | 只保留纯文本                      | 通过 |
+| 分隔线校验           | 创建含意外 children 的 Divider                     | 校验拒绝，normalize 清空          | 通过 |
+| Marks 校验           | 创建样式与链接组合 text                            | 合法 marks 保留，非法值被拒绝     | 通过 |
+| 嵌套列表校验         | 创建三层和超深 nested list                         | 三层合法，超深结构被拒绝          | 通过 |
+| 任务列表校验         | 创建带 checked 的 taskItem                         | checked 被校验并由 normalize 保留 | 通过 |
 
 ## 结论
 
-模型相关单测覆盖文本、void 和 list block、listItem、text marks 与 Link Mark。演示可通过中文混合样例验证当前结构。
+模型相关单测覆盖文本、void 和 list block、listItem、taskItem、嵌套深度、text marks 与 Link Mark。演示可通过中文混合样例验证当前结构。

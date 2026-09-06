@@ -2,7 +2,7 @@
 
 自研富文本编辑内核，不依赖 ProseMirror、Tiptap、Lexical、Slate 作为运行时内核。
 
-> 当前已完成第 1–15 周基础能力闭环，提供文本、void 和 list 文档模型、有序/无序列表切换、列表项输入与 Enter 行为、语义渲染、文字样式、链接、模型选区、Operation、Transaction、Command 和 History。
+> 当前已完成第 1–16 周能力闭环，提供文本、void 和 list 文档模型、三层嵌套列表、任务列表、列表键盘行为、语义渲染、文字样式、链接、模型选区、Operation、Transaction、Command 和 History。
 
 ## 安装
 

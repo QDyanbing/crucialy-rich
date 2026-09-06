@@ -85,7 +85,7 @@ interface TransactionAcceptanceReport {
 
 字段说明：
 
-- `type`：当前支持十二种已注册 operation，包含通用块操作以及 `split_list_item`、`exit_list_item`。
+- `type`：当前支持十六种已注册 operation，包含通用块操作以及列表拆分、退出、缩进、反缩进、拆出和任务状态更新。
 - `point`：插入、分段或合并位置，必须指向 text 节点内的合法偏移。
 - `text`：要插入的文本。
 - `range`：删除范围当前必须落在同一个 text 节点内；mark 范围当前必须落在同一个 block 内。
@@ -234,9 +234,13 @@ interface TransactionAcceptanceReport {
 
 ## 列表项 Operation
 
-- `split_list_item` 在三层 text Point 处分裂当前 ListItem，并把选区落到新项开头。
-- `exit_list_item` 只接受空 ListItem；它会插入 paragraph，必要时把列表拆成前后两段。
-- 两种 Operation 都进入 Transaction 克隆、摘要、验收和 History 流程。
+- `split_list_item` 在列表 text Point 处分裂当前项目，并把选区落到新项开头；任务项的新项目默认未完成。
+- `exit_list_item` 接受顶层空项目，将其退出为 paragraph，并在必要时拆分前后列表。
+- `indent_list_item` 把当前非首项移入前一项的 nested list，最多三层。
+- `outdent_list_item` 把 nested 项提升到父项之后。
+- `unwrap_list_item` 把顶层项目转为 paragraph，并保留其 nested list 与前后项目。
+- `set_task_item_checked` 按 item path 更新任务完成状态。
+- 所有列表 Operation 都进入 Transaction 克隆、摘要、验收和 History 流程。
 
 详细行为见 [有序和无序列表](./list.md)。
 

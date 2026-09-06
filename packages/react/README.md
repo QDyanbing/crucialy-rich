@@ -2,7 +2,7 @@
 
 crucialy-rich 编辑内核的 React 集成包，对外暴露可集成的 React 富文本组件。
 
-> 当前已完成基础编辑与受控集成闭环，`RichTextEditor` 支持文本块、Divider 和有序/无序列表；列表项可输入文字、按 Enter 创建下一项，并从空项按 Enter 退出列表。所有输入都通过 transaction 更新文档。
+> 当前已完成基础编辑与受控集成闭环，`RichTextEditor` 支持文本块、Divider、有序/无序列表、三层嵌套列表和任务列表；列表项支持 Enter、Tab、Shift+Tab、Backspace 与 checkbox 状态写回。所有输入都通过 transaction 更新文档。
 
 ## 安装
 
@@ -41,8 +41,9 @@ export function Demo() {
 - `onChange`：输入后输出最新文档。
 - `selection` / `onSelectionChange`：受控模型选区和输入后的选区回调。
 - `onTransaction`：输入后输出 before、after、transaction、inputType 和输入前后 selection；普通文本输入会带有 `batch: "typing"`。
-- `contentEditable`：开启普通文本输入、Backspace、Delete 和 Enter。
+- `contentEditable`：开启普通文本输入、Backspace、Delete、Enter、列表 Tab 和 Shift+Tab。
 - 输入事件：通过模型 transaction 更新文档，并在输入后回传稳定模型选区；普通文本输入、非折叠删除选区、Enter 分段和段首 Backspace 合并复用 core command。
+- 任务列表：checkbox 点击通过 `set_task_item_checked` transaction 写回 `checked`，并进入宿主的 History 流程。
 - `label`、`className` 和基础 DOM 事件属性。
 
 完整说明见 [组件 API](../../docs/features/component-api.md)。

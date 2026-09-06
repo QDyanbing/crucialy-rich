@@ -2,7 +2,7 @@
 
 ## 范围
 
-验证 paragraph/heading/quote/codeBlock/divider 的语义渲染、文字样式、Link Mark、HTML 序列化、路径绑定、DOM 映射、React 和演示入口。
+验证 paragraph/heading/quote/codeBlock/divider/list 的语义渲染、文字样式、Link Mark、HTML 序列化、路径绑定、DOM 映射、React 和演示入口。
 
 ## 自动化测试
 
@@ -40,6 +40,8 @@ pnpm test:e2e
 | Quote 渲染     | 切换引用块                   | 输出 `blockquote` 且保留 path           | 通过 |
 | CodeBlock 渲染 | 查看代码块样例               | 输出 `pre > code` 并保留换行和 path     | 通过 |
 | Divider 渲染   | 查看混合样例                 | 输出 void `hr`，只绑定 block path       | 通过 |
+| 嵌套列表渲染   | 查看“嵌套与任务列表”样例     | 输出递归 `ul/ol/li` 和完整 model path   | 通过 |
+| 任务列表渲染   | 查看任务项并切换 checkbox    | checked 语义与 model 状态一致           | 通过 |
 | 文字属性渲染   | 设置字号、字色和背景色       | 输出安全结构化 style                    | 通过 |
 | Link 渲染      | 对选区设置安全链接           | 输出带白名单属性的 `a`                  | 通过 |
 | 组合样式渲染   | 对同一选区启用下划线和删除线 | text-decoration 同时保留两种样式        | 通过 |
@@ -50,7 +52,7 @@ pnpm test:e2e
 
 ## 当前限制
 
-- 图片尚未实现；Divider 内部不产生 text Point，列表使用三层 model path。
+- 图片尚未实现；Divider 内部不产生 text Point，列表使用递归 model path。
 
 ## 结论
 

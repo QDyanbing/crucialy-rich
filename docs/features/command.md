@@ -1,6 +1,6 @@
 # Command 系统（第一版）
 
-Command 系统负责把“可执行的编辑意图”包装成统一接口。当前提供注册、执行与状态读取，并内置文字样式、链接、标题、引用、代码块、分隔线插入、文本编辑和 block 编辑 command。
+Command 系统负责把“可执行的编辑意图”包装成统一接口。当前提供注册、执行与状态读取，并内置文字样式、链接、标题、引用、代码块、分隔线、列表、文本编辑和 block 编辑 command。
 
 ## 当前范围
 
@@ -25,7 +25,7 @@ Command 系统负责把“可执行的编辑意图”包装成统一接口。当
 - 提供 `toggleQuoteCommand`，支持单块或多块统一切换 Quote 或恢复 paragraph，并保留模型选区。
 - 提供 `setCodeBlockCommand`，支持单块或多块切换纯文本 CodeBlock，并可恢复 paragraph。
 - 提供 `insertDividerCommand`，在折叠文本选区处分裂当前 block，并在两部分之间插入 Divider。
-- 提供 `toggleBulletListCommand` 和 `toggleOrderedListCommand`，支持段落包装、列表还原和类型互换。
+- 提供 `toggleBulletListCommand`、`toggleOrderedListCommand` 和 `toggleTaskListCommand`，支持段落包装、列表还原和三种列表类型互换。
 - 提供 `BLOCK_TYPE_COMMANDS`，集中暴露 Heading 与 Quote command，并由默认注册表统一装配。
 - 提供 `createTextMarkAttributeCommand` 内部工厂，统一字号和颜色的选区校验、operation 创建与 selection 映射。
 - 提供 `createTextMarkCommand`、`canExecuteTextMarkCommand` 和 `isTextMarkCommandActive`，供文字格式命令复用。

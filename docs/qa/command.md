@@ -2,7 +2,7 @@
 
 ## 验收范围
 
-Command 验收覆盖注册、查询、状态读取、执行结果、文本编辑、四种 boolean mark、三种文字属性、Link、Heading、Quote、CodeBlock、Divider、Block 编辑、快捷键配置查询、React 输入层复用和 demo 调试区。
+Command 验收覆盖注册、查询、状态读取、执行结果、文本编辑、四种 boolean mark、三种文字属性、Link、Heading、Quote、CodeBlock、Divider、三种列表、Block 编辑、快捷键配置查询、React 输入层复用和 demo 调试区。
 
 当前内置 command：
 
@@ -21,6 +21,9 @@ Command 验收覆盖注册、查询、状态读取、执行结果、文本编辑
 - `toggleQuoteCommand`
 - `setCodeBlockCommand`
 - `insertDividerCommand`
+- `toggleBulletListCommand`
+- `toggleOrderedListCommand`
+- `toggleTaskListCommand`
 - `splitBlockCommand`
 - `mergeBlockCommand`
 
@@ -43,6 +46,7 @@ Command 验收覆盖注册、查询、状态读取、执行结果、文本编辑
 - `packages/core/tests/command/quote.test.ts`：引用切换、取消、多块范围和状态读取。
 - `packages/core/tests/command/code-block.test.ts`：代码块切换、恢复正文、marks 清理和状态读取。
 - `packages/core/tests/command/divider.test.ts`：分隔线插入、两侧内容保留和选区落点。
+- `packages/core/tests/command/bullet-list.test.ts`、`ordered-list.test.ts`、`task-list.test.ts`：列表包装、类型互换、还原和状态读取。
 - `packages/core/tests/command/block-type-interaction.test.ts`：Heading/Quote 连续切换与 marks 保留。
 - `packages/core/tests/command/shortcut.test.ts`：默认映射、配置查询、按键匹配、自定义映射和边界输入。
 - `packages/core/tests/command/split-block.test.ts`：段落分裂 command。

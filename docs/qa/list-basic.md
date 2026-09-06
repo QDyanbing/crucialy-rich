@@ -31,4 +31,4 @@ pnpm check:all
 
 ## 结论
 
-第 15 周基础列表范围已闭环。当前未实现嵌套列表、Tab/Shift+Tab、列表 Backspace 和 TaskList，下一步进入第 16 周列表增强。
+第 15 周基础列表范围已闭环。嵌套列表、Tab/Shift+Tab、列表 Backspace 和 TaskList 已在第 16 周完成，见[列表增强 QA](./list-advanced.md)。

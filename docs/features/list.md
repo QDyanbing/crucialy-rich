@@ -1,50 +1,61 @@
-# 有序和无序列表
+# 列表
 
-第 15 周完成基础列表闭环，模型采用 `list -> listItem -> text` 三层结构。
+第 15 周完成有序和无序列表，第 16 周继续完成嵌套、缩进、列表 Backspace 与任务列表闭环。
 
 ## 模型
 
 ```ts
-type ListType = "bulletList" | "orderedList";
+type ListType = "bulletList" | "orderedList" | "taskList";
 
 interface ListItemNode {
   type: "listItem";
   children: TextNode[];
+  nested?: ListNode;
 }
 
-interface ListNode {
-  type: ListType;
-  children: ListItemNode[];
+interface TaskItemNode {
+  type: "taskItem";
+  checked: boolean;
+  children: TextNode[];
+  nested?: ListNode;
 }
 ```
 
-List 和 ListItem 均至少包含一个子节点。`normalizeDocument` 会丢弃非法子节点、合并相邻同 marks text，并为空列表或空列表项补齐可编辑结构。
+- `bulletList` 和 `orderedList` 只接收 `listItem`。
+- `taskList` 只接收带布尔 `checked` 的 `taskItem`。
+- 列表和列表项至少包含一个子节点；规范化会丢弃类型不匹配的项目并补齐空结构。
+- `nested` 最多递归三层，超过 `MAX_LIST_DEPTH` 的结构在校验阶段报错并在规范化阶段移除。
 
 ## 路径与渲染
 
-- List path：`[blockIndex]`。
-- ListItem path：`[blockIndex, itemIndex]`。
-- Text path：`[blockIndex, itemIndex, textIndex]`。
-- `bulletList` 渲染为 `ul`，`orderedList` 渲染为 `ol`，ListItem 渲染为 `li`。
+- 顶层 List：`[blockIndex]`。
+- ListItem：`[...listPath, itemIndex]`。
+- ListItem Text：`[...listPath, itemIndex, textIndex]`。
+- Nested List：`[...itemPath, item.children.length]`，随后继续追加 item 和 text 索引。
+- `bulletList` 渲染为 `ul`，`orderedList` 渲染为 `ol`，`taskList` 渲染为带任务语义的 `ul`。
+- 任务项渲染 checkbox，勾选后通过 operation 写回 model，而不是只修改 DOM。
 
 ## Command
 
-- `toggleBulletList` 把连续 paragraph 包装为无序列表；已在无序列表中时恢复 paragraph。
-- `toggleOrderedList` 把连续 paragraph 包装为有序列表；已在有序列表中时恢复 paragraph。
-- 两类列表可原位互换，内容、marks 和 selection 方向保持不变。
-- 列表转换组合通用 `insert_block` / `remove_block` Operation，可直接进入现有 History。
+- `toggleBulletList`、`toggleOrderedList` 和 `toggleTaskList` 支持 paragraph 包装、列表类型互换和再次执行恢复 paragraph。
+- 列表转换保留文字、marks 和 selection 方向；普通列表转任务列表时补 `checked: false`。
+- checkbox 使用 `set_task_item_checked` 更新任务状态，并进入 Transaction 与 History。
 
-## 输入
+## 键盘输入
 
-- 列表项内普通输入使用 `insert_text`。
-- 非空列表项按 Enter 使用 `split_list_item`，在光标处创建下一项。
-- 空列表项按 Enter 使用 `exit_list_item`，退出为 paragraph。
-- 空项位于列表中间时，原列表会拆为前后两个同类型列表，后续项目不会丢失。
+- 普通输入与删除支持顶层和嵌套列表项的 text path。
+- 非空项按 Enter 使用 `split_list_item`；任务项分裂出的新项目默认未完成。
+- 顶层空项按 Enter 使用 `exit_list_item` 退出为 paragraph；嵌套空项按 Enter 提升一级。
+- Tab 使用 `indent_list_item` 把当前非首项移入前一项，Shift+Tab 使用 `outdent_list_item` 提升一级。
+- 顶层列表项开头 Backspace 使用 `unwrap_list_item` 转为 paragraph；嵌套项开头 Backspace 提升一级。
+- 缩进、反缩进、拆分和退出均保留当前项目已有的子列表。
 
-## 当前边界
+## 边界
 
-- 第 15 周只支持单层列表；缩进、反缩进和列表项开头 Backspace 属于第 16 周。
-- ListItem 只直接包含 text，不包含段落、子列表或任务项。
-- 文字样式、链接和 Block Type Command 暂不直接作用于三层列表选区，列表转换会保留已有 marks。
+- 首项不能继续缩进，顶层项不能反缩进，达到三层上限后不再缩进。
+- 非折叠选区不会触发 Tab/Shift+Tab 结构修改。
+- 已存在的目标子列表必须与当前项目兼容；任务项目不会被缩进到普通列表，反之亦然。
+- 当前列表项直接包含 text 和可选 nested list，不支持在单个列表项中混放 paragraph、heading、quote 或 void block。
+- 跨 text、跨 item 的范围删除与样式命令尚未实现。
 
-完整验收见 [基础列表 QA](../qa/list-basic.md)。
+验收记录见[基础列表 QA](../qa/list-basic.md)和[列表增强 QA](../qa/list-advanced.md)。

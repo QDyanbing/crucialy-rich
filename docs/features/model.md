@@ -1,10 +1,10 @@
 # 文档模型（第一版）
 
-文档模型是富文本内核的数据基础。第一版只支持三层结构，后续功能在此基础上扩展。
+文档模型是富文本内核的数据基础。当前在文本块与基础列表结构上扩展了最多三层的嵌套列表。
 
 ## 节点结构
 
-当前支持 `document → text/void block → text` 和 `document → list → listItem → text` 两种层级。
+当前支持 `document → text/void block → text`，以及 `document → list → listItem/taskItem → text + nested list`。
 
 ```ts
 interface TextNode {
@@ -54,7 +54,36 @@ interface DividerNode {
 
 type TextBlockNode = ParagraphNode | HeadingNode | QuoteNode | CodeBlockNode;
 type VoidBlockNode = DividerNode;
-type BlockNode = TextBlockNode | VoidBlockNode;
+interface ListItemNode {
+  type: "listItem";
+  children: TextNode[];
+  nested?: ListNode;
+}
+
+interface TaskItemNode {
+  type: "taskItem";
+  checked: boolean;
+  children: TextNode[];
+  nested?: ListNode;
+}
+
+interface BulletListNode {
+  type: "bulletList";
+  children: ListItemNode[];
+}
+
+interface OrderedListNode {
+  type: "orderedList";
+  children: ListItemNode[];
+}
+
+interface TaskListNode {
+  type: "taskList";
+  children: TaskItemNode[];
+}
+
+type ListNode = BulletListNode | OrderedListNode | TaskListNode;
+type BlockNode = TextBlockNode | VoidBlockNode | ListNode;
 
 interface DocumentNode {
   type: "document";
@@ -77,6 +106,8 @@ interface DocumentNode {
 - `isQuoteNode(value)`
 - `isCodeBlockNode(value)`
 - `isDividerNode(value)`
+- `isListItemNode(value)` / `isTaskItemNode(value)` / `isListEntryNode(value)`
+- `isBulletListNode(value)` / `isOrderedListNode(value)` / `isTaskListNode(value)`
 - `isTextBlockNode(value)`
 - `isVoidBlockNode(value)`
 - `isBlockNode(value)`
@@ -92,6 +123,9 @@ interface DocumentNode {
 - `createQuote(children = [createText()])`：创建引用。
 - `createCodeBlock(children = [createText()])`：创建纯文本代码块。
 - `createDivider()`：创建无文本子节点的分隔线。
+- `createListItem(children, nested?)`：创建普通列表项，可携带子列表。
+- `createBulletList(children)` / `createOrderedList(children)`：创建普通列表。
+- `createTaskItem(children, checked, nested?)` / `createTaskList(children)`：创建任务项与任务列表。
 - `createDocument(children = [createParagraph()])`：创建文档，默认含一个空段落。
 
 工厂函数对传入的 `children` 原样保留，是否合法由 `validateDocument` / `normalizeDocument` 负责。
@@ -105,6 +139,8 @@ interface DocumentNode {
 - 文本块的 `children` 只能是 `text` 节点；Divider 的 `children` 必须为空。
 - heading level 必须是 1–6。
 - CodeBlock text 不能携带 marks。
+- 普通列表只包含 listItem，任务列表只包含带布尔 checked 的 taskItem。
+- nested 必须是列表，最大嵌套深度为 `MAX_LIST_DEPTH`（当前为三层）。
 - text marks 只能包含受支持的 boolean mark 或合法属性值。
 
 每条错误带 `path`（节点路径，root 为空数组）和 `message`，便于定位非法节点。
@@ -118,12 +154,13 @@ interface DocumentNode {
 - block 里的非法 `children` 被丢弃。
 - text marks 会被规范化为受支持的 `true` 值。
 - 空文本 block 自动补一个空 `text`；Divider 始终规范化为 `children: []`。
+- 空列表和空列表项会补齐对应类型的可编辑项目；非法或超深 nested 会被移除。
 
 修复后的结果一定能通过 `validateDocument`。
 
 ## 当前限制
 
-- 当前 Block Type 还支持 bulletList 和 orderedList；图片尚未实现。
+- 当前 Block Type 还支持 bulletList、orderedList 和 taskList；图片尚未实现。
 - text marks 已完成四种 boolean mark、三种文字属性和 Link Mark 闭环；链接已经接入 operation、command、安全渲染、编辑态/只读态交互、选区恢复和 Demo。
 - heading level 直接存储在 `level` 字段；CodeBlock 和 Divider 当前不包含额外属性。
 - 规范化会丢弃非法节点而不尝试转换，转换策略留待后续。

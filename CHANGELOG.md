@@ -107,6 +107,10 @@
 - 新增 `toggleBulletList`、`toggleOrderedList`、列表类型互换和默认 Command 注册。
 - 新增 `split_list_item`、`exit_list_item`，支持列表项输入、Enter 分裂与空项退出。
 - 新增中文列表 Demo、浏览器综合验收、第 15 周 QA 和基础列表独立报告。
+- 新增最多三层的嵌套列表模型、递归 Path、校验、规范化、渲染与文本范围读取。
+- 新增 `indent_list_item`、`outdent_list_item` 和 `unwrap_list_item`，并接入 Tab、Shift+Tab、Backspace 与嵌套 Enter。
+- 新增 taskList/taskItem checked 模型、`toggleTaskList` command、`set_task_item_checked` 和 React checkbox 持久化。
+- 新增中文“嵌套与任务列表”Demo、浏览器综合验收、第 16 周 QA 和列表增强独立报告。
 
 ### 变更
 
@@ -147,6 +151,7 @@
 - 更新项目、Core 包、Operation、Command、History、渲染和第 13 周 QA 文档，使其匹配标题与引用闭环状态。
 - 更新架构、模型、Marks、Operation、输入、Command、History、渲染和 QA 文档，使其统一描述第 13 周累计能力。
 - 更新 Selection、渲染、Operation、Mark、文字属性、链接和 Command 文档，统一使用 paragraph/heading/quote 的通用 Block 契约。
+- 更新项目、包、模型、选区、渲染、Operation 和输入文档，使其匹配第 16 周列表增强范围。
 
 ### 修复
 
@@ -154,6 +159,7 @@
 - 修复 Demo 独立类型检查因 `rootDir` 与 workspace 源码路径冲突而失败的问题。
 - 修复标题选择器把引用或混合选区错误显示为正文，导致无法直接恢复 paragraph 的问题。
 - 修复 heading 和 quote 元素边界无法映射为模型选区的问题。
+- 修复嵌套列表操作后文本范围读取抛错并导致 Demo 卸载的问题。
 
 ### 暂未包含
 

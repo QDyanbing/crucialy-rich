@@ -1,6 +1,6 @@
 # Block Type 设计
 
-Block Type 用于描述块级节点语义。当前还包含 bulletList 和 orderedList；`set_block_type` 仅用于四种顶层文本块，Divider 与 List 使用各自的结构 Operation 管理。
+Block Type 用于描述块级节点语义。当前还包含 bulletList、orderedList 和 taskList；`set_block_type` 仅用于四种顶层文本块，Divider 与 List 使用各自的结构 Operation 管理。
 
 ## 模型结构
 

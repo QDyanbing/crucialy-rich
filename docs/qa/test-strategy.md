@@ -17,7 +17,7 @@
   - paragraph、1–6 级 heading、quote、codeBlock 和 divider 模型，文本/void block 守卫、校验、规范化和 History 快照。
   - CodeBlock 纯文本约束、`setCodeBlock`、多行输入、退出与 `pre > code` 渲染。
   - Divider 的 `insert_block` / `remove_block`、`insertDivider`、前后光标删除、`hr` 渲染和选区边界。
-  - 有序/无序列表 schema、三层 Path、语义渲染、切换 Command、列表项输入、Enter 分裂和空项退出。
+  - 有序/无序/任务列表 schema、递归 Path、三层嵌套、语义渲染、切换 Command、checked 更新、列表项输入、Enter、Tab、Shift+Tab 和 Backspace。
   - Path、Point、RangeSelection、段落 text offset 和文本切片工具。
   - 基础渲染器、paragraph/heading/quote 语义标签、四种 boolean mark、字号、文字颜色、背景色与安全链接 HTML 输出、组合样式、HTML 序列化、DOM 与模型位置映射和选区同步。
   - React 组件 `value`、`defaultValue`、`onChange` 和 `onTransaction` 初始渲染契约。
@@ -29,7 +29,7 @@
 ## 浏览器测试
 
 - 工具：Playwright。
-- 范围：演示页面、模型/选区/command 调试、基础编辑、文字样式、链接、Heading/Quote、CodeBlock 多行与退出、Divider 插入/删除/继续输入、混合样例和 History 往返。
+- 范围：演示页面、模型/选区/command 调试、基础编辑、文字样式、链接、Heading/Quote、CodeBlock 多行与退出、Divider、嵌套与任务列表、混合样例和 History 往返。
 - 命令：`pnpm test:e2e`。
 
 ## 类型检查

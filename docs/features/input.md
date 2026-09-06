@@ -28,6 +28,9 @@
 - block 首部、中间、尾部和空 block Enter 会分裂当前 block，并保留 block type、heading level 和 text marks。
 - CodeBlock 内 Enter 插入换行；末尾已有换行时再次 Enter 会退出到 paragraph。
 - 列表项内 Enter 分裂当前项；空列表项 Enter 退出为 paragraph。
+- 嵌套空列表项 Enter 提升一级；任务项分裂出的新项目默认未完成。
+- 列表项按 Tab 缩进，按 Shift+Tab 反缩进，最多三层。
+- 顶层列表项开头按 Backspace 转为 paragraph；嵌套项开头按 Backspace 提升一级。
 - Enter 后通过 `createSelectionAfterEnterInput` 计算新的折叠选区。
 
 ## 数据流
@@ -46,7 +49,7 @@ beforeinput
 
 `RichTextEditor` 会阻止浏览器默认 DOM 修改，避免直接信任 contenteditable 生成的 DOM 结果。模型更新只通过 operation 和 transaction 完成。
 
-Backspace、Delete 和 Enter 当前走 `keydown` 入口；非折叠 selection 下的 Backspace/Delete 会先尝试 `deleteSelectionCommand`，Enter 会先尝试 `splitBlockCommand`，段首 Backspace 会先尝试 `mergeBlockCommand`：
+Backspace、Delete、Enter 和列表 Tab 当前走 `keydown` 入口；非折叠 selection 下的 Backspace/Delete 会先尝试 `deleteSelectionCommand`，Enter 会先尝试 `splitBlockCommand`，段首 Backspace 会先尝试 `mergeBlockCommand`：
 
 ```text
 keydown Backspace/Delete/Enter
@@ -100,6 +103,16 @@ interface EnterInput {
 function createEnterInputTransaction(input: EnterInput): Transaction;
 
 function createSelectionAfterEnterInput(input: EnterInput): RangeSelection;
+
+interface TabInput {
+  document: DocumentNode;
+  selection: RangeSelection;
+  shiftKey?: boolean;
+}
+
+function createTabInputTransaction(input: TabInput): Transaction;
+
+function createSelectionAfterTabInput(input: TabInput): RangeSelection;
 ```
 
 当前 `createInsertTextInputTransaction` 会把输入文本插入到 selection 规范化后的起点。
@@ -165,6 +178,8 @@ function createSelectionAfterEnterInput(input: EnterInput): RangeSelection;
 - 在段首、段中、段尾或空段按 Enter 分裂段落。
 - 在 CodeBlock 内输入多行，并通过连续两次 Enter 退出。
 - 从 Divider 后方按 Backspace 或前方按 Delete 删除分隔线。
+- 在列表中使用 Tab/Shift+Tab 缩进或反缩进，并在项目开头使用 Backspace 拆出或提升。
+- 切换任务列表并通过 checkbox 保存完成状态。
 - Enter 后可以继续在新段落输入文本。
 - 文档 JSON 会跟随输入更新。
 - 渲染预览会使用最新模型重渲染。
