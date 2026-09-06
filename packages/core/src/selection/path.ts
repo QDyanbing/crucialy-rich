@@ -1,14 +1,38 @@
 import {
-  isListItemNode,
   isListNode,
   isTextBlockNode,
   type DocumentNode,
+  type ListNode,
   type Node,
 } from "../model";
 import type { Path } from "./types";
 
 function isPathIndex(value: number): boolean {
   return Number.isInteger(value) && value >= 0;
+}
+
+function getNodeInList(list: ListNode, path: Path): Node | undefined {
+  const [itemIndex, childIndex, ...rest] = path;
+
+  if (itemIndex === undefined) {
+    return list;
+  }
+
+  const item = list.children[itemIndex];
+
+  if (!item || childIndex === undefined) {
+    return item;
+  }
+
+  if (childIndex < item.children.length) {
+    return rest.length === 0 ? item.children[childIndex] : undefined;
+  }
+
+  if (childIndex !== item.children.length || !item.nested) {
+    return undefined;
+  }
+
+  return rest.length === 0 ? item.nested : getNodeInList(item.nested, rest);
 }
 
 /**
@@ -25,33 +49,27 @@ export function getNodeAtPath(document: DocumentNode, path: Path): Node | undefi
     return undefined;
   }
 
-  const [blockIndex, childIndex, textIndex, ...rest] = path;
+  const [blockIndex, ...rest] = path;
 
-  if (rest.length > 0 || blockIndex === undefined) {
+  if (blockIndex === undefined) {
     return undefined;
   }
 
   const block = document.children[blockIndex];
 
-  if (!block || childIndex === undefined) {
+  if (!block || rest.length === 0) {
     return block;
   }
 
   if (isTextBlockNode(block)) {
-    return textIndex === undefined ? block.children[childIndex] : undefined;
+    return rest.length === 1 ? block.children[rest[0]!] : undefined;
   }
 
   if (!isListNode(block)) {
     return undefined;
   }
 
-  const item = block.children[childIndex];
-
-  if (!item || textIndex === undefined) {
-    return item;
-  }
-
-  return isListItemNode(item) ? item.children[textIndex] : undefined;
+  return getNodeInList(block, rest);
 }
 
 export function hasNodeAtPath(document: DocumentNode, path: Path): boolean {

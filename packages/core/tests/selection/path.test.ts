@@ -5,6 +5,7 @@ import {
   createDivider,
   createDocument,
   createListItem,
+  createOrderedList,
   createParagraph,
   createText,
 } from "../../src/model";
@@ -16,7 +17,15 @@ const document = createDocument([
   createParagraph([createText("gamma")]),
   createBulletList([
     createListItem([createText("first")]),
-    createListItem([createText("second")]),
+    createListItem(
+      [createText("second")],
+      createOrderedList([
+        createListItem(
+          [createText("nested")],
+          createBulletList([createListItem([createText("deep")])]),
+        ),
+      ]),
+    ),
   ]),
 ]);
 
@@ -48,6 +57,20 @@ describe("selection path lookup", () => {
     });
   });
 
+  it("returns nested list items and text nodes", () => {
+    expect(getNodeAtPath(document, [3, 1, 1])?.type).toBe("orderedList");
+    expect(getNodeAtPath(document, [3, 1, 1, 0])?.type).toBe("listItem");
+    expect(getNodeAtPath(document, [3, 1, 1, 0, 0])).toEqual({
+      text: "nested",
+      type: "text",
+    });
+    expect(getNodeAtPath(document, [3, 1, 1, 0, 1])?.type).toBe("bulletList");
+    expect(getNodeAtPath(document, [3, 1, 1, 0, 1, 0, 0])).toEqual({
+      text: "deep",
+      type: "text",
+    });
+  });
+
   it("reports whether a node exists", () => {
     expect(hasNodeAtPath(document, [0, 0])).toBe(true);
     expect(hasNodeAtPath(document, [4])).toBe(false);
@@ -59,5 +82,6 @@ describe("selection path lookup", () => {
     expect(getNodeAtPath(document, [0.5])).toBeUndefined();
     expect(getNodeAtPath(document, [0, 0, 0])).toBeUndefined();
     expect(getNodeAtPath(document, [3, 0, 0, 0])).toBeUndefined();
+    expect(getNodeAtPath(document, [3, 1, 1, 0, 1, 0, 0, 0])).toBeUndefined();
   });
 });
