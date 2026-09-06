@@ -4,6 +4,40 @@ import { normalizeDocument } from "../../src/model/normalize";
 import { validateDocument } from "../../src/model/validate";
 
 describe("normalizeDocument", () => {
+  it("normalizes task items and preserves checked state", () => {
+    const result = normalizeDocument({
+      children: [
+        {
+          children: [
+            {
+              checked: true,
+              children: [
+                { marks: { bold: true }, text: "已", type: "text" },
+                { marks: { bold: true }, text: "完成", type: "text" },
+              ],
+              type: "taskItem",
+            },
+            { children: [{ text: "丢弃", type: "text" }], type: "listItem" },
+          ],
+          type: "taskList",
+        },
+      ],
+      type: "document",
+    });
+
+    expect(result.children[0]).toEqual({
+      children: [
+        {
+          checked: true,
+          children: [{ marks: { bold: true }, text: "已完成", type: "text" }],
+          type: "taskItem",
+        },
+      ],
+      type: "taskList",
+    });
+    expect(validateDocument(result).valid).toBe(true);
+  });
+
   it("normalizes list items and repairs empty lists", () => {
     const result = normalizeDocument({
       children: [

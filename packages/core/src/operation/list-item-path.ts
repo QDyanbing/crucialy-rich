@@ -1,14 +1,14 @@
 import {
   isListNode,
   type DocumentNode,
-  type ListItemNode,
+  type ListEntryNode,
   type ListNode,
 } from "../model";
 import { isValidPoint, type Path, type Point } from "../selection";
 
 export interface ListItemTarget {
   blockIndex: number;
-  item: ListItemNode;
+  item: ListEntryNode;
   itemIndex: number;
   list: ListNode;
   listPath: Path;
@@ -37,7 +37,7 @@ export function getListItemTarget(
   while (cursor < point.path.length) {
     const itemIndex = point.path[cursor];
     const childIndex = point.path[cursor + 1];
-    const item: ListItemNode | undefined =
+    const item: ListEntryNode | undefined =
       itemIndex === undefined ? undefined : list.children[itemIndex];
 
     if (itemIndex === undefined || !item || childIndex === undefined) {

@@ -49,6 +49,7 @@ describe("model node types", () => {
       "divider",
       "bulletList",
       "orderedList",
+      "taskList",
     ]);
     expect(VOID_BLOCK_TYPES).toEqual(["divider"]);
     expect(HEADING_LEVELS).toEqual([1, 2, 3, 4, 5, 6]);
@@ -68,7 +69,7 @@ describe("model node types", () => {
       type: listType,
     };
 
-    expect(LIST_TYPES).toEqual(["bulletList", "orderedList"]);
+    expect(LIST_TYPES).toEqual(["bulletList", "orderedList", "taskList"]);
     expect(MAX_LIST_DEPTH).toBe(3);
     expect(list.children[0]?.type).toBe("listItem");
   });

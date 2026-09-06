@@ -11,6 +11,8 @@ import {
   createParagraph,
   createQuote,
   createText,
+  createTaskItem,
+  createTaskList,
 } from "../../src/model/factories";
 import { HEADING_LEVELS } from "../../src/model/types";
 import { validateDocument } from "../../src/model/validate";
@@ -23,6 +25,49 @@ describe("validateDocument", () => {
     ]);
 
     expect(validateDocument(document)).toEqual({ errors: [], valid: true });
+  });
+
+  it("accepts task items with persisted checked state", () => {
+    const document = createDocument([
+      createTaskList([
+        createTaskItem([createText("未完成")]),
+        createTaskItem([createText("已完成")], true),
+      ]),
+    ]);
+
+    expect(validateDocument(document)).toEqual({ errors: [], valid: true });
+  });
+
+  it("rejects mismatched task and standard list items", () => {
+    const result = validateDocument({
+      children: [
+        {
+          children: [
+            {
+              checked: false,
+              children: [{ text: "任务", type: "text" }],
+              type: "taskItem",
+            },
+          ],
+          type: "bulletList",
+        },
+        {
+          children: [
+            { children: [{ text: "普通项", type: "text" }], type: "listItem" },
+          ],
+          type: "taskList",
+        },
+      ],
+      type: "document",
+    });
+
+    expect(result.errors).toEqual([
+      { message: "list 子节点必须是 listItem", path: [0, 0] },
+      {
+        message: "taskList 子节点必须是带 checked 的 taskItem",
+        path: [1, 0],
+      },
+    ]);
   });
 
   it("accepts nested lists up to the maximum depth", () => {

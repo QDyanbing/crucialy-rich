@@ -103,7 +103,7 @@ function renderCodeTextNode(node: TextNode, path: Path): RenderedElementNode {
 }
 
 function renderListNode(node: ListNode, path: Path): RenderedElementNode {
-  return createRenderedNode(node.type === "bulletList" ? "ul" : "ol", path, {
+  return createRenderedNode(node.type === "orderedList" ? "ol" : "ul", path, {
     children: node.children.map((item, itemIndex) => {
       const itemPath = [...path, itemIndex];
       const textChildren = item.children.map((child, textIndex) =>
@@ -135,7 +135,11 @@ function renderBlockNode(node: BlockNode, path: Path): RenderedElementNode {
     });
   }
 
-  if (node.type === "bulletList" || node.type === "orderedList") {
+  if (
+    node.type === "bulletList" ||
+    node.type === "orderedList" ||
+    node.type === "taskList"
+  ) {
     return renderListNode(node, path);
   }
 

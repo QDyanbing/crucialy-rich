@@ -9,12 +9,15 @@ import {
   type HeadingLevel,
   type HeadingNode,
   type ListItemNode,
+  type ListEntryNode,
   type ListNode,
   type ListType,
   type OrderedListNode,
   type ParagraphNode,
   type QuoteNode,
   type TextNode,
+  type TaskItemNode,
+  type TaskListNode,
   type TextBlockNode,
   type VoidBlockNode,
 } from "./types";
@@ -67,6 +70,19 @@ export function isListItemNode(value: unknown): value is ListItemNode {
   return isRecord(value) && value.type === "listItem" && Array.isArray(value.children);
 }
 
+export function isTaskItemNode(value: unknown): value is TaskItemNode {
+  return (
+    isRecord(value) &&
+    value.type === "taskItem" &&
+    typeof value.checked === "boolean" &&
+    Array.isArray(value.children)
+  );
+}
+
+export function isListEntryNode(value: unknown): value is ListEntryNode {
+  return isListItemNode(value) || isTaskItemNode(value);
+}
+
 export function isBulletListNode(value: unknown): value is BulletListNode {
   return (
     isRecord(value) && value.type === "bulletList" && Array.isArray(value.children)
@@ -79,8 +95,12 @@ export function isOrderedListNode(value: unknown): value is OrderedListNode {
   );
 }
 
+export function isTaskListNode(value: unknown): value is TaskListNode {
+  return isRecord(value) && value.type === "taskList" && Array.isArray(value.children);
+}
+
 export function isListNode(value: unknown): value is ListNode {
-  return isBulletListNode(value) || isOrderedListNode(value);
+  return isBulletListNode(value) || isOrderedListNode(value) || isTaskListNode(value);
 }
 
 export function isTextBlockNode(value: unknown): value is TextBlockNode {

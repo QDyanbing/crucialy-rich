@@ -3,6 +3,7 @@ import {
   createListItem,
   createParagraph,
   createText,
+  createTaskItem,
 } from "./factories";
 import {
   isBlockNode,
@@ -11,13 +12,14 @@ import {
   isListNode,
   isTextBlockNode,
   isTextNode,
+  isTaskItemNode,
 } from "./guards";
 import { mergeAdjacentTextNodes, normalizeTextMarks } from "./marks";
 import { MAX_LIST_DEPTH } from "./types";
 import type {
   BlockNode,
   DocumentNode,
-  ListItemNode,
+  ListEntryNode,
   ListNode,
   TextNode,
 } from "./types";
@@ -74,17 +76,19 @@ function normalizeBlock(node: BlockNode): BlockNode {
 }
 
 function normalizeList(node: ListNode, depth: number): ListNode {
+  const isExpectedItem = node.type === "taskList" ? isTaskItemNode : isListItemNode;
   const children = node.children
-    .filter(isListItemNode)
+    .filter(isExpectedItem)
     .map((item) => normalizeListItem(item, depth));
+  const fallback = node.type === "taskList" ? createTaskItem() : createListItem();
 
   return {
-    children: children.length > 0 ? children : [createListItem()],
+    children: children.length > 0 ? children : [fallback],
     type: node.type,
   };
 }
 
-function normalizeListItem(node: ListItemNode, depth: number): ListItemNode {
+function normalizeListItem(node: ListEntryNode, depth: number): ListEntryNode {
   const children = mergeAdjacentTextNodes(
     node.children.filter(isTextNode).map(normalizeTextNode),
   );
@@ -93,7 +97,11 @@ function normalizeListItem(node: ListItemNode, depth: number): ListItemNode {
       ? normalizeList(node.nested, depth + 1)
       : undefined;
 
-  return createListItem(children.length > 0 ? children : [createText()], nested);
+  const normalizedChildren = children.length > 0 ? children : [createText()];
+
+  return node.type === "taskItem"
+    ? createTaskItem(normalizedChildren, node.checked, nested)
+    : createListItem(normalizedChildren, nested);
 }
 
 function normalizeCodeTextNode(node: TextNode): TextNode {

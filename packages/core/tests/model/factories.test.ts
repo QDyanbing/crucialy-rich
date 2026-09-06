@@ -11,6 +11,8 @@ import {
   createParagraph,
   createQuote,
   createText,
+  createTaskItem,
+  createTaskList,
 } from "../../src/model/factories";
 import {
   isCodeBlockNode,
@@ -172,6 +174,21 @@ describe("model factories", () => {
       children: [createText("父项")],
       nested,
       type: "listItem",
+    });
+  });
+
+  it("creates checked and unchecked task items", () => {
+    const taskList = createTaskList([
+      createTaskItem([createText("待办")]),
+      createTaskItem([createText("完成")], true),
+    ]);
+
+    expect(taskList).toEqual({
+      children: [
+        { checked: false, children: [createText("待办")], type: "taskItem" },
+        { checked: true, children: [createText("完成")], type: "taskItem" },
+      ],
+      type: "taskList",
     });
   });
 

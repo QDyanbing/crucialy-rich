@@ -22,6 +22,7 @@ export type {
   LinkRelToken,
   LinkTarget,
   ListItemNode,
+  ListEntryNode,
   ListNode,
   ListType,
   Node,
@@ -33,6 +34,8 @@ export type {
   TextMarks,
   TextMarkType,
   TextNode,
+  TaskItemNode,
+  TaskListNode,
   TextBlockNode,
   VoidBlockNode,
 } from "./types";
@@ -45,12 +48,15 @@ export {
   isHeadingLevel,
   isHeadingNode,
   isListItemNode,
+  isListEntryNode,
   isListNode,
   isListType,
   isOrderedListNode,
   isParagraphNode,
   isQuoteNode,
   isTextNode,
+  isTaskItemNode,
+  isTaskListNode,
   isTextBlockNode,
   isVoidBlockNode,
 } from "./guards";
@@ -65,6 +71,8 @@ export {
   createParagraph,
   createQuote,
   createText,
+  createTaskItem,
+  createTaskList,
 } from "./factories";
 export {
   areLinkMarksEqual,

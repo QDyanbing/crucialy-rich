@@ -1,4 +1,4 @@
-import type { DocumentNode, ListItemNode, ListNode } from "../model";
+import type { DocumentNode, ListEntryNode, ListNode } from "../model";
 import type { Point, RangeSelection } from "../selection";
 import { getListItemTarget, updateListAtPath } from "./list-item-path";
 import type { OutdentListItemOperation } from "./types";
@@ -10,7 +10,7 @@ export function createOutdentListItemOperation(point: Point): OutdentListItemOpe
   };
 }
 
-function removeNestedList(item: ListItemNode): ListItemNode {
+function removeNestedList(item: ListEntryNode): ListEntryNode {
   const result = { ...item };
 
   delete result.nested;

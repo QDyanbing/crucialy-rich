@@ -1,4 +1,4 @@
-import { isListItemNode, isVoidBlockNode, type DocumentNode } from "../model";
+import { isListEntryNode, isVoidBlockNode, type DocumentNode } from "../model";
 import {
   createDeleteTextOperation,
   createMergeBlockOperation,
@@ -45,7 +45,7 @@ function createListStartTransaction(
   const textIndex = point.path.at(-1);
   const item = getNodeAtPath(document, point.path.slice(0, -1));
 
-  if (point.offset !== 0 || textIndex !== 0 || !isListItemNode(item)) {
+  if (point.offset !== 0 || textIndex !== 0 || !isListEntryNode(item)) {
     return undefined;
   }
 

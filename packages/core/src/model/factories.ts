@@ -14,6 +14,8 @@ import type {
   QuoteNode,
   TextMarks,
   TextNode,
+  TaskItemNode,
+  TaskListNode,
 } from "./types";
 
 /**
@@ -88,6 +90,22 @@ export function createOrderedList(
   children: ListItemNode[] = [createListItem()],
 ): OrderedListNode {
   return { children, type: "orderedList" };
+}
+
+export function createTaskItem(
+  children: TextNode[] = [createText()],
+  checked = false,
+  nested?: ListNode,
+): TaskItemNode {
+  return nested
+    ? { checked, children, nested, type: "taskItem" }
+    : { checked, children, type: "taskItem" };
+}
+
+export function createTaskList(
+  children: TaskItemNode[] = [createTaskItem()],
+): TaskListNode {
+  return { children, type: "taskList" };
 }
 
 /**

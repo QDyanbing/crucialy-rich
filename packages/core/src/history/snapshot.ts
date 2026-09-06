@@ -2,9 +2,12 @@ import {
   createBulletList,
   createListItem,
   createOrderedList,
+  createTaskItem,
+  createTaskList,
   createText,
   type BlockNode,
   type DocumentNode,
+  type ListNode,
 } from "../model";
 import type { Point, RangeSelection } from "../selection";
 import type { HistorySnapshot } from "./types";
@@ -14,16 +17,22 @@ function cloneBlock(block: BlockNode): BlockNode {
     return { children: [], type: "divider" };
   }
 
-  if (block.type === "bulletList" || block.type === "orderedList") {
-    const items = block.children.map((item) =>
-      createListItem(
-        item.children.map((textNode) => createText(textNode.text, textNode.marks)),
-      ),
-    );
+  if (
+    block.type === "bulletList" ||
+    block.type === "orderedList" ||
+    block.type === "taskList"
+  ) {
+    const items = block.children.map((item) => cloneListItem(item));
+
+    if (block.type === "taskList") {
+      return createTaskList(items.filter((item) => item.type === "taskItem"));
+    }
+
+    const listItems = items.filter((item) => item.type === "listItem");
 
     return block.type === "bulletList"
-      ? createBulletList(items)
-      : createOrderedList(items);
+      ? createBulletList(listItems)
+      : createOrderedList(listItems);
   }
 
   const children = block.children.map((textNode) =>
@@ -45,6 +54,17 @@ function cloneBlock(block: BlockNode): BlockNode {
     case "quote":
       return { children, type: "quote" };
   }
+}
+
+function cloneListItem(item: ListNode["children"][number]) {
+  const children = item.children.map((textNode) =>
+    createText(textNode.text, textNode.marks),
+  );
+  const nested = item.nested ? (cloneBlock(item.nested) as ListNode) : undefined;
+
+  return item.type === "taskItem"
+    ? createTaskItem(children, item.checked, nested)
+    : createListItem(children, nested);
 }
 
 function cloneDocument(document: DocumentNode): DocumentNode {

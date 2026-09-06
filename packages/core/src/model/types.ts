@@ -13,11 +13,12 @@ export const BLOCK_TYPES = [
   "divider",
   "bulletList",
   "orderedList",
+  "taskList",
 ] as const;
 
 export const VOID_BLOCK_TYPES = ["divider"] as const;
 
-export const LIST_TYPES = ["bulletList", "orderedList"] as const;
+export const LIST_TYPES = ["bulletList", "orderedList", "taskList"] as const;
 
 export const MAX_LIST_DEPTH = 3;
 
@@ -106,17 +107,33 @@ export interface ListItemNode {
   text?: never;
 }
 
+export interface TaskItemNode {
+  type: "taskItem";
+  checked: boolean;
+  children: TextNode[];
+  nested?: ListNode;
+  marks?: never;
+  text?: never;
+}
+
+export type ListEntryNode = ListItemNode | TaskItemNode;
+
 export interface BulletListNode {
   type: "bulletList";
-  children: ListItemNode[];
+  children: ListEntryNode[];
 }
 
 export interface OrderedListNode {
   type: "orderedList";
-  children: ListItemNode[];
+  children: ListEntryNode[];
 }
 
-export type ListNode = BulletListNode | OrderedListNode;
+export interface TaskListNode {
+  type: "taskList";
+  children: ListEntryNode[];
+}
+
+export type ListNode = BulletListNode | OrderedListNode | TaskListNode;
 
 /**
  * 文本块直接包含 text children，空块不包含可编辑文本。
@@ -135,4 +152,4 @@ export interface DocumentNode {
 /**
  * 文档树中可能出现的所有节点类型。
  */
-export type Node = DocumentNode | BlockNode | ListItemNode | TextNode;
+export type Node = DocumentNode | BlockNode | ListEntryNode | TextNode;

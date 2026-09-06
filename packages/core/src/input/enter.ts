@@ -1,4 +1,4 @@
-import { isListItemNode, isTextNode, type DocumentNode } from "../model";
+import { isListEntryNode, isTextNode, type DocumentNode } from "../model";
 import {
   createExitListItemOperation,
   createInsertTextOperation,
@@ -75,7 +75,7 @@ function getListItem(document: DocumentNode, point: Point) {
 
   const item = getNodeAtPath(document, point.path.slice(0, -1));
 
-  return isListItemNode(item) ? item : undefined;
+  return isListEntryNode(item) ? item : undefined;
 }
 
 export function createEnterInputTransaction(input: EnterInput): Transaction {

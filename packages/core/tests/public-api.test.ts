@@ -16,6 +16,7 @@ describe("@crucialy-rich/core public API", () => {
       "divider",
       "bulletList",
       "orderedList",
+      "taskList",
     ]);
     expect(core.VOID_BLOCK_TYPES).toEqual(["divider"]);
     expect(core.HEADING_LEVELS).toEqual([1, 2, 3, 4, 5, 6]);
@@ -29,6 +30,8 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.createParagraph).toBe("function");
     expect(typeof core.createQuote).toBe("function");
     expect(typeof core.createText).toBe("function");
+    expect(typeof core.createTaskItem).toBe("function");
+    expect(typeof core.createTaskList).toBe("function");
     expect(core.TEXT_MARK_TYPES).toEqual(["bold", "italic", "underline", "strike"]);
     expect(core.TEXT_MARK_ATTRIBUTE_TYPES).toEqual([
       "fontSize",
@@ -72,7 +75,9 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.isHeadingNode).toBe("function");
     expect(typeof core.isListItemNode).toBe("function");
     expect(typeof core.isListNode).toBe("function");
-    expect(core.LIST_TYPES).toEqual(["bulletList", "orderedList"]);
+    expect(core.LIST_TYPES).toEqual(["bulletList", "orderedList", "taskList"]);
+    expect(typeof core.isTaskItemNode).toBe("function");
+    expect(typeof core.isTaskListNode).toBe("function");
     expect(typeof core.isQuoteNode).toBe("function");
     expect(typeof core.isTextBlockNode).toBe("function");
     expect(typeof core.isVoidBlockNode).toBe("function");

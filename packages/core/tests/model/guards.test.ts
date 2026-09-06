@@ -9,6 +9,7 @@ import {
   isHeadingLevel,
   isHeadingNode,
   isListItemNode,
+  isListEntryNode,
   isListNode,
   isListType,
   isOrderedListNode,
@@ -16,6 +17,8 @@ import {
   isQuoteNode,
   isTextNode,
   isTextBlockNode,
+  isTaskItemNode,
+  isTaskListNode,
   isVoidBlockNode,
 } from "../../src/model/guards";
 
@@ -71,15 +74,27 @@ describe("model type guards", () => {
     const item = { children: [{ text: "项目", type: "text" }], type: "listItem" };
     const bulletList = { children: [item], type: "bulletList" };
     const orderedList = { children: [item], type: "orderedList" };
+    const taskItem = {
+      checked: false,
+      children: [{ text: "任务", type: "text" }],
+      type: "taskItem",
+    };
+    const taskList = { children: [taskItem], type: "taskList" };
 
     expect(isListType("bulletList")).toBe(true);
     expect(isListType("orderedList")).toBe(true);
-    expect(isListType("taskList")).toBe(false);
+    expect(isListType("taskList")).toBe(true);
     expect(isListItemNode(item)).toBe(true);
+    expect(isTaskItemNode(taskItem)).toBe(true);
+    expect(isTaskItemNode({ ...taskItem, checked: "false" })).toBe(false);
+    expect(isListEntryNode(item)).toBe(true);
+    expect(isListEntryNode(taskItem)).toBe(true);
     expect(isBulletListNode(bulletList)).toBe(true);
     expect(isOrderedListNode(orderedList)).toBe(true);
+    expect(isTaskListNode(taskList)).toBe(true);
     expect(isListNode(bulletList)).toBe(true);
     expect(isListNode(orderedList)).toBe(true);
+    expect(isListNode(taskList)).toBe(true);
     expect(isBlockNode(bulletList)).toBe(true);
   });
 

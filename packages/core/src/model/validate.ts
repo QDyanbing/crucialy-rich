@@ -3,6 +3,7 @@ import {
   isDocumentNode,
   isListItemNode,
   isListNode,
+  isTaskItemNode,
   isTextBlockNode,
   isTextNode,
 } from "./guards";
@@ -108,8 +109,17 @@ function validateList(
   list.children.forEach((item, itemIndex) => {
     const itemPath = [...path, itemIndex];
 
-    if (!isListItemNode(item)) {
-      errors.push({ path: itemPath, message: "list 子节点必须是 listItem" });
+    const validItem =
+      list.type === "taskList" ? isTaskItemNode(item) : isListItemNode(item);
+
+    if (!validItem) {
+      errors.push({
+        path: itemPath,
+        message:
+          list.type === "taskList"
+            ? "taskList 子节点必须是带 checked 的 taskItem"
+            : "list 子节点必须是 listItem",
+      });
       return;
     }
 

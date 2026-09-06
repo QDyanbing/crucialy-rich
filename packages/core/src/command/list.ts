@@ -2,6 +2,8 @@ import {
   createBulletList,
   createListItem,
   createParagraph,
+  createTaskItem,
+  createTaskList,
   isListNode,
   type DocumentNode,
   type ListNode,
@@ -100,9 +102,17 @@ function createList(
     return createListItem(block.type === "paragraph" ? block.children : undefined);
   });
 
-  return type === "bulletList"
-    ? createBulletList(items)
-    : { children: items, type: "orderedList" as const };
+  if (type === "bulletList") {
+    return createBulletList(items);
+  }
+
+  if (type === "orderedList") {
+    return { children: items, type: "orderedList" as const };
+  }
+
+  return createTaskList(
+    items.map((item) => createTaskItem(item.children, false, item.nested)),
+  );
 }
 
 function createWrapResult(
