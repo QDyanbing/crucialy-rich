@@ -7,6 +7,7 @@ import {
   isListNode,
   type DocumentNode,
   type ListNode,
+  type ListEntryNode,
   type ListType,
 } from "../model";
 import {
@@ -22,6 +23,7 @@ import type { Command, CommandInput, CommandName, CommandResult } from "./types"
 
 export const TOGGLE_BULLET_LIST_COMMAND_NAME = "toggleBulletList";
 export const TOGGLE_ORDERED_LIST_COMMAND_NAME = "toggleOrderedList";
+export const TOGGLE_TASK_LIST_COMMAND_NAME = "toggleTaskList";
 
 interface ParagraphListTarget {
   blockIndexes: number[];
@@ -48,7 +50,11 @@ function getListCommandTarget(input: CommandInput): ListCommandTarget | undefine
     const block = input.context.document.children[blockIndex];
 
     if (isListNode(block)) {
-      return { blockIndex, kind: "list", list: block };
+      const selection = input.context.selection!;
+
+      return selection.anchor.path.length === 3 && selection.focus.path.length === 3
+        ? { blockIndex, kind: "list", list: block }
+        : undefined;
     }
   }
 
@@ -57,6 +63,33 @@ function getListCommandTarget(input: CommandInput): ListCommandTarget | undefine
   )
     ? { blockIndexes, kind: "paragraphs" }
     : undefined;
+}
+
+function convertListItem(item: ListEntryNode, type: ListType): ListEntryNode {
+  return type === "taskList"
+    ? createTaskItem(
+        item.children,
+        item.type === "taskItem" ? item.checked : false,
+        item.nested,
+      )
+    : createListItem(item.children, item.nested);
+}
+
+function convertList(list: ListNode, type: ListType): ListNode {
+  const children = list.children.map((item) => convertListItem(item, type));
+
+  if (type === "bulletList") {
+    return createBulletList(children.filter((item) => item.type === "listItem"));
+  }
+
+  if (type === "orderedList") {
+    return {
+      children: children.filter((item) => item.type === "listItem"),
+      type,
+    };
+  }
+
+  return createTaskList(children.filter((item) => item.type === "taskItem"));
 }
 
 function mapPointToList(point: Point, firstBlockIndex: number): Point {
@@ -146,14 +179,18 @@ function createUnwrapResult(
   target: ExistingListTarget,
 ): CommandResult {
   const operations: Operation[] = [createRemoveBlockOperation([target.blockIndex])];
+  let insertIndex = target.blockIndex;
 
-  target.list.children.forEach((item, itemIndex) => {
+  target.list.children.forEach((item) => {
     operations.push(
-      createInsertBlockOperation(
-        [target.blockIndex + itemIndex],
-        createParagraph(item.children),
-      ),
+      createInsertBlockOperation([insertIndex], createParagraph(item.children)),
     );
+    insertIndex += 1;
+
+    if (item.nested) {
+      operations.push(createInsertBlockOperation([insertIndex], item.nested));
+      insertIndex += 1;
+    }
   });
 
   return createCommandSuccess(commandName, {
@@ -190,10 +227,7 @@ function executeToggleList(
     selection: cloneRangeSelection(input.context.selection),
     transaction: createTransaction([
       createRemoveBlockOperation([target.blockIndex]),
-      createInsertBlockOperation([target.blockIndex], {
-        children: target.list.children,
-        type,
-      }),
+      createInsertBlockOperation([target.blockIndex], convertList(target.list, type)),
     ]),
   });
 }
@@ -234,7 +268,26 @@ export const toggleOrderedListCommand: Command = {
   name: TOGGLE_ORDERED_LIST_COMMAND_NAME,
 };
 
+export function canExecuteToggleTaskListCommand(input: CommandInput): boolean {
+  return getListCommandTarget(input) !== undefined;
+}
+
+export function isTaskListCommandActive(input: CommandInput): boolean {
+  const target = getListCommandTarget(input);
+
+  return target?.kind === "list" && target.list.type === "taskList";
+}
+
+export const toggleTaskListCommand: Command = {
+  canExecute: canExecuteToggleTaskListCommand,
+  execute(input) {
+    return executeToggleList(TOGGLE_TASK_LIST_COMMAND_NAME, "taskList", input);
+  },
+  name: TOGGLE_TASK_LIST_COMMAND_NAME,
+};
+
 export const LIST_COMMANDS: readonly Command[] = [
   toggleBulletListCommand,
   toggleOrderedListCommand,
+  toggleTaskListCommand,
 ];

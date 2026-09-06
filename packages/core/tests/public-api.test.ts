@@ -142,9 +142,11 @@ describe("@crucialy-rich/core public API", () => {
     expect(core.LIST_COMMANDS.map((command) => command.name)).toEqual([
       "toggleBulletList",
       "toggleOrderedList",
+      "toggleTaskList",
     ]);
     expect(typeof core.toggleBulletListCommand).toBe("object");
     expect(typeof core.toggleOrderedListCommand).toBe("object");
+    expect(typeof core.toggleTaskListCommand).toBe("object");
   });
 
   it("exposes the operation API", () => {
@@ -334,6 +336,7 @@ describe("@crucialy-rich/core public API", () => {
       "toggleQuote",
       "toggleBulletList",
       "toggleOrderedList",
+      "toggleTaskList",
       "deleteSelection",
       "insertText",
       "insertDivider",
