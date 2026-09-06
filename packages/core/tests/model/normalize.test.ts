@@ -44,6 +44,67 @@ describe("normalizeDocument", () => {
     });
   });
 
+  it("normalizes nested lists and trims unsupported depth", () => {
+    const result = normalizeDocument({
+      children: [
+        {
+          children: [
+            {
+              children: [{ text: "一级", type: "text" }],
+              nested: {
+                children: [
+                  {
+                    children: [
+                      { marks: { bold: true }, text: "二", type: "text" },
+                      { marks: { bold: true }, text: "级", type: "text" },
+                    ],
+                    nested: {
+                      children: [
+                        {
+                          children: [{ text: "三级", type: "text" }],
+                          nested: {
+                            children: [
+                              {
+                                children: [{ text: "四级", type: "text" }],
+                                type: "listItem",
+                              },
+                            ],
+                            type: "bulletList",
+                          },
+                          type: "listItem",
+                        },
+                      ],
+                      type: "bulletList",
+                    },
+                    type: "listItem",
+                  },
+                ],
+                type: "orderedList",
+              },
+              type: "listItem",
+            },
+          ],
+          type: "bulletList",
+        },
+      ],
+      type: "document",
+    });
+    const topList = result.children[0];
+
+    expect(topList?.type).toBe("bulletList");
+    if (topList?.type !== "bulletList") {
+      throw new Error("expected bullet list");
+    }
+
+    expect(topList.children[0]?.nested?.children[0]?.children).toEqual([
+      { marks: { bold: true }, text: "二级", type: "text" },
+    ]);
+    expect(topList.children[0]?.nested?.children[0]?.nested?.children[0]?.nested).toBe(
+      undefined,
+    );
+    expect(validateDocument(result)).toEqual({ errors: [], valid: true });
+  });
+
   it("replaces a non-document root with an empty document", () => {
     const result = normalizeDocument({ type: "text", text: "loose" });
     expect(result.type).toBe("document");

@@ -13,6 +13,7 @@ import {
   isTextNode,
 } from "./guards";
 import { mergeAdjacentTextNodes, normalizeTextMarks } from "./marks";
+import { MAX_LIST_DEPTH } from "./types";
 import type {
   BlockNode,
   DocumentNode,
@@ -46,7 +47,7 @@ export function normalizeDocument(value: unknown): DocumentNode {
 
 function normalizeBlock(node: BlockNode): BlockNode {
   if (isListNode(node)) {
-    return normalizeList(node);
+    return normalizeList(node, 1);
   }
 
   if (!isTextBlockNode(node)) {
@@ -72,8 +73,10 @@ function normalizeBlock(node: BlockNode): BlockNode {
   }
 }
 
-function normalizeList(node: ListNode): ListNode {
-  const children = node.children.filter(isListItemNode).map(normalizeListItem);
+function normalizeList(node: ListNode, depth: number): ListNode {
+  const children = node.children
+    .filter(isListItemNode)
+    .map((item) => normalizeListItem(item, depth));
 
   return {
     children: children.length > 0 ? children : [createListItem()],
@@ -81,12 +84,16 @@ function normalizeList(node: ListNode): ListNode {
   };
 }
 
-function normalizeListItem(node: ListItemNode): ListItemNode {
+function normalizeListItem(node: ListItemNode, depth: number): ListItemNode {
   const children = mergeAdjacentTextNodes(
     node.children.filter(isTextNode).map(normalizeTextNode),
   );
+  const nested =
+    depth < MAX_LIST_DEPTH && isListNode(node.nested)
+      ? normalizeList(node.nested, depth + 1)
+      : undefined;
 
-  return createListItem(children.length > 0 ? children : [createText()]);
+  return createListItem(children.length > 0 ? children : [createText()], nested);
 }
 
 function normalizeCodeTextNode(node: TextNode): TextNode {
