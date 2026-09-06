@@ -126,6 +126,7 @@ export function createSelectionAfterDeleteInput(input: DeleteInput): RangeSelect
     case "insert_block":
     case "indent_list_item":
     case "outdent_list_item":
+    case "unwrap_list_item":
     case "set_block_type":
     case "set_link":
     case "set_mark_attribute":

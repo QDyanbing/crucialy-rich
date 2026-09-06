@@ -99,5 +99,11 @@ export type {
   ToggleMarkOperation,
   OperationType,
   Transaction,
+  UnwrapListItemOperation,
 } from "./types";
 export { OPERATION_TYPES } from "./types";
+export {
+  applyUnwrapListItem,
+  createSelectionAfterUnwrapListItem,
+  createUnwrapListItemOperation,
+} from "./unwrap-list-item";

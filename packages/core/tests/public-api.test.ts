@@ -194,6 +194,7 @@ describe("@crucialy-rich/core public API", () => {
       "exit_list_item",
       "indent_list_item",
       "outdent_list_item",
+      "unwrap_list_item",
     ]);
     expect(typeof core.createIndentListItemOperation).toBe("function");
     expect(typeof core.applyIndentListItem).toBe("function");
@@ -201,6 +202,9 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.createOutdentListItemOperation).toBe("function");
     expect(typeof core.applyOutdentListItem).toBe("function");
     expect(typeof core.createSelectionAfterOutdentListItem).toBe("function");
+    expect(typeof core.createUnwrapListItemOperation).toBe("function");
+    expect(typeof core.applyUnwrapListItem).toBe("function");
+    expect(typeof core.createSelectionAfterUnwrapListItem).toBe("function");
     expect(typeof core.isTextOperation).toBe("function");
     expect(typeof core.isBlockOperation).toBe("function");
     expect(typeof core.summarizeOperation).toBe("function");

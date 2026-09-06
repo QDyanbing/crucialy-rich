@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import {
   applyTransaction,
+  createBulletList,
   createBackspaceInputTransaction,
   createDocument,
   createDivider,
+  createListItem,
   createParagraph,
   createSelectionAfterBackspaceInput,
   createText,
@@ -132,6 +134,73 @@ describe("createBackspaceInputTransaction", () => {
     });
 
     expect(transaction.operations).toEqual([]);
+  });
+
+  it("unwraps a top-level list item at its start", () => {
+    const document = createDocument([
+      createBulletList([
+        createListItem([createText("第一项")]),
+        createListItem([createText("第二项")]),
+      ]),
+    ]);
+    const input = {
+      document,
+      selection: {
+        anchor: { offset: 0, path: [0, 1, 0] },
+        focus: { offset: 0, path: [0, 1, 0] },
+      },
+    };
+    const transaction = createBackspaceInputTransaction(input);
+    const result = applyTransaction(document, transaction);
+
+    expect(transaction.operations[0]?.type).toBe("unwrap_list_item");
+    expect(result.children.map((block) => block.type)).toEqual([
+      "bulletList",
+      "paragraph",
+    ]);
+    expect(createSelectionAfterBackspaceInput(input).anchor.path).toEqual([1, 0]);
+  });
+
+  it("outdents a nested list item at its start", () => {
+    const document = createDocument([
+      createBulletList([
+        createListItem(
+          [createText("父项")],
+          createBulletList([createListItem([createText("子项")])]),
+        ),
+      ]),
+    ]);
+    const input = {
+      document,
+      selection: {
+        anchor: { offset: 0, path: [0, 0, 1, 0, 0] },
+        focus: { offset: 0, path: [0, 0, 1, 0, 0] },
+      },
+    };
+
+    expect(createBackspaceInputTransaction(input).operations[0]?.type).toBe(
+      "outdent_list_item",
+    );
+    expect(createSelectionAfterBackspaceInput(input).anchor.path).toEqual([0, 1, 0]);
+  });
+
+  it("preserves a nested list when unwrapping its parent item", () => {
+    const nested = createBulletList([createListItem([createText("子项")])]);
+    const document = createDocument([
+      createBulletList([createListItem([createText("父项")], nested)]),
+    ]);
+    const transaction = createBackspaceInputTransaction({
+      document,
+      selection: {
+        anchor: { offset: 0, path: [0, 0, 0] },
+        focus: { offset: 0, path: [0, 0, 0] },
+      },
+    });
+
+    expect(applyTransaction(document, transaction).children).toEqual([
+      createParagraph([createText("父项")]),
+      nested,
+    ]);
   });
 
   it("does nothing for non-collapsed selections", () => {

@@ -40,6 +40,7 @@ describe("operation type registry", () => {
       "exit_list_item",
       "indent_list_item",
       "outdent_list_item",
+      "unwrap_list_item",
     ]);
     expect(TEXT_OPERATION_TYPES).toEqual([
       "insert_text",
@@ -52,6 +53,7 @@ describe("operation type registry", () => {
       "exit_list_item",
       "indent_list_item",
       "outdent_list_item",
+      "unwrap_list_item",
       "insert_block",
       "remove_block",
       "set_block_type",

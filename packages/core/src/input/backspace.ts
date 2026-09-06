@@ -1,14 +1,23 @@
-import { isVoidBlockNode, type DocumentNode } from "../model";
+import { isListItemNode, isVoidBlockNode, type DocumentNode } from "../model";
 import {
   createDeleteTextOperation,
   createMergeBlockOperation,
+  createOutdentListItemOperation,
   createRemoveBlockOperation,
   createSelectionAfterDeleteText,
   createSelectionAfterMergeBlock,
+  createSelectionAfterOutdentListItem,
+  createSelectionAfterUnwrapListItem,
   createTransaction,
+  createUnwrapListItemOperation,
   type Transaction,
 } from "../operation";
-import { isCollapsed, type Point, type RangeSelection } from "../selection";
+import {
+  getNodeAtPath,
+  isCollapsed,
+  type Point,
+  type RangeSelection,
+} from "../selection";
 
 export interface BackspaceInput {
   document: DocumentNode;
@@ -27,6 +36,24 @@ function createCollapsedSelection(point: Point): RangeSelection {
     anchor: clonePoint(point),
     focus: clonePoint(point),
   };
+}
+
+function createListStartTransaction(
+  document: DocumentNode,
+  point: Point,
+): Transaction | undefined {
+  const textIndex = point.path.at(-1);
+  const item = getNodeAtPath(document, point.path.slice(0, -1));
+
+  if (point.offset !== 0 || textIndex !== 0 || !isListItemNode(item)) {
+    return undefined;
+  }
+
+  return createTransaction([
+    point.path.length > 3
+      ? createOutdentListItemOperation(point)
+      : createUnwrapListItemOperation(point),
+  ]);
 }
 
 function getCollapsedPoint(selection: RangeSelection): Point | undefined {
@@ -71,6 +98,12 @@ export function createBackspaceInputTransaction(input: BackspaceInput): Transact
 
   if (!point) {
     return createTransaction();
+  }
+
+  const listStartTransaction = createListStartTransaction(input.document, point);
+
+  if (listStartTransaction) {
+    return listStartTransaction;
   }
 
   if (point.offset > 0) {
@@ -118,11 +151,14 @@ export function createSelectionAfterBackspaceInput(
 
       return createCollapsedSelection(point);
     }
+    case "outdent_list_item":
+      return createSelectionAfterOutdentListItem(input.document, operation);
+    case "unwrap_list_item":
+      return createSelectionAfterUnwrapListItem(input.document, operation);
     case "insert_text":
     case "exit_list_item":
     case "insert_block":
     case "indent_list_item":
-    case "outdent_list_item":
     case "set_block_type":
     case "set_link":
     case "set_mark_attribute":

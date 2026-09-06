@@ -29,6 +29,7 @@ export const OPERATION_TYPES = [
   "exit_list_item",
   "indent_list_item",
   "outdent_list_item",
+  "unwrap_list_item",
 ] as const;
 
 export type OperationType = (typeof OPERATION_TYPES)[number];
@@ -112,11 +113,17 @@ export interface OutdentListItemOperation {
   type: "outdent_list_item";
 }
 
+export interface UnwrapListItemOperation {
+  point: Point;
+  type: "unwrap_list_item";
+}
+
 export type Operation =
   | DeleteTextOperation
   | ExitListItemOperation
   | IndentListItemOperation
   | OutdentListItemOperation
+  | UnwrapListItemOperation
   | InsertTextOperation
   | InsertBlockOperation
   | MergeBlockOperation

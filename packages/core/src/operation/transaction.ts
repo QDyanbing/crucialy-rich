@@ -14,6 +14,7 @@ import { applySetMarkAttribute } from "./set-mark-attribute";
 import { applySplitBlock } from "./split-block";
 import { applySplitListItem } from "./split-list-item";
 import { applyToggleMark } from "./toggle-mark";
+import { applyUnwrapListItem } from "./unwrap-list-item";
 import type { Operation, Transaction } from "./types";
 
 function clonePoint(point: Point): Point {
@@ -48,6 +49,11 @@ export function cloneOperation(operation: Operation): Operation {
       return {
         point: clonePoint(operation.point),
         type: "outdent_list_item",
+      };
+    case "unwrap_list_item":
+      return {
+        point: clonePoint(operation.point),
+        type: "unwrap_list_item",
       };
     case "remove_block":
       return { path: [...operation.path], type: "remove_block" };
@@ -127,6 +133,8 @@ export function applyOperation(
       return applyIndentListItem(document, operation);
     case "outdent_list_item":
       return applyOutdentListItem(document, operation);
+    case "unwrap_list_item":
+      return applyUnwrapListItem(document, operation);
     case "remove_block":
       return applyRemoveBlock(document, operation);
     case "delete_text":
