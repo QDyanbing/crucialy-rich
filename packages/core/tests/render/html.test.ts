@@ -79,6 +79,21 @@ describe("renderNodeToHtml", () => {
     );
   });
 
+  it("serializes nested lists inside list items", () => {
+    const document = createDocument([
+      createBulletList([
+        createListItem(
+          [createText("父项")],
+          createOrderedList([createListItem([createText("子项")])]),
+        ),
+      ]),
+    ]);
+
+    expect(renderNodeToHtml(renderDocument(document))).toBe(
+      '<div data-crucialy-path="[]"><ul data-crucialy-path="[0]"><li data-crucialy-path="[0,0]"><span data-crucialy-path="[0,0,0]">父项</span><ol data-crucialy-path="[0,0,1]"><li data-crucialy-path="[0,0,1,0]"><span data-crucialy-path="[0,0,1,0,0]">子项</span></li></ol></li></ul></div>',
+    );
+  });
+
   it("escapes text and attribute values", () => {
     const document = createDocument([createParagraph([createText('<script>"&')])]);
 

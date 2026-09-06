@@ -200,6 +200,37 @@ describe("renderDocument", () => {
     });
   });
 
+  it("renders nested lists inside their parent list item", () => {
+    const document = createDocument([
+      createBulletList([
+        createListItem(
+          [createText("父项")],
+          createOrderedList([createListItem([createText("子项")])]),
+        ),
+      ]),
+    ]);
+    const item = renderDocument(document).children?.[0]?.children?.[0];
+
+    expect(item).toMatchObject({
+      children: [
+        { path: [0, 0, 0], text: "父项" },
+        {
+          children: [
+            {
+              children: [{ path: [0, 0, 1, 0, 0], text: "子项" }],
+              path: [0, 0, 1, 0],
+              tagName: "li",
+            },
+          ],
+          path: [0, 0, 1],
+          tagName: "ol",
+        },
+      ],
+      path: [0, 0],
+      tagName: "li",
+    });
+  });
+
   it("maps every supported heading level to its semantic tag", () => {
     const document = createDocument(
       ([1, 2, 3, 4, 5, 6] as const).map((level) =>

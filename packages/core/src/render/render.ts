@@ -5,6 +5,7 @@ import {
   type BlockNode,
   type DocumentNode,
   type HeadingLevel,
+  type ListNode,
   type TextNode,
 } from "../model";
 import type { Path } from "../selection";
@@ -101,6 +102,26 @@ function renderCodeTextNode(node: TextNode, path: Path): RenderedElementNode {
   return createRenderedNode("code", path, { text: node.text });
 }
 
+function renderListNode(node: ListNode, path: Path): RenderedElementNode {
+  return createRenderedNode(node.type === "bulletList" ? "ul" : "ol", path, {
+    children: node.children.map((item, itemIndex) => {
+      const itemPath = [...path, itemIndex];
+      const textChildren = item.children.map((child, textIndex) =>
+        renderTextNode(child, [...itemPath, textIndex]),
+      );
+
+      return createRenderedNode("li", itemPath, {
+        children: item.nested
+          ? [
+              ...textChildren,
+              renderListNode(item.nested, [...itemPath, item.children.length]),
+            ]
+          : textChildren,
+      });
+    }),
+  });
+}
+
 function renderBlockNode(node: BlockNode, path: Path): RenderedElementNode {
   if (node.type === "divider") {
     return createRenderedNode("hr", path);
@@ -115,17 +136,7 @@ function renderBlockNode(node: BlockNode, path: Path): RenderedElementNode {
   }
 
   if (node.type === "bulletList" || node.type === "orderedList") {
-    return createRenderedNode(node.type === "bulletList" ? "ul" : "ol", path, {
-      children: node.children.map((item, itemIndex) => {
-        const itemPath = [...path, itemIndex];
-
-        return createRenderedNode("li", itemPath, {
-          children: item.children.map((child, textIndex) =>
-            renderTextNode(child, [...itemPath, textIndex]),
-          ),
-        });
-      }),
-    });
+    return renderListNode(node, path);
   }
 
   const tagName =
