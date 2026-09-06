@@ -30,6 +30,7 @@ export const OPERATION_TYPES = [
   "indent_list_item",
   "outdent_list_item",
   "unwrap_list_item",
+  "set_task_item_checked",
 ] as const;
 
 export type OperationType = (typeof OPERATION_TYPES)[number];
@@ -118,6 +119,12 @@ export interface UnwrapListItemOperation {
   type: "unwrap_list_item";
 }
 
+export interface SetTaskItemCheckedOperation {
+  checked: boolean;
+  path: Path;
+  type: "set_task_item_checked";
+}
+
 export type Operation =
   | DeleteTextOperation
   | ExitListItemOperation
@@ -131,6 +138,7 @@ export type Operation =
   | SetBlockTypeOperation
   | SetLinkOperation
   | SetMarkAttributeOperation
+  | SetTaskItemCheckedOperation
   | SplitListItemOperation
   | SplitBlockOperation
   | ToggleMarkOperation;

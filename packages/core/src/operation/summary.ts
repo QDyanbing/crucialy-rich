@@ -20,6 +20,7 @@ import type {
   SetBlockTypeOperation,
   SetLinkOperation,
   SetMarkAttributeOperation,
+  SetTaskItemCheckedOperation,
   SplitBlockOperation,
   SplitListItemOperation,
   ToggleMarkOperation,
@@ -43,6 +44,7 @@ export type BlockOperation =
   | MergeBlockOperation
   | RemoveBlockOperation
   | SetBlockTypeOperation
+  | SetTaskItemCheckedOperation
   | SplitBlockOperation
   | SplitListItemOperation;
 
@@ -82,6 +84,7 @@ export const BLOCK_OPERATION_TYPES = [
   "indent_list_item",
   "outdent_list_item",
   "unwrap_list_item",
+  "set_task_item_checked",
   "insert_block",
   "remove_block",
   "set_block_type",
@@ -109,6 +112,7 @@ export function isBlockOperation(operation: Operation): operation is BlockOperat
     operation.type === "insert_block" ||
     operation.type === "remove_block" ||
     operation.type === "set_block_type" ||
+    operation.type === "set_task_item_checked" ||
     operation.type === "split_block" ||
     operation.type === "split_list_item" ||
     operation.type === "merge_block"
@@ -218,6 +222,13 @@ export function summarizeOperation(operation: Operation): OperationSummary {
         scope: "block",
         targetPath: [...operation.path],
         type: "set_block_type",
+      };
+    case "set_task_item_checked":
+      return {
+        scope: "block",
+        targetPath: [...operation.path],
+        type: "set_task_item_checked",
+        value: String(operation.checked),
       };
     case "merge_block":
       return {

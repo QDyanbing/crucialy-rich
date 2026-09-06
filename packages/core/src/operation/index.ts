@@ -46,6 +46,10 @@ export {
 } from "./split-list-item";
 export { applySetBlockType, createSetBlockTypeOperation } from "./set-block-type";
 export {
+  applySetTaskItemChecked,
+  createSetTaskItemCheckedOperation,
+} from "./set-task-item-checked";
+export {
   applySetMarkAttribute,
   createSelectionAfterSetMarkAttribute,
   createSetMarkAttributeOperation,
@@ -94,6 +98,7 @@ export type {
   SetBlockTypeOperation,
   SetLinkOperation,
   SetMarkAttributeOperation,
+  SetTaskItemCheckedOperation,
   SplitBlockOperation,
   SplitListItemOperation,
   ToggleMarkOperation,

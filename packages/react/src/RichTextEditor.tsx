@@ -8,11 +8,14 @@ import {
   createSelectionAfterBackspaceInput,
   createSelectionAfterDeleteInput,
   createSelectionAfterTabInput,
+  createSetTaskItemCheckedOperation,
   createTabInputTransaction,
+  createTransaction,
   DELETE_SELECTION_COMMAND_NAME,
   domSelectionToModelSelection,
   executeCommand,
   getNodeAtPath,
+  getElementModelPath,
   INSERT_TEXT_COMMAND_NAME,
   isCollapsed,
   isTextNode,
@@ -66,7 +69,8 @@ export type RichTextEditorInputType =
   | "insertParagraph"
   | "insertText"
   | "indentListItem"
-  | "outdentListItem";
+  | "outdentListItem"
+  | "setTaskItemChecked";
 
 export interface RichTextEditorTransactionEvent {
   after: DocumentNode;
@@ -492,6 +496,36 @@ export function RichTextEditor({
     onClick?.(event);
 
     if (!editable || !(event.target instanceof Element)) {
+      return;
+    }
+
+    const taskControl = event.target.closest<HTMLInputElement>(
+      'input[data-crucialy-task-item="true"]',
+    );
+
+    if (taskControl && event.currentTarget.contains(taskControl)) {
+      const itemPath = getElementModelPath(taskControl);
+
+      if (itemPath) {
+        const currentSelection = getModelSelectionFromDom(
+          event.currentTarget,
+          document,
+        ) ??
+          selection ?? {
+            anchor: { offset: 0, path: [...itemPath, 0] },
+            focus: { offset: 0, path: [...itemPath, 0] },
+          };
+
+        commitInputResult({
+          beforeSelection: currentSelection,
+          inputType: "setTaskItemChecked",
+          selection: currentSelection,
+          transaction: createTransaction([
+            createSetTaskItemCheckedOperation(itemPath, taskControl.checked),
+          ]),
+        });
+      }
+
       return;
     }
 

@@ -117,6 +117,7 @@ function renderListNode(node: ListNode, path: Path): RenderedElementNode {
         item.type === "taskItem"
           ? createRenderedNode("input", itemPath, {
               attributes: {
+                ...createModelPathAttributes(itemPath),
                 "aria-label": item.checked ? "标记任务为未完成" : "标记任务为已完成",
                 checked: item.checked,
                 contentEditable: "false",

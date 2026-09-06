@@ -130,6 +130,7 @@ export function createSelectionAfterDeleteInput(input: DeleteInput): RangeSelect
     case "set_block_type":
     case "set_link":
     case "set_mark_attribute":
+    case "set_task_item_checked":
     case "split_block":
     case "split_list_item":
     case "toggle_mark":
