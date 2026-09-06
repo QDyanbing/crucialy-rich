@@ -193,10 +193,14 @@ describe("@crucialy-rich/core public API", () => {
       "split_list_item",
       "exit_list_item",
       "indent_list_item",
+      "outdent_list_item",
     ]);
     expect(typeof core.createIndentListItemOperation).toBe("function");
     expect(typeof core.applyIndentListItem).toBe("function");
     expect(typeof core.createSelectionAfterIndentListItem).toBe("function");
+    expect(typeof core.createOutdentListItemOperation).toBe("function");
+    expect(typeof core.applyOutdentListItem).toBe("function");
+    expect(typeof core.createSelectionAfterOutdentListItem).toBe("function");
     expect(typeof core.isTextOperation).toBe("function");
     expect(typeof core.isBlockOperation).toBe("function");
     expect(typeof core.summarizeOperation).toBe("function");

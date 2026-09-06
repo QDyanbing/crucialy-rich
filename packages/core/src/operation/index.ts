@@ -28,6 +28,11 @@ export {
 } from "./merge-block";
 export { applyRemoveBlock, createRemoveBlockOperation } from "./remove-block";
 export {
+  applyOutdentListItem,
+  createOutdentListItemOperation,
+  createSelectionAfterOutdentListItem,
+} from "./outdent-list-item";
+export {
   applySplitBlock,
   createSelectionAfterSplitBlock,
   createSplitBlockOperation,
@@ -78,6 +83,7 @@ export type {
   DeleteTextOperation,
   ExitListItemOperation,
   IndentListItemOperation,
+  OutdentListItemOperation,
   InsertTextOperation,
   InsertBlockOperation,
   MergeBlockOperation,

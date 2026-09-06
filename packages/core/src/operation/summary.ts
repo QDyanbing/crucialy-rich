@@ -15,6 +15,7 @@ import type {
   MergeBlockOperation,
   Operation,
   OperationType,
+  OutdentListItemOperation,
   RemoveBlockOperation,
   SetBlockTypeOperation,
   SetLinkOperation,
@@ -35,6 +36,7 @@ export type TextOperation =
 export type BlockOperation =
   | ExitListItemOperation
   | IndentListItemOperation
+  | OutdentListItemOperation
   | InsertBlockOperation
   | MergeBlockOperation
   | RemoveBlockOperation
@@ -76,6 +78,7 @@ export const TEXT_OPERATION_TYPES = [
 export const BLOCK_OPERATION_TYPES = [
   "exit_list_item",
   "indent_list_item",
+  "outdent_list_item",
   "insert_block",
   "remove_block",
   "set_block_type",
@@ -98,6 +101,7 @@ export function isBlockOperation(operation: Operation): operation is BlockOperat
   return (
     operation.type === "exit_list_item" ||
     operation.type === "indent_list_item" ||
+    operation.type === "outdent_list_item" ||
     operation.type === "insert_block" ||
     operation.type === "remove_block" ||
     operation.type === "set_block_type" ||
@@ -120,6 +124,12 @@ export function summarizeOperation(operation: Operation): OperationSummary {
         scope: "block",
         targetPath: [...operation.point.path],
         type: "indent_list_item",
+      };
+    case "outdent_list_item":
+      return {
+        scope: "block",
+        targetPath: [...operation.point.path],
+        type: "outdent_list_item",
       };
     case "insert_block":
       return {

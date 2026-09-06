@@ -28,6 +28,7 @@ export const OPERATION_TYPES = [
   "split_list_item",
   "exit_list_item",
   "indent_list_item",
+  "outdent_list_item",
 ] as const;
 
 export type OperationType = (typeof OPERATION_TYPES)[number];
@@ -106,10 +107,16 @@ export interface IndentListItemOperation {
   type: "indent_list_item";
 }
 
+export interface OutdentListItemOperation {
+  point: Point;
+  type: "outdent_list_item";
+}
+
 export type Operation =
   | DeleteTextOperation
   | ExitListItemOperation
   | IndentListItemOperation
+  | OutdentListItemOperation
   | InsertTextOperation
   | InsertBlockOperation
   | MergeBlockOperation

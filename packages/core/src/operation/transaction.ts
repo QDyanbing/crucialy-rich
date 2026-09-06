@@ -6,6 +6,7 @@ import { applyInsertText } from "./insert-text";
 import { applyIndentListItem } from "./indent-list-item";
 import { applyInsertBlock, createInsertBlockOperation } from "./insert-block";
 import { applyMergeBlock } from "./merge-block";
+import { applyOutdentListItem } from "./outdent-list-item";
 import { applyRemoveBlock } from "./remove-block";
 import { applySetBlockType } from "./set-block-type";
 import { applySetLink } from "./set-link";
@@ -42,6 +43,11 @@ export function cloneOperation(operation: Operation): Operation {
       return {
         point: clonePoint(operation.point),
         type: "indent_list_item",
+      };
+    case "outdent_list_item":
+      return {
+        point: clonePoint(operation.point),
+        type: "outdent_list_item",
       };
     case "remove_block":
       return { path: [...operation.path], type: "remove_block" };
@@ -119,6 +125,8 @@ export function applyOperation(
       return applyInsertBlock(document, operation);
     case "indent_list_item":
       return applyIndentListItem(document, operation);
+    case "outdent_list_item":
+      return applyOutdentListItem(document, operation);
     case "remove_block":
       return applyRemoveBlock(document, operation);
     case "delete_text":
