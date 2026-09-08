@@ -14,6 +14,7 @@ export type { FixedToolbarProps } from "./FixedToolbar";
 export { FloatingToolbar } from "./FloatingToolbar";
 export type { FloatingToolbarProps } from "./FloatingToolbar";
 export { resolveToolbarItems } from "./state";
+export { createToolbarSelectionSnapshot } from "./selection";
 export { Toolbar } from "./Toolbar";
 export type { ToolbarProps } from "./Toolbar";
 export type {

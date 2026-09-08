@@ -1,4 +1,4 @@
-import type { MouseEvent, ReactElement } from "react";
+import type { MouseEvent, PointerEvent, ReactElement } from "react";
 
 import type { ResolvedToolbarCommandItem, ResolvedToolbarItem } from "./types";
 
@@ -7,6 +7,7 @@ export interface ToolbarProps {
   items: readonly ResolvedToolbarItem[];
   label?: string;
   onCommand?: (item: ResolvedToolbarCommandItem) => void;
+  onCommandPointerDown?: (item: ResolvedToolbarCommandItem) => void;
 }
 
 function joinClassNames(...classNames: Array<string | undefined>): string {
@@ -18,6 +19,7 @@ export function Toolbar({
   items,
   label = "富文本工具栏",
   onCommand,
+  onCommandPointerDown,
 }: ToolbarProps): ReactElement {
   function handleCommandClick(
     event: MouseEvent<HTMLButtonElement>,
@@ -25,6 +27,14 @@ export function Toolbar({
   ) {
     event.preventDefault();
     onCommand?.(item);
+  }
+
+  function handleCommandPointerDown(
+    event: PointerEvent<HTMLButtonElement>,
+    item: ResolvedToolbarCommandItem,
+  ) {
+    event.preventDefault();
+    onCommandPointerDown?.(item);
   }
 
   return (
@@ -53,6 +63,7 @@ export function Toolbar({
             title={item.label}
             type="button"
             onClick={(event) => handleCommandClick(event, item)}
+            onPointerDown={(event) => handleCommandPointerDown(event, item)}
           >
             {item.text ?? item.label}
           </button>

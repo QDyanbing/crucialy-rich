@@ -7,6 +7,7 @@ export type {
 export {
   createDefaultToolbarItems,
   calculateFloatingToolbarPosition,
+  createToolbarSelectionSnapshot,
   defineToolbarItems,
   executeToolbarCommand,
   FixedToolbar,

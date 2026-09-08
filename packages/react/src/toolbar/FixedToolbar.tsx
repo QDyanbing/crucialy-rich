@@ -4,11 +4,12 @@ import {
   type DocumentNode,
   type RangeSelection,
 } from "@crucialy-rich/core";
-import { useMemo, type ReactElement } from "react";
+import { useMemo, useRef, type ReactElement } from "react";
 
 import { createDefaultToolbarItems } from "./defaults";
 import { executeToolbarCommand } from "./execute";
 import { resolveToolbarItems } from "./state";
+import { createToolbarSelectionSnapshot } from "./selection";
 import { Toolbar } from "./Toolbar";
 import type { ToolbarCommandEvent, ToolbarItem } from "./types";
 
@@ -34,6 +35,7 @@ export function FixedToolbar({
   registry = defaultToolbarRegistry,
   selection,
 }: FixedToolbarProps): ReactElement {
+  const savedSelectionRef = useRef<RangeSelection>();
   const resolvedItems = useMemo(
     () =>
       resolveToolbarItems(
@@ -44,24 +46,32 @@ export function FixedToolbar({
     [document, items, registry, selection],
   );
 
+  function handleCommandPointerDown() {
+    savedSelectionRef.current = createToolbarSelectionSnapshot(selection);
+  }
+
   function handleCommand(item: (typeof resolvedItems)[number]) {
     if (item.type !== "command") {
       return;
     }
 
+    const commandSelection = savedSelectionRef.current ?? selection;
+
     onCommand?.(
       executeToolbarCommand(
         item,
         registry,
-        selection ? { document, selection } : { document },
+        commandSelection ? { document, selection: commandSelection } : { document },
       ),
     );
+    savedSelectionRef.current = undefined;
   }
 
   return (
     <Toolbar
       items={resolvedItems}
       label={label}
+      onCommandPointerDown={handleCommandPointerDown}
       {...(className ? { className } : {})}
       {...(onCommand ? { onCommand: handleCommand } : {})}
     />
