@@ -9,6 +9,7 @@ export {
   defineToolbarItems,
   executeToolbarCommand,
   FixedToolbar,
+  isFloatingToolbarVisible,
   resolveToolbarItems,
   Toolbar,
 } from "./toolbar";

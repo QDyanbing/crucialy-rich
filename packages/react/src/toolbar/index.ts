@@ -2,6 +2,7 @@ export { defineToolbarItems } from "./config";
 export { createDefaultToolbarItems } from "./defaults";
 export type { DefaultToolbarOptions } from "./defaults";
 export { executeToolbarCommand } from "./execute";
+export { isFloatingToolbarVisible } from "./floating";
 export { FixedToolbar } from "./FixedToolbar";
 export type { FixedToolbarProps } from "./FixedToolbar";
 export { resolveToolbarItems } from "./state";
