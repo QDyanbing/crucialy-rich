@@ -8,6 +8,7 @@ export {
   createDefaultToolbarItems,
   defineToolbarItems,
   resolveToolbarItems,
+  Toolbar,
 } from "./toolbar";
 export type {
   DefaultToolbarOptions,
@@ -16,5 +17,6 @@ export type {
   ToolbarCommandEvent,
   ToolbarCommandItem,
   ToolbarItem,
+  ToolbarProps,
   ToolbarSeparatorItem,
 } from "./toolbar";
