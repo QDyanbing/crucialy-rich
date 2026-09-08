@@ -66,8 +66,11 @@ import {
   type TransactionAcceptanceReport,
 } from "@crucialy-rich/core";
 import {
+  createDefaultToolbarItems,
+  FixedToolbar,
   RichTextEditor,
   type RichTextEditorTransactionEvent,
+  type ToolbarCommandEvent,
 } from "@crucialy-rich/react";
 import {
   StrictMode,
@@ -828,6 +831,15 @@ function DemoApp() {
       ?.active
       ? "paragraph"
       : "mixed");
+  const fixedToolbarItems = useMemo(
+    () =>
+      createDefaultToolbarItems({
+        link: createLinkCommandPayload(linkHrefValue, linkTargetValue, linkRelValue),
+      }).map((item) =>
+        item.type === "command" ? { ...item, label: `固定工具栏${item.label}` } : item,
+      ),
+    [linkHrefValue, linkRelValue, linkTargetValue],
+  );
 
   function isCommandDisabled(name: CommandName) {
     return (
@@ -900,6 +912,10 @@ function DemoApp() {
 
     setLastTransaction(change.entry.transaction);
     setLastTransactionReport(null);
+  }
+
+  function handleToolbarCommand(event: ToolbarCommandEvent) {
+    applyCommandResult(event.result, event.selection ?? modelSelection);
   }
 
   function handleInsertText() {
@@ -1245,6 +1261,13 @@ function DemoApp() {
 
       <section className="workspace-grid" aria-label="编辑器工作区">
         <div className="editor-surface" aria-label="编辑器预览">
+          <FixedToolbar
+            document={normalizedDocument}
+            items={fixedToolbarItems}
+            onCommand={handleToolbarCommand}
+            registry={demoCommandRegistry}
+            selection={modelSelection}
+          />
           <RichTextEditor
             className="rendered-document"
             contentEditable

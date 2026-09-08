@@ -639,7 +639,7 @@ test("updates command states from the current selection", async ({ page }) => {
 test("toggles bold from the demo controls", async ({ page }) => {
   await page.goto("/");
 
-  await page.getByRole("button", { name: "加粗" }).click();
+  await page.getByRole("button", { name: "加粗", exact: true }).click();
 
   await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
     '"marks": {',
@@ -662,7 +662,7 @@ test("toggles bold from the demo controls", async ({ page }) => {
 test("toggles italic from the demo controls", async ({ page }) => {
   await page.goto("/");
 
-  await page.getByRole("button", { name: "斜体" }).click();
+  await page.getByRole("button", { name: "斜体", exact: true }).click();
 
   await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
     '"marks": {',
@@ -686,8 +686,11 @@ test("toggles underline without changing bold", async ({ page }) => {
   await page.goto("/");
 
   const renderedDocument = page.getByLabel("已渲染文档");
-  const boldButton = page.getByRole("button", { name: "加粗" });
-  const underlineButton = page.getByRole("button", { name: "下划线" });
+  const boldButton = page.getByRole("button", { name: "加粗", exact: true });
+  const underlineButton = page.getByRole("button", {
+    name: "下划线",
+    exact: true,
+  });
 
   await expect(page.getByLabel("下划线 Command 状态")).toContainText("可用");
   await expect(underlineButton).toHaveAttribute("aria-pressed", "false");
@@ -718,8 +721,11 @@ test("toggles strike without changing underline", async ({ page }) => {
   await page.goto("/");
 
   const renderedDocument = page.getByLabel("已渲染文档");
-  const strikeButton = page.getByRole("button", { name: "删除线" });
-  const underlineButton = page.getByRole("button", { name: "下划线" });
+  const strikeButton = page.getByRole("button", { name: "删除线", exact: true });
+  const underlineButton = page.getByRole("button", {
+    name: "下划线",
+    exact: true,
+  });
 
   await expect(page.getByLabel("删除线 Command 状态")).toContainText("可用");
   await expect(strikeButton).toHaveAttribute("aria-pressed", "false");
@@ -757,8 +763,8 @@ test("completes the bold and italic acceptance loop", async ({ page }) => {
 
   const renderedDocument = page.getByLabel("已渲染文档");
   const acceptanceParagraph = renderedDocument.locator("p").nth(1);
-  const boldButton = page.getByRole("button", { name: "加粗" });
-  const italicButton = page.getByRole("button", { name: "斜体" });
+  const boldButton = page.getByRole("button", { name: "加粗", exact: true });
+  const italicButton = page.getByRole("button", { name: "斜体", exact: true });
 
   await expect(renderedDocument).toContainText("加粗文本");
   await expect(renderedDocument).toContainText("斜体文本");
@@ -800,8 +806,11 @@ test("completes the underline and strike acceptance loop", async ({ page }) => {
 
   const renderedDocument = page.getByLabel("已渲染文档");
   const acceptanceParagraph = renderedDocument.locator("p").nth(1);
-  const underlineButton = page.getByRole("button", { name: "下划线" });
-  const strikeButton = page.getByRole("button", { name: "删除线" });
+  const underlineButton = page.getByRole("button", {
+    name: "下划线",
+    exact: true,
+  });
+  const strikeButton = page.getByRole("button", { name: "删除线", exact: true });
 
   await expect(renderedDocument).toContainText("下划线文本");
   await expect(renderedDocument).toContainText("删除线文本");
