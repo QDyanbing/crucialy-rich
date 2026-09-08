@@ -31,6 +31,7 @@ import {
   INSERT_TEXT_COMMAND_NAME,
   INSERT_DIVIDER_COMMAND_NAME,
   ITALIC_COMMAND_NAME,
+  isCollapsed,
   isValidPoint,
   MERGE_BLOCK_COMMAND_NAME,
   normalizeDocument,
@@ -68,7 +69,9 @@ import {
 import {
   createDefaultToolbarItems,
   FixedToolbar,
+  FloatingToolbar,
   RichTextEditor,
+  type FloatingToolbarAnchorRect,
   type RichTextEditorTransactionEvent,
   type ToolbarCommandEvent,
 } from "@crucialy-rich/react";
@@ -724,6 +727,10 @@ function DemoApp() {
   const [linkHrefValue, setLinkHrefValue] = useState("https://example.com/docs");
   const [linkRelValue, setLinkRelValue] = useState("noopener noreferrer");
   const [linkTargetValue, setLinkTargetValue] = useState<"_blank" | "_self">("_blank");
+  const [showFixedToolbar, setShowFixedToolbar] = useState(true);
+  const [showFloatingToolbar, setShowFloatingToolbar] = useState(true);
+  const [floatingToolbarRect, setFloatingToolbarRect] =
+    useState<FloatingToolbarAnchorRect | null>(null);
   const savedLinkSelectionRef = useRef<RangeSelection | null>(null);
   const [lastTransaction, setLastTransaction] = useState<Transaction | null>(null);
   const [lastTransactionReport, setLastTransactionReport] =
@@ -831,14 +838,26 @@ function DemoApp() {
       ?.active
       ? "paragraph"
       : "mixed");
-  const fixedToolbarItems = useMemo(
+  const toolbarItems = useMemo(
     () =>
       createDefaultToolbarItems({
         link: createLinkCommandPayload(linkHrefValue, linkTargetValue, linkRelValue),
-      }).map((item) =>
+      }),
+    [linkHrefValue, linkRelValue, linkTargetValue],
+  );
+  const fixedToolbarItems = useMemo(
+    () =>
+      toolbarItems.map((item) =>
         item.type === "command" ? { ...item, label: `固定工具栏${item.label}` } : item,
       ),
-    [linkHrefValue, linkRelValue, linkTargetValue],
+    [toolbarItems],
+  );
+  const floatingToolbarItems = useMemo(
+    () =>
+      toolbarItems.map((item) =>
+        item.type === "command" ? { ...item, label: `悬浮工具栏${item.label}` } : item,
+      ),
+    [toolbarItems],
   );
 
   function isCommandDisabled(name: CommandName) {
@@ -863,6 +882,7 @@ function DemoApp() {
     setLastTransaction(null);
     setLastTransactionReport(null);
     savedLinkSelectionRef.current = null;
+    setFloatingToolbarRect(null);
     setLinkEditorOpen(false);
   }
 
@@ -1247,6 +1267,26 @@ function DemoApp() {
     if (nextSelection) {
       setModelSelection(nextSelection);
     }
+
+    if (
+      nextSelection &&
+      !isCollapsed(nextSelection) &&
+      browserSelection &&
+      browserSelection.rangeCount > 0
+    ) {
+      const rect = browserSelection.getRangeAt(0).getBoundingClientRect();
+
+      setFloatingToolbarRect({
+        bottom: rect.bottom,
+        height: rect.height,
+        left: rect.left,
+        top: rect.top,
+        width: rect.width,
+      });
+      return;
+    }
+
+    setFloatingToolbarRect(null);
   }
 
   return (
@@ -1261,13 +1301,33 @@ function DemoApp() {
 
       <section className="workspace-grid" aria-label="编辑器工作区">
         <div className="editor-surface" aria-label="编辑器预览">
-          <FixedToolbar
-            document={normalizedDocument}
-            items={fixedToolbarItems}
-            onCommand={handleToolbarCommand}
-            registry={demoCommandRegistry}
-            selection={modelSelection}
-          />
+          <div className="toolbar-display-controls" aria-label="工具栏显示设置">
+            <label>
+              <input
+                checked={showFixedToolbar}
+                type="checkbox"
+                onChange={(event) => setShowFixedToolbar(event.target.checked)}
+              />
+              <span>显示固定工具栏</span>
+            </label>
+            <label>
+              <input
+                checked={showFloatingToolbar}
+                type="checkbox"
+                onChange={(event) => setShowFloatingToolbar(event.target.checked)}
+              />
+              <span>启用悬浮工具栏</span>
+            </label>
+          </div>
+          {showFixedToolbar ? (
+            <FixedToolbar
+              document={normalizedDocument}
+              items={fixedToolbarItems}
+              onCommand={handleToolbarCommand}
+              registry={demoCommandRegistry}
+              selection={modelSelection}
+            />
+          ) : null}
           <RichTextEditor
             className="rendered-document"
             contentEditable
@@ -1281,6 +1341,17 @@ function DemoApp() {
             suppressContentEditableWarning
             value={normalizedDocument}
           />
+          {showFloatingToolbar ? (
+            <FloatingToolbar
+              anchorRect={floatingToolbarRect}
+              document={normalizedDocument}
+              items={floatingToolbarItems}
+              label="悬浮格式工具栏"
+              onCommand={handleToolbarCommand}
+              registry={demoCommandRegistry}
+              selection={modelSelection}
+            />
+          ) : null}
         </div>
 
         <aside className="debug-panel" aria-label="文档调试面板">

@@ -170,6 +170,38 @@ h3 {
   background: #cfd7d1;
 }
 
+.toolbar-display-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+  min-height: 28px;
+}
+
+.toolbar-display-controls label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #4b5d52;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.toolbar-display-controls input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+.crucialy-floating-toolbar {
+  filter: drop-shadow(0 10px 18px rgb(26 36 30 / 18%));
+}
+
+.crucialy-floating-toolbar .crucialy-toolbar {
+  background: #ffffff;
+}
+
 .empty-state {
   width: 100%;
   padding: 14px 16px;
