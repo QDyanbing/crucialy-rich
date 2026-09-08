@@ -89,7 +89,7 @@ Command 验收覆盖注册、查询、状态读取、执行结果、文本编辑
 - `splitBlockCommand` / `mergeBlockCommand` / `insertDividerCommand` 当前只支持 collapsed selection。
 - Heading/Quote command 支持连续顶层 block 范围，不支持非连续多选。
 - collapsed Backspace/Delete 的单字符删除仍保留 input helper；跨段合并路径会优先复用 block command。
-- 当前还没有 React 内置 toolbar；mark 快捷键只提供配置和匹配，不绑定编辑器事件。
+- React Toolbar 已接入默认 Command 状态与执行；mark 快捷键仍只提供配置和匹配，不自动绑定编辑器事件。
 
 ## 结论
 

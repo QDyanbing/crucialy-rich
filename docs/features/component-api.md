@@ -1,6 +1,6 @@
 # 组件 API
 
-`@crucialy-rich/react` 当前暴露 `RichTextEditor` 组件，用于把文档模型渲染到 React 应用中。
+`@crucialy-rich/react` 当前暴露 `RichTextEditor`、`Toolbar`、`FixedToolbar` 和 `FloatingToolbar`。编辑器负责模型渲染与输入，工具栏负责 Command 状态与交互。
 
 ## 属性
 
@@ -65,6 +65,19 @@ export function UncontrolledEditor() {
 - 受控 `selection` 会在文档或选区更新后的 layout effect 中回写 DOM，可用于菜单 command 完成后恢复浏览器选区。
 - 初始渲染或浏览器选区变化不会触发 `onChange`。
 
+## Toolbar API
+
+- `Toolbar`：接收已经解析状态的 items，只负责语义渲染。
+- `FixedToolbar`：接收 `document`、`selection`、items 和可选 Registry，自动查询状态并执行命令。
+- `FloatingToolbar`：在 FixedToolbar 基础上接收 `anchorRect`、`toolbarSize` 和 `viewport`，非空选区时按视口定位。
+- `createDefaultToolbarItems(options)`：创建四种 Boolean Mark、Link、Heading 和 Quote 默认配置。
+- `defineToolbarItems(items)`：校验并复制自定义配置。
+- `resolveToolbarItems(items, registry, context)`：把 CommandState 映射到配置。
+- `executeToolbarCommand(item, registry, context)`：执行命令并返回 `ToolbarCommandEvent`。
+- `createToolbarSelectionSnapshot(selection)`：为 pointerdown 到 click 之间保存独立模型选区。
+
+Toolbar 通过 class name 暴露样式入口，不捆绑主题 CSS。完整契约见[工具栏](./toolbar.md)。
+
 ## 当前边界
 
-当前组件仍不内置 history 状态、输入法完整处理、粘贴解析或序列化能力；Backspace、Delete 和 Enter 当前只覆盖基础编辑路径。
+当前组件仍不内置 history 状态、链接菜单、输入法完整处理、粘贴解析或序列化能力；悬浮 Toolbar 的 Range 矩形由宿主同步。

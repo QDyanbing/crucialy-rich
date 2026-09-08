@@ -69,7 +69,7 @@
 ## 当前边界
 
 - 三种文字属性 command 当前只处理同一 paragraph 内的选区。
-- React 组件尚未内置文字属性 toolbar；当前由宿主或 demo 调用 command。
+- 默认 React Toolbar 尚未包含文字属性项；宿主可通过自定义 ToolbarItem 接入对应 command。
 
 ## 结论
 

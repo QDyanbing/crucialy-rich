@@ -1296,7 +1296,7 @@ function DemoApp() {
           <p className="eyebrow">调试工作台</p>
           <h1 id="page-title">crucialy-rich</h1>
         </div>
-        <span className="status-pill">第 16 周已完成</span>
+        <span className="status-pill">第 17 周已完成</span>
       </header>
 
       <section className="workspace-grid" aria-label="编辑器工作区">

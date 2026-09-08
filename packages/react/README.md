@@ -2,7 +2,7 @@
 
 crucialy-rich 编辑内核的 React 集成包，对外暴露可集成的 React 富文本组件。
 
-> 当前已完成基础编辑与受控集成闭环，`RichTextEditor` 支持文本块、Divider、有序/无序列表、三层嵌套列表和任务列表；列表项支持 Enter、Tab、Shift+Tab、Backspace 与 checkbox 状态写回。所有输入都通过 transaction 更新文档。
+> 当前已完成基础编辑、列表和 Toolbar 闭环，提供 `RichTextEditor`、固定工具栏、悬浮工具栏、Command 状态映射与选区保护。所有输入和工具栏命令都通过 transaction 更新文档。
 
 ## 安装
 
@@ -46,7 +46,15 @@ export function Demo() {
 - 任务列表：checkbox 点击通过 `set_task_item_checked` transaction 写回 `checked`，并进入宿主的 History 流程。
 - `label`、`className` 和基础 DOM 事件属性。
 
-完整说明见 [组件 API](../../docs/features/component-api.md)。
+Toolbar 当前支持：
+
+- `createDefaultToolbarItems`：创建 Bold、Italic、Underline、Strike、Link、H2 和 Quote 默认配置。
+- `FixedToolbar`：根据 document/selection 展示 active 和 disabled，并通过 `onCommand` 输出执行结果。
+- `FloatingToolbar`：根据非折叠 selection 和宿主提供的 `anchorRect` 显示在选区附近。
+- pointerdown 选区快照：点击工具栏后仍把命令应用到原选区。
+- 固定/悬浮组件只提供结构 class，产品主题、History 应用和链接菜单由宿主负责。
+
+完整说明见[组件 API](../../docs/features/component-api.md)和[工具栏](../../docs/features/toolbar.md)。
 
 ## 许可
 

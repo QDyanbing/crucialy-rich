@@ -44,4 +44,4 @@ pnpm test:e2e
 ## 当前边界
 
 - 三种文字属性 command 只处理同一个 block 内的选区。
-- React 组件不内置文字属性 toolbar，由宿主或 demo 调用 command。
+- 默认 React Toolbar 不包含文字属性项，由宿主自定义 ToolbarItem 或直接调用 command。

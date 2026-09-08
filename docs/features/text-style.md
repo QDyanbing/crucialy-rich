@@ -105,5 +105,5 @@ createText("示例", {
 ## 当前边界
 
 - 三种文字属性均支持 paragraph、heading、quote 中同一 block 内的选区，跨 block 策略尚未实现。
-- React 组件尚未内置文字属性 toolbar；当前由宿主或 demo 调用 command。
+- 默认 React Toolbar 尚未包含文字属性项；宿主可通过自定义 ToolbarItem 接入对应 command。
 - `TEXT_STYLE_COMMANDS` 按字号、文字颜色、背景色统一组织三种 command，综合验收记录见 `docs/qa/text-style.md`。

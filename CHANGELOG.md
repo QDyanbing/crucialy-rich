@@ -111,6 +111,10 @@
 - 新增 `indent_list_item`、`outdent_list_item` 和 `unwrap_list_item`，并接入 Tab、Shift+Tab、Backspace 与嵌套 Enter。
 - 新增 taskList/taskItem checked 模型、`toggleTaskList` command、`set_task_item_checked` 和 React checkbox 持久化。
 - 新增中文“嵌套与任务列表”Demo、浏览器综合验收、第 16 周 QA 和列表增强独立报告。
+- 新增 ToolbarItem 配置、默认工具栏项和 Command active/disabled 状态映射。
+- 新增固定工具栏、命令执行事件以及 Bold、Italic、Underline、Strike、Link、Heading 和 Quote 默认入口。
+- 新增悬浮工具栏可见性、视口定位、窄屏约束和选区快照恢复机制。
+- 新增中文固定/悬浮 Toolbar Demo、显示开关、浏览器综合验收、第 17 周 QA 和工具栏独立报告。
 
 ### 变更
 
@@ -152,6 +156,7 @@
 - 更新架构、模型、Marks、Operation、输入、Command、History、渲染和 QA 文档，使其统一描述第 13 周累计能力。
 - 更新 Selection、渲染、Operation、Mark、文字属性、链接和 Command 文档，统一使用 paragraph/heading/quote 的通用 Block 契约。
 - 更新项目、包、模型、选区、渲染、Operation 和输入文档，使其匹配第 16 周列表增强范围。
+- 更新项目、React 包、组件 API、Command 和测试文档，使其匹配第 17 周工具栏闭环。
 
 ### 修复
 

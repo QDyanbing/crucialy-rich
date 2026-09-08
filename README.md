@@ -24,7 +24,9 @@ text marks schema 当前支持 `bold`、`italic`、`underline` 和 `strike` 共�
 
 第 15 周“有序和无序列表闭环”已全部完成：模型支持 bulletList、orderedList 和 listItem，渲染输出 `ul/ol/li`，支持段落与列表切换、列表类型互换、列表项输入、Enter 分裂、空项 Enter 退出、History 和中文浏览器验收。
 
-第 16 周“列表缩进和任务列表闭环”已全部完成：支持最多三层嵌套列表、Tab/Shift+Tab 缩进与反缩进、列表项开头 Backspace、嵌套项 Enter、taskList/taskItem checked 模型、任务列表切换、checkbox 状态持久化、History 和中文浏览器验收。当前指针为第 17 周 Day 1「Toolbar 架构」。
+第 16 周“列表缩进和任务列表闭环”已全部完成：支持最多三层嵌套列表、Tab/Shift+Tab 缩进与反缩进、列表项开头 Backspace、嵌套项 Enter、taskList/taskItem checked 模型、任务列表切换、checkbox 状态持久化、History 和中文浏览器验收。
+
+第 17 周“工具栏闭环”已全部完成：React 包提供 Toolbar 配置、Command 状态映射、默认按钮、固定工具栏、悬浮工具栏、选区位置计算与点击前选区快照；Demo 支持固定/悬浮模式开关、真实命令执行、History 和中文浏览器验收。当前指针为第 18 周 Day 1「Slash Menu 设计」。
 
 ## 技术栈
 
@@ -162,6 +164,8 @@ pnpm test:e2e
 - [第 14 周 QA](./docs/qa/week-14.md)
 - [第 15 周 QA](./docs/qa/week-15.md)
 - [第 16 周 QA](./docs/qa/week-16.md)
+- [第 17 周 QA](./docs/qa/week-17.md)
+- [工具栏闭环验收](./docs/qa/toolbar.md)
 - [基础列表闭环验收](./docs/qa/list-basic.md)
 - [列表增强闭环验收](./docs/qa/list-advanced.md)
 - [代码块和分割线闭环验收](./docs/qa/code-block-divider.md)

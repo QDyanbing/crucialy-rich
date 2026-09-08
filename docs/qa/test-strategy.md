@@ -21,6 +21,7 @@
   - Path、Point、RangeSelection、段落 text offset 和文本切片工具。
   - 基础渲染器、paragraph/heading/quote 语义标签、四种 boolean mark、字号、文字颜色、背景色与安全链接 HTML 输出、组合样式、HTML 序列化、DOM 与模型位置映射和选区同步。
   - React 组件 `value`、`defaultValue`、`onChange` 和 `onTransaction` 初始渲染契约。
+  - Toolbar 配置、默认项、Command 状态映射、固定/悬浮渲染、位置计算、窄屏边界、命令执行与选区快照。
   - 输入 helper 的普通文本输入、Backspace、Delete 和 Enter transaction。
   - Command 注册、执行、可执行判断、默认注册表、状态矩阵、四种 boolean mark command、`setFontSize`、`setTextColor`、`setBackgroundColor`、链接、Heading、Quote、mark 快捷键配置与匹配、文本编辑 command 和 block 编辑 command。
   - History 快照、entry 克隆、状态工厂、记录入口、batch 合并、查询 helper、undo/redo 栈转换、快捷键识别、history command 和 Block Type 生命周期。
@@ -29,7 +30,7 @@
 ## 浏览器测试
 
 - 工具：Playwright。
-- 范围：演示页面、模型/选区/command 调试、基础编辑、文字样式、链接、Heading/Quote、CodeBlock 多行与退出、Divider、嵌套与任务列表、混合样例和 History 往返。
+- 范围：演示页面、模型/选区/command 调试、基础编辑、文字样式、链接、Heading/Quote、CodeBlock、Divider、列表、固定/悬浮 Toolbar、选区恢复和 History 往返。
 - 命令：`pnpm test:e2e`。
 
 ## 类型检查

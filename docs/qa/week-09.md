@@ -64,7 +64,7 @@
 
 ## 当前限制
 
-- 暂未接入 React 组件内置 toolbar。
+- 第 9 周当时尚未接入 React Toolbar；该能力已在第 17 周完成。
 - 暂未实现跨 paragraph 的 mark 应用策略。
 
 ## 结论

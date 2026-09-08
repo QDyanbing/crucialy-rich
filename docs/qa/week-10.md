@@ -61,7 +61,7 @@
 
 ## 当前边界
 
-- React 组件仍未提供内置 toolbar。
+- 第 10 周当时尚未提供 React Toolbar；该能力已在第 17 周完成。
 - mark 快捷键只提供配置查询与匹配，不绑定编辑器事件。
 - mark 应用范围仍限制在同一个 paragraph 内。
 

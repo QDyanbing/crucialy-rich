@@ -73,7 +73,7 @@
 
 ## 当前限制
 
-- 暂未实现 React 组件内置 toolbar。
+- 第 17 周 React Toolbar 已提供四种 boolean mark 默认项。
 - mark 快捷键尚未绑定编辑器键盘事件。
 - 暂未实现跨 block 的 mark 应用策略。
 - 三种文字属性 command 尚未支持跨 block 选区。
