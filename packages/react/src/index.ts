@@ -7,11 +7,13 @@ export type {
 export {
   createDefaultToolbarItems,
   defineToolbarItems,
+  FixedToolbar,
   resolveToolbarItems,
   Toolbar,
 } from "./toolbar";
 export type {
   DefaultToolbarOptions,
+  FixedToolbarProps,
   ResolvedToolbarCommandItem,
   ResolvedToolbarItem,
   ToolbarCommandEvent,
