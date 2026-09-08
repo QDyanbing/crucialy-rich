@@ -23,6 +23,37 @@ async function placeCaretInRenderedText(page: Page, path: string, offset: number
     }, offset);
 }
 
+async function selectRenderedTextRange(
+  page: Page,
+  path: string,
+  startOffset: number,
+  endOffset: number,
+) {
+  await page
+    .getByLabel("已渲染文档")
+    .locator(`[data-crucialy-path="${path}"]`)
+    .evaluate(
+      (element, offsets) => {
+        const text = element.firstChild;
+        const range = document.createRange();
+        const selection = window.getSelection();
+        const renderedDocument = element.closest('[aria-label="已渲染文档"]');
+
+        if (!text || !selection || !(renderedDocument instanceof HTMLElement)) {
+          throw new Error("Missing rendered text range target.");
+        }
+
+        renderedDocument.focus();
+        range.setStart(text, offsets.startOffset);
+        range.setEnd(text, offsets.endOffset);
+        selection.removeAllRanges();
+        selection.addRange(range);
+        renderedDocument.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+      },
+      { endOffset, startOffset },
+    );
+}
+
 async function setDebuggerSelection(
   page: Page,
   path: string,
@@ -58,6 +89,63 @@ test("renders the demo shell", async ({ page }) => {
   await expect(page.getByLabel("文档调试面板")).toContainText('"type": "document"');
   await expect(page.getByLabel("选区调试器")).toBeVisible();
   await expect(page.getByLabel("选中文本")).toContainText("你好");
+});
+
+test("applies formatting from the fixed toolbar", async ({ page }) => {
+  await page.goto("/");
+
+  const fixedToolbar = page.getByRole("toolbar", { name: "固定格式工具栏" });
+
+  await expect(fixedToolbar).toBeVisible();
+  await fixedToolbar
+    .getByRole("button", { name: "固定工具栏加粗", exact: true })
+    .click();
+
+  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
+    '"bold": true',
+  );
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+});
+
+test("shows and toggles toolbar display modes", async ({ page }) => {
+  await page.goto("/");
+  await selectRenderedTextRange(page, "[0,0]", 0, 2);
+
+  const fixedToggle = page.getByRole("checkbox", { name: "显示固定工具栏" });
+  const floatingToggle = page.getByRole("checkbox", { name: "启用悬浮工具栏" });
+
+  await expect(page.getByRole("toolbar", { name: "悬浮格式工具栏" })).toBeVisible();
+  await fixedToggle.uncheck();
+  await expect(page.getByRole("toolbar", { name: "固定格式工具栏" })).toHaveCount(0);
+  await floatingToggle.uncheck();
+  await expect(page.getByRole("toolbar", { name: "悬浮格式工具栏" })).toHaveCount(0);
+});
+
+test("keeps the selected range when the floating toolbar runs a command", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await selectRenderedTextRange(page, "[0,0]", 0, 2);
+
+  const floatingToolbar = page.getByRole("toolbar", { name: "悬浮格式工具栏" });
+
+  await floatingToolbar
+    .getByRole("button", { name: "悬浮工具栏加粗", exact: true })
+    .click();
+
+  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
+    '"bold": true',
+  );
+  await expect(page.getByLabel("锚点偏移")).toHaveValue("0");
+  await expect(page.getByLabel("焦点偏移")).toHaveValue("2");
+  await expect
+    .poll(() => page.evaluate(() => window.getSelection()?.toString()))
+    .toBe("你好");
+
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect(page.getByLabel("文档 JSON", { exact: true })).not.toContainText(
+    '"bold": true',
+  );
 });
 
 test("renders every heading level from the demo example", async ({ page }) => {

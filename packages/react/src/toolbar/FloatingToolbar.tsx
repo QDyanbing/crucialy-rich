@@ -34,7 +34,15 @@ export function FloatingToolbar({
     return null;
   }
 
-  const position = calculateFloatingToolbarPosition(anchorRect, toolbarSize, viewport);
+  const fittedToolbarSize = {
+    ...toolbarSize,
+    width: Math.min(toolbarSize.width, Math.max(0, viewport.width - 16)),
+  };
+  const position = calculateFloatingToolbarPosition(
+    anchorRect,
+    fittedToolbarSize,
+    viewport,
+  );
 
   return (
     <div
@@ -44,7 +52,7 @@ export function FloatingToolbar({
         left: position.left,
         position: "fixed",
         top: position.top,
-        width: toolbarSize.width,
+        width: fittedToolbarSize.width,
         zIndex: 1000,
       }}
     >

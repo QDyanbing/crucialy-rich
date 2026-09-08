@@ -121,6 +121,7 @@ h3 {
   align-items: center;
   gap: 4px;
   min-height: 40px;
+  overflow-x: auto;
   padding: 4px;
   border: 1px solid #d9ded8;
   border-radius: 6px;
