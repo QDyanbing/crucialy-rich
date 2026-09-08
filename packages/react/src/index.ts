@@ -4,3 +4,12 @@ export type {
   RichTextEditorProps,
   RichTextEditorTransactionEvent,
 } from "./RichTextEditor";
+export { defineToolbarItems } from "./toolbar";
+export type {
+  ResolvedToolbarCommandItem,
+  ResolvedToolbarItem,
+  ToolbarCommandEvent,
+  ToolbarCommandItem,
+  ToolbarItem,
+  ToolbarSeparatorItem,
+} from "./toolbar";
