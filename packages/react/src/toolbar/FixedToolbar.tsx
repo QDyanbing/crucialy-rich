@@ -7,9 +7,10 @@ import {
 import { useMemo, type ReactElement } from "react";
 
 import { createDefaultToolbarItems } from "./defaults";
+import { executeToolbarCommand } from "./execute";
 import { resolveToolbarItems } from "./state";
 import { Toolbar } from "./Toolbar";
-import type { ResolvedToolbarCommandItem, ToolbarItem } from "./types";
+import type { ToolbarCommandEvent, ToolbarItem } from "./types";
 
 const defaultToolbarRegistry = createDefaultCommandRegistry();
 const defaultToolbarItems = createDefaultToolbarItems();
@@ -19,7 +20,7 @@ export interface FixedToolbarProps {
   document: DocumentNode;
   items?: readonly ToolbarItem[];
   label?: string;
-  onCommand?: (item: ResolvedToolbarCommandItem) => void;
+  onCommand?: (event: ToolbarCommandEvent) => void;
   registry?: CommandRegistry;
   selection?: RangeSelection;
 }
@@ -43,12 +44,26 @@ export function FixedToolbar({
     [document, items, registry, selection],
   );
 
+  function handleCommand(item: (typeof resolvedItems)[number]) {
+    if (item.type !== "command") {
+      return;
+    }
+
+    onCommand?.(
+      executeToolbarCommand(
+        item,
+        registry,
+        selection ? { document, selection } : { document },
+      ),
+    );
+  }
+
   return (
     <Toolbar
       items={resolvedItems}
       label={label}
       {...(className ? { className } : {})}
-      {...(onCommand ? { onCommand } : {})}
+      {...(onCommand ? { onCommand: handleCommand } : {})}
     />
   );
 }

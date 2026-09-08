@@ -7,6 +7,7 @@ export type {
 export {
   createDefaultToolbarItems,
   defineToolbarItems,
+  executeToolbarCommand,
   FixedToolbar,
   resolveToolbarItems,
   Toolbar,
