@@ -6,6 +6,7 @@ export type {
 } from "./RichTextEditor";
 export {
   createDefaultToolbarItems,
+  calculateFloatingToolbarPosition,
   defineToolbarItems,
   executeToolbarCommand,
   FixedToolbar,
@@ -16,6 +17,10 @@ export {
 export type {
   DefaultToolbarOptions,
   FixedToolbarProps,
+  FloatingToolbarAnchorRect,
+  FloatingToolbarPosition,
+  FloatingToolbarSize,
+  FloatingToolbarViewport,
   ResolvedToolbarCommandItem,
   ResolvedToolbarItem,
   ToolbarCommandEvent,
