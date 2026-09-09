@@ -20,6 +20,13 @@ describe("@crucialy-rich/react public API", () => {
     expect(reactPackage).toBeDefined();
   });
 
+  it("exposes the slash menu design helpers", () => {
+    expect(typeof reactPackage.defineSlashCommandItems).toBe("function");
+    expect(typeof reactPackage.createDefaultSlashCommandItems).toBe("function");
+    expect(typeof reactPackage.filterSlashCommandItems).toBe("function");
+    expect(typeof reactPackage.findSlashMenuTrigger).toBe("function");
+  });
+
   it("exposes a renderable editor shell", () => {
     const element = createElement(RichTextEditor);
     const html = renderToStaticMarkup(element);

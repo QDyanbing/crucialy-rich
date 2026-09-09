@@ -115,6 +115,7 @@
 - 新增固定工具栏、命令执行事件以及 Bold、Italic、Underline、Strike、Link、Heading 和 Quote 默认入口。
 - 新增悬浮工具栏可见性、视口定位、窄屏约束和选区快照恢复机制。
 - 新增中文固定/悬浮 Toolbar Demo、显示开关、浏览器综合验收、第 17 周 QA 和工具栏独立报告。
+- 新增 Slash Command 配置契约、默认块命令目录、前缀过滤和 paragraph 触发识别。
 
 ### 变更
 
@@ -157,6 +158,7 @@
 - 更新 Selection、渲染、Operation、Mark、文字属性、链接和 Command 文档，统一使用 paragraph/heading/quote 的通用 Block 契约。
 - 更新项目、包、模型、选区、渲染、Operation 和输入文档，使其匹配第 16 周列表增强范围。
 - 更新项目、React 包、组件 API、Command 和测试文档，使其匹配第 17 周工具栏闭环。
+- 更新项目、React 包和架构文档，使其匹配第 18 周 Day 1 斜杠菜单设计范围。
 
 ### 修复
 

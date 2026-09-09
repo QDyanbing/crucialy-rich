@@ -26,7 +26,9 @@ text marks schema 当前支持 `bold`、`italic`、`underline` 和 `strike` 共�
 
 第 16 周“列表缩进和任务列表闭环”已全部完成：支持最多三层嵌套列表、Tab/Shift+Tab 缩进与反缩进、列表项开头 Backspace、嵌套项 Enter、taskList/taskItem checked 模型、任务列表切换、checkbox 状态持久化、History 和中文浏览器验收。
 
-第 17 周“工具栏闭环”已全部完成：React 包提供 Toolbar 配置、Command 状态映射、默认按钮、固定工具栏、悬浮工具栏、选区位置计算与点击前选区快照；Demo 支持固定/悬浮模式开关、真实命令执行、History 和中文浏览器验收。当前指针为第 18 周 Day 1「Slash Menu 设计」。
+第 17 周“工具栏闭环”已全部完成：React 包提供 Toolbar 配置、Command 状态映射、默认按钮、固定工具栏、悬浮工具栏、选区位置计算与点击前选区快照；Demo 支持固定/悬浮模式开关、真实命令执行、History 和中文浏览器验收。
+
+第 18 周 Day 1“斜杠菜单设计”已完成：React 包提供 Slash Command 配置校验、默认块命令目录、中文/英文关键词过滤和 paragraph 折叠光标触发识别，并保留跨 mark 文本节点的触发 Range。当前指针为第 18 周 Day 2「打开和关闭」。
 
 ## 技术栈
 
@@ -145,6 +147,7 @@ pnpm test:e2e
 - [Command 系统](./docs/features/command.md)
 - [History 记录与撤销重做](./docs/features/history.md)
 - [工具栏](./docs/features/toolbar.md)
+- [斜杠菜单](./docs/features/slash-menu.md)
 - [提交规范](./docs/development/commit-convention.md)
 - [测试策略](./docs/qa/test-strategy.md)
 - [脚手架验收基线](./docs/qa/scaffold-acceptance.md)

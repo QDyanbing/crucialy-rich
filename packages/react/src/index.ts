@@ -32,3 +32,10 @@ export type {
   ToolbarProps,
   ToolbarSeparatorItem,
 } from "./toolbar";
+export {
+  createDefaultSlashCommandItems,
+  defineSlashCommandItems,
+  filterSlashCommandItems,
+  findSlashMenuTrigger,
+} from "./slash-menu";
+export type { SlashCommandItem, SlashMenuTrigger } from "./slash-menu";
