@@ -14,3 +14,25 @@ export interface SlashMenuTrigger {
   range: RangeSelection;
   text: string;
 }
+
+export interface SlashMenuAnchorRect {
+  bottom: number;
+  left: number;
+  top: number;
+}
+
+export interface SlashMenuSize {
+  height: number;
+  width: number;
+}
+
+export interface SlashMenuViewport {
+  height: number;
+  width: number;
+}
+
+export interface SlashMenuPosition {
+  left: number;
+  placement: "above" | "below";
+  top: number;
+}
