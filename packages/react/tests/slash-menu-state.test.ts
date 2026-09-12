@@ -1,0 +1,35 @@
+import { describe, expect, it } from "vitest";
+
+import {
+  closeSlashMenu,
+  createClosedSlashMenuState,
+  openSlashMenu,
+} from "../src/slash-menu/state";
+import type { SlashMenuTrigger } from "../src/slash-menu/types";
+
+const trigger: SlashMenuTrigger = {
+  query: "he",
+  range: {
+    anchor: { offset: 0, path: [0, 0] },
+    focus: { offset: 3, path: [0, 0] },
+  },
+  text: "/he",
+};
+
+describe("slash menu state", () => {
+  it("creates a closed initial state", () => {
+    expect(createClosedSlashMenuState()).toEqual({ activeIndex: 0, open: false });
+  });
+
+  it("opens with an isolated trigger snapshot", () => {
+    const state = openSlashMenu(trigger);
+
+    expect(state).toEqual({ activeIndex: 0, open: true, trigger });
+    expect(state.trigger).not.toBe(trigger);
+    expect(state.trigger?.range.anchor.path).not.toBe(trigger.range.anchor.path);
+  });
+
+  it("closes without retaining the previous trigger", () => {
+    expect(closeSlashMenu()).toEqual({ activeIndex: 0, open: false });
+  });
+});

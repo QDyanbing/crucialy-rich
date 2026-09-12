@@ -36,3 +36,9 @@ export interface SlashMenuPosition {
   placement: "above" | "below";
   top: number;
 }
+
+export interface SlashMenuState {
+  activeIndex: number;
+  open: boolean;
+  trigger?: SlashMenuTrigger;
+}
