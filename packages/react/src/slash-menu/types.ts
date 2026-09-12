@@ -1,4 +1,4 @@
-import type { CommandName, RangeSelection } from "@crucialy-rich/core";
+import type { CommandName, CommandResult, RangeSelection } from "@crucialy-rich/core";
 
 export interface SlashCommandItem {
   commandName: CommandName;
@@ -41,4 +41,10 @@ export interface SlashMenuState {
   activeIndex: number;
   open: boolean;
   trigger?: SlashMenuTrigger;
+}
+
+export interface SlashCommandEvent {
+  item: SlashCommandItem;
+  result: CommandResult;
+  trigger: SlashMenuTrigger;
 }
