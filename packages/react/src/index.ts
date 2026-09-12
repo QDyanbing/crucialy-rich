@@ -33,9 +33,33 @@ export type {
   ToolbarSeparatorItem,
 } from "./toolbar";
 export {
+  calculateSlashMenuPosition,
+  closeSlashMenu,
+  createClosedSlashMenuState,
   createDefaultSlashCommandItems,
   defineSlashCommandItems,
+  executeSlashCommand,
   filterSlashCommandItems,
   findSlashMenuTrigger,
+  FloatingSlashMenu,
+  getActiveSlashCommandItem,
+  getNextSlashMenuIndex,
+  getSlashMenuKeyboardAction,
+  moveSlashMenuSelection,
+  openSlashMenu,
+  SlashMenu,
 } from "./slash-menu";
-export type { SlashCommandItem, SlashMenuTrigger } from "./slash-menu";
+export type {
+  FloatingSlashMenuProps,
+  SlashCommandEvent,
+  SlashCommandItem,
+  SlashMenuAnchorRect,
+  SlashMenuKeyboardAction,
+  SlashMenuNavigationDirection,
+  SlashMenuPosition,
+  SlashMenuProps,
+  SlashMenuSize,
+  SlashMenuState,
+  SlashMenuTrigger,
+  SlashMenuViewport,
+} from "./slash-menu";

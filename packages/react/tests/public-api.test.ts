@@ -27,6 +27,15 @@ describe("@crucialy-rich/react public API", () => {
     expect(typeof reactPackage.findSlashMenuTrigger).toBe("function");
   });
 
+  it("exposes the slash menu interaction API", () => {
+    expect(typeof reactPackage.SlashMenu).toBe("function");
+    expect(typeof reactPackage.FloatingSlashMenu).toBe("function");
+    expect(typeof reactPackage.calculateSlashMenuPosition).toBe("function");
+    expect(typeof reactPackage.getSlashMenuKeyboardAction).toBe("function");
+    expect(typeof reactPackage.moveSlashMenuSelection).toBe("function");
+    expect(typeof reactPackage.executeSlashCommand).toBe("function");
+  });
+
   it("exposes a renderable editor shell", () => {
     const element = createElement(RichTextEditor);
     const html = renderToStaticMarkup(element);
