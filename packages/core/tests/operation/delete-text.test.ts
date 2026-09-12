@@ -214,26 +214,66 @@ describe("applyDeleteText", () => {
     ).toThrow("delete text range must reference text nodes");
   });
 
-  it("throws when a range crosses text nodes", () => {
+  it("deletes across text nodes in one paragraph and preserves edge marks", () => {
     const document = createDocument([
-      createParagraph([createText("你好"), createText("世界")]),
+      createParagraph([
+        createText("你好", { bold: true }),
+        createText("世界", { italic: true }),
+      ]),
+    ]);
+
+    expect(
+      applyDeleteText(
+        document,
+        createDeleteTextOperation({
+          anchor: { path: [0, 0], offset: 1 },
+          focus: { path: [0, 1], offset: 1 },
+        }),
+      ),
+    ).toEqual(
+      createDocument([
+        createParagraph([
+          createText("你", { bold: true }),
+          createText("界", { italic: true }),
+        ]),
+      ]),
+    );
+  });
+
+  it("leaves one empty text node after deleting a whole marked range", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("/", { bold: true }),
+        createText("he", { italic: true }),
+      ]),
+    ]);
+
+    expect(
+      applyDeleteText(
+        document,
+        createDeleteTextOperation({
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [0, 1], offset: 2 },
+        }),
+      ).children[0],
+    ).toEqual(createParagraph([createText("", { bold: true })]));
+  });
+
+  it("rejects a range that crosses text containers", () => {
+    const document = createDocument([
+      createParagraph([createText("第一段")]),
+      createParagraph([createText("第二段")]),
     ]);
 
     expect(() =>
       applyDeleteText(
         document,
         createDeleteTextOperation({
-          anchor: {
-            path: [0, 0],
-            offset: 1,
-          },
-          focus: {
-            path: [0, 1],
-            offset: 1,
-          },
+          anchor: { path: [0, 0], offset: 1 },
+          focus: { path: [1, 0], offset: 1 },
         }),
       ),
-    ).toThrow("delete text range must stay inside one text node");
+    ).toThrow("delete text range must stay inside one text container");
   });
 
   it("keeps the same document reference when the range is collapsed", () => {

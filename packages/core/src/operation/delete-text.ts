@@ -2,7 +2,7 @@ import type { DocumentNode } from "../model";
 import type { RangeSelection } from "../selection";
 import { isCollapsed, isValidPoint, normalizeRange } from "../selection";
 import type { DeleteTextOperation } from "./types";
-import { getTextTarget, replaceTextContainer } from "./text-target";
+import { getTextTarget, replaceTextContainer, type TextTarget } from "./text-target";
 
 export function createDeleteTextOperation(range: RangeSelection): DeleteTextOperation {
   return {
@@ -23,46 +23,68 @@ export function createDeleteTextOperation(range: RangeSelection): DeleteTextOper
 function getDeleteTextIndexes(
   document: DocumentNode,
   operation: DeleteTextOperation,
-): [NonNullable<ReturnType<typeof getTextTarget>>, RangeSelection] {
+): [TextTarget, TextTarget, RangeSelection] {
   const range = normalizeRange(operation.range);
 
   if (!isValidPoint(document, range.anchor) || !isValidPoint(document, range.focus)) {
     throw new RangeError("delete text range must reference text nodes");
   }
 
-  const target = getTextTarget(document, range.anchor);
+  const startTarget = getTextTarget(document, range.anchor);
+  const endTarget = getTextTarget(document, range.focus);
 
   if (
-    !target ||
-    range.anchor.path.length !== range.focus.path.length ||
-    !range.anchor.path.every((part, index) => part === range.focus.path[index])
+    !startTarget ||
+    !endTarget ||
+    startTarget.containerPath.length !== endTarget.containerPath.length ||
+    !startTarget.containerPath.every(
+      (part, index) => part === endTarget.containerPath[index],
+    )
   ) {
-    throw new RangeError("delete text range must stay inside one text node");
+    throw new RangeError("delete text range must stay inside one text container");
   }
 
-  return [target, range];
+  return [startTarget, endTarget, range];
 }
 
 export function applyDeleteText(
   document: DocumentNode,
   operation: DeleteTextOperation,
 ): DocumentNode {
-  const [target, range] = getDeleteTextIndexes(document, operation);
+  const [startTarget, endTarget, range] = getDeleteTextIndexes(document, operation);
 
   if (isCollapsed(range)) {
     return document;
   }
 
-  return replaceTextContainer(document, target.containerPath, {
-    ...target.container,
-    children: target.container.children.map((textNode, currentTextIndex) =>
-      currentTextIndex === target.textIndex
-        ? {
-            ...textNode,
-            text: `${textNode.text.slice(0, range.anchor.offset)}${textNode.text.slice(range.focus.offset)}`,
-          }
-        : textNode,
-    ),
+  if (startTarget.textIndex === endTarget.textIndex) {
+    return replaceTextContainer(document, startTarget.containerPath, {
+      ...startTarget.container,
+      children: startTarget.container.children.map((textNode, currentTextIndex) =>
+        currentTextIndex === startTarget.textIndex
+          ? {
+              ...textNode,
+              text: `${textNode.text.slice(0, range.anchor.offset)}${textNode.text.slice(range.focus.offset)}`,
+            }
+          : textNode,
+      ),
+    });
+  }
+
+  const startNode = startTarget.container.children[startTarget.textIndex]!;
+  const endNode = endTarget.container.children[endTarget.textIndex]!;
+  const prefix = startNode.text.slice(0, range.anchor.offset);
+  const suffix = endNode.text.slice(range.focus.offset);
+  const children = [
+    ...startTarget.container.children.slice(0, startTarget.textIndex),
+    ...(prefix.length > 0 ? [{ ...startNode, text: prefix }] : []),
+    ...(suffix.length > 0 ? [{ ...endNode, text: suffix }] : []),
+    ...startTarget.container.children.slice(endTarget.textIndex + 1),
+  ];
+
+  return replaceTextContainer(document, startTarget.containerPath, {
+    ...startTarget.container,
+    children: children.length > 0 ? children : [{ ...startNode, text: "" }],
   });
 }
 
