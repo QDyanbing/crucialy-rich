@@ -67,12 +67,25 @@ import {
   type TransactionAcceptanceReport,
 } from "@crucialy-rich/core";
 import {
+  closeSlashMenu,
+  createDefaultSlashCommandItems,
   createDefaultToolbarItems,
+  executeSlashCommand,
+  filterSlashCommandItems,
+  findSlashMenuTrigger,
   FixedToolbar,
   FloatingToolbar,
+  FloatingSlashMenu,
+  getActiveSlashCommandItem,
+  getSlashMenuKeyboardAction,
+  moveSlashMenuSelection,
+  openSlashMenu,
   RichTextEditor,
   type FloatingToolbarAnchorRect,
   type RichTextEditorTransactionEvent,
+  type SlashCommandItem,
+  type SlashMenuAnchorRect,
+  type SlashMenuTrigger,
   type ToolbarCommandEvent,
 } from "@crucialy-rich/react";
 import {
@@ -731,7 +744,10 @@ function DemoApp() {
   const [showFloatingToolbar, setShowFloatingToolbar] = useState(true);
   const [floatingToolbarRect, setFloatingToolbarRect] =
     useState<FloatingToolbarAnchorRect | null>(null);
+  const [slashMenuRect, setSlashMenuRect] = useState<SlashMenuAnchorRect | null>(null);
+  const [slashMenuState, setSlashMenuState] = useState(closeSlashMenu);
   const savedLinkSelectionRef = useRef<RangeSelection | null>(null);
+  const dismissedSlashTriggerRef = useRef<string | null>(null);
   const [lastTransaction, setLastTransaction] = useState<Transaction | null>(null);
   const [lastTransactionReport, setLastTransactionReport] =
     useState<TransactionAcceptanceReport | null>(null);
@@ -859,6 +875,34 @@ function DemoApp() {
       ),
     [toolbarItems],
   );
+  const slashCommandItems = useMemo(createDefaultSlashCommandItems, []);
+  const filteredSlashCommandItems = useMemo(
+    () =>
+      slashMenuState.open && slashMenuState.trigger
+        ? filterSlashCommandItems(slashCommandItems, slashMenuState.trigger.query)
+        : [],
+    [slashCommandItems, slashMenuState],
+  );
+
+  function getSlashTriggerKey(trigger: SlashMenuTrigger): string {
+    return `${trigger.range.anchor.path.join(".")}:${trigger.range.anchor.offset}`;
+  }
+
+  function syncSlashMenu(trigger: SlashMenuTrigger | undefined) {
+    if (!trigger) {
+      dismissedSlashTriggerRef.current = null;
+      setSlashMenuState(closeSlashMenu());
+      setSlashMenuRect(null);
+      return;
+    }
+
+    if (dismissedSlashTriggerRef.current === getSlashTriggerKey(trigger)) {
+      setSlashMenuState(closeSlashMenu());
+      return;
+    }
+
+    setSlashMenuState(openSlashMenu(trigger));
+  }
 
   function isCommandDisabled(name: CommandName) {
     return (
@@ -883,6 +927,9 @@ function DemoApp() {
     setLastTransactionReport(null);
     savedLinkSelectionRef.current = null;
     setFloatingToolbarRect(null);
+    setSlashMenuRect(null);
+    setSlashMenuState(closeSlashMenu());
+    dismissedSlashTriggerRef.current = null;
     setLinkEditorOpen(false);
   }
 
@@ -916,6 +963,8 @@ function DemoApp() {
     setLastTransactionReport(
       createTransactionAcceptanceReport(normalizedDocument, transaction),
     );
+    setSlashMenuRect(null);
+    setSlashMenuState(closeSlashMenu());
   }
 
   function applyHistoryChange(change: HistoryChange | undefined) {
@@ -932,6 +981,8 @@ function DemoApp() {
 
     setLastTransaction(change.entry.transaction);
     setLastTransactionReport(null);
+    setSlashMenuRect(null);
+    setSlashMenuState(closeSlashMenu());
   }
 
   function handleToolbarCommand(event: ToolbarCommandEvent) {
@@ -1225,6 +1276,46 @@ function DemoApp() {
   }
 
   function handleEditorKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (slashMenuState.open) {
+      const slashAction = getSlashMenuKeyboardAction(event.key);
+
+      if (slashAction) {
+        event.preventDefault();
+
+        if (slashAction === "close") {
+          if (slashMenuState.trigger) {
+            dismissedSlashTriggerRef.current = getSlashTriggerKey(
+              slashMenuState.trigger,
+            );
+          }
+          setSlashMenuRect(null);
+          setSlashMenuState(closeSlashMenu());
+          return;
+        }
+
+        if (slashAction === "next" || slashAction === "previous") {
+          setSlashMenuState((state) =>
+            moveSlashMenuSelection(
+              state,
+              slashAction,
+              filteredSlashCommandItems.length,
+            ),
+          );
+          return;
+        }
+
+        const item = getActiveSlashCommandItem(
+          filteredSlashCommandItems,
+          slashMenuState.activeIndex,
+        );
+
+        if (item) {
+          handleSlashCommand(item);
+        }
+        return;
+      }
+    }
+
     const action = getHistoryShortcutAction(event);
 
     if (!action) {
@@ -1256,6 +1347,24 @@ function DemoApp() {
     setLastTransactionReport(
       createTransactionAcceptanceReport(event.before, event.transaction),
     );
+    syncSlashMenu(findSlashMenuTrigger(event.after, event.selection));
+  }
+
+  function handleSlashCommand(item: SlashCommandItem) {
+    const trigger = slashMenuState.trigger;
+
+    if (!trigger) {
+      return;
+    }
+
+    const event = executeSlashCommand(
+      item,
+      demoCommandRegistry,
+      { document: normalizedDocument, selection: modelSelection },
+      trigger,
+    );
+
+    applyCommandResult(event.result, modelSelection);
   }
 
   function handleBrowserSelectionSync() {
@@ -1266,6 +1375,7 @@ function DemoApp() {
 
     if (nextSelection) {
       setModelSelection(nextSelection);
+      syncSlashMenu(findSlashMenuTrigger(normalizedDocument, nextSelection));
     }
 
     if (
@@ -1283,10 +1393,24 @@ function DemoApp() {
         top: rect.top,
         width: rect.width,
       });
+      setSlashMenuRect(null);
       return;
     }
 
     setFloatingToolbarRect(null);
+
+    if (
+      nextSelection &&
+      isCollapsed(nextSelection) &&
+      browserSelection &&
+      browserSelection.rangeCount > 0
+    ) {
+      const rect = browserSelection.getRangeAt(0).getBoundingClientRect();
+
+      setSlashMenuRect({ bottom: rect.bottom, left: rect.left, top: rect.top });
+    } else {
+      setSlashMenuRect(null);
+    }
   }
 
   return (
@@ -1296,7 +1420,7 @@ function DemoApp() {
           <p className="eyebrow">调试工作台</p>
           <h1 id="page-title">crucialy-rich</h1>
         </div>
-        <span className="status-pill">第 17 周已完成</span>
+        <span className="status-pill">第 18 周斜杠菜单</span>
       </header>
 
       <section className="workspace-grid" aria-label="编辑器工作区">
@@ -1350,6 +1474,15 @@ function DemoApp() {
               onCommand={handleToolbarCommand}
               registry={demoCommandRegistry}
               selection={modelSelection}
+            />
+          ) : null}
+          {slashMenuState.open ? (
+            <FloatingSlashMenu
+              activeIndex={slashMenuState.activeIndex}
+              anchorRect={slashMenuRect}
+              items={filteredSlashCommandItems}
+              label="插入块菜单"
+              onSelect={handleSlashCommand}
             />
           ) : null}
         </div>

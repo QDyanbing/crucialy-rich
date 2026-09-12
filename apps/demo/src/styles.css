@@ -203,6 +203,51 @@ h3 {
   background: #ffffff;
 }
 
+.crucialy-floating-slash-menu {
+  overflow-y: auto;
+  border: 1px solid #cfd7d1;
+  border-radius: 6px;
+  background: #ffffff;
+  box-shadow: 0 14px 32px rgb(26 36 30 / 18%);
+}
+
+.crucialy-slash-menu {
+  display: grid;
+  gap: 2px;
+  padding: 5px;
+}
+
+.crucialy-slash-menu__item {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  min-height: 48px;
+  padding: 7px 9px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: #26382e;
+  cursor: pointer;
+  text-align: left;
+}
+
+.crucialy-slash-menu__item[aria-selected="true"],
+.crucialy-slash-menu__item:hover {
+  border-color: #b8c7bd;
+  background: #edf4ef;
+}
+
+.crucialy-slash-menu__label {
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.crucialy-slash-menu__description {
+  color: #65766b;
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+
 .empty-state {
   width: 100%;
   padding: 14px 16px;
