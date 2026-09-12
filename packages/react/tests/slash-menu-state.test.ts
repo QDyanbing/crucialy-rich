@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   closeSlashMenu,
   createClosedSlashMenuState,
+  moveSlashMenuSelection,
   openSlashMenu,
 } from "../src/slash-menu/state";
 import type { SlashMenuTrigger } from "../src/slash-menu/types";
@@ -31,5 +32,26 @@ describe("slash menu state", () => {
 
   it("closes without retaining the previous trigger", () => {
     expect(closeSlashMenu()).toEqual({ activeIndex: 0, open: false });
+  });
+
+  it("moves the active selection while open", () => {
+    const state = openSlashMenu(trigger);
+
+    expect(moveSlashMenuSelection(state, "previous", 3)).toMatchObject({
+      activeIndex: 2,
+      open: true,
+    });
+    expect(moveSlashMenuSelection(state, "next", 3)).toMatchObject({
+      activeIndex: 1,
+      open: true,
+    });
+  });
+
+  it("leaves closed or empty state unchanged", () => {
+    const closedState = closeSlashMenu();
+    const openState = openSlashMenu(trigger);
+
+    expect(moveSlashMenuSelection(closedState, "next", 3)).toBe(closedState);
+    expect(moveSlashMenuSelection(openState, "next", 0)).toBe(openState);
   });
 });

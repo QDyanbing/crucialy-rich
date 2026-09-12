@@ -1,4 +1,5 @@
 import type { SlashMenuState, SlashMenuTrigger } from "./types";
+import { getNextSlashMenuIndex, type SlashMenuNavigationDirection } from "./keyboard";
 
 function cloneTrigger(trigger: SlashMenuTrigger): SlashMenuTrigger {
   return {
@@ -30,4 +31,19 @@ export function openSlashMenu(trigger: SlashMenuTrigger): SlashMenuState {
 
 export function closeSlashMenu(): SlashMenuState {
   return createClosedSlashMenuState();
+}
+
+export function moveSlashMenuSelection(
+  state: SlashMenuState,
+  direction: SlashMenuNavigationDirection,
+  itemCount: number,
+): SlashMenuState {
+  if (!state.open || itemCount <= 0) {
+    return state;
+  }
+
+  return {
+    ...state,
+    activeIndex: getNextSlashMenuIndex(state.activeIndex, direction, itemCount),
+  };
 }
