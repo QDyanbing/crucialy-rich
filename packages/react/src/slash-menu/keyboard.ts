@@ -24,5 +24,17 @@ export function getNextSlashMenuIndex(
 export function getSlashMenuKeyboardAction(
   key: string,
 ): SlashMenuKeyboardAction | undefined {
-  return key === "Escape" ? "close" : undefined;
+  if (key === "Escape") {
+    return "close";
+  }
+
+  if (key === "ArrowDown") {
+    return "next";
+  }
+
+  if (key === "ArrowUp") {
+    return "previous";
+  }
+
+  return key === "Enter" ? "select" : undefined;
 }

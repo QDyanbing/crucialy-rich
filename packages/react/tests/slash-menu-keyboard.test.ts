@@ -27,12 +27,17 @@ describe("getNextSlashMenuIndex", () => {
 });
 
 describe("getSlashMenuKeyboardAction", () => {
-  it("maps Escape to menu close", () => {
-    expect(getSlashMenuKeyboardAction("Escape")).toBe("close");
+  it.each([
+    ["Escape", "close"],
+    ["ArrowDown", "next"],
+    ["ArrowUp", "previous"],
+    ["Enter", "select"],
+  ] as const)("maps %s to %s", (key, action) => {
+    expect(getSlashMenuKeyboardAction(key)).toBe(action);
   });
 
-  it.each(["Enter", "ArrowUp", "ArrowDown", "Tab", "a"])(
-    "does not claim %s before navigation is enabled",
+  it.each(["Tab", "ArrowLeft", "ArrowRight", "Backspace", "a"])(
+    "does not claim the editor key %s",
     (key) => {
       expect(getSlashMenuKeyboardAction(key)).toBeUndefined();
     },
