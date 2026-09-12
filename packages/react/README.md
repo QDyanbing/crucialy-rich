@@ -2,7 +2,7 @@
 
 crucialy-rich 编辑内核的 React 集成包，对外暴露可集成的 React 富文本组件。
 
-> 当前已完成基础编辑、列表和 Toolbar 闭环，以及斜杠菜单配置、过滤与触发识别。所有输入和工具栏命令都通过 transaction 更新文档。
+> 当前已完成基础编辑、列表、Toolbar 和斜杠菜单闭环。所有输入、工具栏和斜杠菜单命令都通过 transaction 更新文档。
 
 ## 安装
 
@@ -54,13 +54,15 @@ Toolbar 当前支持：
 - pointerdown 选区快照：点击工具栏后仍把命令应用到原选区。
 - 固定/悬浮组件只提供结构 class，产品主题、History 应用和链接菜单由宿主负责。
 
-斜杠菜单设计层当前支持：
+斜杠菜单当前支持：
 
 - `defineSlashCommandItems`：校验并复制自定义 Slash Command 配置。
 - `createDefaultSlashCommandItems`：创建正文、标题、引用、代码块、列表和分割线默认目录。
 - `filterSlashCommandItems`：按 ID、标签和关键词进行前缀过滤。
 - `findSlashMenuTrigger`：识别 paragraph 折叠光标前的 `/query` 并返回待清理 Range。
-- 菜单渲染、定位、关闭、键盘导航和命令执行将在后续迭代接入。
+- `SlashMenu` / `FloatingSlashMenu`：渲染可访问菜单并定位到浏览器光标附近。
+- `getSlashMenuKeyboardAction` / `moveSlashMenuSelection`：处理 Escape、上下键循环和 Enter 选择。
+- `executeSlashCommand`：清理触发文本、执行目标命令并合并 Transaction。
 
 完整说明见[组件 API](../../docs/features/component-api.md)、[工具栏](../../docs/features/toolbar.md)和[斜杠菜单](../../docs/features/slash-menu.md)。
 
