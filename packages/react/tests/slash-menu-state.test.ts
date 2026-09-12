@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   closeSlashMenu,
   createClosedSlashMenuState,
+  getActiveSlashCommandItem,
   moveSlashMenuSelection,
   openSlashMenu,
 } from "../src/slash-menu/state";
@@ -53,5 +54,17 @@ describe("slash menu state", () => {
 
     expect(moveSlashMenuSelection(closedState, "next", 3)).toBe(closedState);
     expect(moveSlashMenuSelection(openState, "next", 0)).toBe(openState);
+  });
+
+  it("resolves only a valid active item", () => {
+    const items = [
+      { commandName: "setHeading", id: "heading", label: "标题" },
+      { commandName: "toggleQuote", id: "quote", label: "引用" },
+    ];
+
+    expect(getActiveSlashCommandItem(items, 1)).toBe(items[1]);
+    expect(getActiveSlashCommandItem(items, -1)).toBeUndefined();
+    expect(getActiveSlashCommandItem(items, 2)).toBeUndefined();
+    expect(getActiveSlashCommandItem([], 0)).toBeUndefined();
   });
 });
