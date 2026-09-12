@@ -148,6 +148,64 @@ test("keeps the selected range when the floating toolbar runs a command", async 
   );
 });
 
+test("opens and closes the slash menu from editor input", async ({ page }) => {
+  await page.goto("/");
+  await placeCaretInRenderedText(page, "[0,0]", 0);
+  await page.keyboard.type("/");
+
+  const menu = page.getByRole("listbox", { name: "插入块菜单" });
+
+  await expect(menu).toBeVisible();
+  await expect(menu.getByRole("option")).toHaveCount(10);
+  await expect(menu.getByRole("option").first()).toHaveAttribute(
+    "aria-selected",
+    "true",
+  );
+
+  await page.keyboard.press("Escape");
+  await expect(menu).toHaveCount(0);
+  await expect(page.getByLabel("已渲染文档")).toContainText("/你好");
+});
+
+test("cycles through slash menu options with arrow keys", async ({ page }) => {
+  await page.goto("/");
+  await placeCaretInRenderedText(page, "[0,0]", 0);
+  await page.keyboard.type("/");
+
+  const menu = page.getByRole("listbox", { name: "插入块菜单" });
+
+  await page.keyboard.press("ArrowUp");
+  await expect(menu.locator('[aria-selected="true"]')).toContainText("分割线");
+  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("ArrowDown");
+  await expect(menu.locator('[aria-selected="true"]')).toContainText("2 级标题");
+});
+
+test("filters and executes a slash command without leaving trigger text", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await placeCaretInRenderedText(page, "[0,0]", 0);
+  await page.keyboard.type("/h2");
+
+  const menu = page.getByRole("listbox", { name: "插入块菜单" });
+
+  await expect(menu.getByRole("option")).toHaveCount(1);
+  await expect(menu.getByRole("option")).toContainText("2 级标题");
+  await page.keyboard.press("Enter");
+
+  const editor = page.getByLabel("已渲染文档");
+
+  await expect(menu).toHaveCount(0);
+  await expect(editor.locator('h2[data-crucialy-path="[0]"]')).toContainText("你好");
+  await expect(editor).not.toContainText("/h2");
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 2');
+
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect(editor.locator('p[data-crucialy-path="[0]"]')).toContainText("/h2你好");
+});
+
 test("renders every heading level from the demo example", async ({ page }) => {
   await page.goto("/");
   await page.getByLabel("模型示例").selectOption("headings");

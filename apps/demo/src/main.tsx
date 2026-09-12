@@ -901,7 +901,20 @@ function DemoApp() {
       return;
     }
 
-    setSlashMenuState(openSlashMenu(trigger));
+    setSlashMenuState((currentState) => {
+      const currentTrigger = currentState.trigger;
+
+      if (
+        currentState.open &&
+        currentTrigger &&
+        getSlashTriggerKey(currentTrigger) === getSlashTriggerKey(trigger) &&
+        currentTrigger.text === trigger.text
+      ) {
+        return { ...currentState, trigger: openSlashMenu(trigger).trigger! };
+      }
+
+      return openSlashMenu(trigger);
+    });
   }
 
   function isCommandDisabled(name: CommandName) {
