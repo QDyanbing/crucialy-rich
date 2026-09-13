@@ -4,6 +4,60 @@ import { normalizeDocument } from "../../src/model/normalize";
 import { validateDocument } from "../../src/model/validate";
 
 describe("normalizeDocument", () => {
+  it("normalizes image metadata and removes editable children", () => {
+    const result = normalizeDocument({
+      children: [
+        {
+          alt: "项目封面",
+          children: [{ text: "非法", type: "text" }],
+          height: -1,
+          src: " HTTPS://Example.COM/cover.png ",
+          status: "done",
+          type: "image",
+          width: 640,
+        },
+      ],
+      type: "document",
+    });
+
+    expect(result).toEqual({
+      children: [
+        {
+          alt: "项目封面",
+          children: [],
+          height: null,
+          src: "https://example.com/cover.png",
+          status: "error",
+          type: "image",
+          width: 640,
+        },
+      ],
+      type: "document",
+    });
+  });
+
+  it("drops an unsafe image and restores an empty paragraph", () => {
+    const result = normalizeDocument({
+      children: [
+        {
+          alt: "危险图片",
+          children: [],
+          height: null,
+          src: "javascript:alert(1)",
+          status: "ready",
+          type: "image",
+          width: null,
+        },
+      ],
+      type: "document",
+    });
+
+    expect(result).toEqual({
+      children: [{ children: [{ text: "", type: "text" }], type: "paragraph" }],
+      type: "document",
+    });
+  });
+
   it("normalizes task items and preserves checked state", () => {
     const result = normalizeDocument({
       children: [

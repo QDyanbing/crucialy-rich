@@ -8,12 +8,15 @@ import {
 import {
   isBlockNode,
   isDocumentNode,
+  isImageNode,
+  isImageStatus,
   isListItemNode,
   isListNode,
   isTextBlockNode,
   isTextNode,
   isTaskItemNode,
 } from "./guards";
+import { normalizeImageDimension, sanitizeImageSrc } from "./image";
 import { mergeAdjacentTextNodes, normalizeTextMarks } from "./marks";
 import { MAX_LIST_DEPTH } from "./types";
 import type {
@@ -39,7 +42,11 @@ export function normalizeDocument(value: unknown): DocumentNode {
     return createDocument();
   }
 
-  const children = value.children.filter(isBlockNode).map(normalizeBlock);
+  const children = value.children.filter(isBlockNode).flatMap((child) => {
+    const normalized = normalizeBlock(child);
+
+    return normalized ? [normalized] : [];
+  });
 
   return {
     type: "document",
@@ -47,9 +54,25 @@ export function normalizeDocument(value: unknown): DocumentNode {
   };
 }
 
-function normalizeBlock(node: BlockNode): BlockNode {
+function normalizeBlock(node: BlockNode): BlockNode | undefined {
   if (isListNode(node)) {
     return normalizeList(node, 1);
+  }
+
+  if (isImageNode(node)) {
+    const src = sanitizeImageSrc(node.src);
+
+    return src
+      ? {
+          alt: typeof node.alt === "string" ? node.alt : "",
+          children: [],
+          height: normalizeImageDimension(node.height),
+          src,
+          status: isImageStatus(node.status) ? node.status : "error",
+          type: "image",
+          width: normalizeImageDimension(node.width),
+        }
+      : undefined;
   }
 
   if (!isTextBlockNode(node)) {
