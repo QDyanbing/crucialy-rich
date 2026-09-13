@@ -6,6 +6,7 @@ import {
   createDivider,
   createHeading,
   createHistorySnapshot,
+  createImage,
   createParagraph,
   createQuote,
   createText,
@@ -104,5 +105,29 @@ describe("createHistorySnapshot", () => {
       },
       { children: [], type: "divider" },
     ]);
+  });
+
+  it("clones image metadata and children", () => {
+    const image = createImage("https://example.com/cover.png", {
+      alt: "封面",
+      height: 360,
+      width: 640,
+    });
+    const snapshot = createHistorySnapshot(createDocument([image]));
+
+    image.alt = "已修改";
+    image.children.push({ text: "异常内容", type: "text" } as never);
+
+    expect(snapshot.document.children[0]).toEqual({
+      alt: "封面",
+      children: [],
+      height: 360,
+      src: "https://example.com/cover.png",
+      status: "ready",
+      type: "image",
+      width: 640,
+    });
+    expect(snapshot.document.children[0]).not.toBe(image);
+    expect(snapshot.document.children[0]?.children).not.toBe(image.children);
   });
 });

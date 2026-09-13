@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   createDivider,
   createDocument,
+  createImage,
   createParagraph,
   createText,
 } from "../../src/model";
@@ -43,6 +44,30 @@ describe("insert block operation", () => {
       "paragraph",
     ]);
     expect(document.children).toHaveLength(2);
+  });
+
+  it("inserts a detached image block", () => {
+    const image = createImage("https://example.com/photo.png", {
+      alt: "照片",
+      width: 480,
+    });
+    const operation = createInsertBlockOperation([1], image);
+    const document = createDocument([createParagraph([createText("正文")])]);
+
+    image.alt = "已修改";
+
+    const result = applyInsertBlock(document, operation);
+
+    expect(result.children[1]).toEqual({
+      alt: "照片",
+      children: [],
+      height: null,
+      src: "https://example.com/photo.png",
+      status: "ready",
+      type: "image",
+      width: 480,
+    });
+    expect(result.children[1]).not.toBe(image);
   });
 
   it("supports document boundaries and rejects invalid paths", () => {
