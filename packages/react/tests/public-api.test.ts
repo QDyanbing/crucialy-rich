@@ -2,6 +2,8 @@ import {
   createCodeBlock,
   createDocument,
   createDivider,
+  createBlockSelection,
+  createImage,
   createParagraph,
   createText,
   createTaskItem,
@@ -83,6 +85,22 @@ describe("@crucialy-rich/react public API", () => {
     );
 
     expect(html).toContain('<hr data-crucialy-path="[0]"/>');
+  });
+
+  it("renders selected images through React", () => {
+    const html = renderToStaticMarkup(
+      createElement(RichTextEditor, {
+        blockSelection: createBlockSelection([0]),
+        value: createDocument([
+          createImage("https://example.com/cover.png", { alt: "封面" }),
+        ]),
+      }),
+    );
+
+    expect(html).toContain('<img data-crucialy-path="[0]"');
+    expect(html).toContain('alt="封面"');
+    expect(html).toContain('data-crucialy-image="true"');
+    expect(html).toContain('data-selected="true"');
   });
 
   it("renders task list checkboxes through React", () => {

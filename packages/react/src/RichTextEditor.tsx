@@ -4,6 +4,7 @@ import {
   createDefaultCommandRegistry,
   createDocument,
   createBackspaceInputTransaction,
+  createBlockSelection,
   createDeleteInputTransaction,
   createSelectionAfterBackspaceInput,
   createSelectionAfterDeleteInput,
@@ -12,6 +13,7 @@ import {
   createTabInputTransaction,
   createTransaction,
   DELETE_SELECTION_COMMAND_NAME,
+  DELETE_IMAGE_COMMAND_NAME,
   domSelectionToModelSelection,
   executeCommand,
   getNodeAtPath,
@@ -23,6 +25,7 @@ import {
   renderDocument,
   SPLIT_BLOCK_COMMAND_NAME,
   type CommandResult,
+  type BlockSelection,
   type DocumentNode,
   type RangeSelection,
   type RenderedElementNode,
@@ -55,7 +58,9 @@ export interface RichTextEditorProps
     | "suppressContentEditableWarning"
   > {
   defaultValue?: DocumentNode;
+  blockSelection?: BlockSelection;
   label?: string;
+  onBlockSelectionChange?: (selection: BlockSelection | undefined) => void;
   onChange?: (value: DocumentNode) => void;
   onSelectionChange?: (selection: RangeSelection) => void;
   onTransaction?: (event: RichTextEditorTransactionEvent) => void;
@@ -65,6 +70,7 @@ export interface RichTextEditorProps
 
 export type RichTextEditorInputType =
   | "deleteBackward"
+  | "deleteImage"
   | "deleteForward"
   | "insertParagraph"
   | "insertText"
@@ -82,14 +88,30 @@ export interface RichTextEditorTransactionEvent {
   transaction: Transaction;
 }
 
-function createRenderedElement(node: RenderedElementNode): ReactElement {
-  const children = node.children?.map(createRenderedElement) ?? node.text;
+function arePathsEqual(left: number[], right: number[]): boolean {
+  return (
+    left.length === right.length && left.every((part, index) => part === right[index])
+  );
+}
+
+function createRenderedElement(
+  node: RenderedElementNode,
+  blockSelection?: BlockSelection,
+): ReactElement {
+  const children =
+    node.children?.map((child) => createRenderedElement(child, blockSelection)) ??
+    node.text;
+  const selected =
+    node.tagName === "img" &&
+    blockSelection !== undefined &&
+    arePathsEqual(node.path, blockSelection.path);
 
   return createElement(
     node.tagName,
     {
       ...node.attributes,
       key: node.path.join(".") || "root",
+      ...(selected ? { "data-selected": "true" } : {}),
       ...(node.style ? { style: node.style } : {}),
     },
     children,
@@ -244,6 +266,24 @@ function createDeleteSelectionCommandResult(
   return createKeyboardInputResultFromCommandResult(result, selection, inputType);
 }
 
+function createDeleteImageCommandResult(
+  document: DocumentNode,
+  blockSelection: BlockSelection,
+): KeyboardInputResult | undefined {
+  const result = executeCommand(richTextCommandRegistry, DELETE_IMAGE_COMMAND_NAME, {
+    context: { document },
+    payload: { selection: blockSelection },
+  });
+
+  return result.selection
+    ? createKeyboardInputResultFromCommandResult(
+        result,
+        result.selection,
+        "deleteImage",
+      )
+    : undefined;
+}
+
 function createSplitBlockCommandResult(
   document: DocumentNode,
   selection: RangeSelection,
@@ -322,11 +362,13 @@ function createMergeNextBlockCommandResult(
 }
 
 export function RichTextEditor({
+  blockSelection,
   className,
   contentEditable,
   defaultValue,
   label = "Rich text editor",
   onBeforeInput,
+  onBlockSelectionChange,
   onClick,
   onKeyDown,
   onKeyUp,
@@ -420,6 +462,18 @@ export function RichTextEditor({
       return;
     }
 
+    if (blockSelection && (event.key === "Backspace" || event.key === "Delete")) {
+      const deleteImageInput = createDeleteImageCommandResult(document, blockSelection);
+
+      if (deleteImageInput) {
+        event.preventDefault();
+        commitInputResult(deleteImageInput);
+        onBlockSelectionChange?.(undefined);
+
+        return;
+      }
+    }
+
     const modelSelection = getModelSelectionFromDom(event.currentTarget, document);
 
     if (!modelSelection) {
@@ -499,6 +553,24 @@ export function RichTextEditor({
       return;
     }
 
+    const image = event.target.closest<HTMLImageElement>(
+      'img[data-crucialy-image="true"]',
+    );
+
+    if (image && event.currentTarget.contains(image)) {
+      const imagePath = getElementModelPath(image);
+
+      if (imagePath) {
+        event.preventDefault();
+        event.currentTarget.focus();
+        onBlockSelectionChange?.(createBlockSelection(imagePath));
+      }
+
+      return;
+    }
+
+    onBlockSelectionChange?.(undefined);
+
     const taskControl = event.target.closest<HTMLInputElement>(
       'input[data-crucialy-task-item="true"]',
     );
@@ -553,7 +625,9 @@ export function RichTextEditor({
       role="textbox"
       suppressContentEditableWarning={suppressContentEditableWarning ?? editable}
     >
-      {renderedDocument.children?.map(createRenderedElement)}
+      {renderedDocument.children?.map((child) =>
+        createRenderedElement(child, blockSelection),
+      )}
     </div>
   );
 }
