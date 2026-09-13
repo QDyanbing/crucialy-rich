@@ -4,6 +4,8 @@ export type {
   RichTextEditorProps,
   RichTextEditorTransactionEvent,
 } from "./RichTextEditor";
+export { createLocalImageResource } from "./image";
+export type { LocalImageResource, ObjectUrlApi } from "./image";
 export {
   createDefaultToolbarItems,
   calculateFloatingToolbarPosition,
