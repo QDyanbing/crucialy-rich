@@ -14,16 +14,20 @@ describe("@crucialy-rich/core public API", () => {
       "quote",
       "codeBlock",
       "divider",
+      "image",
       "bulletList",
       "orderedList",
       "taskList",
     ]);
-    expect(core.VOID_BLOCK_TYPES).toEqual(["divider"]);
+    expect(core.VOID_BLOCK_TYPES).toEqual(["divider", "image"]);
+    expect(core.IMAGE_STATUSES).toEqual(["loading", "ready", "error"]);
+    expect(core.IMAGE_PROTOCOLS).toEqual(["http:", "https:", "blob:"]);
     expect(core.HEADING_LEVELS).toEqual([1, 2, 3, 4, 5, 6]);
     expect(typeof core.createCodeBlock).toBe("function");
     expect(typeof core.createDocument).toBe("function");
     expect(typeof core.createDivider).toBe("function");
     expect(typeof core.createHeading).toBe("function");
+    expect(typeof core.createImage).toBe("function");
     expect(typeof core.createBulletList).toBe("function");
     expect(typeof core.createListItem).toBe("function");
     expect(typeof core.createOrderedList).toBe("function");
@@ -73,6 +77,8 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.isDividerNode).toBe("function");
     expect(typeof core.isHeadingLevel).toBe("function");
     expect(typeof core.isHeadingNode).toBe("function");
+    expect(typeof core.isImageNode).toBe("function");
+    expect(typeof core.isImageStatus).toBe("function");
     expect(typeof core.isListItemNode).toBe("function");
     expect(typeof core.isListNode).toBe("function");
     expect(core.LIST_TYPES).toEqual(["bulletList", "orderedList", "taskList"]);
@@ -81,6 +87,8 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.isQuoteNode).toBe("function");
     expect(typeof core.isTextBlockNode).toBe("function");
     expect(typeof core.isVoidBlockNode).toBe("function");
+    expect(typeof core.normalizeImageDimension).toBe("function");
+    expect(typeof core.sanitizeImageSrc).toBe("function");
   });
 
   it("exposes the complete link feature namespace", () => {
@@ -305,6 +313,7 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.canExecuteInsertTextCommand).toBe("function");
     expect(typeof core.canExecuteItalicCommand).toBe("function");
     expect(typeof core.canExecuteInsertDividerCommand).toBe("function");
+    expect(typeof core.canExecuteInsertImageCommand).toBe("function");
     expect(typeof core.canExecuteMergeBlockCommand).toBe("function");
     expect(typeof core.canExecuteSetBackgroundColorCommand).toBe("function");
     expect(typeof core.canExecuteSetCodeBlockCommand).toBe("function");
@@ -343,6 +352,7 @@ describe("@crucialy-rich/core public API", () => {
       "deleteSelection",
       "insertText",
       "insertDivider",
+      "insertImage",
       "mergeBlock",
       "splitBlock",
     ]);
@@ -355,6 +365,8 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.getSelectedHeadingLevel).toBe("function");
     expect(typeof core.insertTextCommand).toBe("object");
     expect(typeof core.insertDividerCommand).toBe("object");
+    expect(typeof core.insertImageCommand).toBe("object");
+    expect(core.INSERT_IMAGE_COMMAND_NAME).toBe("insertImage");
     expect(typeof core.isBoldCommandActive).toBe("function");
     expect(typeof core.isCodeBlockCommandActive).toBe("function");
     expect(typeof core.isItalicCommandActive).toBe("function");

@@ -12,6 +12,7 @@ import {
   DELETE_SELECTION_COMMAND_NAME,
   executeCommand,
   INSERT_TEXT_COMMAND_NAME,
+  INSERT_IMAGE_COMMAND_NAME,
   ITALIC_COMMAND_NAME,
   MERGE_BLOCK_COMMAND_NAME,
   SET_BACKGROUND_COLOR_COMMAND_NAME,
@@ -26,6 +27,27 @@ import {
 } from "../../src";
 
 describe("default command registry integration", () => {
+  it("executes image insertion through the default registry", () => {
+    const registry = createDefaultCommandRegistry();
+    const document = createDocument([createParagraph([createText("封面说明")])]);
+    const result = executeCommand(registry, INSERT_IMAGE_COMMAND_NAME, {
+      context: {
+        document,
+        selection: {
+          anchor: { offset: 0, path: [0, 0] },
+          focus: { offset: 0, path: [0, 0] },
+        },
+      },
+      payload: { alt: "封面", src: "https://example.com/cover.png" },
+    });
+
+    expect(result.ok).toBe(true);
+    expect(applyTransaction(document, result.transaction!).children[1]).toMatchObject({
+      alt: "封面",
+      type: "image",
+    });
+  });
+
   it("executes list commands through the default registry", () => {
     const registry = createDefaultCommandRegistry();
     const document = createDocument([createParagraph([createText("项目")])]);
