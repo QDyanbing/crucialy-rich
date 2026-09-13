@@ -303,9 +303,12 @@ h3 {
 .rendered-document img {
   display: block;
   width: auto;
+  min-width: min(160px, 100%);
   max-width: 100%;
+  min-height: 80px;
   height: auto;
   border-radius: 6px;
+  object-fit: contain;
 }
 
 .rendered-document img[data-selected="true"] {

@@ -1512,7 +1512,7 @@ test("applies insert text from the operation controls", async ({ page }) => {
   await page.goto("/");
 
   await page.getByLabel("插入文本").fill("新文本");
-  await page.getByRole("button", { name: "插入" }).click();
+  await page.getByRole("button", { name: "插入", exact: true }).click();
 
   await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
     '"text": "新文本ucialy-rich。"',
@@ -1544,7 +1544,7 @@ test("undos and redoes operation control changes", async ({ page }) => {
   await expect(page.getByLabel("History 状态")).toContainText('"redoStack": 0');
 
   await page.getByLabel("插入文本").fill("回");
-  await page.getByRole("button", { name: "插入" }).click();
+  await page.getByRole("button", { name: "插入", exact: true }).click();
 
   await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
     '"text": "回ucialy-rich。"',
@@ -1891,4 +1891,44 @@ test("highlights the selected document json node", async ({ page }) => {
   await page.getByLabel("锚点路径").fill("1,0");
 
   await expect(highlightedLines.filter({ hasText: "选区模型已就绪。" })).toBeVisible();
+});
+
+test("inserts, selects, and deletes image blocks", async ({ page }) => {
+  await page.goto("/");
+
+  const editor = page.getByLabel("已渲染文档");
+  const documentJson = page.getByLabel("文档 JSON", { exact: true });
+
+  await setDebuggerSelection(page, "0,0", 3, 3);
+  await page.getByLabel("图片地址").fill("https://example.com/cover.png");
+  await page.getByRole("button", { name: "插入网络图片" }).click();
+
+  const remoteImage = editor.locator('img[alt="网络图片"]');
+
+  await expect(remoteImage).toHaveAttribute("src", "https://example.com/cover.png");
+  await expect(documentJson).toContainText('"type": "image"');
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+
+  await remoteImage.click({ force: true });
+  await expect(remoteImage).toHaveAttribute("data-selected", "true");
+  await editor.press("Delete");
+
+  await expect(remoteImage).toHaveCount(0);
+  await expect(documentJson).not.toContainText('"type": "image"');
+  await expect(page.getByLabel("选区 JSON")).toContainText('"path": [');
+
+  await page.getByLabel("选择本地图片").setInputFiles({
+    buffer: Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+      "base64",
+    ),
+    mimeType: "image/png",
+    name: "本地封面.png",
+  });
+
+  const localImage = editor.locator('img[alt="本地封面.png"]');
+
+  await expect(localImage).toHaveAttribute("src", /^blob:/);
+  await expect(documentJson).toContainText('"src": "blob:');
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
