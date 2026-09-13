@@ -23,3 +23,11 @@ export interface RangeSelection {
   anchor: Point;
   focus: Point;
 }
+
+/**
+ * BlockSelection 定位一个完整的顶层块节点。
+ */
+export interface BlockSelection {
+  path: Path;
+  type: "block";
+}
