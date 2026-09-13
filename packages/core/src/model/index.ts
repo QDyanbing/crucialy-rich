@@ -50,6 +50,8 @@ export {
   isDividerNode,
   isHeadingLevel,
   isHeadingNode,
+  isImageNode,
+  isImageStatus,
   isListItemNode,
   isListEntryNode,
   isListNode,
@@ -69,6 +71,7 @@ export {
   createDocument,
   createDivider,
   createHeading,
+  createImage,
   createListItem,
   createOrderedList,
   createParagraph,
@@ -77,6 +80,7 @@ export {
   createTaskItem,
   createTaskList,
 } from "./factories";
+export type { CreateImageOptions } from "./factories";
 export {
   areLinkMarksEqual,
   isValidLinkMark,

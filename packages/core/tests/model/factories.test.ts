@@ -6,6 +6,7 @@ import {
   createDocument,
   createDivider,
   createHeading,
+  createImage,
   createListItem,
   createOrderedList,
   createParagraph,
@@ -19,6 +20,7 @@ import {
   isDocumentNode,
   isDividerNode,
   isHeadingNode,
+  isImageNode,
   isParagraphNode,
   isQuoteNode,
   isTextNode,
@@ -150,6 +152,39 @@ describe("model factories", () => {
 
     expect(isDividerNode(divider)).toBe(true);
     expect(divider).toEqual({ children: [], type: "divider" });
+  });
+
+  it("creates images with stable defaults", () => {
+    const first = createImage("https://example.com/cover.png");
+    const second = createImage("blob:https://example.com/local");
+
+    expect(isImageNode(first)).toBe(true);
+    expect(first).toEqual({
+      alt: "",
+      children: [],
+      height: null,
+      src: "https://example.com/cover.png",
+      status: "ready",
+      type: "image",
+      width: null,
+    });
+    expect(first.children).not.toBe(second.children);
+  });
+
+  it("creates images with explicit metadata", () => {
+    expect(
+      createImage("https://example.com/cover.png", {
+        alt: "项目封面",
+        height: 480,
+        status: "loading",
+        width: 640,
+      }),
+    ).toMatchObject({
+      alt: "项目封面",
+      height: 480,
+      status: "loading",
+      width: 640,
+    });
   });
 
   it("creates list items and both list types", () => {

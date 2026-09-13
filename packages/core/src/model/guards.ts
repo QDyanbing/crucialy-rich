@@ -1,5 +1,6 @@
 import {
   HEADING_LEVELS,
+  IMAGE_STATUSES,
   LIST_TYPES,
   type BlockNode,
   type BulletListNode,
@@ -8,6 +9,8 @@ import {
   type DocumentNode,
   type HeadingLevel,
   type HeadingNode,
+  type ImageNode,
+  type ImageStatus,
   type ListItemNode,
   type ListEntryNode,
   type ListNode,
@@ -23,6 +26,7 @@ import {
 } from "./types";
 
 const HEADING_LEVEL_SET = new Set<number>(HEADING_LEVELS);
+const IMAGE_STATUS_SET = new Set<string>(IMAGE_STATUSES);
 const LIST_TYPE_SET = new Set<string>(LIST_TYPES);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -60,6 +64,14 @@ export function isCodeBlockNode(value: unknown): value is CodeBlockNode {
 
 export function isDividerNode(value: unknown): value is DividerNode {
   return isRecord(value) && value.type === "divider" && Array.isArray(value.children);
+}
+
+export function isImageStatus(value: unknown): value is ImageStatus {
+  return typeof value === "string" && IMAGE_STATUS_SET.has(value);
+}
+
+export function isImageNode(value: unknown): value is ImageNode {
+  return isRecord(value) && value.type === "image" && Array.isArray(value.children);
 }
 
 export function isListType(value: unknown): value is ListType {
@@ -113,7 +125,7 @@ export function isTextBlockNode(value: unknown): value is TextBlockNode {
 }
 
 export function isVoidBlockNode(value: unknown): value is VoidBlockNode {
-  return isDividerNode(value);
+  return isDividerNode(value) || isImageNode(value);
 }
 
 export function isBlockNode(value: unknown): value is BlockNode {

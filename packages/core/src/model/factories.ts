@@ -7,6 +7,8 @@ import type {
   DocumentNode,
   HeadingLevel,
   HeadingNode,
+  ImageNode,
+  ImageStatus,
   ListItemNode,
   ListNode,
   OrderedListNode,
@@ -69,6 +71,26 @@ export function createCodeBlock(children: TextNode[] = [createText()]): CodeBloc
 /** 创建一个不可编辑的分隔线节点。 */
 export function createDivider(): DividerNode {
   return { children: [], type: "divider" };
+}
+
+export interface CreateImageOptions {
+  alt?: string;
+  height?: number | null;
+  status?: ImageStatus;
+  width?: number | null;
+}
+
+/** 创建一个不可编辑的图片节点。 */
+export function createImage(src: string, options: CreateImageOptions = {}): ImageNode {
+  return {
+    alt: options.alt ?? "",
+    children: [],
+    height: options.height ?? null,
+    src,
+    status: options.status ?? "ready",
+    type: "image",
+    width: options.width ?? null,
+  };
 }
 
 export function createListItem(

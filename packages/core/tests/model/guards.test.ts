@@ -8,6 +8,8 @@ import {
   isDividerNode,
   isHeadingLevel,
   isHeadingNode,
+  isImageNode,
+  isImageStatus,
   isListItemNode,
   isListEntryNode,
   isListNode,
@@ -68,6 +70,28 @@ describe("model type guards", () => {
     expect(isTextBlockNode(divider)).toBe(false);
     expect(isBlockNode(divider)).toBe(true);
     expect(isDividerNode({ type: "divider" })).toBe(false);
+  });
+
+  it("recognizes image nodes and statuses", () => {
+    const image = {
+      alt: "封面",
+      children: [],
+      height: null,
+      src: "https://example.com/cover.png",
+      status: "ready",
+      type: "image",
+      width: null,
+    };
+
+    expect(isImageNode(image)).toBe(true);
+    expect(isVoidBlockNode(image)).toBe(true);
+    expect(isBlockNode(image)).toBe(true);
+    expect(isTextBlockNode(image)).toBe(false);
+    expect(isImageNode({ type: "image" })).toBe(false);
+    expect(isImageStatus("loading")).toBe(true);
+    expect(isImageStatus("ready")).toBe(true);
+    expect(isImageStatus("error")).toBe(true);
+    expect(isImageStatus("done")).toBe(false);
   });
 
   it("recognizes list types and list nodes", () => {
