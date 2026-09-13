@@ -13,6 +13,7 @@ import {
   createDocument,
   createDivider,
   createHeading,
+  createImage,
   createListItem,
   createOrderedList,
   createParagraph,
@@ -30,6 +31,7 @@ import {
   getTextInRange,
   INSERT_TEXT_COMMAND_NAME,
   INSERT_DIVIDER_COMMAND_NAME,
+  INSERT_IMAGE_COMMAND_NAME,
   ITALIC_COMMAND_NAME,
   isCollapsed,
   isValidPoint,
@@ -57,6 +59,7 @@ import {
   type CommandName,
   type CommandResult,
   type CommandState,
+  type BlockSelection,
   type DocumentNode,
   type HistoryChange,
   type HeadingLevel,
@@ -68,6 +71,7 @@ import {
 } from "@crucialy-rich/core";
 import {
   closeSlashMenu,
+  createLocalImageResource,
   createDefaultSlashCommandItems,
   createDefaultToolbarItems,
   executeSlashCommand,
@@ -82,6 +86,7 @@ import {
   openSlashMenu,
   RichTextEditor,
   type FloatingToolbarAnchorRect,
+  type LocalImageResource,
   type RichTextEditorTransactionEvent,
   type SlashCommandItem,
   type SlashMenuAnchorRect,
@@ -90,6 +95,7 @@ import {
 } from "@crucialy-rich/react";
 import {
   StrictMode,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -111,6 +117,7 @@ type ModelExampleId =
   | "advanced-lists"
   | "marks"
   | "links"
+  | "images"
   | "empty"
   | "invalid";
 
@@ -350,6 +357,22 @@ const modelExamples: ModelExample[] = [
     ]),
   },
   {
+    id: "images",
+    label: "图片块",
+    selection: {
+      anchor: { path: [0, 0], offset: 4 },
+      focus: { path: [0, 0], offset: 4 },
+    },
+    value: createDocument([
+      createParagraph([createText("图片示例")]),
+      createImage("https://images.unsplash.com/photo-1497250681960-ef046c08a56e", {
+        alt: "绿色植物",
+        width: 640,
+      }),
+      createParagraph([createText("点击图片后可按退格键或删除键移除。")]),
+    ]),
+  },
+  {
     id: "empty",
     label: "空文档",
     selection: {
@@ -394,6 +417,7 @@ const demoCommandDescriptors: DemoCommandDescriptor[] = [
   { label: "加粗", name: BOLD_COMMAND_NAME },
   { label: "插入", name: INSERT_TEXT_COMMAND_NAME },
   { label: "分隔线", name: INSERT_DIVIDER_COMMAND_NAME },
+  { label: "图片", name: INSERT_IMAGE_COMMAND_NAME },
   { label: "斜体", name: ITALIC_COMMAND_NAME },
   { label: "下划线", name: UNDERLINE_COMMAND_NAME },
   { label: "删除线", name: STRIKE_COMMAND_NAME },
@@ -733,6 +757,10 @@ function DemoApp() {
     getModelExample("regular").selection,
   );
   const [insertTextValue, setInsertTextValue] = useState("插入文本");
+  const [imageUrlValue, setImageUrlValue] = useState(
+    "https://images.unsplash.com/photo-1497250681960-ef046c08a56e",
+  );
+  const [blockSelection, setBlockSelection] = useState<BlockSelection>();
   const [fontSizeValue, setFontSizeValue] = useState("18");
   const [textColorValue, setTextColorValue] = useState("#1677ff");
   const [backgroundColorValue, setBackgroundColorValue] = useState("#fff4cc");
@@ -748,6 +776,7 @@ function DemoApp() {
   const [slashMenuState, setSlashMenuState] = useState(closeSlashMenu);
   const savedLinkSelectionRef = useRef<RangeSelection | null>(null);
   const dismissedSlashTriggerRef = useRef<string | null>(null);
+  const localImageResourcesRef = useRef<LocalImageResource[]>([]);
   const [lastTransaction, setLastTransaction] = useState<Transaction | null>(null);
   const [lastTransactionReport, setLastTransactionReport] =
     useState<TransactionAcceptanceReport | null>(null);
@@ -760,6 +789,10 @@ function DemoApp() {
     () => normalizeDocument(documentValue),
     [documentValue],
   );
+
+  useEffect(() => () => {
+    localImageResourcesRef.current.forEach((resource) => resource.revoke());
+  });
   const selectedLink = useMemo(
     () =>
       getSelectedLinkMark({
@@ -809,29 +842,31 @@ function DemoApp() {
               ? {
                   text: insertTextValue,
                 }
-              : command.name === SET_FONT_SIZE_COMMAND_NAME
-                ? {
-                    fontSize: parseFontSizeOption(fontSizeValue),
-                  }
-                : command.name === SET_TEXT_COLOR_COMMAND_NAME
+              : command.name === INSERT_IMAGE_COMMAND_NAME
+                ? { alt: "网络图片", src: imageUrlValue }
+                : command.name === SET_FONT_SIZE_COMMAND_NAME
                   ? {
-                      textColor: textColorValue,
+                      fontSize: parseFontSizeOption(fontSizeValue),
                     }
-                  : command.name === SET_BACKGROUND_COLOR_COMMAND_NAME
+                  : command.name === SET_TEXT_COLOR_COMMAND_NAME
                     ? {
-                        backgroundColor: backgroundColorValue,
+                        textColor: textColorValue,
                       }
-                    : command.name === SET_LINK_COMMAND_NAME
-                      ? createLinkCommandPayload(
-                          linkHrefValue,
-                          linkTargetValue,
-                          linkRelValue,
-                        )
-                      : command.name === SET_HEADING_COMMAND_NAME
-                        ? { level: selectedHeadingLevel ?? null }
-                        : command.name === SET_CODE_BLOCK_COMMAND_NAME
-                          ? { enabled: true }
-                          : undefined,
+                    : command.name === SET_BACKGROUND_COLOR_COMMAND_NAME
+                      ? {
+                          backgroundColor: backgroundColorValue,
+                        }
+                      : command.name === SET_LINK_COMMAND_NAME
+                        ? createLinkCommandPayload(
+                            linkHrefValue,
+                            linkTargetValue,
+                            linkRelValue,
+                          )
+                        : command.name === SET_HEADING_COMMAND_NAME
+                          ? { level: selectedHeadingLevel ?? null }
+                          : command.name === SET_CODE_BLOCK_COMMAND_NAME
+                            ? { enabled: true }
+                            : undefined,
         }),
         label: command.label,
       })),
@@ -839,6 +874,7 @@ function DemoApp() {
       backgroundColorValue,
       fontSizeValue,
       insertTextValue,
+      imageUrlValue,
       linkHrefValue,
       linkRelValue,
       linkTargetValue,
@@ -944,6 +980,7 @@ function DemoApp() {
     setSlashMenuState(closeSlashMenu());
     dismissedSlashTriggerRef.current = null;
     setLinkEditorOpen(false);
+    setBlockSelection(undefined);
   }
 
   function handleNormalize() {
@@ -978,6 +1015,7 @@ function DemoApp() {
     );
     setSlashMenuRect(null);
     setSlashMenuState(closeSlashMenu());
+    setBlockSelection(undefined);
   }
 
   function applyHistoryChange(change: HistoryChange | undefined) {
@@ -1025,6 +1063,47 @@ function DemoApp() {
         },
       }),
     );
+  }
+
+  function handleInsertImage() {
+    applyCommandResult(
+      executeCommand(demoCommandRegistry, INSERT_IMAGE_COMMAND_NAME, {
+        context: {
+          document: normalizedDocument,
+          selection: modelSelection,
+        },
+        payload: { alt: "网络图片", src: imageUrlValue },
+      }),
+    );
+  }
+
+  function handleLocalImageChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    const resource = createLocalImageResource(file);
+
+    if (resource) {
+      const result = executeCommand(demoCommandRegistry, INSERT_IMAGE_COMMAND_NAME, {
+        context: {
+          document: normalizedDocument,
+          selection: modelSelection,
+        },
+        payload: resource.payload,
+      });
+
+      if (result.ok) {
+        localImageResourcesRef.current.push(resource);
+        applyCommandResult(result);
+      } else {
+        resource.revoke();
+      }
+    }
+
+    event.target.value = "";
   }
 
   function handleToggleList(commandName: CommandName) {
@@ -1361,6 +1440,7 @@ function DemoApp() {
       createTransactionAcceptanceReport(event.before, event.transaction),
     );
     syncSlashMenu(findSlashMenuTrigger(event.after, event.selection));
+    setBlockSelection(undefined);
   }
 
   function handleSlashCommand(item: SlashCommandItem) {
@@ -1433,7 +1513,7 @@ function DemoApp() {
           <p className="eyebrow">调试工作台</p>
           <h1 id="page-title">crucialy-rich</h1>
         </div>
-        <span className="status-pill">第 18 周斜杠菜单</span>
+        <span className="status-pill">第 19 周图片闭环</span>
       </header>
 
       <section className="workspace-grid" aria-label="编辑器工作区">
@@ -1465,11 +1545,40 @@ function DemoApp() {
               selection={modelSelection}
             />
           ) : null}
+          <div className="image-controls" aria-label="图片插入控制">
+            <label>
+              <span>图片地址</span>
+              <input
+                aria-label="图片地址"
+                inputMode="url"
+                value={imageUrlValue}
+                onChange={(event) => setImageUrlValue(event.target.value)}
+              />
+            </label>
+            <button
+              type="button"
+              disabled={isCommandDisabled(INSERT_IMAGE_COMMAND_NAME)}
+              onClick={handleInsertImage}
+            >
+              插入网络图片
+            </button>
+            <label>
+              <span>本地图片预览（不上传）</span>
+              <input
+                accept="image/*"
+                aria-label="选择本地图片"
+                type="file"
+                onChange={handleLocalImageChange}
+              />
+            </label>
+          </div>
           <RichTextEditor
+            {...(blockSelection ? { blockSelection } : {})}
             className="rendered-document"
             contentEditable
             label="已渲染文档"
             onKeyDown={handleEditorKeyDown}
+            onBlockSelectionChange={setBlockSelection}
             onKeyUp={handleBrowserSelectionSync}
             onMouseUp={handleBrowserSelectionSync}
             onSelectionChange={setModelSelection}
