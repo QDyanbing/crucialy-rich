@@ -6,6 +6,7 @@ import {
   createDocument,
   createDivider,
   createHeading,
+  createImage,
   createListItem,
   createOrderedList,
   createParagraph,
@@ -166,6 +167,32 @@ describe("renderDocument", () => {
       attributes: { [MODEL_PATH_ATTRIBUTE]: "[0]" },
       path: [0],
       tagName: "hr",
+    });
+  });
+
+  it("renders images as non-editable void elements", () => {
+    const document = createDocument([
+      createImage("https://example.com/cover.png", {
+        alt: "封面",
+        height: 360,
+        status: "loading",
+        width: 640,
+      }),
+    ]);
+
+    expect(renderDocument(document).children?.[0]).toEqual({
+      attributes: {
+        [MODEL_PATH_ATTRIBUTE]: "[0]",
+        alt: "封面",
+        contentEditable: "false",
+        "data-crucialy-image": "true",
+        "data-status": "loading",
+        height: "360",
+        src: "https://example.com/cover.png",
+        width: "640",
+      },
+      path: [0],
+      tagName: "img",
     });
   });
 

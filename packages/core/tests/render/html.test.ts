@@ -6,6 +6,7 @@ import {
   createDocument,
   createDivider,
   createHeading,
+  createImage,
   createListItem,
   createOrderedList,
   createParagraph,
@@ -67,6 +68,20 @@ describe("renderNodeToHtml", () => {
 
     expect(renderNodeToHtml(renderDocument(document))).toBe(
       '<div data-crucialy-path="[]"><hr data-crucialy-path="[0]"></div>',
+    );
+  });
+
+  it("serializes image metadata and escapes alt text", () => {
+    const document = createDocument([
+      createImage("https://example.com/cover.png", {
+        alt: "中文“封面” & preview",
+        height: 360,
+        width: 640,
+      }),
+    ]);
+
+    expect(renderNodeToHtml(renderDocument(document))).toBe(
+      '<div data-crucialy-path="[]"><img data-crucialy-path="[0]" alt="中文“封面” &amp; preview" contentEditable="false" data-crucialy-image="true" data-status="ready" height="360" src="https://example.com/cover.png" width="640"></div>',
     );
   });
 

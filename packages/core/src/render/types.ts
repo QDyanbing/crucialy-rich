@@ -13,6 +13,7 @@ export type RenderedTagName =
   | "h5"
   | "h6"
   | "hr"
+  | "img"
   | "input"
   | "li"
   | "ol"

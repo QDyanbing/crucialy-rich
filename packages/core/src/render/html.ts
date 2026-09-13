@@ -39,7 +39,7 @@ function renderAttributes(node: RenderedElementNode): string {
 }
 
 export function renderNodeToHtml(node: RenderedElementNode): string {
-  if (node.tagName === "hr" || node.tagName === "input") {
+  if (node.tagName === "hr" || node.tagName === "img" || node.tagName === "input") {
     return `<${node.tagName}${renderAttributes(node)}>`;
   }
 

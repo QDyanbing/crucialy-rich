@@ -146,6 +146,21 @@ function renderListNode(node: ListNode, path: Path): RenderedElementNode {
 }
 
 function renderBlockNode(node: BlockNode, path: Path): RenderedElementNode {
+  if (node.type === "image") {
+    return createRenderedNode("img", path, {
+      attributes: {
+        ...createModelPathAttributes(path),
+        alt: node.alt,
+        contentEditable: "false",
+        "data-crucialy-image": "true",
+        "data-status": node.status,
+        ...(node.height === null ? {} : { height: String(node.height) }),
+        src: node.src,
+        ...(node.width === null ? {} : { width: String(node.width) }),
+      },
+    });
+  }
+
   if (node.type === "divider") {
     return createRenderedNode("hr", path);
   }
