@@ -45,11 +45,14 @@ export {
 } from "./heading";
 export type { SetHeadingCommandPayload } from "./heading";
 export {
+  canExecuteDeleteImageCommand,
   canExecuteInsertImageCommand,
+  DELETE_IMAGE_COMMAND_NAME,
+  deleteImageCommand,
   INSERT_IMAGE_COMMAND_NAME,
   insertImageCommand,
 } from "./image";
-export type { InsertImageCommandPayload } from "./image";
+export type { DeleteImageCommandPayload, InsertImageCommandPayload } from "./image";
 export {
   canExecuteToggleQuoteCommand,
   isQuoteCommandActive,

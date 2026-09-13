@@ -314,6 +314,7 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.canExecuteItalicCommand).toBe("function");
     expect(typeof core.canExecuteInsertDividerCommand).toBe("function");
     expect(typeof core.canExecuteInsertImageCommand).toBe("function");
+    expect(typeof core.canExecuteDeleteImageCommand).toBe("function");
     expect(typeof core.canExecuteMergeBlockCommand).toBe("function");
     expect(typeof core.canExecuteSetBackgroundColorCommand).toBe("function");
     expect(typeof core.canExecuteSetCodeBlockCommand).toBe("function");
@@ -353,6 +354,7 @@ describe("@crucialy-rich/core public API", () => {
       "insertText",
       "insertDivider",
       "insertImage",
+      "deleteImage",
       "mergeBlock",
       "splitBlock",
     ]);
@@ -366,6 +368,8 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.insertTextCommand).toBe("object");
     expect(typeof core.insertDividerCommand).toBe("object");
     expect(typeof core.insertImageCommand).toBe("object");
+    expect(typeof core.deleteImageCommand).toBe("object");
+    expect(core.DELETE_IMAGE_COMMAND_NAME).toBe("deleteImage");
     expect(core.INSERT_IMAGE_COMMAND_NAME).toBe("insertImage");
     expect(typeof core.isBoldCommandActive).toBe("function");
     expect(typeof core.isCodeBlockCommandActive).toBe("function");
