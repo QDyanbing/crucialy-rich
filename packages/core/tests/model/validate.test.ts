@@ -6,6 +6,7 @@ import {
   createDocument,
   createDivider,
   createHeading,
+  createImage,
   createListItem,
   createOrderedList,
   createParagraph,
@@ -18,6 +19,45 @@ import { HEADING_LEVELS } from "../../src/model/types";
 import { validateDocument } from "../../src/model/validate";
 
 describe("validateDocument", () => {
+  it("accepts a complete image block", () => {
+    expect(
+      validateDocument(
+        createDocument([
+          createImage("https://example.com/cover.png", {
+            alt: "项目封面",
+            height: 480,
+            status: "ready",
+            width: 640,
+          }),
+        ]),
+      ),
+    ).toEqual({ errors: [], valid: true });
+  });
+
+  it.each([
+    [{ src: "javascript:alert(1)" }, "image src"],
+    [{ alt: undefined }, "image alt"],
+    [{ width: 0 }, "image width"],
+    [{ height: -1 }, "image height"],
+    [{ status: "done" }, "image status"],
+    [{ children: [{ text: "非法", type: "text" }] }, "image 不能包含子节点"],
+  ])("rejects invalid image attributes", (override, message) => {
+    const image = {
+      alt: "图片",
+      children: [],
+      height: null,
+      src: "https://example.com/image.png",
+      status: "ready",
+      type: "image",
+      width: null,
+      ...override,
+    };
+    const result = validateDocument({ children: [image], type: "document" });
+
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((error) => error.message.includes(message))).toBe(true);
+  });
+
   it("accepts bullet and ordered list structures", () => {
     const document = createDocument([
       createBulletList([createListItem([createText("无序项")])]),

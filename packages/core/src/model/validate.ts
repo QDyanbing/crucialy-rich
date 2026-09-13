@@ -1,12 +1,15 @@
 import {
   isBlockNode,
   isDocumentNode,
+  isImageNode,
+  isImageStatus,
   isListItemNode,
   isListNode,
   isTaskItemNode,
   isTextBlockNode,
   isTextNode,
 } from "./guards";
+import { normalizeImageDimension, sanitizeImageSrc } from "./image";
 import { isValidLinkMark } from "./link";
 import { isValidTextMarkAttributeValue } from "./marks";
 import {
@@ -187,6 +190,34 @@ export function validateDocument(value: unknown): ValidationResult {
 
     if (isListNode(child)) {
       validateList(child, [blockIndex], 1, errors);
+      return;
+    }
+
+    if (isImageNode(child)) {
+      if (child.children.length > 0) {
+        errors.push({ path: [blockIndex], message: "image 不能包含子节点" });
+      }
+
+      if (sanitizeImageSrc(child.src) === undefined) {
+        errors.push({ path: [blockIndex], message: "image src 必须是安全的绝对 URL" });
+      }
+
+      if (typeof child.alt !== "string") {
+        errors.push({ path: [blockIndex], message: "image alt 必须是字符串" });
+      }
+
+      if (child.width !== null && normalizeImageDimension(child.width) === null) {
+        errors.push({ path: [blockIndex], message: "image width 必须是正数或 null" });
+      }
+
+      if (child.height !== null && normalizeImageDimension(child.height) === null) {
+        errors.push({ path: [blockIndex], message: "image height 必须是正数或 null" });
+      }
+
+      if (!isImageStatus(child.status)) {
+        errors.push({ path: [blockIndex], message: "image status 不受支持" });
+      }
+
       return;
     }
 
