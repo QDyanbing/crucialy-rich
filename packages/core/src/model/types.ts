@@ -11,12 +11,15 @@ export const BLOCK_TYPES = [
   "quote",
   "codeBlock",
   "divider",
+  "image",
   "bulletList",
   "orderedList",
   "taskList",
 ] as const;
 
-export const VOID_BLOCK_TYPES = ["divider"] as const;
+export const VOID_BLOCK_TYPES = ["divider", "image"] as const;
+
+export const IMAGE_STATUSES = ["loading", "ready", "error"] as const;
 
 export const LIST_TYPES = ["bulletList", "orderedList", "taskList"] as const;
 
@@ -49,6 +52,8 @@ export type TextMarkAttributeType = (typeof TEXT_MARK_ATTRIBUTE_TYPES)[number];
 export type LinkTarget = (typeof LINK_TARGETS)[number];
 
 export type LinkRelToken = (typeof LINK_REL_TOKENS)[number];
+
+export type ImageStatus = (typeof IMAGE_STATUSES)[number];
 
 export interface LinkMarkAttributes {
   href: string;
@@ -99,6 +104,16 @@ export interface DividerNode {
   children: [];
 }
 
+export interface ImageNode {
+  alt: string;
+  children: [];
+  height: number | null;
+  src: string;
+  status: ImageStatus;
+  type: "image";
+  width: number | null;
+}
+
 export interface ListItemNode {
   type: "listItem";
   children: TextNode[];
@@ -140,7 +155,7 @@ export type ListNode = BulletListNode | OrderedListNode | TaskListNode;
  */
 export type TextBlockNode = CodeBlockNode | HeadingNode | ParagraphNode | QuoteNode;
 
-export type VoidBlockNode = DividerNode;
+export type VoidBlockNode = DividerNode | ImageNode;
 
 export type BlockNode = ListNode | TextBlockNode | VoidBlockNode;
 

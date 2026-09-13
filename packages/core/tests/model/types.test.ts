@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   BLOCK_TYPES,
   HEADING_LEVELS,
+  IMAGE_STATUSES,
   LINK_REL_TOKENS,
   LINK_TARGETS,
   LIST_TYPES,
@@ -14,6 +15,8 @@ import {
   type DocumentNode,
   type HeadingLevel,
   type HeadingNode,
+  type ImageNode,
+  type ImageStatus,
   type LinkMarkAttributes,
   type LinkRelToken,
   type LinkTarget,
@@ -47,14 +50,31 @@ describe("model node types", () => {
       "quote",
       "codeBlock",
       "divider",
+      "image",
       "bulletList",
       "orderedList",
       "taskList",
     ]);
-    expect(VOID_BLOCK_TYPES).toEqual(["divider"]);
+    expect(VOID_BLOCK_TYPES).toEqual(["divider", "image"]);
     expect(HEADING_LEVELS).toEqual([1, 2, 3, 4, 5, 6]);
     expect(heading.level).toBe(2);
     expect(quote.type).toBe("quote");
+  });
+
+  it("describes an image block and its loading states", () => {
+    const status: ImageStatus = "ready";
+    const image: ImageNode = {
+      alt: "示例图片",
+      children: [],
+      height: 480,
+      src: "https://example.com/image.png",
+      status,
+      type: "image",
+      width: 640,
+    };
+
+    expect(IMAGE_STATUSES).toEqual(["loading", "ready", "error"]);
+    expect(image.status).toBe("ready");
   });
 
   it("describes ordered and unordered lists", () => {

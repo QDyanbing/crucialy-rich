@@ -18,6 +18,10 @@ import type { Path } from "../selection";
 import type { InsertBlockOperation } from "./types";
 
 function cloneBlock(block: BlockNode): BlockNode {
+  if (block.type === "image") {
+    return { ...block, children: [] };
+  }
+
   if (block.type === "divider") {
     return createDivider();
   }

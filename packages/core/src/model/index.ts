@@ -1,6 +1,7 @@
 export {
   BLOCK_TYPES,
   HEADING_LEVELS,
+  IMAGE_STATUSES,
   LINK_REL_TOKENS,
   LINK_TARGETS,
   LIST_TYPES,
@@ -18,6 +19,8 @@ export type {
   DividerNode,
   HeadingLevel,
   HeadingNode,
+  ImageNode,
+  ImageStatus,
   LinkMarkAttributes,
   LinkRelToken,
   LinkTarget,

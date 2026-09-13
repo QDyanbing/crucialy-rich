@@ -13,6 +13,10 @@ import type { Point, RangeSelection } from "../selection";
 import type { HistorySnapshot } from "./types";
 
 function cloneBlock(block: BlockNode): BlockNode {
+  if (block.type === "image") {
+    return { ...block, children: [] };
+  }
+
   if (block.type === "divider") {
     return { children: [], type: "divider" };
   }
