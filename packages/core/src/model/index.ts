@@ -81,6 +81,7 @@ export {
   createTaskList,
 } from "./factories";
 export type { CreateImageOptions } from "./factories";
+export { IMAGE_PROTOCOLS, normalizeImageDimension, sanitizeImageSrc } from "./image";
 export {
   areLinkMarksEqual,
   isValidLinkMark,
