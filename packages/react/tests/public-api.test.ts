@@ -216,6 +216,18 @@ describe("@crucialy-rich/react public API", () => {
     expect(html).toContain('aria-readonly="false"');
   });
 
+  it("accepts a paste event override on the editor shell", () => {
+    const onPaste = vi.fn();
+    const html = renderToStaticMarkup(
+      createElement(RichTextEditor, {
+        contentEditable: true,
+        onPaste,
+      }),
+    );
+
+    expect(html).toContain('contenteditable="true"');
+  });
+
   it("renders an empty document boundary", () => {
     const document: DocumentNode = {
       type: "document",

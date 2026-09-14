@@ -2,6 +2,7 @@ import {
   applyTransaction,
   applyModelSelectionToDom,
   createDefaultCommandRegistry,
+  DEFAULT_CLIPBOARD_PARSERS,
   createDocument,
   createBackspaceInputTransaction,
   createBlockSelection,
@@ -22,6 +23,8 @@ import {
   isCollapsed,
   isTextNode,
   MERGE_BLOCK_COMMAND_NAME,
+  parseClipboardData,
+  PASTE_COMMAND_NAME,
   renderDocument,
   SPLIT_BLOCK_COMMAND_NAME,
   type CommandResult,
@@ -39,6 +42,7 @@ import {
   useRef,
   useState,
   type FormEvent,
+  type ClipboardEvent,
   type HTMLAttributes,
   type KeyboardEvent,
   type MouseEvent,
@@ -55,6 +59,7 @@ export interface RichTextEditorProps
     | "onKeyDown"
     | "onKeyUp"
     | "onMouseUp"
+    | "onPaste"
     | "suppressContentEditableWarning"
   > {
   defaultValue?: DocumentNode;
@@ -73,6 +78,7 @@ export type RichTextEditorInputType =
   | "deleteImage"
   | "deleteForward"
   | "insertParagraph"
+  | "insertFromPaste"
   | "insertText"
   | "indentListItem"
   | "outdentListItem"
@@ -373,6 +379,7 @@ export function RichTextEditor({
   onKeyDown,
   onKeyUp,
   onMouseUp,
+  onPaste,
   onChange,
   onSelectionChange,
   onTransaction,
@@ -546,6 +553,42 @@ export function RichTextEditor({
     commitInputResult(input);
   }
 
+  function handlePaste(event: ClipboardEvent<HTMLDivElement>) {
+    onPaste?.(event);
+
+    if (event.defaultPrevented || !editable) {
+      return;
+    }
+
+    const modelSelection = getModelSelectionFromDom(event.currentTarget, document);
+    const fragment = parseClipboardData(
+      {
+        getData: (mimeType) => event.clipboardData.getData(mimeType),
+        types: Array.from(event.clipboardData.types),
+      },
+      DEFAULT_CLIPBOARD_PARSERS,
+    );
+
+    if (!modelSelection || !fragment) {
+      return;
+    }
+
+    const result = executeCommand(richTextCommandRegistry, PASTE_COMMAND_NAME, {
+      context: { document, selection: modelSelection },
+      payload: { fragment },
+    });
+    const input = createKeyboardInputResultFromCommandResult(
+      result,
+      modelSelection,
+      "insertFromPaste",
+    );
+
+    if (input) {
+      event.preventDefault();
+      commitInputResult(input);
+    }
+  }
+
   function handleClick(event: MouseEvent<HTMLDivElement>) {
     onClick?.(event);
 
@@ -622,6 +665,7 @@ export function RichTextEditor({
       onKeyDown={handleKeyDown}
       onKeyUp={onKeyUp}
       onMouseUp={onMouseUp}
+      onPaste={handlePaste}
       role="textbox"
       suppressContentEditableWarning={suppressContentEditableWarning ?? editable}
     >
