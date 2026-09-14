@@ -30,7 +30,9 @@ text marks schema 当前支持 `bold`、`italic`、`underline` 和 `strike` 共�
 
 第 18 周“斜杠菜单闭环”已全部完成：React 包提供 Slash Command 配置校验、默认块命令目录、中文/英文关键词过滤、paragraph 折叠光标触发识别、浮层定位、Escape 关闭、上下键循环选择和 Enter/鼠标执行；`/query` 清理与目标命令合并为一个 Transaction，支持跨 mark 文本节点和一次撤销。
 
-第 19 周“图片闭环”已全部完成：core 支持安全 ImageNode、URL 清洗、校验/规范化、语义化 `img` 渲染、`insertImage` / `deleteImage` 命令和独立 BlockSelection；React 支持图片点击选中、Backspace/Delete 删除及本地 object URL 预览，Demo 提供中文 URL、本地和删除流程。真实上传由外部接入。当前指针为第 20 周 Day 1「Clipboard 架构」。
+第 19 周“图片闭环”已全部完成：core 支持安全 ImageNode、URL 清洗、校验/规范化、语义化 `img` 渲染、`insertImage` / `deleteImage` 命令和独立 BlockSelection；React 支持图片点击选中、Backspace/Delete 删除及本地 object URL 预览，Demo 提供中文 URL、本地和删除流程，真实上传由外部接入。
+
+第 20 周“粘贴闭环”已全部完成：core 提供可扩展 Clipboard parser、Markdown/HTML/纯文本优先级、安全 HTML 白名单和 `paste` 命令；纯文本换行转换为 paragraph，结构化内容保留标题、引用、代码、marks 和列表。React 通过 `onPaste` 生成统一 Transaction，Demo 与 Playwright 覆盖三种中文粘贴流程。当前指针为第 21 周 Day 1「Table 模型设计」。
 
 ## 技术栈
 
@@ -151,6 +153,7 @@ pnpm test:e2e
 - [工具栏](./docs/features/toolbar.md)
 - [斜杠菜单](./docs/features/slash-menu.md)
 - [图片](./docs/features/image.md)
+- [粘贴](./docs/features/paste.md)
 - [提交规范](./docs/development/commit-convention.md)
 - [测试策略](./docs/qa/test-strategy.md)
 - [脚手架验收基线](./docs/qa/scaffold-acceptance.md)
@@ -173,9 +176,11 @@ pnpm test:e2e
 - [第 17 周 QA](./docs/qa/week-17.md)
 - [第 18 周 QA](./docs/qa/week-18.md)
 - [第 19 周 QA](./docs/qa/week-19.md)
+- [第 20 周 QA](./docs/qa/week-20.md)
 - [工具栏闭环验收](./docs/qa/toolbar.md)
 - [斜杠菜单闭环验收](./docs/qa/slash-menu.md)
 - [图片闭环验收](./docs/qa/image.md)
+- [粘贴闭环验收](./docs/qa/paste.md)
 - [基础列表闭环验收](./docs/qa/list-basic.md)
 - [列表增强闭环验收](./docs/qa/list-advanced.md)
 - [代码块和分割线闭环验收](./docs/qa/code-block-divider.md)

@@ -58,6 +58,37 @@ describe("pasteCommand", () => {
     ]);
   });
 
+  it("replaces a selection across adjacent marked text nodes", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("前"),
+        createText("旧一", { bold: true }),
+        createText("旧二", { italic: true }),
+        createText("后"),
+      ]),
+    ]);
+    const result = pasteCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { offset: 1, path: [0, 1] },
+          focus: { offset: 1, path: [0, 2] },
+        },
+      },
+      payload: { fragment: parsePlainText("新")! },
+    });
+
+    expect(applyTransaction(document, result.transaction!).children[0]).toEqual(
+      createParagraph([
+        createText("前"),
+        createText("旧新", { bold: true }),
+        createText("二", { italic: true }),
+        createText("后"),
+      ]),
+    );
+    expect(result.selection?.anchor).toEqual({ offset: 2, path: [0, 1] });
+  });
+
   it("turns line breaks into paragraphs joined to surrounding text", () => {
     const document = createDocument([createParagraph([createText("前旧后")])]);
     const result = pasteCommand.execute({
