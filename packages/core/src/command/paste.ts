@@ -3,7 +3,9 @@ import {
   createDeleteTextOperation,
   createInsertTextOperation,
   createSelectionAfterInsertText,
+  createSplitBlockOperation,
   createTransaction,
+  type Operation,
 } from "../operation";
 import {
   isCollapsed,
@@ -30,7 +32,7 @@ function isSamePath(left: Path, right: Path): boolean {
 
 function resolvePasteTarget(
   input: CommandInput,
-): { range: RangeSelection; text: string } | undefined {
+): { lines: string[]; range: RangeSelection } | undefined {
   const selection = input.context.selection;
   const payload = input.payload;
 
@@ -44,22 +46,29 @@ function resolvePasteTarget(
     typeof payload.fragment !== "object" ||
     payload.fragment === null ||
     !("blocks" in payload.fragment) ||
+    !("mimeType" in payload.fragment) ||
     !Array.isArray(payload.fragment.blocks) ||
-    payload.fragment.blocks.length !== 1
+    payload.fragment.blocks.length === 0 ||
+    payload.fragment.mimeType !== "text/plain"
   ) {
     return undefined;
   }
 
   const range = normalizeRange(selection);
-  const [block] = payload.fragment.blocks;
 
-  if (!isSamePath(range.anchor.path, range.focus.path) || !isParagraphNode(block)) {
+  if (
+    range.anchor.path.length !== 2 ||
+    !isSamePath(range.anchor.path, range.focus.path) ||
+    !payload.fragment.blocks.every(isParagraphNode)
+  ) {
     return undefined;
   }
 
   return {
+    lines: payload.fragment.blocks.map((block) =>
+      block.children.map((node) => node.text).join(""),
+    ),
     range,
-    text: block.children.map((node) => node.text).join(""),
   };
 }
 
@@ -79,13 +88,36 @@ export const pasteCommand: Command = {
       );
     }
 
-    const insertOperation = createInsertTextOperation(target.range.anchor, target.text);
-    const operations = isCollapsed(target.range)
-      ? [insertOperation]
-      : [createDeleteTextOperation(target.range), insertOperation];
+    const operations: Operation[] = isCollapsed(target.range)
+      ? []
+      : [createDeleteTextOperation(target.range)];
+    let point = {
+      offset: target.range.anchor.offset,
+      path: [...target.range.anchor.path],
+    };
+
+    target.lines.forEach((line, index) => {
+      const insertOperation = createInsertTextOperation(point, line);
+
+      operations.push(insertOperation);
+      point = createSelectionAfterInsertText(insertOperation).anchor;
+
+      if (index < target.lines.length - 1) {
+        const [blockIndex] = point.path;
+
+        operations.push(createSplitBlockOperation(point));
+        point = {
+          offset: 0,
+          path: [(blockIndex ?? 0) + 1, 0],
+        };
+      }
+    });
 
     return createCommandSuccess(PASTE_COMMAND_NAME, {
-      selection: createSelectionAfterInsertText(insertOperation),
+      selection: {
+        anchor: point,
+        focus: { offset: point.offset, path: [...point.path] },
+      },
       transaction: createTransaction(operations),
     });
   },

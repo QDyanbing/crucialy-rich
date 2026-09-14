@@ -57,6 +57,35 @@ describe("pasteCommand", () => {
     ]);
   });
 
+  it("turns line breaks into paragraphs joined to surrounding text", () => {
+    const document = createDocument([createParagraph([createText("前旧后")])]);
+    const result = pasteCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { offset: 2, path: [0, 0] },
+          focus: { offset: 1, path: [0, 0] },
+        },
+      },
+      payload: { fragment: parsePlainText("第一行\n\n第三行")! },
+    });
+
+    expect(result.transaction?.operations.map((operation) => operation.type)).toEqual([
+      "delete_text",
+      "insert_text",
+      "split_block",
+      "insert_text",
+      "split_block",
+      "insert_text",
+    ]);
+    expect(applyTransaction(document, result.transaction!).children).toEqual([
+      createParagraph([createText("前第一行")]),
+      createParagraph([createText("")]),
+      createParagraph([createText("第三行后")]),
+    ]);
+    expect(result.selection?.anchor).toEqual({ offset: 3, path: [2, 0] });
+  });
+
   it("skips missing fragments and invalid selections", () => {
     const document = createDocument();
 
