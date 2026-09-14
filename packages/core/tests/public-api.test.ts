@@ -355,6 +355,7 @@ describe("@crucialy-rich/core public API", () => {
       "insertDivider",
       "insertImage",
       "deleteImage",
+      "paste",
       "mergeBlock",
       "splitBlock",
     ]);
@@ -369,6 +370,8 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.insertDividerCommand).toBe("object");
     expect(typeof core.insertImageCommand).toBe("object");
     expect(typeof core.deleteImageCommand).toBe("object");
+    expect(typeof core.pasteCommand).toBe("object");
+    expect(core.PASTE_COMMAND_NAME).toBe("paste");
     expect(core.DELETE_IMAGE_COMMAND_NAME).toBe("deleteImage");
     expect(core.INSERT_IMAGE_COMMAND_NAME).toBe("insertImage");
     expect(typeof core.isBoldCommandActive).toBe("function");

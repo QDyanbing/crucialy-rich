@@ -7,6 +7,7 @@ import { deleteSelectionCommand, insertTextCommand } from "./text";
 import { insertDividerCommand } from "./divider";
 import { deleteImageCommand, insertImageCommand } from "./image";
 import { LIST_COMMANDS } from "./list";
+import { pasteCommand } from "./paste";
 import { TEXT_STYLE_COMMANDS } from "./text-style";
 import type { Command } from "./types";
 
@@ -21,6 +22,7 @@ export const DEFAULT_COMMANDS: readonly Command[] = [
   insertDividerCommand,
   insertImageCommand,
   deleteImageCommand,
+  pasteCommand,
   mergeBlockCommand,
   splitBlockCommand,
 ];

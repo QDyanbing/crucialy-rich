@@ -116,6 +116,8 @@ export {
   underlineCommand,
 } from "./mark";
 export type { TextMarkCommandConfig } from "./mark";
+export { canExecutePasteCommand, PASTE_COMMAND_NAME, pasteCommand } from "./paste";
+export type { PasteCommandPayload } from "./paste";
 export { canExecuteCommand } from "./can-execute";
 export { createDefaultCommandRegistry, DEFAULT_COMMANDS } from "./defaults";
 export { executeCommand } from "./execute";
