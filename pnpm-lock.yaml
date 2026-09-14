@@ -83,6 +83,9 @@ importers:
 
   packages/core:
     dependencies:
+      marked:
+        specifier: 18.0.13
+        version: 18.0.13
       parse5:
         specifier: 8.0.1
         version: 8.0.1
@@ -2595,6 +2598,12 @@ packages:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.5
     dev: true
+
+  /marked@18.0.13:
+    resolution: {integrity: sha512-xTxVzZsBFwunP6HDmtBkabUQEYArnP7/rMDGmPj9SlrKlQ4i8MdYVow+nJL0eOqwpUqhzBoTBRADGN6uYwPyOw==}
+    engines: {node: '>= 20'}
+    hasBin: true
+    dev: false
 
   /mdn-data@2.27.1:
     resolution: {integrity: sha512-9Yubnt3e8A0OKwxYSXyhLymGW4sCufcLG6VdiDdUGVkPhpqLxlvP5vl1983gQjJl3tqbrM731mjaZaP68AgosQ==}

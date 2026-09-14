@@ -43,6 +43,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit --pretty false"
   },
   "dependencies": {
+    "marked": "18.0.13",
     "parse5": "8.0.1"
   }
 }
