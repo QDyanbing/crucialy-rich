@@ -7,6 +7,7 @@ import {
   createBulletList,
   createCodeBlock,
   createDefaultCommandRegistry,
+  DEFAULT_CLIPBOARD_PARSERS,
   createHistorySnapshot,
   createHistoryState,
   createTransactionAcceptanceReport,
@@ -37,6 +38,8 @@ import {
   isValidPoint,
   MERGE_BLOCK_COMMAND_NAME,
   normalizeDocument,
+  parseClipboardData,
+  PASTE_COMMAND_NAME,
   queryCommandState,
   redoHistory,
   recordHistory,
@@ -59,6 +62,7 @@ import {
   type CommandName,
   type CommandResult,
   type CommandState,
+  type ClipboardMimeType,
   type BlockSelection,
   type DocumentNode,
   type HistoryChange,
@@ -145,6 +149,11 @@ interface DemoCommandState extends CommandState {
 
 const FONT_SIZE_OPTIONS = [12, 14, 16, 18, 24, 32] as const;
 const HEADING_LEVEL_OPTIONS = [1, 2, 3, 4, 5, 6] as const;
+const PASTE_EXAMPLES: Record<ClipboardMimeType, string> = {
+  "text/html": "<p><strong>HTML 加粗</strong></p><ul><li>HTML 列表</li></ul>",
+  "text/markdown": "## Markdown 标题\n\n> Markdown 引用\n\n**Markdown 加粗**",
+  "text/plain": "纯文本第一行\n纯文本第二行",
+};
 
 function parseFontSizeOption(value: string): number | null {
   return value === "default" ? null : Number(value);
@@ -418,6 +427,7 @@ const demoCommandDescriptors: DemoCommandDescriptor[] = [
   { label: "插入", name: INSERT_TEXT_COMMAND_NAME },
   { label: "分隔线", name: INSERT_DIVIDER_COMMAND_NAME },
   { label: "图片", name: INSERT_IMAGE_COMMAND_NAME },
+  { label: "粘贴", name: PASTE_COMMAND_NAME },
   { label: "斜体", name: ITALIC_COMMAND_NAME },
   { label: "下划线", name: UNDERLINE_COMMAND_NAME },
   { label: "删除线", name: STRIKE_COMMAND_NAME },
@@ -760,6 +770,8 @@ function DemoApp() {
   const [imageUrlValue, setImageUrlValue] = useState(
     "https://images.unsplash.com/photo-1497250681960-ef046c08a56e",
   );
+  const [pasteMimeType, setPasteMimeType] = useState<ClipboardMimeType>("text/plain");
+  const [pasteValue, setPasteValue] = useState(PASTE_EXAMPLES["text/plain"]);
   const [blockSelection, setBlockSelection] = useState<BlockSelection>();
   const [fontSizeValue, setFontSizeValue] = useState("18");
   const [textColorValue, setTextColorValue] = useState("#1677ff");
@@ -788,6 +800,17 @@ function DemoApp() {
   const normalizedDocument = useMemo(
     () => normalizeDocument(documentValue),
     [documentValue],
+  );
+  const pasteFragment = useMemo(
+    () =>
+      parseClipboardData(
+        {
+          getData: () => pasteValue,
+          types: [pasteMimeType],
+        },
+        DEFAULT_CLIPBOARD_PARSERS,
+      ),
+    [pasteMimeType, pasteValue],
   );
 
   useEffect(() => () => {
@@ -844,29 +867,31 @@ function DemoApp() {
                 }
               : command.name === INSERT_IMAGE_COMMAND_NAME
                 ? { alt: "网络图片", src: imageUrlValue }
-                : command.name === SET_FONT_SIZE_COMMAND_NAME
-                  ? {
-                      fontSize: parseFontSizeOption(fontSizeValue),
-                    }
-                  : command.name === SET_TEXT_COLOR_COMMAND_NAME
+                : command.name === PASTE_COMMAND_NAME && pasteFragment
+                  ? { fragment: pasteFragment }
+                  : command.name === SET_FONT_SIZE_COMMAND_NAME
                     ? {
-                        textColor: textColorValue,
+                        fontSize: parseFontSizeOption(fontSizeValue),
                       }
-                    : command.name === SET_BACKGROUND_COLOR_COMMAND_NAME
+                    : command.name === SET_TEXT_COLOR_COMMAND_NAME
                       ? {
-                          backgroundColor: backgroundColorValue,
+                          textColor: textColorValue,
                         }
-                      : command.name === SET_LINK_COMMAND_NAME
-                        ? createLinkCommandPayload(
-                            linkHrefValue,
-                            linkTargetValue,
-                            linkRelValue,
-                          )
-                        : command.name === SET_HEADING_COMMAND_NAME
-                          ? { level: selectedHeadingLevel ?? null }
-                          : command.name === SET_CODE_BLOCK_COMMAND_NAME
-                            ? { enabled: true }
-                            : undefined,
+                      : command.name === SET_BACKGROUND_COLOR_COMMAND_NAME
+                        ? {
+                            backgroundColor: backgroundColorValue,
+                          }
+                        : command.name === SET_LINK_COMMAND_NAME
+                          ? createLinkCommandPayload(
+                              linkHrefValue,
+                              linkTargetValue,
+                              linkRelValue,
+                            )
+                          : command.name === SET_HEADING_COMMAND_NAME
+                            ? { level: selectedHeadingLevel ?? null }
+                            : command.name === SET_CODE_BLOCK_COMMAND_NAME
+                              ? { enabled: true }
+                              : undefined,
         }),
         label: command.label,
       })),
@@ -880,6 +905,7 @@ function DemoApp() {
       linkTargetValue,
       modelSelection,
       normalizedDocument,
+      pasteFragment,
       selectedHeadingLevel,
       textColorValue,
     ],
@@ -1104,6 +1130,29 @@ function DemoApp() {
     }
 
     event.target.value = "";
+  }
+
+  function handlePasteExample() {
+    if (!pasteFragment) {
+      return;
+    }
+
+    applyCommandResult(
+      executeCommand(demoCommandRegistry, PASTE_COMMAND_NAME, {
+        context: {
+          document: normalizedDocument,
+          selection: modelSelection,
+        },
+        payload: { fragment: pasteFragment },
+      }),
+    );
+  }
+
+  function handlePasteMimeTypeChange(event: ChangeEvent<HTMLSelectElement>) {
+    const mimeType = event.target.value as ClipboardMimeType;
+
+    setPasteMimeType(mimeType);
+    setPasteValue(PASTE_EXAMPLES[mimeType]);
   }
 
   function handleToggleList(commandName: CommandName) {
@@ -1513,7 +1562,7 @@ function DemoApp() {
           <p className="eyebrow">调试工作台</p>
           <h1 id="page-title">crucialy-rich</h1>
         </div>
-        <span className="status-pill">第 19 周图片闭环</span>
+        <span className="status-pill">第 20 周粘贴闭环</span>
       </header>
 
       <section className="workspace-grid" aria-label="编辑器工作区">
@@ -1571,6 +1620,35 @@ function DemoApp() {
                 onChange={handleLocalImageChange}
               />
             </label>
+          </div>
+          <div className="paste-controls" aria-label="粘贴验收控制">
+            <label>
+              <span>粘贴格式</span>
+              <select
+                aria-label="粘贴格式"
+                value={pasteMimeType}
+                onChange={handlePasteMimeTypeChange}
+              >
+                <option value="text/plain">纯文本</option>
+                <option value="text/html">HTML</option>
+                <option value="text/markdown">Markdown</option>
+              </select>
+            </label>
+            <label>
+              <span>粘贴内容</span>
+              <textarea
+                aria-label="粘贴内容"
+                value={pasteValue}
+                onChange={(event) => setPasteValue(event.target.value)}
+              />
+            </label>
+            <button
+              type="button"
+              disabled={isCommandDisabled(PASTE_COMMAND_NAME)}
+              onClick={handlePasteExample}
+            >
+              粘贴示例
+            </button>
           </div>
           <RichTextEditor
             {...(blockSelection ? { blockSelection } : {})}

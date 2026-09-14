@@ -1932,3 +1932,50 @@ test("inserts, selects, and deletes image blocks", async ({ page }) => {
   await expect(documentJson).toContainText('"src": "blob:');
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
+
+test("pastes plain text through the native editor event", async ({ page }) => {
+  await page.goto("/");
+  await placeCaretInRenderedText(page, "[0,0]", 3);
+
+  await page.getByLabel("已渲染文档").evaluate((editor) => {
+    const clipboardData = new DataTransfer();
+
+    clipboardData.setData("text/plain", "第一行\n第二行");
+    editor.dispatchEvent(
+      new ClipboardEvent("paste", {
+        bubbles: true,
+        cancelable: true,
+        clipboardData,
+      }),
+    );
+  });
+
+  await expect(page.getByLabel("已渲染文档")).toContainText("你好，第一行");
+  await expect(page.getByLabel("已渲染文档")).toContainText("第二行crucialy-rich。");
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
+test("pastes HTML and Markdown from the acceptance controls", async ({ page }) => {
+  await page.goto("/");
+  const editor = page.getByLabel("已渲染文档");
+
+  await setDebuggerSelection(page, "0,0", 3, 3);
+  await page.getByLabel("粘贴格式").selectOption("text/html");
+  await page.getByRole("button", { name: "粘贴示例" }).click();
+
+  await expect(editor.locator("strong")).toContainText("HTML 加粗");
+  await expect(editor.locator("ul li")).toContainText("HTML 列表");
+
+  await page.getByLabel("模型示例").selectOption("regular");
+  await setDebuggerSelection(page, "0,0", 3, 3);
+  await page.getByLabel("粘贴格式").selectOption("text/markdown");
+  await page.getByRole("button", { name: "粘贴示例" }).click();
+
+  await expect(editor.getByRole("heading", { level: 2 })).toContainText(
+    "Markdown 标题",
+  );
+  await expect(editor.locator("blockquote")).toContainText("Markdown 引用");
+  await expect(editor.locator("strong")).toContainText("Markdown 加粗");
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
