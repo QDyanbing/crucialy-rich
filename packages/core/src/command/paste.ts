@@ -1,6 +1,13 @@
-import { isParagraphNode } from "../model";
+import {
+  isBlockNode,
+  isListNode,
+  isParagraphNode,
+  isTextBlockNode,
+  type BlockNode,
+} from "../model";
 import {
   createDeleteTextOperation,
+  createInsertBlockOperation,
   createInsertTextOperation,
   createSelectionAfterInsertText,
   createSplitBlockOperation,
@@ -14,7 +21,11 @@ import {
   type Path,
   type RangeSelection,
 } from "../selection";
-import type { ClipboardFragment } from "../clipboard";
+import {
+  CLIPBOARD_MIME_TYPES,
+  type ClipboardFragment,
+  type ClipboardMimeType,
+} from "../clipboard";
 import { createCommandSkipped, createCommandSuccess } from "./result";
 import type { Command, CommandInput } from "./types";
 
@@ -32,7 +43,7 @@ function isSamePath(left: Path, right: Path): boolean {
 
 function resolvePasteTarget(
   input: CommandInput,
-): { lines: string[]; range: RangeSelection } | undefined {
+): { fragment: ClipboardFragment; range: RangeSelection } | undefined {
   const selection = input.context.selection;
   const payload = input.payload;
 
@@ -49,7 +60,8 @@ function resolvePasteTarget(
     !("mimeType" in payload.fragment) ||
     !Array.isArray(payload.fragment.blocks) ||
     payload.fragment.blocks.length === 0 ||
-    payload.fragment.mimeType !== "text/plain"
+    !payload.fragment.blocks.every(isBlockNode) ||
+    !CLIPBOARD_MIME_TYPES.includes(payload.fragment.mimeType as ClipboardMimeType)
   ) {
     return undefined;
   }
@@ -58,18 +70,107 @@ function resolvePasteTarget(
 
   if (
     range.anchor.path.length !== 2 ||
-    !isSamePath(range.anchor.path, range.focus.path) ||
-    !payload.fragment.blocks.every(isParagraphNode)
+    !isSamePath(range.anchor.path, range.focus.path)
   ) {
     return undefined;
   }
 
   return {
-    lines: payload.fragment.blocks.map((block) =>
-      block.children.map((node) => node.text).join(""),
-    ),
+    fragment: payload.fragment as ClipboardFragment,
     range,
   };
+}
+
+function getLastTextPoint(block: BlockNode, blockIndex: number) {
+  if (isTextBlockNode(block)) {
+    const textIndex = block.children.length - 1;
+    const text = block.children[textIndex];
+
+    return text
+      ? { offset: text.text.length, path: [blockIndex, textIndex] }
+      : undefined;
+  }
+
+  if (isListNode(block)) {
+    const itemIndex = block.children.length - 1;
+    const item = block.children[itemIndex];
+    const textIndex = item ? item.children.length - 1 : -1;
+    const text = item?.children[textIndex];
+
+    return text
+      ? { offset: text.text.length, path: [blockIndex, itemIndex, textIndex] }
+      : undefined;
+  }
+
+  return undefined;
+}
+
+function createPlainTextPasteResult(target: {
+  fragment: ClipboardFragment;
+  range: RangeSelection;
+}) {
+  if (!target.fragment.blocks.every(isParagraphNode)) {
+    return undefined;
+  }
+
+  const lines = target.fragment.blocks.map((block) =>
+    block.children.map((node) => node.text).join(""),
+  );
+  const operations: Operation[] = isCollapsed(target.range)
+    ? []
+    : [createDeleteTextOperation(target.range)];
+  let point = {
+    offset: target.range.anchor.offset,
+    path: [...target.range.anchor.path],
+  };
+
+  lines.forEach((line, index) => {
+    const insertOperation = createInsertTextOperation(point, line);
+
+    operations.push(insertOperation);
+    point = createSelectionAfterInsertText(insertOperation).anchor;
+
+    if (index < lines.length - 1) {
+      const [blockIndex] = point.path;
+
+      operations.push(createSplitBlockOperation(point));
+      point = {
+        offset: 0,
+        path: [(blockIndex ?? 0) + 1, 0],
+      };
+    }
+  });
+
+  return { operations, point };
+}
+
+function createRichPasteResult(target: {
+  fragment: ClipboardFragment;
+  range: RangeSelection;
+}) {
+  const [blockIndex] = target.range.anchor.path;
+
+  if (blockIndex === undefined) {
+    return undefined;
+  }
+
+  const operations: Operation[] = isCollapsed(target.range)
+    ? []
+    : [createDeleteTextOperation(target.range)];
+
+  operations.push(createSplitBlockOperation(target.range.anchor));
+  target.fragment.blocks.forEach((block, index) => {
+    operations.push(createInsertBlockOperation([blockIndex + index + 1], block));
+  });
+
+  const lastBlock = target.fragment.blocks.at(-1)!;
+  const lastBlockIndex = blockIndex + target.fragment.blocks.length;
+  const point = getLastTextPoint(lastBlock, lastBlockIndex) ?? {
+    offset: 0,
+    path: [lastBlockIndex + 1, 0],
+  };
+
+  return { operations, point };
 }
 
 export function canExecutePasteCommand(input: CommandInput): boolean {
@@ -88,37 +189,27 @@ export const pasteCommand: Command = {
       );
     }
 
-    const operations: Operation[] = isCollapsed(target.range)
-      ? []
-      : [createDeleteTextOperation(target.range)];
-    let point = {
-      offset: target.range.anchor.offset,
-      path: [...target.range.anchor.path],
-    };
+    const pasteResult =
+      target.fragment.mimeType === "text/plain"
+        ? createPlainTextPasteResult(target)
+        : createRichPasteResult(target);
 
-    target.lines.forEach((line, index) => {
-      const insertOperation = createInsertTextOperation(point, line);
-
-      operations.push(insertOperation);
-      point = createSelectionAfterInsertText(insertOperation).anchor;
-
-      if (index < target.lines.length - 1) {
-        const [blockIndex] = point.path;
-
-        operations.push(createSplitBlockOperation(point));
-        point = {
-          offset: 0,
-          path: [(blockIndex ?? 0) + 1, 0],
-        };
-      }
-    });
+    if (!pasteResult) {
+      return createCommandSkipped(
+        PASTE_COMMAND_NAME,
+        "Paste command received an unsupported clipboard fragment.",
+      );
+    }
 
     return createCommandSuccess(PASTE_COMMAND_NAME, {
       selection: {
-        anchor: point,
-        focus: { offset: point.offset, path: [...point.path] },
+        anchor: pasteResult.point,
+        focus: {
+          offset: pasteResult.point.offset,
+          path: [...pasteResult.point.path],
+        },
       },
-      transaction: createTransaction(operations),
+      transaction: createTransaction(pasteResult.operations),
     });
   },
   name: PASTE_COMMAND_NAME,

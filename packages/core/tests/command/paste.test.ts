@@ -8,6 +8,7 @@ import {
   createParagraph,
   createText,
   executeCommand,
+  parseHtml,
   parsePlainText,
   PASTE_COMMAND_NAME,
   pasteCommand,
@@ -84,6 +85,34 @@ describe("pasteCommand", () => {
       createParagraph([createText("第三行后")]),
     ]);
     expect(result.selection?.anchor).toEqual({ offset: 3, path: [2, 0] });
+  });
+
+  it("inserts structured HTML blocks without flattening marks", () => {
+    const document = createDocument([createParagraph([createText("前后")])]);
+    const result = pasteCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { offset: 1, path: [0, 0] },
+          focus: { offset: 1, path: [0, 0] },
+        },
+      },
+      payload: {
+        fragment: parseHtml("<p><strong>加粗</strong></p><ul><li>列表</li></ul>")!,
+      },
+    });
+    const resultDocument = applyTransaction(document, result.transaction!);
+
+    expect(resultDocument.children.map((block) => block.type)).toEqual([
+      "paragraph",
+      "paragraph",
+      "bulletList",
+      "paragraph",
+    ]);
+    expect(resultDocument.children[1]).toMatchObject({
+      children: [{ marks: { bold: true }, text: "加粗" }],
+    });
+    expect(result.selection?.anchor).toEqual({ offset: 2, path: [2, 0, 0] });
   });
 
   it("skips missing fragments and invalid selections", () => {
