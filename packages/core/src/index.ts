@@ -1,4 +1,5 @@
 export * from "./command";
+export * from "./clipboard";
 export * from "./history";
 export * from "./input";
 export * as link from "./link";
