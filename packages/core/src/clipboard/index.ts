@@ -1,4 +1,5 @@
 export { parseClipboardData } from "./parse";
+export { htmlClipboardParser, parseHtml } from "./html";
 export { parsePlainText, plainTextClipboardParser } from "./plain-text";
 export {
   CLIPBOARD_ALLOWED_ATTRIBUTES,
