@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import {
   applyTransaction,
+  addRowAfterCommand,
+  addRowBeforeCommand,
   canExecuteInsertTableCommand,
   canExecuteDeleteTableCommand,
   createDocument,
@@ -111,6 +113,54 @@ describe("deleteTableCommand", () => {
     expect(
       deleteTableCommand.execute({ context: { document }, payload: { path: [0, 0] } })
         .status,
+    ).toBe("skipped");
+  });
+});
+
+describe("table row insertion commands", () => {
+  it("adds a row before the first row", () => {
+    const table = createTable(2, 2);
+    table.children[0]!.children[0]!.children[0]!.children[0]!.text = "首行";
+    const document = createDocument([table]);
+    const result = addRowBeforeCommand.execute({
+      context: { document },
+      payload: { path: [0], rowIndex: 0 },
+    });
+    const nextDocument = applyTransaction(document, result.transaction!);
+    const nextTable = nextDocument.children[0];
+
+    expect(nextTable?.type).toBe("table");
+    expect(nextTable?.type === "table" ? nextTable.children.length : 0).toBe(3);
+    expect(
+      nextTable?.type === "table"
+        ? nextTable.children[1]?.children[0]?.children[0]?.children[0]?.text
+        : undefined,
+    ).toBe("首行");
+    expect(validateDocument(nextDocument).valid).toBe(true);
+  });
+
+  it("adds a row after the last row", () => {
+    const document = createDocument([createTable(2, 3)]);
+    const result = addRowAfterCommand.execute({
+      context: { document },
+      payload: { path: [0], rowIndex: 1 },
+    });
+    const nextTable = applyTransaction(document, result.transaction!).children[0];
+
+    expect(nextTable?.type === "table" ? nextTable.children.length : 0).toBe(3);
+    expect(
+      nextTable?.type === "table" ? nextTable.children[2]?.children.length : undefined,
+    ).toBe(3);
+  });
+
+  it("skips row indexes outside the table", () => {
+    const document = createDocument([createTable(1, 1)]);
+
+    expect(
+      addRowBeforeCommand.execute({
+        context: { document },
+        payload: { path: [0], rowIndex: 1 },
+      }).status,
     ).toBe("skipped");
   });
 });

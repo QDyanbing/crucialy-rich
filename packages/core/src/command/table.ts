@@ -1,6 +1,8 @@
 import {
   createParagraph,
   createTable,
+  createTableCell,
+  createTableRow,
   isListNode,
   isTableNode,
   isTextBlockNode,
@@ -27,9 +29,15 @@ import type { Command, CommandInput } from "./types";
 
 export const INSERT_TABLE_COMMAND_NAME = "insertTable";
 export const DELETE_TABLE_COMMAND_NAME = "deleteTable";
+export const ADD_ROW_BEFORE_COMMAND_NAME = "addRowBefore";
+export const ADD_ROW_AFTER_COMMAND_NAME = "addRowAfter";
 
 export interface TableCommandPayload {
   path: Path;
+}
+
+export interface TableRowCommandPayload extends TableCommandPayload {
+  rowIndex: number;
 }
 
 interface TableCommandTarget {
@@ -58,6 +66,35 @@ function getTableTarget(input: CommandInput): TableCommandTarget | undefined {
   const node = getNodeAtPath(input.context.document, path);
 
   return isTableNode(node) ? { index: path[0]!, path, table: node } : undefined;
+}
+
+interface IndexedTableCommandTarget extends TableCommandTarget {
+  itemIndex: number;
+}
+
+function getIndexedTableTarget(
+  input: CommandInput,
+  key: "columnIndex" | "rowIndex",
+): IndexedTableCommandTarget | undefined {
+  const target = getTableTarget(input);
+  const payload = input.payload;
+
+  if (!target || typeof payload !== "object" || payload === null || !(key in payload)) {
+    return undefined;
+  }
+
+  const itemIndex = (payload as Record<string, unknown>)[key];
+  const itemCount =
+    key === "rowIndex"
+      ? target.table.children.length
+      : (target.table.children[0]?.children.length ?? 0);
+
+  return typeof itemIndex === "number" &&
+    Number.isInteger(itemIndex) &&
+    itemIndex >= 0 &&
+    itemIndex < itemCount
+    ? { ...target, itemIndex }
+    : undefined;
 }
 
 function getInsertionPoint(input: CommandInput): Point | undefined {
@@ -146,6 +183,30 @@ function createRangeAtPoint(point: Point): RangeSelection {
   };
 }
 
+function cloneRange(selection: RangeSelection): RangeSelection {
+  return {
+    anchor: { offset: selection.anchor.offset, path: [...selection.anchor.path] },
+    focus: { offset: selection.focus.offset, path: [...selection.focus.path] },
+  };
+}
+
+function createReplaceTableResult(
+  input: CommandInput,
+  target: TableCommandTarget,
+  table: TableNode,
+  commandName: string,
+) {
+  return createCommandSuccess(commandName, {
+    ...(input.context.selection
+      ? { selection: cloneRange(input.context.selection) }
+      : {}),
+    transaction: createTransaction([
+      createRemoveBlockOperation(target.path),
+      createInsertBlockOperation(target.path, table),
+    ]),
+  });
+}
+
 function createDeleteTableResult(
   input: CommandInput,
   target: TableCommandTarget,
@@ -197,3 +258,49 @@ export const deleteTableCommand: Command = {
   },
   name: DELETE_TABLE_COMMAND_NAME,
 };
+
+function createAddRowCommand(
+  name: typeof ADD_ROW_AFTER_COMMAND_NAME | typeof ADD_ROW_BEFORE_COMMAND_NAME,
+  offset: 0 | 1,
+): Command {
+  return {
+    canExecute(input) {
+      return getIndexedTableTarget(input, "rowIndex") !== undefined;
+    },
+    execute(input) {
+      const target = getIndexedTableTarget(input, "rowIndex");
+
+      if (!target) {
+        return createCommandSkipped(name, "Row command requires a valid table row.");
+      }
+
+      const columnCount = target.table.children[0]?.children.length ?? 1;
+      const insertionIndex = target.itemIndex + offset;
+      const row = createTableRow(
+        Array.from({ length: columnCount }, () => createTableCell()),
+      );
+      const table: TableNode = {
+        children: [
+          ...target.table.children.slice(0, insertionIndex),
+          row,
+          ...target.table.children.slice(insertionIndex),
+        ],
+        type: "table",
+      };
+
+      return createReplaceTableResult(input, target, table, name);
+    },
+    name,
+  };
+}
+
+export const addRowBeforeCommand = createAddRowCommand(ADD_ROW_BEFORE_COMMAND_NAME, 0);
+export const addRowAfterCommand = createAddRowCommand(ADD_ROW_AFTER_COMMAND_NAME, 1);
+
+export function canExecuteAddRowBeforeCommand(input: CommandInput): boolean {
+  return addRowBeforeCommand.canExecute?.(input) ?? false;
+}
+
+export function canExecuteAddRowAfterCommand(input: CommandInput): boolean {
+  return addRowAfterCommand.canExecute?.(input) ?? false;
+}
