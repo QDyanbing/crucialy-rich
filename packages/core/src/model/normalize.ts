@@ -4,6 +4,9 @@ import {
   createParagraph,
   createText,
   createTaskItem,
+  createTable,
+  createTableCell,
+  createTableRow,
 } from "./factories";
 import {
   isBlockNode,
@@ -15,6 +18,10 @@ import {
   isTextBlockNode,
   isTextNode,
   isTaskItemNode,
+  isParagraphNode,
+  isTableCellNode,
+  isTableNode,
+  isTableRowNode,
 } from "./guards";
 import { normalizeImageDimension, sanitizeImageSrc } from "./image";
 import { mergeAdjacentTextNodes, normalizeTextMarks } from "./marks";
@@ -24,6 +31,9 @@ import type {
   DocumentNode,
   ListEntryNode,
   ListNode,
+  ParagraphNode,
+  TableCellNode,
+  TableNode,
   TextNode,
 } from "./types";
 
@@ -75,6 +85,10 @@ function normalizeBlock(node: BlockNode): BlockNode | undefined {
       : undefined;
   }
 
+  if (isTableNode(node)) {
+    return normalizeTable(node);
+  }
+
   if (!isTextBlockNode(node)) {
     return { children: [], type: "divider" };
   }
@@ -96,6 +110,47 @@ function normalizeBlock(node: BlockNode): BlockNode | undefined {
     case "quote":
       return { children: normalizedChildren, type: "quote" };
   }
+}
+
+function normalizeTable(node: TableNode): TableNode {
+  const rows = node.children.filter(isTableRowNode);
+
+  if (rows.length === 0) {
+    return createTable(1, 1);
+  }
+
+  const columnCount = Math.max(
+    1,
+    ...rows.map((row) => row.children.filter(isTableCellNode).length),
+  );
+
+  return {
+    children: rows.map((row) => {
+      const cells = row.children
+        .filter(isTableCellNode)
+        .map((cell) => normalizeTableCell(cell));
+
+      return createTableRow([
+        ...cells,
+        ...Array.from({ length: columnCount - cells.length }, () => createTableCell()),
+      ]);
+    }),
+    type: "table",
+  };
+}
+
+function normalizeTableCell(node: TableCellNode): TableCellNode {
+  const paragraphs = node.children.filter(isParagraphNode).map(normalizeTableParagraph);
+
+  return createTableCell(paragraphs.length > 0 ? paragraphs : undefined);
+}
+
+function normalizeTableParagraph(node: ParagraphNode): ParagraphNode {
+  const children = mergeAdjacentTextNodes(
+    node.children.filter(isTextNode).map(normalizeTextNode),
+  );
+
+  return createParagraph(children.length > 0 ? children : undefined);
 }
 
 function normalizeList(node: ListNode, depth: number): ListNode {

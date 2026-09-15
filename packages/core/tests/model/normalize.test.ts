@@ -4,6 +4,122 @@ import { normalizeDocument } from "../../src/model/normalize";
 import { validateDocument } from "../../src/model/validate";
 
 describe("normalizeDocument", () => {
+  it("repairs an empty table to one row and one cell", () => {
+    const result = normalizeDocument({
+      children: [{ children: [], type: "table" }],
+      type: "document",
+    });
+
+    expect(result).toEqual({
+      children: [
+        {
+          children: [
+            {
+              children: [
+                {
+                  children: [
+                    { children: [{ text: "", type: "text" }], type: "paragraph" },
+                  ],
+                  type: "tableCell",
+                },
+              ],
+              type: "tableRow",
+            },
+          ],
+          type: "table",
+        },
+      ],
+      type: "document",
+    });
+    expect(validateDocument(result).valid).toBe(true);
+  });
+
+  it("pads uneven rows to the widest table row", () => {
+    const result = normalizeDocument({
+      children: [
+        {
+          children: [
+            {
+              children: [
+                { children: [], type: "tableCell" },
+                { children: [], type: "tableCell" },
+              ],
+              type: "tableRow",
+            },
+            {
+              children: [{ children: [], type: "tableCell" }],
+              type: "tableRow",
+            },
+          ],
+          type: "table",
+        },
+      ],
+      type: "document",
+    });
+    const table = result.children[0];
+
+    expect(table?.type).toBe("table");
+    expect(
+      table?.type === "table"
+        ? table.children.map((row) => row.children.length)
+        : undefined,
+    ).toEqual([2, 2]);
+    expect(validateDocument(result).valid).toBe(true);
+  });
+
+  it("keeps only normalized paragraphs inside table cells", () => {
+    const result = normalizeDocument({
+      children: [
+        {
+          children: [
+            {
+              children: [
+                {
+                  children: [
+                    {
+                      children: [
+                        { marks: { bold: true }, text: "姓", type: "text" },
+                        { marks: { bold: true }, text: "名", type: "text" },
+                        { type: "inline" },
+                      ],
+                      type: "paragraph",
+                    },
+                    { children: [], type: "quote" },
+                  ],
+                  type: "tableCell",
+                },
+              ],
+              type: "tableRow",
+            },
+          ],
+          type: "table",
+        },
+      ],
+      type: "document",
+    });
+
+    expect(result.children[0]).toMatchObject({
+      children: [
+        {
+          children: [
+            {
+              children: [
+                {
+                  children: [{ marks: { bold: true }, text: "姓名", type: "text" }],
+                  type: "paragraph",
+                },
+              ],
+              type: "tableCell",
+            },
+          ],
+          type: "tableRow",
+        },
+      ],
+      type: "table",
+    });
+    expect(validateDocument(result).valid).toBe(true);
+  });
+
   it("normalizes image metadata and removes editable children", () => {
     const result = normalizeDocument({
       children: [
