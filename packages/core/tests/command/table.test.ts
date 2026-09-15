@@ -3,9 +3,12 @@ import { describe, expect, it } from "vitest";
 import {
   applyTransaction,
   canExecuteInsertTableCommand,
+  canExecuteDeleteTableCommand,
   createDocument,
   createParagraph,
   createText,
+  createTable,
+  deleteTableCommand,
   insertTableCommand,
   validateDocument,
 } from "../../src";
@@ -61,5 +64,53 @@ describe("insertTableCommand", () => {
         },
       }),
     ).toBe(false);
+  });
+});
+
+describe("deleteTableCommand", () => {
+  it("deletes a table and moves selection to following text", () => {
+    const document = createDocument([
+      createParagraph([createText("上")]),
+      createTable(),
+      createParagraph([createText("下")]),
+    ]);
+    const input = { context: { document }, payload: { path: [1] } };
+    const result = deleteTableCommand.execute(input);
+
+    expect(canExecuteDeleteTableCommand(input)).toBe(true);
+    expect(result.selection).toEqual({
+      anchor: { offset: 0, path: [1, 0] },
+      focus: { offset: 0, path: [1, 0] },
+    });
+    expect(applyTransaction(document, result.transaction!).children).toEqual([
+      createParagraph([createText("上")]),
+      createParagraph([createText("下")]),
+    ]);
+  });
+
+  it("restores an editable paragraph after deleting the only table", () => {
+    const document = createDocument([createTable()]);
+    const result = deleteTableCommand.execute({
+      context: { document },
+      payload: { path: [0] },
+    });
+
+    expect(applyTransaction(document, result.transaction!)).toEqual(createDocument());
+    expect(result.selection?.anchor).toEqual({ offset: 0, path: [0, 0] });
+  });
+
+  it("skips non-table and malformed paths", () => {
+    const document = createDocument();
+
+    expect(
+      canExecuteDeleteTableCommand({
+        context: { document },
+        payload: { path: [0] },
+      }),
+    ).toBe(false);
+    expect(
+      deleteTableCommand.execute({ context: { document }, payload: { path: [0, 0] } })
+        .status,
+    ).toBe("skipped");
   });
 });

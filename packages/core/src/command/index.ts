@@ -119,10 +119,14 @@ export type { TextMarkCommandConfig } from "./mark";
 export { canExecutePasteCommand, PASTE_COMMAND_NAME, pasteCommand } from "./paste";
 export type { PasteCommandPayload } from "./paste";
 export {
+  canExecuteDeleteTableCommand,
   canExecuteInsertTableCommand,
+  DELETE_TABLE_COMMAND_NAME,
+  deleteTableCommand,
   INSERT_TABLE_COMMAND_NAME,
   insertTableCommand,
 } from "./table";
+export type { TableCommandPayload } from "./table";
 export { canExecuteCommand } from "./can-execute";
 export { createDefaultCommandRegistry, DEFAULT_COMMANDS } from "./defaults";
 export { executeCommand } from "./execute";
