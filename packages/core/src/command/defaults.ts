@@ -9,6 +9,7 @@ import { deleteImageCommand, insertImageCommand } from "./image";
 import { LIST_COMMANDS } from "./list";
 import { pasteCommand } from "./paste";
 import { TEXT_STYLE_COMMANDS } from "./text-style";
+import { insertTableCommand } from "./table";
 import type { Command } from "./types";
 
 export const DEFAULT_COMMANDS: readonly Command[] = [
@@ -23,6 +24,7 @@ export const DEFAULT_COMMANDS: readonly Command[] = [
   insertImageCommand,
   deleteImageCommand,
   pasteCommand,
+  insertTableCommand,
   mergeBlockCommand,
   splitBlockCommand,
 ];
