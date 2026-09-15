@@ -14,6 +14,7 @@ import {
   createText,
   createTaskItem,
   createTaskList,
+  createTable,
 } from "../../src/model";
 import { renderDocument, renderNodeToHtml } from "../../src/render";
 
@@ -123,6 +124,16 @@ describe("renderNodeToHtml", () => {
     expect(html).toContain("<input");
     expect(html).toContain(" checked ");
     expect(html).toContain('type="checkbox"');
+  });
+
+  it("serializes semantic table markup", () => {
+    const table = createTable(1, 1);
+    table.children[0]!.children[0]!.children[0]!.children[0]!.text = "内容";
+    const html = renderNodeToHtml(renderDocument(createDocument([table])));
+
+    expect(html).toContain(
+      '<table data-crucialy-path="[0]" contentEditable="false" data-crucialy-table="true"><tbody data-crucialy-path="[0]"><tr data-crucialy-path="[0,0]"><td data-crucialy-path="[0,0,0]"><p data-crucialy-path="[0,0,0,0]"><span data-crucialy-path="[0,0,0,0,0]">内容</span></p></td></tr></tbody></table>',
+    );
   });
 
   it("escapes text and attribute values", () => {

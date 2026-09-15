@@ -14,6 +14,7 @@ import {
   createText,
   createTaskItem,
   createTaskList,
+  createTable,
   type DocumentNode,
 } from "../../src/model";
 import { MODEL_PATH_ATTRIBUTE, renderDocument } from "../../src/render";
@@ -288,6 +289,48 @@ describe("renderDocument", () => {
         },
       ],
       tagName: "ul",
+    });
+  });
+
+  it("renders tables with semantic structure and model paths", () => {
+    const table = createTable(1, 2);
+    table.children[0]!.children[0]!.children[0]!.children[0]!.text = "姓名";
+    table.children[0]!.children[1]!.children[0]!.children[0]!.text = "角色";
+    const rendered = renderDocument(createDocument([table])).children?.[0];
+
+    expect(rendered).toMatchObject({
+      attributes: {
+        contentEditable: "false",
+        "data-crucialy-table": "true",
+        [MODEL_PATH_ATTRIBUTE]: "[0]",
+      },
+      children: [
+        {
+          children: [
+            {
+              children: [
+                {
+                  children: [
+                    {
+                      children: [{ path: [0, 0, 0, 0, 0], text: "姓名" }],
+                      path: [0, 0, 0, 0],
+                      tagName: "p",
+                    },
+                  ],
+                  path: [0, 0, 0],
+                  tagName: "td",
+                },
+                { path: [0, 0, 1], tagName: "td" },
+              ],
+              path: [0, 0],
+              tagName: "tr",
+            },
+          ],
+          tagName: "tbody",
+        },
+      ],
+      path: [0],
+      tagName: "table",
     });
   });
 
