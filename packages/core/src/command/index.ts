@@ -119,10 +119,16 @@ export type { TextMarkCommandConfig } from "./mark";
 export { canExecutePasteCommand, PASTE_COMMAND_NAME, pasteCommand } from "./paste";
 export type { PasteCommandPayload } from "./paste";
 export {
+  ADD_COLUMN_AFTER_COMMAND_NAME,
+  ADD_COLUMN_BEFORE_COMMAND_NAME,
   ADD_ROW_AFTER_COMMAND_NAME,
   ADD_ROW_BEFORE_COMMAND_NAME,
+  addColumnAfterCommand,
+  addColumnBeforeCommand,
   addRowAfterCommand,
   addRowBeforeCommand,
+  canExecuteAddColumnAfterCommand,
+  canExecuteAddColumnBeforeCommand,
   canExecuteAddRowAfterCommand,
   canExecuteAddRowBeforeCommand,
   canExecuteDeleteRowCommand,
@@ -135,7 +141,11 @@ export {
   INSERT_TABLE_COMMAND_NAME,
   insertTableCommand,
 } from "./table";
-export type { TableCommandPayload, TableRowCommandPayload } from "./table";
+export type {
+  TableColumnCommandPayload,
+  TableCommandPayload,
+  TableRowCommandPayload,
+} from "./table";
 export { canExecuteCommand } from "./can-execute";
 export { createDefaultCommandRegistry, DEFAULT_COMMANDS } from "./defaults";
 export { executeCommand } from "./execute";

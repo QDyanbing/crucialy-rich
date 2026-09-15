@@ -32,6 +32,8 @@ export const DELETE_TABLE_COMMAND_NAME = "deleteTable";
 export const ADD_ROW_BEFORE_COMMAND_NAME = "addRowBefore";
 export const ADD_ROW_AFTER_COMMAND_NAME = "addRowAfter";
 export const DELETE_ROW_COMMAND_NAME = "deleteRow";
+export const ADD_COLUMN_BEFORE_COMMAND_NAME = "addColumnBefore";
+export const ADD_COLUMN_AFTER_COMMAND_NAME = "addColumnAfter";
 
 export interface TableCommandPayload {
   path: Path;
@@ -39,6 +41,10 @@ export interface TableCommandPayload {
 
 export interface TableRowCommandPayload extends TableCommandPayload {
   rowIndex: number;
+}
+
+export interface TableColumnCommandPayload extends TableCommandPayload {
+  columnIndex: number;
 }
 
 interface TableCommandTarget {
@@ -340,3 +346,56 @@ export const deleteRowCommand: Command = {
   },
   name: DELETE_ROW_COMMAND_NAME,
 };
+
+function createAddColumnCommand(
+  name: typeof ADD_COLUMN_AFTER_COMMAND_NAME | typeof ADD_COLUMN_BEFORE_COMMAND_NAME,
+  offset: 0 | 1,
+): Command {
+  return {
+    canExecute(input) {
+      return getIndexedTableTarget(input, "columnIndex") !== undefined;
+    },
+    execute(input) {
+      const target = getIndexedTableTarget(input, "columnIndex");
+
+      if (!target) {
+        return createCommandSkipped(
+          name,
+          "Column command requires a valid table column.",
+        );
+      }
+
+      const insertionIndex = target.itemIndex + offset;
+      const table: TableNode = {
+        children: target.table.children.map((row) =>
+          createTableRow([
+            ...row.children.slice(0, insertionIndex),
+            createTableCell(),
+            ...row.children.slice(insertionIndex),
+          ]),
+        ),
+        type: "table",
+      };
+
+      return createReplaceTableResult(input, target, table, name);
+    },
+    name,
+  };
+}
+
+export const addColumnBeforeCommand = createAddColumnCommand(
+  ADD_COLUMN_BEFORE_COMMAND_NAME,
+  0,
+);
+export const addColumnAfterCommand = createAddColumnCommand(
+  ADD_COLUMN_AFTER_COMMAND_NAME,
+  1,
+);
+
+export function canExecuteAddColumnBeforeCommand(input: CommandInput): boolean {
+  return addColumnBeforeCommand.canExecute?.(input) ?? false;
+}
+
+export function canExecuteAddColumnAfterCommand(input: CommandInput): boolean {
+  return addColumnAfterCommand.canExecute?.(input) ?? false;
+}

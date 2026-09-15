@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  addColumnAfterCommand,
+  addColumnBeforeCommand,
   applyTransaction,
   addRowAfterCommand,
   addRowBeforeCommand,
@@ -196,5 +198,46 @@ describe("deleteRowCommand", () => {
 
     expect(applyTransaction(document, result.transaction!)).toEqual(createDocument());
     expect(result.selection?.anchor).toEqual({ offset: 0, path: [0, 0] });
+  });
+});
+
+describe("table column insertion commands", () => {
+  it("adds a column before the first column in every row", () => {
+    const table = createTable(2, 2);
+    table.children[0]!.children[0]!.children[0]!.children[0]!.text = "原首列";
+    const document = createDocument([table]);
+    const result = addColumnBeforeCommand.execute({
+      context: { document },
+      payload: { columnIndex: 0, path: [0] },
+    });
+    const nextDocument = applyTransaction(document, result.transaction!);
+    const nextTable = nextDocument.children[0];
+
+    expect(
+      nextTable?.type === "table"
+        ? nextTable.children.map((row) => row.children.length)
+        : undefined,
+    ).toEqual([3, 3]);
+    expect(
+      nextTable?.type === "table"
+        ? nextTable.children[0]?.children[1]?.children[0]?.children[0]?.text
+        : undefined,
+    ).toBe("原首列");
+    expect(validateDocument(nextDocument).valid).toBe(true);
+  });
+
+  it("adds a column after the last column", () => {
+    const document = createDocument([createTable(2, 2)]);
+    const result = addColumnAfterCommand.execute({
+      context: { document },
+      payload: { columnIndex: 1, path: [0] },
+    });
+    const nextTable = applyTransaction(document, result.transaction!).children[0];
+
+    expect(
+      nextTable?.type === "table"
+        ? nextTable.children.map((row) => row.children.length)
+        : undefined,
+    ).toEqual([3, 3]);
   });
 });

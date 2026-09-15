@@ -10,6 +10,8 @@ import { LIST_COMMANDS } from "./list";
 import { pasteCommand } from "./paste";
 import { TEXT_STYLE_COMMANDS } from "./text-style";
 import {
+  addColumnAfterCommand,
+  addColumnBeforeCommand,
   addRowAfterCommand,
   addRowBeforeCommand,
   deleteRowCommand,
@@ -34,6 +36,8 @@ export const DEFAULT_COMMANDS: readonly Command[] = [
   deleteTableCommand,
   addRowBeforeCommand,
   addRowAfterCommand,
+  addColumnBeforeCommand,
+  addColumnAfterCommand,
   deleteRowCommand,
   mergeBlockCommand,
   splitBlockCommand,
