@@ -7,6 +7,7 @@ import {
   createListItem,
   createOrderedList,
   createParagraph,
+  createTable,
   createText,
 } from "../../src/model";
 import { getNodeAtPath, hasNodeAtPath } from "../../src/selection/path";
@@ -30,6 +31,32 @@ const document = createDocument([
 ]);
 
 describe("selection path lookup", () => {
+  it("resolves every level of a table path", () => {
+    const table = createTable(1, 1);
+    table.children[0]!.children[0]!.children[0]!.children[0]!.text = "单元格";
+    const tableDocument = createDocument([table]);
+
+    expect(getNodeAtPath(tableDocument, [0])?.type).toBe("table");
+    expect(getNodeAtPath(tableDocument, [0, 0])?.type).toBe("tableRow");
+    expect(getNodeAtPath(tableDocument, [0, 0, 0])?.type).toBe("tableCell");
+    expect(getNodeAtPath(tableDocument, [0, 0, 0, 0])?.type).toBe("paragraph");
+    expect(getNodeAtPath(tableDocument, [0, 0, 0, 0, 0])).toEqual({
+      text: "单元格",
+      type: "text",
+    });
+  });
+
+  it("rejects invalid table paths", () => {
+    const tableDocument = createDocument([createTable(1, 1)]);
+
+    expect(getNodeAtPath(tableDocument, [0, 1])).toBeUndefined();
+    expect(getNodeAtPath(tableDocument, [0, 0, 1])).toBeUndefined();
+    expect(getNodeAtPath(tableDocument, [0, 0, 0, 1])).toBeUndefined();
+    expect(getNodeAtPath(tableDocument, [0, 0, 0, 0, 1])).toBeUndefined();
+    expect(getNodeAtPath(tableDocument, [0, 0, 0, 0, 0, 0])).toBeUndefined();
+    expect(hasNodeAtPath(tableDocument, [0, 0, 0, 0, 0])).toBe(true);
+  });
+
   it("returns the document for the root path", () => {
     expect(getNodeAtPath(document, [])).toBe(document);
   });
