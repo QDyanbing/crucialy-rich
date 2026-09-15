@@ -10,6 +10,7 @@ import {
   createParagraph,
   createQuote,
   createText,
+  createTable,
 } from "../../src";
 
 describe("createHistorySnapshot", () => {
@@ -129,5 +130,23 @@ describe("createHistorySnapshot", () => {
     });
     expect(snapshot.document.children[0]).not.toBe(image);
     expect(snapshot.document.children[0]?.children).not.toBe(image.children);
+  });
+
+  it("deeply clones table contents", () => {
+    const table = createTable(1, 1);
+    table.children[0]!.children[0]!.children[0]!.children[0]!.text = "快照";
+    const snapshot = createHistorySnapshot(createDocument([table]));
+
+    table.children[0]!.children[0]!.children[0]!.children[0]!.text = "已修改";
+    const cloned = snapshot.document.children[0];
+
+    expect(cloned?.type).toBe("table");
+    expect(
+      cloned?.type === "table"
+        ? cloned.children[0]?.children[0]?.children[0]?.children[0]?.text
+        : undefined,
+    ).toBe("快照");
+    expect(cloned).not.toBe(table);
+    expect(cloned?.children).not.toBe(table.children);
   });
 });

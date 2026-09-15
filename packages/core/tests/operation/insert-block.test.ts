@@ -6,6 +6,7 @@ import {
   createImage,
   createParagraph,
   createText,
+  createTable,
 } from "../../src/model";
 import { applyInsertBlock, createInsertBlockOperation } from "../../src/operation";
 
@@ -68,6 +69,24 @@ describe("insert block operation", () => {
       width: 480,
     });
     expect(result.children[1]).not.toBe(image);
+  });
+
+  it("deeply detaches inserted table cells", () => {
+    const table = createTable(1, 1);
+    table.children[0]!.children[0]!.children[0]!.children[0]!.text = "原始";
+    const operation = createInsertBlockOperation([1], table);
+
+    table.children[0]!.children[0]!.children[0]!.children[0]!.text = "已修改";
+    const result = applyInsertBlock(createDocument(), operation);
+    const inserted = result.children[1];
+
+    expect(inserted?.type).toBe("table");
+    expect(
+      inserted?.type === "table"
+        ? inserted.children[0]?.children[0]?.children[0]?.children[0]?.text
+        : undefined,
+    ).toBe("原始");
+    expect(inserted).not.toBe(table);
   });
 
   it("supports document boundaries and rejects invalid paths", () => {
