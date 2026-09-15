@@ -15,6 +15,7 @@ export const BLOCK_TYPES = [
   "bulletList",
   "orderedList",
   "taskList",
+  "table",
 ] as const;
 
 export const VOID_BLOCK_TYPES = ["divider", "image"] as const;
@@ -22,6 +23,8 @@ export const VOID_BLOCK_TYPES = ["divider", "image"] as const;
 export const IMAGE_STATUSES = ["loading", "ready", "error"] as const;
 
 export const LIST_TYPES = ["bulletList", "orderedList", "taskList"] as const;
+
+export const TABLE_NODE_TYPES = ["table", "tableRow", "tableCell"] as const;
 
 export const MAX_LIST_DEPTH = 3;
 
@@ -150,6 +153,25 @@ export interface TaskListNode {
 
 export type ListNode = BulletListNode | OrderedListNode | TaskListNode;
 
+export interface TableCellNode {
+  type: "tableCell";
+  children: ParagraphNode[];
+  marks?: never;
+  text?: never;
+}
+
+export interface TableRowNode {
+  type: "tableRow";
+  children: TableCellNode[];
+  marks?: never;
+  text?: never;
+}
+
+export interface TableNode {
+  type: "table";
+  children: TableRowNode[];
+}
+
 /**
  * 文本块直接包含 text children，空块不包含可编辑文本。
  */
@@ -157,7 +179,7 @@ export type TextBlockNode = CodeBlockNode | HeadingNode | ParagraphNode | QuoteN
 
 export type VoidBlockNode = DividerNode | ImageNode;
 
-export type BlockNode = ListNode | TextBlockNode | VoidBlockNode;
+export type BlockNode = ListNode | TableNode | TextBlockNode | VoidBlockNode;
 
 export interface DocumentNode {
   type: "document";
@@ -167,4 +189,10 @@ export interface DocumentNode {
 /**
  * 文档树中可能出现的所有节点类型。
  */
-export type Node = DocumentNode | BlockNode | ListEntryNode | TextNode;
+export type Node =
+  | DocumentNode
+  | BlockNode
+  | ListEntryNode
+  | TableCellNode
+  | TableRowNode
+  | TextNode;

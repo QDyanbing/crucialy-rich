@@ -2,8 +2,11 @@ import {
   createBulletList,
   createListItem,
   createOrderedList,
+  createParagraph,
   createTaskItem,
   createTaskList,
+  createTableCell,
+  createTableRow,
   createText,
   type BlockNode,
   type DocumentNode,
@@ -19,6 +22,25 @@ function cloneBlock(block: BlockNode): BlockNode {
 
   if (block.type === "divider") {
     return { children: [], type: "divider" };
+  }
+
+  if (block.type === "table") {
+    return {
+      children: block.children.map((row) =>
+        createTableRow(
+          row.children.map((cell) =>
+            createTableCell(
+              cell.children.map((paragraph) =>
+                createParagraph(
+                  paragraph.children.map((text) => createText(text.text, text.marks)),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+      type: "table",
+    };
   }
 
   if (

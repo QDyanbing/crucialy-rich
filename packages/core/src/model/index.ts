@@ -8,6 +8,7 @@ export {
   MAX_LIST_DEPTH,
   TEXT_MARK_ATTRIBUTE_TYPES,
   TEXT_MARK_TYPES,
+  TABLE_NODE_TYPES,
   VOID_BLOCK_TYPES,
 } from "./types";
 export type {
@@ -39,6 +40,9 @@ export type {
   TextNode,
   TaskItemNode,
   TaskListNode,
+  TableCellNode,
+  TableNode,
+  TableRowNode,
   TextBlockNode,
   VoidBlockNode,
 } from "./types";
@@ -62,6 +66,9 @@ export {
   isTextNode,
   isTaskItemNode,
   isTaskListNode,
+  isTableCellNode,
+  isTableNode,
+  isTableRowNode,
   isTextBlockNode,
   isVoidBlockNode,
 } from "./guards";
@@ -79,6 +86,9 @@ export {
   createText,
   createTaskItem,
   createTaskList,
+  createTable,
+  createTableCell,
+  createTableRow,
 } from "./factories";
 export type { CreateImageOptions } from "./factories";
 export { IMAGE_PROTOCOLS, normalizeImageDimension, sanitizeImageSrc } from "./image";

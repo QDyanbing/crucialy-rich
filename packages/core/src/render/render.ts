@@ -6,6 +6,7 @@ import {
   type DocumentNode,
   type HeadingLevel,
   type ListNode,
+  type TableNode,
   type TextNode,
 } from "../model";
 import type { Path } from "../selection";
@@ -145,6 +146,41 @@ function renderListNode(node: ListNode, path: Path): RenderedElementNode {
   });
 }
 
+function renderTableNode(node: TableNode, path: Path): RenderedElementNode {
+  return createRenderedNode("table", path, {
+    attributes: {
+      ...createModelPathAttributes(path),
+      contentEditable: "false",
+      "data-crucialy-table": "true",
+    },
+    children: [
+      createRenderedNode("tbody", path, {
+        children: node.children.map((row, rowIndex) => {
+          const rowPath = [...path, rowIndex];
+
+          return createRenderedNode("tr", rowPath, {
+            children: row.children.map((cell, cellIndex) => {
+              const cellPath = [...rowPath, cellIndex];
+
+              return createRenderedNode("td", cellPath, {
+                children: cell.children.map((paragraph, paragraphIndex) => {
+                  const paragraphPath = [...cellPath, paragraphIndex];
+
+                  return createRenderedNode("p", paragraphPath, {
+                    children: paragraph.children.map((text, textIndex) =>
+                      renderTextNode(text, [...paragraphPath, textIndex]),
+                    ),
+                  });
+                }),
+              });
+            }),
+          });
+        }),
+      }),
+    ],
+  });
+}
+
 function renderBlockNode(node: BlockNode, path: Path): RenderedElementNode {
   if (node.type === "image") {
     return createRenderedNode("img", path, {
@@ -171,6 +207,10 @@ function renderBlockNode(node: BlockNode, path: Path): RenderedElementNode {
         renderCodeTextNode(child, [...path, index]),
       ),
     });
+  }
+
+  if (node.type === "table") {
+    return renderTableNode(node, path);
   }
 
   if (

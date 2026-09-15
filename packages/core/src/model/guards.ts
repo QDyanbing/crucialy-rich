@@ -21,6 +21,9 @@ import {
   type TextNode,
   type TaskItemNode,
   type TaskListNode,
+  type TableCellNode,
+  type TableNode,
+  type TableRowNode,
   type TextBlockNode,
   type VoidBlockNode,
 } from "./types";
@@ -115,6 +118,18 @@ export function isListNode(value: unknown): value is ListNode {
   return isBulletListNode(value) || isOrderedListNode(value) || isTaskListNode(value);
 }
 
+export function isTableCellNode(value: unknown): value is TableCellNode {
+  return isRecord(value) && value.type === "tableCell" && Array.isArray(value.children);
+}
+
+export function isTableRowNode(value: unknown): value is TableRowNode {
+  return isRecord(value) && value.type === "tableRow" && Array.isArray(value.children);
+}
+
+export function isTableNode(value: unknown): value is TableNode {
+  return isRecord(value) && value.type === "table" && Array.isArray(value.children);
+}
+
 export function isTextBlockNode(value: unknown): value is TextBlockNode {
   return (
     isCodeBlockNode(value) ||
@@ -129,7 +144,12 @@ export function isVoidBlockNode(value: unknown): value is VoidBlockNode {
 }
 
 export function isBlockNode(value: unknown): value is BlockNode {
-  return isListNode(value) || isTextBlockNode(value) || isVoidBlockNode(value);
+  return (
+    isListNode(value) ||
+    isTableNode(value) ||
+    isTextBlockNode(value) ||
+    isVoidBlockNode(value)
+  );
 }
 
 export function isDocumentNode(value: unknown): value is DocumentNode {

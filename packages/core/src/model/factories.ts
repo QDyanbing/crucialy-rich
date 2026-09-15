@@ -18,6 +18,9 @@ import type {
   TextNode,
   TaskItemNode,
   TaskListNode,
+  TableCellNode,
+  TableNode,
+  TableRowNode,
 } from "./types";
 
 /**
@@ -128,6 +131,33 @@ export function createTaskList(
   children: TaskItemNode[] = [createTaskItem()],
 ): TaskListNode {
   return { children, type: "taskList" };
+}
+
+/** 创建一个只允许包含段落的表格单元格。 */
+export function createTableCell(
+  children: ParagraphNode[] = [createParagraph()],
+): TableCellNode {
+  return { children, type: "tableCell" };
+}
+
+/** 创建一个表格行，默认包含一个空单元格。 */
+export function createTableRow(
+  children: TableCellNode[] = [createTableCell()],
+): TableRowNode {
+  return { children, type: "tableRow" };
+}
+
+/** 创建一个规则表格，默认尺寸为 3 行 3 列。 */
+export function createTable(rows = 3, columns = 3): TableNode {
+  const rowCount = Math.max(1, Math.trunc(rows));
+  const columnCount = Math.max(1, Math.trunc(columns));
+
+  return {
+    children: Array.from({ length: rowCount }, () =>
+      createTableRow(Array.from({ length: columnCount }, () => createTableCell())),
+    ),
+    type: "table",
+  };
 }
 
 /**

@@ -10,6 +10,8 @@ import {
   createText,
   createTaskItem,
   createTaskList,
+  createTableCell,
+  createTableRow,
   type BlockNode,
   type DocumentNode,
   type ListNode,
@@ -24,6 +26,25 @@ function cloneBlock(block: BlockNode): BlockNode {
 
   if (block.type === "divider") {
     return createDivider();
+  }
+
+  if (block.type === "table") {
+    return {
+      children: block.children.map((row) =>
+        createTableRow(
+          row.children.map((cell) =>
+            createTableCell(
+              cell.children.map((paragraph) =>
+                createParagraph(
+                  paragraph.children.map((node) => createText(node.text, node.marks)),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+      type: "table",
+    };
   }
 
   if (

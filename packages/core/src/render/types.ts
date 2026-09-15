@@ -22,6 +22,10 @@ export type RenderedTagName =
   | "s"
   | "span"
   | "strong"
+  | "table"
+  | "tbody"
+  | "td"
+  | "tr"
   | "ul"
   | "u";
 

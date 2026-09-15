@@ -10,6 +10,7 @@ import {
   MAX_LIST_DEPTH,
   TEXT_MARK_ATTRIBUTE_TYPES,
   TEXT_MARK_TYPES,
+  TABLE_NODE_TYPES,
   VOID_BLOCK_TYPES,
   type BlockType,
   type DocumentNode,
@@ -28,6 +29,7 @@ import {
   type TextMarkAttributeType,
   type TextMarkType,
   type TextNode,
+  type TableNode,
 } from "../../src/model/types";
 
 describe("model node types", () => {
@@ -54,11 +56,34 @@ describe("model node types", () => {
       "bulletList",
       "orderedList",
       "taskList",
+      "table",
     ]);
     expect(VOID_BLOCK_TYPES).toEqual(["divider", "image"]);
     expect(HEADING_LEVELS).toEqual([1, 2, 3, 4, 5, 6]);
     expect(heading.level).toBe(2);
     expect(quote.type).toBe("quote");
+  });
+
+  it("describes a table with rows, cells, and paragraphs", () => {
+    const table: TableNode = {
+      children: [
+        {
+          children: [
+            {
+              children: [
+                { children: [{ text: "单元格", type: "text" }], type: "paragraph" },
+              ],
+              type: "tableCell",
+            },
+          ],
+          type: "tableRow",
+        },
+      ],
+      type: "table",
+    };
+
+    expect(TABLE_NODE_TYPES).toEqual(["table", "tableRow", "tableCell"]);
+    expect(table.children[0]?.children[0]?.children[0]?.type).toBe("paragraph");
   });
 
   it("describes an image block and its loading states", () => {
