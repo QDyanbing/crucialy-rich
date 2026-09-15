@@ -21,6 +21,9 @@ import {
   isTextBlockNode,
   isTaskItemNode,
   isTaskListNode,
+  isTableCellNode,
+  isTableNode,
+  isTableRowNode,
   isVoidBlockNode,
 } from "../../src/model/guards";
 
@@ -125,6 +128,20 @@ describe("model type guards", () => {
   it("treats paragraph as a block node", () => {
     expect(isBlockNode({ type: "paragraph", children: [] })).toBe(true);
     expect(isBlockNode({ type: "document", children: [] })).toBe(false);
+  });
+
+  it("recognizes table nodes without claiming nested shape validity", () => {
+    const cell = { children: [], type: "tableCell" };
+    const row = { children: [cell], type: "tableRow" };
+    const table = { children: [row], type: "table" };
+
+    expect(isTableCellNode(cell)).toBe(true);
+    expect(isTableRowNode(row)).toBe(true);
+    expect(isTableNode(table)).toBe(true);
+    expect(isBlockNode(table)).toBe(true);
+    expect(isTableNode({ type: "table" })).toBe(false);
+    expect(isTableRowNode({ type: "tableRow" })).toBe(false);
+    expect(isTableCellNode({ type: "tableCell" })).toBe(false);
   });
 
   it("recognizes a document node", () => {

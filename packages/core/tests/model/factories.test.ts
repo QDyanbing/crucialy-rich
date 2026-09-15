@@ -14,6 +14,9 @@ import {
   createText,
   createTaskItem,
   createTaskList,
+  createTable,
+  createTableCell,
+  createTableRow,
 } from "../../src/model/factories";
 import {
   isCodeBlockNode,
@@ -24,6 +27,9 @@ import {
   isParagraphNode,
   isQuoteNode,
   isTextNode,
+  isTableCellNode,
+  isTableNode,
+  isTableRowNode,
 } from "../../src/model/guards";
 
 describe("model factories", () => {
@@ -225,6 +231,33 @@ describe("model factories", () => {
       ],
       type: "taskList",
     });
+  });
+
+  it("creates a default three-by-three table", () => {
+    const table = createTable();
+
+    expect(isTableNode(table)).toBe(true);
+    expect(table.children).toHaveLength(3);
+    expect(table.children.every((row) => row.children.length === 3)).toBe(true);
+    expect(table.children[0]).not.toBe(table.children[1]);
+    expect(table.children[0]?.children[0]).not.toBe(table.children[0]?.children[1]);
+  });
+
+  it("creates table rows and cells from paragraphs", () => {
+    const cell = createTableCell([createParagraph([createText("内容")])]);
+    const row = createTableRow([cell]);
+
+    expect(isTableCellNode(cell)).toBe(true);
+    expect(isTableRowNode(row)).toBe(true);
+    expect(row.children[0]?.children[0]?.children[0]?.text).toBe("内容");
+  });
+
+  it("keeps table dimensions positive and finite", () => {
+    expect(createTable(2.9, 4.7).children.map((row) => row.children.length)).toEqual([
+      4, 4,
+    ]);
+    expect(createTable(0, Number.NaN).children).toHaveLength(1);
+    expect(createTable(0, Number.NaN).children[0]?.children).toHaveLength(1);
   });
 
   it("creates a document with a default empty paragraph", () => {

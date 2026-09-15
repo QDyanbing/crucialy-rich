@@ -149,8 +149,8 @@ export function createTableRow(
 
 /** 创建一个规则表格，默认尺寸为 3 行 3 列。 */
 export function createTable(rows = 3, columns = 3): TableNode {
-  const rowCount = Math.max(1, Math.trunc(rows));
-  const columnCount = Math.max(1, Math.trunc(columns));
+  const rowCount = Number.isFinite(rows) ? Math.max(1, Math.trunc(rows)) : 1;
+  const columnCount = Number.isFinite(columns) ? Math.max(1, Math.trunc(columns)) : 1;
 
   return {
     children: Array.from({ length: rowCount }, () =>
