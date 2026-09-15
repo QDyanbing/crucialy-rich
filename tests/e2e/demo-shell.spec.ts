@@ -1979,3 +1979,31 @@ test("pastes HTML and Markdown from the acceptance controls", async ({ page }) =
   await expect(editor.locator("strong")).toContainText("Markdown 加粗");
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
+
+test("inserts and reshapes a basic table from the acceptance controls", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const editor = page.getByLabel("已渲染文档");
+
+  await setDebuggerSelection(page, "0,0", 1, 1);
+  await page.getByRole("button", { name: "插入 3×3 表格" }).click();
+
+  await expect(editor.locator("table")).toHaveCount(1);
+  await expect(editor.locator("table tr")).toHaveCount(3);
+  await expect(editor.locator("table td")).toHaveCount(9);
+
+  await page.getByRole("button", { name: "首行后添加" }).click();
+  await expect(editor.locator("table tr")).toHaveCount(4);
+  await page.getByRole("button", { name: "删除首行" }).click();
+  await expect(editor.locator("table tr")).toHaveCount(3);
+
+  await page.getByRole("button", { name: "首列后添加" }).click();
+  await expect(editor.locator("table td")).toHaveCount(12);
+  await page.getByRole("button", { name: "删除首列" }).click();
+  await expect(editor.locator("table td")).toHaveCount(9);
+
+  await page.getByRole("button", { name: "删除表格" }).click();
+  await expect(editor.locator("table")).toHaveCount(0);
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});

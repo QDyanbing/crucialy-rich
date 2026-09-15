@@ -223,6 +223,12 @@ h3 {
   padding: 8px 10px;
 }
 
+.table-controls {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
 .crucialy-floating-toolbar {
   filter: drop-shadow(0 10px 18px rgb(26 36 30 / 18%));
 }
@@ -331,6 +337,24 @@ h3 {
 .rendered-document img[data-selected="true"] {
   outline: 3px solid #2f6d46;
   outline-offset: 3px;
+}
+
+.rendered-document table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.rendered-document td {
+  min-width: 72px;
+  border: 1px solid #aebbb2;
+  background: #ffffff;
+  padding: 8px 10px;
+  vertical-align: top;
+}
+
+.rendered-document td p {
+  min-height: 24px;
 }
 
 .rendered-document pre {
@@ -907,7 +931,8 @@ input {
   }
 
   .image-controls,
-  .paste-controls {
+  .paste-controls,
+  .table-controls {
     grid-template-columns: minmax(0, 1fr);
   }
 

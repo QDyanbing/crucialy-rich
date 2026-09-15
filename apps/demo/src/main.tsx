@@ -1,4 +1,8 @@
 import {
+  ADD_COLUMN_AFTER_COMMAND_NAME,
+  ADD_COLUMN_BEFORE_COMMAND_NAME,
+  ADD_ROW_AFTER_COMMAND_NAME,
+  ADD_ROW_BEFORE_COMMAND_NAME,
   applyTransaction,
   BOLD_COMMAND_NAME,
   canRedo,
@@ -22,7 +26,11 @@ import {
   createText,
   createTaskItem,
   createTaskList,
+  createTable,
+  DELETE_COLUMN_COMMAND_NAME,
+  DELETE_ROW_COMMAND_NAME,
   DELETE_SELECTION_COMMAND_NAME,
+  DELETE_TABLE_COMMAND_NAME,
   domSelectionToModelSelection,
   executeCommand,
   getNodeAtPath,
@@ -33,6 +41,7 @@ import {
   INSERT_TEXT_COMMAND_NAME,
   INSERT_DIVIDER_COMMAND_NAME,
   INSERT_IMAGE_COMMAND_NAME,
+  INSERT_TABLE_COMMAND_NAME,
   ITALIC_COMMAND_NAME,
   isCollapsed,
   isValidPoint,
@@ -122,6 +131,7 @@ type ModelExampleId =
   | "marks"
   | "links"
   | "images"
+  | "tables"
   | "empty"
   | "invalid";
 
@@ -247,6 +257,29 @@ const modelExamples: ModelExample[] = [
       createDivider(),
       createParagraph([createText("分隔线后可以继续编辑正文。")]),
     ]),
+  },
+  {
+    id: "tables",
+    label: "基础表格",
+    selection: {
+      anchor: { path: [1, 0], offset: 0 },
+      focus: { path: [1, 0], offset: 0 },
+    },
+    value: (() => {
+      const table = createTable(3, 3);
+      const labels = ["姓名", "角色", "状态", "小明", "编辑", "进行中"];
+
+      labels.forEach((label, index) => {
+        const row = Math.floor(index / 3);
+        const column = index % 3;
+        table.children[row]!.children[column]!.children[0]!.children[0]!.text = label;
+      });
+
+      return createDocument([
+        table,
+        createParagraph([createText("表格后方保留可编辑段落。")]),
+      ]);
+    })(),
   },
   {
     id: "lists",
@@ -428,6 +461,7 @@ const demoCommandDescriptors: DemoCommandDescriptor[] = [
   { label: "分隔线", name: INSERT_DIVIDER_COMMAND_NAME },
   { label: "图片", name: INSERT_IMAGE_COMMAND_NAME },
   { label: "粘贴", name: PASTE_COMMAND_NAME },
+  { label: "表格", name: INSERT_TABLE_COMMAND_NAME },
   { label: "斜体", name: ITALIC_COMMAND_NAME },
   { label: "下划线", name: UNDERLINE_COMMAND_NAME },
   { label: "删除线", name: STRIKE_COMMAND_NAME },
@@ -801,6 +835,9 @@ function DemoApp() {
     () => normalizeDocument(documentValue),
     [documentValue],
   );
+  const tableIndex = normalizedDocument.children.findIndex(
+    (block) => block.type === "table",
+  );
   const pasteFragment = useMemo(
     () =>
       parseClipboardData(
@@ -1087,6 +1124,18 @@ function DemoApp() {
           document: normalizedDocument,
           selection: modelSelection,
         },
+      }),
+    );
+  }
+
+  function handleTableCommand(commandName: CommandName, payload?: object) {
+    applyCommandResult(
+      executeCommand(demoCommandRegistry, commandName, {
+        context: {
+          document: normalizedDocument,
+          selection: modelSelection,
+        },
+        ...(payload ? { payload } : {}),
       }),
     );
   }
@@ -1562,7 +1611,7 @@ function DemoApp() {
           <p className="eyebrow">调试工作台</p>
           <h1 id="page-title">crucialy-rich</h1>
         </div>
-        <span className="status-pill">第 20 周粘贴闭环</span>
+        <span className="status-pill">第 21 周基础表格闭环</span>
       </header>
 
       <section className="workspace-grid" aria-label="编辑器工作区">
@@ -1648,6 +1697,98 @@ function DemoApp() {
               onClick={handlePasteExample}
             >
               粘贴示例
+            </button>
+          </div>
+          <div className="table-controls" aria-label="基础表格验收控制">
+            <button
+              type="button"
+              disabled={isCommandDisabled(INSERT_TABLE_COMMAND_NAME)}
+              onClick={() => handleTableCommand(INSERT_TABLE_COMMAND_NAME)}
+            >
+              插入 3×3 表格
+            </button>
+            <button
+              type="button"
+              disabled={tableIndex < 0}
+              onClick={() =>
+                handleTableCommand(ADD_ROW_BEFORE_COMMAND_NAME, {
+                  path: [tableIndex],
+                  rowIndex: 0,
+                })
+              }
+            >
+              首行前添加
+            </button>
+            <button
+              type="button"
+              disabled={tableIndex < 0}
+              onClick={() =>
+                handleTableCommand(ADD_ROW_AFTER_COMMAND_NAME, {
+                  path: [tableIndex],
+                  rowIndex: 0,
+                })
+              }
+            >
+              首行后添加
+            </button>
+            <button
+              type="button"
+              disabled={tableIndex < 0}
+              onClick={() =>
+                handleTableCommand(DELETE_ROW_COMMAND_NAME, {
+                  path: [tableIndex],
+                  rowIndex: 0,
+                })
+              }
+            >
+              删除首行
+            </button>
+            <button
+              type="button"
+              disabled={tableIndex < 0}
+              onClick={() =>
+                handleTableCommand(ADD_COLUMN_BEFORE_COMMAND_NAME, {
+                  columnIndex: 0,
+                  path: [tableIndex],
+                })
+              }
+            >
+              首列前添加
+            </button>
+            <button
+              type="button"
+              disabled={tableIndex < 0}
+              onClick={() =>
+                handleTableCommand(ADD_COLUMN_AFTER_COMMAND_NAME, {
+                  columnIndex: 0,
+                  path: [tableIndex],
+                })
+              }
+            >
+              首列后添加
+            </button>
+            <button
+              type="button"
+              disabled={tableIndex < 0}
+              onClick={() =>
+                handleTableCommand(DELETE_COLUMN_COMMAND_NAME, {
+                  columnIndex: 0,
+                  path: [tableIndex],
+                })
+              }
+            >
+              删除首列
+            </button>
+            <button
+              type="button"
+              disabled={tableIndex < 0}
+              onClick={() =>
+                handleTableCommand(DELETE_TABLE_COMMAND_NAME, {
+                  path: [tableIndex],
+                })
+              }
+            >
+              删除表格
             </button>
           </div>
           <RichTextEditor
