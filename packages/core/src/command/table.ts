@@ -31,6 +31,7 @@ export const INSERT_TABLE_COMMAND_NAME = "insertTable";
 export const DELETE_TABLE_COMMAND_NAME = "deleteTable";
 export const ADD_ROW_BEFORE_COMMAND_NAME = "addRowBefore";
 export const ADD_ROW_AFTER_COMMAND_NAME = "addRowAfter";
+export const DELETE_ROW_COMMAND_NAME = "deleteRow";
 
 export interface TableCommandPayload {
   path: Path;
@@ -304,3 +305,38 @@ export function canExecuteAddRowBeforeCommand(input: CommandInput): boolean {
 export function canExecuteAddRowAfterCommand(input: CommandInput): boolean {
   return addRowAfterCommand.canExecute?.(input) ?? false;
 }
+
+export function canExecuteDeleteRowCommand(input: CommandInput): boolean {
+  return getIndexedTableTarget(input, "rowIndex") !== undefined;
+}
+
+export const deleteRowCommand: Command = {
+  canExecute: canExecuteDeleteRowCommand,
+  execute(input) {
+    const target = getIndexedTableTarget(input, "rowIndex");
+
+    if (!target) {
+      return createCommandSkipped(
+        DELETE_ROW_COMMAND_NAME,
+        "Delete row command requires a valid table row.",
+      );
+    }
+
+    if (target.table.children.length === 1) {
+      return createDeleteTableResult(input, target, DELETE_ROW_COMMAND_NAME);
+    }
+
+    return createReplaceTableResult(
+      input,
+      target,
+      {
+        children: target.table.children.filter(
+          (_, rowIndex) => rowIndex !== target.itemIndex,
+        ),
+        type: "table",
+      },
+      DELETE_ROW_COMMAND_NAME,
+    );
+  },
+  name: DELETE_ROW_COMMAND_NAME,
+};

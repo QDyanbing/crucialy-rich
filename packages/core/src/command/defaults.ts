@@ -12,6 +12,7 @@ import { TEXT_STYLE_COMMANDS } from "./text-style";
 import {
   addRowAfterCommand,
   addRowBeforeCommand,
+  deleteRowCommand,
   deleteTableCommand,
   insertTableCommand,
 } from "./table";
@@ -33,6 +34,7 @@ export const DEFAULT_COMMANDS: readonly Command[] = [
   deleteTableCommand,
   addRowBeforeCommand,
   addRowAfterCommand,
+  deleteRowCommand,
   mergeBlockCommand,
   splitBlockCommand,
 ];

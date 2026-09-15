@@ -10,6 +10,7 @@ import {
   createParagraph,
   createText,
   createTable,
+  deleteRowCommand,
   deleteTableCommand,
   insertTableCommand,
   validateDocument,
@@ -162,5 +163,38 @@ describe("table row insertion commands", () => {
         payload: { path: [0], rowIndex: 1 },
       }).status,
     ).toBe("skipped");
+  });
+});
+
+describe("deleteRowCommand", () => {
+  it("deletes the selected row and keeps the table rectangular", () => {
+    const table = createTable(2, 2);
+    table.children[1]!.children[0]!.children[0]!.children[0]!.text = "保留";
+    const document = createDocument([table]);
+    const result = deleteRowCommand.execute({
+      context: { document },
+      payload: { path: [0], rowIndex: 0 },
+    });
+    const nextDocument = applyTransaction(document, result.transaction!);
+    const nextTable = nextDocument.children[0];
+
+    expect(nextTable?.type === "table" ? nextTable.children.length : 0).toBe(1);
+    expect(
+      nextTable?.type === "table"
+        ? nextTable.children[0]?.children[0]?.children[0]?.children[0]?.text
+        : undefined,
+    ).toBe("保留");
+    expect(validateDocument(nextDocument).valid).toBe(true);
+  });
+
+  it("removes the table when deleting its last row", () => {
+    const document = createDocument([createTable(1, 2)]);
+    const result = deleteRowCommand.execute({
+      context: { document },
+      payload: { path: [0], rowIndex: 0 },
+    });
+
+    expect(applyTransaction(document, result.transaction!)).toEqual(createDocument());
+    expect(result.selection?.anchor).toEqual({ offset: 0, path: [0, 0] });
   });
 });

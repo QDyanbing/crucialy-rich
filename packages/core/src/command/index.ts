@@ -125,10 +125,13 @@ export {
   addRowBeforeCommand,
   canExecuteAddRowAfterCommand,
   canExecuteAddRowBeforeCommand,
+  canExecuteDeleteRowCommand,
   canExecuteDeleteTableCommand,
   canExecuteInsertTableCommand,
   DELETE_TABLE_COMMAND_NAME,
+  DELETE_ROW_COMMAND_NAME,
   deleteTableCommand,
+  deleteRowCommand,
   INSERT_TABLE_COMMAND_NAME,
   insertTableCommand,
 } from "./table";
