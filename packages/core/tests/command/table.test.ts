@@ -13,6 +13,7 @@ import {
   createText,
   createTable,
   deleteRowCommand,
+  deleteColumnCommand,
   deleteTableCommand,
   insertTableCommand,
   validateDocument,
@@ -239,5 +240,42 @@ describe("table column insertion commands", () => {
         ? nextTable.children.map((row) => row.children.length)
         : undefined,
     ).toEqual([3, 3]);
+  });
+});
+
+describe("deleteColumnCommand", () => {
+  it("deletes the selected column from every row", () => {
+    const table = createTable(2, 2);
+    table.children[0]!.children[1]!.children[0]!.children[0]!.text = "保留";
+    const document = createDocument([table]);
+    const result = deleteColumnCommand.execute({
+      context: { document },
+      payload: { columnIndex: 0, path: [0] },
+    });
+    const nextDocument = applyTransaction(document, result.transaction!);
+    const nextTable = nextDocument.children[0];
+
+    expect(
+      nextTable?.type === "table"
+        ? nextTable.children.map((row) => row.children.length)
+        : undefined,
+    ).toEqual([1, 1]);
+    expect(
+      nextTable?.type === "table"
+        ? nextTable.children[0]?.children[0]?.children[0]?.children[0]?.text
+        : undefined,
+    ).toBe("保留");
+    expect(validateDocument(nextDocument).valid).toBe(true);
+  });
+
+  it("removes the table when deleting its last column", () => {
+    const document = createDocument([createTable(2, 1)]);
+    const result = deleteColumnCommand.execute({
+      context: { document },
+      payload: { columnIndex: 0, path: [0] },
+    });
+
+    expect(applyTransaction(document, result.transaction!)).toEqual(createDocument());
+    expect(result.selection?.anchor).toEqual({ offset: 0, path: [0, 0] });
   });
 });

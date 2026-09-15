@@ -15,6 +15,7 @@ import {
   addRowAfterCommand,
   addRowBeforeCommand,
   deleteRowCommand,
+  deleteColumnCommand,
   deleteTableCommand,
   insertTableCommand,
 } from "./table";
@@ -38,6 +39,7 @@ export const DEFAULT_COMMANDS: readonly Command[] = [
   addRowAfterCommand,
   addColumnBeforeCommand,
   addColumnAfterCommand,
+  deleteColumnCommand,
   deleteRowCommand,
   mergeBlockCommand,
   splitBlockCommand,

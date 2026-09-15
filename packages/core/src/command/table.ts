@@ -34,6 +34,7 @@ export const ADD_ROW_AFTER_COMMAND_NAME = "addRowAfter";
 export const DELETE_ROW_COMMAND_NAME = "deleteRow";
 export const ADD_COLUMN_BEFORE_COMMAND_NAME = "addColumnBefore";
 export const ADD_COLUMN_AFTER_COMMAND_NAME = "addColumnAfter";
+export const DELETE_COLUMN_COMMAND_NAME = "deleteColumn";
 
 export interface TableCommandPayload {
   path: Path;
@@ -399,3 +400,40 @@ export function canExecuteAddColumnBeforeCommand(input: CommandInput): boolean {
 export function canExecuteAddColumnAfterCommand(input: CommandInput): boolean {
   return addColumnAfterCommand.canExecute?.(input) ?? false;
 }
+
+export function canExecuteDeleteColumnCommand(input: CommandInput): boolean {
+  return getIndexedTableTarget(input, "columnIndex") !== undefined;
+}
+
+export const deleteColumnCommand: Command = {
+  canExecute: canExecuteDeleteColumnCommand,
+  execute(input) {
+    const target = getIndexedTableTarget(input, "columnIndex");
+
+    if (!target) {
+      return createCommandSkipped(
+        DELETE_COLUMN_COMMAND_NAME,
+        "Delete column command requires a valid table column.",
+      );
+    }
+
+    if (target.table.children[0]?.children.length === 1) {
+      return createDeleteTableResult(input, target, DELETE_COLUMN_COMMAND_NAME);
+    }
+
+    return createReplaceTableResult(
+      input,
+      target,
+      {
+        children: target.table.children.map((row) =>
+          createTableRow(
+            row.children.filter((_, columnIndex) => columnIndex !== target.itemIndex),
+          ),
+        ),
+        type: "table",
+      },
+      DELETE_COLUMN_COMMAND_NAME,
+    );
+  },
+  name: DELETE_COLUMN_COMMAND_NAME,
+};
