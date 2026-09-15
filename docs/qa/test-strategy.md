@@ -1,6 +1,6 @@
 # 测试策略
 
-当前阶段已经包含工程冒烟测试、文档模型单测、text marks 单测、Block Type 与 operation 单测、Range/Block Selection 单测、渲染与 DOM 映射单测、React 组件 API 单测、输入 helper 单测、command 单测、history 单测、工具栏、斜杠菜单、图片与 Clipboard 单测和演示端到端验收。
+当前阶段已经包含工程冒烟测试、文档模型单测、text marks 单测、Block Type 与 operation 单测、Range/Block Selection 单测、渲染与 DOM 映射单测、React 组件 API 单测、输入 helper 单测、command 单测、history 单测、工具栏、斜杠菜单、图片、Clipboard、基础表格单测和演示端到端验收。
 
 ## 单元测试
 
@@ -25,6 +25,7 @@
   - 斜杠菜单配置、过滤、触发、状态、定位、键盘导航、浮层渲染、跨 text 清理和组合命令执行。
   - 图片 schema、安全 URL、规范化、命令、块选区、渲染和本地 object URL 生命周期。
   - Clipboard parser 优先级、纯文本换行、HTML 白名单、Markdown 转换和结构化 paste command。
+  - table/tableRow/tableCell schema、矩形修复、递归 Path、深拷贝、语义渲染、插删表和行列增删 command。
   - 输入 helper 的普通文本输入、Backspace、Delete 和 Enter transaction。
   - Command 注册、执行、可执行判断、默认注册表、状态矩阵、四种 boolean mark command、`setFontSize`、`setTextColor`、`setBackgroundColor`、链接、Heading、Quote、mark 快捷键配置与匹配、文本编辑 command 和 block 编辑 command。
   - History 快照、entry 克隆、状态工厂、记录入口、batch 合并、查询 helper、undo/redo 栈转换、快捷键识别、history command 和 Block Type 生命周期。
@@ -33,7 +34,7 @@
 ## 浏览器测试
 
 - 工具：Playwright。
-- 范围：演示页面、模型/选区/command 调试、基础编辑、文字样式、链接、Heading/Quote、CodeBlock、Divider、列表、固定/悬浮 Toolbar、斜杠菜单、URL/本地图片、图片删除、纯文本/HTML/Markdown 粘贴、选区恢复和 History 往返。
+- 范围：演示页面、模型/选区/command 调试、基础编辑、文字样式、链接、Heading/Quote、CodeBlock、Divider、列表、固定/悬浮 Toolbar、斜杠菜单、URL/本地图片、图片删除、纯文本/HTML/Markdown 粘贴、基础表格结构操作、选区恢复和 History 往返。
 - 命令：`pnpm test:e2e`。
 
 ## 类型检查

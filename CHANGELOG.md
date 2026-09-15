@@ -111,6 +111,7 @@
 - 新增 `indent_list_item`、`outdent_list_item` 和 `unwrap_list_item`，并接入 Tab、Shift+Tab、Backspace 与嵌套 Enter。
 - 新增 taskList/taskItem checked 模型、`toggleTaskList` command、`set_task_item_checked` 和 React checkbox 持久化。
 - 新增中文“嵌套与任务列表”Demo、浏览器综合验收、第 16 周 QA 和列表增强独立报告。
+- 新增基础表格模型、矩形校验与修复、递归 Path、语义渲染、插删表、行列增删命令、中文 Demo 和第 21 周验收文档。
 - 新增 ToolbarItem 配置、默认工具栏项和 Command active/disabled 状态映射。
 - 新增固定工具栏、命令执行事件以及 Bold、Italic、Underline、Strike、Link、Heading 和 Quote 默认入口。
 - 新增悬浮工具栏可见性、视口定位、窄屏约束和选区快照恢复机制。

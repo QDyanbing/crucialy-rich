@@ -37,10 +37,10 @@ export const DEFAULT_COMMANDS: readonly Command[] = [
   deleteTableCommand,
   addRowBeforeCommand,
   addRowAfterCommand,
+  deleteRowCommand,
   addColumnBeforeCommand,
   addColumnAfterCommand,
   deleteColumnCommand,
-  deleteRowCommand,
   mergeBlockCommand,
   splitBlockCommand,
 ];

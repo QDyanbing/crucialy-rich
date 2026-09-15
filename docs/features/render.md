@@ -1,6 +1,6 @@
 # 基础渲染（第一版）
 
-基础渲染负责把当前文档模型转换为可展示的 DOM 结构描述。当前覆盖 `document`、`paragraph`、1–6 级 `heading`、`quote`、`codeBlock`、`divider`、`text`、文字样式和 Link Mark。
+基础渲染负责把当前文档模型转换为可展示的 DOM 结构描述。当前覆盖 `document`、文本块、列表、图片、基础表格、文字样式和 Link Mark。
 
 ## 渲染结构
 
@@ -139,4 +139,4 @@ interface RenderedElementNode {
 
 - 浏览器选区同步覆盖当前文本块的直接 text 结构；void block 不接收内部光标。
 - 纯 renderer 不处理 `contentEditable`、`beforeinput` 或真实编辑行为；这些能力由 React 集成、输入 helper 和 command 层负责。
-- 当前包含标题、引用、代码块、分隔线、嵌套列表、任务列表、文字样式和链接渲染；图片尚未实现。
+- 当前包含标题、引用、代码块、分隔线、嵌套列表、任务列表、图片、基础表格、文字样式和链接渲染；表格单元格编辑尚未实现。

@@ -1,10 +1,10 @@
 # 文档模型（第一版）
 
-文档模型是富文本内核的数据基础。当前在文本块与基础列表结构上扩展了最多三层的嵌套列表。
+文档模型是富文本内核的数据基础。当前覆盖文本块、void block、图片、最多三层的嵌套列表和基础表格结构。
 
 ## 节点结构
 
-当前支持 `document → text/void block → text`，以及 `document → list → listItem/taskItem → text + nested list`。
+当前支持 `document → text/void block → text`、`document → list → listItem/taskItem → text + nested list`，以及 `document → table → tableRow → tableCell → paragraph → text`。
 
 ```ts
 interface TextNode {
@@ -160,7 +160,7 @@ interface DocumentNode {
 
 ## 当前限制
 
-- 当前 Block Type 还支持 bulletList、orderedList 和 taskList；图片尚未实现。
+- 当前 Block Type 还支持 bulletList、orderedList、taskList、image 和 table。
 - text marks 已完成四种 boolean mark、三种文字属性和 Link Mark 闭环；链接已经接入 operation、command、安全渲染、编辑态/只读态交互、选区恢复和 Demo。
 - heading level 直接存储在 `level` 字段；CodeBlock 和 Divider 当前不包含额外属性。
 - 规范化会丢弃非法节点而不尝试转换，转换策略留待后续。

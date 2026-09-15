@@ -18,6 +18,7 @@ describe("@crucialy-rich/core public API", () => {
       "bulletList",
       "orderedList",
       "taskList",
+      "table",
     ]);
     expect(core.VOID_BLOCK_TYPES).toEqual(["divider", "image"]);
     expect(core.IMAGE_STATUSES).toEqual(["loading", "ready", "error"]);
@@ -36,6 +37,13 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.createText).toBe("function");
     expect(typeof core.createTaskItem).toBe("function");
     expect(typeof core.createTaskList).toBe("function");
+    expect(core.TABLE_NODE_TYPES).toEqual(["table", "tableRow", "tableCell"]);
+    expect(typeof core.createTable).toBe("function");
+    expect(typeof core.createTableCell).toBe("function");
+    expect(typeof core.createTableRow).toBe("function");
+    expect(typeof core.isTableNode).toBe("function");
+    expect(typeof core.isTableCellNode).toBe("function");
+    expect(typeof core.isTableRowNode).toBe("function");
     expect(core.TEXT_MARK_TYPES).toEqual(["bold", "italic", "underline", "strike"]);
     expect(core.TEXT_MARK_ATTRIBUTE_TYPES).toEqual([
       "fontSize",
@@ -356,6 +364,14 @@ describe("@crucialy-rich/core public API", () => {
       "insertImage",
       "deleteImage",
       "paste",
+      "insertTable",
+      "deleteTable",
+      "addRowBefore",
+      "addRowAfter",
+      "deleteRow",
+      "addColumnBefore",
+      "addColumnAfter",
+      "deleteColumn",
       "mergeBlock",
       "splitBlock",
     ]);
@@ -371,6 +387,14 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.insertImageCommand).toBe("object");
     expect(typeof core.deleteImageCommand).toBe("object");
     expect(typeof core.pasteCommand).toBe("object");
+    expect(typeof core.insertTableCommand).toBe("object");
+    expect(typeof core.deleteTableCommand).toBe("object");
+    expect(typeof core.addRowBeforeCommand).toBe("object");
+    expect(typeof core.addRowAfterCommand).toBe("object");
+    expect(typeof core.deleteRowCommand).toBe("object");
+    expect(typeof core.addColumnBeforeCommand).toBe("object");
+    expect(typeof core.addColumnAfterCommand).toBe("object");
+    expect(typeof core.deleteColumnCommand).toBe("object");
     expect(core.PASTE_COMMAND_NAME).toBe("paste");
     expect(core.DELETE_IMAGE_COMMAND_NAME).toBe("deleteImage");
     expect(core.INSERT_IMAGE_COMMAND_NAME).toBe("insertImage");
