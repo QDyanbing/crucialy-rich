@@ -5,6 +5,10 @@ import {
   isImageStatus,
   isListItemNode,
   isListNode,
+  isParagraphNode,
+  isTableCellNode,
+  isTableNode,
+  isTableRowNode,
   isTaskItemNode,
   isTextBlockNode,
   isTextNode,
@@ -17,6 +21,7 @@ import {
   TEXT_MARK_TYPES,
   MAX_LIST_DEPTH,
   type ListNode,
+  type TableNode,
   type TextMarkAttributeType,
 } from "./types";
 
@@ -162,6 +167,75 @@ function validateList(
   });
 }
 
+function validateTable(
+  table: TableNode,
+  path: number[],
+  errors: ValidationError[],
+): void {
+  if (table.children.length === 0) {
+    errors.push({ path, message: "table 至少需要一行" });
+    return;
+  }
+
+  const expectedColumns = isTableRowNode(table.children[0])
+    ? table.children[0].children.length
+    : undefined;
+
+  table.children.forEach((row, rowIndex) => {
+    const rowPath = [...path, rowIndex];
+
+    if (!isTableRowNode(row)) {
+      errors.push({ path: rowPath, message: "table 子节点必须是 tableRow" });
+      return;
+    }
+
+    if (row.children.length === 0) {
+      errors.push({ path: rowPath, message: "tableRow 至少需要一个 tableCell" });
+    } else if (
+      expectedColumns !== undefined &&
+      row.children.length !== expectedColumns
+    ) {
+      errors.push({ path: rowPath, message: "table 每行必须包含相同数量的单元格" });
+    }
+
+    row.children.forEach((cell, cellIndex) => {
+      const cellPath = [...rowPath, cellIndex];
+
+      if (!isTableCellNode(cell)) {
+        errors.push({ path: cellPath, message: "tableRow 子节点必须是 tableCell" });
+        return;
+      }
+
+      if (cell.children.length === 0) {
+        errors.push({ path: cellPath, message: "tableCell 至少需要一个 paragraph" });
+      }
+
+      cell.children.forEach((paragraph, paragraphIndex) => {
+        const paragraphPath = [...cellPath, paragraphIndex];
+
+        if (!isParagraphNode(paragraph)) {
+          errors.push({
+            path: paragraphPath,
+            message: "tableCell 子节点必须是 paragraph",
+          });
+          return;
+        }
+
+        paragraph.children.forEach((text, textIndex) => {
+          const textPath = [...paragraphPath, textIndex];
+
+          if (!isTextNode(text)) {
+            errors.push({ path: textPath, message: "paragraph 子节点必须是 text" });
+            return;
+          }
+
+          validateTextMarks(text, textPath, errors);
+        });
+      });
+    });
+  });
+}
+
 /**
  * 校验一个值是否为合法文档。
  *
@@ -190,6 +264,11 @@ export function validateDocument(value: unknown): ValidationResult {
 
     if (isListNode(child)) {
       validateList(child, [blockIndex], 1, errors);
+      return;
+    }
+
+    if (isTableNode(child)) {
+      validateTable(child, [blockIndex], errors);
       return;
     }
 

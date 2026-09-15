@@ -14,6 +14,9 @@ import {
   createText,
   createTaskItem,
   createTaskList,
+  createTable,
+  createTableCell,
+  createTableRow,
 } from "../../src/model/factories";
 import { HEADING_LEVELS } from "../../src/model/types";
 import { validateDocument } from "../../src/model/validate";
@@ -197,6 +200,64 @@ describe("validateDocument", () => {
   it("accepts a well-formed document", () => {
     const document = createDocument([createParagraph([createText("hi")])]);
     expect(validateDocument(document)).toEqual({ valid: true, errors: [] });
+  });
+
+  it("accepts a table whose cells contain paragraphs", () => {
+    const table = createTable(2, 2);
+    table.children[0]!.children[0] = createTableCell([
+      createParagraph([createText("姓名", { bold: true })]),
+    ]);
+
+    expect(validateDocument(createDocument([table]))).toEqual({
+      errors: [],
+      valid: true,
+    });
+  });
+
+  it("rejects empty and uneven table rows", () => {
+    const result = validateDocument(
+      createDocument([
+        {
+          children: [createTableRow([]), createTableRow([createTableCell()])],
+          type: "table",
+        },
+      ]),
+    );
+
+    expect(result).toEqual({
+      errors: [
+        { message: "tableRow 至少需要一个 tableCell", path: [0, 0] },
+        { message: "table 每行必须包含相同数量的单元格", path: [0, 1] },
+      ],
+      valid: false,
+    });
+  });
+
+  it("rejects non-paragraph table cell children", () => {
+    const result = validateDocument({
+      children: [
+        {
+          children: [
+            {
+              children: [
+                {
+                  children: [{ children: [], type: "quote" }],
+                  type: "tableCell",
+                },
+              ],
+              type: "tableRow",
+            },
+          ],
+          type: "table",
+        },
+      ],
+      type: "document",
+    });
+
+    expect(result).toEqual({
+      errors: [{ message: "tableCell 子节点必须是 paragraph", path: [0, 0, 0, 0] }],
+      valid: false,
+    });
   });
 
   it("accepts an empty document", () => {
