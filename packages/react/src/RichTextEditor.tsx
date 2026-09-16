@@ -6,6 +6,7 @@ import {
   createDocument,
   createBackspaceInputTransaction,
   createBlockSelection,
+  createCellSelection,
   createDeleteInputTransaction,
   createSelectionAfterBackspaceInput,
   createSelectionAfterDeleteInput,
@@ -29,6 +30,7 @@ import {
   SPLIT_BLOCK_COMMAND_NAME,
   type CommandResult,
   type BlockSelection,
+  type CellSelection,
   type DocumentNode,
   type RangeSelection,
   type RenderedElementNode,
@@ -64,8 +66,10 @@ export interface RichTextEditorProps
   > {
   defaultValue?: DocumentNode;
   blockSelection?: BlockSelection;
+  cellSelection?: CellSelection;
   label?: string;
   onBlockSelectionChange?: (selection: BlockSelection | undefined) => void;
+  onCellSelectionChange?: (selection: CellSelection | undefined) => void;
   onChange?: (value: DocumentNode) => void;
   onSelectionChange?: (selection: RangeSelection) => void;
   onTransaction?: (event: RichTextEditorTransactionEvent) => void;
@@ -103,21 +107,27 @@ function arePathsEqual(left: number[], right: number[]): boolean {
 function createRenderedElement(
   node: RenderedElementNode,
   blockSelection?: BlockSelection,
+  cellSelection?: CellSelection,
 ): ReactElement {
   const children =
-    node.children?.map((child) => createRenderedElement(child, blockSelection)) ??
-    node.text;
-  const selected =
+    node.children?.map((child) =>
+      createRenderedElement(child, blockSelection, cellSelection),
+    ) ?? node.text;
+  const blockSelected =
     node.tagName === "img" &&
     blockSelection !== undefined &&
     arePathsEqual(node.path, blockSelection.path);
+  const cellSelected =
+    node.tagName === "td" &&
+    cellSelection !== undefined &&
+    arePathsEqual(node.path, cellSelection.path);
 
   return createElement(
     node.tagName,
     {
       ...node.attributes,
       key: node.path.join(".") || "root",
-      ...(selected ? { "data-selected": "true" } : {}),
+      ...(blockSelected || cellSelected ? { "data-selected": "true" } : {}),
       ...(node.style ? { style: node.style } : {}),
     },
     children,
@@ -370,12 +380,14 @@ function createMergeNextBlockCommandResult(
 
 export function RichTextEditor({
   blockSelection,
+  cellSelection,
   className,
   contentEditable,
   defaultValue,
   label = "Rich text editor",
   onBeforeInput,
   onBlockSelectionChange,
+  onCellSelectionChange,
   onClick,
   onKeyDown,
   onKeyUp,
@@ -615,6 +627,20 @@ export function RichTextEditor({
 
     onBlockSelectionChange?.(undefined);
 
+    const tableCell = event.target.closest<HTMLTableCellElement>(
+      'td[data-crucialy-table-cell="true"]',
+    );
+
+    if (tableCell && event.currentTarget.contains(tableCell)) {
+      const cellPath = getElementModelPath(tableCell);
+
+      if (cellPath) {
+        onCellSelectionChange?.(createCellSelection(cellPath));
+      }
+    } else {
+      onCellSelectionChange?.(undefined);
+    }
+
     const taskControl = event.target.closest<HTMLInputElement>(
       'input[data-crucialy-task-item="true"]',
     );
@@ -671,7 +697,7 @@ export function RichTextEditor({
       suppressContentEditableWarning={suppressContentEditableWarning ?? editable}
     >
       {renderedDocument.children?.map((child) =>
-        createRenderedElement(child, blockSelection),
+        createRenderedElement(child, blockSelection, cellSelection),
       )}
     </div>
   );

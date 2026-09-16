@@ -3,6 +3,7 @@ import {
   createDocument,
   createDivider,
   createBlockSelection,
+  createCellSelection,
   createImage,
   createParagraph,
   createText,
@@ -129,6 +130,20 @@ describe("@crucialy-rich/react public API", () => {
     expect(html).toContain('data-crucialy-table="true"');
     expect(html).toContain('data-crucialy-table-cell="true"');
     expect(html).not.toContain('<table contenteditable="false"');
+  });
+
+  it("renders the selected table cell state", () => {
+    const html = renderToStaticMarkup(
+      createElement(RichTextEditor, {
+        cellSelection: createCellSelection([0, 0, 1]),
+        value: createDocument([createTable(1, 2)]),
+      }),
+    );
+
+    expect(html.match(/data-selected="true"/g)).toHaveLength(1);
+    expect(html).toContain(
+      'data-crucialy-path="[0,0,1]" data-crucialy-table-cell="true" data-selected="true"',
+    );
   });
 
   it("renders combined mark styles through React", () => {
