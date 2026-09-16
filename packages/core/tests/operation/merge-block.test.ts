@@ -4,7 +4,9 @@ import {
   createDivider,
   createDocument,
   createParagraph,
+  createTable,
   createText,
+  isTableNode,
 } from "../../src/model";
 import {
   applyMergeBlock,
@@ -109,6 +111,45 @@ describe("applyMergeBlock", () => {
       { bold: true },
       { italic: true },
     ]);
+  });
+
+  it("merges adjacent paragraphs inside the same table cell", () => {
+    const table = createTable(1, 1);
+    table.children[0]!.children[0]!.children = [
+      createParagraph([createText("第一段")]),
+      createParagraph([createText("第二段")]),
+    ];
+    const document = createDocument([table]);
+    const result = applyMergeBlock(
+      document,
+      createMergeBlockOperation({ path: [0, 0, 0, 1, 0], offset: 0 }),
+    );
+    const resultTable = result.children[0];
+
+    expect(isTableNode(resultTable)).toBe(true);
+
+    if (!isTableNode(resultTable)) {
+      throw new Error("expected table result");
+    }
+
+    expect(resultTable.children[0]?.children[0]?.children).toHaveLength(1);
+    expect(
+      resultTable.children[0]?.children[0]?.children[0]?.children.map(
+        (node) => node.text,
+      ),
+    ).toEqual(["第一段", "第二段"]);
+    expect(table.children[0]!.children[0]!.children).toHaveLength(2);
+  });
+
+  it("rejects merging the first paragraph in a table cell", () => {
+    const document = createDocument([createTable(1, 1)]);
+
+    expect(() =>
+      applyMergeBlock(
+        document,
+        createMergeBlockOperation({ path: [0, 0, 0, 0, 0], offset: 0 }),
+      ),
+    ).toThrow("non-first table paragraph");
   });
 
   it("throws when merging the first block", () => {
@@ -217,6 +258,24 @@ describe("createSelectionAfterMergeBlock", () => {
         path: [0, 0],
         offset: 0,
       },
+    });
+  });
+
+  it("creates a collapsed selection at the previous table paragraph end", () => {
+    const table = createTable(1, 1);
+    table.children[0]!.children[0]!.children = [
+      createParagraph([createText("第一"), createText("段")]),
+      createParagraph([createText("第二段")]),
+    ];
+    const document = createDocument([table]);
+    const operation = createMergeBlockOperation({
+      path: [0, 0, 0, 1, 0],
+      offset: 0,
+    });
+
+    expect(createSelectionAfterMergeBlock(document, operation)).toEqual({
+      anchor: { path: [0, 0, 0, 0, 1], offset: 1 },
+      focus: { path: [0, 0, 0, 0, 1], offset: 1 },
     });
   });
 });

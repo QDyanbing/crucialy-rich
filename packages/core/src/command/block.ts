@@ -3,9 +3,9 @@ import {
   createSelectionAfterMergeBlock,
   createTransaction,
 } from "../operation";
-import { isTextBlockNode } from "../model";
+import { isParagraphNode, isTextBlockNode } from "../model";
 import { createEnterInputTransaction, createSelectionAfterEnterInput } from "../input";
-import { isCollapsed, isValidPoint, type Point } from "../selection";
+import { getNodeAtPath, isCollapsed, isValidPoint, type Point } from "../selection";
 import { createCommandSkipped, createCommandSuccess } from "./result";
 import type { Command, CommandInput } from "./types";
 
@@ -32,9 +32,36 @@ function canMergeBlockAt(input: CommandInput, point: Point | undefined): boolean
   if (
     !hasCollapsedSelection(input) ||
     !point ||
-    point.path.length !== 2 ||
     !isValidPoint(input.context.document, point)
   ) {
+    return false;
+  }
+
+  if (point.path.length === 5) {
+    const [blockIndex, rowIndex, cellIndex, paragraphIndex, textIndex] = point.path;
+    const previousParagraph =
+      blockIndex === undefined ||
+      rowIndex === undefined ||
+      cellIndex === undefined ||
+      paragraphIndex === undefined
+        ? undefined
+        : getNodeAtPath(input.context.document, [
+            blockIndex,
+            rowIndex,
+            cellIndex,
+            paragraphIndex - 1,
+          ]);
+
+    return (
+      paragraphIndex !== undefined &&
+      paragraphIndex > 0 &&
+      textIndex === 0 &&
+      point.offset === 0 &&
+      isParagraphNode(previousParagraph)
+    );
+  }
+
+  if (point.path.length !== 2) {
     return false;
   }
 
