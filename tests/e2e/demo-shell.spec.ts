@@ -2007,3 +2007,38 @@ test("inserts and reshapes a basic table from the acceptance controls", async ({
   await expect(editor.locator("table")).toHaveCount(0);
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
+
+test("edits selects and pastes TSV into table cells", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("tables");
+
+  const editor = page.getByLabel("已渲染文档");
+  const cells = editor.locator('td[data-crucialy-table-cell="true"]');
+  const firstCell = cells.nth(0);
+
+  await firstCell.click();
+  await expect(firstCell).toHaveAttribute("data-selected", "true");
+  await expect(page.getByLabel("当前单元格路径")).toHaveText("当前单元格：0 → 0 → 0");
+
+  await firstCell.locator("p").click();
+  await page.keyboard.press("End");
+  await page.keyboard.type("项");
+  await expect(firstCell).toContainText("姓名项");
+
+  await page.keyboard.press("Enter");
+  await expect(firstCell.locator("p")).toHaveCount(2);
+  await page.keyboard.press("Backspace");
+  await expect(firstCell.locator("p")).toHaveCount(1);
+  await expect(firstCell).toContainText("姓名项");
+
+  await firstCell.click();
+  await page.getByRole("button", { name: "载入 TSV 示例" }).click();
+  await page.getByRole("button", { name: "粘贴示例" }).click();
+
+  await expect(cells.nth(0)).toHaveText("小明");
+  await expect(cells.nth(1)).toHaveText("开发");
+  await expect(cells.nth(3)).toHaveText("小红");
+  await expect(cells.nth(4)).toHaveText("设计");
+  await expect(cells).toHaveCount(9);
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
