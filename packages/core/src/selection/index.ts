@@ -11,7 +11,14 @@ export {
   isImageBlockSelection,
   isValidBlockSelection,
 } from "./block";
-export { cloneCellSelection, createCellSelection, isValidCellSelection } from "./cell";
+export {
+  cloneCellSelection,
+  createCellSelection,
+  getCellPathFromPoint,
+  getCellSelectionFromRange,
+  isRangeInSameCell,
+  isValidCellSelection,
+} from "./cell";
 export { getNodeAtPath, hasNodeAtPath } from "./path";
 export {
   getBlockTextOffset,
