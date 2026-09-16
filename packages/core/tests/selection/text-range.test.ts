@@ -7,6 +7,7 @@ import {
   createListItem,
   createParagraph,
   createText,
+  createTable,
 } from "../../src/model";
 import { getTextInRange, splitTextByRange } from "../../src/selection/text-range";
 
@@ -23,6 +24,20 @@ describe("getTextInRange", () => {
         focus: { path: [0, 0], offset: 4 },
       }),
     ).toBe("lph");
+  });
+
+  it("reads text selections inside table cells", () => {
+    const table = createTable(1, 2);
+    table.children[0]!.children[0]!.children[0]!.children[0]!.text = "姓名";
+    table.children[0]!.children[1]!.children[0]!.children[0]!.text = "角色";
+    const document = createDocument([table]);
+
+    expect(
+      getTextInRange(document, {
+        anchor: { path: [0, 0, 0, 0, 0], offset: 1 },
+        focus: { path: [0, 0, 1, 0, 0], offset: 1 },
+      }),
+    ).toBe("名\t角");
   });
 
   it("reads text across sibling text nodes", () => {

@@ -1,8 +1,10 @@
 import {
   isListNode,
+  isTableNode,
   isTextBlockNode,
   type DocumentNode,
   type ListNode,
+  type TableNode,
   type TextNode,
 } from "../model";
 import { isValidPoint } from "./point";
@@ -32,9 +34,9 @@ function createLinearSegments(document: DocumentNode): LinearSegment[] {
   const segments: LinearSegment[] = [];
   let cursor = 0;
 
-  function appendSeparator() {
-    segments.push({ start: cursor, end: cursor + 1, text: "\n" });
-    cursor += 1;
+  function appendSeparator(text = "\n") {
+    segments.push({ start: cursor, end: cursor + text.length, text });
+    cursor += text.length;
   }
 
   function appendTextNodes(nodes: TextNode[], path: Path) {
@@ -66,9 +68,38 @@ function createLinearSegments(document: DocumentNode): LinearSegment[] {
     });
   }
 
+  function appendTable(table: TableNode, path: Path) {
+    table.children.forEach((row, rowIndex) => {
+      row.children.forEach((cell, cellIndex) => {
+        cell.children.forEach((paragraph, paragraphIndex) => {
+          appendTextNodes(paragraph.children, [
+            ...path,
+            rowIndex,
+            cellIndex,
+            paragraphIndex,
+          ]);
+
+          if (paragraphIndex < cell.children.length - 1) {
+            appendSeparator();
+          }
+        });
+
+        if (cellIndex < row.children.length - 1) {
+          appendSeparator("\t");
+        }
+      });
+
+      if (rowIndex < table.children.length - 1) {
+        appendSeparator();
+      }
+    });
+  }
+
   document.children.forEach((block, blockIndex) => {
     if (isListNode(block)) {
       appendList(block, [blockIndex]);
+    } else if (isTableNode(block)) {
+      appendTable(block, [blockIndex]);
     } else if (isTextBlockNode(block)) {
       appendTextNodes(block.children, [blockIndex]);
     }
