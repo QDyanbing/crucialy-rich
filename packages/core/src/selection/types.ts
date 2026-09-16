@@ -31,3 +31,11 @@ export interface BlockSelection {
   path: Path;
   type: "block";
 }
+
+/**
+ * CellSelection 定位一个完整的表格单元格。
+ */
+export interface CellSelection {
+  path: Path;
+  type: "cell";
+}

@@ -1,10 +1,17 @@
-export type { BlockSelection, Path, Point, RangeSelection } from "./types";
+export type {
+  BlockSelection,
+  CellSelection,
+  Path,
+  Point,
+  RangeSelection,
+} from "./types";
 export {
   cloneBlockSelection,
   createBlockSelection,
   isImageBlockSelection,
   isValidBlockSelection,
 } from "./block";
+export { cloneCellSelection, createCellSelection, isValidCellSelection } from "./cell";
 export { getNodeAtPath, hasNodeAtPath } from "./path";
 export {
   getBlockTextOffset,
