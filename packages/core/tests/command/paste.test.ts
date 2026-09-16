@@ -6,12 +6,14 @@ import {
   createDefaultCommandRegistry,
   createDocument,
   createParagraph,
+  createTable,
   createText,
   executeCommand,
   parseHtml,
   parsePlainText,
   PASTE_COMMAND_NAME,
   pasteCommand,
+  isTableNode,
 } from "../../src";
 
 describe("pasteCommand", () => {
@@ -144,6 +146,97 @@ describe("pasteCommand", () => {
       children: [{ marks: { bold: true }, text: "加粗" }],
     });
     expect(result.selection?.anchor).toEqual({ offset: 2, path: [2, 0, 0] });
+  });
+
+  it("pastes one TSV row across table cells", () => {
+    const document = createDocument([createTable(2, 3)]);
+    const result = pasteCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { offset: 0, path: [0, 0, 1, 0, 0] },
+          focus: { offset: 0, path: [0, 0, 1, 0, 0] },
+        },
+      },
+      payload: { fragment: parsePlainText("姓名\t角色")! },
+    });
+    const resultTable = applyTransaction(document, result.transaction!).children[0];
+
+    expect(isTableNode(resultTable)).toBe(true);
+
+    if (!isTableNode(resultTable)) {
+      throw new Error("expected table result");
+    }
+
+    expect(
+      resultTable.children[0]?.children.map(
+        (cell) => cell.children[0]?.children[0]?.text,
+      ),
+    ).toEqual(["", "姓名", "角色"]);
+    expect(result.selection?.anchor).toEqual({
+      offset: 2,
+      path: [0, 0, 2, 0, 0],
+    });
+  });
+
+  it("pastes multiple TSV rows without changing table dimensions", () => {
+    const document = createDocument([createTable(2, 2)]);
+    const result = pasteCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { offset: 0, path: [0, 0, 0, 0, 0] },
+          focus: { offset: 0, path: [0, 0, 0, 0, 0] },
+        },
+      },
+      payload: { fragment: parsePlainText("小明\t开发\n小红\t设计")! },
+    });
+    const resultTable = applyTransaction(document, result.transaction!).children[0];
+
+    expect(isTableNode(resultTable)).toBe(true);
+
+    if (!isTableNode(resultTable)) {
+      throw new Error("expected table result");
+    }
+
+    expect(resultTable.children).toHaveLength(2);
+    expect(
+      resultTable.children.map((row) =>
+        row.children.map((cell) => cell.children[0]?.children[0]?.text),
+      ),
+    ).toEqual([
+      ["小明", "开发"],
+      ["小红", "设计"],
+    ]);
+  });
+
+  it("falls back to in-cell text when TSV exceeds remaining columns", () => {
+    const document = createDocument([createTable(1, 2)]);
+    const result = pasteCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { offset: 0, path: [0, 0, 1, 0, 0] },
+          focus: { offset: 0, path: [0, 0, 1, 0, 0] },
+        },
+      },
+      payload: { fragment: parsePlainText("甲\t乙")! },
+    });
+    const resultTable = applyTransaction(document, result.transaction!).children[0];
+
+    expect(result.transaction?.operations.map((operation) => operation.type)).toEqual([
+      "insert_text",
+    ]);
+    expect(isTableNode(resultTable)).toBe(true);
+
+    if (!isTableNode(resultTable)) {
+      throw new Error("expected table result");
+    }
+
+    expect(resultTable.children[0]?.children).toHaveLength(2);
+    expect(resultTable.children[0]?.children[1]?.children[0]?.children[0]?.text).toBe(
+      "甲\t乙",
+    );
   });
 
   it("skips missing fragments and invalid selections", () => {

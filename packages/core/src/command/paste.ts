@@ -2,6 +2,7 @@ import {
   isBlockNode,
   isListNode,
   isParagraphNode,
+  isTableNode,
   isTextBlockNode,
   type BlockNode,
 } from "../model";
@@ -11,6 +12,8 @@ import {
   createInsertBlockOperation,
   createInsertTextOperation,
   createSelectionAfterInsertText,
+  createSelectionAfterSplitBlock,
+  createSetTableCellTextOperation,
   createSplitBlockOperation,
   createTransaction,
   type Operation,
@@ -20,12 +23,15 @@ import {
   isValidPoint,
   getBlockTextOffset,
   getPointAtBlockTextOffset,
+  getCellSelectionFromRange,
   normalizeRange,
+  type CellSelection,
   type Point,
   type RangeSelection,
 } from "../selection";
 import {
   CLIPBOARD_MIME_TYPES,
+  getPlainTextTableGrid,
   type ClipboardFragment,
   type ClipboardMimeType,
 } from "../clipboard";
@@ -39,6 +45,7 @@ export interface PasteCommandPayload {
 }
 
 interface PasteTarget {
+  cellSelection?: CellSelection;
   fragment: ClipboardFragment;
   insertionPoint: Point;
   range: RangeSelection;
@@ -70,13 +77,18 @@ function resolvePasteTarget(input: CommandInput): PasteTarget | undefined {
   const range = normalizeRange(selection);
   const [anchorBlockIndex] = range.anchor.path;
   const [focusBlockIndex] = range.focus.path;
+  const cellSelection = getCellSelectionFromRange(input.context.document, range);
+  const topLevelTarget =
+    range.anchor.path.length === 2 &&
+    range.focus.path.length === 2 &&
+    anchorBlockIndex !== undefined &&
+    anchorBlockIndex === focusBlockIndex;
 
-  if (
-    range.anchor.path.length !== 2 ||
-    range.focus.path.length !== 2 ||
-    anchorBlockIndex === undefined ||
-    anchorBlockIndex !== focusBlockIndex
-  ) {
+  if (!topLevelTarget && !cellSelection) {
+    return undefined;
+  }
+
+  if (cellSelection && payload.fragment.mimeType !== "text/plain") {
     return undefined;
   }
 
@@ -85,7 +97,7 @@ function resolvePasteTarget(input: CommandInput): PasteTarget | undefined {
     path: [...range.anchor.path],
   };
 
-  if (!isCollapsed(range)) {
+  if (!isCollapsed(range) && topLevelTarget) {
     const textOffset = getBlockTextOffset(input.context.document, range.anchor);
     const documentAfterDelete = applyDeleteText(
       input.context.document,
@@ -104,6 +116,7 @@ function resolvePasteTarget(input: CommandInput): PasteTarget | undefined {
   }
 
   return {
+    ...(cellSelection ? { cellSelection } : {}),
     fragment: payload.fragment as ClipboardFragment,
     insertionPoint,
     range,
@@ -157,17 +170,65 @@ function createPlainTextPasteResult(target: PasteTarget) {
     point = createSelectionAfterInsertText(insertOperation).anchor;
 
     if (index < lines.length - 1) {
-      const [blockIndex] = point.path;
+      const splitOperation = createSplitBlockOperation(point);
 
-      operations.push(createSplitBlockOperation(point));
-      point = {
-        offset: 0,
-        path: [(blockIndex ?? 0) + 1, 0],
-      };
+      operations.push(splitOperation);
+      point = createSelectionAfterSplitBlock(splitOperation).anchor;
     }
   });
 
   return { operations, point };
+}
+
+function createTableGridPasteResult(
+  document: CommandInput["context"]["document"],
+  target: PasteTarget,
+) {
+  if (!target.cellSelection) {
+    return undefined;
+  }
+
+  const grid = getPlainTextTableGrid(target.fragment);
+  const [blockIndex, startRowIndex, startCellIndex] = target.cellSelection.path;
+  const table = blockIndex === undefined ? undefined : document.children[blockIndex];
+
+  if (
+    !grid ||
+    blockIndex === undefined ||
+    !isTableNode(table) ||
+    startRowIndex === undefined ||
+    startCellIndex === undefined ||
+    startRowIndex + grid.length > table.children.length ||
+    grid.some(
+      (row, rowOffset) =>
+        startCellIndex + row.length >
+        (table.children[startRowIndex + rowOffset]?.children.length ?? 0),
+    )
+  ) {
+    return undefined;
+  }
+
+  const operations = grid.flatMap((row, rowOffset) =>
+    row.map((text, cellOffset) =>
+      createSetTableCellTextOperation(
+        [blockIndex, startRowIndex + rowOffset, startCellIndex + cellOffset],
+        text,
+      ),
+    ),
+  );
+  const lastOperation = operations.at(-1);
+
+  if (!lastOperation) {
+    return undefined;
+  }
+
+  return {
+    operations,
+    point: {
+      offset: lastOperation.text.length,
+      path: [...lastOperation.path, 0, 0],
+    },
+  };
 }
 
 function createRichPasteResult(target: PasteTarget) {
@@ -213,9 +274,10 @@ export const pasteCommand: Command = {
     }
 
     const pasteResult =
-      target.fragment.mimeType === "text/plain"
+      createTableGridPasteResult(input.context.document, target) ??
+      (target.fragment.mimeType === "text/plain"
         ? createPlainTextPasteResult(target)
-        : createRichPasteResult(target);
+        : createRichPasteResult(target));
 
     if (!pasteResult) {
       return createCommandSkipped(
