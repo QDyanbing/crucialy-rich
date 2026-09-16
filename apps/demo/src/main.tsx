@@ -73,6 +73,7 @@ import {
   type CommandState,
   type ClipboardMimeType,
   type BlockSelection,
+  type CellSelection,
   type DocumentNode,
   type HistoryChange,
   type HeadingLevel,
@@ -260,7 +261,7 @@ const modelExamples: ModelExample[] = [
   },
   {
     id: "tables",
-    label: "基础表格",
+    label: "表格编辑",
     selection: {
       anchor: { path: [1, 0], offset: 0 },
       focus: { path: [1, 0], offset: 0 },
@@ -807,6 +808,7 @@ function DemoApp() {
   const [pasteMimeType, setPasteMimeType] = useState<ClipboardMimeType>("text/plain");
   const [pasteValue, setPasteValue] = useState(PASTE_EXAMPLES["text/plain"]);
   const [blockSelection, setBlockSelection] = useState<BlockSelection>();
+  const [cellSelection, setCellSelection] = useState<CellSelection>();
   const [fontSizeValue, setFontSizeValue] = useState("18");
   const [textColorValue, setTextColorValue] = useState("#1677ff");
   const [backgroundColorValue, setBackgroundColorValue] = useState("#fff4cc");
@@ -1044,6 +1046,7 @@ function DemoApp() {
     dismissedSlashTriggerRef.current = null;
     setLinkEditorOpen(false);
     setBlockSelection(undefined);
+    setCellSelection(undefined);
   }
 
   function handleNormalize() {
@@ -1079,6 +1082,7 @@ function DemoApp() {
     setSlashMenuRect(null);
     setSlashMenuState(closeSlashMenu());
     setBlockSelection(undefined);
+    setCellSelection(undefined);
   }
 
   function applyHistoryChange(change: HistoryChange | undefined) {
@@ -1539,6 +1543,7 @@ function DemoApp() {
     );
     syncSlashMenu(findSlashMenuTrigger(event.after, event.selection));
     setBlockSelection(undefined);
+    setCellSelection(undefined);
   }
 
   function handleSlashCommand(item: SlashCommandItem) {
@@ -1611,7 +1616,7 @@ function DemoApp() {
           <p className="eyebrow">调试工作台</p>
           <h1 id="page-title">crucialy-rich</h1>
         </div>
-        <span className="status-pill">第 21 周基础表格闭环</span>
+        <span className="status-pill">第 22 周表格编辑闭环</span>
       </header>
 
       <section className="workspace-grid" aria-label="编辑器工作区">
@@ -1699,7 +1704,7 @@ function DemoApp() {
               粘贴示例
             </button>
           </div>
-          <div className="table-controls" aria-label="基础表格验收控制">
+          <div className="table-controls" aria-label="表格编辑验收控制">
             <button
               type="button"
               disabled={isCommandDisabled(INSERT_TABLE_COMMAND_NAME)}
@@ -1790,14 +1795,28 @@ function DemoApp() {
             >
               删除表格
             </button>
+            <button
+              type="button"
+              onClick={() => {
+                setPasteMimeType("text/plain");
+                setPasteValue("小明\t开发\n小红\t设计");
+              }}
+            >
+              载入 TSV 示例
+            </button>
+            <output aria-label="当前单元格路径" className="cell-path-output">
+              当前单元格：{cellSelection ? cellSelection.path.join(" → ") : "未选择"}
+            </output>
           </div>
           <RichTextEditor
             {...(blockSelection ? { blockSelection } : {})}
+            {...(cellSelection ? { cellSelection } : {})}
             className="rendered-document"
             contentEditable
             label="已渲染文档"
             onKeyDown={handleEditorKeyDown}
             onBlockSelectionChange={setBlockSelection}
+            onCellSelectionChange={setCellSelection}
             onKeyUp={handleBrowserSelectionSync}
             onMouseUp={handleBrowserSelectionSync}
             onSelectionChange={setModelSelection}
