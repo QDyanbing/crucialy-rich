@@ -21,6 +21,7 @@ import type {
   SetLinkOperation,
   SetMarkAttributeOperation,
   SetTaskItemCheckedOperation,
+  SetTableCellTextOperation,
   SplitBlockOperation,
   SplitListItemOperation,
   ToggleMarkOperation,
@@ -33,6 +34,7 @@ export type TextOperation =
   | InsertTextOperation
   | SetLinkOperation
   | SetMarkAttributeOperation
+  | SetTableCellTextOperation
   | ToggleMarkOperation;
 
 export type BlockOperation =
@@ -77,6 +79,7 @@ export const TEXT_OPERATION_TYPES = [
   "toggle_mark",
   "set_mark_attribute",
   "set_link",
+  "set_table_cell_text",
 ] as const satisfies readonly OperationType[];
 
 export const BLOCK_OPERATION_TYPES = [
@@ -99,6 +102,7 @@ export function isTextOperation(operation: Operation): operation is TextOperatio
     operation.type === "delete_text" ||
     operation.type === "set_mark_attribute" ||
     operation.type === "set_link" ||
+    operation.type === "set_table_cell_text" ||
     operation.type === "toggle_mark"
   );
 }
@@ -229,6 +233,13 @@ export function summarizeOperation(operation: Operation): OperationSummary {
         targetPath: [...operation.path],
         type: "set_task_item_checked",
         value: String(operation.checked),
+      };
+    case "set_table_cell_text":
+      return {
+        scope: "text",
+        targetPath: [...operation.path],
+        textLength: operation.text.length,
+        type: "set_table_cell_text",
       };
     case "merge_block":
       return {

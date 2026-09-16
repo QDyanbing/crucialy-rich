@@ -50,6 +50,10 @@ export {
   createSetTaskItemCheckedOperation,
 } from "./set-task-item-checked";
 export {
+  applySetTableCellText,
+  createSetTableCellTextOperation,
+} from "./set-table-cell-text";
+export {
   applySetMarkAttribute,
   createSelectionAfterSetMarkAttribute,
   createSetMarkAttributeOperation,
@@ -99,6 +103,7 @@ export type {
   SetLinkOperation,
   SetMarkAttributeOperation,
   SetTaskItemCheckedOperation,
+  SetTableCellTextOperation,
   SplitBlockOperation,
   SplitListItemOperation,
   ToggleMarkOperation,

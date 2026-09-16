@@ -12,6 +12,7 @@ import { applySetBlockType } from "./set-block-type";
 import { applySetLink } from "./set-link";
 import { applySetMarkAttribute } from "./set-mark-attribute";
 import { applySetTaskItemChecked } from "./set-task-item-checked";
+import { applySetTableCellText } from "./set-table-cell-text";
 import { applySplitBlock } from "./split-block";
 import { applySplitListItem } from "./split-list-item";
 import { applyToggleMark } from "./toggle-mark";
@@ -94,6 +95,12 @@ export function cloneOperation(operation: Operation): Operation {
         path: [...operation.path],
         type: "set_task_item_checked",
       };
+    case "set_table_cell_text":
+      return {
+        path: [...operation.path],
+        text: operation.text,
+        type: "set_table_cell_text",
+      };
     case "set_block_type":
       return {
         block:
@@ -156,6 +163,8 @@ export function applyOperation(
       return applySetLink(document, operation);
     case "set_task_item_checked":
       return applySetTaskItemChecked(document, operation);
+    case "set_table_cell_text":
+      return applySetTableCellText(document, operation);
     case "set_block_type":
       return applySetBlockType(document, operation);
     case "merge_block":

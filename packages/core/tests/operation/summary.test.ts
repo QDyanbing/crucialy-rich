@@ -12,6 +12,7 @@ import {
   createSetBlockTypeOperation,
   createSetMarkAttributeOperation,
   createSetLinkOperation,
+  createSetTableCellTextOperation,
   createSplitBlockOperation,
   createToggleMarkOperation,
   createTransaction,
@@ -42,6 +43,7 @@ describe("operation type registry", () => {
       "outdent_list_item",
       "unwrap_list_item",
       "set_task_item_checked",
+      "set_table_cell_text",
     ]);
     expect(TEXT_OPERATION_TYPES).toEqual([
       "insert_text",
@@ -49,6 +51,7 @@ describe("operation type registry", () => {
       "toggle_mark",
       "set_mark_attribute",
       "set_link",
+      "set_table_cell_text",
     ]);
     expect(BLOCK_OPERATION_TYPES).toEqual([
       "exit_list_item",
@@ -98,12 +101,17 @@ describe("operation scope classification", () => {
       },
       { href: "https://example.com/docs" },
     );
+    const setTableCellTextOperation = createSetTableCellTextOperation(
+      [0, 0, 0],
+      "内容",
+    );
 
     expect(isTextOperation(insertOperation)).toBe(true);
     expect(isTextOperation(deleteOperation)).toBe(true);
     expect(isTextOperation(toggleMarkOperation)).toBe(true);
     expect(isTextOperation(setMarkAttributeOperation)).toBe(true);
     expect(isTextOperation(setLinkOperation)).toBe(true);
+    expect(isTextOperation(setTableCellTextOperation)).toBe(true);
     expect(isBlockOperation(insertOperation)).toBe(false);
   });
 

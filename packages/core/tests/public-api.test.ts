@@ -219,6 +219,7 @@ describe("@crucialy-rich/core public API", () => {
       "outdent_list_item",
       "unwrap_list_item",
       "set_task_item_checked",
+      "set_table_cell_text",
     ]);
     expect(typeof core.createIndentListItemOperation).toBe("function");
     expect(typeof core.applyIndentListItem).toBe("function");
@@ -231,6 +232,8 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.createSelectionAfterUnwrapListItem).toBe("function");
     expect(typeof core.createSetTaskItemCheckedOperation).toBe("function");
     expect(typeof core.applySetTaskItemChecked).toBe("function");
+    expect(typeof core.createSetTableCellTextOperation).toBe("function");
+    expect(typeof core.applySetTableCellText).toBe("function");
     expect(typeof core.isTextOperation).toBe("function");
     expect(typeof core.isBlockOperation).toBe("function");
     expect(typeof core.summarizeOperation).toBe("function");
