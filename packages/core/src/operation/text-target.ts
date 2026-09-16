@@ -1,5 +1,7 @@
 import {
   isListEntryNode,
+  isParagraphNode,
+  isTableNode,
   isTextBlockNode,
   type DocumentNode,
   type ListEntryNode,
@@ -51,11 +53,60 @@ export function replaceTextContainer(
     };
   }
 
+  if (path.length === 4 && blockIndex !== undefined && isParagraphNode(container)) {
+    const [, rowIndex, cellIndex, paragraphIndex] = path;
+    const table = document.children[blockIndex];
+    const row =
+      rowIndex === undefined || !isTableNode(table)
+        ? undefined
+        : table.children[rowIndex];
+    const cell = cellIndex === undefined ? undefined : row?.children[cellIndex];
+
+    if (
+      isTableNode(table) &&
+      row &&
+      cell &&
+      paragraphIndex !== undefined &&
+      cell.children[paragraphIndex]
+    ) {
+      const nextTable = {
+        ...table,
+        children: table.children.map((currentRow, currentRowIndex) =>
+          currentRowIndex === rowIndex
+            ? {
+                ...currentRow,
+                children: currentRow.children.map((currentCell, currentCellIndex) =>
+                  currentCellIndex === cellIndex
+                    ? {
+                        ...currentCell,
+                        children: currentCell.children.map(
+                          (paragraph, currentParagraphIndex) =>
+                            currentParagraphIndex === paragraphIndex
+                              ? container
+                              : paragraph,
+                        ),
+                      }
+                    : currentCell,
+                ),
+              }
+            : currentRow,
+        ),
+      };
+
+      return {
+        ...document,
+        children: document.children.map((block, currentBlockIndex) =>
+          currentBlockIndex === blockIndex ? nextTable : block,
+        ),
+      };
+    }
+  }
+
   const itemIndex = path.at(-1);
 
   if (itemIndex === undefined || !isListEntryNode(container)) {
     throw new RangeError(
-      "text container path must reference a text block or list item",
+      "text container path must reference a text block, list item, or table paragraph",
     );
   }
 

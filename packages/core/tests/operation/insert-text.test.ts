@@ -8,6 +8,7 @@ import {
   createText,
   createTaskItem,
   createTaskList,
+  createTable,
 } from "../../src/model";
 import {
   applyInsertText,
@@ -66,6 +67,26 @@ describe("createInsertTextOperation", () => {
 });
 
 describe("applyInsertText", () => {
+  it("inserts text inside a table cell paragraph", () => {
+    const table = createTable(1, 1);
+    table.children[0]!.children[0]!.children[0]!.children[0]!.text = "单元格";
+    const document = createDocument([table]);
+    const result = applyInsertText(
+      document,
+      createInsertTextOperation({ offset: 2, path: [0, 0, 0, 0, 0] }, "内"),
+    );
+    const resultTable = result.children[0];
+
+    expect(
+      resultTable?.type === "table"
+        ? resultTable.children[0]?.children[0]?.children[0]?.children[0]?.text
+        : undefined,
+    ).toBe("单元内格");
+    expect(table.children[0]!.children[0]!.children[0]!.children[0]!.text).toBe(
+      "单元格",
+    );
+  });
+
   it("inserts text inside a list item", () => {
     const document = createDocument([
       createBulletList([createListItem([createText("项目")])]),
