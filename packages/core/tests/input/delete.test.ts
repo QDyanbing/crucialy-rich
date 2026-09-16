@@ -7,7 +7,9 @@ import {
   createDivider,
   createParagraph,
   createSelectionAfterDeleteInput,
+  createTable,
   createText,
+  isTableNode,
 } from "../../src";
 
 describe("createDeleteInputTransaction", () => {
@@ -94,6 +96,38 @@ describe("createDeleteInputTransaction", () => {
 
     expect(result.children).toHaveLength(1);
     expect(result.children[0]?.children[0]?.text).toBe("第一段");
+  });
+
+  it("merges the next paragraph inside a table cell", () => {
+    const table = createTable(1, 1);
+    table.children[0]!.children[0]!.children = [
+      createParagraph([createText("第一段")]),
+      createParagraph([createText("第二段")]),
+    ];
+    const document = createDocument([table]);
+    const input = {
+      document,
+      selection: {
+        anchor: { path: [0, 0, 0, 0, 0], offset: 3 },
+        focus: { path: [0, 0, 0, 0, 0], offset: 3 },
+      },
+    };
+    const transaction = createDeleteInputTransaction(input);
+    const result = applyTransaction(document, transaction);
+    const resultTable = result.children[0];
+
+    expect(transaction.operations[0]).toMatchObject({
+      point: { path: [0, 0, 0, 1, 0], offset: 0 },
+      type: "merge_block",
+    });
+    expect(isTableNode(resultTable)).toBe(true);
+
+    if (!isTableNode(resultTable)) {
+      throw new Error("expected table result");
+    }
+
+    expect(resultTable.children[0]?.children[0]?.children).toHaveLength(1);
+    expect(createSelectionAfterDeleteInput(input)).toEqual(input.selection);
   });
 
   it("removes a following divider and keeps the current selection", () => {

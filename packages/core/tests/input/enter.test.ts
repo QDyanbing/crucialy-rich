@@ -12,6 +12,8 @@ import {
   createText,
   createTaskItem,
   createTaskList,
+  createTable,
+  isTableNode,
 } from "../../src";
 
 describe("createEnterInputTransaction", () => {
@@ -91,6 +93,39 @@ describe("createEnterInputTransaction", () => {
     ).toEqual({
       anchor: { path: [1, 0], offset: 0 },
       focus: { path: [1, 0], offset: 0 },
+    });
+  });
+
+  it("splits a paragraph inside a table cell", () => {
+    const table = createTable(1, 1);
+    table.children[0]!.children[0]!.children = [
+      createParagraph([createText("单元格")]),
+    ];
+    const document = createDocument([table]);
+    const input = {
+      document,
+      selection: {
+        anchor: { path: [0, 0, 0, 0, 0], offset: 2 },
+        focus: { path: [0, 0, 0, 0, 0], offset: 2 },
+      },
+    };
+    const result = applyTransaction(document, createEnterInputTransaction(input));
+    const resultTable = result.children[0];
+
+    expect(isTableNode(resultTable)).toBe(true);
+
+    if (!isTableNode(resultTable)) {
+      throw new Error("expected table result");
+    }
+
+    expect(
+      resultTable.children[0]?.children[0]?.children.map(
+        (paragraph) => paragraph.children[0]?.text,
+      ),
+    ).toEqual(["单元", "格"]);
+    expect(createSelectionAfterEnterInput(input).anchor).toEqual({
+      path: [0, 0, 0, 1, 0],
+      offset: 0,
     });
   });
 

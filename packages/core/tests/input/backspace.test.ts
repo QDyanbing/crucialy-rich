@@ -9,7 +9,9 @@ import {
   createListItem,
   createParagraph,
   createSelectionAfterBackspaceInput,
+  createTable,
   createText,
+  isTableNode,
 } from "../../src";
 
 describe("createBackspaceInputTransaction", () => {
@@ -96,6 +98,38 @@ describe("createBackspaceInputTransaction", () => {
 
     expect(result.children).toHaveLength(1);
     expect(result.children[0]?.children[0]?.text).toBe("第一段");
+  });
+
+  it("merges the previous paragraph inside a table cell", () => {
+    const table = createTable(1, 1);
+    table.children[0]!.children[0]!.children = [
+      createParagraph([createText("第一段")]),
+      createParagraph([createText("第二段")]),
+    ];
+    const document = createDocument([table]);
+    const input = {
+      document,
+      selection: {
+        anchor: { path: [0, 0, 0, 1, 0], offset: 0 },
+        focus: { path: [0, 0, 0, 1, 0], offset: 0 },
+      },
+    };
+    const transaction = createBackspaceInputTransaction(input);
+    const result = applyTransaction(document, transaction);
+    const resultTable = result.children[0];
+
+    expect(transaction.operations[0]?.type).toBe("merge_block");
+    expect(isTableNode(resultTable)).toBe(true);
+
+    if (!isTableNode(resultTable)) {
+      throw new Error("expected table result");
+    }
+
+    expect(resultTable.children[0]?.children[0]?.children).toHaveLength(1);
+    expect(createSelectionAfterBackspaceInput(input).anchor).toEqual({
+      path: [0, 0, 0, 0, 0],
+      offset: 3,
+    });
   });
 
   it("removes a preceding divider and moves the selection with its block", () => {

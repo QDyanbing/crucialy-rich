@@ -1,4 +1,10 @@
-import { isTextNode, isVoidBlockNode, type DocumentNode } from "../model";
+import {
+  isParagraphNode,
+  isTableCellNode,
+  isTextNode,
+  isVoidBlockNode,
+  type DocumentNode,
+} from "../model";
 import {
   createDeleteTextOperation,
   createMergeBlockOperation,
@@ -76,6 +82,49 @@ function createMergeNextBlockTransaction(point: Point): Transaction {
   ]);
 }
 
+function getNextTableParagraphPoint(
+  document: DocumentNode,
+  point: Point,
+): Point | undefined {
+  if (point.path.length !== 5) {
+    return undefined;
+  }
+
+  const [blockIndex, rowIndex, cellIndex, paragraphIndex, textIndex] = point.path;
+
+  if (
+    blockIndex === undefined ||
+    rowIndex === undefined ||
+    cellIndex === undefined ||
+    paragraphIndex === undefined ||
+    textIndex === undefined
+  ) {
+    return undefined;
+  }
+
+  const cell = getNodeAtPath(document, [blockIndex, rowIndex, cellIndex]);
+  const paragraph = getNodeAtPath(document, [
+    blockIndex,
+    rowIndex,
+    cellIndex,
+    paragraphIndex,
+  ]);
+
+  if (
+    !isTableCellNode(cell) ||
+    !isParagraphNode(paragraph) ||
+    textIndex !== paragraph.children.length - 1 ||
+    paragraphIndex >= cell.children.length - 1
+  ) {
+    return undefined;
+  }
+
+  return {
+    path: [blockIndex, rowIndex, cellIndex, paragraphIndex + 1, 0],
+    offset: 0,
+  };
+}
+
 export function createDeleteInputTransaction(input: DeleteInput): Transaction {
   const point = getCollapsedPoint(input.selection);
 
@@ -91,6 +140,12 @@ export function createDeleteInputTransaction(input: DeleteInput): Transaction {
 
   if (point.offset < textLength) {
     return createDeleteNextCharacterTransaction(point);
+  }
+
+  const nextTableParagraphPoint = getNextTableParagraphPoint(input.document, point);
+
+  if (nextTableParagraphPoint) {
+    return createTransaction([createMergeBlockOperation(nextTableParagraphPoint)]);
   }
 
   if (hasNextBlock(input.document, point)) {
