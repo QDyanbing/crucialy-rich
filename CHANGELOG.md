@@ -112,6 +112,9 @@
 - 新增 taskList/taskItem checked 模型、`toggleTaskList` command、`set_task_item_checked` 和 React checkbox 持久化。
 - 新增中文“嵌套与任务列表”Demo、浏览器综合验收、第 16 周 QA 和列表增强独立报告。
 - 新增基础表格模型、矩形校验与修复、递归 Path、语义渲染、插删表、行列增删命令、中文 Demo 和第 21 周验收文档。
+- 新增 CellSelection、当前 cell 定位、单元格内输入/删除/分段/合并、可控高亮和表格文本范围读取。
+- 新增 `set_table_cell_text` operation、纯文本二维网格解析和不改变表格尺寸的 TSV 粘贴。
+- 新增中文表格编辑 Demo、cell path 状态、浏览器综合验收、第 22 周 QA 和表格编辑独立报告。
 - 新增 ToolbarItem 配置、默认工具栏项和 Command active/disabled 状态映射。
 - 新增固定工具栏、命令执行事件以及 Bold、Italic、Underline、Strike、Link、Heading 和 Quote 默认入口。
 - 新增悬浮工具栏可见性、视口定位、窄屏约束和选区快照恢复机制。
@@ -172,6 +175,7 @@
 - 修复标题选择器把引用或混合选区错误显示为正文，导致无法直接恢复 paragraph 的问题。
 - 修复 heading 和 quote 元素边界无法映射为模型选区的问题。
 - 修复嵌套列表操作后文本范围读取抛错并导致 Demo 卸载的问题。
+- 修复表格文本选区无法被范围读取器识别并导致 Demo 点击 cell 后卸载的问题。
 
 ### 暂未包含
 

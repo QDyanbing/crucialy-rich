@@ -2,7 +2,7 @@
 
 自研富文本编辑内核，不依赖 ProseMirror、Tiptap、Lexical、Slate 作为运行时内核。
 
-> 当前已完成第 1–21 周能力闭环，提供文本、void、list、image 和 table 文档模型，以及语义渲染、文字样式、链接、模型选区、Operation、Transaction、Command、History 和 Clipboard parser。
+> 当前已完成第 1–22 周能力闭环，提供文本、void、list、image 和可编辑 table 文档模型，以及语义渲染、文字样式、链接、模型选区、Operation、Transaction、Command、History 和 Clipboard parser。
 
 ## 安装
 

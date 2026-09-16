@@ -34,7 +34,9 @@ text marks schema 当前支持 `bold`、`italic`、`underline` 和 `strike` 共�
 
 第 20 周“粘贴闭环”已全部完成：core 提供可扩展 Clipboard parser、Markdown/HTML/纯文本优先级、安全 HTML 白名单和 `paste` 命令；纯文本换行转换为 paragraph，结构化内容保留标题、引用、代码、marks 和列表。React 通过 `onPaste` 生成统一 Transaction，Demo 与 Playwright 覆盖三种中文粘贴流程。
 
-第 21 周“基础表格闭环”已全部完成：core 支持 table/tableRow/tableCell 模型、矩形结构校验与修复、完整模型 Path、语义渲染、默认 3×3 插入、整表删除以及行列增删命令；Demo 和 Playwright 提供中文验收流程。表格在本阶段保持只读，当前指针为第 22 周 Day 1「Cell Selection 设计」。
+第 21 周“基础表格闭环”已全部完成：core 支持 table/tableRow/tableCell 模型、矩形结构校验与修复、完整模型 Path、语义渲染、默认 3×3 插入、整表删除以及行列增删命令；Demo 和 Playwright 提供中文验收流程。
+
+第 22 周“表格编辑闭环”已全部完成：单元格支持文字输入、删除、Enter 分段和段落边界合并；core 提供 CellSelection、当前 cell 定位、`set_table_cell_text` 与 TSV 网格粘贴；React 支持 cell 点击回调和可控高亮，Demo 显示当前 cell path，Playwright 覆盖完整交互。当前指针为第 23 周 Day 1「IME 状态」。
 
 ## 技术栈
 
@@ -181,11 +183,13 @@ pnpm test:e2e
 - [第 19 周 QA](./docs/qa/week-19.md)
 - [第 20 周 QA](./docs/qa/week-20.md)
 - [第 21 周 QA](./docs/qa/week-21.md)
+- [第 22 周 QA](./docs/qa/week-22.md)
 - [工具栏闭环验收](./docs/qa/toolbar.md)
 - [斜杠菜单闭环验收](./docs/qa/slash-menu.md)
 - [图片闭环验收](./docs/qa/image.md)
 - [粘贴闭环验收](./docs/qa/paste.md)
 - [基础表格闭环验收](./docs/qa/table-basic.md)
+- [表格编辑闭环验收](./docs/qa/table-editing.md)
 - [基础列表闭环验收](./docs/qa/list-basic.md)
 - [列表增强闭环验收](./docs/qa/list-advanced.md)
 - [代码块和分割线闭环验收](./docs/qa/code-block-divider.md)
