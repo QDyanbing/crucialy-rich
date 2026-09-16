@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { createDocument, createParagraph, createText } from "../../src/model";
+import {
+  createDocument,
+  createParagraph,
+  createTable,
+  createText,
+  isTableNode,
+} from "../../src/model";
 import {
   applySplitBlock,
   createSelectionAfterSplitBlock,
@@ -134,6 +140,33 @@ describe("applySplitBlock", () => {
     });
   });
 
+  it("splits a paragraph inside a table cell", () => {
+    const table = createTable(1, 1);
+    table.children[0]!.children[0]!.children = [
+      createParagraph([createText("单元格")]),
+    ];
+    const document = createDocument([table]);
+    const result = applySplitBlock(
+      document,
+      createSplitBlockOperation({ path: [0, 0, 0, 0, 0], offset: 2 }),
+    );
+    const resultTable = result.children[0];
+
+    expect(isTableNode(resultTable)).toBe(true);
+
+    if (!isTableNode(resultTable)) {
+      throw new Error("expected table result");
+    }
+
+    const cell = resultTable.children[0]?.children[0];
+
+    expect(cell?.children.map((paragraph) => paragraph.children[0]?.text)).toEqual([
+      "单元",
+      "格",
+    ]);
+    expect(table.children[0]!.children[0]!.children).toHaveLength(1);
+  });
+
   it("throws when the point does not reference text", () => {
     const document = createDocument([createParagraph([createText("你好")])]);
 
@@ -179,6 +212,18 @@ describe("createSelectionAfterSplitBlock", () => {
         path: [3, 0],
         offset: 0,
       },
+    });
+  });
+
+  it("moves to the next paragraph inside a table cell", () => {
+    const operation = createSplitBlockOperation({
+      path: [1, 2, 3, 4, 0],
+      offset: 2,
+    });
+
+    expect(createSelectionAfterSplitBlock(operation)).toEqual({
+      anchor: { path: [1, 2, 3, 5, 0], offset: 0 },
+      focus: { path: [1, 2, 3, 5, 0], offset: 0 },
     });
   });
 });
