@@ -300,7 +300,6 @@ describe("renderDocument", () => {
 
     expect(rendered).toMatchObject({
       attributes: {
-        contentEditable: "false",
         "data-crucialy-table": "true",
         [MODEL_PATH_ATTRIBUTE]: "[0]",
       },
@@ -317,6 +316,9 @@ describe("renderDocument", () => {
                       tagName: "p",
                     },
                   ],
+                  attributes: {
+                    "data-crucialy-table-cell": "true",
+                  },
                   path: [0, 0, 0],
                   tagName: "td",
                 },

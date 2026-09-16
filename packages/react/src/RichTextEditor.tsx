@@ -349,6 +349,7 @@ function createMergeNextBlockCommandResult(
   const node = getNodeAtPath(document, point.path);
 
   if (
+    point.path.length !== 2 ||
     blockIndex === undefined ||
     blockIndex >= document.children.length - 1 ||
     !isTextNode(node) ||

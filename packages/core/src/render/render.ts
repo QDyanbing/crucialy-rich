@@ -150,7 +150,6 @@ function renderTableNode(node: TableNode, path: Path): RenderedElementNode {
   return createRenderedNode("table", path, {
     attributes: {
       ...createModelPathAttributes(path),
-      contentEditable: "false",
       "data-crucialy-table": "true",
     },
     children: [
@@ -163,6 +162,10 @@ function renderTableNode(node: TableNode, path: Path): RenderedElementNode {
               const cellPath = [...rowPath, cellIndex];
 
               return createRenderedNode("td", cellPath, {
+                attributes: {
+                  ...createModelPathAttributes(cellPath),
+                  "data-crucialy-table-cell": "true",
+                },
                 children: cell.children.map((paragraph, paragraphIndex) => {
                   const paragraphPath = [...cellPath, paragraphIndex];
 

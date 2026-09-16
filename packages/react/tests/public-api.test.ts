@@ -8,6 +8,7 @@ import {
   createText,
   createTaskItem,
   createTaskList,
+  createTable,
   type DocumentNode,
 } from "@crucialy-rich/core";
 import { describe, expect, it, vi } from "vitest";
@@ -115,6 +116,19 @@ describe("@crucialy-rich/react public API", () => {
     expect(html).toContain('data-crucialy-list-type="task"');
     expect(html).toContain('type="checkbox"');
     expect(html).toContain("checked");
+  });
+
+  it("renders editable semantic table cells through React", () => {
+    const html = renderToStaticMarkup(
+      createElement(RichTextEditor, {
+        contentEditable: true,
+        value: createDocument([createTable(1, 1)]),
+      }),
+    );
+
+    expect(html).toContain('data-crucialy-table="true"');
+    expect(html).toContain('data-crucialy-table-cell="true"');
+    expect(html).not.toContain('<table contenteditable="false"');
   });
 
   it("renders combined mark styles through React", () => {

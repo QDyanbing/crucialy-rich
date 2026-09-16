@@ -132,7 +132,7 @@ describe("renderNodeToHtml", () => {
     const html = renderNodeToHtml(renderDocument(createDocument([table])));
 
     expect(html).toContain(
-      '<table data-crucialy-path="[0]" contentEditable="false" data-crucialy-table="true"><tbody data-crucialy-path="[0]"><tr data-crucialy-path="[0,0]"><td data-crucialy-path="[0,0,0]"><p data-crucialy-path="[0,0,0,0]"><span data-crucialy-path="[0,0,0,0,0]">内容</span></p></td></tr></tbody></table>',
+      '<table data-crucialy-path="[0]" data-crucialy-table="true"><tbody data-crucialy-path="[0]"><tr data-crucialy-path="[0,0]"><td data-crucialy-path="[0,0,0]" data-crucialy-table-cell="true"><p data-crucialy-path="[0,0,0,0]"><span data-crucialy-path="[0,0,0,0,0]">内容</span></p></td></tr></tbody></table>',
     );
   });
 
