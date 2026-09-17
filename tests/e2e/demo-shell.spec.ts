@@ -2042,3 +2042,46 @@ test("edits selects and pastes TSV into table cells", async ({ page }) => {
   await expect(cells).toHaveCount(9);
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
+
+test("commits Chinese composition once after candidate updates", async ({ page }) => {
+  await page.goto("/");
+  await placeCaretInRenderedText(page, "[0,0]", 3);
+
+  const editor = page.getByLabel("已渲染文档");
+
+  await editor.evaluate((element) => {
+    element.dispatchEvent(
+      new CompositionEvent("compositionstart", { bubbles: true, data: "" }),
+    );
+    element.dispatchEvent(
+      new CompositionEvent("compositionupdate", { bubbles: true, data: "中文" }),
+    );
+    element.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        bubbles: true,
+        isComposing: true,
+        key: "Backspace",
+      }),
+    );
+    element.dispatchEvent(
+      new CompositionEvent("compositionupdate", { bubbles: true, data: "中" }),
+    );
+    element.dispatchEvent(
+      new InputEvent("beforeinput", {
+        bubbles: true,
+        cancelable: true,
+        data: "中",
+        inputType: "insertCompositionText",
+        isComposing: true,
+      }),
+    );
+    element.dispatchEvent(
+      new CompositionEvent("compositionend", { bubbles: true, data: "中文" }),
+    );
+  });
+
+  await expect(editor).toContainText("你好，中文crucialy-rich。");
+  await expect(editor).toHaveAttribute("data-composing", "false");
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
