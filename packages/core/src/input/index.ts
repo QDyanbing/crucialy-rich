@@ -4,6 +4,13 @@ export {
 } from "./backspace";
 export type { BackspaceInput } from "./backspace";
 export {
+  cancelComposition,
+  createCompositionState,
+  startComposition,
+  updateComposition,
+} from "./composition";
+export type { CompositionState } from "./composition";
+export {
   createDeleteInputTransaction,
   createSelectionAfterDeleteInput,
 } from "./delete";
