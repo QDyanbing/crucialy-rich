@@ -2,6 +2,7 @@ export * from "./command";
 export * from "./clipboard";
 export * from "./history";
 export * from "./input";
+export * from "./input-rule";
 export * as link from "./link";
 export * from "./model";
 export * from "./operation";
