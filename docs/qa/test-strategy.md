@@ -1,6 +1,6 @@
 # 测试策略
 
-当前阶段已经包含工程冒烟测试、文档模型单测、text marks 单测、Block Type 与 operation 单测、Range/Block Selection 单测、渲染与 DOM 映射单测、React 组件 API 单测、输入 helper 单测、command 单测、history 单测、工具栏、斜杠菜单、图片、Clipboard、基础表格单测和演示端到端验收。
+当前阶段已经包含工程冒烟测试、文档模型单测、text marks 单测、Block Type 与 operation 单测、Range/Block Selection 单测、渲染与 DOM 映射单测、React 组件 API 单测、输入 helper 单测、command 单测、history 单测、工具栏、斜杠菜单、图片、Clipboard、基础表格、Composition、快捷键、Markdown 输入规则单测和演示端到端验收。
 
 ## 单元测试
 
@@ -27,6 +27,9 @@
   - Clipboard parser 优先级、纯文本换行、HTML 白名单、Markdown 转换和结构化 paste command。
   - table/tableRow/tableCell schema、矩形修复、递归 Path、深拷贝、语义渲染、插删表和行列增删 command。
   - 输入 helper 的普通文本输入、Backspace、Delete 和 Enter transaction。
+  - Composition 状态切换、选区快照、候选更新、Backspace 后确认、取消和空确认。
+  - 格式与 History 快捷键统一解析、浏览器冲突和组合输入保护。
+  - Markdown 输入规则匹配、五类结构转换、误触发保护、transaction 和 selection。
   - Command 注册、执行、可执行判断、默认注册表、状态矩阵、四种 boolean mark command、`setFontSize`、`setTextColor`、`setBackgroundColor`、链接、Heading、Quote、mark 快捷键配置与匹配、文本编辑 command 和 block 编辑 command。
   - History 快照、entry 克隆、状态工厂、记录入口、batch 合并、查询 helper、undo/redo 栈转换、快捷键识别、history command 和 Block Type 生命周期。
 - 命令：`pnpm test`。
@@ -34,7 +37,7 @@
 ## 浏览器测试
 
 - 工具：Playwright。
-- 范围：演示页面、模型/选区/command 调试、基础编辑、文字样式、链接、Heading/Quote、CodeBlock、Divider、列表、固定/悬浮 Toolbar、斜杠菜单、URL/本地图片、图片删除、纯文本/HTML/Markdown 粘贴、基础表格结构操作、选区恢复和 History 往返。
+- 范围：演示页面、模型/选区/command 调试、基础编辑、文字样式、链接、Heading/Quote、CodeBlock、Divider、列表、固定/悬浮 Toolbar、斜杠菜单、URL/本地图片、图片删除、纯文本/HTML/Markdown 粘贴、基础表格结构操作、中文组合输入、编辑快捷键、Markdown 输入规则、选区恢复和 History 往返。
 - 命令：`pnpm test:e2e`。
 
 ## 类型检查
