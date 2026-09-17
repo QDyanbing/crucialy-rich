@@ -4,6 +4,7 @@ import {
   createDefaultCommandRegistry,
   DEFAULT_CLIPBOARD_PARSERS,
   createDocument,
+  createMarkdownInputRuleResult,
   createBackspaceInputTransaction,
   createBlockSelection,
   createCellSelection,
@@ -95,6 +96,7 @@ export type RichTextEditorInputType =
   | "deleteForward"
   | "insertParagraph"
   | "insertFromPaste"
+  | "insertFromInputRule"
   | "insertCompositionText"
   | "insertText"
   | "indentListItem"
@@ -496,6 +498,23 @@ export function RichTextEditor({
     const modelSelection = getModelSelectionFromDom(event.currentTarget, document);
 
     if (!modelSelection) {
+      return;
+    }
+
+    const inputRuleResult = createMarkdownInputRuleResult({
+      data,
+      document,
+      selection: modelSelection,
+    });
+
+    if (inputRuleResult) {
+      event.preventDefault();
+      commitInputResult({
+        beforeSelection: modelSelection,
+        inputType: "insertFromInputRule",
+        selection: inputRuleResult.selection,
+        transaction: inputRuleResult.transaction,
+      });
       return;
     }
 
