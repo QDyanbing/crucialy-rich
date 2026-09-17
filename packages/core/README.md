@@ -2,7 +2,7 @@
 
 自研富文本编辑内核，不依赖 ProseMirror、Tiptap、Lexical、Slate 作为运行时内核。
 
-> 当前已完成第 1–22 周能力闭环，提供文本、void、list、image 和可编辑 table 文档模型，以及语义渲染、文字样式、链接、模型选区、Operation、Transaction、Command、History 和 Clipboard parser。
+> 当前已完成第 1–23 周能力闭环，提供文本、void、list、image 和可编辑 table 文档模型，以及语义渲染、文字样式、链接、模型选区、Operation、Transaction、Command、History、Clipboard parser、输入法状态、编辑快捷键和 Markdown 输入规则。
 
 ## 安装
 
@@ -204,7 +204,7 @@ const shortcutCommandName = getCommandNameFromShortcut({
 - 选区同步：`domSelectionToModelSelection`、`createDomRangeFromModelSelection`、`applyModelSelectionToDom`。
 - Operation：文本、Mark、链接和 Block Type operation，以及 `split_block`、`merge_block`、通用 `insert_block` 与 `remove_block`。
 - Transaction：`createTransaction`、`applyOperation`、`applyTransaction`、`summarizeOperation`、`summarizeTransaction`、`createTransactionAcceptanceReport`。
-- 输入：`createInsertTextInputTransaction`、`createSelectionAfterInsertTextInput`、`createBackspaceInputTransaction`、`createSelectionAfterBackspaceInput`、`createDeleteInputTransaction`、`createSelectionAfterDeleteInput`、`createEnterInputTransaction`、`createSelectionAfterEnterInput`。
+- 输入：基础文本输入与删除 helper、Composition 状态机、`getEditorShortcutAction`、`findMarkdownInputRule` 和 `createMarkdownInputRuleResult`。
 - 当前输入 helper 覆盖普通文本插入、段中删除、文本块合并/分裂、CodeBlock 换行/退出、相邻 void block 删除和输入后 selection 落点。
 - Command：默认注册表、状态查询、文字样式、链接、Heading、Quote、CodeBlock、Divider、BulletList、OrderedList、文本与 block command。
 - History：`createHistorySnapshot`、`cloneHistorySnapshot`、`createHistoryEntry`、`cloneHistoryEntry`、`createHistoryState`、`clearHistory`、`recordHistory`、`canMergeHistoryEntries`、`mergeHistoryEntries`、`canUndo`、`canRedo`、`getUndoEntry`、`getRedoEntry`、`undoHistory`、`redoHistory`、`getHistoryShortcutAction`、`undoCommand`、`redoCommand`。

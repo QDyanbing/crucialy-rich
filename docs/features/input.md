@@ -32,6 +32,9 @@
 - 列表项按 Tab 缩进，按 Shift+Tab 反缩进，最多三层。
 - 顶层列表项开头按 Backspace 转为 paragraph；嵌套项开头按 Backspace 提升一级。
 - Enter 后通过 `createSelectionAfterEnterInput` 计算新的折叠选区。
+- 支持完整 Composition 生命周期；候选阶段不修改模型，结束时提交一次 `insertCompositionText` transaction。
+- 支持 `Mod+B`、`Mod+I`、`Mod+U` 格式快捷键，并在组合输入期间暂停执行。
+- 支持 paragraph 开头的标题、列表、引用和代码块 Markdown 输入规则。
 
 ## 数据流
 
@@ -145,6 +148,8 @@ function createSelectionAfterTabInput(input: TabInput): RangeSelection;
 - `onTransaction`：输入后输出 before、after、transaction、inputType 和输入前后 selection；普通文本输入会额外带上 `batch: "typing"`。
 - `onKeyDown`：宿主可先拦截撤销/重做快捷键；若外部已 `preventDefault`，内部不再执行普通输入处理。
 - `onBeforeInput`：仍会先调用外部回调，若外部已 `preventDefault`，内部不再处理。
+- `onCompositionStateChange`：输入法开始、更新和结束时输出当前 Composition 状态。
+- `onCompositionStart` / `onCompositionUpdate` / `onCompositionEnd`：外部回调先执行，内部随后维护候选状态和最终提交。
 - 普通文本输入复用 `insertTextCommand`。
 - 同一 text 内的非折叠普通文本输入会先删除选区，再插入输入文本。
 - 非折叠 selection 下的 Backspace/Delete 复用 `deleteSelectionCommand`。
@@ -187,6 +192,9 @@ function createSelectionAfterTabInput(input: TabInput): RangeSelection;
 - History 状态会记录真实输入产生的 transaction。
 - 连续普通文本输入会按 `typing` batch 合并为一个 undo item。
 - 主编辑器可通过 Ctrl/Meta + Z 撤销，通过 Ctrl/Meta + Shift + Z 或 Ctrl/Meta + Y 重做。
+- 主编辑器可通过 Ctrl/Meta + B、I、U 执行加粗、斜体和下划线 Command。
+- 中文候选更新不会产生中间 transaction，确认后只记录一次输入。
+- paragraph 开头可用 `# `、`- `、`1. `、`> ` 和 ` ``` ` 转换块结构。
 
 ## 当前限制
 
@@ -194,5 +202,6 @@ function createSelectionAfterTabInput(input: TabInput): RangeSelection;
 - 暂不处理粘贴、拖拽或格式输入。
 - Backspace 和 Delete 支持同一 text 内的非折叠 selection，暂不处理跨 text 或跨 block 删除。
 - Enter 暂不处理非折叠 selection；collapsed Enter 会保留文本 block 类型，CodeBlock 使用纯文本换行与退出规则。
-- 暂不处理 IME composition 的完整生命周期。
 - 组件本身不持有 history 状态，撤销重做快捷键需要宿主接入 history 状态。
+
+输入法、快捷键和输入规则的独立契约见[中文输入法](./ime.md)、[编辑快捷键](./shortcuts.md)和 [Markdown 输入规则](./input-rules.md)。

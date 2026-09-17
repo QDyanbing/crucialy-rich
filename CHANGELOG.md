@@ -115,6 +115,10 @@
 - 新增 CellSelection、当前 cell 定位、单元格内输入/删除/分段/合并、可控高亮和表格文本范围读取。
 - 新增 `set_table_cell_text` operation、纯文本二维网格解析和不改变表格尺寸的 TSV 粘贴。
 - 新增中文表格编辑 Demo、cell path 状态、浏览器综合验收、第 22 周 QA 和表格编辑独立报告。
+- 新增 Composition 状态模型、中文候选词生命周期和 React 单次提交入口。
+- 新增统一编辑快捷键解析，以及 Mod+B/I/U 格式命令和 History 动作分流。
+- 新增 paragraph 开头的标题、列表、引用和代码块 Markdown 输入规则。
+- 新增中文输入法状态、输入规则 Demo 和浏览器综合验收。
 - 新增 ToolbarItem 配置、默认工具栏项和 Command active/disabled 状态映射。
 - 新增固定工具栏、命令执行事件以及 Bold、Italic、Underline、Strike、Link、Heading 和 Quote 默认入口。
 - 新增悬浮工具栏可见性、视口定位、窄屏约束和选区快照恢复机制。
@@ -179,4 +183,4 @@
 
 ### 暂未包含
 
-- 复杂历史合并策略、解析、文档序列化或输入法完整处理。
+- 复杂历史合并策略、完整 Markdown/HTML 序列化或跨 text、跨 block 的输入替换。

@@ -4,19 +4,20 @@
 
 ## 属性
 
-| 属性                    | 类型                                                            | 说明                                           |
-| ----------------------- | --------------------------------------------------------------- | ---------------------------------------------- |
-| `value`                 | `DocumentNode`                                                  | 受控文档。传入后组件会按该文档渲染内容。       |
-| `defaultValue`          | `DocumentNode`                                                  | 非受控初始文档。仅用于组件初始化时的渲染内容。 |
-| `onChange`              | `(value: DocumentNode) => void`                                 | 文本输入后输出最新文档。                       |
-| `selection`             | `RangeSelection`                                                | 受控模型选区，用于输入后回写 DOM selection。   |
-| `onSelectionChange`     | `(selection: RangeSelection) => void`                           | 输入后输出新的模型选区。                       |
-| `cellSelection`         | `CellSelection`                                                 | 受控单元格选中态。                             |
-| `onCellSelectionChange` | `(selection: CellSelection \| undefined) => void`               | 点击表格单元格或离开表格时输出选中态。         |
-| `onTransaction`         | `(event: RichTextEditorTransactionEvent) => void`               | 输入后输出 before、after、transaction 和选区。 |
-| `label`                 | `string`                                                        | 编辑器区域的可访问名称。                       |
-| `className`             | `string`                                                        | 传给编辑器根节点的样式类名。                   |
-| DOM 事件属性            | `onBeforeInput`、`onClick`、`onKeyDown`、`onMouseUp`、`onKeyUp` | 用于输入、链接交互和选区同步。                 |
+| 属性                       | 类型                                                                              | 说明                                           |
+| -------------------------- | --------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `value`                    | `DocumentNode`                                                                    | 受控文档。传入后组件会按该文档渲染内容。       |
+| `defaultValue`             | `DocumentNode`                                                                    | 非受控初始文档。仅用于组件初始化时的渲染内容。 |
+| `onChange`                 | `(value: DocumentNode) => void`                                                   | 文本输入后输出最新文档。                       |
+| `selection`                | `RangeSelection`                                                                  | 受控模型选区，用于输入后回写 DOM selection。   |
+| `onSelectionChange`        | `(selection: RangeSelection) => void`                                             | 输入后输出新的模型选区。                       |
+| `cellSelection`            | `CellSelection`                                                                   | 受控单元格选中态。                             |
+| `onCellSelectionChange`    | `(selection: CellSelection \| undefined) => void`                                 | 点击表格单元格或离开表格时输出选中态。         |
+| `onCompositionStateChange` | `(state: CompositionState) => void`                                               | 输入法组合状态变化时输出最新状态。             |
+| `onTransaction`            | `(event: RichTextEditorTransactionEvent) => void`                                 | 输入后输出 before、after、transaction 和选区。 |
+| `label`                    | `string`                                                                          | 编辑器区域的可访问名称。                       |
+| `className`                | `string`                                                                          | 传给编辑器根节点的样式类名。                   |
+| DOM 事件属性               | `onBeforeInput`、`onClick`、`onComposition*`、`onKeyDown`、`onMouseUp`、`onKeyUp` | 用于输入、链接交互和选区同步。                 |
 
 ## 受控用法
 
@@ -63,6 +64,9 @@ export function UncontrolledEditor() {
 - 点击 `td[data-crucialy-table-cell="true"]` 会输出 `CellSelection`；传回 `cellSelection` 后目标 cell 获得 `data-selected="true"`。
 - 纯文本 TSV 粘贴会从当前 cell 向右、向下填充，不改变表格尺寸。
 - 宿主可在 `onKeyDown` 中用 `getHistoryShortcutAction` 接入撤销/重做快捷键；外部 `preventDefault` 后组件不会继续执行普通输入处理。
+- Ctrl/Meta + B、I、U 会执行默认格式 Command，并输出 `formatShortcut` transaction。
+- Composition 候选阶段暂停普通输入、编辑快捷键和粘贴；结束时只输出一次 `insertCompositionText` transaction。
+- paragraph 开头命中 Markdown 前缀时输出 `insertFromInputRule` transaction，并把选区移动到目标结构起点。
 - 输入、删除、分段和段落合并都不会直接信任浏览器默认修改后的 DOM。
 - 外部 `onBeforeInput` / `onKeyDown` 会先执行，若已 `preventDefault`，内部不再处理对应输入。
 - 编辑态点击 Link Mark 渲染的 `<a>` 时会先调用外部 `onClick`，再阻止浏览器默认跳转，文字仍可正常选择。
@@ -85,4 +89,4 @@ Toolbar 通过 class name 暴露样式入口，不捆绑主题 CSS。完整契�
 
 ## 当前边界
 
-当前组件仍不内置 history 状态、链接菜单、输入法完整处理或序列化能力；悬浮 Toolbar 的 Range 矩形由宿主同步。Clipboard parser 与粘贴命令来自 core，图片上传仍由宿主接入。
+当前组件仍不内置 history 状态、链接菜单或序列化能力；悬浮 Toolbar 的 Range 矩形由宿主同步。Clipboard parser 与粘贴命令来自 core，图片上传仍由宿主接入。

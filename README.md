@@ -36,7 +36,9 @@ text marks schema 当前支持 `bold`、`italic`、`underline` 和 `strike` 共�
 
 第 21 周“基础表格闭环”已全部完成：core 支持 table/tableRow/tableCell 模型、矩形结构校验与修复、完整模型 Path、语义渲染、默认 3×3 插入、整表删除以及行列增删命令；Demo 和 Playwright 提供中文验收流程。
 
-第 22 周“表格编辑闭环”已全部完成：单元格支持文字输入、删除、Enter 分段和段落边界合并；core 提供 CellSelection、当前 cell 定位、`set_table_cell_text` 与 TSV 网格粘贴；React 支持 cell 点击回调和可控高亮，Demo 显示当前 cell path，Playwright 覆盖完整交互。当前指针为第 23 周 Day 1「IME 状态」。
+第 22 周“表格编辑闭环”已全部完成：单元格支持文字输入、删除、Enter 分段和段落边界合并；core 提供 CellSelection、当前 cell 定位、`set_table_cell_text` 与 TSV 网格粘贴；React 支持 cell 点击回调和可控高亮，Demo 显示当前 cell path，Playwright 覆盖完整交互。
+
+第 23 周“键盘与输入法闭环”已全部完成：支持 Composition 状态与中文候选词单次提交、Mod+B/I/U 和撤销重做统一快捷键解析，以及 paragraph 开头的标题、列表、引用和代码块 Markdown 输入规则。当前指针为第 24 周 Day 1「组件 API 定稿」。
 
 ## 技术栈
 
@@ -152,6 +154,9 @@ pnpm test:e2e
 - [组件 API](./docs/features/component-api.md)
 - [Operation](./docs/features/operation.md)
 - [输入事件](./docs/features/input.md)
+- [中文输入法](./docs/features/ime.md)
+- [编辑快捷键](./docs/features/shortcuts.md)
+- [Markdown 输入规则](./docs/features/input-rules.md)
 - [Command 系统](./docs/features/command.md)
 - [History 记录与撤销重做](./docs/features/history.md)
 - [工具栏](./docs/features/toolbar.md)
