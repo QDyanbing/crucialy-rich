@@ -22,6 +22,7 @@ import {
   executeCommand,
   finishComposition,
   getNodeAtPath,
+  getEditorShortcutAction,
   getElementModelPath,
   INSERT_TEXT_COMMAND_NAME,
   isCollapsed,
@@ -97,6 +98,7 @@ export type RichTextEditorInputType =
   | "insertCompositionText"
   | "insertText"
   | "indentListItem"
+  | "formatShortcut"
   | "outdentListItem"
   | "setTaskItemChecked";
 
@@ -516,6 +518,31 @@ export function RichTextEditor({
       event.nativeEvent.isComposing
     ) {
       return;
+    }
+
+    const shortcutAction = getEditorShortcutAction(event.nativeEvent);
+
+    if (shortcutAction?.type === "command") {
+      const shortcutSelection = getModelSelectionFromDom(event.currentTarget, document);
+      const result = shortcutSelection
+        ? executeCommand(richTextCommandRegistry, shortcutAction.commandName, {
+            context: { document, selection: shortcutSelection },
+          })
+        : undefined;
+      const shortcutInput =
+        result && shortcutSelection
+          ? createKeyboardInputResultFromCommandResult(
+              result,
+              shortcutSelection,
+              "formatShortcut",
+            )
+          : undefined;
+
+      if (shortcutInput) {
+        event.preventDefault();
+        commitInputResult(shortcutInput);
+        return;
+      }
     }
 
     if (blockSelection && (event.key === "Backspace" || event.key === "Delete")) {
