@@ -1,4 +1,5 @@
 import type { RangeSelection } from "../selection";
+import type { Transaction } from "../operation";
 
 export type MarkdownInputRuleName =
   | "bulletList"
@@ -12,4 +13,10 @@ export interface MarkdownInputRuleMatch {
   name: MarkdownInputRuleName;
   prefixRange: RangeSelection;
   trigger: string;
+}
+
+export interface MarkdownInputRuleResult {
+  name: MarkdownInputRuleName;
+  selection: RangeSelection;
+  transaction: Transaction;
 }
