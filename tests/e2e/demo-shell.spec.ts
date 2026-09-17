@@ -107,6 +107,30 @@ test("applies formatting from the fixed toolbar", async ({ page }) => {
   await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
 });
 
+test("applies formatting and history keyboard shortcuts", async ({ page }) => {
+  await page.goto("/");
+  await selectRenderedTextRange(page, "[0,0]", 0, 2);
+
+  const documentJson = page.getByLabel("文档 JSON", { exact: true });
+
+  await page.keyboard.press("Control+B");
+  await expect(documentJson).toContainText('"bold": true');
+
+  await page.keyboard.press("Control+I");
+  await expect(documentJson).toContainText('"italic": true');
+
+  await page.keyboard.press("Control+U");
+  await expect(documentJson).toContainText('"underline": true');
+
+  await page.keyboard.press("Control+Z");
+  await expect(documentJson).not.toContainText('"underline": true');
+  await expect(documentJson).toContainText('"italic": true');
+
+  await page.keyboard.press("Control+Shift+Z");
+  await expect(documentJson).toContainText('"underline": true');
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
 test("shows and toggles toolbar display modes", async ({ page }) => {
   await page.goto("/");
   await selectRenderedTextRange(page, "[0,0]", 0, 2);
