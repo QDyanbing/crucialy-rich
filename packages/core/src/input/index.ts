@@ -6,10 +6,11 @@ export type { BackspaceInput } from "./backspace";
 export {
   cancelComposition,
   createCompositionState,
+  finishComposition,
   startComposition,
   updateComposition,
 } from "./composition";
-export type { CompositionState } from "./composition";
+export type { CompositionCommit, CompositionState } from "./composition";
 export {
   createDeleteInputTransaction,
   createSelectionAfterDeleteInput,

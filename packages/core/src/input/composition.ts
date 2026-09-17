@@ -7,6 +7,11 @@ export interface CompositionState {
   startSelection?: RangeSelection;
 }
 
+export interface CompositionCommit {
+  data: string;
+  selection: RangeSelection;
+}
+
 export function createCompositionState(): CompositionState {
   return { active: false, data: "" };
 }
@@ -38,4 +43,18 @@ export function updateComposition(
 
 export function cancelComposition(): CompositionState {
   return createCompositionState();
+}
+
+export function finishComposition(
+  state: CompositionState,
+  data = state.data,
+): CompositionCommit | undefined {
+  if (!state.active || !state.startSelection || data.length === 0) {
+    return undefined;
+  }
+
+  return {
+    data,
+    selection: cloneRangeSelection(state.startSelection),
+  };
 }
