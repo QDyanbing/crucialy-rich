@@ -195,6 +195,12 @@ h3 {
   margin: 0;
 }
 
+.composition-status {
+  color: #435149;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
 .image-controls {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(220px, 0.8fr);

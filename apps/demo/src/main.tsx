@@ -10,6 +10,7 @@ import {
   cloneRangeSelection,
   createBulletList,
   createCodeBlock,
+  createCompositionState,
   createDefaultCommandRegistry,
   DEFAULT_CLIPBOARD_PARSERS,
   createHistorySnapshot,
@@ -74,6 +75,7 @@ import {
   type ClipboardMimeType,
   type BlockSelection,
   type CellSelection,
+  type CompositionState,
   type DocumentNode,
   type HistoryChange,
   type HeadingLevel,
@@ -122,6 +124,7 @@ import "./styles.css";
 
 type ModelExampleId =
   | "regular"
+  | "input-rules"
   | "headings"
   | "quotes"
   | "block-types"
@@ -188,6 +191,15 @@ const modelExamples: ModelExample[] = [
       createParagraph([createText("你好，crucialy-rich。")]),
       createParagraph([createText("选区模型已就绪。")]),
     ]),
+  },
+  {
+    id: "input-rules",
+    label: "输入法与 Markdown 规则",
+    selection: {
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 0 },
+    },
+    value: createDocument([createParagraph()]),
   },
   {
     id: "headings",
@@ -809,6 +821,8 @@ function DemoApp() {
   const [pasteValue, setPasteValue] = useState(PASTE_EXAMPLES["text/plain"]);
   const [blockSelection, setBlockSelection] = useState<BlockSelection>();
   const [cellSelection, setCellSelection] = useState<CellSelection>();
+  const [compositionState, setCompositionState] =
+    useState<CompositionState>(createCompositionState);
   const [fontSizeValue, setFontSizeValue] = useState("18");
   const [textColorValue, setTextColorValue] = useState("#1677ff");
   const [backgroundColorValue, setBackgroundColorValue] = useState("#fff4cc");
@@ -1047,6 +1061,7 @@ function DemoApp() {
     setLinkEditorOpen(false);
     setBlockSelection(undefined);
     setCellSelection(undefined);
+    setCompositionState(createCompositionState());
   }
 
   function handleNormalize() {
@@ -1616,7 +1631,7 @@ function DemoApp() {
           <p className="eyebrow">调试工作台</p>
           <h1 id="page-title">crucialy-rich</h1>
         </div>
-        <span className="status-pill">第 22 周表格编辑闭环</span>
+        <span className="status-pill">第 23 周键盘输入闭环</span>
       </header>
 
       <section className="workspace-grid" aria-label="编辑器工作区">
@@ -1638,6 +1653,12 @@ function DemoApp() {
               />
               <span>启用悬浮工具栏</span>
             </label>
+            <output aria-label="输入法状态" className="composition-status">
+              输入法：
+              {compositionState.active
+                ? `组合中${compositionState.data ? `（${compositionState.data}）` : ""}`
+                : "空闲"}
+            </output>
           </div>
           {showFixedToolbar ? (
             <FixedToolbar
@@ -1814,6 +1835,7 @@ function DemoApp() {
             className="rendered-document"
             contentEditable
             label="已渲染文档"
+            onCompositionStateChange={setCompositionState}
             onKeyDown={handleEditorKeyDown}
             onBlockSelectionChange={setBlockSelection}
             onCellSelectionChange={setCellSelection}
