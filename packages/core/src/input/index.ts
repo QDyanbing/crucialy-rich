@@ -23,5 +23,7 @@ export {
   createSelectionAfterInsertTextInput,
 } from "./insert-text";
 export type { InsertTextInput } from "./insert-text";
+export { getEditorShortcutAction } from "./keyboard-shortcut";
+export type { EditorShortcutAction } from "./keyboard-shortcut";
 export { createSelectionAfterTabInput, createTabInputTransaction } from "./tab";
 export type { TabInput } from "./tab";

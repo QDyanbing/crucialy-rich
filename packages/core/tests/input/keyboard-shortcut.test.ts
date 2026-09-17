@@ -1,0 +1,49 @@
+import { describe, expect, it } from "vitest";
+
+import {
+  BOLD_COMMAND_NAME,
+  getEditorShortcutAction,
+  ITALIC_COMMAND_NAME,
+  UNDERLINE_COMMAND_NAME,
+} from "../../src";
+
+describe("getEditorShortcutAction", () => {
+  it("resolves formatting shortcuts", () => {
+    expect(getEditorShortcutAction({ key: "b", metaKey: true })).toEqual({
+      commandName: BOLD_COMMAND_NAME,
+      type: "command",
+    });
+    expect(getEditorShortcutAction({ ctrlKey: true, key: "i" })).toEqual({
+      commandName: ITALIC_COMMAND_NAME,
+      type: "command",
+    });
+    expect(getEditorShortcutAction({ ctrlKey: true, key: "u" })).toEqual({
+      commandName: UNDERLINE_COMMAND_NAME,
+      type: "command",
+    });
+  });
+
+  it("resolves undo and redo shortcuts before command shortcuts", () => {
+    expect(getEditorShortcutAction({ key: "z", metaKey: true })).toEqual({
+      action: "undo",
+      type: "history",
+    });
+    expect(
+      getEditorShortcutAction({ key: "z", metaKey: true, shiftKey: true }),
+    ).toEqual({ action: "redo", type: "history" });
+    expect(getEditorShortcutAction({ ctrlKey: true, key: "y" })).toEqual({
+      action: "redo",
+      type: "history",
+    });
+  });
+
+  it("ignores browser-like conflicts and composition keys", () => {
+    expect(getEditorShortcutAction({ key: "b" })).toBeUndefined();
+    expect(
+      getEditorShortcutAction({ altKey: true, ctrlKey: true, key: "b" }),
+    ).toBeUndefined();
+    expect(
+      getEditorShortcutAction({ ctrlKey: true, isComposing: true, key: "b" }),
+    ).toBeUndefined();
+  });
+});
