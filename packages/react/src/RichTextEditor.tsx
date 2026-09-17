@@ -7,6 +7,7 @@ import {
   createBackspaceInputTransaction,
   createBlockSelection,
   createCellSelection,
+  createCompositionState,
   createDeleteInputTransaction,
   createSelectionAfterBackspaceInput,
   createSelectionAfterDeleteInput,
@@ -14,10 +15,12 @@ import {
   createSetTaskItemCheckedOperation,
   createTabInputTransaction,
   createTransaction,
+  cancelComposition,
   DELETE_SELECTION_COMMAND_NAME,
   DELETE_IMAGE_COMMAND_NAME,
   domSelectionToModelSelection,
   executeCommand,
+  finishComposition,
   getNodeAtPath,
   getElementModelPath,
   INSERT_TEXT_COMMAND_NAME,
@@ -27,10 +30,13 @@ import {
   parseClipboardData,
   PASTE_COMMAND_NAME,
   renderDocument,
+  startComposition,
+  updateComposition,
   SPLIT_BLOCK_COMMAND_NAME,
   type CommandResult,
   type BlockSelection,
   type CellSelection,
+  type CompositionState,
   type DocumentNode,
   type RangeSelection,
   type RenderedElementNode,
@@ -45,6 +51,7 @@ import {
   useState,
   type FormEvent,
   type ClipboardEvent,
+  type CompositionEvent,
   type HTMLAttributes,
   type KeyboardEvent,
   type MouseEvent,
@@ -58,6 +65,9 @@ export interface RichTextEditorProps
     | "contentEditable"
     | "onBeforeInput"
     | "onClick"
+    | "onCompositionEnd"
+    | "onCompositionStart"
+    | "onCompositionUpdate"
     | "onKeyDown"
     | "onKeyUp"
     | "onMouseUp"
@@ -71,6 +81,7 @@ export interface RichTextEditorProps
   onBlockSelectionChange?: (selection: BlockSelection | undefined) => void;
   onCellSelectionChange?: (selection: CellSelection | undefined) => void;
   onChange?: (value: DocumentNode) => void;
+  onCompositionStateChange?: (state: CompositionState) => void;
   onSelectionChange?: (selection: RangeSelection) => void;
   onTransaction?: (event: RichTextEditorTransactionEvent) => void;
   selection?: RangeSelection;
@@ -83,6 +94,7 @@ export type RichTextEditorInputType =
   | "deleteForward"
   | "insertParagraph"
   | "insertFromPaste"
+  | "insertCompositionText"
   | "insertText"
   | "indentListItem"
   | "outdentListItem"
@@ -244,6 +256,8 @@ function createInsertTextCommandResult(
   document: DocumentNode,
   selection: RangeSelection,
   text: string,
+  inputType: KeyboardInputResult["inputType"] = "insertText",
+  batch = "typing",
 ): KeyboardInputResult | undefined {
   const result = executeCommand(richTextCommandRegistry, INSERT_TEXT_COMMAND_NAME, {
     context: {
@@ -258,8 +272,8 @@ function createInsertTextCommandResult(
   return createKeyboardInputResultFromCommandResult(
     result,
     selection,
-    "insertText",
-    "typing",
+    inputType,
+    batch,
   );
 }
 
@@ -389,6 +403,10 @@ export function RichTextEditor({
   onBlockSelectionChange,
   onCellSelectionChange,
   onClick,
+  onCompositionEnd,
+  onCompositionStart,
+  onCompositionStateChange,
+  onCompositionUpdate,
   onKeyDown,
   onKeyUp,
   onMouseUp,
@@ -401,6 +419,8 @@ export function RichTextEditor({
   value,
 }: RichTextEditorProps): ReactElement {
   const rootRef = useRef<HTMLDivElement>(null);
+  const compositionRef = useRef<CompositionState>(createCompositionState());
+  const [compositionActive, setCompositionActive] = useState(false);
   const [uncontrolledDocument, setUncontrolledDocument] = useState(
     () => defaultValue ?? createDocument(),
   );
@@ -423,6 +443,12 @@ export function RichTextEditor({
     }
 
     onChange?.(nextDocument);
+  }
+
+  function publishCompositionState(nextState: CompositionState) {
+    compositionRef.current = nextState;
+    setCompositionActive(nextState.active);
+    onCompositionStateChange?.(nextState);
   }
 
   function commitInputResult(input: KeyboardInputResult) {
@@ -450,7 +476,12 @@ export function RichTextEditor({
   function handleBeforeInput(event: FormEvent<HTMLDivElement>) {
     onBeforeInput?.(event);
 
-    if (event.defaultPrevented || !editable) {
+    if (
+      event.defaultPrevented ||
+      !editable ||
+      compositionRef.current.active ||
+      (event.nativeEvent as InputEvent).isComposing
+    ) {
       return;
     }
 
@@ -478,7 +509,12 @@ export function RichTextEditor({
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     onKeyDown?.(event);
 
-    if (event.defaultPrevented || !editable) {
+    if (
+      event.defaultPrevented ||
+      !editable ||
+      compositionRef.current.active ||
+      event.nativeEvent.isComposing
+    ) {
       return;
     }
 
@@ -569,7 +605,7 @@ export function RichTextEditor({
   function handlePaste(event: ClipboardEvent<HTMLDivElement>) {
     onPaste?.(event);
 
-    if (event.defaultPrevented || !editable) {
+    if (event.defaultPrevented || !editable || compositionRef.current.active) {
       return;
     }
 
@@ -678,6 +714,58 @@ export function RichTextEditor({
     }
   }
 
+  function handleCompositionStart(event: CompositionEvent<HTMLDivElement>) {
+    onCompositionStart?.(event);
+
+    if (event.defaultPrevented || !editable) {
+      return;
+    }
+
+    const modelSelection = getModelSelectionFromDom(event.currentTarget, document);
+
+    if (modelSelection) {
+      publishCompositionState(startComposition(modelSelection));
+    }
+  }
+
+  function handleCompositionUpdate(event: CompositionEvent<HTMLDivElement>) {
+    onCompositionUpdate?.(event);
+
+    if (!compositionRef.current.active) {
+      return;
+    }
+
+    const modelSelection = getModelSelectionFromDom(event.currentTarget, document);
+
+    publishCompositionState(
+      updateComposition(compositionRef.current, event.data, modelSelection),
+    );
+  }
+
+  function handleCompositionEnd(event: CompositionEvent<HTMLDivElement>) {
+    onCompositionEnd?.(event);
+
+    const commit = finishComposition(compositionRef.current, event.data);
+
+    publishCompositionState(cancelComposition());
+
+    if (!editable || !commit) {
+      return;
+    }
+
+    const input = createInsertTextCommandResult(
+      document,
+      commit.selection,
+      commit.data,
+      "insertCompositionText",
+      "composition",
+    );
+
+    if (input) {
+      commitInputResult(input);
+    }
+  }
+
   return (
     <div
       {...renderedDocument.attributes}
@@ -686,9 +774,13 @@ export function RichTextEditor({
       aria-readonly={editable ? "false" : "true"}
       className={className}
       contentEditable={contentEditable}
+      data-composing={compositionActive ? "true" : "false"}
       data-crucialy-rich-editor="true"
       onBeforeInput={handleBeforeInput}
       onClick={handleClick}
+      onCompositionEnd={handleCompositionEnd}
+      onCompositionStart={handleCompositionStart}
+      onCompositionUpdate={handleCompositionUpdate}
       onKeyDown={handleKeyDown}
       onKeyUp={onKeyUp}
       onMouseUp={onMouseUp}
