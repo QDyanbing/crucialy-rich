@@ -23,6 +23,10 @@ async function placeCaretInRenderedText(page: Page, path: string, offset: number
     }, offset);
 }
 
+async function insertEditorText(page: Page, data: string) {
+  await page.keyboard.insertText(data);
+}
+
 async function selectRenderedTextRange(
   page: Page,
   path: string,
@@ -128,6 +132,51 @@ test("applies formatting and history keyboard shortcuts", async ({ page }) => {
 
   await page.keyboard.press("Control+Shift+Z");
   await expect(documentJson).toContainText('"underline": true');
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
+test("applies Markdown input rules and restores prefixes through undo", async ({
+  page,
+}) => {
+  await page.goto("/");
+
+  const editor = page.getByLabel("已渲染文档");
+  const modelExamples = page.getByLabel("模型示例");
+
+  async function resetInputRuleExample() {
+    await modelExamples.selectOption("regular");
+    await modelExamples.selectOption("input-rules");
+    await placeCaretInRenderedText(page, "[0,0]", 0);
+  }
+
+  await resetInputRuleExample();
+  await insertEditorText(page, "#");
+  await expect(editor.locator("p")).toHaveText("#");
+  await insertEditorText(page, " ");
+  await expect(editor.locator("h1")).toHaveCount(1);
+  await page.keyboard.press("Control+Z");
+  await expect(editor.locator("p")).toHaveText("#");
+
+  await resetInputRuleExample();
+  await insertEditorText(page, "- ");
+  await expect(editor.locator("ul > li")).toHaveCount(1);
+
+  await resetInputRuleExample();
+  await insertEditorText(page, "1. ");
+  await expect(editor.locator("ol > li")).toHaveCount(1);
+
+  await resetInputRuleExample();
+  await insertEditorText(page, "> ");
+  await expect(editor.locator("blockquote")).toHaveCount(1);
+
+  await resetInputRuleExample();
+  await insertEditorText(page, "```");
+  await expect(editor.locator("pre > code")).toHaveCount(1);
+
+  await resetInputRuleExample();
+  await insertEditorText(page, "正文 # ");
+  await expect(editor.locator("p")).toHaveText("正文 # ");
+  await expect(editor.locator("h1")).toHaveCount(0);
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
 
