@@ -135,6 +135,7 @@ pnpm test:e2e
 
 ## 文档入口
 
+- [完整文档中心](./docs/README.md)
 - [工程结构](./docs/architecture/project-structure.md)
 - [环境要求](./docs/development/environment.md)
 - [初始化流程](./docs/development/initialization-flow.md)
