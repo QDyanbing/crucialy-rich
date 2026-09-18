@@ -93,7 +93,7 @@ importers:
   packages/react:
     dependencies:
       '@crucialy-rich/core':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../core
     devDependencies:
       react:

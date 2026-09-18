@@ -1,6 +1,6 @@
 {
   "name": "@crucialy-rich/react",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "React bindings for the crucialy-rich editor kernel.",
   "keywords": [
     "rich-text",
@@ -23,12 +23,15 @@
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.js",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    }
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "dist",
@@ -38,12 +41,15 @@
   "publishConfig": {
     "access": "public"
   },
+  "engines": {
+    "node": ">=22.14.0 <23"
+  },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --clean --tsconfig tsconfig.build.json",
+    "build": "tsup src/index.ts --format esm --dts --sourcemap --clean --tsconfig tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.typecheck.json --pretty false"
   },
   "dependencies": {
-    "@crucialy-rich/core": "workspace:*"
+    "@crucialy-rich/core": "workspace:^"
   },
   "peerDependencies": {
     "react": ">=18 <20",

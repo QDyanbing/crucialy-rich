@@ -1,6 +1,6 @@
 {
   "name": "@crucialy-rich/core",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Self-hosted rich text editor kernel for crucialy-rich.",
   "keywords": [
     "rich-text",
@@ -23,12 +23,15 @@
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.js",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    }
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "dist",
@@ -38,8 +41,11 @@
   "publishConfig": {
     "access": "public"
   },
+  "engines": {
+    "node": ">=22.14.0 <23"
+  },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --clean --tsconfig tsconfig.build.json",
+    "build": "tsup src/index.ts --format esm --dts --sourcemap --clean --tsconfig tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json --noEmit --pretty false"
   },
   "dependencies": {
