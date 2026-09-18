@@ -53,6 +53,7 @@
 
 ## 专项验收
 
+- [0.1.0 全量回归](./qa/full-regression.md)、[0.1.0 发布验收](./qa/release.md)、[0.1.0 发布说明草稿](./release-notes/0.1.0.md)
 - [模型](./qa/model.md)、[选区](./qa/selection.md)、[渲染](./qa/render.md)、[选区同步](./qa/selection-sync.md)
 - [Operation](./qa/operation.md)、[Command](./qa/command.md)、[History](./qa/history.md)、[输入事件](./qa/input.md)
 - [文字标记](./qa/marks.md)、[Bold/Italic](./qa/bold-italic.md)、[Underline/Strike](./qa/underline-strike.md)、[文字属性](./qa/text-style.md)、[链接](./qa/link.md)
@@ -67,4 +68,4 @@
 - [第 9 周](./qa/week-09.md)、[第 10 周](./qa/week-10.md)、[第 11 周](./qa/week-11.md)、[第 12 周](./qa/week-12.md)
 - [第 13 周](./qa/week-13.md)、[第 14 周](./qa/week-14.md)、[第 15 周](./qa/week-15.md)、[第 16 周](./qa/week-16.md)
 - [第 17 周](./qa/week-17.md)、[第 18 周](./qa/week-18.md)、[第 19 周](./qa/week-19.md)、[第 20 周](./qa/week-20.md)
-- [第 21 周](./qa/week-21.md)、[第 22 周](./qa/week-22.md)、[第 23 周](./qa/week-23.md)
+- [第 21 周](./qa/week-21.md)、[第 22 周](./qa/week-22.md)、[第 23 周](./qa/week-23.md)、[第 24 周](./qa/week-24.md)

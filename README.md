@@ -38,7 +38,9 @@ text marks schema 当前支持 `bold`、`italic`、`underline` 和 `strike` 共�
 
 第 22 周“表格编辑闭环”已全部完成：单元格支持文字输入、删除、Enter 分段和段落边界合并；core 提供 CellSelection、当前 cell 定位、`set_table_cell_text` 与 TSV 网格粘贴；React 支持 cell 点击回调和可控高亮，Demo 显示当前 cell path，Playwright 覆盖完整交互。
 
-第 23 周“键盘与输入法闭环”已全部完成：支持 Composition 状态与中文候选词单次提交、Mod+B/I/U 和撤销重做统一快捷键解析，以及 paragraph 开头的标题、列表、引用和代码块 Markdown 输入规则。当前指针为第 24 周 Day 1「组件 API 定稿」。
+第 23 周“键盘与输入法闭环”已全部完成：支持 Composition 状态与中文候选词单次提交、Mod+B/I/U 和撤销重做统一快捷键解析，以及 paragraph 开头的标题、列表、引用和代码块 Markdown 输入规则。
+
+第 24 周“组件 API、集成回归与发布闭环”已全部完成：`RichTextEditor` 提供 Command Registry 和 ref API，core/react 已形成 `0.1.0` ESM 发布产物，全量回归、Demo 示例索引、中文文档中心和发布说明草稿均已完成。当前 `0.1.0` 发布候选已就绪，尚未创建 tag 或发布 npm 包。
 
 ## 技术栈
 
@@ -193,6 +195,7 @@ pnpm test:e2e
 - [第 21 周 QA](./docs/qa/week-21.md)
 - [第 22 周 QA](./docs/qa/week-22.md)
 - [第 23 周 QA](./docs/qa/week-23.md)
+- [第 24 周 QA](./docs/qa/week-24.md)
 - [工具栏闭环验收](./docs/qa/toolbar.md)
 - [斜杠菜单闭环验收](./docs/qa/slash-menu.md)
 - [图片闭环验收](./docs/qa/image.md)
@@ -200,6 +203,9 @@ pnpm test:e2e
 - [基础表格闭环验收](./docs/qa/table-basic.md)
 - [表格编辑闭环验收](./docs/qa/table-editing.md)
 - [输入法、快捷键与输入规则闭环验收](./docs/qa/ime-shortcuts-input-rules.md)
+- [0.1.0 全量回归](./docs/qa/full-regression.md)
+- [0.1.0 发布验收](./docs/qa/release.md)
+- [0.1.0 发布说明草稿](./docs/release-notes/0.1.0.md)
 - [基础列表闭环验收](./docs/qa/list-basic.md)
 - [列表增强闭环验收](./docs/qa/list-advanced.md)
 - [代码块和分割线闭环验收](./docs/qa/code-block-divider.md)

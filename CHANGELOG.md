@@ -119,6 +119,11 @@
 - 新增统一编辑快捷键解析，以及 Mod+B/I/U 格式命令和 History 动作分流。
 - 新增 paragraph 开头的标题、列表、引用和代码块 Markdown 输入规则。
 - 新增中文输入法状态、输入规则 Demo 和浏览器综合验收。
+- 新增 `RichTextEditorHandle`，支持聚焦、读取 DOM/文档/选区和执行 Command。
+- 新增 React `commandRegistry` 接入，统一组件输入、快捷键、粘贴和 ref 命令。
+- 新增受控、非受控、只读和 ref Command 集成测试。
+- 新增公开包构建产物导入与类型声明校验，并纳入 `pnpm check`。
+- 新增中文文档中心、0.1.0 全量回归、发布验收和 Release Notes 草稿。
 - 新增 ToolbarItem 配置、默认工具栏项和 Command active/disabled 状态映射。
 - 新增固定工具栏、命令执行事件以及 Bold、Italic、Underline、Strike、Link、Heading 和 Quote 默认入口。
 - 新增悬浮工具栏可见性、视口定位、窄屏约束和选区快照恢复机制。
@@ -171,6 +176,8 @@
 - 更新项目、React 包、组件 API、Command 和测试文档，使其匹配第 17 周工具栏闭环。
 - 更新项目、React 包和架构文档，使其匹配第 18 周 Day 1 斜杠菜单设计范围。
 - 更新项目、React 包、架构和测试文档，使其匹配第 18 周斜杠菜单闭环。
+- 更新 core/react 为 `0.1.0` 发布元数据，补齐 ESM 默认入口、source map 和 Node.js 版本约束。
+- 按五个验收区域整理 Demo 模型示例入口，保持现有示例 ID 与行为。
 
 ### 修复
 
