@@ -1,6 +1,6 @@
 # 组件 API
 
-`@crucialy-rich/react` 当前暴露 `RichTextEditor`、`Toolbar`、`FixedToolbar` 和 `FloatingToolbar`。编辑器负责模型渲染与输入，工具栏负责 Command 状态与交互。
+`@crucialy-rich/react` 当前暴露 `RichTextEditor`、`RichTextEditorHandle`、`Toolbar`、`FixedToolbar` 和 `FloatingToolbar`。编辑器负责模型渲染与输入，工具栏负责 Command 状态与交互，ref 负责宿主主动聚焦、读取状态和执行命令。
 
 ## 属性
 
@@ -12,6 +12,7 @@
 | `selection`                | `RangeSelection`                                                                  | 受控模型选区，用于输入后回写 DOM selection。   |
 | `onSelectionChange`        | `(selection: RangeSelection) => void`                                             | 输入后输出新的模型选区。                       |
 | `cellSelection`            | `CellSelection`                                                                   | 受控单元格选中态。                             |
+| `commandRegistry`          | `CommandRegistry`                                                                 | 覆盖组件使用的默认 Command 注册表。            |
 | `onCellSelectionChange`    | `(selection: CellSelection \| undefined) => void`                                 | 点击表格单元格或离开表格时输出选中态。         |
 | `onCompositionStateChange` | `(state: CompositionState) => void`                                               | 输入法组合状态变化时输出最新状态。             |
 | `onTransaction`            | `(event: RichTextEditorTransactionEvent) => void`                                 | 输入后输出 before、after、transaction 和选区。 |
@@ -45,6 +46,43 @@ export function UncontrolledEditor() {
 }
 ```
 
+## Command 与 Ref API
+
+```tsx
+import { BOLD_COMMAND_NAME, createDefaultCommandRegistry } from "@crucialy-rich/core";
+import { RichTextEditor, type RichTextEditorHandle } from "@crucialy-rich/react";
+import { useRef } from "react";
+
+export function CommandEditor() {
+  const editorRef = useRef<RichTextEditorHandle>(null);
+  const commandRegistry = createDefaultCommandRegistry();
+
+  return (
+    <>
+      <button onClick={() => editorRef.current?.executeCommand(BOLD_COMMAND_NAME)}>
+        加粗
+      </button>
+      <RichTextEditor
+        commandRegistry={commandRegistry}
+        contentEditable
+        label="命令编辑器"
+        ref={editorRef}
+      />
+    </>
+  );
+}
+```
+
+`RichTextEditorHandle` 提供：
+
+- `focus(options?)`：聚焦 contenteditable 根节点。
+- `getElement()`：返回根 `HTMLDivElement`，未挂载时返回 `null`。
+- `getDocument()`：返回组件当前使用的 `DocumentNode`。
+- `getSelection()`：优先读取 DOM Selection，并转换为模型选区。
+- `executeCommand(name, payload?)`：使用当前文档、选区和 `commandRegistry` 执行命令；成功 transaction 通过 `onChange`、`onSelectionChange` 和 `onTransaction` 输出。
+
+ref 命令事件的 `inputType` 为 `command`。受控模式不会自行替换 `value`，宿主必须在 `onChange` 后回传新文档；非受控模式会更新内部文档。`contentEditable={false}` 只禁止用户输入，宿主仍可主动执行 ref 命令。
+
 ## 当前行为
 
 - 组件内部复用 `@crucialy-rich/core` 的 `renderDocument`。
@@ -69,6 +107,7 @@ export function UncontrolledEditor() {
 - paragraph 开头命中 Markdown 前缀时输出 `insertFromInputRule` transaction，并把选区移动到目标结构起点。
 - 输入、删除、分段和段落合并都不会直接信任浏览器默认修改后的 DOM。
 - 外部 `onBeforeInput` / `onKeyDown` 会先执行，若已 `preventDefault`，内部不再处理对应输入。
+- 组件内部输入、快捷键、粘贴和 ref 命令统一使用 `commandRegistry`；未传入时使用 core 默认注册表。
 - 编辑态点击 Link Mark 渲染的 `<a>` 时会先调用外部 `onClick`，再阻止浏览器默认跳转，文字仍可正常选择。
 - 只读态不会阻止 `<a>` 的默认行为，href、target 和 rel 由浏览器处理。
 - 受控 `selection` 会在文档或选区更新后的 layout effect 中回写 DOM，可用于菜单 command 完成后恢复浏览器选区。

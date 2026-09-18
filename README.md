@@ -91,6 +91,7 @@ pnpm dev
 - `pnpm test:e2e`：运行 Playwright 演示页面冒烟测试。
 - `pnpm test:e2e:install`：安装本地 Playwright Chromium。
 - `pnpm test:e2e:install:deps`：安装 Playwright Chromium 和 Linux 系统依赖。
+- `pnpm test:packages`：验证已构建公开包的运行时导出与类型声明。
 - `pnpm typecheck`：运行全仓 TypeScript 类型检查。
 - `pnpm typecheck:packages`：逐个验证工作区项目声明的类型检查脚本。
 - `pnpm lint`：运行 ESLint。
@@ -116,6 +117,7 @@ pnpm test:e2e
 - `pnpm typecheck:packages`
 - `pnpm test`
 - `pnpm build`
+- `pnpm test:packages`
 
 执行 `pnpm hooks:install` 后：
 

@@ -7,10 +7,11 @@ crucialy-rich 编辑内核的 React 集成包，对外暴露可集成的 React �
 ## 安装
 
 ```sh
-pnpm add @crucialy-rich/react @crucialy-rich/core react react-dom
+pnpm add @crucialy-rich/react@^0.1.0 @crucialy-rich/core@^0.1.0 react react-dom
 ```
 
 `react` 与 `react-dom` 为同伴依赖，需要宿主项目自行安装（支持 `>=18 <20`）。
+运行环境要求 Node.js `>=22.14.0 <23`。
 
 ## 使用
 
@@ -43,6 +44,8 @@ export function Demo() {
 - `cellSelection` / `onCellSelectionChange`：受控单元格选中态和点击 cell 后的路径回调。
 - `onTransaction`：输入后输出 before、after、transaction、inputType 和输入前后 selection；普通文本输入会带有 `batch: "typing"`。
 - `onCompositionStateChange`：输出输入法候选状态；确认候选词后只提交一次 transaction。
+- `commandRegistry`：允许宿主提供自定义 Command 注册表，内部输入和 ref 共用该注册表。
+- `ref`：暴露 `focus`、`getElement`、`getDocument`、`getSelection` 和 `executeCommand`。
 - `contentEditable`：开启普通文本输入、Backspace、Delete、Enter、列表 Tab 和 Shift+Tab。
 - 输入事件：通过模型 transaction 更新文档，并在输入后回传稳定模型选区；普通文本输入、非折叠删除选区、Enter 分段和段首 Backspace 合并复用 core command。
 - 任务列表：checkbox 点击通过 `set_task_item_checked` transaction 写回 `checked`，并进入宿主的 History 流程。
@@ -70,6 +73,15 @@ Toolbar 当前支持：
 - `executeSlashCommand`：清理触发文本、执行目标命令并合并 Transaction。
 
 完整说明见[组件 API](../../docs/features/component-api.md)、[工具栏](../../docs/features/toolbar.md)和[斜杠菜单](../../docs/features/slash-menu.md)。
+
+## 构建产物
+
+```sh
+pnpm --filter @crucialy-rich/core build
+pnpm --filter @crucialy-rich/react build
+```
+
+构建输出位于 `dist`，包含 ESM、source map 和 TypeScript 声明。React 包声明 `react` / `react-dom` 为 peer dependencies，并通过 `exports` 提供 `types`、`import` 和 `default` 入口。
 
 ## 许可
 

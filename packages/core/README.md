@@ -7,8 +7,10 @@
 ## 安装
 
 ```sh
-pnpm add @crucialy-rich/core
+pnpm add @crucialy-rich/core@^0.1.0
 ```
+
+要求 Node.js `>=22.14.0 <23`。
 
 ## 使用
 
@@ -208,6 +210,14 @@ const shortcutCommandName = getCommandNameFromShortcut({
 - 当前输入 helper 覆盖普通文本插入、段中删除、文本块合并/分裂、CodeBlock 换行/退出、相邻 void block 删除和输入后 selection 落点。
 - Command：默认注册表、状态查询、文字样式、链接、Heading、Quote、CodeBlock、Divider、BulletList、OrderedList、文本与 block command。
 - History：`createHistorySnapshot`、`cloneHistorySnapshot`、`createHistoryEntry`、`cloneHistoryEntry`、`createHistoryState`、`clearHistory`、`recordHistory`、`canMergeHistoryEntries`、`mergeHistoryEntries`、`canUndo`、`canRedo`、`getUndoEntry`、`getRedoEntry`、`undoHistory`、`redoHistory`、`getHistoryShortcutAction`、`undoCommand`、`redoCommand`。
+
+## 构建产物
+
+```sh
+pnpm --filter @crucialy-rich/core build
+```
+
+构建输出位于 `dist`，包含 ESM `index.js`、`index.js.map` 和 `index.d.ts`。包通过 `exports` 同时声明 `types`、`import` 和 `default` 入口，并标记 `sideEffects: false`。
 
 ## 许可
 
