@@ -46,7 +46,9 @@ import {
 } from "@crucialy-rich/core";
 import {
   createElement,
+  forwardRef,
   useEffect,
+  useImperativeHandle,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -54,6 +56,7 @@ import {
   type FormEvent,
   type ClipboardEvent,
   type CompositionEvent,
+  type ForwardedRef,
   type HTMLAttributes,
   type KeyboardEvent,
   type MouseEvent,
@@ -88,6 +91,13 @@ export interface RichTextEditorProps
   onTransaction?: (event: RichTextEditorTransactionEvent) => void;
   selection?: RangeSelection;
   value?: DocumentNode;
+}
+
+export interface RichTextEditorHandle {
+  focus: (options?: FocusOptions) => void;
+  getDocument: () => DocumentNode;
+  getElement: () => HTMLDivElement | null;
+  getSelection: () => RangeSelection | undefined;
 }
 
 export type RichTextEditorInputType =
@@ -396,32 +406,35 @@ function createMergeNextBlockCommandResult(
   );
 }
 
-export function RichTextEditor({
-  blockSelection,
-  cellSelection,
-  className,
-  contentEditable,
-  defaultValue,
-  label = "Rich text editor",
-  onBeforeInput,
-  onBlockSelectionChange,
-  onCellSelectionChange,
-  onClick,
-  onCompositionEnd,
-  onCompositionStart,
-  onCompositionStateChange,
-  onCompositionUpdate,
-  onKeyDown,
-  onKeyUp,
-  onMouseUp,
-  onPaste,
-  onChange,
-  onSelectionChange,
-  onTransaction,
-  selection,
-  suppressContentEditableWarning,
-  value,
-}: RichTextEditorProps): ReactElement {
+function RichTextEditorComponent(
+  {
+    blockSelection,
+    cellSelection,
+    className,
+    contentEditable,
+    defaultValue,
+    label = "Rich text editor",
+    onBeforeInput,
+    onBlockSelectionChange,
+    onCellSelectionChange,
+    onClick,
+    onCompositionEnd,
+    onCompositionStart,
+    onCompositionStateChange,
+    onCompositionUpdate,
+    onKeyDown,
+    onKeyUp,
+    onMouseUp,
+    onPaste,
+    onChange,
+    onSelectionChange,
+    onTransaction,
+    selection,
+    suppressContentEditableWarning,
+    value,
+  }: RichTextEditorProps,
+  forwardedRef: ForwardedRef<RichTextEditorHandle>,
+): ReactElement {
   const rootRef = useRef<HTMLDivElement>(null);
   const compositionRef = useRef<CompositionState>(createCompositionState());
   const [compositionActive, setCompositionActive] = useState(false);
@@ -432,6 +445,27 @@ export function RichTextEditor({
   const document = value ?? uncontrolledDocument;
   const renderedDocument = useMemo(() => renderDocument(document), [document]);
   const editable = isEditableContent(contentEditable);
+
+  useImperativeHandle(
+    forwardedRef,
+    () => ({
+      focus(options) {
+        rootRef.current?.focus(options);
+      },
+      getDocument() {
+        return document;
+      },
+      getElement() {
+        return rootRef.current;
+      },
+      getSelection() {
+        return rootRef.current
+          ? (getModelSelectionFromDom(rootRef.current, document) ?? selection)
+          : selection;
+      },
+    }),
+    [document, selection],
+  );
 
   useIsomorphicLayoutEffect(() => {
     if (!selection || !rootRef.current) {
@@ -840,3 +874,9 @@ export function RichTextEditor({
     </div>
   );
 }
+
+export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorProps>(
+  RichTextEditorComponent,
+);
+
+RichTextEditor.displayName = "RichTextEditor";

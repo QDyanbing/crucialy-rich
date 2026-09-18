@@ -1,6 +1,7 @@
 export { RichTextEditor } from "./RichTextEditor";
 export type {
   RichTextEditorInputType,
+  RichTextEditorHandle,
   RichTextEditorProps,
   RichTextEditorTransactionEvent,
 } from "./RichTextEditor";
