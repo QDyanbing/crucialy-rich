@@ -146,6 +146,11 @@ interface ModelExample {
   value: unknown;
 }
 
+interface ModelExampleGroup {
+  exampleIds: readonly ModelExampleId[];
+  label: string;
+}
+
 interface RenderBoundaryExample {
   document: DocumentNode;
   id: string;
@@ -447,6 +452,29 @@ const modelExamples: ModelExample[] = [
       type: "document",
       children: [{ type: "text", text: "游离文本" }],
     },
+  },
+];
+
+const modelExampleGroups: ModelExampleGroup[] = [
+  {
+    exampleIds: ["regular", "input-rules"],
+    label: "输入与选区",
+  },
+  {
+    exampleIds: ["headings", "quotes", "block-types", "code-block", "code-divider"],
+    label: "块结构",
+  },
+  {
+    exampleIds: ["lists", "advanced-lists", "tables"],
+    label: "复杂结构",
+  },
+  {
+    exampleIds: ["marks", "links", "images"],
+    label: "内容能力",
+  },
+  {
+    exampleIds: ["empty", "invalid"],
+    label: "边界场景",
   },
 ];
 
@@ -1889,10 +1917,18 @@ function DemoApp() {
                 value={modelExampleId}
                 onChange={handleModelExampleChange}
               >
-                {modelExamples.map((example) => (
-                  <option key={example.id} value={example.id}>
-                    {example.label}
-                  </option>
+                {modelExampleGroups.map((group) => (
+                  <optgroup key={group.label} label={group.label}>
+                    {group.exampleIds.map((exampleId) => {
+                      const example = getModelExample(exampleId);
+
+                      return (
+                        <option key={example.id} value={example.id}>
+                          {example.label}
+                        </option>
+                      );
+                    })}
+                  </optgroup>
                 ))}
               </select>
             </label>

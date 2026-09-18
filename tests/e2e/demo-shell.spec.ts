@@ -95,6 +95,20 @@ test("renders the demo shell", async ({ page }) => {
   await expect(page.getByLabel("选中文本")).toContainText("你好");
 });
 
+test("groups every model example by acceptance area", async ({ page }) => {
+  await page.goto("/");
+
+  const groups = page.getByLabel("模型示例").locator("optgroup");
+
+  await expect(groups).toHaveCount(5);
+  expect(
+    await groups.evaluateAll((elements) =>
+      elements.map((element) => element.getAttribute("label")),
+    ),
+  ).toEqual(["输入与选区", "块结构", "复杂结构", "内容能力", "边界场景"]);
+  await expect(page.getByLabel("模型示例").locator("option")).toHaveCount(15);
+});
+
 test("applies formatting from the fixed toolbar", async ({ page }) => {
   await page.goto("/");
 
