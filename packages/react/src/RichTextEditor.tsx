@@ -20,7 +20,7 @@ import {
   DELETE_SELECTION_COMMAND_NAME,
   DELETE_IMAGE_COMMAND_NAME,
   domSelectionToModelSelection,
-  executeCommand,
+  executeCommand as executeCoreCommand,
   finishComposition,
   getNodeAtPath,
   getEditorShortcutAction,
@@ -36,6 +36,8 @@ import {
   updateComposition,
   SPLIT_BLOCK_COMMAND_NAME,
   type CommandResult,
+  type CommandName,
+  type CommandRegistry,
   type BlockSelection,
   type CellSelection,
   type CompositionState,
@@ -82,6 +84,7 @@ export interface RichTextEditorProps
   defaultValue?: DocumentNode;
   blockSelection?: BlockSelection;
   cellSelection?: CellSelection;
+  commandRegistry?: CommandRegistry;
   label?: string;
   onBlockSelectionChange?: (selection: BlockSelection | undefined) => void;
   onCellSelectionChange?: (selection: CellSelection | undefined) => void;
@@ -94,6 +97,7 @@ export interface RichTextEditorProps
 }
 
 export interface RichTextEditorHandle {
+  executeCommand: (name: CommandName, payload?: unknown) => CommandResult;
   focus: (options?: FocusOptions) => void;
   getDocument: () => DocumentNode;
   getElement: () => HTMLDivElement | null;
@@ -101,6 +105,7 @@ export interface RichTextEditorHandle {
 }
 
 export type RichTextEditorInputType =
+  | "command"
   | "deleteBackward"
   | "deleteImage"
   | "deleteForward"
@@ -177,7 +182,7 @@ function getInsertTextInputData(event: Event): string | undefined {
 const useIsomorphicLayoutEffect =
   typeof window === "undefined" ? useEffect : useLayoutEffect;
 
-const richTextCommandRegistry = createDefaultCommandRegistry();
+const defaultCommandRegistry = createDefaultCommandRegistry();
 
 interface KeyboardInputResult {
   batch?: string;
@@ -267,13 +272,14 @@ function createKeyboardInputResult(
 }
 
 function createInsertTextCommandResult(
+  registry: CommandRegistry,
   document: DocumentNode,
   selection: RangeSelection,
   text: string,
   inputType: KeyboardInputResult["inputType"] = "insertText",
   batch = "typing",
 ): KeyboardInputResult | undefined {
-  const result = executeCommand(richTextCommandRegistry, INSERT_TEXT_COMMAND_NAME, {
+  const result = executeCoreCommand(registry, INSERT_TEXT_COMMAND_NAME, {
     context: {
       document,
       selection,
@@ -292,29 +298,27 @@ function createInsertTextCommandResult(
 }
 
 function createDeleteSelectionCommandResult(
+  registry: CommandRegistry,
   document: DocumentNode,
   selection: RangeSelection,
   inputType: KeyboardInputResult["inputType"],
 ): KeyboardInputResult | undefined {
-  const result = executeCommand(
-    richTextCommandRegistry,
-    DELETE_SELECTION_COMMAND_NAME,
-    {
-      context: {
-        document,
-        selection,
-      },
+  const result = executeCoreCommand(registry, DELETE_SELECTION_COMMAND_NAME, {
+    context: {
+      document,
+      selection,
     },
-  );
+  });
 
   return createKeyboardInputResultFromCommandResult(result, selection, inputType);
 }
 
 function createDeleteImageCommandResult(
+  registry: CommandRegistry,
   document: DocumentNode,
   blockSelection: BlockSelection,
 ): KeyboardInputResult | undefined {
-  const result = executeCommand(richTextCommandRegistry, DELETE_IMAGE_COMMAND_NAME, {
+  const result = executeCoreCommand(registry, DELETE_IMAGE_COMMAND_NAME, {
     context: { document },
     payload: { selection: blockSelection },
   });
@@ -329,10 +333,11 @@ function createDeleteImageCommandResult(
 }
 
 function createSplitBlockCommandResult(
+  registry: CommandRegistry,
   document: DocumentNode,
   selection: RangeSelection,
 ): KeyboardInputResult | undefined {
-  const result = executeCommand(richTextCommandRegistry, SPLIT_BLOCK_COMMAND_NAME, {
+  const result = executeCoreCommand(registry, SPLIT_BLOCK_COMMAND_NAME, {
     context: {
       document,
       selection,
@@ -347,11 +352,12 @@ function createSplitBlockCommandResult(
 }
 
 function createMergeBlockCommandResult(
+  registry: CommandRegistry,
   document: DocumentNode,
   selection: RangeSelection,
   inputType: KeyboardInputResult["inputType"] = "deleteBackward",
 ): KeyboardInputResult | undefined {
-  const result = executeCommand(richTextCommandRegistry, MERGE_BLOCK_COMMAND_NAME, {
+  const result = executeCoreCommand(registry, MERGE_BLOCK_COMMAND_NAME, {
     context: {
       document,
       selection,
@@ -375,6 +381,7 @@ function createCollapsedSelection(point: RangeSelection["anchor"]): RangeSelecti
 }
 
 function createMergeNextBlockCommandResult(
+  registry: CommandRegistry,
   document: DocumentNode,
   selection: RangeSelection,
 ): KeyboardInputResult | undefined {
@@ -397,6 +404,7 @@ function createMergeNextBlockCommandResult(
   }
 
   return createMergeBlockCommandResult(
+    registry,
     document,
     createCollapsedSelection({
       path: [blockIndex + 1, 0],
@@ -411,6 +419,7 @@ function RichTextEditorComponent(
     blockSelection,
     cellSelection,
     className,
+    commandRegistry,
     contentEditable,
     defaultValue,
     label = "Rich text editor",
@@ -443,6 +452,7 @@ function RichTextEditorComponent(
   );
   const controlled = value !== undefined;
   const document = value ?? uncontrolledDocument;
+  const registry = commandRegistry ?? defaultCommandRegistry;
   const renderedDocument = useMemo(() => renderDocument(document), [document]);
   const editable = isEditableContent(contentEditable);
 
@@ -451,6 +461,31 @@ function RichTextEditorComponent(
     () => ({
       focus(options) {
         rootRef.current?.focus(options);
+      },
+      executeCommand(name, payload) {
+        const currentSelection = rootRef.current
+          ? (getModelSelectionFromDom(rootRef.current, document) ?? selection)
+          : selection;
+        const result = executeCoreCommand(registry, name, {
+          context: currentSelection
+            ? { document, selection: currentSelection }
+            : { document },
+          ...(payload === undefined ? {} : { payload }),
+        });
+
+        if (currentSelection && result.transaction && result.selection) {
+          const input = createKeyboardInputResultFromCommandResult(
+            result,
+            currentSelection,
+            "command",
+          );
+
+          if (input) {
+            commitInputResult(input);
+          }
+        }
+
+        return result;
       },
       getDocument() {
         return document;
@@ -464,7 +499,15 @@ function RichTextEditorComponent(
           : selection;
       },
     }),
-    [document, selection],
+    [
+      controlled,
+      document,
+      onChange,
+      onSelectionChange,
+      onTransaction,
+      registry,
+      selection,
+    ],
   );
 
   useIsomorphicLayoutEffect(() => {
@@ -552,7 +595,12 @@ function RichTextEditorComponent(
       return;
     }
 
-    const input = createInsertTextCommandResult(document, modelSelection, data);
+    const input = createInsertTextCommandResult(
+      registry,
+      document,
+      modelSelection,
+      data,
+    );
 
     event.preventDefault();
 
@@ -578,7 +626,7 @@ function RichTextEditorComponent(
     if (shortcutAction?.type === "command") {
       const shortcutSelection = getModelSelectionFromDom(event.currentTarget, document);
       const result = shortcutSelection
-        ? executeCommand(richTextCommandRegistry, shortcutAction.commandName, {
+        ? executeCoreCommand(registry, shortcutAction.commandName, {
             context: { document, selection: shortcutSelection },
           })
         : undefined;
@@ -599,7 +647,11 @@ function RichTextEditorComponent(
     }
 
     if (blockSelection && (event.key === "Backspace" || event.key === "Delete")) {
-      const deleteImageInput = createDeleteImageCommandResult(document, blockSelection);
+      const deleteImageInput = createDeleteImageCommandResult(
+        registry,
+        document,
+        blockSelection,
+      );
 
       if (deleteImageInput) {
         event.preventDefault();
@@ -617,7 +669,11 @@ function RichTextEditorComponent(
     }
 
     if (event.key === "Enter") {
-      const splitBlockInput = createSplitBlockCommandResult(document, modelSelection);
+      const splitBlockInput = createSplitBlockCommandResult(
+        registry,
+        document,
+        modelSelection,
+      );
 
       if (splitBlockInput) {
         event.preventDefault();
@@ -629,6 +685,7 @@ function RichTextEditorComponent(
 
     if (event.key === "Backspace" || event.key === "Delete") {
       const deleteSelectionInput = createDeleteSelectionCommandResult(
+        registry,
         document,
         modelSelection,
         event.key === "Backspace" ? "deleteBackward" : "deleteForward",
@@ -643,7 +700,11 @@ function RichTextEditorComponent(
     }
 
     if (event.key === "Backspace") {
-      const mergeBlockInput = createMergeBlockCommandResult(document, modelSelection);
+      const mergeBlockInput = createMergeBlockCommandResult(
+        registry,
+        document,
+        modelSelection,
+      );
 
       if (mergeBlockInput) {
         event.preventDefault();
@@ -655,6 +716,7 @@ function RichTextEditorComponent(
 
     if (event.key === "Delete") {
       const mergeNextBlockInput = createMergeNextBlockCommandResult(
+        registry,
         document,
         modelSelection,
       );
@@ -702,7 +764,7 @@ function RichTextEditorComponent(
       return;
     }
 
-    const result = executeCommand(richTextCommandRegistry, PASTE_COMMAND_NAME, {
+    const result = executeCoreCommand(registry, PASTE_COMMAND_NAME, {
       context: { document, selection: modelSelection },
       payload: { fragment },
     });
@@ -834,6 +896,7 @@ function RichTextEditorComponent(
     }
 
     const input = createInsertTextCommandResult(
+      registry,
       document,
       commit.selection,
       commit.data,
