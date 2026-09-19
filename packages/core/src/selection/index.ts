@@ -40,3 +40,9 @@ export {
 } from "./range";
 export { getTextInRange, splitTextByRange } from "./text-range";
 export type { TextRangeSplit } from "./text-range";
+export {
+  getPointAtTextContainerOffset,
+  getTextContainerOffset,
+  getTextContainerPath,
+  isSameTextContainer,
+} from "./text-container-offset";
