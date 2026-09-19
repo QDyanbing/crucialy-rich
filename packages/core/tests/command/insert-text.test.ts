@@ -112,4 +112,39 @@ describe("insertTextCommand", () => {
       focus: { path: [0, 0], offset: 3 },
     });
   });
+
+  it("replaces a selection across text nodes after remapping its start", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("旧"),
+        createText("加粗", { bold: true }),
+        createText("结尾"),
+      ]),
+    ]);
+    const input = {
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [0, 2], offset: 1 },
+        },
+      },
+      payload: { text: "新" },
+    };
+    const result = insertTextCommand.execute(input);
+
+    expect(canExecuteInsertTextCommand(input)).toBe(true);
+    expect(result.transaction?.operations[1]).toEqual({
+      point: { path: [0, 0], offset: 0 },
+      text: "新",
+      type: "insert_text",
+    });
+    expect(result.selection).toEqual({
+      anchor: { path: [0, 0], offset: 1 },
+      focus: { path: [0, 0], offset: 1 },
+    });
+    expect(applyTransaction(document, result.transaction!)).toEqual(
+      createDocument([createParagraph([createText("新尾")])]),
+    );
+  });
 });

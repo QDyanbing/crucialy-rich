@@ -10,7 +10,6 @@ import {
   isSameTextContainer,
   isValidPoint,
   normalizeRange,
-  type Path,
 } from "../selection";
 import {
   createCommandFailure,
@@ -24,12 +23,6 @@ export const DELETE_SELECTION_COMMAND_NAME = "deleteSelection";
 
 export interface InsertTextCommandPayload {
   text: string;
-}
-
-function isSamePath(left: Path, right: Path): boolean {
-  return (
-    left.length === right.length && left.every((part, index) => part === right[index])
-  );
 }
 
 function hasInsertTextPayload(payload: unknown): payload is InsertTextCommandPayload {
@@ -53,7 +46,7 @@ function canEditTextRange(input: CommandInput): boolean {
   return (
     isValidPoint(input.context.document, range.anchor) &&
     isValidPoint(input.context.document, range.focus) &&
-    (isCollapsed(range) || isSamePath(range.anchor.path, range.focus.path))
+    (isCollapsed(range) || isSameTextContainer(range.anchor, range.focus))
   );
 }
 
@@ -98,10 +91,16 @@ export const insertTextCommand: Command = {
     }
 
     const range = normalizeRange(selection);
-    const insertOperation = createInsertTextOperation(range.anchor, input.payload.text);
-    const operations = isCollapsed(range)
-      ? [insertOperation]
-      : [createDeleteTextOperation(range), insertOperation];
+    const deleteOperation = isCollapsed(range)
+      ? undefined
+      : createDeleteTextOperation(range);
+    const insertPoint = deleteOperation
+      ? createSelectionAfterDeleteText(input.context.document, deleteOperation).anchor
+      : range.anchor;
+    const insertOperation = createInsertTextOperation(insertPoint, input.payload.text);
+    const operations = deleteOperation
+      ? [deleteOperation, insertOperation]
+      : [insertOperation];
 
     return createCommandSuccess(INSERT_TEXT_COMMAND_NAME, {
       selection: createSelectionAfterInsertText(insertOperation),
