@@ -147,4 +147,43 @@ describe("insertTextCommand", () => {
       createDocument([createParagraph([createText("新尾")])]),
     );
   });
+
+  it("replaces a selection across top-level text blocks", () => {
+    const document = createDocument([
+      createParagraph([createText("第一段")]),
+      createParagraph([createText("中间段")]),
+      createParagraph([createText("最后段")]),
+    ]);
+    const input = {
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 1 },
+          focus: { path: [2, 0], offset: 1 },
+        },
+      },
+      payload: { text: "新" },
+    };
+    const result = insertTextCommand.execute(input);
+
+    expect(canExecuteInsertTextCommand(input)).toBe(true);
+    expect(result.transaction?.operations).toEqual([
+      {
+        range: input.context.selection,
+        type: "delete_range",
+      },
+      {
+        point: { path: [0, 0], offset: 1 },
+        text: "新",
+        type: "insert_text",
+      },
+    ]);
+    expect(result.selection).toEqual({
+      anchor: { path: [0, 0], offset: 2 },
+      focus: { path: [0, 0], offset: 2 },
+    });
+    expect(applyTransaction(document, result.transaction!)).toEqual(
+      createDocument([createParagraph([createText("第新后段")])]),
+    );
+  });
 });

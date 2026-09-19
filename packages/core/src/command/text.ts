@@ -49,7 +49,9 @@ function canEditTextRange(input: CommandInput): boolean {
   return (
     isValidPoint(input.context.document, range.anchor) &&
     isValidPoint(input.context.document, range.focus) &&
-    (isCollapsed(range) || isSameTextContainer(range.anchor, range.focus))
+    (isCollapsed(range) ||
+      isSameTextContainer(range.anchor, range.focus) ||
+      canDeleteRange(input.context.document, range))
   );
 }
 
@@ -97,9 +99,14 @@ export const insertTextCommand: Command = {
     const range = normalizeRange(selection);
     const deleteOperation = isCollapsed(range)
       ? undefined
-      : createDeleteTextOperation(range);
+      : isSameTextContainer(range.anchor, range.focus)
+        ? createDeleteTextOperation(range)
+        : createDeleteRangeOperation(range);
     const insertPoint = deleteOperation
-      ? createSelectionAfterDeleteText(input.context.document, deleteOperation).anchor
+      ? deleteOperation.type === "delete_text"
+        ? createSelectionAfterDeleteText(input.context.document, deleteOperation).anchor
+        : createSelectionAfterDeleteRange(input.context.document, deleteOperation)
+            .anchor
       : range.anchor;
     const insertOperation = createInsertTextOperation(insertPoint, input.payload.text);
     const operations = deleteOperation
