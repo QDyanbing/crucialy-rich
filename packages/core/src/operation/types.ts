@@ -47,6 +47,11 @@ export interface DeleteTextOperation {
   type: "delete_text";
 }
 
+export interface DeleteRangeOperation {
+  range: RangeSelection;
+  type: "delete_range";
+}
+
 export interface ToggleMarkOperation {
   mark: TextMarkType;
   range: RangeSelection;

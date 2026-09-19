@@ -17,6 +17,7 @@ export {
   createDeleteTextOperation,
   createSelectionAfterDeleteText,
 } from "./delete-text";
+export { canDeleteRange, createDeleteRangeOperation } from "./delete-range";
 export {
   applyInsertText,
   createInsertTextOperation,
@@ -90,6 +91,7 @@ export type {
 } from "./summary";
 export type {
   BlockTypeSpec,
+  DeleteRangeOperation,
   DeleteTextOperation,
   ExitListItemOperation,
   IndentListItemOperation,
