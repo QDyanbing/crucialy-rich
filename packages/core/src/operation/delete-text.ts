@@ -1,6 +1,13 @@
 import type { DocumentNode } from "../model";
 import type { RangeSelection } from "../selection";
-import { isCollapsed, isValidPoint, normalizeRange } from "../selection";
+import {
+  getPointAtTextContainerOffset,
+  getTextContainerOffset,
+  getTextContainerPath,
+  isCollapsed,
+  isValidPoint,
+  normalizeRange,
+} from "../selection";
 import type { DeleteTextOperation } from "./types";
 import { getTextTarget, replaceTextContainer, type TextTarget } from "./text-target";
 
@@ -89,16 +96,31 @@ export function applyDeleteText(
 }
 
 export function createSelectionAfterDeleteText(
+  document: DocumentNode,
   operation: DeleteTextOperation,
 ): RangeSelection {
   const range = normalizeRange(operation.range);
-  const point = {
-    path: [...range.anchor.path],
-    offset: range.anchor.offset,
-  };
+  const containerPath = getTextContainerPath(range.anchor);
+  const textOffset = getTextContainerOffset(document, range.anchor);
+
+  if (!containerPath || textOffset === undefined) {
+    throw new RangeError("delete text range must reference a text container");
+  }
+
+  const nextDocument = applyDeleteText(document, operation);
+  const point = getPointAtTextContainerOffset(nextDocument, containerPath, textOffset, {
+    affinity: "backward",
+  });
+
+  if (!point) {
+    throw new RangeError("deleted text selection could not be restored");
+  }
 
   return {
-    anchor: point,
+    anchor: {
+      path: [...point.path],
+      offset: point.offset,
+    },
     focus: {
       path: [...point.path],
       offset: point.offset,

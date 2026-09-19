@@ -318,6 +318,8 @@ describe("applyDeleteText", () => {
 });
 
 describe("createSelectionAfterDeleteText", () => {
+  const document = createDocument([createParagraph([createText("abcdef")])]);
+
   it("creates a collapsed selection at the start of the deleted range", () => {
     const operation = createDeleteTextOperation({
       anchor: {
@@ -330,7 +332,7 @@ describe("createSelectionAfterDeleteText", () => {
       },
     });
 
-    expect(createSelectionAfterDeleteText(operation)).toEqual({
+    expect(createSelectionAfterDeleteText(document, operation)).toEqual({
       anchor: {
         path: [0, 0],
         offset: 1,
@@ -354,7 +356,7 @@ describe("createSelectionAfterDeleteText", () => {
       },
     });
 
-    expect(createSelectionAfterDeleteText(operation)).toEqual({
+    expect(createSelectionAfterDeleteText(document, operation)).toEqual({
       anchor: {
         path: [0, 0],
         offset: 2,
@@ -363,6 +365,21 @@ describe("createSelectionAfterDeleteText", () => {
         path: [0, 0],
         offset: 2,
       },
+    });
+  });
+
+  it("remaps a start point when deleting across text nodes", () => {
+    const splitDocument = createDocument([
+      createParagraph([createText("ab"), createText("cd"), createText("ef")]),
+    ]);
+    const operation = createDeleteTextOperation({
+      anchor: { offset: 1, path: [0, 1] },
+      focus: { offset: 1, path: [0, 2] },
+    });
+
+    expect(createSelectionAfterDeleteText(splitDocument, operation)).toEqual({
+      anchor: { offset: 1, path: [0, 1] },
+      focus: { offset: 1, path: [0, 1] },
     });
   });
 });

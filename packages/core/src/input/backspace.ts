@@ -150,7 +150,7 @@ export function createSelectionAfterBackspaceInput(
 
   switch (operation.type) {
     case "delete_text":
-      return createSelectionAfterDeleteText(operation);
+      return createSelectionAfterDeleteText(input.document, operation);
     case "merge_block":
       return createSelectionAfterMergeBlock(input.document, operation);
     case "remove_block": {
