@@ -1,14 +1,19 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  applyDeleteRange,
+  applyTransaction,
   canDeleteRange,
   createBulletList,
   createDeleteRangeOperation,
   createDivider,
   createDocument,
+  createHeading,
   createListItem,
   createParagraph,
+  createQuote,
   createText,
+  createTransaction,
 } from "../../src";
 
 describe("cross-block delete range", () => {
@@ -32,6 +37,67 @@ describe("cross-block delete range", () => {
     ]);
 
     expect(canDeleteRange(document, range)).toBe(true);
+  });
+
+  it.each(["forward", "backward"])(
+    "merges the boundary content for a %s range",
+    (direction) => {
+      const document = createDocument([
+        createParagraph([createText("开头")]),
+        createParagraph([createText("中间")]),
+        createParagraph([createText("结尾")]),
+      ]);
+      const start = { offset: 1, path: [0, 0] };
+      const end = { offset: 1, path: [2, 0] };
+      const operation = createDeleteRangeOperation({
+        anchor: direction === "forward" ? start : end,
+        focus: direction === "forward" ? end : start,
+      });
+
+      expect(applyDeleteRange(document, operation)).toEqual(
+        createDocument([createParagraph([createText("开尾")])]),
+      );
+      expect(document.children).toHaveLength(3);
+    },
+  );
+
+  it("keeps the starting block type and boundary marks", () => {
+    const document = createDocument([
+      createHeading(2, [createText("标", { bold: true }), createText("题")]),
+      createQuote([createText("引", { italic: true }), createText("用")]),
+    ]);
+    const result = applyDeleteRange(
+      document,
+      createDeleteRangeOperation({
+        anchor: { offset: 1, path: [0, 1] },
+        focus: { offset: 1, path: [1, 0] },
+      }),
+    );
+
+    expect(result).toEqual(
+      createDocument([
+        createHeading(2, [createText("标", { bold: true }), createText("题用")]),
+      ]),
+    );
+  });
+
+  it("leaves an empty starting block when the whole range is removed", () => {
+    const document = createDocument([
+      createQuote([createText("全部")]),
+      createParagraph([createText("删除")]),
+    ]);
+
+    expect(
+      applyTransaction(
+        document,
+        createTransaction([
+          createDeleteRangeOperation({
+            anchor: { offset: 0, path: [0, 0] },
+            focus: { offset: 2, path: [1, 0] },
+          }),
+        ]),
+      ),
+    ).toEqual(createDocument([createQuote([createText("")])]));
   });
 
   it.each([
@@ -61,5 +127,25 @@ describe("cross-block delete range", () => {
         focus: { offset: 1, path: [focusBlockIndex, 0] },
       }),
     ).toBe(false);
+  });
+
+  it("throws without mutating a document for an invalid structural crossing", () => {
+    const document = createDocument([
+      createParagraph([createText("开头")]),
+      createDivider(),
+      createParagraph([createText("结尾")]),
+    ]);
+    const snapshot = structuredClone(document);
+
+    expect(() =>
+      applyDeleteRange(
+        document,
+        createDeleteRangeOperation({
+          anchor: { offset: 0, path: [0, 0] },
+          focus: { offset: 1, path: [2, 0] },
+        }),
+      ),
+    ).toThrow(RangeError);
+    expect(document).toEqual(snapshot);
   });
 });
