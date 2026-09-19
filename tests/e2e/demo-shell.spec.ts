@@ -1835,6 +1835,25 @@ for (const key of ["Backspace", "Delete"] as const) {
   });
 }
 
+test("restores cross-block replacement through history", async ({ page }) => {
+  await page.goto("/");
+  await selectRenderedTextAcrossNodes(page, "[0,0]", 3, "[1,0]", 2);
+  await insertEditorText(page, "跨");
+
+  const editor = page.getByLabel("已渲染文档");
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect(editor.locator("p")).toHaveCount(2);
+  await expect(editor.locator("p").first()).toHaveText("你好，crucialy-rich。");
+  await expect(editor.locator("p").nth(1)).toHaveText("选区模型已就绪。");
+
+  await page.getByRole("button", { name: "重做", exact: true }).click();
+  await expect(editor.locator("p")).toHaveCount(1);
+  await expect(editor.locator("p")).toHaveText("你好，跨模型已就绪。");
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
 test("merges consecutive typing into one history item", async ({ page }) => {
   await page.goto("/");
 
