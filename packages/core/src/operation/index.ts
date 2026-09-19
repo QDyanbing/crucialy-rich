@@ -21,6 +21,7 @@ export {
   applyDeleteRange,
   canDeleteRange,
   createDeleteRangeOperation,
+  createSelectionAfterDeleteRange,
 } from "./delete-range";
 export {
   applyInsertText,

@@ -5,6 +5,8 @@ import {
   type TextBlockNode,
 } from "../model";
 import {
+  getBlockTextOffset,
+  getPointAtBlockTextOffset,
   isCollapsed,
   isValidPoint,
   normalizeRange,
@@ -110,5 +112,36 @@ export function applyDeleteRange(
       mergedBlock,
       ...document.children.slice(target.endBlockIndex + 1),
     ],
+  };
+}
+
+export function createSelectionAfterDeleteRange(
+  document: DocumentNode,
+  operation: DeleteRangeOperation,
+): RangeSelection {
+  const target = getDeleteRangeTarget(document, operation);
+
+  if (!target) {
+    throw new RangeError(
+      "delete range must cross top-level text blocks without structural nodes",
+    );
+  }
+
+  const textOffset = getBlockTextOffset(document, target.range.anchor);
+  const nextDocument = applyDeleteRange(document, operation);
+  const point =
+    textOffset === undefined
+      ? undefined
+      : getPointAtBlockTextOffset(nextDocument, target.startBlockIndex, textOffset, {
+          affinity: "backward",
+        });
+
+  if (!point) {
+    throw new RangeError("deleted block range selection could not be restored");
+  }
+
+  return {
+    anchor: { offset: point.offset, path: [...point.path] },
+    focus: { offset: point.offset, path: [...point.path] },
   };
 }

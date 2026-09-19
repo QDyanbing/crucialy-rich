@@ -6,6 +6,7 @@ import {
   canDeleteRange,
   createBulletList,
   createDeleteRangeOperation,
+  createSelectionAfterDeleteRange,
   createDivider,
   createDocument,
   createHeading,
@@ -79,6 +80,39 @@ describe("cross-block delete range", () => {
         createHeading(2, [createText("标", { bold: true }), createText("题用")]),
       ]),
     );
+  });
+
+  it("collapses the selection at the retained start offset", () => {
+    const document = createDocument([
+      createParagraph([createText("前"), createText("缀", { bold: true })]),
+      createParagraph([createText("中间")]),
+      createParagraph([createText("结尾")]),
+    ]);
+    const operation = createDeleteRangeOperation({
+      anchor: { offset: 1, path: [2, 0] },
+      focus: { offset: 1, path: [0, 1] },
+    });
+
+    expect(createSelectionAfterDeleteRange(document, operation)).toEqual({
+      anchor: { offset: 1, path: [0, 1] },
+      focus: { offset: 1, path: [0, 1] },
+    });
+  });
+
+  it("maps a fully removed starting node onto the remaining suffix", () => {
+    const document = createDocument([
+      createParagraph([createText("删除")]),
+      createParagraph([createText("保留")]),
+    ]);
+    const operation = createDeleteRangeOperation({
+      anchor: { offset: 0, path: [0, 0] },
+      focus: { offset: 1, path: [1, 0] },
+    });
+
+    expect(createSelectionAfterDeleteRange(document, operation)).toEqual({
+      anchor: { offset: 0, path: [0, 0] },
+      focus: { offset: 0, path: [0, 0] },
+    });
   });
 
   it("leaves an empty starting block when the whole range is removed", () => {
