@@ -58,6 +58,41 @@ async function selectRenderedTextRange(
     );
 }
 
+async function selectRenderedTextAcrossNodes(
+  page: Page,
+  startPath: string,
+  startOffset: number,
+  endPath: string,
+  endOffset: number,
+) {
+  await page.getByLabel("已渲染文档").evaluate(
+    (renderedDocument, target) => {
+      const startElement = renderedDocument.querySelector(
+        `[data-crucialy-path="${target.startPath}"]`,
+      );
+      const endElement = renderedDocument.querySelector(
+        `[data-crucialy-path="${target.endPath}"]`,
+      );
+      const startText = startElement?.firstChild;
+      const endText = endElement?.firstChild;
+      const selection = window.getSelection();
+
+      if (!startText || !endText || !selection) {
+        throw new Error("Missing rendered cross-node selection target.");
+      }
+
+      (renderedDocument as HTMLElement).focus();
+      const range = document.createRange();
+      range.setStart(startText, target.startOffset);
+      range.setEnd(endText, target.endOffset);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      renderedDocument.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+    },
+    { endOffset, endPath, startOffset, startPath },
+  );
+}
+
 async function setDebuggerSelection(
   page: Page,
   path: string,
@@ -1032,6 +1067,34 @@ test("completes the bold and italic acceptance loop", async ({ page }) => {
     "跨节点选区可以继续切换。",
   );
 });
+
+test("replaces a cross-node text selection from editor input", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("marks");
+  await selectRenderedTextAcrossNodes(page, "[1,0]", 1, "[1,4]", 2);
+
+  await insertEditorText(page, "替换");
+
+  await expect(page.getByLabel("已渲染文档").locator("p").nth(1)).toHaveText(
+    "跨替换。",
+  );
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+  await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 3');
+});
+
+for (const key of ["Backspace", "Delete"] as const) {
+  test(`deletes a cross-node text selection with ${key}`, async ({ page }) => {
+    await page.goto("/");
+    await page.getByLabel("模型示例").selectOption("marks");
+    await selectRenderedTextAcrossNodes(page, "[1,0]", 1, "[1,4]", 2);
+
+    await page.keyboard.press(key);
+
+    await expect(page.getByLabel("已渲染文档").locator("p").nth(1)).toHaveText("跨。");
+    await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+    await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 1');
+  });
+}
 
 test("completes the underline and strike acceptance loop", async ({ page }) => {
   await page.goto("/");
