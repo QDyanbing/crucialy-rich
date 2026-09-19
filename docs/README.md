@@ -55,7 +55,7 @@
 
 - [0.1.0 全量回归](./qa/full-regression.md)、[0.1.0 发布验收](./qa/release.md)、[0.1.0 发布说明草稿](./release-notes/0.1.0.md)
 - [模型](./qa/model.md)、[选区](./qa/selection.md)、[渲染](./qa/render.md)、[选区同步](./qa/selection-sync.md)
-- [Operation](./qa/operation.md)、[Command](./qa/command.md)、[History](./qa/history.md)、[输入事件](./qa/input.md)
+- [Operation](./qa/operation.md)、[Command](./qa/command.md)、[History](./qa/history.md)、[输入事件](./qa/input.md)、[跨节点与跨块选区编辑](./qa/range-editing.md)
 - [文字标记](./qa/marks.md)、[Bold/Italic](./qa/bold-italic.md)、[Underline/Strike](./qa/underline-strike.md)、[文字属性](./qa/text-style.md)、[链接](./qa/link.md)
 - [标题和引用](./qa/block-type.md)、[代码块和分割线](./qa/code-block-divider.md)、[基础列表](./qa/list-basic.md)、[列表增强](./qa/list-advanced.md)
 - [工具栏](./qa/toolbar.md)、[斜杠菜单](./qa/slash-menu.md)、[图片](./qa/image.md)、[粘贴](./qa/paste.md)

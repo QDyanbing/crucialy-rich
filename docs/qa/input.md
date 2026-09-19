@@ -12,8 +12,9 @@
 - `packages/core/tests/input/enter.test.ts`：Enter 转换为 `split_block` transaction、段首/段中/段尾/空段分裂、非折叠 selection no-op 和 selection 落点。
 - `packages/core/tests/input/tab.test.ts`：列表 Tab/Shift+Tab、首项 no-op、三层上限和 selection 落点。
 - CodeBlock 与 Divider 测试：代码块换行/退出、void block 相邻 Backspace/Delete 和选区 path 调整。
-- `packages/core/tests/command/insert-text.test.ts`：collapsed 插入和同一 text range 替换。
-- `packages/core/tests/command/delete-selection.test.ts`：同一 text range 的 Backspace/Delete 共用删除命令。
+- `packages/core/tests/command/insert-text.test.ts`：collapsed 插入、同容器跨 text 替换和跨顶层文本块替换。
+- `packages/core/tests/command/delete-selection.test.ts`：同容器跨 text 与跨顶层文本块的 Backspace/Delete 共用删除命令。
+- `packages/core/tests/operation/delete-range.test.ts`：跨块范围校验、正反向删除、块类型与 marks 边界、选区映射和非法结构拒绝。
 - `packages/core/tests/command/block-type-interaction.test.ts`：Block Type 切换后继续输入，文字、marks 和选区保持稳定。
 - `packages/react/tests/public-api.test.ts`：可编辑语义、输入 transaction 与组件回调契约。
 - `tests/e2e/demo-shell.spec.ts`：真实输入、range 删除、Backspace/Delete 合并、Enter 分段、Quote 内输入/删除/换行、History 和组合编辑。
@@ -37,8 +38,8 @@ pnpm test:e2e
 | 非可编辑渲染   | 不传 `contentEditable`                 | 不处理输入，保持只读语义          | 通过 |
 | 可编辑语义     | 传入 `contentEditable`                 | 根节点 `aria-readonly` 为 `false` | 通过 |
 | 连续输入稳定性 | 输入两个中文字符                       | 第二个字符插入到第一个字符之后    | 通过 |
-| 选区替换       | 同一 text 内选中文字后输入             | 先删除选区，再插入输入文字        | 通过 |
-| 选区删除       | 同一 text 内选中文字后按删除键         | 删除选区并折叠到起点              | 通过 |
+| 选区替换       | 跨 text 或连续文本块选中文字后输入     | 先删除选区，再插入输入文字        | 通过 |
+| 选区删除       | 跨 text 或连续文本块选中后按删除键     | 删除选区并折叠到起点              | 通过 |
 | 段中 Backspace | 光标在 text 节点中间按 Backspace       | 删除光标前一个字符                | 通过 |
 | 段首 Backspace | 第二段开头按 Backspace                 | 当前段合并到上一段                | 通过 |
 | 空段 Backspace | 空段开头按 Backspace                   | 空段被并入上一段                  | 通过 |
@@ -64,13 +65,11 @@ pnpm test:e2e
 
 ## 当前限制
 
-- 普通 `insertText` 和 Backspace/Delete 的非折叠 selection 当前要求落在同一 text 节点内。
-- 粘贴和 IME composition 尚未接入。
-- Backspace/Delete 暂不处理跨 text 或跨 block range 删除。
+- 跨块替换与删除只接受连续顶层 paragraph、heading、quote 或 codeBlock，不跨越列表、表格、图片和分隔线。
 - Enter 暂不处理非折叠 selection；collapsed Enter 会继承当前 Block Type、heading level 和 text marks。
 - React 组件通过 `onTransaction` 暴露记录入口，但 History 状态仍由宿主维护。
-- 空 Quote 自动退出、粘贴解析和 IME composition 完整生命周期仍未实现。
+- 空 Quote 自动退出与拖拽输入仍未实现。
 
 ## 结论
 
-输入已接入 Command、Transaction、History 和文本/void block 流程。当前已验证普通文本块、CodeBlock 与 Divider 边界，后续集中在跨节点删除、粘贴和 IME。
+输入已接入 Command、Transaction、History 和文本/void block 流程。当前已验证同容器跨 text、连续顶层文本块、CodeBlock 与 Divider 边界；结构节点之间的跨块编辑继续保持显式限制。

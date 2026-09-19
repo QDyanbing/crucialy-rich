@@ -99,7 +99,7 @@ describe("deleteSelectionCommand", () => {
       focus: { path: [0, 0], offset: 1 },
     });
     expect(applyTransaction(document, result.transaction!)).toEqual(
-      createDocument([createParagraph([createText("你"), createText("尾")])]),
+      createDocument([createParagraph([createText("你尾")])]),
     );
   });
 

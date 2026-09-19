@@ -1,25 +1,25 @@
 # 输入事件（第一版）
 
-输入事件负责把浏览器编辑意图转换为模型 transaction。当前阶段已接入 `beforeinput insertText`、Backspace、Delete 和 collapsed selection 下的 Enter；同一个 text 节点内的非折叠选区可以通过输入或删除命令完成替换与删除。
+输入事件负责把浏览器编辑意图转换为模型 transaction。当前阶段已接入 `beforeinput insertText`、Backspace、Delete 和 collapsed selection 下的 Enter；同一文本容器或连续顶层文本块中的非折叠选区可以通过输入或删除命令完成替换与删除。
 
 ## 当前范围
 
 - 监听 `beforeinput`。
 - 支持 `insertText` 文本输入。
-- collapsed selection 直接插入；同一 text 内的非折叠 selection 先删除选区再插入。
+- collapsed selection 直接插入；受支持的非折叠 selection 先删除选区再插入。
 - 使用 DOM Selection 转换得到模型 `RangeSelection`。
 - 使用 `createInsertTextInputTransaction` 创建 transaction。
 - 使用 `applyTransaction` 更新文档模型。
 - 通过 `onChange` 输出最新 `DocumentNode`。
 - 输入后通过 `createSelectionAfterInsertTextInput` 计算新的折叠选区。
 - 支持 collapsed selection 下的 Backspace。
-- 支持同一 text 内非折叠 selection 的 Backspace 删除。
+- 支持同一文本容器及连续顶层文本块 selection 的 Backspace 删除。
 - 段中 Backspace 会删除光标前一个字符。
 - 段首 Backspace 会合并上一段。
 - 文本块开头的 Backspace 会删除紧邻的前一个 void block，并修正 block path。
 - Backspace 后通过 `createSelectionAfterBackspaceInput` 计算新的折叠选区。
 - 支持 collapsed selection 下的 Delete。
-- 支持同一 text 内非折叠 selection 的 Delete 删除。
+- 支持同一文本容器及连续顶层文本块 selection 的 Delete 删除。
 - 段中 Delete 会删除光标后一个字符。
 - 段尾 Delete 会合并下一段。
 - 文本块末尾的 Delete 会删除紧邻的后一个 void block，并保持当前 Point。
@@ -151,7 +151,7 @@ function createSelectionAfterTabInput(input: TabInput): RangeSelection;
 - `onCompositionStateChange`：输入法开始、更新和结束时输出当前 Composition 状态。
 - `onCompositionStart` / `onCompositionUpdate` / `onCompositionEnd`：外部回调先执行，内部随后维护候选状态和最终提交。
 - 普通文本输入复用 `insertTextCommand`。
-- 同一 text 内的非折叠普通文本输入会先删除选区，再插入输入文本。
+- 同一文本容器内跨 text 节点、或跨连续顶层文本块的普通文本输入会先删除选区，再插入输入文本。
 - 非折叠 selection 下的 Backspace/Delete 复用 `deleteSelectionCommand`。
 - Enter 复用 `splitBlockCommand`。
 - 段首 Backspace 复用 `mergeBlockCommand`。
@@ -198,9 +198,9 @@ function createSelectionAfterTabInput(input: TabInput): RangeSelection;
 
 ## 当前限制
 
-- 普通 `insertText` 支持 collapsed selection 和同一 text 节点内的非折叠 selection；跨 text 或跨 block 替换尚未实现。
-- 暂不处理粘贴、拖拽或格式输入。
-- Backspace 和 Delete 支持同一 text 内的非折叠 selection，暂不处理跨 text 或跨 block 删除。
+- 普通 `insertText`、Backspace 和 Delete 支持 collapsed selection、同一文本容器内跨 text 节点选区，以及连续顶层文本块选区。
+- 跨块编辑暂不跨越 Divider、Image、List、Table 等结构节点；列表项和表格段落仅支持各自文本容器内部的范围。
+- 暂不处理拖拽输入。
 - Enter 暂不处理非折叠 selection；collapsed Enter 会保留文本 block 类型，CodeBlock 使用纯文本换行与退出规则。
 - 组件本身不持有 history 状态，撤销重做快捷键需要宿主接入 history 状态。
 

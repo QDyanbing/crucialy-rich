@@ -176,6 +176,9 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.createDeleteTextOperation).toBe("function");
     expect(typeof core.applyDeleteText).toBe("function");
     expect(typeof core.createSelectionAfterDeleteText).toBe("function");
+    expect(typeof core.createDeleteRangeOperation).toBe("function");
+    expect(typeof core.applyDeleteRange).toBe("function");
+    expect(typeof core.createSelectionAfterDeleteRange).toBe("function");
     expect(typeof core.createSplitBlockOperation).toBe("function");
     expect(typeof core.applySplitBlock).toBe("function");
     expect(typeof core.createSelectionAfterSplitBlock).toBe("function");
@@ -205,6 +208,7 @@ describe("@crucialy-rich/core public API", () => {
     expect(core.OPERATION_TYPES).toEqual([
       "insert_text",
       "delete_text",
+      "delete_range",
       "toggle_mark",
       "set_mark_attribute",
       "set_link",

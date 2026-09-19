@@ -8,6 +8,11 @@
 
 ### 新增
 
+- 新增统一文本容器偏移映射，覆盖顶层文本块、列表项和表格段落。
+- 新增同一文本容器内跨 text 节点的选区删除与输入替换。
+- 新增 `delete_range` operation，支持连续顶层文本块的选区删除、输入替换和选区恢复。
+- 新增跨节点与跨块选区的 React 输入、Backspace、Delete、History 和中文 Demo 验收。
+
 - 初始化 `packages/core`、`packages/react` 和 `apps/demo` 的 pnpm 工作区结构。
 - 新增 TypeScript、tsup、Vite、Vitest、Playwright、ESLint、Prettier、commitlint、lint-staged 和 Git hooks。
 - 新增 GitHub Actions CI、Issue 模板、PR 模板、CODEOWNERS 和 Dependabot 配置。
@@ -190,4 +195,4 @@
 
 ### 暂未包含
 
-- 复杂历史合并策略、完整 Markdown/HTML 序列化或跨 text、跨 block 的输入替换。
+- 复杂历史合并策略、完整 Markdown/HTML 序列化，以及跨列表、表格、图片或分隔线等结构节点的范围编辑。

@@ -2,12 +2,13 @@
 
 ## 范围
 
-验证 `insert_text`、`delete_text`、`toggle_mark`、`set_mark_attribute`、`set_link`、`set_block_type`、`split_block`、`merge_block` operation 和 transaction 的创建、应用、边界处理、操作后选区计算、摘要、闭环验收报告和演示调试入口。
+验证 `insert_text`、`delete_text`、`delete_range`、Mark、链接、块结构 operation 和 transaction 的创建、应用、边界处理、操作后选区计算、摘要、闭环验收报告和演示调试入口。
 
 ## 自动化测试
 
 - `packages/core/tests/operation/insert-text.test.ts`：operation 创建、path 复制、段首/段中/段尾插入、非法 point、空文本 no-op 和插入后 selection。
 - `packages/core/tests/operation/delete-text.test.ts`：operation 创建、path 复制、段首/段中/段尾删除、反向 range、非法 range、折叠 range no-op 和删除后 selection。
+- `packages/core/tests/operation/delete-range.test.ts`：跨顶层文本块删除、反向 range、起始块类型、marks、CodeBlock、结构边界和删除后 selection。
 - `packages/core/tests/operation/toggle-mark.test.ts`：operation 创建、path 复制、同 block range 切换、heading 内 mark、collapsed mark 占位、相邻同 marks text 合并、非法 range 和切换后 selection。
 - `packages/core/tests/operation/set-mark-attribute.test.ts`：属性设置、覆盖、取消、非法值、collapsed 占位、跨 text、合并和 selection 映射。
 - `packages/core/tests/operation/set-link.test.ts`：安全链接设置、覆盖、取消、跨 text、marks 保留和 selection 映射。
@@ -44,9 +45,11 @@ pnpm test:e2e
 | 段中删除         | range 位于 text 中间                     | 删除 range 内文本并拼接前后内容       | 通过 |
 | 段尾删除         | range 结束于 `text.length`               | 删除 text 末尾内容                    | 通过 |
 | 反向删除         | anchor 在 focus 后面                     | 先规范化 range 再删除                 | 通过 |
-| 非法 range       | point 越界或跨 text 节点                 | 抛出 `RangeError`                     | 通过 |
+| 非法 range       | point 越界或跨文本容器                   | 抛出 `RangeError`                     | 通过 |
 | 折叠删除         | anchor 和 focus 相同                     | 返回原文档引用                        | 通过 |
 | 删除后选区       | 调用 `createSelectionAfterDeleteText`    | selection 折叠到删除范围起点          | 通过 |
+| 跨块删除         | 连续顶层文本块执行 `delete_range`        | 合并边界并移除中间块                  | 通过 |
+| 结构边界         | 范围跨越列表、表格、图片或分隔线         | 拒绝执行并保持原文档                  | 通过 |
 | 演示删除         | 设置选区后点击“删除选区”                 | 文档 JSON、渲染预览和最近操作同步更新 | 通过 |
 | 创建 mark 操作   | 调用 `createToggleMarkOperation`         | 返回 `type: "toggle_mark"` 的操作对象 | 通过 |
 | 选区加粗         | 同 text range 执行 toggle mark           | 被选文本带 `marks.bold`               | 通过 |
@@ -86,8 +89,8 @@ pnpm test:e2e
 
 ## 当前限制
 
-- 当前覆盖全部八种已注册 operation；单条 `set_block_type` 只处理一个顶层 block，多块命令会组合多条 operation。
-- 删除暂不支持跨 text 节点或跨 block range。
+- 当前覆盖十八种已注册 operation；单条 `set_block_type` 只处理一个顶层 block，多块命令会组合多条 operation。
+- 删除支持同一文本容器跨 text 节点和连续顶层文本块，暂不跨越列表、表格或 void block。
 - 合并暂不支持批量跨多段合并。
 - transaction 当前不生成 inverse；History 使用 before/after 快照提供撤销重做。
 - 普通 `beforeinput insertText`、collapsed selection 下的 Backspace、collapsed selection 下的 Delete 和 collapsed selection 下的 Enter 已接入输入事件管线，并已完成基础编辑闭环验收。
@@ -95,4 +98,4 @@ pnpm test:e2e
 
 ## 结论
 
-八种 operation 和 transaction 的核心模型操作、测试、摘要与验收报告已闭环；文本、marks、Link、Block Type、输入和 History 均进入同一条可验证管线。
+十八种 operation 和 transaction 的核心模型操作、测试、摘要与验收报告已闭环；文本、marks、Link、Block Type、输入和 History 均进入同一条可验证管线。

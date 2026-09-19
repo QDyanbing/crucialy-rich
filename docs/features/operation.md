@@ -18,6 +18,11 @@ interface DeleteTextOperation {
   range: RangeSelection;
 }
 
+interface DeleteRangeOperation {
+  type: "delete_range";
+  range: RangeSelection;
+}
+
 interface ToggleMarkOperation {
   type: "toggle_mark";
   mark: TextMarkType;
@@ -85,10 +90,10 @@ interface TransactionAcceptanceReport {
 
 字段说明：
 
-- `type`：当前支持十六种已注册 operation，包含通用块操作以及列表拆分、退出、缩进、反缩进、拆出和任务状态更新。
+- `type`：当前支持十八种已注册 operation，包含文本范围、通用块操作以及列表拆分、退出、缩进、反缩进、拆出和任务状态更新。
 - `point`：插入、分段或合并位置，必须指向 text 节点内的合法偏移。
 - `text`：要插入的文本。
-- `range`：删除范围当前必须落在同一个 text 节点内；mark 范围当前必须落在同一个 block 内。
+- `range`：`delete_text` 可覆盖同一文本容器内的多个 text 节点；`delete_range` 可覆盖连续的顶层文本块；mark 范围当前必须落在同一个 block 内。
 - `mark`：要切换的 text mark，当前用于 `toggle_mark`。
 - `attribute` / `value`：要设置的属性 Mark 和新值；`null` 表示移除属性。
 - `link`：要设置的 Link Mark；`null` 表示取消链接。
@@ -127,11 +132,24 @@ interface TransactionAcceptanceReport {
 
 当前规则：
 
-- 支持同一个 text 节点内的段首、段中和段尾删除。
+- 支持同一个文本容器内跨一个或多个 text 节点删除，包括顶层文本块、列表项和表格段落。
 - 支持反向 range，会先规范化为正向 range。
 - 不会修改传入的原始文档对象。
 - 折叠 range 返回原文档引用。
-- range 任一点不指向 text 节点、offset 越界或跨 text 节点时抛出 `RangeError`。
+- range 任一点不指向 text 节点、offset 越界或跨文本容器时抛出 `RangeError`。
+
+## 创建和应用跨块删除操作
+
+使用 `createDeleteRangeOperation(range)` 创建操作，使用 `applyDeleteRange(document, operation)` 返回更新后的文档。
+
+当前规则：
+
+- 只接受跨越两个或更多连续顶层文本块的非折叠 range。
+- 支持 paragraph、heading、quote 和 codeBlock，结果保留起始块类型与起始边界之前的内容。
+- 删除范围内的中间块被移除，终点之后的文本拼接到起始块。
+- CodeBlock 作为起始块时会移除拼接文本的 marks，保证纯文本约束。
+- 不跨越 Divider、Image、List 或 Table 等结构节点；命中这些边界时抛出 `RangeError`。
+- `createSelectionAfterDeleteRange` 会把选区折叠到保留内容的起始偏移。
 
 ## 创建和应用 Boolean Mark 操作
 
@@ -258,6 +276,7 @@ interface TransactionAcceptanceReport {
 
 - `applyInsertText`
 - `applyDeleteText`
+- `applyDeleteRange`
 - `applyToggleMark`
 - `applySetMarkAttribute`
 - `applySetLink`
@@ -323,13 +342,13 @@ interface TransactionAcceptanceReport {
 
 ## 删除后的选区
 
-使用 `createSelectionAfterDeleteText(operation)` 计算删除后的折叠选区。
+使用 `createSelectionAfterDeleteText(document, operation)` 或 `createSelectionAfterDeleteRange(document, operation)` 计算删除后的折叠选区。
 
 规则：
 
 - 先规范化 range。
-- path 保持为删除范围起点 path。
-- offset 保持为删除范围起点 offset。
+- 根据删除前的容器内文字偏移，在删除后的真实文档中重新映射 path 和 offset。
+- 跨块删除保留起始块，并把选区落到起始边界对应的位置。
 - anchor 和 focus 落在同一点。
 
 ## 分段后的选区
@@ -370,9 +389,9 @@ interface TransactionAcceptanceReport {
 ## 当前限制
 
 - 当前实现文本、Mark、链接、Block Type、block split/merge 和通用 block insert/remove。
-- 删除暂不支持跨 text 节点或跨 block 范围。
+- 删除支持同一文本容器内跨 text 节点，以及连续顶层文本块范围；暂不跨越列表、表格或 void block 等结构边界。
 - 合并暂不支持跨多段批量合并，也不会跨 void block。
 - 单条 `set_block_type` 仍只处理一个顶层 block；Heading/Quote command 已能在同一 transaction 中组合多条 operation 完成跨块切换，语义 renderer 已支持 `h1`–`h6` 与 `blockquote`。
 - transaction 当前只负责批量应用和结束 normalize；History 已使用快照策略提供撤销/重做，operation 层本身暂不生成 undo/redo inverse 信息。
 - text operation 会保留现有 text marks；`toggle_mark` 和 `set_mark_attribute` 已支持同 block 内跨 text 切分与相邻同 marks 合并，跨 block mark 范围留到后续阶段。
-- 普通 `beforeinput insertText`、同 text 非折叠选区替换、Backspace、Delete 和 collapsed selection 下的 Enter 已接入输入事件管线，并复用当前 command、operation 和 transaction 更新模型。
+- 普通 `beforeinput insertText`、同容器及连续顶层文本块的非折叠选区替换、Backspace、Delete 和 collapsed selection 下的 Enter 已接入输入事件管线，并复用当前 command、operation 和 transaction 更新模型。

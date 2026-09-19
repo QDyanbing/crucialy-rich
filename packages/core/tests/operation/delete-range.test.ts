@@ -5,6 +5,7 @@ import {
   applyTransaction,
   canDeleteRange,
   createBulletList,
+  createCodeBlock,
   createDeleteRangeOperation,
   createSelectionAfterDeleteRange,
   createDivider,
@@ -15,6 +16,7 @@ import {
   createQuote,
   createText,
   createTransaction,
+  validateDocument,
 } from "../../src";
 
 describe("cross-block delete range", () => {
@@ -80,6 +82,23 @@ describe("cross-block delete range", () => {
         createHeading(2, [createText("标", { bold: true }), createText("题用")]),
       ]),
     );
+  });
+
+  it("strips suffix marks when the starting block is a code block", () => {
+    const document = createDocument([
+      createCodeBlock([createText("代码")]),
+      createParagraph([createText("样式", { bold: true })]),
+    ]);
+    const result = applyDeleteRange(
+      document,
+      createDeleteRangeOperation({
+        anchor: { offset: 1, path: [0, 0] },
+        focus: { offset: 1, path: [1, 0] },
+      }),
+    );
+
+    expect(result).toEqual(createDocument([createCodeBlock([createText("代式")])]));
+    expect(validateDocument(result).valid).toBe(true);
   });
 
   it("collapses the selection at the retained start offset", () => {

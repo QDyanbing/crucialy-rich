@@ -94,12 +94,17 @@ export function applyDeleteRange(
   const endText = target.endBlock.children[endTextIndex]!;
   const prefix = startText.text.slice(0, target.range.anchor.offset);
   const suffix = endText.text.slice(target.range.focus.offset);
-  const children = mergeAdjacentTextNodes([
+  const boundaryChildren = [
     ...target.startBlock.children.slice(0, startTextIndex),
     ...(prefix ? [{ ...startText, text: prefix }] : []),
     ...(suffix ? [{ ...endText, text: suffix }] : []),
     ...target.endBlock.children.slice(endTextIndex + 1),
-  ]);
+  ];
+  const children = mergeAdjacentTextNodes(
+    target.startBlock.type === "codeBlock"
+      ? boundaryChildren.map((text) => ({ text: text.text, type: "text" as const }))
+      : boundaryChildren,
+  );
   const mergedBlock: TextBlockNode = {
     ...target.startBlock,
     children: children.length > 0 ? children : [{ ...startText, text: "" }],

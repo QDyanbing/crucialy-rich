@@ -26,4 +26,4 @@
 
 `RichTextEditor` 内部处理 `onCompositionStart`、`onCompositionUpdate` 和 `onCompositionEnd`，并保留宿主传入的同名事件回调。宿主可通过 `onCompositionStateChange` 展示输入法状态，但不需要自行提交候选文本。
 
-当前文本插入边界仍受普通输入命令约束：支持折叠选区，以及同一 text 节点内的非折叠选区替换。
+当前文本插入边界与普通输入命令一致：支持折叠选区、同一文本容器内跨 text 节点选区，以及连续顶层文本块选区；不跨越列表、表格或 void block 等结构边界。
