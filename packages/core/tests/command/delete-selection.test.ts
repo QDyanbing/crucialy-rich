@@ -74,6 +74,35 @@ describe("deleteSelectionCommand", () => {
     });
   });
 
+  it("deletes a selection across marked text nodes in one container", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("你好"),
+        createText("加粗", { bold: true }),
+        createText("结尾"),
+      ]),
+    ]);
+    const input = {
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 2], offset: 1 },
+          focus: { path: [0, 0], offset: 1 },
+        },
+      },
+    };
+    const result = deleteSelectionCommand.execute(input);
+
+    expect(canExecuteDeleteSelectionCommand(input)).toBe(true);
+    expect(result.selection).toEqual({
+      anchor: { path: [0, 0], offset: 1 },
+      focus: { path: [0, 0], offset: 1 },
+    });
+    expect(applyTransaction(document, result.transaction!)).toEqual(
+      createDocument([createParagraph([createText("你"), createText("尾")])]),
+    );
+  });
+
   it("skips collapsed selections", () => {
     const document = createDocument([createParagraph([createText("你好")])]);
     const input = {

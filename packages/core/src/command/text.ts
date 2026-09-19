@@ -5,7 +5,13 @@ import {
   createSelectionAfterInsertText,
   createTransaction,
 } from "../operation";
-import { isCollapsed, isValidPoint, normalizeRange, type Path } from "../selection";
+import {
+  isCollapsed,
+  isSameTextContainer,
+  isValidPoint,
+  normalizeRange,
+  type Path,
+} from "../selection";
 import {
   createCommandFailure,
   createCommandSkipped,
@@ -64,7 +70,7 @@ function canDeleteTextRange(input: CommandInput): boolean {
     !isCollapsed(range) &&
     isValidPoint(input.context.document, range.anchor) &&
     isValidPoint(input.context.document, range.focus) &&
-    isSamePath(range.anchor.path, range.focus.path)
+    isSameTextContainer(range.anchor, range.focus)
   );
 }
 
