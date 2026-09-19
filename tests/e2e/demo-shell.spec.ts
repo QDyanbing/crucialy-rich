@@ -141,7 +141,21 @@ test("groups every model example by acceptance area", async ({ page }) => {
       elements.map((element) => element.getAttribute("label")),
     ),
   ).toEqual(["输入与选区", "块结构", "复杂结构", "内容能力", "边界场景"]);
-  await expect(page.getByLabel("模型示例").locator("option")).toHaveCount(15);
+  await expect(page.getByLabel("模型示例").locator("option")).toHaveCount(16);
+});
+
+test("renders the cross-block editing acceptance sample", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("range-editing");
+
+  const editor = page.getByLabel("已渲染文档");
+  await expect(editor.locator("p")).toHaveCount(3);
+  await expect(editor.locator("strong")).toHaveText("跨块选区");
+  await expect(editor.locator("em")).toHaveText("中间段将被删除。");
+  await expect(editor.locator("u")).toHaveText("替换边界");
+  await expect(page.getByLabel("选中文本")).toContainText("跨块选区");
+  await expect(page.getByLabel("选中文本")).toContainText("替换边界");
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
 
 test("applies formatting from the fixed toolbar", async ({ page }) => {

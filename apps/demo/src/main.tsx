@@ -125,6 +125,7 @@ import "./styles.css";
 type ModelExampleId =
   | "regular"
   | "input-rules"
+  | "range-editing"
   | "headings"
   | "quotes"
   | "block-types"
@@ -205,6 +206,25 @@ const modelExamples: ModelExample[] = [
       focus: { path: [0, 0], offset: 0 },
     },
     value: createDocument([createParagraph()]),
+  },
+  {
+    id: "range-editing",
+    label: "跨块选区编辑",
+    selection: {
+      anchor: { path: [0, 1], offset: 0 },
+      focus: { path: [2, 0], offset: 4 },
+    },
+    value: createDocument([
+      createParagraph([
+        createText("保留开头："),
+        createText("跨块选区", { bold: true }),
+      ]),
+      createParagraph([createText("中间段将被删除。", { italic: true })]),
+      createParagraph([
+        createText("替换边界", { underline: true }),
+        createText("：保留结尾。"),
+      ]),
+    ]),
   },
   {
     id: "headings",
@@ -457,7 +477,7 @@ const modelExamples: ModelExample[] = [
 
 const modelExampleGroups: ModelExampleGroup[] = [
   {
-    exampleIds: ["regular", "input-rules"],
+    exampleIds: ["regular", "input-rules", "range-editing"],
     label: "输入与选区",
   },
   {
