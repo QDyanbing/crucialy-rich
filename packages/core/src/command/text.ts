@@ -1,6 +1,9 @@
 import {
+  canDeleteRange,
+  createDeleteRangeOperation,
   createDeleteTextOperation,
   createInsertTextOperation,
+  createSelectionAfterDeleteRange,
   createSelectionAfterDeleteText,
   createSelectionAfterInsertText,
   createTransaction,
@@ -50,7 +53,7 @@ function canEditTextRange(input: CommandInput): boolean {
   );
 }
 
-function canDeleteTextRange(input: CommandInput): boolean {
+function canDeleteSelectionRange(input: CommandInput): boolean {
   const selection = input.context.selection;
 
   if (!selection) {
@@ -63,7 +66,8 @@ function canDeleteTextRange(input: CommandInput): boolean {
     !isCollapsed(range) &&
     isValidPoint(input.context.document, range.anchor) &&
     isValidPoint(input.context.document, range.focus) &&
-    isSameTextContainer(range.anchor, range.focus)
+    (isSameTextContainer(range.anchor, range.focus) ||
+      canDeleteRange(input.context.document, range))
   );
 }
 
@@ -111,7 +115,7 @@ export const insertTextCommand: Command = {
 };
 
 export function canExecuteDeleteSelectionCommand(input: CommandInput): boolean {
-  return canDeleteTextRange(input);
+  return canDeleteSelectionRange(input);
 }
 
 export const deleteSelectionCommand: Command = {
@@ -119,17 +123,24 @@ export const deleteSelectionCommand: Command = {
   execute(input) {
     const selection = input.context.selection;
 
-    if (!selection || !canDeleteTextRange(input)) {
+    if (!selection || !canDeleteSelectionRange(input)) {
       return createCommandSkipped(
         DELETE_SELECTION_COMMAND_NAME,
         "Delete selection command requires a non-collapsed text selection.",
       );
     }
 
-    const operation = createDeleteTextOperation(normalizeRange(selection));
+    const range = normalizeRange(selection);
+    const operation = isSameTextContainer(range.anchor, range.focus)
+      ? createDeleteTextOperation(range)
+      : createDeleteRangeOperation(range);
+    const nextSelection =
+      operation.type === "delete_text"
+        ? createSelectionAfterDeleteText(input.context.document, operation)
+        : createSelectionAfterDeleteRange(input.context.document, operation);
 
     return createCommandSuccess(DELETE_SELECTION_COMMAND_NAME, {
-      selection: createSelectionAfterDeleteText(input.context.document, operation),
+      selection: nextSelection,
       transaction: createTransaction([operation]),
     });
   },
