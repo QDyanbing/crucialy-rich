@@ -7,6 +7,7 @@ import type {
 import type { Path } from "../selection";
 import { isCollapsed, normalizeRange } from "../selection";
 import type {
+  DeleteRangeOperation,
   DeleteTextOperation,
   ExitListItemOperation,
   IndentListItemOperation,
@@ -38,6 +39,7 @@ export type TextOperation =
   | ToggleMarkOperation;
 
 export type BlockOperation =
+  | DeleteRangeOperation
   | ExitListItemOperation
   | IndentListItemOperation
   | OutdentListItemOperation
@@ -83,6 +85,7 @@ export const TEXT_OPERATION_TYPES = [
 ] as const satisfies readonly OperationType[];
 
 export const BLOCK_OPERATION_TYPES = [
+  "delete_range",
   "exit_list_item",
   "indent_list_item",
   "outdent_list_item",
@@ -109,6 +112,7 @@ export function isTextOperation(operation: Operation): operation is TextOperatio
 
 export function isBlockOperation(operation: Operation): operation is BlockOperation {
   return (
+    operation.type === "delete_range" ||
     operation.type === "exit_list_item" ||
     operation.type === "indent_list_item" ||
     operation.type === "outdent_list_item" ||
@@ -125,6 +129,16 @@ export function isBlockOperation(operation: Operation): operation is BlockOperat
 
 export function summarizeOperation(operation: Operation): OperationSummary {
   switch (operation.type) {
+    case "delete_range": {
+      const range = normalizeRange(operation.range);
+
+      return {
+        collapsedRange: false,
+        scope: "block",
+        targetPath: [...range.anchor.path],
+        type: "delete_range",
+      };
+    }
     case "exit_list_item":
       return {
         scope: "block",

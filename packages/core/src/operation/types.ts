@@ -17,6 +17,7 @@ export type BlockTypeSpec =
 export const OPERATION_TYPES = [
   "insert_text",
   "delete_text",
+  "delete_range",
   "toggle_mark",
   "set_mark_attribute",
   "set_link",
@@ -138,6 +139,7 @@ export interface SetTableCellTextOperation {
 }
 
 export type Operation =
+  | DeleteRangeOperation
   | DeleteTextOperation
   | ExitListItemOperation
   | IndentListItemOperation

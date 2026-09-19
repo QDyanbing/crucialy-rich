@@ -29,6 +29,7 @@ describe("operation type registry", () => {
     expect(OPERATION_TYPES).toEqual([
       "insert_text",
       "delete_text",
+      "delete_range",
       "toggle_mark",
       "set_mark_attribute",
       "set_link",
@@ -54,6 +55,7 @@ describe("operation type registry", () => {
       "set_table_cell_text",
     ]);
     expect(BLOCK_OPERATION_TYPES).toEqual([
+      "delete_range",
       "exit_list_item",
       "indent_list_item",
       "outdent_list_item",

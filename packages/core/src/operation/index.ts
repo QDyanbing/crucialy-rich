@@ -17,7 +17,11 @@ export {
   createDeleteTextOperation,
   createSelectionAfterDeleteText,
 } from "./delete-text";
-export { canDeleteRange, createDeleteRangeOperation } from "./delete-range";
+export {
+  applyDeleteRange,
+  canDeleteRange,
+  createDeleteRangeOperation,
+} from "./delete-range";
 export {
   applyInsertText,
   createInsertTextOperation,
