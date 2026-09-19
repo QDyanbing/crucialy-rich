@@ -1805,6 +1805,36 @@ test("keeps the caret moving during consecutive beforeinput inserts", async ({
   await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 5');
 });
 
+test("replaces a cross-block selection from editor input", async ({ page }) => {
+  await page.goto("/");
+  await selectRenderedTextAcrossNodes(page, "[0,0]", 3, "[1,0]", 2);
+
+  await insertEditorText(page, "跨");
+
+  const editor = page.getByLabel("已渲染文档");
+  await expect(editor.locator("p")).toHaveCount(1);
+  await expect(editor.locator("p")).toHaveText("你好，跨模型已就绪。");
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"type": "delete_range"',
+  );
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
+for (const key of ["Backspace", "Delete"] as const) {
+  test(`deletes a cross-block selection with ${key}`, async ({ page }) => {
+    await page.goto("/");
+    await selectRenderedTextAcrossNodes(page, "[0,0]", 3, "[1,0]", 2);
+
+    await page.keyboard.press(key);
+
+    const editor = page.getByLabel("已渲染文档");
+    await expect(editor.locator("p")).toHaveCount(1);
+    await expect(editor.locator("p")).toHaveText("你好，模型已就绪。");
+    await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 3');
+    await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+  });
+}
+
 test("merges consecutive typing into one history item", async ({ page }) => {
   await page.goto("/");
 
