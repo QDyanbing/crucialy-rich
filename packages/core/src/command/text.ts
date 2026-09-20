@@ -19,6 +19,7 @@ import {
   createCommandSkipped,
   createCommandSuccess,
 } from "./result";
+import { createRangeDeletionPlan } from "./range-deletion";
 import type { Command, CommandInput } from "./types";
 
 export const INSERT_TEXT_COMMAND_NAME = "insertText";
@@ -58,18 +59,9 @@ function canEditTextRange(input: CommandInput): boolean {
 function canDeleteSelectionRange(input: CommandInput): boolean {
   const selection = input.context.selection;
 
-  if (!selection) {
-    return false;
-  }
-
-  const range = normalizeRange(selection);
-
   return (
-    !isCollapsed(range) &&
-    isValidPoint(input.context.document, range.anchor) &&
-    isValidPoint(input.context.document, range.focus) &&
-    (isSameTextContainer(range.anchor, range.focus) ||
-      canDeleteRange(input.context.document, range))
+    selection !== undefined &&
+    createRangeDeletionPlan(input.context.document, selection) !== undefined
   );
 }
 
@@ -137,18 +129,11 @@ export const deleteSelectionCommand: Command = {
       );
     }
 
-    const range = normalizeRange(selection);
-    const operation = isSameTextContainer(range.anchor, range.focus)
-      ? createDeleteTextOperation(range)
-      : createDeleteRangeOperation(range);
-    const nextSelection =
-      operation.type === "delete_text"
-        ? createSelectionAfterDeleteText(input.context.document, operation)
-        : createSelectionAfterDeleteRange(input.context.document, operation);
+    const plan = createRangeDeletionPlan(input.context.document, selection)!;
 
     return createCommandSuccess(DELETE_SELECTION_COMMAND_NAME, {
-      selection: nextSelection,
-      transaction: createTransaction([operation]),
+      selection: plan.selection,
+      transaction: createTransaction([plan.operation]),
     });
   },
   name: DELETE_SELECTION_COMMAND_NAME,
