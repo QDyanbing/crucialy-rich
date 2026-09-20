@@ -3,8 +3,11 @@ import { describe, expect, it } from "vitest";
 import {
   applyTransaction,
   canExecuteSplitBlockCommand,
+  createBulletList,
   createCodeBlock,
+  createDivider,
   createDocument,
+  createListItem,
   createParagraph,
   createText,
   splitBlockCommand,
@@ -148,5 +151,80 @@ describe("splitBlockCommand", () => {
         (block) => block.type,
       ),
     ).toEqual(["codeBlock", "paragraph"]);
+  });
+
+  it("replaces a code block selection with a newline", () => {
+    const document = createDocument([createCodeBlock([createText("code")])]);
+    const result = splitBlockCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 1 },
+          focus: { path: [0, 0], offset: 3 },
+        },
+      },
+    });
+
+    expect(result.transaction?.operations.map((operation) => operation.type)).toEqual([
+      "delete_text",
+      "insert_text",
+    ]);
+    expect(applyTransaction(document, result.transaction!)).toEqual(
+      createDocument([createCodeBlock([createText("c\ne")])]),
+    );
+    expect(result.selection?.anchor).toEqual({ path: [0, 0], offset: 2 });
+  });
+
+  it("splits a list item after deleting its selected text", () => {
+    const document = createDocument([
+      createBulletList([createListItem([createText("项目内容")])]),
+    ]);
+    const result = splitBlockCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0, 0], offset: 1 },
+          focus: { path: [0, 0, 0], offset: 3 },
+        },
+      },
+    });
+
+    expect(result.transaction?.operations.map((operation) => operation.type)).toEqual([
+      "delete_text",
+      "split_list_item",
+    ]);
+    expect(applyTransaction(document, result.transaction!)).toEqual(
+      createDocument([
+        createBulletList([
+          createListItem([createText("项")]),
+          createListItem([createText("容")]),
+        ]),
+      ]),
+    );
+  });
+
+  it("rejects selections that cross structural blocks", () => {
+    const document = createDocument([
+      createParagraph([createText("开头")]),
+      createDivider(),
+      createParagraph([createText("结尾")]),
+    ]);
+    const input = {
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [2, 0], offset: 1 },
+        },
+      },
+    };
+
+    expect(canExecuteSplitBlockCommand(input)).toBe(false);
+    expect(splitBlockCommand.execute(input)).toEqual({
+      commandName: "splitBlock",
+      ok: false,
+      reason: "Split block command requires an editable text selection.",
+      status: "skipped",
+    });
   });
 });
