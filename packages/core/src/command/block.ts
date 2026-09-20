@@ -1,4 +1,5 @@
 import {
+  applyOperation,
   createMergeBlockOperation,
   createSelectionAfterMergeBlock,
   createTransaction,
@@ -7,6 +8,7 @@ import { isParagraphNode, isTextBlockNode } from "../model";
 import { createEnterInputTransaction, createSelectionAfterEnterInput } from "../input";
 import { getNodeAtPath, isCollapsed, isValidPoint, type Point } from "../selection";
 import { createCommandSkipped, createCommandSuccess } from "./result";
+import { createRangeDeletionPlan } from "./range-deletion";
 import type { Command, CommandInput } from "./types";
 
 export const SPLIT_BLOCK_COMMAND_NAME = "splitBlock";
@@ -20,11 +22,31 @@ function hasCollapsedSelection(input: CommandInput): boolean {
   return input.context.selection ? isCollapsed(input.context.selection) : false;
 }
 
-function canSplitBlockAt(input: CommandInput, point: Point | undefined): boolean {
+function canSplitCollapsedBlockAt(
+  input: CommandInput,
+  point: Point | undefined,
+): boolean {
   return (
     hasCollapsedSelection(input) &&
     point !== undefined &&
     isValidPoint(input.context.document, point)
+  );
+}
+
+function canSplitBlockSelection(input: CommandInput): boolean {
+  const selection = input.context.selection;
+
+  if (!selection) {
+    return false;
+  }
+
+  if (isCollapsed(selection)) {
+    return canSplitCollapsedBlockAt(input, selection.anchor);
+  }
+
+  return (
+    createRangeDeletionPlan(input.context.document, selection)?.operation.type ===
+    "delete_text"
   );
 }
 
@@ -81,29 +103,41 @@ function canMergeBlockAt(input: CommandInput, point: Point | undefined): boolean
 }
 
 export function canExecuteSplitBlockCommand(input: CommandInput): boolean {
-  return canSplitBlockAt(input, getSelectionAnchor(input));
+  return canSplitBlockSelection(input);
 }
 
 export const splitBlockCommand: Command = {
   canExecute: canExecuteSplitBlockCommand,
   execute(input) {
-    const point = getSelectionAnchor(input);
+    const selection = input.context.selection;
 
-    if (!point || !canSplitBlockAt(input, point)) {
+    if (!selection || !canSplitBlockSelection(input)) {
       return createCommandSkipped(
         SPLIT_BLOCK_COMMAND_NAME,
-        "Split block command requires a collapsed text selection.",
+        "Split block command requires an editable text selection.",
       );
     }
 
+    const deletion = isCollapsed(selection)
+      ? undefined
+      : createRangeDeletionPlan(input.context.document, selection);
+    const document = deletion
+      ? applyOperation(input.context.document, deletion.operation)
+      : input.context.document;
+    const nextSelection = deletion?.selection ?? selection;
+
     const enterInput = {
-      document: input.context.document,
-      selection: input.context.selection!,
+      document,
+      selection: nextSelection,
     };
+    const enterTransaction = createEnterInputTransaction(enterInput);
 
     return createCommandSuccess(SPLIT_BLOCK_COMMAND_NAME, {
       selection: createSelectionAfterEnterInput(enterInput),
-      transaction: createEnterInputTransaction(enterInput),
+      transaction: createTransaction([
+        ...(deletion ? [deletion.operation] : []),
+        ...enterTransaction.operations,
+      ]),
     });
   },
   name: SPLIT_BLOCK_COMMAND_NAME,

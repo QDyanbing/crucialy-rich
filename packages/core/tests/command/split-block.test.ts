@@ -50,7 +50,7 @@ describe("splitBlockCommand", () => {
     expect(nextDocument.children[1]?.children[0]?.text).toBe("世界");
   });
 
-  it("skips non-collapsed selections", () => {
+  it("deletes and splits a non-collapsed selection", () => {
     const document = createDocument([createParagraph([createText("你好世界")])]);
     const input = {
       context: {
@@ -62,12 +62,22 @@ describe("splitBlockCommand", () => {
       },
     };
 
-    expect(canExecuteSplitBlockCommand(input)).toBe(false);
-    expect(splitBlockCommand.execute(input)).toEqual({
-      commandName: "splitBlock",
-      ok: false,
-      reason: "Split block command requires a collapsed text selection.",
-      status: "skipped",
+    const result = splitBlockCommand.execute(input);
+
+    expect(canExecuteSplitBlockCommand(input)).toBe(true);
+    expect(result.transaction?.operations.map((operation) => operation.type)).toEqual([
+      "delete_text",
+      "split_block",
+    ]);
+    expect(applyTransaction(document, result.transaction!)).toEqual(
+      createDocument([
+        createParagraph([createText("你")]),
+        createParagraph([createText("界")]),
+      ]),
+    );
+    expect(result.selection).toEqual({
+      anchor: { path: [1, 0], offset: 0 },
+      focus: { path: [1, 0], offset: 0 },
     });
   });
 
