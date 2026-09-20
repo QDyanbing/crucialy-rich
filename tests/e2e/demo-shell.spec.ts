@@ -1096,6 +1096,26 @@ test("replaces a cross-node text selection from editor input", async ({ page }) 
   await expect(page.getByLabel("选区 JSON")).toContainText('"offset": 3');
 });
 
+test("splits after deleting a cross-node selection with Enter", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("marks");
+  await selectRenderedTextAcrossNodes(page, "[1,0]", 1, "[1,4]", 2);
+
+  await page.keyboard.press("Enter");
+
+  const paragraphs = page.getByLabel("已渲染文档").locator("p");
+  await expect(paragraphs).toHaveCount(3);
+  await expect(paragraphs.nth(1)).toHaveText("跨");
+  await expect(paragraphs.nth(2)).toHaveText("。");
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"type": "delete_text"',
+  );
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"type": "split_block"',
+  );
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
 for (const key of ["Backspace", "Delete"] as const) {
   test(`deletes a cross-node text selection with ${key}`, async ({ page }) => {
     await page.goto("/");
