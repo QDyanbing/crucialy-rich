@@ -1,6 +1,6 @@
 # 输入事件（第一版）
 
-输入事件负责把浏览器编辑意图转换为模型 transaction。当前阶段已接入 `beforeinput insertText`、Backspace、Delete 和 collapsed selection 下的 Enter；同一文本容器或连续顶层文本块中的非折叠选区可以通过输入或删除命令完成替换与删除。
+输入事件负责把浏览器编辑意图转换为模型 transaction。当前阶段已接入 `beforeinput insertText`、Backspace、Delete 和 Enter；同一文本容器或连续顶层文本块中的非折叠选区可以通过输入、删除或 Enter 完成替换、删除与分段。
 
 ## 当前范围
 
@@ -24,7 +24,8 @@
 - 段尾 Delete 会合并下一段。
 - 文本块末尾的 Delete 会删除紧邻的后一个 void block，并保持当前 Point。
 - Delete 后通过 `createSelectionAfterDeleteInput` 计算新的折叠选区。
-- 支持 collapsed selection 下的 Enter。
+- 支持 collapsed selection，以及同一文本容器或连续顶层文本块 selection 下的 Enter。
+- 非折叠 selection 会先通过共享范围删除计划折叠到起点，再执行当前位置的 Enter 规则。
 - block 首部、中间、尾部和空 block Enter 会分裂当前 block，并保留 block type、heading level 和 text marks。
 - CodeBlock 内 Enter 插入换行；末尾已有换行时再次 Enter 会退出到 paragraph。
 - 列表项内 Enter 分裂当前项；空列表项 Enter 退出为 paragraph。
@@ -137,6 +138,8 @@ function createSelectionAfterTabInput(input: TabInput): RangeSelection;
 - `split_block`：在当前 text 节点 offset 处分裂 block，并保留原 block 类型和 text marks。
 - 空 transaction：selection 非折叠时。
 
+低层 Enter helper 保持 collapsed-only；`splitBlockCommand` 负责组合范围删除和上述 Enter transaction，React 键盘入口统一复用该 command。
+
 ## React 行为
 
 `RichTextEditor` 当前支持：
@@ -153,7 +156,7 @@ function createSelectionAfterTabInput(input: TabInput): RangeSelection;
 - 普通文本输入复用 `insertTextCommand`。
 - 同一文本容器内跨 text 节点、或跨连续顶层文本块的普通文本输入会先删除选区，再插入输入文本。
 - 非折叠 selection 下的 Backspace/Delete 复用 `deleteSelectionCommand`。
-- Enter 复用 `splitBlockCommand`。
+- Enter 复用 `splitBlockCommand`；非折叠选区会在同一 transaction 中先删除再分段。
 - 段首 Backspace 复用 `mergeBlockCommand`。
 - merge command 遇到 void block 会跳过，随后输入 helper 使用 `remove_block` 删除相邻 Divider。
 
@@ -181,6 +184,7 @@ function createSelectionAfterTabInput(input: TabInput): RangeSelection;
 - 在段中按 Delete 删除后一个字符。
 - 在第一段段尾按 Delete 合并下一段。
 - 在段首、段中、段尾或空段按 Enter 分裂段落。
+- 选中同一文本容器或连续顶层文本块后按 Enter，删除选区并在起点建立新段落边界。
 - 在 CodeBlock 内输入多行，并通过连续两次 Enter 退出。
 - 从 Divider 后方按 Backspace 或前方按 Delete 删除分隔线。
 - 在列表中使用 Tab/Shift+Tab 缩进或反缩进，并在项目开头使用 Backspace 拆出或提升。
@@ -201,7 +205,7 @@ function createSelectionAfterTabInput(input: TabInput): RangeSelection;
 - 普通 `insertText`、Backspace 和 Delete 支持 collapsed selection、同一文本容器内跨 text 节点选区，以及连续顶层文本块选区。
 - 跨块编辑暂不跨越 Divider、Image、List、Table 等结构节点；列表项和表格段落仅支持各自文本容器内部的范围。
 - 暂不处理拖拽输入。
-- Enter 暂不处理非折叠 selection；collapsed Enter 会保留文本 block 类型，CodeBlock 使用纯文本换行与退出规则。
+- 非折叠 Enter 与其他范围编辑使用相同结构边界：不跨越 Divider、Image、List 或 Table；列表项和表格段落内部仍可按各自规则分段。
 - 组件本身不持有 history 状态，撤销重做快捷键需要宿主接入 history 状态。
 
 输入法、快捷键和输入规则的独立契约见[中文输入法](./ime.md)、[编辑快捷键](./shortcuts.md)和 [Markdown 输入规则](./input-rules.md)。

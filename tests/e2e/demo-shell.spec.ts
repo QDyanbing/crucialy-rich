@@ -904,7 +904,7 @@ test("updates command states from the current selection", async ({ page }) => {
   await expect(page.getByLabel("加粗 Command 状态")).toContainText("可用");
   await expect(page.getByLabel("斜体 Command 状态")).toContainText("可用");
   await expect(page.getByLabel("删除选区 Command 状态")).toContainText("可用");
-  await expect(page.getByLabel("分段 Command 状态")).toContainText("不可用");
+  await expect(page.getByLabel("分段 Command 状态")).toContainText("可用");
   await expect(page.getByLabel("合并段落 Command 状态")).toContainText("不可用");
 
   await page.getByLabel("焦点偏移").fill("0");

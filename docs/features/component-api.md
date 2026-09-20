@@ -89,14 +89,14 @@ ref 命令事件的 `inputType` 为 `command`。受控模式不会自行替换 `
 - 渲染出的节点会保留 `data-crucialy-path`，用于 DOM 与模型映射和选区同步。
 - `value` 优先级高于 `defaultValue`。
 - `defaultValue` 只在组件初始化时读取。
-- `contentEditable` 开启后，普通 `insertText`、collapsed selection 下的 Backspace、collapsed selection 下的 Delete 和 collapsed selection 下的 Enter 会通过 transaction 更新模型并触发 `onChange`。
+- `contentEditable` 开启后，普通 `insertText`、Backspace、Delete 和 Enter 会通过 transaction 更新模型并触发 `onChange`。
 - 输入后会通过 `onSelectionChange` 输出新的折叠选区。
 - 非空 transaction 输入后会通过 `onTransaction` 输出输入前文档、输入后文档、输入前 selection、输入后 selection、transaction 和 inputType。
 - 普通文本输入的 `onTransaction` 事件会带有 `batch: "typing"`，宿主可用于连续输入合并。
 - 输入处理会复用当前 DOM selection，先转换为模型 selection，再创建输入 transaction。
 - 普通文本输入会通过 `insertTextCommand` 创建 transaction。
 - 非折叠 selection 下的 Backspace/Delete 会通过 `deleteSelectionCommand` 创建 transaction。
-- Enter 会通过 `splitBlockCommand` 创建 transaction。
+- Enter 会通过 `splitBlockCommand` 创建 transaction；受支持的非折叠 selection 会先删除再执行分段规则。
 - 段首 Backspace 会通过 `mergeBlockCommand` 创建 transaction。
 - 表格单元格内复用相同输入链路；Enter 只在当前 cell 内新增 paragraph，Backspace/Delete 不跨 cell 合并。
 - 点击 `td[data-crucialy-table-cell="true"]` 会输出 `CellSelection`；传回 `cellSelection` 后目标 cell 获得 `data-selected="true"`。

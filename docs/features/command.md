@@ -32,7 +32,7 @@ Command 系统负责把“可执行的编辑意图”包装成统一接口。当
 - 提供 `createTextMarkCommand`、`canExecuteTextMarkCommand` 和 `isTextMarkCommandActive`，供文字格式命令复用。
 - 提供 `insertTextCommand`，支持 collapsed selection 插入文本、同一文本容器跨 text 节点替换，以及连续顶层文本块替换。
 - 提供 `deleteSelectionCommand`，支持同一文本容器跨 text 节点删除，以及连续顶层文本块删除。
-- 提供 `splitBlockCommand`，支持 collapsed selection 下分裂文本 block，并复用 CodeBlock Enter/退出规则。
+- 提供 `splitBlockCommand`，支持 collapsed selection 直接分段，也支持先删除同容器或连续顶层文本块选区再分段，并复用列表、表格和 CodeBlock 的 Enter 规则。
 - 提供 `mergeBlockCommand`，支持 collapsed selection 位于非首文本块开头时合并上一文本块，遇到 void block 时跳过。
 
 ## Core API
@@ -216,7 +216,7 @@ const mergeBlockCommand: Command;
 - Mark command 在混合 selection 中统一添加目标 mark，全部激活时统一移除。
 - `insertTextCommand` 成功时返回包含 `insert_text` 的 transaction；同容器 range 先生成 `delete_text`，跨块 range 先生成 `delete_range`。
 - `deleteSelectionCommand` 成功时按范围返回 `delete_text` 或 `delete_range` transaction。
-- `splitBlockCommand` 成功时返回包含 `split_block` 的 transaction。
+- `splitBlockCommand` 在 collapsed selection 下返回 Enter 对应 transaction；非折叠 selection 下先加入 `delete_text` 或 `delete_range`，再加入分段、列表分裂或 CodeBlock 换行 operation。
 - `mergeBlockCommand` 成功时返回包含 `merge_block` 的 transaction。
 - React 编辑器的普通文本输入会复用 `insertTextCommand`。
 - React 编辑器的非折叠 Backspace/Delete 会优先复用 `deleteSelectionCommand`。
@@ -230,7 +230,7 @@ const mergeBlockCommand: Command;
 
 - 文本插入和删除 command 支持同一文本容器或连续顶层文本块 range；暂不跨越列表、表格和 void block 等结构边界。
 - Mark command 当前处理 paragraph、heading、quote 中同一 block 内的 selection；CodeBlock、Divider 和三层列表选区暂不接受 marks。
-- split/merge block command 当前只处理 collapsed selection；heading/quote command 已支持 collapsed、单块 range 和跨 block range selection。
+- `splitBlockCommand` 支持 collapsed、同容器和连续顶层文本块 selection；`mergeBlockCommand` 与 `insertDividerCommand` 仍只处理 collapsed selection。
 - 当前没有快捷键事件绑定或权限系统；快捷键模块只提供可查询配置和纯匹配函数。
 - History 模块已提供 `undoCommand` 和 `redoCommand`；默认 Command 注册表暂不内置 history command。
 - 当前没有批量 command pipeline。

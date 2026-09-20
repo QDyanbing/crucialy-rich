@@ -12,6 +12,8 @@
 - 新增同一文本容器内跨 text 节点的选区删除与输入替换。
 - 新增 `delete_range` operation，支持连续顶层文本块的选区删除、输入替换和选区恢复。
 - 新增跨节点与跨块选区的 React 输入、Backspace、Delete、History 和中文 Demo 验收。
+- 新增非折叠选区 Enter，支持同容器跨 text 与连续顶层文本块的“先删除、再分段”原子 transaction。
+- 新增选区 Enter 的 CodeBlock、列表项、结构边界、React 交互与 History 往返验收。
 
 - 初始化 `packages/core`、`packages/react` 和 `apps/demo` 的 pnpm 工作区结构。
 - 新增 TypeScript、tsup、Vite、Vitest、Playwright、ESLint、Prettier、commitlint、lint-staged 和 Git hooks。

@@ -14,6 +14,7 @@
 - CodeBlock 与 Divider 测试：代码块换行/退出、void block 相邻 Backspace/Delete 和选区 path 调整。
 - `packages/core/tests/command/insert-text.test.ts`：collapsed 插入、同容器跨 text 替换和跨顶层文本块替换。
 - `packages/core/tests/command/delete-selection.test.ts`：同容器跨 text 与跨顶层文本块的 Backspace/Delete 共用删除命令。
+- `packages/core/tests/command/split-block.test.ts`：collapsed、同容器与跨块选区 Enter，以及 CodeBlock、列表项和结构边界。
 - `packages/core/tests/operation/delete-range.test.ts`：跨块范围校验、正反向删除、块类型与 marks 边界、选区映射和非法结构拒绝。
 - `packages/core/tests/command/block-type-interaction.test.ts`：Block Type 切换后继续输入，文字、marks 和选区保持稳定。
 - `packages/react/tests/public-api.test.ts`：可编辑语义、输入 transaction 与组件回调契约。
@@ -52,6 +53,7 @@ pnpm test:e2e
 | 段首 Enter     | 光标在段首按 Enter                     | 前方创建空段，文本进入下一段      | 通过 |
 | 段尾 Enter     | 光标在段尾按 Enter                     | 后方创建空段                      | 通过 |
 | 空段 Enter     | 空段内按 Enter                         | 创建新的空段                      | 通过 |
+| 选区 Enter     | 跨 text 或连续文本块选中后按 Enter     | 删除选区并在起点分段              | 通过 |
 | Enter 后输入   | Enter 后继续输入文字                   | 文本进入新段开头                  | 通过 |
 | 组合编辑       | 输入文字后 Enter，再输入并按 Delete    | 文档分段、删除和选区都稳定        | 通过 |
 | 合并后输入     | 第二段段首 Backspace 后继续输入        | 合并段落保持合法并继续插入文本    | 通过 |
@@ -66,7 +68,7 @@ pnpm test:e2e
 ## 当前限制
 
 - 跨块替换与删除只接受连续顶层 paragraph、heading、quote 或 codeBlock，不跨越列表、表格、图片和分隔线。
-- Enter 暂不处理非折叠 selection；collapsed Enter 会继承当前 Block Type、heading level 和 text marks。
+- `createEnterInputTransaction` 低层 helper 仍只接受 collapsed selection；范围删除由 `splitBlockCommand` 组合。
 - React 组件通过 `onTransaction` 暴露记录入口，但 History 状态仍由宿主维护。
 - 空 Quote 自动退出与拖拽输入仍未实现。
 

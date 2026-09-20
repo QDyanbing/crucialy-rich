@@ -49,7 +49,7 @@ Command 验收覆盖注册、查询、状态读取、执行结果、文本编辑
 - `packages/core/tests/command/bullet-list.test.ts`、`ordered-list.test.ts`、`task-list.test.ts`：列表包装、类型互换、还原和状态读取。
 - `packages/core/tests/command/block-type-interaction.test.ts`：Heading/Quote 连续切换与 marks 保留。
 - `packages/core/tests/command/shortcut.test.ts`：默认映射、配置查询、按键匹配、自定义映射和边界输入。
-- `packages/core/tests/command/split-block.test.ts`：段落分裂 command。
+- `packages/core/tests/command/split-block.test.ts`：collapsed、同容器与跨块选区分段，以及 CodeBlock、列表项和结构边界。
 - `packages/core/tests/command/merge-block.test.ts`：段落合并 command。
 - `packages/core/tests/command/state.test.ts`：状态读取和默认命令状态矩阵。
 - `packages/core/tests/command/integration.test.ts`：默认注册表综合执行闭环。
@@ -75,6 +75,7 @@ Command 验收覆盖注册、查询、状态读取、执行结果、文本编辑
 | 跨 text 斜体 | 设置同 block 跨 text 选区后执行 `italicCommand` | 选中文本被切分斜体并合并同 marks text           | 通过 |
 | 扩展块 Mark  | 在 heading/quote 内执行 Mark command            | 保留 block 类型并更新选中文字                   | 通过 |
 | 分段         | 设置 collapsed selection 后点击“分段”           | 文档新增 paragraph，最近 transaction 包含 split | 通过 |
+| 选区分段     | 设置跨 text 或跨文本块 selection 后按 Enter     | 先删除选区，再按删除起点分段                    | 通过 |
 | 合并段落     | 设置第二段段首 collapsed selection 后点击“合并” | 两段合并，最近 transaction 包含 merge           | 通过 |
 | 状态读取     | 调整 selection 的 anchor/focus                  | Command 状态面板在可用/不可用/激活之间同步切换  | 通过 |
 | React 输入   | 在编辑器中输入、Enter、Backspace、Delete        | 输入层优先复用 command，文档和 selection 同步   | 通过 |
@@ -84,9 +85,9 @@ Command 验收覆盖注册、查询、状态读取、执行结果、文本编辑
 
 ## 当前限制
 
-- 文本 command 当前只支持同一 text 节点内的 range selection。
+- 文本 command 支持同一文本容器和连续顶层文本块 range selection。
 - Mark command 当前支持 paragraph、heading、quote 中同一 block 内的 selection。
-- `splitBlockCommand` / `mergeBlockCommand` / `insertDividerCommand` 当前只支持 collapsed selection。
+- `splitBlockCommand` 支持 collapsed、同容器和连续顶层文本块 selection；`mergeBlockCommand` / `insertDividerCommand` 仍只支持 collapsed selection。
 - Heading/Quote command 支持连续顶层 block 范围，不支持非连续多选。
 - collapsed Backspace/Delete 的单字符删除仍保留 input helper；跨段合并路径会优先复用 block command。
 - React Toolbar 已接入默认 Command 状态与执行；mark 快捷键仍只提供配置和匹配，不自动绑定编辑器事件。

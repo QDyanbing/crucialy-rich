@@ -93,7 +93,7 @@ pnpm test:e2e
 - 删除支持同一文本容器跨 text 节点和连续顶层文本块，暂不跨越列表、表格或 void block。
 - 合并暂不支持批量跨多段合并。
 - transaction 当前不生成 inverse；History 使用 before/after 快照提供撤销重做。
-- 普通 `beforeinput insertText`、collapsed selection 下的 Backspace、collapsed selection 下的 Delete 和 collapsed selection 下的 Enter 已接入输入事件管线，并已完成基础编辑闭环验收。
+- 普通 `beforeinput insertText`、Backspace、Delete 和 Enter 已接入输入事件管线；受支持的非折叠选区会组合范围删除 operation，并已完成基础编辑闭环验收。
 - 失败保护依赖 operation 不可变返回新文档。
 
 ## 结论
