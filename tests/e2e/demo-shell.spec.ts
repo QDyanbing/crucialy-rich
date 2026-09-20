@@ -1854,6 +1854,28 @@ test("replaces a cross-block selection from editor input", async ({ page }) => {
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
 
+test("splits after deleting a cross-block selection with Enter", async ({ page }) => {
+  await page.goto("/");
+  await selectRenderedTextAcrossNodes(page, "[0,0]", 3, "[1,0]", 2);
+
+  await page.keyboard.press("Enter");
+
+  const paragraphs = page.getByLabel("已渲染文档").locator("p");
+  await expect(paragraphs).toHaveCount(2);
+  await expect(paragraphs.first()).toHaveText("你好，");
+  await expect(paragraphs.nth(1)).toHaveText("模型已就绪。");
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"type": "delete_range"',
+  );
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"type": "split_block"',
+  );
+  await expect(page.getByLabel("选区 JSON")).toContainText('"path": [');
+  await expect(page.getByLabel("锚点路径")).toHaveValue("1,0");
+  await expect(page.getByLabel("锚点偏移")).toHaveValue("0");
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
 for (const key of ["Backspace", "Delete"] as const) {
   test(`deletes a cross-block selection with ${key}`, async ({ page }) => {
     await page.goto("/");
