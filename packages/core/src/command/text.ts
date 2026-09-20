@@ -1,19 +1,9 @@
 import {
-  canDeleteRange,
-  createDeleteRangeOperation,
-  createDeleteTextOperation,
   createInsertTextOperation,
-  createSelectionAfterDeleteRange,
-  createSelectionAfterDeleteText,
   createSelectionAfterInsertText,
   createTransaction,
 } from "../operation";
-import {
-  isCollapsed,
-  isSameTextContainer,
-  isValidPoint,
-  normalizeRange,
-} from "../selection";
+import { isCollapsed, isValidPoint, normalizeRange } from "../selection";
 import {
   createCommandFailure,
   createCommandSkipped,
@@ -47,13 +37,9 @@ function canEditTextRange(input: CommandInput): boolean {
 
   const range = normalizeRange(selection);
 
-  return (
-    isValidPoint(input.context.document, range.anchor) &&
-    isValidPoint(input.context.document, range.focus) &&
-    (isCollapsed(range) ||
-      isSameTextContainer(range.anchor, range.focus) ||
-      canDeleteRange(input.context.document, range))
-  );
+  return isCollapsed(range)
+    ? isValidPoint(input.context.document, range.anchor)
+    : createRangeDeletionPlan(input.context.document, range) !== undefined;
 }
 
 function canDeleteSelectionRange(input: CommandInput): boolean {
@@ -89,20 +75,13 @@ export const insertTextCommand: Command = {
     }
 
     const range = normalizeRange(selection);
-    const deleteOperation = isCollapsed(range)
+    const deletion = isCollapsed(range)
       ? undefined
-      : isSameTextContainer(range.anchor, range.focus)
-        ? createDeleteTextOperation(range)
-        : createDeleteRangeOperation(range);
-    const insertPoint = deleteOperation
-      ? deleteOperation.type === "delete_text"
-        ? createSelectionAfterDeleteText(input.context.document, deleteOperation).anchor
-        : createSelectionAfterDeleteRange(input.context.document, deleteOperation)
-            .anchor
-      : range.anchor;
+      : createRangeDeletionPlan(input.context.document, range);
+    const insertPoint = deletion?.selection.anchor ?? range.anchor;
     const insertOperation = createInsertTextOperation(insertPoint, input.payload.text);
-    const operations = deleteOperation
-      ? [deleteOperation, insertOperation]
+    const operations = deletion
+      ? [deletion.operation, insertOperation]
       : [insertOperation];
 
     return createCommandSuccess(INSERT_TEXT_COMMAND_NAME, {
