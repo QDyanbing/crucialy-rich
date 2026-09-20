@@ -81,6 +81,40 @@ describe("splitBlockCommand", () => {
     });
   });
 
+  it("deletes and splits a selection across text blocks", () => {
+    const document = createDocument([
+      createParagraph([createText("第一段")]),
+      createParagraph([createText("中间段")]),
+      createParagraph([createText("最后段")]),
+    ]);
+    const input = {
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 1 },
+          focus: { path: [2, 0], offset: 1 },
+        },
+      },
+    };
+    const result = splitBlockCommand.execute(input);
+
+    expect(canExecuteSplitBlockCommand(input)).toBe(true);
+    expect(result.transaction?.operations.map((operation) => operation.type)).toEqual([
+      "delete_range",
+      "split_block",
+    ]);
+    expect(applyTransaction(document, result.transaction!)).toEqual(
+      createDocument([
+        createParagraph([createText("第")]),
+        createParagraph([createText("后段")]),
+      ]),
+    );
+    expect(result.selection).toEqual({
+      anchor: { path: [1, 0], offset: 0 },
+      focus: { path: [1, 0], offset: 0 },
+    });
+  });
+
   it("inserts newlines and exits code blocks through the same command", () => {
     const document = createDocument([createCodeBlock([createText("code")])]);
     const newlineResult = splitBlockCommand.execute({

@@ -44,10 +44,7 @@ function canSplitBlockSelection(input: CommandInput): boolean {
     return canSplitCollapsedBlockAt(input, selection.anchor);
   }
 
-  return (
-    createRangeDeletionPlan(input.context.document, selection)?.operation.type ===
-    "delete_text"
-  );
+  return createRangeDeletionPlan(input.context.document, selection) !== undefined;
 }
 
 function canMergeBlockAt(input: CommandInput, point: Point | undefined): boolean {
