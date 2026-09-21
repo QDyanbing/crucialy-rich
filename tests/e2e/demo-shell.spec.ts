@@ -908,6 +908,27 @@ test("exits an empty quote on Enter and continues in a paragraph", async ({ page
   await expect(page.getByLabel("模型校验状态")).toContainText("合法");
 });
 
+test("restores selected quote exit through history", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("quotes");
+  await selectRenderedTextRange(page, "[0,0]", 0, 4);
+  await page.keyboard.press("Enter");
+
+  const renderedDocument = page.getByLabel("已渲染文档");
+
+  await expect(renderedDocument.locator("blockquote")).toHaveCount(0);
+  await expect(renderedDocument.locator("p")).toHaveCount(2);
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect(renderedDocument.locator("blockquote")).toHaveText("引用内容");
+
+  await page.getByRole("button", { name: "重做", exact: true }).click();
+  await expect(renderedDocument.locator("blockquote")).toHaveCount(0);
+  await expect(renderedDocument.locator("p")).toHaveCount(2);
+  await expect(page.getByLabel("模型校验状态")).toContainText("合法");
+});
+
 test("updates the selection debug preview", async ({ page }) => {
   await page.goto("/");
 
