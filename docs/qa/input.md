@@ -58,6 +58,7 @@ pnpm test:e2e
 | 组合编辑       | 输入文字后 Enter，再输入并按 Delete    | 文档分段、删除和选区都稳定        | 通过 |
 | 合并后输入     | 第二段段首 Backspace 后继续输入        | 合并段落保持合法并继续插入文本    | 通过 |
 | Quote 输入     | Quote 内输入、删除并按 Enter           | Quote 类型、文字和选区保持稳定    | 通过 |
+| 空 Quote 退出  | 空引用或选区清空引用后按 Enter         | 原地转为正文，History 可往返      | 通过 |
 | CodeBlock 输入 | 输入、Enter 换行、连续 Enter 退出      | 纯文本和后续 paragraph 稳定       | 通过 |
 | Divider 删除   | 从前后文本边界按 Delete/Backspace      | Divider 删除且选区保持合法        | 通过 |
 | 列表 Enter     | 非空项分裂，空项退出                   | 项目和三层选区保持合法            | 通过 |
@@ -70,7 +71,7 @@ pnpm test:e2e
 - 跨块替换与删除只接受连续顶层 paragraph、heading、quote 或 codeBlock，不跨越列表、表格、图片和分隔线。
 - `createEnterInputTransaction` 低层 helper 仍只接受 collapsed selection；范围删除由 `splitBlockCommand` 组合。
 - React 组件通过 `onTransaction` 暴露记录入口，但 History 状态仍由宿主维护。
-- 空 Quote 自动退出与拖拽输入仍未实现。
+- 拖拽输入仍未实现。
 
 ## 结论
 

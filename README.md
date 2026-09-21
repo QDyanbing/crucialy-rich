@@ -22,6 +22,8 @@ text marks schema 当前支持 `bold`、`italic`、`underline` 和 `strike` 共�
 
 第 13 周“标题和引用闭环”已全部完成：文档模型可表达 paragraph、1–6 级 heading 和 quote；Heading 与 Quote 均完成语义渲染、默认 command、单块/多块类型切换、History 往返、中文混合块 Demo 和浏览器验收，跨块正向/反向选区不会丢失文字、marks 或选区方向。
 
+Quote 内按 Enter 会保留引用格式分段；空 Quote 再按 Enter 则原地退出为正文。选区 Enter 清空 Quote 后同样退出，并可通过 History 撤销、重做。
+
 第 14 周“代码块和分割线闭环”已全部完成：CodeBlock 使用纯文本模型与 `pre > code` 语义渲染，支持 command 切换、多行输入和双 Enter 退出；Divider 使用 void block 模型与 `hr` 渲染，支持在光标处分割并插入、相邻 Backspace/Delete 删除、History 往返和中文混合样例。
 
 第 15 周“有序和无序列表闭环”已全部完成：模型支持 bulletList、orderedList 和 listItem，渲染输出 `ul/ol/li`，支持段落与列表切换、列表类型互换、列表项输入、Enter 分裂、空项 Enter 退出、History 和中文浏览器验收。

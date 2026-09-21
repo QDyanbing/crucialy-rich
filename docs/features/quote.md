@@ -43,11 +43,10 @@ const result = executeCommand(registry, TOGGLE_QUOTE_COMMAND_NAME, {
 
 - Quote 内普通输入复用现有 `insertTextCommand`，块类型保持 Quote。
 - Quote 内 Backspace/Delete 的字符删除复用现有文本 operation，不改变块类型。
-- Quote 内按 Enter 使用 `split_block`，左右两个 block 都继承 Quote 类型。
+- 非空 Quote 内按 Enter 使用 `split_block`，左右两个 block 都继承 Quote 类型。
+- 空 Quote 内按 Enter 使用 `set_block_type` 原地转为 paragraph，不额外增加 block；选区 Enter 若先删空 Quote，也按此规则退出。
 - 在拆分后的新 Quote 中可以继续输入，模型仍可通过校验。
 - block 合并沿用当前规则：结果保留前一个 block 的类型。
-
-当前没有“空引用按 Enter 自动退出”等额外编辑器策略；这类产品行为将在后续输入规则阶段单独设计。
 
 ## 选区规则
 
@@ -64,7 +63,8 @@ Demo 的“引用块”样例包含 Quote 和普通正文，操作区提供带 a
 - Quote 渲染为 `blockquote`。
 - 引用按钮可切换 Quote 和 paragraph。
 - Quote 内可以输入和删除文字。
-- Quote 内 Enter 生成两个 Quote，并可在新块继续输入。
+- 非空 Quote 内 Enter 生成两个 Quote，并可在新块继续输入。
+- 空 Quote 或选区清空 Quote 后按 Enter 会退出为正文；撤销和重做可恢复原引用内容。
 - 跨段选区可以统一开启或取消 Quote，文字和模型选区保持稳定。
 - 整个操作过程中文档模型保持合法。
 

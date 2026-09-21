@@ -19,6 +19,7 @@ import {
 import {
   getNodeAtPath,
   isCollapsed,
+  isValidPoint,
   type Point,
   type RangeSelection,
 } from "../selection";
@@ -92,7 +93,7 @@ function getEmptyQuoteIndex(document: DocumentNode, point: Point): number | unde
 export function createEnterInputTransaction(input: EnterInput): Transaction {
   const point = getCollapsedPoint(input.selection);
 
-  if (!point) {
+  if (!point || !isValidPoint(input.document, point)) {
     return createTransaction();
   }
 

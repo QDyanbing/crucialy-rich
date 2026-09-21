@@ -220,6 +220,20 @@ describe("createEnterInputTransaction", () => {
     );
   });
 
+  it("does not exit an empty quote from an invalid point", () => {
+    const document = createDocument([createQuote()]);
+
+    expect(
+      createEnterInputTransaction({
+        document,
+        selection: {
+          anchor: { path: [0, 1], offset: 0 },
+          focus: { path: [0, 1], offset: 0 },
+        },
+      }).operations,
+    ).toEqual([]);
+  });
+
   it("does nothing for non-collapsed selections", () => {
     const document = createDocument([createParagraph([createText("你好")])]);
     const transaction = createEnterInputTransaction({
