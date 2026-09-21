@@ -8,6 +8,7 @@ import {
   createEnterInputTransaction,
   createListItem,
   createParagraph,
+  createQuote,
   createSelectionAfterEnterInput,
   createText,
   createTaskItem,
@@ -179,6 +180,44 @@ describe("createEnterInputTransaction", () => {
     expect(result.children).toHaveLength(2);
     expect(result.children[0]?.children[0]?.text).toBe("");
     expect(result.children[1]?.children[0]?.text).toBe("");
+  });
+
+  it("exits an empty quote without adding another block", () => {
+    const document = createDocument([createQuote()]);
+    const input = {
+      document,
+      selection: {
+        anchor: { path: [0, 0], offset: 0 },
+        focus: { path: [0, 0], offset: 0 },
+      },
+    };
+    const transaction = createEnterInputTransaction(input);
+
+    expect(transaction.operations).toEqual([
+      { block: { type: "paragraph" }, path: [0], type: "set_block_type" },
+    ]);
+    expect(applyTransaction(document, transaction)).toEqual(
+      createDocument([createParagraph()]),
+    );
+    expect(createSelectionAfterEnterInput(input)).toEqual(input.selection);
+  });
+
+  it("keeps non-empty quotes split as quotes", () => {
+    const document = createDocument([createQuote([createText("引用")])]);
+    const input = {
+      document,
+      selection: {
+        anchor: { path: [0, 0], offset: 2 },
+        focus: { path: [0, 0], offset: 2 },
+      },
+    };
+
+    expect(applyTransaction(document, createEnterInputTransaction(input))).toEqual(
+      createDocument([
+        createQuote([createText("引用")]),
+        createQuote([createText("")]),
+      ]),
+    );
   });
 
   it("does nothing for non-collapsed selections", () => {

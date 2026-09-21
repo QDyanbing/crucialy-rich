@@ -1,4 +1,4 @@
-import { isListEntryNode, isTextNode, type DocumentNode } from "../model";
+import { isListEntryNode, isQuoteNode, isTextNode, type DocumentNode } from "../model";
 import {
   createExitListItemOperation,
   createInsertTextOperation,
@@ -78,6 +78,17 @@ function getListItem(document: DocumentNode, point: Point) {
   return isListEntryNode(item) ? item : undefined;
 }
 
+function getEmptyQuoteIndex(document: DocumentNode, point: Point): number | undefined {
+  const [blockIndex] = point.path;
+  const block = blockIndex === undefined ? undefined : document.children[blockIndex];
+
+  return point.path.length === 2 &&
+    isQuoteNode(block) &&
+    block.children.every((text) => text.text.length === 0)
+    ? blockIndex
+    : undefined;
+}
+
 export function createEnterInputTransaction(input: EnterInput): Transaction {
   const point = getCollapsedPoint(input.selection);
 
@@ -87,6 +98,7 @@ export function createEnterInputTransaction(input: EnterInput): Transaction {
 
   const codeBlock = getCodeBlockText(input.document, point);
   const listItem = getListItem(input.document, point);
+  const emptyQuoteIndex = getEmptyQuoteIndex(input.document, point);
 
   if (listItem) {
     const empty = listItem.children.every((text) => text.text.length === 0);
@@ -99,6 +111,12 @@ export function createEnterInputTransaction(input: EnterInput): Transaction {
           : empty
             ? createExitListItemOperation(point)
             : createSplitListItemOperation(point),
+    ]);
+  }
+
+  if (emptyQuoteIndex !== undefined) {
+    return createTransaction([
+      createSetBlockTypeOperation([emptyQuoteIndex], { type: "paragraph" }),
     ]);
   }
 
@@ -140,6 +158,10 @@ export function createSelectionAfterEnterInput(input: EnterInput): RangeSelectio
 
   if (operation?.type === "unwrap_list_item") {
     return createSelectionAfterUnwrapListItem(input.document, operation);
+  }
+
+  if (operation?.type === "set_block_type" && operation.block.type === "paragraph") {
+    return createCollapsedSelection({ path: [operation.path[0] ?? 0, 0], offset: 0 });
   }
 
   return operation?.type === "split_block"
