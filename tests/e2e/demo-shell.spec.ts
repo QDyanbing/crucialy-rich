@@ -887,6 +887,27 @@ test("keeps quote input deletion and line breaks stable", async ({ page }) => {
   await expect(page.getByLabel("模型校验状态")).toContainText("合法");
 });
 
+test("exits an empty quote on Enter and continues in a paragraph", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("quotes");
+
+  const renderedDocument = page.getByLabel("已渲染文档");
+
+  await placeCaretInRenderedText(page, "[0,0]", 4);
+  await page.keyboard.press("Enter");
+  await expect(renderedDocument.locator("blockquote")).toHaveCount(2);
+
+  await page.keyboard.press("Enter");
+  await expect(renderedDocument.locator("blockquote")).toHaveCount(1);
+  await expect(renderedDocument.locator('p[data-crucialy-path="[1]"]')).toHaveCount(1);
+
+  await page.keyboard.type("继续正文");
+  await expect(renderedDocument.locator('p[data-crucialy-path="[1]"]')).toHaveText(
+    "继续正文",
+  );
+  await expect(page.getByLabel("模型校验状态")).toContainText("合法");
+});
+
 test("updates the selection debug preview", async ({ page }) => {
   await page.goto("/");
 
