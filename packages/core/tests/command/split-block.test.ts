@@ -9,6 +9,7 @@ import {
   createDocument,
   createListItem,
   createParagraph,
+  createQuote,
   createText,
   splitBlockCommand,
 } from "../../src";
@@ -82,6 +83,55 @@ describe("splitBlockCommand", () => {
       anchor: { path: [1, 0], offset: 0 },
       focus: { path: [1, 0], offset: 0 },
     });
+  });
+
+  it("exits a quote when selected Enter removes all its text", () => {
+    const document = createDocument([createQuote([createText("引用")])]);
+    const result = splitBlockCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 2 },
+          focus: { path: [0, 0], offset: 0 },
+        },
+      },
+    });
+
+    expect(result.transaction?.operations.map((operation) => operation.type)).toEqual([
+      "delete_text",
+      "set_block_type",
+    ]);
+    expect(applyTransaction(document, result.transaction!)).toEqual(
+      createDocument([createParagraph()]),
+    );
+    expect(result.selection).toEqual({
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 0 },
+    });
+  });
+
+  it("keeps a quote when selected Enter leaves text behind", () => {
+    const document = createDocument([createQuote([createText("引用内容")])]);
+    const result = splitBlockCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 1 },
+          focus: { path: [0, 0], offset: 3 },
+        },
+      },
+    });
+
+    expect(result.transaction?.operations.map((operation) => operation.type)).toEqual([
+      "delete_text",
+      "split_block",
+    ]);
+    expect(applyTransaction(document, result.transaction!)).toEqual(
+      createDocument([
+        createQuote([createText("引")]),
+        createQuote([createText("容")]),
+      ]),
+    );
   });
 
   it("deletes and splits a selection across text blocks", () => {
