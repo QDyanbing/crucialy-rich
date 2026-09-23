@@ -1578,6 +1578,39 @@ test("sets and cancels font size from the demo control", async ({ page }) => {
   );
 });
 
+test("sets text attributes across text blocks", async ({ page }) => {
+  await page.goto("/");
+  await selectRenderedTextAcrossNodes(page, "[0,0]", 3, "[1,0]", 2);
+
+  const editor = page.getByLabel("已渲染文档");
+  const fontSizeSelect = page.getByLabel("字号", { exact: true });
+  const textColorInput = page.getByLabel("文字颜色", { exact: true });
+
+  await fontSizeSelect.selectOption("24");
+  await expect(editor.locator('[data-crucialy-path="[0,1]"]')).toHaveCSS(
+    "font-size",
+    "24px",
+  );
+  await expect(editor.locator('[data-crucialy-path="[1,0]"]')).toHaveCSS(
+    "font-size",
+    "24px",
+  );
+
+  await textColorInput.fill("#52c41a");
+  await expect(editor.locator('[data-crucialy-path="[0,1]"]')).toHaveCSS(
+    "color",
+    "rgb(82, 196, 26)",
+  );
+  await expect(editor.locator('[data-crucialy-path="[1,0]"]')).toHaveCSS(
+    "color",
+    "rgb(82, 196, 26)",
+  );
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"attribute": "textColor"',
+  );
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
 test("sets and cancels text color from the demo control", async ({ page }) => {
   await page.goto("/");
   await page.getByLabel("模型示例").selectOption("marks");
