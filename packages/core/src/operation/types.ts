@@ -54,6 +54,7 @@ export interface DeleteRangeOperation {
 }
 
 export interface ToggleMarkOperation {
+  active?: boolean;
   mark: TextMarkType;
   range: RangeSelection;
   type: "toggle_mark";

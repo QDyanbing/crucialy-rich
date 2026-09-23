@@ -78,6 +78,7 @@ export function cloneOperation(operation: Operation): Operation {
       };
     case "toggle_mark":
       return {
+        ...(operation.active === undefined ? {} : { active: operation.active }),
         mark: operation.mark,
         range: cloneRange(operation.range),
         type: "toggle_mark",

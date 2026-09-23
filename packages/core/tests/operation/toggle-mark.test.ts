@@ -98,6 +98,27 @@ describe("applyToggleMark", () => {
     });
   });
 
+  it("honors an explicit active state", () => {
+    const document = createDocument([
+      createParagraph([createText("已加粗", { bold: true }), createText("未加粗")]),
+    ]);
+    const range = {
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 1], offset: 3 },
+    };
+    const operation = createToggleMarkOperation(range, "bold", true);
+
+    expect(operation.active).toBe(true);
+    expect(applyToggleMark(document, operation).children[0]?.children).toEqual([
+      { marks: { bold: true }, text: "已加粗未加粗", type: "text" },
+    ]);
+
+    expect(
+      applyToggleMark(document, createToggleMarkOperation(range, "bold", false))
+        .children[0]?.children,
+    ).toEqual([{ text: "已加粗未加粗", type: "text" }]);
+  });
+
   it("adds underline without removing other boolean marks", () => {
     const document = createDocument([
       createParagraph([

@@ -23,8 +23,10 @@ import {
 export function createToggleMarkOperation(
   range: RangeSelection,
   mark: TextMarkType,
+  active?: boolean,
 ): ToggleMarkOperation {
   return {
+    ...(active === undefined ? {} : { active }),
     mark,
     range: {
       anchor: {
@@ -38,6 +40,12 @@ export function createToggleMarkOperation(
     },
     type: "toggle_mark",
   };
+}
+
+function getNextTextMarks(source: TextNode, operation: ToggleMarkOperation) {
+  return operation.active === undefined
+    ? toggleTextMark(source.marks, operation.mark)
+    : setTextMark(source.marks, operation.mark, operation.active);
 }
 
 function createMarkedTextPart(
@@ -80,11 +88,11 @@ function shouldAddTextMark(
 function createCollapsedToggleMarkReplacement(
   textNode: TextNode,
   range: RangeSelection,
-  mark: TextMarkType,
+  operation: ToggleMarkOperation,
 ): TextNode[] {
   const before = textNode.text.slice(0, range.anchor.offset);
   const after = textNode.text.slice(range.focus.offset);
-  const toggledMarks = toggleTextMark(textNode.marks, mark);
+  const toggledMarks = getNextTextMarks(textNode, operation);
 
   return compactTextParts([
     createTextPart(before, textNode),
@@ -96,18 +104,19 @@ function createCollapsedToggleMarkReplacement(
 function createToggleMarkReplacement(
   textNodes: readonly TextNode[],
   target: TextMarkRangeTarget,
-  mark: TextMarkType,
+  operation: ToggleMarkOperation,
 ): TextNode[] {
   if (isCollapsed(target.range)) {
     return createCollapsedToggleMarkReplacement(
       textNodes[target.startTextIndex]!,
       target.range,
-      mark,
+      operation,
     );
   }
 
   const parts: Array<TextNode | undefined> = [];
-  const active = shouldAddTextMark(textNodes, target, mark);
+  const active =
+    operation.active ?? shouldAddTextMark(textNodes, target, operation.mark);
 
   textNodes.forEach((textNode, textIndex) => {
     if (textIndex < target.startTextIndex || textIndex > target.endTextIndex) {
@@ -129,7 +138,7 @@ function createToggleMarkReplacement(
       createMarkedTextPart(
         textNode.text.slice(selectionStart, selectionEnd),
         textNode,
-        mark,
+        operation.mark,
         active,
       ),
     );
@@ -156,7 +165,7 @@ export function applyToggleMark(
             ...block,
             children: mergeAdjacentTextNodes([
               ...block.children.slice(0, target.startTextIndex),
-              ...createToggleMarkReplacement(block.children, target, operation.mark),
+              ...createToggleMarkReplacement(block.children, target, operation),
               ...block.children.slice(target.endTextIndex + 1),
             ]),
           }
@@ -171,8 +180,10 @@ export function createSelectionAfterToggleMark(
 ): RangeSelection {
   const target = getTextMarkRangeTarget(document, operation.range, "toggle mark");
   const nextDocument = applyToggleMark(document, operation);
-  const textNode =
-    document.children[target.blockIndex]?.children[target.startTextIndex];
+  const block = document.children[target.blockIndex];
+  const textNode = isTextBlockNode(block)
+    ? block.children[target.startTextIndex]
+    : undefined;
 
   if (!textNode) {
     throw new RangeError("toggle mark range must reference text nodes");
@@ -182,7 +193,7 @@ export function createSelectionAfterToggleMark(
     document,
     target,
     nextDocument,
-    toggleTextMark(textNode.marks, operation.mark),
+    getNextTextMarks(textNode, operation),
     "toggle mark",
   );
 }
