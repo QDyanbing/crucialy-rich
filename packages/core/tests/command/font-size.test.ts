@@ -111,6 +111,33 @@ describe("setFontSizeCommand", () => {
     ]);
   });
 
+  it("sets a font size across text blocks", () => {
+    const document = createDocument([
+      createParagraph([createText("正文")]),
+      createQuote([createText("引用")]),
+    ]);
+    const result = setFontSizeCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 1 },
+          focus: { path: [1, 0], offset: 1 },
+        },
+      },
+      payload: { fontSize: 20 },
+    });
+
+    expect(result.transaction?.operations).toHaveLength(2);
+    expect(applyTransaction(document, result.transaction!).children).toEqual([
+      createParagraph([createText("正"), createText("文", { fontSize: 20 })]),
+      createQuote([createText("引", { fontSize: 20 }), createText("用")]),
+    ]);
+    expect(result.selection).toEqual({
+      anchor: { path: [0, 1], offset: 0 },
+      focus: { path: [1, 0], offset: 1 },
+    });
+  });
+
   it("uses a collapsed sized placeholder for later input", () => {
     const document = createDocument([createParagraph([createText("你好世界")])]);
     const sizeResult = setFontSizeCommand.execute({
@@ -192,7 +219,7 @@ describe("setFontSizeCommand", () => {
     },
   );
 
-  it("skips a selection that crosses paragraphs", () => {
+  it("accepts a selection that crosses paragraphs", () => {
     const document = createDocument([
       createParagraph([createText("第一段")]),
       createParagraph([createText("第二段")]),
@@ -208,8 +235,8 @@ describe("setFontSizeCommand", () => {
       payload: { fontSize: 18 },
     };
 
-    expect(canExecuteSetFontSizeCommand(input)).toBe(false);
-    expect(setFontSizeCommand.execute(input).status).toBe("skipped");
+    expect(canExecuteSetFontSizeCommand(input)).toBe(true);
+    expect(setFontSizeCommand.execute(input).status).toBe("success");
   });
 
   it("executes through the default command registry", () => {

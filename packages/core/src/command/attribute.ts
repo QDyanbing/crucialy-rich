@@ -1,12 +1,16 @@
 import type { TextMarkAttributes, TextMarkAttributeType } from "../model";
 import {
+  applyTransaction,
   createSelectionAfterSetMarkAttribute,
   createSetMarkAttributeOperation,
   createTransaction,
 } from "../operation";
-import { normalizeRange } from "../selection";
 import { canExecuteTextMarkCommand } from "./mark";
 import { createCommandSkipped, createCommandSuccess } from "./result";
+import {
+  getTextMarkCommandRanges,
+  restoreTextMarkCommandSelection,
+} from "./text-mark-range";
 import type { Command, CommandInput } from "./types";
 
 export interface TextMarkAttributeCommandConfig<
@@ -34,23 +38,34 @@ export function createTextMarkAttributeCommand<
     execute(input) {
       const selection = input.context.selection;
       const value = config.resolveValue(input);
+      const ranges = selection
+        ? getTextMarkCommandRanges(input.context.document, selection)
+        : undefined;
 
-      if (!selection || value === undefined || !canExecuteTextMarkCommand(input)) {
+      if (!selection || value === undefined || !ranges) {
         return createCommandSkipped(config.commandName, config.invalidReason);
       }
 
-      const operation = createSetMarkAttributeOperation(
-        normalizeRange(selection),
-        config.attribute,
-        value,
+      const operations = ranges.map(({ range }) =>
+        createSetMarkAttributeOperation(range, config.attribute, value),
       );
+      const transaction = createTransaction(operations);
+      const nextSelection =
+        ranges.length === 1
+          ? createSelectionAfterSetMarkAttribute(input.context.document, operations[0]!)
+          : restoreTextMarkCommandSelection(
+              input.context.document,
+              selection,
+              applyTransaction(input.context.document, transaction),
+            );
+
+      if (!nextSelection) {
+        return createCommandSkipped(config.commandName, config.invalidReason);
+      }
 
       return createCommandSuccess(config.commandName, {
-        selection: createSelectionAfterSetMarkAttribute(
-          input.context.document,
-          operation,
-        ),
-        transaction: createTransaction([operation]),
+        selection: nextSelection,
+        transaction,
       });
     },
     name: config.commandName,

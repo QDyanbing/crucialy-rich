@@ -206,7 +206,7 @@ describe("setBackgroundColorCommand", () => {
     });
   });
 
-  it("skips a selection that crosses paragraphs", () => {
+  it("accepts a selection that crosses paragraphs", () => {
     const document = createDocument([
       createParagraph([createText("第一段")]),
       createParagraph([createText("第二段")]),
@@ -222,8 +222,8 @@ describe("setBackgroundColorCommand", () => {
       payload: { backgroundColor: "#fff4cc" },
     };
 
-    expect(canExecuteSetBackgroundColorCommand(input)).toBe(false);
-    expect(setBackgroundColorCommand.execute(input).status).toBe("skipped");
+    expect(canExecuteSetBackgroundColorCommand(input)).toBe(true);
+    expect(setBackgroundColorCommand.execute(input).status).toBe("success");
   });
 
   it("executes through the default command registry", () => {

@@ -191,7 +191,7 @@ describe("setTextColorCommand", () => {
     });
   });
 
-  it("skips a selection that crosses paragraphs", () => {
+  it("accepts a selection that crosses paragraphs", () => {
     const document = createDocument([
       createParagraph([createText("第一段")]),
       createParagraph([createText("第二段")]),
@@ -207,8 +207,8 @@ describe("setTextColorCommand", () => {
       payload: { textColor: "#1677ff" },
     };
 
-    expect(canExecuteSetTextColorCommand(input)).toBe(false);
-    expect(setTextColorCommand.execute(input).status).toBe("skipped");
+    expect(canExecuteSetTextColorCommand(input)).toBe(true);
+    expect(setTextColorCommand.execute(input).status).toBe("success");
   });
 
   it("executes through the default command registry", () => {
