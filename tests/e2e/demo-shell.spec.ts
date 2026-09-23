@@ -198,6 +198,39 @@ test("applies formatting and history keyboard shortcuts", async ({ page }) => {
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
 
+test("applies boolean marks across text blocks", async ({ page }) => {
+  await page.goto("/");
+  await selectRenderedTextAcrossNodes(page, "[0,0]", 3, "[1,0]", 2);
+
+  const editor = page.getByLabel("已渲染文档");
+  const boldButton = page.getByRole("button", { name: "加粗", exact: true });
+  const italicButton = page.getByRole("button", { name: "斜体", exact: true });
+
+  await boldButton.click();
+  await expect(editor.locator("strong")).toHaveCount(2);
+  await expect(editor.locator("strong").first()).toHaveText("crucialy-rich。");
+  await expect(editor.locator("strong").last()).toHaveText("选区");
+  await expect(boldButton).toHaveAttribute("aria-pressed", "true");
+
+  await italicButton.click();
+  await expect(editor.locator("strong")).toHaveCount(2);
+  await expect(editor.locator("strong").first()).toHaveAttribute(
+    "style",
+    "font-style: italic;",
+  );
+  await expect(editor.locator("strong").last()).toHaveAttribute(
+    "style",
+    "font-style: italic;",
+  );
+  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
+    '"bold": true',
+  );
+  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
+    '"italic": true',
+  );
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
 test("applies Markdown input rules and restores prefixes through undo", async ({
   page,
 }) => {
