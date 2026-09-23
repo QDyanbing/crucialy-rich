@@ -95,6 +95,7 @@ History snapshot 现在会深拷贝 text marks，撤销/重做记录不会丢失
 ```ts
 interface ToggleMarkOperation {
   type: "toggle_mark";
+  active?: boolean;
   mark: TextMarkType;
   range: RangeSelection;
 }
@@ -105,6 +106,7 @@ interface ToggleMarkOperation {
 - range 必须落在同一个 block 内。
 - 非折叠 range 会按 text 边界切分 before / selected / after，只修改 selected 覆盖到的 text 片段。
 - 选区内存在未激活的目标 mark 时会统一添加；全部已激活时会统一移除，避免混合选区逐节点反转。
+- `active` 可由 command 显式指定统一目标状态；省略时继续按当前 range 自动判断。
 - 同一 block 内跨多个 text 节点时会统一修改目标 mark，并合并相邻同 marks 的 text 节点。
 - selection 会在合并后的文档中按 paragraph text offset 重新映射。
 - collapsed range 会在光标处创建一个空 text 节点，并把切换后的 marks 写到该空节点上。
@@ -160,7 +162,7 @@ const UNDERLINE_COMMAND_NAME = "underline";
 const underlineCommand: Command;
 ```
 
-执行规则与 Bold/Italic 一致，支持同一 block 内的选区应用、取消、跨 text 切换、collapsed 后续输入继承和 active 状态读取。切换 underline 不会移除已有 bold、italic 或 strike。
+执行规则与 Bold/Italic 一致，支持单块或跨连续文本块的选区应用、取消、跨 text 切换、collapsed 后续输入继承和 active 状态读取。切换 underline 不会移除已有 bold、italic 或 strike。
 
 `underlineCommand` 已加入默认 command registry，demo 操作区可通过“下划线”按钮调用，并会记录 history。
 
@@ -174,7 +176,7 @@ const STRIKE_COMMAND_NAME = "strike";
 const strikeCommand: Command;
 ```
 
-执行规则与其他 boolean mark command 一致，支持同一 block 内的选区应用、取消、跨 text 切换、collapsed 后续输入继承和 active 状态读取。切换 strike 不会移除已有 bold、italic 或 underline。
+执行规则与其他 boolean mark command 一致，支持单块或跨连续文本块的选区应用、取消、跨 text 切换、collapsed 后续输入继承和 active 状态读取。切换 strike 不会移除已有 bold、italic 或 underline。
 
 `strikeCommand` 已加入默认 command registry，demo 操作区可通过“删除线”按钮调用，并会记录 history。
 
@@ -214,5 +216,5 @@ Demo 的“文字标记”样例覆盖普通、加粗、斜体、下划线、删
 
 - 第 17 周 React Toolbar 已内置四种 boolean mark 默认项；快捷键仍由宿主绑定。
 - 快捷键当前只提供映射与查询，不包含编辑器事件绑定。
-- 暂未实现跨 block 的 mark 应用策略。
-- 文字属性 command 当前只处理同一 block 内的选区。
+- boolean mark 与文字属性 command 支持连续顶层 paragraph、heading、quote；每个 block 对应一条 operation，并在同一 transaction 中提交。
+- CodeBlock、Divider、Image、List 和 Table 不参与跨块样式；Link Mark 仍要求同一 block 内的非折叠选区。

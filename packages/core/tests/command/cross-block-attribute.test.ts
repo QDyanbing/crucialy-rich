@@ -100,4 +100,25 @@ describe("cross-block text mark attribute commands", () => {
       );
     },
   );
+
+  it("keeps a cross-block selection when its last segment is empty", () => {
+    const document = createDocument([
+      createParagraph([createText("前段")]),
+      createParagraph([createText("后")]),
+    ]);
+    const selection = {
+      anchor: { path: [0, 0], offset: 1 },
+      focus: { path: [1, 0], offset: 0 },
+    };
+    const result = setFontSizeCommand.execute({
+      context: { document, selection },
+      payload: { fontSize: 18 },
+    });
+
+    expect(result.transaction?.operations).toHaveLength(1);
+    expect(result.selection).toEqual({
+      anchor: { path: [0, 1], offset: 0 },
+      focus: { path: [1, 0], offset: 0 },
+    });
+  });
 });

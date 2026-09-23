@@ -15,6 +15,8 @@
 - 新增非折叠选区 Enter，支持同容器跨 text 与连续顶层文本块的“先删除、再分段”原子 transaction。
 - 新增选区 Enter 的 CodeBlock、列表项、结构边界、React 交互与 History 往返验收。
 - 新增空 Quote 按 Enter 原地退出；选区清空 Quote 后按 Enter 也会退出，并补齐 History 验收。
+- 新增跨连续 paragraph、heading、quote 的 boolean mark 与文字属性命令，统一混合激活状态并保留正反向选区。
+- 新增跨块样式的 Core、React、History 和中文 Demo 自动化验收，结构节点与 CodeBlock 继续作为范围边界。
 
 - 初始化 `packages/core`、`packages/react` 和 `apps/demo` 的 pnpm 工作区结构。
 - 新增 TypeScript、tsup、Vite、Vitest、Playwright、ESLint、Prettier、commitlint、lint-staged 和 Git hooks。

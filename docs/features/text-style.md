@@ -56,9 +56,9 @@ createText("示例", {
 
 `setFontSizeCommand` 已加入默认 Command 注册表，payload 为 `{ fontSize: number | null }`：
 
-- `8–72` 的整数会通过 `set_mark_attribute` operation 应用到同一 block 内的选区。
+- `8–72` 的整数会通过 `set_mark_attribute` operation 应用到选区；跨块 command 会为每个连续文本块生成一条 operation。
 - `null` 会取消选区字号，同时保留 boolean mark 和其他属性 Mark。
-- 越界值、小数、缺失 payload、非法选区或跨 block 选区会跳过执行。
+- 越界值、小数、缺失 payload、非法选区或跨结构边界的选区会跳过执行。
 - 非折叠选区支持跨多个 text 节点切分与合并；折叠选区会创建可供后续输入继承字号的空 text 占位。
 - operation 应用后会按 paragraph text offset 重新映射 selection，并可进入 Transaction 与 History 管线。
 
@@ -104,6 +104,7 @@ createText("示例", {
 
 ## 当前边界
 
-- 三种文字属性均支持 paragraph、heading、quote 中同一 block 内的选区，跨 block 策略尚未实现。
+- 三种文字属性均支持 paragraph、heading、quote 中的单块选区与连续顶层跨块选区，并保留正向或反向选择方向。
+- CodeBlock、Divider、Image、List 和 Table 不参与跨块文字属性范围。
 - 默认 React Toolbar 尚未包含文字属性项；宿主可通过自定义 ToolbarItem 接入对应 command。
 - `TEXT_STYLE_COMMANDS` 按字号、文字颜色、背景色统一组织三种 command，综合验收记录见 `docs/qa/text-style.md`。

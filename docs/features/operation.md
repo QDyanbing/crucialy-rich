@@ -393,5 +393,5 @@ interface TransactionAcceptanceReport {
 - 合并暂不支持跨多段批量合并，也不会跨 void block。
 - 单条 `set_block_type` 仍只处理一个顶层 block；Heading/Quote command 已能在同一 transaction 中组合多条 operation 完成跨块切换，语义 renderer 已支持 `h1`–`h6` 与 `blockquote`。
 - transaction 当前只负责批量应用和结束 normalize；History 已使用快照策略提供撤销/重做，operation 层本身暂不生成 undo/redo inverse 信息。
-- text operation 会保留现有 text marks；`toggle_mark` 和 `set_mark_attribute` 已支持同 block 内跨 text 切分与相邻同 marks 合并，跨 block mark 范围留到后续阶段。
+- text operation 会保留现有 text marks；单条 `toggle_mark` 和 `set_mark_attribute` 仍限定在一个 block 内，Mark command 已能在同一 transaction 中组合多条 operation 完成连续文本块样式更新。
 - 普通 `beforeinput insertText`、同容器及连续顶层文本块的非折叠选区替换、Backspace、Delete 和 Enter 已接入输入事件管线，并复用当前 command、operation 和 transaction 更新模型。

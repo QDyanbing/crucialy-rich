@@ -75,8 +75,8 @@
 
 - 第 17 周 React Toolbar 已提供四种 boolean mark 默认项。
 - mark 快捷键尚未绑定编辑器键盘事件。
-- 暂未实现跨 block 的 mark 应用策略。
-- 三种文字属性 command 尚未支持跨 block 选区。
+- boolean mark 与三种文字属性 command 已支持连续顶层 paragraph、heading、quote，并覆盖反向选区、混合状态和 History 往返。
+- CodeBlock、Divider、Image、List 和 Table 仍是样式范围边界；Link Mark 仍为单块范围。
 
 ## 结论
 

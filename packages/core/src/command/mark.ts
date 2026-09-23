@@ -136,13 +136,15 @@ export function createTextMarkCommand(config: TextMarkCommandConfig): Command {
       }
 
       const active =
-        ranges.length > 1 ? !isTextMarkCommandActive(input, config.mark) : undefined;
+        selection.anchor.path[0] !== selection.focus.path[0]
+          ? !isTextMarkCommandActive(input, config.mark)
+          : undefined;
       const operations = ranges.map(({ range }) =>
         createToggleMarkOperation(range, config.mark, active),
       );
       const transaction = createTransaction(operations);
       const nextSelection =
-        ranges.length === 1
+        selection.anchor.path[0] === selection.focus.path[0]
           ? createSelectionAfterToggleMark(input.context.document, operations[0]!)
           : restoreTextMarkCommandSelection(
               input.context.document,

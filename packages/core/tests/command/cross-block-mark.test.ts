@@ -97,4 +97,21 @@ describe("cross-block text mark commands", () => {
     expect(result.status).toBe("skipped");
     expect(result.transaction).toBeUndefined();
   });
+
+  it("keeps a cross-block selection when its first segment is empty", () => {
+    const document = createDocument([
+      createParagraph([createText("前")]),
+      createParagraph([createText("后续")]),
+    ]);
+    const selection = {
+      anchor: { path: [0, 0], offset: 1 },
+      focus: { path: [1, 0], offset: 1 },
+    };
+    const result = boldCommand.execute({ context: { document, selection } });
+
+    expect(result.transaction?.operations).toEqual([
+      expect.objectContaining({ active: true, type: "toggle_mark" }),
+    ]);
+    expect(result.selection).toEqual(selection);
+  });
 });

@@ -52,6 +52,7 @@ export function Demo() {
 - 表格：支持单元格内输入、删除、Enter、Backspace/Delete 段落合并、点击高亮和纯文本 TSV 粘贴。
 - 快捷键：支持 Mod+B/I/U，History 快捷键继续由宿主状态接管。
 - 输入规则：支持 paragraph 开头的标题、列表、引用和代码块 Markdown 前缀。
+- 文字样式：四种 boolean mark 与字号、文字颜色、背景色可应用到连续顶层 paragraph、heading、quote，并作为一个 transaction 进入宿主 History。
 - `label`、`className` 和基础 DOM 事件属性。
 
 Toolbar 当前支持：

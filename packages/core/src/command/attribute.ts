@@ -51,7 +51,7 @@ export function createTextMarkAttributeCommand<
       );
       const transaction = createTransaction(operations);
       const nextSelection =
-        ranges.length === 1
+        selection.anchor.path[0] === selection.focus.path[0]
           ? createSelectionAfterSetMarkAttribute(input.context.document, operations[0]!)
           : restoreTextMarkCommandSelection(
               input.context.document,
