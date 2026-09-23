@@ -231,6 +231,26 @@ test("applies boolean marks across text blocks", async ({ page }) => {
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
 
+test("restores cross-block marks through history", async ({ page }) => {
+  await page.goto("/");
+  await selectRenderedTextAcrossNodes(page, "[0,0]", 3, "[1,0]", 2);
+  await page.keyboard.press("Control+U");
+
+  const editor = page.getByLabel("已渲染文档");
+
+  await expect(editor.locator("u")).toHaveCount(2);
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect(editor.locator("u")).toHaveCount(0);
+  await expect(editor.locator("p").first()).toHaveText("你好，crucialy-rich。");
+  await expect(editor.locator("p").last()).toHaveText("选区模型已就绪。");
+
+  await page.getByRole("button", { name: "重做", exact: true }).click();
+  await expect(editor.locator("u")).toHaveCount(2);
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
 test("applies Markdown input rules and restores prefixes through undo", async ({
   page,
 }) => {
