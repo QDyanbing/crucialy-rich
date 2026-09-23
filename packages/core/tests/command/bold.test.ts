@@ -197,9 +197,10 @@ describe("boldCommand", () => {
     ).toBe(true);
   });
 
-  it("skips invalid or cross-paragraph selections", () => {
+  it("toggles bold across text blocks", () => {
     const document = createDocument([
       createParagraph([createText("你好")]),
+      createHeading(2, [createText("标题")]),
       createParagraph([createText("世界")]),
     ]);
     const input = {
@@ -207,17 +208,33 @@ describe("boldCommand", () => {
         document,
         selection: {
           anchor: { path: [0, 0], offset: 1 },
-          focus: { path: [1, 0], offset: 1 },
+          focus: { path: [2, 0], offset: 1 },
         },
       },
     };
 
-    expect(canExecuteBoldCommand(input)).toBe(false);
-    expect(boldCommand.execute(input)).toEqual({
-      commandName: "bold",
-      ok: false,
-      reason: "Bold command requires a text selection.",
-      status: "skipped",
+    const result = boldCommand.execute(input);
+
+    expect(canExecuteBoldCommand(input)).toBe(true);
+    expect(result.transaction?.operations).toHaveLength(3);
+    expect(
+      applyTransaction(document, result.transaction!).children.map(
+        (block) => block.children,
+      ),
+    ).toEqual([
+      [
+        { text: "你", type: "text" },
+        { marks: { bold: true }, text: "好", type: "text" },
+      ],
+      [{ marks: { bold: true }, text: "标题", type: "text" }],
+      [
+        { marks: { bold: true }, text: "世", type: "text" },
+        { text: "界", type: "text" },
+      ],
+    ]);
+    expect(result.selection).toEqual({
+      anchor: { path: [0, 1], offset: 0 },
+      focus: { path: [2, 0], offset: 1 },
     });
   });
 

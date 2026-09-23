@@ -1,16 +1,17 @@
 import { hasTextMark, isTextBlockNode, type TextMarkType } from "../model";
 import {
+  applyTransaction,
   createSelectionAfterToggleMark,
   createToggleMarkOperation,
   createTransaction,
 } from "../operation";
-import {
-  isCollapsed,
-  isValidPoint,
-  normalizeRange,
-  type RangeSelection,
-} from "../selection";
+import { isCollapsed } from "../selection";
 import { createCommandSkipped, createCommandSuccess } from "./result";
+import {
+  getTextMarkCommandRanges,
+  restoreTextMarkCommandSelection,
+  type TextMarkCommandRange,
+} from "./text-mark-range";
 import type { Command, CommandInput } from "./types";
 
 export const BOLD_COMMAND_NAME = "bold";
@@ -24,58 +25,16 @@ export interface TextMarkCommandConfig {
   mark: TextMarkType;
 }
 
-interface TextCommandRange {
-  blockIndex: number;
-  endTextIndex: number;
-  range: RangeSelection;
-  startTextIndex: number;
-}
-
-function getTextCommandRange(input: CommandInput): TextCommandRange | undefined {
+function getTextCommandRanges(input: CommandInput) {
   const selection = input.context.selection;
 
-  if (!selection) {
-    return undefined;
-  }
-
-  const range = normalizeRange(selection);
-
-  if (
-    !isValidPoint(input.context.document, range.anchor) ||
-    !isValidPoint(input.context.document, range.focus)
-  ) {
-    return undefined;
-  }
-
-  const [anchorBlockIndex, anchorTextIndex] = range.anchor.path;
-  const [focusBlockIndex, focusTextIndex] = range.focus.path;
-
-  if (
-    range.anchor.path.length !== 2 ||
-    range.focus.path.length !== 2 ||
-    anchorBlockIndex === undefined ||
-    anchorTextIndex === undefined ||
-    focusBlockIndex === undefined ||
-    focusTextIndex === undefined ||
-    anchorBlockIndex !== focusBlockIndex
-  ) {
-    return undefined;
-  }
-
-  if (input.context.document.children[anchorBlockIndex]?.type === "codeBlock") {
-    return undefined;
-  }
-
-  return {
-    blockIndex: anchorBlockIndex,
-    endTextIndex: focusTextIndex,
-    range,
-    startTextIndex: anchorTextIndex,
-  };
+  return selection
+    ? getTextMarkCommandRanges(input.context.document, selection)
+    : undefined;
 }
 
 export function canExecuteTextMarkCommand(input: CommandInput): boolean {
-  return getTextCommandRange(input) !== undefined;
+  return getTextCommandRanges(input) !== undefined;
 }
 
 export function canExecuteBoldCommand(input: CommandInput): boolean {
@@ -98,33 +57,44 @@ export function isTextMarkCommandActive(
   input: CommandInput,
   mark: TextMarkType,
 ): boolean {
-  const target = getTextCommandRange(input);
+  const targets = getTextCommandRanges(input);
 
-  if (!target) {
+  return (
+    targets !== undefined &&
+    targets.every((target) => isTextMarkRangeActive(input, target, mark))
+  );
+}
+
+function isTextMarkRangeActive(
+  input: CommandInput,
+  target: TextMarkCommandRange,
+  mark: TextMarkType,
+): boolean {
+  const block = input.context.document.children[target.blockIndex];
+
+  if (!isTextBlockNode(block)) {
     return false;
   }
 
-  const block = input.context.document.children[target.blockIndex];
-  const textNodes = isTextBlockNode(block) ? block.children : undefined;
+  const startTextIndex = target.range.anchor.path[1];
+  const endTextIndex = target.range.focus.path[1];
 
-  if (!textNodes) {
+  if (startTextIndex === undefined || endTextIndex === undefined) {
     return false;
   }
 
   if (isCollapsed(target.range)) {
-    return hasTextMark(textNodes[target.startTextIndex]?.marks, mark);
+    return hasTextMark(block.children[startTextIndex]?.marks, mark);
   }
 
-  const selectedNodes = textNodes
-    .slice(target.startTextIndex, target.endTextIndex + 1)
+  const selectedNodes = block.children
+    .slice(startTextIndex, endTextIndex + 1)
     .filter((node, index) => {
-      const textIndex = target.startTextIndex + index;
+      const textIndex = startTextIndex + index;
       const selectionStart =
-        textIndex === target.startTextIndex ? target.range.anchor.offset : 0;
+        textIndex === startTextIndex ? target.range.anchor.offset : 0;
       const selectionEnd =
-        textIndex === target.endTextIndex
-          ? target.range.focus.offset
-          : node.text.length;
+        textIndex === endTextIndex ? target.range.focus.offset : node.text.length;
 
       return selectionStart < selectionEnd;
     });
@@ -155,21 +125,41 @@ export function createTextMarkCommand(config: TextMarkCommandConfig): Command {
   return {
     canExecute: canExecuteTextMarkCommand,
     execute(input) {
-      if (!canExecuteTextMarkCommand(input) || !input.context.selection) {
+      const selection = input.context.selection;
+      const ranges = getTextCommandRanges(input);
+
+      if (!selection || !ranges) {
         return createCommandSkipped(
           config.commandName,
           `${config.label} command requires a text selection.`,
         );
       }
 
-      const operation = createToggleMarkOperation(
-        normalizeRange(input.context.selection),
-        config.mark,
+      const active =
+        ranges.length > 1 ? !isTextMarkCommandActive(input, config.mark) : undefined;
+      const operations = ranges.map(({ range }) =>
+        createToggleMarkOperation(range, config.mark, active),
       );
+      const transaction = createTransaction(operations);
+      const nextSelection =
+        ranges.length === 1
+          ? createSelectionAfterToggleMark(input.context.document, operations[0]!)
+          : restoreTextMarkCommandSelection(
+              input.context.document,
+              selection,
+              applyTransaction(input.context.document, transaction),
+            );
+
+      if (!nextSelection) {
+        return createCommandSkipped(
+          config.commandName,
+          `${config.label} command could not restore the text selection.`,
+        );
+      }
 
       return createCommandSuccess(config.commandName, {
-        selection: createSelectionAfterToggleMark(input.context.document, operation),
-        transaction: createTransaction([operation]),
+        selection: nextSelection,
+        transaction,
       });
     },
     isActive: (input) => isTextMarkCommandActive(input, config.mark),

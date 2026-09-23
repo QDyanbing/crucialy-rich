@@ -186,7 +186,7 @@ describe("italicCommand", () => {
     ).toBe(true);
   });
 
-  it("skips invalid or cross-paragraph selections", () => {
+  it("toggles italic across paragraphs", () => {
     const document = createDocument([
       createParagraph([createText("你好")]),
       createParagraph([createText("世界")]),
@@ -201,12 +201,10 @@ describe("italicCommand", () => {
       },
     };
 
-    expect(canExecuteItalicCommand(input)).toBe(false);
-    expect(italicCommand.execute(input)).toEqual({
-      commandName: "italic",
-      ok: false,
-      reason: "Italic command requires a text selection.",
-      status: "skipped",
-    });
+    const result = italicCommand.execute(input);
+
+    expect(canExecuteItalicCommand(input)).toBe(true);
+    expect(result.transaction?.operations).toHaveLength(2);
+    expect(result.status).toBe("success");
   });
 });

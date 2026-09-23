@@ -65,6 +65,12 @@ export function getTextMarkCommandRanges(
   const ranges: TextMarkCommandRange[] = [];
 
   for (let blockIndex = startBlockIndex; blockIndex <= endBlockIndex; blockIndex += 1) {
+    const block = document.children[blockIndex];
+
+    if (!isTextBlockNode(block) || block.type === "codeBlock") {
+      return undefined;
+    }
+
     const anchor =
       blockIndex === startBlockIndex
         ? clonePoint(range.anchor)
