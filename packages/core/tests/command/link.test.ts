@@ -650,4 +650,48 @@ describe("link command integration", () => {
       registered: true,
     });
   });
+
+  it("records a cross-block link transaction as one history entry", () => {
+    const document = createDocument([
+      createParagraph([createText("正文")]),
+      createHeading(2, [createText("标题")]),
+    ]);
+    const selection = {
+      anchor: { path: [0, 0], offset: 1 },
+      focus: { path: [1, 0], offset: 1 },
+    };
+    const result = setLinkCommand.execute({
+      context: { document, selection },
+      payload: { href: "https://example.com/history" },
+    });
+
+    if (!result.transaction || !result.selection) {
+      throw new Error(
+        "Cross-block link command should return a transaction and selection.",
+      );
+    }
+
+    const linkedDocument = applyTransaction(document, result.transaction);
+    const acceptance = createTransactionAcceptanceReport(document, result.transaction);
+    const history = recordHistory({
+      after: createHistorySnapshot(linkedDocument, result.selection),
+      before: createHistorySnapshot(document, selection),
+      history: createHistoryState(),
+      transaction: result.transaction,
+    });
+    const undone = undoHistory(history);
+    const redone = undone ? redoHistory(undone.history) : undefined;
+
+    expect(acceptance).toMatchObject({
+      ok: true,
+      transaction: {
+        operationCount: 2,
+        operationTypes: ["set_link", "set_link"],
+        textOperationCount: 2,
+      },
+    });
+    expect(history.undoStack).toHaveLength(1);
+    expect(undone?.document).toEqual(document);
+    expect(redone?.document).toEqual(linkedDocument);
+  });
 });
