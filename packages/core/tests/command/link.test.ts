@@ -314,6 +314,44 @@ describe("unsetLinkCommand", () => {
       status: "skipped",
     });
   });
+
+  it("removes links across text blocks and preserves other marks", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("正文", {
+          bold: true,
+          link: { href: "https://example.com/first" },
+        }),
+      ]),
+      createHeading(2, [createText("标题", { textColor: "#1677ff" })]),
+      createQuote([
+        createText("引用", {
+          link: { href: "https://example.com/second" },
+          underline: true,
+        }),
+      ]),
+    ]);
+    const input = {
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [2, 0], offset: 2 },
+        },
+      },
+    };
+    const result = unsetLinkCommand.execute(input);
+    const nextDocument = applyTransaction(document, result.transaction!);
+
+    expect(canExecuteUnsetLinkCommand(input)).toBe(true);
+    expect(result.transaction?.operations).toHaveLength(3);
+    expect(nextDocument.children).toEqual([
+      createParagraph([createText("正文", { bold: true })]),
+      createHeading(2, [createText("标题", { textColor: "#1677ff" })]),
+      createQuote([createText("引用", { underline: true })]),
+    ]);
+    expect(result.selection).toEqual(input.context.selection);
+  });
 });
 
 describe("link command state", () => {
