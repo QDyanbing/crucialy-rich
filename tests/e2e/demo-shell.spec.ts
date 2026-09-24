@@ -1321,6 +1321,42 @@ test("creates one link across text blocks", async ({ page }) => {
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
 
+test("updates and removes one link across text blocks", async ({ page }) => {
+  await page.goto("/");
+  await selectRenderedTextAcrossNodes(page, "[0,0]", 3, "[1,0]", 2);
+
+  const editor = page.getByLabel("已渲染文档");
+  const linkButton = page.getByRole("button", { name: "链接", exact: true });
+
+  await linkButton.click();
+  await page.getByLabel("链接地址").fill("https://example.com/before");
+  await page.getByRole("button", { name: "确认链接" }).click();
+
+  await linkButton.click();
+  await page.getByLabel("链接地址").fill("https://example.com/after");
+  await page.getByRole("button", { name: "确认链接" }).click();
+
+  await expect(editor.getByRole("link")).toHaveCount(2);
+  await expect(editor.getByRole("link").first()).toHaveAttribute(
+    "href",
+    "https://example.com/after",
+  );
+  await expect(editor.getByRole("link").last()).toHaveAttribute(
+    "href",
+    "https://example.com/after",
+  );
+  await expect(page.getByLabel("文档 JSON", { exact: true })).not.toContainText(
+    "https://example.com/before",
+  );
+
+  await page.getByRole("button", { name: "取消链接" }).click();
+
+  await expect(editor.getByRole("link")).toHaveCount(0);
+  await expect(editor.locator("p").first()).toHaveText("你好，crucialy-rich。");
+  await expect(editor.locator("p").last()).toHaveText("选区模型已就绪。");
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
 test("sets, replaces, and removes links from the demo popover", async ({ page }) => {
   await page.goto("/");
 
