@@ -1357,6 +1357,36 @@ test("updates and removes one link across text blocks", async ({ page }) => {
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
 
+test("restores cross-block links through history", async ({ page }) => {
+  await page.goto("/");
+  await selectRenderedTextAcrossNodes(page, "[0,0]", 3, "[1,0]", 2);
+
+  await page.getByRole("button", { name: "链接", exact: true }).click();
+  await page.getByLabel("链接地址").fill("https://example.com/history");
+  await page.getByRole("button", { name: "确认链接" }).click();
+
+  const editor = page.getByLabel("已渲染文档");
+
+  await expect(editor.getByRole("link")).toHaveCount(2);
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect(editor.getByRole("link")).toHaveCount(0);
+  await expect(page.getByLabel("History 状态")).toContainText('"redoStack": 1');
+
+  await page.getByRole("button", { name: "重做", exact: true }).click();
+  await expect(editor.getByRole("link")).toHaveCount(2);
+  await expect(editor.getByRole("link").first()).toHaveAttribute(
+    "href",
+    "https://example.com/history",
+  );
+  await expect(editor.getByRole("link").last()).toHaveAttribute(
+    "href",
+    "https://example.com/history",
+  );
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
 test("sets, replaces, and removes links from the demo popover", async ({ page }) => {
   await page.goto("/");
 
