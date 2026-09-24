@@ -397,7 +397,7 @@ describe("link command state", () => {
     expect(canExecuteUnsetLinkCommand(input)).toBe(false);
   });
 
-  it("disables link commands across paragraphs", () => {
+  it("enables link commands across paragraphs", () => {
     const document = createDocument([
       createParagraph([
         createText("第一段", { link: { href: "https://example.com/" } }),
@@ -417,10 +417,10 @@ describe("link command state", () => {
       payload: { href: "https://example.com/next" },
     };
 
-    expect(canExecuteSetLinkCommand(input)).toBe(false);
-    expect(canExecuteUnsetLinkCommand(input)).toBe(false);
-    expect(setLinkCommand.execute(input).status).toBe("skipped");
-    expect(unsetLinkCommand.execute(input).status).toBe("skipped");
+    expect(canExecuteSetLinkCommand(input)).toBe(true);
+    expect(canExecuteUnsetLinkCommand(input)).toBe(true);
+    expect(setLinkCommand.execute(input).status).toBe("success");
+    expect(unsetLinkCommand.execute(input).status).toBe("success");
   });
 });
 

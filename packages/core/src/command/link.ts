@@ -7,17 +7,18 @@ import {
   type TextNode,
 } from "../model";
 import {
+  applyTransaction,
   createSelectionAfterSetLink,
   createSetLinkOperation,
   createTransaction,
 } from "../operation";
-import {
-  isCollapsed,
-  isValidPoint,
-  normalizeRange,
-  type RangeSelection,
-} from "../selection";
+import { isCollapsed } from "../selection";
 import { createCommandSkipped, createCommandSuccess } from "./result";
+import {
+  getTextMarkCommandRanges,
+  restoreTextMarkCommandSelection,
+  type TextMarkCommandRange,
+} from "./text-mark-range";
 import type { Command, CommandInput } from "./types";
 
 export const SET_LINK_COMMAND_NAME = "setLink";
@@ -26,8 +27,46 @@ export const UNSET_LINK_COMMAND_NAME = "unsetLink";
 export type SetLinkCommandPayload = LinkMarkAttributes;
 
 interface LinkCommandTarget {
-  range: RangeSelection;
+  ranges: TextMarkCommandRange[];
   textNodes: TextNode[];
+}
+
+function getSelectedTextNodes(
+  input: CommandInput,
+  ranges: TextMarkCommandRange[],
+): TextNode[] {
+  return ranges.flatMap((target) => {
+    const block = input.context.document.children[target.blockIndex];
+
+    if (!isTextBlockNode(block)) {
+      return [];
+    }
+
+    const startTextIndex = target.range.anchor.path[1];
+    const endTextIndex = target.range.focus.path[1];
+
+    if (startTextIndex === undefined || endTextIndex === undefined) {
+      return [];
+    }
+
+    if (isCollapsed(target.range)) {
+      const textNode = block.children[startTextIndex];
+
+      return textNode ? [textNode] : [];
+    }
+
+    return block.children
+      .slice(startTextIndex, endTextIndex + 1)
+      .filter((node, index) => {
+        const textIndex = startTextIndex + index;
+        const selectionStart =
+          textIndex === startTextIndex ? target.range.anchor.offset : 0;
+        const selectionEnd =
+          textIndex === endTextIndex ? target.range.focus.offset : node.text.length;
+
+        return selectionStart < selectionEnd;
+      });
+  });
 }
 
 function getLinkSelectionTarget(
@@ -40,53 +79,15 @@ function getLinkSelectionTarget(
     return undefined;
   }
 
-  const range = normalizeRange(selection);
+  const ranges = getTextMarkCommandRanges(input.context.document, selection);
 
-  if (
-    (!includeCollapsed && isCollapsed(range)) ||
-    !isValidPoint(input.context.document, range.anchor) ||
-    !isValidPoint(input.context.document, range.focus)
-  ) {
+  if (!ranges || (!includeCollapsed && isCollapsed(selection))) {
     return undefined;
   }
 
-  const [anchorBlockIndex, anchorTextIndex] = range.anchor.path;
-  const [focusBlockIndex, focusTextIndex] = range.focus.path;
+  const textNodes = getSelectedTextNodes(input, ranges);
 
-  if (
-    anchorBlockIndex === undefined ||
-    anchorTextIndex === undefined ||
-    focusBlockIndex === undefined ||
-    focusTextIndex === undefined ||
-    anchorBlockIndex !== focusBlockIndex
-  ) {
-    return undefined;
-  }
-
-  const block = input.context.document.children[anchorBlockIndex];
-
-  if (!isTextBlockNode(block) || block.type === "codeBlock") {
-    return undefined;
-  }
-
-  if (isCollapsed(range)) {
-    const textNode = block.children[anchorTextIndex];
-
-    return textNode ? { range, textNodes: [textNode] } : undefined;
-  }
-
-  const textNodes = block.children
-    .slice(anchorTextIndex, focusTextIndex + 1)
-    .filter((node, index) => {
-      const textIndex = anchorTextIndex + index;
-      const selectionStart = textIndex === anchorTextIndex ? range.anchor.offset : 0;
-      const selectionEnd =
-        textIndex === focusTextIndex ? range.focus.offset : node.text.length;
-
-      return selectionStart < selectionEnd;
-    });
-
-  return textNodes && textNodes.length > 0 ? { range, textNodes } : undefined;
+  return textNodes.length > 0 ? { ranges, textNodes } : undefined;
 }
 
 function getLinkCommandTarget(input: CommandInput): LinkCommandTarget | undefined {
@@ -147,11 +148,30 @@ function createLinkCommandResult(
     );
   }
 
-  const operation = createSetLinkOperation(target.range, link);
+  const operations = target.ranges.map(({ range }) =>
+    createSetLinkOperation(range, link),
+  );
+  const transaction = createTransaction(operations);
+  const selection = input.context.selection!;
+  const nextSelection =
+    selection.anchor.path[0] === selection.focus.path[0]
+      ? createSelectionAfterSetLink(input.context.document, operations[0]!)
+      : restoreTextMarkCommandSelection(
+          input.context.document,
+          selection,
+          applyTransaction(input.context.document, transaction),
+        );
+
+  if (!nextSelection) {
+    return createCommandSkipped(
+      commandName,
+      `${commandName} command could not restore the text selection.`,
+    );
+  }
 
   return createCommandSuccess(commandName, {
-    selection: createSelectionAfterSetLink(input.context.document, operation),
-    transaction: createTransaction([operation]),
+    selection: nextSelection,
+    transaction,
   });
 }
 
