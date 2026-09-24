@@ -395,6 +395,56 @@ describe("link command state", () => {
     expect(isLinkCommandActive(input)).toBe(false);
   });
 
+  it("reads one shared link across text blocks", () => {
+    const sharedLink = {
+      href: "https://example.com/shared",
+      rel: "noopener",
+      target: "_blank" as const,
+    };
+    const document = createDocument([
+      createParagraph([createText("正文", { link: sharedLink })]),
+      createHeading(2, [createText("标题", { bold: true, link: sharedLink })]),
+      createQuote([createText("引用", { link: sharedLink })]),
+    ]);
+    const input = {
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 1 },
+          focus: { path: [2, 0], offset: 1 },
+        },
+      },
+    };
+
+    expect(getSelectedLinkMark(input)).toEqual(sharedLink);
+    expect(isLinkCommandActive(input)).toBe(true);
+    expect(canExecuteUnsetLinkCommand(input)).toBe(true);
+  });
+
+  it("does not report different links across text blocks as shared", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("正文", { link: { href: "https://example.com/first" } }),
+      ]),
+      createQuote([
+        createText("引用", { link: { href: "https://example.com/second" } }),
+      ]),
+    ]);
+    const input = {
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [1, 0], offset: 2 },
+        },
+      },
+    };
+
+    expect(getSelectedLinkMark(input)).toBeUndefined();
+    expect(isLinkCommandActive(input)).toBe(false);
+    expect(canExecuteUnsetLinkCommand(input)).toBe(true);
+  });
+
   it("is active only when every selected text part has a link", () => {
     const document = createDocument([
       createParagraph([
