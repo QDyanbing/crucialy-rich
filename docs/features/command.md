@@ -16,6 +16,7 @@ Command 系统负责把“可执行的编辑意图”包装成统一接口。当
 - 提供 `DEFAULT_COMMAND_SHORTCUTS`、`getCommandShortcuts` 和 `getCommandNameFromShortcut`，用于查询和匹配预留快捷键配置。
 - 提供 `boldCommand`、`italicCommand`、`underlineCommand` 和 `strikeCommand`，支持单块或跨连续文本块统一应用/取消，以及 collapsed selection 的后续输入占位。
 - 提供 `setFontSizeCommand`、`setTextColorCommand` 和 `setBackgroundColorCommand`，支持单块或跨连续文本块设置/取消安全属性值，以及 collapsed selection 的后续输入占位。
+- 提供 `setLinkCommand` 和 `unsetLinkCommand`，支持单块或跨连续文本块设置、覆盖和取消安全链接。
 - 提供 `setHeadingCommand`，支持单块或多块设置 1–6 级标题、切换层级或恢复 paragraph，并保留模型选区。
 - 提供 `toggleQuoteCommand`，支持单块或多块统一切换 Quote 或恢复 paragraph，并保留模型选区。
 - 提供 `setCodeBlockCommand`，支持单块或多块切换纯文本 CodeBlock，并可恢复 paragraph。
@@ -204,6 +205,7 @@ const mergeBlockCommand: Command;
 - 字号只接受 `8–72` 的整数，非法值、缺失 payload 或跨结构边界的选区不可执行。
 - `setTextColorCommand` 接受 `{ textColor: string | null }`；只允许 `#RGB` / `#RRGGBB`，`null` 表示取消文字颜色。
 - `setBackgroundColorCommand` 接受 `{ backgroundColor: string | null }`；使用相同颜色白名单，`null` 表示取消背景色。
+- `setLinkCommand` 为每个命中的连续文本块生成一条 `set_link` operation，并在同一 transaction 中应用；`unsetLinkCommand` 使用相同范围规则取消链接。
 - `setHeadingCommand` 接受 `{ level: 1 | 2 | 3 | 4 | 5 | 6 | null }`；数字把全部命中 block 设为同级标题，`null` 恢复 paragraph，并返回 `set_block_type` transaction。
 - `toggleQuoteCommand` 无需 payload；混合范围统一切换为 Quote，全部为 Quote 时统一恢复 paragraph，并返回 `set_block_type` transaction。
 - `setCodeBlockCommand` 接受可选 `{ enabled }`，进入 CodeBlock 时移除 marks，退出时恢复 paragraph。
@@ -224,7 +226,7 @@ const mergeBlockCommand: Command;
 ## 当前限制
 
 - 文本插入和删除 command 支持同一文本容器或连续顶层文本块 range；暂不跨越列表、表格和 void block 等结构边界。
-- Mark command 支持 paragraph、heading、quote 的单块或连续顶层跨块 selection；CodeBlock、Divider、Image、List 和 Table 不接受跨块 marks。
+- boolean mark、文字属性和链接 command 支持 paragraph、heading、quote 的单块或连续顶层跨块 selection；CodeBlock、Divider、Image、List 和 Table 不接受跨块 marks。
 - `splitBlockCommand` 支持 collapsed、同容器和连续顶层文本块 selection；`mergeBlockCommand` 与 `insertDividerCommand` 仍只处理 collapsed selection。
 - 当前没有快捷键事件绑定或权限系统；快捷键模块只提供可查询配置和纯匹配函数。
 - History 模块已提供 `undoCommand` 和 `redoCommand`；默认 Command 注册表暂不内置 history command。

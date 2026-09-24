@@ -208,7 +208,7 @@ const shortcutCommandName = getCommandNameFromShortcut({
 - Transaction：`createTransaction`、`applyOperation`、`applyTransaction`、`summarizeOperation`、`summarizeTransaction`、`createTransactionAcceptanceReport`。
 - 输入：基础文本输入与删除 helper、Composition 状态机、`getEditorShortcutAction`、`findMarkdownInputRule` 和 `createMarkdownInputRuleResult`。
 - 当前输入与 command 管线覆盖普通文本插入、同容器跨 text 与连续顶层文本块选区编辑、非折叠 Enter、段中删除、文本块合并/分裂、CodeBlock 换行/退出、相邻 void block 删除和输入后 selection 落点。
-- Command：默认注册表、状态查询、跨连续文本块文字样式、链接、Heading、Quote、CodeBlock、Divider、BulletList、OrderedList、文本与 block command。
+- Command：默认注册表、状态查询、跨连续文本块文字样式与链接、Heading、Quote、CodeBlock、Divider、BulletList、OrderedList、文本与 block command。
 - History：`createHistorySnapshot`、`cloneHistorySnapshot`、`createHistoryEntry`、`cloneHistoryEntry`、`createHistoryState`、`clearHistory`、`recordHistory`、`canMergeHistoryEntries`、`mergeHistoryEntries`、`canUndo`、`canRedo`、`getUndoEntry`、`getRedoEntry`、`undoHistory`、`redoHistory`、`getHistoryShortcutAction`、`undoCommand`、`redoCommand`。
 
 ## 构建产物

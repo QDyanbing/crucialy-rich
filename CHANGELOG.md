@@ -17,6 +17,7 @@
 - 新增空 Quote 按 Enter 原地退出；选区清空 Quote 后按 Enter 也会退出，并补齐 History 验收。
 - 新增跨连续 paragraph、heading、quote 的 boolean mark 与文字属性命令，统一混合激活状态并保留正反向选区。
 - 新增跨块样式的 Core、React、History 和中文 Demo 自动化验收，结构节点与 CodeBlock 继续作为范围边界。
+- 新增跨连续 paragraph、heading、quote 的链接创建、覆盖、取消与统一状态读取，并保持单条 History 记录。
 
 - 初始化 `packages/core`、`packages/react` 和 `apps/demo` 的 pnpm 工作区结构。
 - 新增 TypeScript、tsup、Vite、Vitest、Playwright、ESLint、Prettier、commitlint、lint-staged 和 Git hooks。

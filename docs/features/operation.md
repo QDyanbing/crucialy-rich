@@ -183,6 +183,7 @@ interface TransactionAcceptanceReport {
 当前规则：
 
 - range 必须是同一个 block 内的非折叠文字选区，支持 paragraph、heading、quote 中跨多个 text 节点和反向选区。
+- 跨块链接由 command 按文本块拆分为多条 `set_link` operation，并放入同一 transaction；operation 本身不放宽单块原子边界。
 - `link` 会在创建和应用阶段执行 href、target 与 rel 安全校验；`null` 表示取消链接。
 - 设置、覆盖或取消链接时会保留其他 boolean mark 和文字属性。
 - 应用后会合并相邻同 marks 节点，并通过 `createSelectionAfterSetLink` 重新映射选区。

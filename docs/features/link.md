@@ -1,6 +1,6 @@
 # Link Mark
 
-Link Mark 用于描述 text 节点上的链接目标。第 12 周已完成模型、安全校验、`set_link` operation、设置/取消 command、`<a>` 渲染、选中状态读取、编辑态/只读态交互、菜单选区恢复和闭环验收。
+Link Mark 用于描述 text 节点上的链接目标。当前已完成模型、安全校验、`set_link` operation、单块与连续文本块设置/取消 command、`<a>` 渲染、选中状态读取、编辑态/只读态交互、菜单选区恢复和闭环验收。
 
 ## 数据结构
 
@@ -85,6 +85,7 @@ interface SetLinkOperation {
 - 传入 Link Mark 时会先规范化，危险 href 会抛出 `RangeError`。
 - 传入 `null` 会取消选区内的链接。
 - 支持 paragraph、heading、quote 中同一 block 内跨多个 text 节点设置、覆盖和取消。
+- 单条 operation 保持单 block 约束；跨块 command 会为每个连续文本块创建一条 operation，并组合到同一 transaction。
 - 只修改选区覆盖的文字，并保留 boolean mark、字号和颜色。
 - `applySetLink` 会再次校验手工构造的 operation，不能绕过 href 安全规则。
 - `createSelectionAfterSetLink` 会在节点切分或合并后返回等价模型选区。
@@ -121,9 +122,9 @@ executeCommand(registry, UNSET_LINK_COMMAND_NAME, {
 });
 ```
 
-两条命令当前要求非折叠、同一 block 内的有效文字选区。`setLink` 会拒绝不安全 payload；`unsetLink` 仅在选区至少覆盖一个 Link Mark 时可用。成功结果包含 `set_link` transaction 和重映射后的 selection，可直接接入 History。
+两条命令要求非折叠的有效文字选区，支持单块或跨连续顶层 paragraph、heading、quote。`setLink` 会拒绝不安全 payload；`unsetLink` 仅在选区至少覆盖一个 Link Mark 时可用。跨块成功结果在同一 transaction 中包含逐块 `set_link` operation，并恢复正向或反向模型选区，可作为一条记录接入 History。
 
-`getSelectedLinkMark` 与 command 的执行条件不同：折叠光标位于链接文字中时也会返回 Link Mark。非折叠选区只有在所有有效文字节点拥有完全相同的 href、target 和 rel 时才返回结果；普通文字、不同目标链接、跨 block 或非法选区均返回 `undefined`。
+`getSelectedLinkMark` 与 command 的执行条件不同：折叠光标位于链接文字中时也会返回 Link Mark。非折叠选区只有在单块或连续文本块中的所有有效文字节点拥有完全相同的 href、target 和 rel 时才返回结果；普通文字、不同目标链接、跨结构边界或非法选区均返回 `undefined`。
 
 ## 渲染规则
 
@@ -142,7 +143,7 @@ executeCommand(registry, UNSET_LINK_COMMAND_NAME, {
 
 ## Demo 入口
 
-中文 demo 的“链接”弹层可输入 href、打开方式和 rel，并支持设置、覆盖和取消链接。弹层使用当前模型选区执行默认 registry 中的 command；危险协议会使“确认链接”不可用，最近 Transaction、验收报告和文档 JSON 会同步展示结果。
+中文 demo 的“链接”弹层可输入 href、打开方式和 rel，并支持对单块或连续文本块设置、覆盖和取消链接。弹层使用当前模型选区执行默认 registry 中的 command；危险协议会使“确认链接”不可用，最近 Transaction、验收报告和文档 JSON 会同步展示结果。
 
 “选中链接状态”会展示当前统一 href，打开弹层时回填已选链接的 href、target 和 rel。“模型示例”中的“链接闭环”同时提供已有链接和待创建链接，可独立验收创建、编辑和取消。页面还提供编辑态和只读态链接样例，用于核对选择文字与原生跳转差异。
 
@@ -163,6 +164,7 @@ executeCommand(registry, UNSET_LINK_COMMAND_NAME, {
 
 ## 当前边界
 
-- 链接范围当前要求同一 block 内的非折叠文字选区，当前支持 paragraph、heading 和 quote。
+- 链接 command 支持连续顶层 paragraph、heading 和 quote 中的非折叠文字选区；CodeBlock、Divider、Image、List 和 Table 是范围边界。
+- 单条 `set_link` operation 仍只处理一个 block，跨块行为由 command 组合多条 operation。
 - href 当前只接受绝对 HTTP、HTTPS 和 mailto 地址。
 - DOM 选区恢复不保留反向选择方向。

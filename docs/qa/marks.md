@@ -34,7 +34,7 @@
 - `textColor` 已限制为安全十六进制颜色，并完成规范化、operation、Command、安全渲染、中文 demo 与 E2E 闭环。
 - `backgroundColor` 已限制为安全十六进制颜色，并完成规范化、operation、Command、安全渲染、中文 demo 与 E2E 闭环。
 - 三种属性 command 已由 `TEXT_STYLE_COMMANDS` 统一组织，并完成跨 text、反向选区、默认注册表和混合样例验收。
-- Link Mark 已完成安全校验、helper、`set_link` operation、设置/取消 command、渲染、选区恢复、History 和中文 Demo 验收。
+- Link Mark 已完成安全校验、helper、`set_link` operation、单块与跨连续文本块设置/取消 command、渲染、选区恢复、History 和中文 Demo 验收。
 
 ## 自动化覆盖
 
@@ -76,7 +76,7 @@
 - 第 17 周 React Toolbar 已提供四种 boolean mark 默认项。
 - mark 快捷键尚未绑定编辑器键盘事件。
 - boolean mark 与三种文字属性 command 已支持连续顶层 paragraph、heading、quote，并覆盖反向选区、混合状态和 History 往返。
-- CodeBlock、Divider、Image、List 和 Table 仍是样式范围边界；Link Mark 仍为单块范围。
+- boolean mark、三种文字属性与 Link Mark 均支持连续顶层 paragraph、heading、quote；CodeBlock、Divider、Image、List 和 Table 仍是样式范围边界。
 
 ## 结论
 

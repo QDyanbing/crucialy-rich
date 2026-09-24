@@ -8,6 +8,7 @@
 - 编辑态链接允许选择文字但不触发导航，只读态保留浏览器原生导航。
 - 链接弹层获得焦点后仍使用打开前的模型选区，确认后恢复 DOM 范围。
 - 链接 transaction 可进入 History，并在撤销/重做时恢复文档与选区。
+- 链接 command 可跨连续 paragraph、heading、quote 创建、覆盖和取消，并作为一条 History 记录往返。
 
 ## 自动化覆盖
 
@@ -24,10 +25,11 @@
 
 - `packages/core/tests/operation/set-link.test.ts`
 - `packages/core/tests/command/link.test.ts`
+- `packages/core/tests/command/cross-block-link-boundary.test.ts`
 - `packages/core/tests/history/snapshot.test.ts`
 - `packages/core/tests/public-api.test.ts`
 
-覆盖同段跨 text 设置、覆盖、取消、其他 marks 保留、选区重映射、command 状态、History 快照和 `core.link` 功能命名空间。
+覆盖同段跨 text 与连续文本块设置、覆盖、取消、其他 marks 保留、正反向选区重映射、结构边界、command 状态、History 快照和 `core.link` 功能命名空间。
 
 ### 渲染与 React
 
@@ -41,7 +43,7 @@
 
 - `tests/e2e/demo-shell.spec.ts`
 
-覆盖链接创建、编辑、取消、危险地址禁用、编辑态选择、只读态导航、字段回填、pointer/键盘打开弹层后的选区恢复，以及 selection 丢失后的原范围应用。
+覆盖单块与跨块链接创建、编辑、取消、History 往返、危险地址禁用、编辑态选择、只读态导航、字段回填、pointer/键盘打开弹层后的选区恢复，以及 selection 丢失后的原范围应用。
 
 ## Demo 手测
 
@@ -62,10 +64,10 @@ pnpm check:all
 
 ## 当前边界
 
-- 链接范围当前要求同一 block 内的非折叠文字选区，当前支持 paragraph、heading 和 quote。
+- 链接 command 当前支持连续顶层 paragraph、heading 和 quote 中的非折叠文字选区。
 - href 当前只接受绝对 HTTP、HTTPS 和 mailto 地址。
 - DOM 选区恢复使用规范化后的正向范围，不保留反向选择方向。
-- 通用浮层组件、站内相对链接和复杂跨 block 链接不在本周范围。
+- CodeBlock、Divider、Image、List、Table、通用浮层组件和站内相对链接仍不在当前链接范围。
 
 ## 结论
 

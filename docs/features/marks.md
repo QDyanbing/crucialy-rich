@@ -217,4 +217,4 @@ Demo 的“文字标记”样例覆盖普通、加粗、斜体、下划线、删
 - 第 17 周 React Toolbar 已内置四种 boolean mark 默认项；快捷键仍由宿主绑定。
 - 快捷键当前只提供映射与查询，不包含编辑器事件绑定。
 - boolean mark 与文字属性 command 支持连续顶层 paragraph、heading、quote；每个 block 对应一条 operation，并在同一 transaction 中提交。
-- CodeBlock、Divider、Image、List 和 Table 不参与跨块样式；Link Mark 仍要求同一 block 内的非折叠选区。
+- boolean mark、三种文字属性与 Link Mark 均支持连续顶层 paragraph、heading、quote；CodeBlock、Divider、Image、List 和 Table 仍是跨块样式边界。

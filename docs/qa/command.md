@@ -41,7 +41,7 @@ Command 验收覆盖注册、查询、状态读取、执行结果、文本编辑
 - `packages/core/tests/command/strike.test.ts`：选区删除线、取消删除线、collapsed 后续输入继承、跨 text、active 状态和多 mark 叠加。
 - `packages/core/tests/command/mark-interaction.test.ts`：四种 boolean mark 在混合选区中的独立切换。
 - `packages/core/tests/command/text-style-interaction.test.ts`：字号、文字颜色、背景色与 boolean mark 组合应用。
-- `packages/core/tests/command/link.test.ts`：链接设置、覆盖、取消、状态读取和安全 payload。
+- `packages/core/tests/command/link.test.ts`、`cross-block-link-boundary.test.ts`：链接设置、覆盖、取消、跨块边界、状态读取、History 和安全 payload。
 - `packages/core/tests/command/heading.test.ts`：1–6 级标题、恢复正文、多块范围和状态读取。
 - `packages/core/tests/command/quote.test.ts`：引用切换、取消、多块范围和状态读取。
 - `packages/core/tests/command/code-block.test.ts`：代码块切换、恢复正文、marks 清理和状态读取。
@@ -75,6 +75,7 @@ Command 验收覆盖注册、查询、状态读取、执行结果、文本编辑
 | 跨 text 斜体 | 设置同 block 跨 text 选区后执行 `italicCommand` | 选中文本被切分斜体并合并同 marks text           | 通过 |
 | 扩展块 Mark  | 在 heading/quote 内执行 Mark command            | 保留 block 类型并更新选中文字                   | 通过 |
 | 跨块 Mark    | 跨 paragraph/heading/quote 执行样式命令         | 逐块更新、统一状态并保持选区方向                | 通过 |
+| 跨块链接     | 跨 paragraph/heading/quote 设置或取消链接       | 多条 operation 组成一个 transaction 与历史项    | 通过 |
 | 分段         | 设置 collapsed selection 后点击“分段”           | 文档新增 paragraph，最近 transaction 包含 split | 通过 |
 | 选区分段     | 设置跨 text 或跨文本块 selection 后按 Enter     | 先删除选区，再按删除起点分段                    | 通过 |
 | 合并段落     | 设置第二段段首 collapsed selection 后点击“合并” | 两段合并，最近 transaction 包含 merge           | 通过 |
@@ -87,7 +88,7 @@ Command 验收覆盖注册、查询、状态读取、执行结果、文本编辑
 ## 当前限制
 
 - 文本 command 支持同一文本容器和连续顶层文本块 range selection。
-- Mark command 支持 paragraph、heading、quote 中的单块或连续顶层跨块 selection；结构节点、CodeBlock、List 和 Table 保持拒绝。
+- boolean mark、文字属性和链接 command 支持 paragraph、heading、quote 中的单块或连续顶层跨块 selection；结构节点、CodeBlock、List 和 Table 保持拒绝。
 - `splitBlockCommand` 支持 collapsed、同容器和连续顶层文本块 selection；`mergeBlockCommand` / `insertDividerCommand` 仍只支持 collapsed selection。
 - Heading/Quote command 支持连续顶层 block 范围，不支持非连续多选。
 - collapsed Backspace/Delete 的单字符删除仍保留 input helper；跨段合并路径会优先复用 block command。

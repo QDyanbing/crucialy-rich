@@ -16,7 +16,7 @@
 
 非折叠选区编辑已支持同一文本容器内跨 text 节点，以及跨连续顶层 paragraph、heading、quote、codeBlock。输入替换、Backspace、Delete、Enter、选区映射和 History 往返共用 `delete_text` / `delete_range` operation；列表、表格、图片和分隔线等结构边界暂不参与跨块删除。
 
-四种 boolean mark 与字号、文字颜色、背景色已支持跨连续顶层 paragraph、heading、quote 应用和取消；command 会把范围拆成逐块 operation，并在同一 transaction 中统一状态、恢复正向或反向选区。CodeBlock、列表、表格和 void block 仍是样式范围边界，Link Mark 仍保持单块规则。
+四种 boolean mark、字号、文字颜色、背景色与 Link Mark 已支持跨连续顶层 paragraph、heading、quote 应用和取消；command 会把范围拆成逐块 operation，并在同一 transaction 中统一状态、恢复正向或反向选区。CodeBlock、列表、表格和 void block 仍是样式范围边界。
 
 text marks schema 当前支持 `bold`、`italic`、`underline` 和 `strike` 共存，四种 boolean mark 均已完成 command、renderer、demo 和 history 闭环。第 11 周已完成 `8–72px` 字号、安全文字颜色与背景色，以及三种属性的跨 text、反向选区、默认注册表和混合样例验收；颜色只接受 `#RGB` / `#RRGGBB`，并统一规范化为小写六位格式。
 

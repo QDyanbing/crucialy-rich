@@ -43,4 +43,4 @@
 
 ## 当前边界
 
-当前仍不包含真实图片上传、图片缩放/图注、跨表格单元格选区、非连续 block 多选或复杂 history 合并；跨块样式目前只覆盖连续顶层 paragraph、heading、quote，完整输入法策略仍有待扩展。
+当前仍不包含真实图片上传、图片缩放/图注、跨表格单元格选区、非连续 block 多选或复杂 history 合并；跨块 boolean mark、文字属性和链接目前只覆盖连续顶层 paragraph、heading、quote，完整输入法策略仍有待扩展。
