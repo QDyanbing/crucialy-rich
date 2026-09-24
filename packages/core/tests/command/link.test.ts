@@ -11,6 +11,7 @@ import {
   createHistoryState,
   createHeading,
   createParagraph,
+  createQuote,
   createText,
   createTransactionAcceptanceReport,
   executeCommand,
@@ -151,6 +152,74 @@ describe("setLinkCommand", () => {
         type: "text",
       },
     ]);
+  });
+
+  it("sets one normalized link across text blocks", () => {
+    const document = createDocument([
+      createParagraph([createText("开头", { bold: true })]),
+      createHeading(2, [createText("标题")]),
+      createQuote([createText("引用", { underline: true })]),
+    ]);
+    const result = setLinkCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0], offset: 1 },
+          focus: { path: [2, 0], offset: 1 },
+        },
+      },
+      payload: {
+        href: " HTTPS://Example.com/docs ",
+        rel: "NOFOLLOW noopener",
+        target: "_blank",
+      },
+    });
+
+    expect(result.transaction?.operations).toHaveLength(3);
+    expect(
+      result.transaction?.operations.every(
+        (operation) =>
+          operation.type === "set_link" &&
+          operation.link?.href === "https://example.com/docs",
+      ),
+    ).toBe(true);
+    expect(applyTransaction(document, result.transaction!).children).toEqual([
+      createParagraph([
+        createText("开", { bold: true }),
+        createText("头", {
+          bold: true,
+          link: {
+            href: "https://example.com/docs",
+            rel: "nofollow noopener",
+            target: "_blank",
+          },
+        }),
+      ]),
+      createHeading(2, [
+        createText("标题", {
+          link: {
+            href: "https://example.com/docs",
+            rel: "nofollow noopener",
+            target: "_blank",
+          },
+        }),
+      ]),
+      createQuote([
+        createText("引", {
+          link: {
+            href: "https://example.com/docs",
+            rel: "nofollow noopener",
+            target: "_blank",
+          },
+          underline: true,
+        }),
+        createText("用", { underline: true }),
+      ]),
+    ]);
+    expect(result.selection).toEqual({
+      anchor: { path: [0, 1], offset: 0 },
+      focus: { path: [2, 0], offset: 1 },
+    });
   });
 
   it.each([
