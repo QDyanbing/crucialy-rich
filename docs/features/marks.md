@@ -180,15 +180,16 @@ const strikeCommand: Command;
 
 `strikeCommand` 已加入默认 command registry，demo 操作区可通过“删除线”按钮调用，并会记录 history。
 
-## 快捷键占位
+## 快捷键
 
-`DEFAULT_COMMAND_SHORTCUTS` 当前预留三组跨平台主修饰键映射：
+`DEFAULT_COMMAND_SHORTCUTS` 当前提供四组 boolean mark 跨平台主修饰键映射：
 
 - Ctrl/Meta + B：`boldCommand`。
 - Ctrl/Meta + I：`italicCommand`。
 - Ctrl/Meta + U：`underlineCommand`。
+- Ctrl/Meta + Shift + X：`strikeCommand`。
 
-`getCommandShortcuts` 可以按 command name 查询配置，`getCommandNameFromShortcut` 可以把键盘输入匹配为 command name。当前不会在 React 组件中自动绑定或执行这些快捷键，Strike 也没有默认映射；宿主可以传入自定义表扩展。
+`getCommandShortcuts` 可以按 command name 查询配置，`getCommandShortcutFromInput` 可以读取包含 payload 的完整绑定，`getCommandNameFromShortcut` 可以只匹配 command name。React 组件会自动执行默认 command 快捷键，宿主仍可传入自定义表进行纯函数查询。
 
 ## 通用 Mark Command
 
@@ -214,7 +215,6 @@ Demo 的“文字标记”样例覆盖普通、加粗、斜体、下划线、删
 
 ## 当前限制
 
-- 第 17 周 React Toolbar 已内置四种 boolean mark 默认项；快捷键仍由宿主绑定。
-- 快捷键当前只提供映射与查询，不包含编辑器事件绑定。
+- 第 17 周 React Toolbar 已内置四种 boolean mark 默认项，React 编辑器也已绑定四种默认 mark 快捷键。
 - boolean mark 与文字属性 command 支持连续顶层 paragraph、heading、quote；每个 block 对应一条 operation，并在同一 transaction 中提交。
 - boolean mark、三种文字属性与 Link Mark 均支持连续顶层 paragraph、heading、quote；CodeBlock、Divider、Image、List 和 Table 仍是跨块样式边界。

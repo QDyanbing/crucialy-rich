@@ -13,7 +13,7 @@ Command 系统负责把“可执行的编辑意图”包装成统一接口。当
 - 提供 `canExecuteCommand` 判断 command 是否可执行。
 - 提供 `executeCommand` 按名称执行 command。
 - 提供 `queryCommandState` 读取 command 的 registered、disabled、active 和不可用原因。
-- 提供 `DEFAULT_COMMAND_SHORTCUTS`、`getCommandShortcuts` 和 `getCommandNameFromShortcut`，用于查询和匹配预留快捷键配置。
+- 提供 `DEFAULT_COMMAND_SHORTCUTS`、`getCommandShortcuts`、`getCommandShortcutFromInput` 和 `getCommandNameFromShortcut`，用于查询和匹配可携带 payload 的快捷键配置。
 - 提供 `boldCommand`、`italicCommand`、`underlineCommand` 和 `strikeCommand`，支持单块或跨连续文本块统一应用/取消，以及 collapsed selection 的后续输入占位。
 - 提供 `setFontSizeCommand`、`setTextColorCommand` 和 `setBackgroundColorCommand`，支持单块或跨连续文本块设置/取消安全属性值，以及 collapsed selection 的后续输入占位。
 - 提供 `setLinkCommand` 和 `unsetLinkCommand`，支持单块或跨连续文本块设置、覆盖和取消安全链接。
@@ -69,6 +69,7 @@ interface CommandShortcutBinding {
   readonly altKey?: boolean;
   readonly commandName: string;
   readonly key: string;
+  readonly payload?: unknown;
   readonly shiftKey?: boolean;
 }
 
@@ -83,6 +84,11 @@ function getCommandNameFromShortcut(
   input: CommandShortcutInput,
   shortcuts?: readonly CommandShortcutBinding[],
 ): string | undefined;
+
+function getCommandShortcutFromInput(
+  input: CommandShortcutInput,
+  shortcuts?: readonly CommandShortcutBinding[],
+): CommandShortcutBinding | undefined;
 
 function createDefaultCommandRegistry(): CommandRegistry;
 
@@ -194,9 +200,10 @@ const mergeBlockCommand: Command;
 - command 注册但 `canExecute` 返回 `false` 时，`queryCommandState` 返回 `disabled: true`。
 - command 没有 `isActive` 时，`queryCommandState` 默认 `active: false`。
 - command 提供 `isActive` 时，`queryCommandState` 使用它返回工具栏激活态。
-- 默认快捷键配置包含 Ctrl/Meta + B、Ctrl/Meta + I 和 Ctrl/Meta + U，分别映射 Bold、Italic 和 Underline。
-- 快捷键匹配同时接受大小写 `key` 和 `KeyB` 形式的 `code`，并跳过 Alt、额外 Shift 和输入法组合态。
-- 宿主可以向查询函数传入自定义映射表；当前只返回 command name，不自动执行命令或绑定 DOM 事件。
+- 默认快捷键覆盖 Bold、Italic、Underline、Strike、Heading 0–6、Quote、OrderedList 和 BulletList。
+- 快捷键匹配同时接受大小写 `key`、`KeyB` 与 `Digit2` 形式的 `code`，并要求主修饰键、Alt、Shift 与配置精确一致；输入法组合态不会命中。
+- 绑定可携带 command `payload`，例如 Heading 层级；`getCommandShortcutFromInput` 返回完整绑定，`getCommandNameFromShortcut` 只返回名称。
+- 宿主可以向查询函数传入自定义映射表；React 编辑器会自动执行默认 command 快捷键并透传 payload。
 - `boldCommand` 成功时返回包含 `toggle_mark` 的 transaction，并根据当前 selection 覆盖的 text marks 返回 active 状态。
 - `italicCommand` 成功时返回包含 `toggle_mark` 的 transaction，并根据当前 selection 覆盖的 text marks 返回 active 状态。
 - `underlineCommand` 成功时返回包含 `toggle_mark` 的 transaction，并根据当前 selection 覆盖的 text marks 返回 active 状态。
@@ -228,6 +235,6 @@ const mergeBlockCommand: Command;
 - 文本插入和删除 command 支持同一文本容器或连续顶层文本块 range；暂不跨越列表、表格和 void block 等结构边界。
 - boolean mark、文字属性和链接 command 支持 paragraph、heading、quote 的单块或连续顶层跨块 selection；CodeBlock、Divider、Image、List 和 Table 不接受跨块 marks。
 - `splitBlockCommand` 支持 collapsed、同容器和连续顶层文本块 selection；`mergeBlockCommand` 与 `insertDividerCommand` 仍只处理 collapsed selection。
-- 当前没有快捷键事件绑定或权限系统；快捷键模块只提供可查询配置和纯匹配函数。
+- 快捷键模块不处理权限；宿主提供自定义 registry 时，React 编辑器会使用该 registry 执行命中的默认快捷键名称。
 - History 模块已提供 `undoCommand` 和 `redoCommand`；默认 Command 注册表暂不内置 history command。
 - 当前没有批量 command pipeline。

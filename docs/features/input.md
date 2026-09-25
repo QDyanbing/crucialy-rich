@@ -35,7 +35,7 @@
 - 顶层列表项开头按 Backspace 转为 paragraph；嵌套项开头按 Backspace 提升一级。
 - Enter 后通过 `createSelectionAfterEnterInput` 计算新的折叠选区。
 - 支持完整 Composition 生命周期；候选阶段不修改模型，结束时提交一次 `insertCompositionText` transaction。
-- 支持 `Mod+B`、`Mod+I`、`Mod+U` 格式快捷键，并在组合输入期间暂停执行。
+- 支持 boolean mark、标题、引用和两种列表快捷键，并在组合输入期间暂停执行。
 - 支持 paragraph 开头的标题、列表、引用和代码块 Markdown 输入规则。
 
 ## 数据流
@@ -198,7 +198,7 @@ function createSelectionAfterTabInput(input: TabInput): RangeSelection;
 - History 状态会记录真实输入产生的 transaction。
 - 连续普通文本输入会按 `typing` batch 合并为一个 undo item。
 - 主编辑器可通过 Ctrl/Meta + Z 撤销，通过 Ctrl/Meta + Shift + Z 或 Ctrl/Meta + Y 重做。
-- 主编辑器可通过 Ctrl/Meta + B、I、U 执行加粗、斜体和下划线 Command。
+- 主编辑器可通过快捷键执行加粗、斜体、下划线、删除线、标题、引用、有序列表和无序列表 Command。
 - 中文候选更新不会产生中间 transaction，确认后只记录一次输入。
 - paragraph 开头可用 `# `、`- `、`1. `、`> ` 和 ` ``` ` 转换块结构。
 

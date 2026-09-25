@@ -79,4 +79,4 @@ Demo 的“引用块”样例包含 Quote 和普通正文，操作区提供带 a
 
 ## 当前边界
 
-- 当前没有 Quote 快捷键；宿主可以通过 command API 自行绑定工具栏或键盘入口。
+- React 编辑器支持 Ctrl/Meta + Shift + 9 切换 Quote，并复用现有多块 command 与 History 流程。

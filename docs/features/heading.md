@@ -80,4 +80,4 @@ Demo 的“标题层级”样例包含一级到六级标题和正文，操作区
 ## 当前边界
 
 - Quote command 与 `blockquote` 语义渲染已在第 13 周 Day 3 完成，详见 [Quote 引用块](./quote.md)。
-- 当前没有标题快捷键；宿主可以通过 command API 自行绑定工具栏或键盘入口。
+- React 编辑器支持 Ctrl/Meta + Alt + 1–6 设置标题级别，并支持 Ctrl/Meta + Alt + 0 恢复 paragraph。
