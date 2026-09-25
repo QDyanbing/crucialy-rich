@@ -1,5 +1,10 @@
 import type { CommandName } from "./types";
-import { BOLD_COMMAND_NAME, ITALIC_COMMAND_NAME, UNDERLINE_COMMAND_NAME } from "./mark";
+import {
+  BOLD_COMMAND_NAME,
+  ITALIC_COMMAND_NAME,
+  STRIKE_COMMAND_NAME,
+  UNDERLINE_COMMAND_NAME,
+} from "./mark";
 
 export interface CommandShortcutBinding {
   readonly altKey?: boolean;
@@ -23,6 +28,7 @@ export const DEFAULT_COMMAND_SHORTCUTS: readonly CommandShortcutBinding[] = [
   { commandName: BOLD_COMMAND_NAME, key: "b" },
   { commandName: ITALIC_COMMAND_NAME, key: "i" },
   { commandName: UNDERLINE_COMMAND_NAME, key: "u" },
+  { commandName: STRIKE_COMMAND_NAME, key: "x", shiftKey: true },
 ];
 
 export function getCommandShortcuts(

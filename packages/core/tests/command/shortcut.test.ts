@@ -17,6 +17,7 @@ describe("command shortcut config", () => {
       { commandName: BOLD_COMMAND_NAME, key: "b" },
       { commandName: ITALIC_COMMAND_NAME, key: "i" },
       { commandName: UNDERLINE_COMMAND_NAME, key: "u" },
+      { commandName: STRIKE_COMMAND_NAME, key: "x", shiftKey: true },
     ]);
   });
 
@@ -24,7 +25,9 @@ describe("command shortcut config", () => {
     expect(getCommandShortcuts(BOLD_COMMAND_NAME)).toEqual([
       { commandName: BOLD_COMMAND_NAME, key: "b" },
     ]);
-    expect(getCommandShortcuts(STRIKE_COMMAND_NAME)).toEqual([]);
+    expect(getCommandShortcuts(STRIKE_COMMAND_NAME)).toEqual([
+      { commandName: STRIKE_COMMAND_NAME, key: "x", shiftKey: true },
+    ]);
   });
 
   it("resolves Ctrl and Meta mark shortcuts", () => {
@@ -37,6 +40,9 @@ describe("command shortcut config", () => {
     expect(getCommandNameFromShortcut({ code: "KeyU", ctrlKey: true, key: "" })).toBe(
       UNDERLINE_COMMAND_NAME,
     );
+    expect(
+      getCommandNameFromShortcut({ key: "X", metaKey: true, shiftKey: true }),
+    ).toBe(STRIKE_COMMAND_NAME);
   });
 
   it("ignores unmatched modifiers and composing input", () => {
