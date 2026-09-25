@@ -9,6 +9,7 @@ import {
   ITALIC_COMMAND_NAME,
   SET_HEADING_COMMAND_NAME,
   STRIKE_COMMAND_NAME,
+  TOGGLE_QUOTE_COMMAND_NAME,
   UNDERLINE_COMMAND_NAME,
 } from "../../src";
 
@@ -25,6 +26,7 @@ describe("command shortcut config", () => {
         key: String(level),
         payload: { level: level === 0 ? null : level },
       })),
+      { commandName: TOGGLE_QUOTE_COMMAND_NAME, key: "9", shiftKey: true },
     ]);
   });
 
@@ -36,6 +38,9 @@ describe("command shortcut config", () => {
       { commandName: STRIKE_COMMAND_NAME, key: "x", shiftKey: true },
     ]);
     expect(getCommandShortcuts(SET_HEADING_COMMAND_NAME)).toHaveLength(7);
+    expect(getCommandShortcuts(TOGGLE_QUOTE_COMMAND_NAME)).toEqual([
+      { commandName: TOGGLE_QUOTE_COMMAND_NAME, key: "9", shiftKey: true },
+    ]);
   });
 
   it("resolves Ctrl and Meta mark shortcuts", () => {
@@ -57,6 +62,14 @@ describe("command shortcut config", () => {
       commandName: SET_HEADING_COMMAND_NAME,
       payload: { level: 3 },
     });
+    expect(
+      getCommandNameFromShortcut({
+        code: "Digit9",
+        metaKey: true,
+        key: "",
+        shiftKey: true,
+      }),
+    ).toBe(TOGGLE_QUOTE_COMMAND_NAME);
   });
 
   it("ignores unmatched modifiers and composing input", () => {

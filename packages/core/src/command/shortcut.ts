@@ -1,5 +1,6 @@
 import type { CommandName } from "./types";
 import { SET_HEADING_COMMAND_NAME } from "./heading";
+import { TOGGLE_QUOTE_COMMAND_NAME } from "./quote";
 import {
   BOLD_COMMAND_NAME,
   ITALIC_COMMAND_NAME,
@@ -72,6 +73,7 @@ export const DEFAULT_COMMAND_SHORTCUTS: readonly CommandShortcutBinding[] = [
     key: "6",
     payload: { level: 6 },
   },
+  { commandName: TOGGLE_QUOTE_COMMAND_NAME, key: "9", shiftKey: true },
 ];
 
 export function getCommandShortcuts(
