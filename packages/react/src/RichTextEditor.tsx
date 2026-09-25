@@ -628,6 +628,9 @@ function RichTextEditorComponent(
       const result = shortcutSelection
         ? executeCoreCommand(registry, shortcutAction.commandName, {
             context: { document, selection: shortcutSelection },
+            ...(shortcutAction.payload === undefined
+              ? {}
+              : { payload: shortcutAction.payload }),
           })
         : undefined;
       const shortcutInput =
