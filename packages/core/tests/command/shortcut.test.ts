@@ -9,6 +9,7 @@ import {
   ITALIC_COMMAND_NAME,
   SET_HEADING_COMMAND_NAME,
   STRIKE_COMMAND_NAME,
+  TOGGLE_ORDERED_LIST_COMMAND_NAME,
   TOGGLE_QUOTE_COMMAND_NAME,
   UNDERLINE_COMMAND_NAME,
 } from "../../src";
@@ -26,6 +27,7 @@ describe("command shortcut config", () => {
         key: String(level),
         payload: { level: level === 0 ? null : level },
       })),
+      { commandName: TOGGLE_ORDERED_LIST_COMMAND_NAME, key: "7", shiftKey: true },
       { commandName: TOGGLE_QUOTE_COMMAND_NAME, key: "9", shiftKey: true },
     ]);
   });
@@ -38,6 +40,9 @@ describe("command shortcut config", () => {
       { commandName: STRIKE_COMMAND_NAME, key: "x", shiftKey: true },
     ]);
     expect(getCommandShortcuts(SET_HEADING_COMMAND_NAME)).toHaveLength(7);
+    expect(getCommandShortcuts(TOGGLE_ORDERED_LIST_COMMAND_NAME)).toEqual([
+      { commandName: TOGGLE_ORDERED_LIST_COMMAND_NAME, key: "7", shiftKey: true },
+    ]);
     expect(getCommandShortcuts(TOGGLE_QUOTE_COMMAND_NAME)).toEqual([
       { commandName: TOGGLE_QUOTE_COMMAND_NAME, key: "9", shiftKey: true },
     ]);
@@ -70,6 +75,9 @@ describe("command shortcut config", () => {
         shiftKey: true,
       }),
     ).toBe(TOGGLE_QUOTE_COMMAND_NAME);
+    expect(
+      getCommandNameFromShortcut({ ctrlKey: true, key: "7", shiftKey: true }),
+    ).toBe(TOGGLE_ORDERED_LIST_COMMAND_NAME);
   });
 
   it("ignores unmatched modifiers and composing input", () => {

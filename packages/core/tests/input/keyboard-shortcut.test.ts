@@ -6,6 +6,7 @@ import {
   ITALIC_COMMAND_NAME,
   SET_HEADING_COMMAND_NAME,
   STRIKE_COMMAND_NAME,
+  TOGGLE_ORDERED_LIST_COMMAND_NAME,
   TOGGLE_QUOTE_COMMAND_NAME,
   UNDERLINE_COMMAND_NAME,
 } from "../../src";
@@ -37,6 +38,14 @@ describe("getEditorShortcutAction", () => {
     expect(
       getEditorShortcutAction({ ctrlKey: true, key: "9", shiftKey: true }),
     ).toEqual({ commandName: TOGGLE_QUOTE_COMMAND_NAME, type: "command" });
+    expect(
+      getEditorShortcutAction({
+        code: "Digit7",
+        key: "",
+        metaKey: true,
+        shiftKey: true,
+      }),
+    ).toEqual({ commandName: TOGGLE_ORDERED_LIST_COMMAND_NAME, type: "command" });
   });
 
   it("resolves undo and redo shortcuts before command shortcuts", () => {
