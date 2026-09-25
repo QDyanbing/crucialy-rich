@@ -83,5 +83,11 @@ describe("command shortcut config", () => {
     expect(
       getCommandShortcutFromInput({ altKey: true, ctrlKey: true, key: "2" }, shortcuts),
     ).toEqual(shortcuts[0]);
+    expect(
+      getCommandShortcutFromInput(
+        { altKey: true, code: "Digit2", metaKey: true, key: "" },
+        shortcuts,
+      ),
+    ).toEqual(shortcuts[0]);
   });
 });

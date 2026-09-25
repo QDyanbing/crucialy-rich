@@ -37,10 +37,15 @@ function isShortcutKey(
   shortcut: CommandShortcutBinding,
 ): boolean {
   const shortcutKey = shortcut.key.toLowerCase();
+  const shortcutCode = /^[a-z]$/.test(shortcutKey)
+    ? `key${shortcutKey}`
+    : /^\d$/.test(shortcutKey)
+      ? `digit${shortcutKey}`
+      : undefined;
 
   return (
     input.key.toLowerCase() === shortcutKey ||
-    input.code?.toLowerCase() === `key${shortcutKey}`
+    (shortcutCode !== undefined && input.code?.toLowerCase() === shortcutCode)
   );
 }
 
