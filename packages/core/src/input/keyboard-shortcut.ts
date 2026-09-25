@@ -1,12 +1,12 @@
 import {
-  getCommandNameFromShortcut,
+  getCommandShortcutFromInput,
   type CommandName,
   type CommandShortcutInput,
 } from "../command";
 import { getHistoryShortcutAction, type HistoryShortcutAction } from "../history";
 
 export type EditorShortcutAction =
-  | { commandName: CommandName; type: "command" }
+  | { commandName: CommandName; payload?: unknown; type: "command" }
   | { action: HistoryShortcutAction; type: "history" };
 
 export function getEditorShortcutAction(
@@ -18,7 +18,13 @@ export function getEditorShortcutAction(
     return { action: historyAction, type: "history" };
   }
 
-  const commandName = getCommandNameFromShortcut(input);
+  const shortcut = getCommandShortcutFromInput(input);
 
-  return commandName ? { commandName, type: "command" } : undefined;
+  return shortcut
+    ? {
+        commandName: shortcut.commandName,
+        ...(shortcut.payload === undefined ? {} : { payload: shortcut.payload }),
+        type: "command",
+      }
+    : undefined;
 }

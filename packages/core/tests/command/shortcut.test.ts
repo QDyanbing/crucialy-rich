@@ -4,6 +4,7 @@ import {
   BOLD_COMMAND_NAME,
   DEFAULT_COMMAND_SHORTCUTS,
   getCommandNameFromShortcut,
+  getCommandShortcutFromInput,
   getCommandShortcuts,
   ITALIC_COMMAND_NAME,
   STRIKE_COMMAND_NAME,
@@ -66,5 +67,21 @@ describe("command shortcut config", () => {
     expect(
       getCommandNameFromShortcut({ key: "x", metaKey: true }, shortcuts),
     ).toBeUndefined();
+  });
+
+  it("returns the payload from a matched shortcut binding", () => {
+    const payload = { level: 2 };
+    const shortcuts = [
+      {
+        altKey: true,
+        commandName: "setHeading",
+        key: "2",
+        payload,
+      },
+    ] as const;
+
+    expect(
+      getCommandShortcutFromInput({ altKey: true, ctrlKey: true, key: "2" }, shortcuts),
+    ).toEqual(shortcuts[0]);
   });
 });

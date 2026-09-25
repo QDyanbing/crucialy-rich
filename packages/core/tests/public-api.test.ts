@@ -386,6 +386,7 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.deleteSelectionCommand).toBe("object");
     expect(typeof core.executeCommand).toBe("function");
     expect(typeof core.getCommandNameFromShortcut).toBe("function");
+    expect(typeof core.getCommandShortcutFromInput).toBe("function");
     expect(typeof core.getCommandShortcuts).toBe("function");
     expect(typeof core.getSelectedLinkMark).toBe("function");
     expect(typeof core.getSelectedHeadingLevel).toBe("function");

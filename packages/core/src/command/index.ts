@@ -162,6 +162,7 @@ export { createCommandRegistry, type CommandRegistry } from "./registry";
 export {
   DEFAULT_COMMAND_SHORTCUTS,
   getCommandNameFromShortcut,
+  getCommandShortcutFromInput,
   getCommandShortcuts,
 } from "./shortcut";
 export type { CommandShortcutBinding, CommandShortcutInput } from "./shortcut";

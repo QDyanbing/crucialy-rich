@@ -5,6 +5,7 @@ export interface CommandShortcutBinding {
   readonly altKey?: boolean;
   readonly commandName: CommandName;
   readonly key: string;
+  readonly payload?: unknown;
   readonly shiftKey?: boolean;
 }
 
@@ -62,6 +63,12 @@ export function getCommandNameFromShortcut(
   input: CommandShortcutInput,
   shortcuts: readonly CommandShortcutBinding[] = DEFAULT_COMMAND_SHORTCUTS,
 ): CommandName | undefined {
-  return shortcuts.find((shortcut) => matchesCommandShortcut(input, shortcut))
-    ?.commandName;
+  return getCommandShortcutFromInput(input, shortcuts)?.commandName;
+}
+
+export function getCommandShortcutFromInput(
+  input: CommandShortcutInput,
+  shortcuts: readonly CommandShortcutBinding[] = DEFAULT_COMMAND_SHORTCUTS,
+): CommandShortcutBinding | undefined {
+  return shortcuts.find((shortcut) => matchesCommandShortcut(input, shortcut));
 }
