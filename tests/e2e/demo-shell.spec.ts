@@ -249,6 +249,26 @@ test("toggles quote with the keyboard shortcut", async ({ page }) => {
   await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 2');
 });
 
+test("switches list types with keyboard shortcuts", async ({ page }) => {
+  await page.goto("/");
+  await selectRenderedTextRange(page, "[0,0]", 0, 2);
+
+  const editor = page.getByLabel("已渲染文档");
+
+  await page.keyboard.press("Control+Shift+7");
+  await expect(editor.locator("ol > li")).toHaveText("你好，crucialy-rich。");
+
+  await page.keyboard.press("Control+Shift+8");
+  await expect(editor.locator("ol")).toHaveCount(0);
+  await expect(editor.locator("ul > li")).toHaveText("你好，crucialy-rich。");
+
+  await page.keyboard.press("Control+Shift+8");
+  await expect(editor.locator("ul")).toHaveCount(0);
+  await expect(editor.locator("p").first()).toHaveText("你好，crucialy-rich。");
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 3');
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
 test("applies boolean marks across text blocks", async ({ page }) => {
   await page.goto("/");
   await selectRenderedTextAcrossNodes(page, "[0,0]", 3, "[1,0]", 2);
