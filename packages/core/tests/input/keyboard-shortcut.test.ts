@@ -4,6 +4,7 @@ import {
   BOLD_COMMAND_NAME,
   getEditorShortcutAction,
   ITALIC_COMMAND_NAME,
+  SET_HEADING_COMMAND_NAME,
   STRIKE_COMMAND_NAME,
   UNDERLINE_COMMAND_NAME,
 } from "../../src";
@@ -25,6 +26,13 @@ describe("getEditorShortcutAction", () => {
     expect(
       getEditorShortcutAction({ key: "x", metaKey: true, shiftKey: true }),
     ).toEqual({ commandName: STRIKE_COMMAND_NAME, type: "command" });
+    expect(
+      getEditorShortcutAction({ altKey: true, code: "Digit2", ctrlKey: true, key: "" }),
+    ).toEqual({
+      commandName: SET_HEADING_COMMAND_NAME,
+      payload: { level: 2 },
+      type: "command",
+    });
   });
 
   it("resolves undo and redo shortcuts before command shortcuts", () => {

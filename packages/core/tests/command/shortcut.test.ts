@@ -7,6 +7,7 @@ import {
   getCommandShortcutFromInput,
   getCommandShortcuts,
   ITALIC_COMMAND_NAME,
+  SET_HEADING_COMMAND_NAME,
   STRIKE_COMMAND_NAME,
   UNDERLINE_COMMAND_NAME,
 } from "../../src";
@@ -18,6 +19,12 @@ describe("command shortcut config", () => {
       { commandName: ITALIC_COMMAND_NAME, key: "i" },
       { commandName: UNDERLINE_COMMAND_NAME, key: "u" },
       { commandName: STRIKE_COMMAND_NAME, key: "x", shiftKey: true },
+      ...Array.from({ length: 7 }, (_, level) => ({
+        altKey: true,
+        commandName: SET_HEADING_COMMAND_NAME,
+        key: String(level),
+        payload: { level: level === 0 ? null : level },
+      })),
     ]);
   });
 
@@ -28,6 +35,7 @@ describe("command shortcut config", () => {
     expect(getCommandShortcuts(STRIKE_COMMAND_NAME)).toEqual([
       { commandName: STRIKE_COMMAND_NAME, key: "x", shiftKey: true },
     ]);
+    expect(getCommandShortcuts(SET_HEADING_COMMAND_NAME)).toHaveLength(7);
   });
 
   it("resolves Ctrl and Meta mark shortcuts", () => {
@@ -43,6 +51,12 @@ describe("command shortcut config", () => {
     expect(
       getCommandNameFromShortcut({ key: "X", metaKey: true, shiftKey: true }),
     ).toBe(STRIKE_COMMAND_NAME);
+    expect(
+      getCommandShortcutFromInput({ altKey: true, ctrlKey: true, key: "3" }),
+    ).toMatchObject({
+      commandName: SET_HEADING_COMMAND_NAME,
+      payload: { level: 3 },
+    });
   });
 
   it("ignores unmatched modifiers and composing input", () => {

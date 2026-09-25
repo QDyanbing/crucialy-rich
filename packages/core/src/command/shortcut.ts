@@ -1,4 +1,5 @@
 import type { CommandName } from "./types";
+import { SET_HEADING_COMMAND_NAME } from "./heading";
 import {
   BOLD_COMMAND_NAME,
   ITALIC_COMMAND_NAME,
@@ -29,6 +30,48 @@ export const DEFAULT_COMMAND_SHORTCUTS: readonly CommandShortcutBinding[] = [
   { commandName: ITALIC_COMMAND_NAME, key: "i" },
   { commandName: UNDERLINE_COMMAND_NAME, key: "u" },
   { commandName: STRIKE_COMMAND_NAME, key: "x", shiftKey: true },
+  {
+    altKey: true,
+    commandName: SET_HEADING_COMMAND_NAME,
+    key: "0",
+    payload: { level: null },
+  },
+  {
+    altKey: true,
+    commandName: SET_HEADING_COMMAND_NAME,
+    key: "1",
+    payload: { level: 1 },
+  },
+  {
+    altKey: true,
+    commandName: SET_HEADING_COMMAND_NAME,
+    key: "2",
+    payload: { level: 2 },
+  },
+  {
+    altKey: true,
+    commandName: SET_HEADING_COMMAND_NAME,
+    key: "3",
+    payload: { level: 3 },
+  },
+  {
+    altKey: true,
+    commandName: SET_HEADING_COMMAND_NAME,
+    key: "4",
+    payload: { level: 4 },
+  },
+  {
+    altKey: true,
+    commandName: SET_HEADING_COMMAND_NAME,
+    key: "5",
+    payload: { level: 5 },
+  },
+  {
+    altKey: true,
+    commandName: SET_HEADING_COMMAND_NAME,
+    key: "6",
+    payload: { level: 6 },
+  },
 ];
 
 export function getCommandShortcuts(
