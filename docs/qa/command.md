@@ -82,8 +82,8 @@ Command 验收覆盖注册、查询、状态读取、执行结果、文本编辑
 | 状态读取     | 调整 selection 的 anchor/focus                  | Command 状态面板在可用/不可用/激活之间同步切换  | 通过 |
 | React 输入   | 在编辑器中输入、Enter、Backspace、Delete        | 输入层优先复用 command，文档和 selection 同步   | 通过 |
 | 默认注册表   | demo 和 React 使用默认 command registry         | 两侧内置 command 顺序和可执行状态保持一致       | 通过 |
-| 快捷键查询   | 查询 Bold、Italic、Underline 和 Strike 配置     | 前三种有默认映射，Strike 默认返回空             | 通过 |
-| 快捷键匹配   | 传入 Ctrl/Meta + B/I/U 和边界组合               | 返回对应 command name，非法组合不匹配           | 通过 |
+| 快捷键查询   | 查询 Mark、Heading、Quote 和 List 配置          | 返回 command name、修饰键和可选 payload         | 通过 |
+| 快捷键匹配   | 传入字母/数字 key、code 和边界组合              | 返回完整绑定，非法修饰键与组合输入不匹配        | 通过 |
 
 ## 当前限制
 
@@ -92,8 +92,8 @@ Command 验收覆盖注册、查询、状态读取、执行结果、文本编辑
 - `splitBlockCommand` 支持 collapsed、同容器和连续顶层文本块 selection；`mergeBlockCommand` / `insertDividerCommand` 仍只支持 collapsed selection。
 - Heading/Quote command 支持连续顶层 block 范围，不支持非连续多选。
 - collapsed Backspace/Delete 的单字符删除仍保留 input helper；跨段合并路径会优先复用 block command。
-- React Toolbar 已接入默认 Command 状态与执行；mark 快捷键仍只提供配置和匹配，不自动绑定编辑器事件。
+- React Toolbar 已接入默认 Command 状态与执行；React 编辑器会执行默认 Mark、Heading、Quote 和 List 快捷键并透传 payload。
 
 ## 结论
 
-Command 系统已经完成默认注册表、文本与 Block 编辑、四种 boolean mark、三种文字属性、Link、Heading、Quote、CodeBlock、Divider 和快捷键占位：demo 和 React 复用同一套 registry，状态面板可验证 command 可用性和 active 状态，自动化测试覆盖默认注册、状态矩阵、综合执行和浏览器交互。
+Command 系统已经完成默认注册表、文本与 Block 编辑、四种 boolean mark、三种文字属性、Link、Heading、Quote、CodeBlock、Divider 和可执行快捷键：demo 和 React 复用同一套 registry，状态面板可验证 command 可用性和 active 状态，自动化测试覆盖默认注册、状态矩阵、综合执行和浏览器交互。

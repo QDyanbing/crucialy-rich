@@ -26,7 +26,7 @@
 - `createHistorySnapshot` 会深拷贝 text marks。
 - Underline 与 Strike 均已完成 command、renderer 和 demo。
 - 四种 mark command 已由 `BOOLEAN_MARK_COMMANDS` 统一组织。
-- Bold、Italic 和 Underline 已提供可查询的默认快捷键配置。
+- Bold、Italic、Underline 和 Strike 已提供可查询、可由 React 编辑器执行的默认快捷键配置。
 - `TextMarks` 支持 `fontSize`、`textColor` 和 `backgroundColor`，并可与四种 boolean mark 共存。
 - 属性 Mark 已接入基础值校验、helper、规范化、合并判断、编辑保留和 History 快照。
 - core 公共入口已导出属性类型、常量和 helper。
@@ -74,7 +74,7 @@
 ## 当前限制
 
 - 第 17 周 React Toolbar 已提供四种 boolean mark 默认项。
-- mark 快捷键尚未绑定编辑器键盘事件。
+- 四种 boolean mark 默认快捷键已绑定 React 编辑器键盘事件，并通过统一 command transaction 进入宿主 History。
 - boolean mark 与三种文字属性 command 已支持连续顶层 paragraph、heading、quote，并覆盖反向选区、混合状态和 History 往返。
 - boolean mark、三种文字属性与 Link Mark 均支持连续顶层 paragraph、heading、quote；CodeBlock、Divider、Image、List 和 Table 仍是样式范围边界。
 

@@ -18,6 +18,8 @@
 - 新增跨连续 paragraph、heading、quote 的 boolean mark 与文字属性命令，统一混合激活状态并保留正反向选区。
 - 新增跨块样式的 Core、React、History 和中文 Demo 自动化验收，结构节点与 CodeBlock 继续作为范围边界。
 - 新增跨连续 paragraph、heading、quote 的链接创建、覆盖、取消与统一状态读取，并保持单条 History 记录。
+- 新增可携带 command payload 的快捷键绑定，以及 Strike、Heading 0–6、Quote、OrderedList 和 BulletList 默认快捷键。
+- 新增 React 快捷键 payload 透传、组件集成测试和中文 Demo 浏览器验收。
 
 - 初始化 `packages/core`、`packages/react` 和 `apps/demo` 的 pnpm 工作区结构。
 - 新增 TypeScript、tsup、Vite、Vitest、Playwright、ESLint、Prettier、commitlint、lint-staged 和 Git hooks。

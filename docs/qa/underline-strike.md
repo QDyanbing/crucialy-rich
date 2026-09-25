@@ -30,22 +30,22 @@
 
 ## 手测场景
 
-| 场景             | 操作                                     | 预期                                           | 状态 |
-| ---------------- | ---------------------------------------- | ---------------------------------------------- | ---- |
-| Underline 开关   | 对选区连续点击“下划线”                   | underline 独立添加和移除                       | 通过 |
-| Strike 开关      | 对选区连续点击“删除线”                   | strike 独立添加和移除                          | 通过 |
-| 两种装饰叠加     | 依次点击“下划线”和“删除线”               | 同时输出 underline 和 line-through             | 通过 |
-| 保留其他 mark    | 在已有 Bold/Italic 的选区切换装饰        | Bold/Italic 状态保持不变                       | 通过 |
-| 混合选区 active  | 对跨 text 混合选区应用再取消单一 mark    | 按钮 active 状态与整个选区一致                 | 通过 |
-| 快捷键配置查询   | 查询 Bold、Italic、Underline 和 Strike   | 前三者返回默认配置，Strike 返回空配置          | 通过 |
-| 自定义快捷键匹配 | 向匹配函数传入宿主自定义 Strike 快捷键表 | 返回 Strike command name，不自动执行或绑定事件 | 通过 |
+| 场景             | 操作                                     | 预期                               | 状态 |
+| ---------------- | ---------------------------------------- | ---------------------------------- | ---- |
+| Underline 开关   | 对选区连续点击“下划线”                   | underline 独立添加和移除           | 通过 |
+| Strike 开关      | 对选区连续点击“删除线”                   | strike 独立添加和移除              | 通过 |
+| 两种装饰叠加     | 依次点击“下划线”和“删除线”               | 同时输出 underline 和 line-through | 通过 |
+| 保留其他 mark    | 在已有 Bold/Italic 的选区切换装饰        | Bold/Italic 状态保持不变           | 通过 |
+| 混合选区 active  | 对跨 text 混合选区应用再取消单一 mark    | 按钮 active 状态与整个选区一致     | 通过 |
+| 快捷键配置查询   | 查询 Bold、Italic、Underline 和 Strike   | 四者均返回默认配置                 | 通过 |
+| 自定义快捷键匹配 | 向匹配函数传入宿主自定义 Strike 快捷键表 | 返回 Strike command name           | 通过 |
 
 ## 当前边界
 
 - mark command 仍限制在同一个 block 内，当前支持 paragraph、heading 和 quote。
 - 第 17 周 React Toolbar 已提供 Underline 和 Strike 默认项。
-- mark 快捷键只提供配置和匹配纯函数，尚未绑定编辑器键盘事件。
+- 后续扩展已将 Mod+Shift+X 设为默认 Strike 快捷键，并绑定 React 编辑器键盘事件。
 
 ## 结论
 
-第 10 周 boolean marks 已完成 schema、Operation、Command、renderer、Demo、快捷键占位和 QA 闭环，可以进入第 11 周属性 Mark 设计。
+第 10 周 boolean marks 已完成 schema、Operation、Command、renderer、Demo 和 QA 闭环；后续快捷键扩展已补齐 Strike 默认映射与编辑器执行。

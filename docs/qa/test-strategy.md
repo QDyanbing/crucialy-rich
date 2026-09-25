@@ -28,9 +28,9 @@
   - table/tableRow/tableCell schema、矩形修复、递归 Path、深拷贝、语义渲染、插删表和行列增删 command。
   - 输入 helper 的普通文本输入、Backspace、Delete 和 Enter transaction。
   - Composition 状态切换、选区快照、候选更新、Backspace 后确认、取消和空确认。
-  - 格式与 History 快捷键统一解析、浏览器冲突和组合输入保护。
+  - Mark、Heading、Quote、List 与 History 快捷键统一解析、payload、字母/数字 code、浏览器冲突和组合输入保护。
   - Markdown 输入规则匹配、五类结构转换、误触发保护、transaction 和 selection。
-  - Command 注册、执行、可执行判断、默认注册表、状态矩阵、四种 boolean mark command、`setFontSize`、`setTextColor`、`setBackgroundColor`、链接、Heading、Quote、mark 快捷键配置与匹配、文本编辑 command 和 block 编辑 command。
+  - Command 注册、执行、可执行判断、默认注册表、状态矩阵、四种 boolean mark command、`setFontSize`、`setTextColor`、`setBackgroundColor`、链接、Heading、Quote、带 payload 的快捷键配置与匹配、文本编辑 command 和 block 编辑 command。
   - History 快照、entry 克隆、状态工厂、记录入口、batch 合并、查询 helper、undo/redo 栈转换、快捷键识别、history command 和 Block Type 生命周期。
 - 命令：`pnpm test`。
 

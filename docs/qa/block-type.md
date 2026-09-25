@@ -80,7 +80,7 @@ pnpm check:all
 
 - 单条 `set_block_type` operation 仍只描述一个顶层 block；多块 command 会组合多条 operation。
 - 当前只支持连续顶层 block 范围，不支持非连续多选。
-- 空 Quote 按 Enter 已可退出为 paragraph；标题快捷键和 Quote 快捷键尚未实现。
+- 空 Quote 按 Enter 已可退出为 paragraph；后续扩展已补齐 Heading 0–6 与 Quote 的 React 默认快捷键。
 - CodeBlock 与 Divider 已在第 14 周完成；List 按第 15 周计划继续扩展。
 
 ## 结论
