@@ -214,6 +214,23 @@ test("toggles strike with the keyboard shortcut", async ({ page }) => {
   await expect(editor.locator("s")).toHaveCount(0);
 });
 
+test("sets and clears a heading with keyboard shortcuts", async ({ page }) => {
+  await page.goto("/");
+  await selectRenderedTextRange(page, "[0,0]", 0, 2);
+
+  const editor = page.getByLabel("已渲染文档");
+
+  await page.keyboard.press("Control+Alt+2");
+  await expect(editor.locator("h2")).toHaveText("你好，crucialy-rich。");
+  await expect(page.getByLabel("标题层级")).toHaveValue("2");
+
+  await page.keyboard.press("Control+Alt+0");
+  await expect(editor.locator("h2")).toHaveCount(0);
+  await expect(editor.locator("p").first()).toHaveText("你好，crucialy-rich。");
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 2');
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
 test("applies boolean marks across text blocks", async ({ page }) => {
   await page.goto("/");
   await selectRenderedTextAcrossNodes(page, "[0,0]", 3, "[1,0]", 2);
