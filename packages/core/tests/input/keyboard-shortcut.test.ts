@@ -6,6 +6,7 @@ import {
   ITALIC_COMMAND_NAME,
   SET_HEADING_COMMAND_NAME,
   STRIKE_COMMAND_NAME,
+  TOGGLE_BULLET_LIST_COMMAND_NAME,
   TOGGLE_ORDERED_LIST_COMMAND_NAME,
   TOGGLE_QUOTE_COMMAND_NAME,
   UNDERLINE_COMMAND_NAME,
@@ -46,6 +47,9 @@ describe("getEditorShortcutAction", () => {
         shiftKey: true,
       }),
     ).toEqual({ commandName: TOGGLE_ORDERED_LIST_COMMAND_NAME, type: "command" });
+    expect(
+      getEditorShortcutAction({ ctrlKey: true, key: "8", shiftKey: true }),
+    ).toEqual({ commandName: TOGGLE_BULLET_LIST_COMMAND_NAME, type: "command" });
   });
 
   it("resolves undo and redo shortcuts before command shortcuts", () => {

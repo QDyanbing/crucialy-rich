@@ -1,6 +1,9 @@
 import type { CommandName } from "./types";
 import { SET_HEADING_COMMAND_NAME } from "./heading";
-import { TOGGLE_ORDERED_LIST_COMMAND_NAME } from "./list";
+import {
+  TOGGLE_BULLET_LIST_COMMAND_NAME,
+  TOGGLE_ORDERED_LIST_COMMAND_NAME,
+} from "./list";
 import { TOGGLE_QUOTE_COMMAND_NAME } from "./quote";
 import {
   BOLD_COMMAND_NAME,
@@ -75,6 +78,7 @@ export const DEFAULT_COMMAND_SHORTCUTS: readonly CommandShortcutBinding[] = [
     payload: { level: 6 },
   },
   { commandName: TOGGLE_ORDERED_LIST_COMMAND_NAME, key: "7", shiftKey: true },
+  { commandName: TOGGLE_BULLET_LIST_COMMAND_NAME, key: "8", shiftKey: true },
   { commandName: TOGGLE_QUOTE_COMMAND_NAME, key: "9", shiftKey: true },
 ];
 
