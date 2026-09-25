@@ -231,6 +231,24 @@ test("sets and clears a heading with keyboard shortcuts", async ({ page }) => {
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
 
+test("toggles quote with the keyboard shortcut", async ({ page }) => {
+  await page.goto("/");
+  await selectRenderedTextRange(page, "[0,0]", 0, 2);
+
+  const editor = page.getByLabel("已渲染文档");
+  const quoteButton = page.getByRole("button", { name: "引用", exact: true });
+
+  await page.keyboard.press("Control+Shift+9");
+  await expect(editor.locator("blockquote")).toHaveText("你好，crucialy-rich。");
+  await expect(quoteButton).toHaveAttribute("aria-pressed", "true");
+
+  await page.keyboard.press("Control+Shift+9");
+  await expect(editor.locator("blockquote")).toHaveCount(0);
+  await expect(editor.locator("p").first()).toHaveText("你好，crucialy-rich。");
+  await expect(quoteButton).toHaveAttribute("aria-pressed", "false");
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 2');
+});
+
 test("applies boolean marks across text blocks", async ({ page }) => {
   await page.goto("/");
   await selectRenderedTextAcrossNodes(page, "[0,0]", 3, "[1,0]", 2);
