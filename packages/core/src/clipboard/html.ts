@@ -135,12 +135,18 @@ function parseTable(node: HtmlElement): TableNode | undefined {
         .map((cell) => createTableCell([createParagraph(parseInlineChildren(cell))])),
     )
     .filter((cells) => cells.length > 0);
-  const columnCount = rows[0]?.length;
+  const columnCount = rows.reduce((count, cells) => Math.max(count, cells.length), 0);
 
-  return columnCount !== undefined &&
-    rows.every((cells) => cells.length === columnCount)
+  return columnCount > 0
     ? {
-        children: rows.map((cells) => createTableRow(cells)),
+        children: rows.map((cells) =>
+          createTableRow([
+            ...cells,
+            ...Array.from({ length: columnCount - cells.length }, () =>
+              createTableCell(),
+            ),
+          ]),
+        ),
         type: "table",
       }
     : undefined;

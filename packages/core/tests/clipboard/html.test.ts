@@ -106,6 +106,23 @@ describe("parseHtml", () => {
     ).toEqual(["表头", "正文", "汇总"]);
   });
 
+  it("pads short HTML table rows to a rectangular grid", () => {
+    const fragment = parseHtml(
+      "<table><tr><td>甲</td></tr><tr><td>乙</td><td>丙</td></tr></table>",
+    );
+    const table = fragment?.blocks[0];
+
+    expect(isTableNode(table)).toBe(true);
+
+    if (!isTableNode(table)) {
+      throw new Error("expected parsed table");
+    }
+
+    expect(table.children.map((row) => row.children.length)).toEqual([2, 2]);
+    expect(table.children[0]?.children[1]?.children[0]?.children[0]?.text).toBe("");
+    expect(validateDocument({ children: [table], type: "document" }).valid).toBe(true);
+  });
+
   it("drops scripts and unsafe link attributes", () => {
     const fragment = parseHtml(
       '<p><script>alert(1)</script><a href="javascript:alert(2)" onclick="alert(3)">安全文本</a></p>',
