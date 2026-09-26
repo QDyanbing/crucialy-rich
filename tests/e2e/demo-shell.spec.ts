@@ -2544,6 +2544,26 @@ test("pastes HTML and Markdown from the acceptance controls", async ({ page }) =
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
 
+test("pastes an HTML table from the acceptance controls", async ({ page }) => {
+  await page.goto("/");
+  const editor = page.getByLabel("已渲染文档");
+
+  await setDebuggerSelection(page, "0,0", 3, 3);
+  await page.getByLabel("粘贴格式").selectOption("text/html");
+  await page
+    .getByLabel("粘贴内容")
+    .fill(
+      "<table><thead><tr><th>姓名</th><th>角色</th></tr></thead><tbody><tr><td>小明</td><td>开发</td></tr></tbody></table>",
+    );
+  await page.getByRole("button", { name: "粘贴示例" }).click();
+
+  await expect(editor.locator("table")).toHaveCount(1);
+  await expect(editor.locator("table tr")).toHaveCount(2);
+  await expect(editor.locator("table td")).toHaveText(["姓名", "角色", "小明", "开发"]);
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
 test("inserts and reshapes a basic table from the acceptance controls", async ({
   page,
 }) => {
