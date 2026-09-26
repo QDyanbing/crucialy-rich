@@ -8,6 +8,8 @@
 
 ### 新增
 
+- 新增 HTML 表格 Clipboard 解析，支持 `thead`、`tbody`、`tfoot`、`td`、`th`、非等宽行补齐、cell 多段落、行内 marks 和安全链接。
+- 新增 HTML 表格粘贴的 Command、History、React 原生事件、Demo 验收控制和 Playwright 回归覆盖。
 - 新增统一文本容器偏移映射，覆盖顶层文本块、列表项和表格段落。
 - 新增同一文本容器内跨 text 节点的选区删除与输入替换。
 - 新增 `delete_range` operation，支持连续顶层文本块的选区删除、输入替换和选区恢复。
