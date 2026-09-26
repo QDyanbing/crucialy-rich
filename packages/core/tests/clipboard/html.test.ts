@@ -161,6 +161,29 @@ describe("parseHtml", () => {
     ]);
   });
 
+  it("sanitizes links inside HTML table cells", () => {
+    const fragment = parseHtml(
+      '<table><tr><td><a href="https://example.com/docs">安全链接</a></td><td><a href="javascript:alert(1)">危险链接</a></td></tr></table>',
+    );
+    const table = fragment?.blocks[0];
+
+    expect(isTableNode(table)).toBe(true);
+
+    if (!isTableNode(table)) {
+      throw new Error("expected parsed table");
+    }
+
+    expect(table.children[0]?.children[0]?.children[0]?.children[0]).toEqual({
+      marks: { link: { href: "https://example.com/docs" } },
+      text: "安全链接",
+      type: "text",
+    });
+    expect(table.children[0]?.children[1]?.children[0]?.children[0]).toEqual({
+      text: "危险链接",
+      type: "text",
+    });
+  });
+
   it("drops scripts and unsafe link attributes", () => {
     const fragment = parseHtml(
       '<p><script>alert(1)</script><a href="javascript:alert(2)" onclick="alert(3)">安全文本</a></p>',
