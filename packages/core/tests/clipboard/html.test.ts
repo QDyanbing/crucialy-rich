@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { parseHtml, validateDocument } from "../../src";
+import { isTableNode, parseHtml, validateDocument } from "../../src";
 
 describe("parseHtml", () => {
   it("maps paragraphs, inline marks, and safe links", () => {
@@ -87,6 +87,23 @@ describe("parseHtml", () => {
     expect(
       validateDocument({ children: fragment?.blocks ?? [], type: "document" }).valid,
     ).toBe(true);
+  });
+
+  it("maps table sections and header cells in source order", () => {
+    const fragment = parseHtml(
+      "<table><thead><tr><th>表头</th></tr></thead><tbody><tr><td>正文</td></tr></tbody><tfoot><tr><td>汇总</td></tr></tfoot></table>",
+    );
+    const table = fragment?.blocks[0];
+
+    expect(isTableNode(table)).toBe(true);
+
+    if (!isTableNode(table)) {
+      throw new Error("expected parsed table");
+    }
+
+    expect(
+      table.children.map((row) => row.children[0]?.children[0]?.children[0]?.text),
+    ).toEqual(["表头", "正文", "汇总"]);
   });
 
   it("drops scripts and unsafe link attributes", () => {

@@ -129,7 +129,8 @@ function parseTable(node: HtmlElement): TableNode | undefined {
     .map((row) =>
       row.childNodes
         .filter(
-          (child): child is HtmlElement => isElement(child) && child.tagName === "td",
+          (child): child is HtmlElement =>
+            isElement(child) && (child.tagName === "td" || child.tagName === "th"),
         )
         .map((cell) => createTableCell([createParagraph(parseInlineChildren(cell))])),
     )
