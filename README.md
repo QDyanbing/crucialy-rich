@@ -38,7 +38,7 @@ Quote 内按 Enter 会保留引用格式分段；空 Quote 再按 Enter 则原�
 
 第 19 周“图片闭环”已全部完成：core 支持安全 ImageNode、URL 清洗、校验/规范化、语义化 `img` 渲染、`insertImage` / `deleteImage` 命令和独立 BlockSelection；React 支持图片点击选中、Backspace/Delete 删除及本地 object URL 预览，Demo 提供中文 URL、本地和删除流程，真实上传由外部接入。
 
-第 20 周“粘贴闭环”已全部完成：core 提供可扩展 Clipboard parser、Markdown/HTML/纯文本优先级、安全 HTML 白名单和 `paste` 命令；纯文本换行转换为 paragraph，结构化内容保留标题、引用、代码、marks 和列表。React 通过 `onPaste` 生成统一 Transaction，Demo 与 Playwright 覆盖三种中文粘贴流程。
+第 20 周“粘贴闭环”已全部完成并继续扩展：core 提供可扩展 Clipboard parser、Markdown/HTML/纯文本优先级、安全 HTML 白名单和 `paste` 命令；纯文本换行转换为 paragraph，结构化内容保留标题、引用、代码、marks、列表和顶层表格。React 通过 `onPaste` 生成统一 Transaction，Demo 与 Playwright 覆盖三种中文粘贴流程及 HTML 表格导入。
 
 第 21 周“基础表格闭环”已全部完成：core 支持 table/tableRow/tableCell 模型、矩形结构校验与修复、完整模型 Path、语义渲染、默认 3×3 插入、整表删除以及行列增删命令；Demo 和 Playwright 提供中文验收流程。
 

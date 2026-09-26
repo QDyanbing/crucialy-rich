@@ -70,10 +70,16 @@ renderer 输出 `table > tbody > tr > td > p` 语义结构，并为模型节点�
 
 `getPlainTextTableGrid` 把纯文本 fragment 解析为二维字符串数组。`paste` command 从当前 cell 开始生成多个 `set_table_cell_text` operation；只有整个网格都能落入现有行列时才执行，否则退回 cell 内普通文本粘贴。粘贴不会新增或删除行列。
 
+## HTML 表格粘贴
+
+`parseHtml` 可把顶层 HTML `table` 转换为模型表格，支持直接 `tr` 和 `thead`、`tbody`、`tfoot` 分区。`th` 以普通 cell 导入，行宽不一致时按最宽行补空 cell；每个 cell 至少生成一个 paragraph，并保留其中的多个直接 paragraph、行内 mark 和安全链接。
+
+解析后的表格继续通过 `paste` command 作为结构化 block 插入，整个操作进入一个 Transaction 和一条 History 记录。React 原生 `paste` 事件和 Demo 粘贴验收控制共用这条路径。
+
 ## 当前限制
 
 - 暂不支持跨 cell 范围选择、合并单元格和表头。
-- 暂不支持通过 HTML Clipboard parser 导入表格。
+- HTML 导入不保留 `colspan`、`rowspan`、`th` 语义或嵌套表格结构。
 - TSV 超出当前表格范围时不会自动扩表。
 
 验收结果见[基础表格 QA](../qa/table-basic.md)和[表格编辑 QA](../qa/table-editing.md)。

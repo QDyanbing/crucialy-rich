@@ -49,7 +49,7 @@ export function Demo() {
 - `contentEditable`：开启普通文本输入、Backspace、Delete、Enter、列表 Tab 和 Shift+Tab。
 - 输入事件：通过模型 transaction 更新文档，并在输入后回传稳定模型选区；普通文本输入、非折叠删除选区、选区 Enter 分段和段首 Backspace 合并复用 core command。
 - 任务列表：checkbox 点击通过 `set_task_item_checked` transaction 写回 `checked`，并进入宿主的 History 流程。
-- 表格：支持单元格内输入、删除、Enter、Backspace/Delete 段落合并、点击高亮和纯文本 TSV 粘贴。
+- 表格：支持单元格内输入、删除、Enter、Backspace/Delete 段落合并、点击高亮、纯文本 TSV 填充和顶层 HTML 表格粘贴。
 - 快捷键：支持 Mod+B/I/U、Mod+Shift+X、Mod+Alt+0–6、Mod+Shift+7/8/9；History 快捷键继续由宿主状态接管。
 - 输入规则：支持 paragraph 开头的标题、列表、引用和代码块 Markdown 前缀。
 - 文字样式：四种 boolean mark 与字号、文字颜色、背景色可应用到连续顶层 paragraph、heading、quote，并作为一个 transaction 进入宿主 History。

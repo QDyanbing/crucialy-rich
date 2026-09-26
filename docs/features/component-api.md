@@ -101,6 +101,7 @@ ref 命令事件的 `inputType` 为 `command`。受控模式不会自行替换 `
 - 表格单元格内复用相同输入链路；Enter 只在当前 cell 内新增 paragraph，Backspace/Delete 不跨 cell 合并。
 - 点击 `td[data-crucialy-table-cell="true"]` 会输出 `CellSelection`；传回 `cellSelection` 后目标 cell 获得 `data-selected="true"`。
 - 纯文本 TSV 粘贴会从当前 cell 向右、向下填充，不改变表格尺寸。
+- 顶层 HTML 表格粘贴会经过 core 白名单解析，并作为一个结构化 block 和一条 History 记录插入。
 - 宿主可在 `onKeyDown` 中用 `getHistoryShortcutAction` 接入撤销/重做快捷键；外部 `preventDefault` 后组件不会继续执行普通输入处理。
 - Ctrl/Meta 主修饰键组合可执行默认 boolean mark、标题、引用和列表 Command；绑定 payload 会透传，并输出 `formatShortcut` transaction。
 - Composition 候选阶段暂停普通输入、编辑快捷键和粘贴；结束时只输出一次 `insertCompositionText` transaction。
