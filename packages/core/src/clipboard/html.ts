@@ -201,9 +201,7 @@ function parseBlock(node: HtmlNode): BlockNode[] {
   if (node.tagName === "table") {
     const table = parseTable(node);
 
-    if (table) {
-      return [table];
-    }
+    return table ? [table] : [];
   }
 
   const nestedBlocks = node.childNodes.flatMap(parseBlock);

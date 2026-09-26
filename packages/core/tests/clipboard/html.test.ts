@@ -184,6 +184,12 @@ describe("parseHtml", () => {
     });
   });
 
+  it("declines empty and blocked-only HTML tables", () => {
+    expect(parseHtml("<table></table>")).toBeUndefined();
+    expect(parseHtml("<table><tr></tr></table>")).toBeUndefined();
+    expect(parseHtml("<table><script>alert(1)</script></table>")).toBeUndefined();
+  });
+
   it("drops scripts and unsafe link attributes", () => {
     const fragment = parseHtml(
       '<p><script>alert(1)</script><a href="javascript:alert(2)" onclick="alert(3)">安全文本</a></p>',
