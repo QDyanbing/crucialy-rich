@@ -123,6 +123,24 @@ describe("parseHtml", () => {
     expect(validateDocument({ children: [table], type: "document" }).valid).toBe(true);
   });
 
+  it("preserves paragraphs inside HTML table cells", () => {
+    const fragment = parseHtml(
+      "<table><tr><td><p>第一段</p><p>第二段</p></td></tr></table>",
+    );
+    const table = fragment?.blocks[0];
+
+    expect(isTableNode(table)).toBe(true);
+
+    if (!isTableNode(table)) {
+      throw new Error("expected parsed table");
+    }
+
+    expect(table.children[0]?.children[0]?.children).toEqual([
+      { children: [{ text: "第一段", type: "text" }], type: "paragraph" },
+      { children: [{ text: "第二段", type: "text" }], type: "paragraph" },
+    ]);
+  });
+
   it("drops scripts and unsafe link attributes", () => {
     const fragment = parseHtml(
       '<p><script>alert(1)</script><a href="javascript:alert(2)" onclick="alert(3)">安全文本</a></p>',

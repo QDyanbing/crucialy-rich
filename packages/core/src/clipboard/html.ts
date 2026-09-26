@@ -107,6 +107,16 @@ function parseList(node: HtmlElement): BlockNode {
     : createBulletList(items.length > 0 ? items : undefined);
 }
 
+function parseTableCell(node: HtmlElement) {
+  const paragraphs = node.childNodes
+    .filter((child): child is HtmlElement => isElement(child) && child.tagName === "p")
+    .map((paragraph) => createParagraph(parseInlineChildren(paragraph)));
+
+  return createTableCell(
+    paragraphs.length > 0 ? paragraphs : [createParagraph(parseInlineChildren(node))],
+  );
+}
+
 function parseTable(node: HtmlElement): TableNode | undefined {
   const rowNodes = node.childNodes.flatMap((child) => {
     if (!isElement(child)) {
@@ -132,7 +142,7 @@ function parseTable(node: HtmlElement): TableNode | undefined {
           (child): child is HtmlElement =>
             isElement(child) && (child.tagName === "td" || child.tagName === "th"),
         )
-        .map((cell) => createTableCell([createParagraph(parseInlineChildren(cell))])),
+        .map(parseTableCell),
     )
     .filter((cells) => cells.length > 0);
   const columnCount = rows.reduce((count, cells) => Math.max(count, cells.length), 0);
