@@ -2520,6 +2520,38 @@ test("pastes plain text through the native editor event", async ({ page }) => {
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
 
+test("pastes an HTML table through the native editor event", async ({ page }) => {
+  await page.goto("/");
+  await placeCaretInRenderedText(page, "[0,0]", 3);
+
+  const editor = page.getByLabel("已渲染文档");
+
+  await editor.evaluate((element) => {
+    const clipboardData = new DataTransfer();
+
+    clipboardData.setData(
+      "text/html",
+      "<table><tr><td>姓名</td><td>角色</td></tr><tr><td>小明</td><td>开发</td></tr></table>",
+    );
+    clipboardData.setData("text/plain", "姓名\t角色\n小明\t开发");
+    element.dispatchEvent(
+      new ClipboardEvent("paste", {
+        bubbles: true,
+        cancelable: true,
+        clipboardData,
+      }),
+    );
+  });
+
+  await expect(editor.locator("table")).toHaveCount(1);
+  await expect(editor.locator("table td")).toHaveText(["姓名", "角色", "小明", "开发"]);
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"type": "insert_block"',
+  );
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
 test("pastes HTML and Markdown from the acceptance controls", async ({ page }) => {
   await page.goto("/");
   const editor = page.getByLabel("已渲染文档");
