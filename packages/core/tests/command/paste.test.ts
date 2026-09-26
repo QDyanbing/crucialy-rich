@@ -148,6 +148,53 @@ describe("pasteCommand", () => {
     expect(result.selection?.anchor).toEqual({ offset: 2, path: [2, 0, 0] });
   });
 
+  it("inserts a parsed HTML table as a structured block", () => {
+    const document = createDocument([createParagraph([createText("前后")])]);
+    const result = pasteCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { offset: 1, path: [0, 0] },
+          focus: { offset: 1, path: [0, 0] },
+        },
+      },
+      payload: {
+        fragment: parseHtml(
+          "<table><tr><td>姓名</td><td>角色</td></tr><tr><td>小明</td><td>开发</td></tr></table>",
+        )!,
+      },
+    });
+    const resultDocument = applyTransaction(document, result.transaction!);
+
+    expect(result.transaction?.operations.map((operation) => operation.type)).toEqual([
+      "split_block",
+      "insert_block",
+    ]);
+    expect(resultDocument.children.map((block) => block.type)).toEqual([
+      "paragraph",
+      "table",
+      "paragraph",
+    ]);
+
+    const table = resultDocument.children[1];
+
+    expect(isTableNode(table)).toBe(true);
+
+    if (!isTableNode(table)) {
+      throw new Error("expected table result");
+    }
+
+    expect(
+      table.children.map((row) =>
+        row.children.map((cell) => cell.children[0]?.children[0]?.text),
+      ),
+    ).toEqual([
+      ["姓名", "角色"],
+      ["小明", "开发"],
+    ]);
+    expect(result.selection?.anchor).toEqual({ offset: 0, path: [2, 0] });
+  });
+
   it("pastes one TSV row across table cells", () => {
     const document = createDocument([createTable(2, 3)]);
     const result = pasteCommand.execute({
