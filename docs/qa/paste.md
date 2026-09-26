@@ -9,6 +9,7 @@
 | 纯文本多行  | 换行转 paragraph，保留空行                 | 通过 |
 | 替换选区    | 支持正反向及同块跨 mark 文本节点           | 通过 |
 | HTML        | 保留 paragraph、strong、em、link、ul/ol/li | 通过 |
+| HTML 表格   | 导入分区、表头 cell、多段落和非等宽行      | 通过 |
 | HTML 安全   | 丢弃脚本、样式、事件属性和危险链接         | 通过 |
 | Markdown    | 转换标题、引用、代码、列表、bold、italic   | 通过 |
 | React       | paste 事件生成 Transaction，不直接写 DOM   | 通过 |
@@ -18,9 +19,9 @@
 ## 自动化覆盖
 
 - Clipboard parser：`packages/core/tests/clipboard`。
-- Paste command：`packages/core/tests/command/paste.test.ts`。
-- React API：`packages/react/tests/public-api.test.ts`。
-- 浏览器：`tests/e2e/demo-shell.spec.ts` 覆盖原生纯文本 paste 事件，以及 HTML、Markdown 验收控制。
+- Paste command：`packages/core/tests/command/paste.test.ts`，HTML 表格 History 往返见 `html-table-paste-history.test.ts`。
+- React：`packages/react/tests/html-table-paste.test.ts` 覆盖原生 HTML Clipboard 事件。
+- 浏览器：`tests/e2e/demo-shell.spec.ts` 覆盖原生纯文本和 HTML 表格 paste 事件，以及 HTML、Markdown 验收控制。
 - 全量入口：`pnpm check:all`。
 
 ## 安全结论
@@ -29,4 +30,4 @@ Clipboard 原始内容不会直接注入编辑器 DOM。HTML 先由标准 parser
 
 ## 结论
 
-第 20 周粘贴能力已完成代码、测试、中文 Demo、文档和浏览器验收闭环。下一步进入第 21 周基础表格模型设计。
+第 20 周粘贴能力已完成代码、测试、中文 Demo、文档和浏览器验收闭环，并在表格模型完成后补齐了顶层 HTML 表格导入。

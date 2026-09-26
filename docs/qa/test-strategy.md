@@ -24,7 +24,7 @@
   - Toolbar 配置、默认项、Command 状态映射、固定/悬浮渲染、位置计算、窄屏边界、命令执行与选区快照。
   - 斜杠菜单配置、过滤、触发、状态、定位、键盘导航、浮层渲染、跨 text 清理和组合命令执行。
   - 图片 schema、安全 URL、规范化、命令、块选区、渲染和本地 object URL 生命周期。
-  - Clipboard parser 优先级、纯文本换行、HTML 白名单、Markdown 转换和结构化 paste command。
+  - Clipboard parser 优先级、纯文本换行、HTML 白名单、Markdown 转换、HTML 表格分区/矩形化/cell 内容解析和结构化 paste command。
   - table/tableRow/tableCell schema、矩形修复、递归 Path、深拷贝、语义渲染、插删表和行列增删 command。
   - 输入 helper 的普通文本输入、Backspace、Delete 和 Enter transaction。
   - Composition 状态切换、选区快照、候选更新、Backspace 后确认、取消和空确认。
@@ -37,7 +37,7 @@
 ## 浏览器测试
 
 - 工具：Playwright。
-- 范围：演示页面、模型/选区/command 调试、基础编辑、文字样式、链接、Heading/Quote、CodeBlock、Divider、列表、固定/悬浮 Toolbar、斜杠菜单、URL/本地图片、图片删除、纯文本/HTML/Markdown 粘贴、基础表格结构操作、中文组合输入、编辑快捷键、Markdown 输入规则、选区恢复和 History 往返。
+- 范围：演示页面、模型/选区/command 调试、基础编辑、文字样式、链接、Heading/Quote、CodeBlock、Divider、列表、固定/悬浮 Toolbar、斜杠菜单、URL/本地图片、图片删除、纯文本/HTML/Markdown 粘贴、HTML 表格原生粘贴、基础表格结构操作、中文组合输入、编辑快捷键、Markdown 输入规则、选区恢复和 History 往返。
 - 命令：`pnpm test:e2e`。
 
 ## 类型检查
