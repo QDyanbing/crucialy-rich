@@ -141,6 +141,26 @@ describe("parseHtml", () => {
     ]);
   });
 
+  it("preserves inline marks and line breaks inside table cells", () => {
+    const fragment = parseHtml(
+      "<table><tr><td><p><strong>加粗</strong><em>斜体</em><br>换行</p></td></tr></table>",
+    );
+    const table = fragment?.blocks[0];
+
+    expect(isTableNode(table)).toBe(true);
+
+    if (!isTableNode(table)) {
+      throw new Error("expected parsed table");
+    }
+
+    expect(table.children[0]?.children[0]?.children[0]?.children).toEqual([
+      { marks: { bold: true }, text: "加粗", type: "text" },
+      { marks: { italic: true }, text: "斜体", type: "text" },
+      { text: "\n", type: "text" },
+      { text: "换行", type: "text" },
+    ]);
+  });
+
   it("drops scripts and unsafe link attributes", () => {
     const fragment = parseHtml(
       '<p><script>alert(1)</script><a href="javascript:alert(2)" onclick="alert(3)">安全文本</a></p>',
