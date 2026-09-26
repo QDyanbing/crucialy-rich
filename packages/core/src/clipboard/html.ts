@@ -8,10 +8,13 @@ import {
   createOrderedList,
   createParagraph,
   createQuote,
+  createTableCell,
+  createTableRow,
   createText,
   normalizeLinkMark,
   type BlockNode,
   type HeadingLevel,
+  type TableNode,
   type TextMarks,
   type TextNode,
 } from "../model";
@@ -104,6 +107,44 @@ function parseList(node: HtmlElement): BlockNode {
     : createBulletList(items.length > 0 ? items : undefined);
 }
 
+function parseTable(node: HtmlElement): TableNode | undefined {
+  const rowNodes = node.childNodes.flatMap((child) => {
+    if (!isElement(child)) {
+      return [];
+    }
+
+    if (child.tagName === "tr") {
+      return [child];
+    }
+
+    return child.tagName === "thead" ||
+      child.tagName === "tbody" ||
+      child.tagName === "tfoot"
+      ? child.childNodes.filter(
+          (row): row is HtmlElement => isElement(row) && row.tagName === "tr",
+        )
+      : [];
+  });
+  const rows = rowNodes
+    .map((row) =>
+      row.childNodes
+        .filter(
+          (child): child is HtmlElement => isElement(child) && child.tagName === "td",
+        )
+        .map((cell) => createTableCell([createParagraph(parseInlineChildren(cell))])),
+    )
+    .filter((cells) => cells.length > 0);
+  const columnCount = rows[0]?.length;
+
+  return columnCount !== undefined &&
+    rows.every((cells) => cells.length === columnCount)
+    ? {
+        children: rows.map((cells) => createTableRow(cells)),
+        type: "table",
+      }
+    : undefined;
+}
+
 function parseBlock(node: HtmlNode): BlockNode[] {
   if (isText(node)) {
     return node.value.trim().length > 0
@@ -138,6 +179,14 @@ function parseBlock(node: HtmlNode): BlockNode[] {
 
   if (node.tagName === "ul" || node.tagName === "ol") {
     return [parseList(node)];
+  }
+
+  if (node.tagName === "table") {
+    const table = parseTable(node);
+
+    if (table) {
+      return [table];
+    }
   }
 
   const nestedBlocks = node.childNodes.flatMap(parseBlock);

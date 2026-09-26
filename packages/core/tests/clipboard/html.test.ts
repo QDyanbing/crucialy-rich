@@ -40,6 +40,55 @@ describe("parseHtml", () => {
     });
   });
 
+  it("maps a basic HTML table", () => {
+    const fragment = parseHtml(
+      "<table><tr><td>姓名</td><td>角色</td></tr><tr><td>小明</td><td>开发</td></tr></table>",
+    );
+
+    expect(fragment?.blocks[0]).toEqual({
+      children: [
+        {
+          children: [
+            {
+              children: [
+                { children: [{ text: "姓名", type: "text" }], type: "paragraph" },
+              ],
+              type: "tableCell",
+            },
+            {
+              children: [
+                { children: [{ text: "角色", type: "text" }], type: "paragraph" },
+              ],
+              type: "tableCell",
+            },
+          ],
+          type: "tableRow",
+        },
+        {
+          children: [
+            {
+              children: [
+                { children: [{ text: "小明", type: "text" }], type: "paragraph" },
+              ],
+              type: "tableCell",
+            },
+            {
+              children: [
+                { children: [{ text: "开发", type: "text" }], type: "paragraph" },
+              ],
+              type: "tableCell",
+            },
+          ],
+          type: "tableRow",
+        },
+      ],
+      type: "table",
+    });
+    expect(
+      validateDocument({ children: fragment?.blocks ?? [], type: "document" }).valid,
+    ).toBe(true);
+  });
+
   it("drops scripts and unsafe link attributes", () => {
     const fragment = parseHtml(
       '<p><script>alert(1)</script><a href="javascript:alert(2)" onclick="alert(3)">安全文本</a></p>',
