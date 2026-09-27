@@ -71,6 +71,19 @@ describe("parseHtml", () => {
     });
   });
 
+  it("preserves positive integer HTML image dimensions", () => {
+    const fragment = parseHtml(
+      '<img src="https://example.com/cover.png" width="640" height="360">',
+    );
+
+    expect(fragment?.blocks[0]).toMatchObject({
+      height: 360,
+      src: "https://example.com/cover.png",
+      type: "image",
+      width: 640,
+    });
+  });
+
   it("maps a basic HTML table", () => {
     const fragment = parseHtml(
       "<table><tr><td>姓名</td><td>角色</td></tr><tr><td>小明</td><td>开发</td></tr></table>",

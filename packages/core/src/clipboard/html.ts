@@ -12,6 +12,7 @@ import {
   createTableCell,
   createTableRow,
   createText,
+  normalizeImageDimension,
   normalizeLinkMark,
   sanitizeImageSrc,
   type BlockNode,
@@ -109,10 +110,24 @@ function parseList(node: HtmlElement): BlockNode {
     : createBulletList(items.length > 0 ? items : undefined);
 }
 
+function parseImageDimension(value: string | undefined): number | null {
+  const normalized = value?.trim();
+
+  return normalized && /^\d+$/.test(normalized)
+    ? normalizeImageDimension(Number(normalized))
+    : null;
+}
+
 function parseImage(node: HtmlElement): BlockNode | undefined {
   const src = sanitizeImageSrc(getAttribute(node, "src"));
 
-  return src ? createImage(src, { alt: getAttribute(node, "alt") ?? "" }) : undefined;
+  return src
+    ? createImage(src, {
+        alt: getAttribute(node, "alt") ?? "",
+        height: parseImageDimension(getAttribute(node, "height")),
+        width: parseImageDimension(getAttribute(node, "width")),
+      })
+    : undefined;
 }
 
 function parseTableCell(node: HtmlElement) {
