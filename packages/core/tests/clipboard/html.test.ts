@@ -59,6 +59,18 @@ describe("parseHtml", () => {
     ).toBe(true);
   });
 
+  it("preserves HTML image alternative text", () => {
+    const fragment = parseHtml(
+      '<img src="https://example.com/cover.png" alt="中文 &amp; preview">',
+    );
+
+    expect(fragment?.blocks[0]).toMatchObject({
+      alt: "中文 & preview",
+      src: "https://example.com/cover.png",
+      type: "image",
+    });
+  });
+
   it("maps a basic HTML table", () => {
     const fragment = parseHtml(
       "<table><tr><td>姓名</td><td>角色</td></tr><tr><td>小明</td><td>开发</td></tr></table>",

@@ -112,7 +112,7 @@ function parseList(node: HtmlElement): BlockNode {
 function parseImage(node: HtmlElement): BlockNode | undefined {
   const src = sanitizeImageSrc(getAttribute(node, "src"));
 
-  return src ? createImage(src) : undefined;
+  return src ? createImage(src, { alt: getAttribute(node, "alt") ?? "" }) : undefined;
 }
 
 function parseTableCell(node: HtmlElement) {
