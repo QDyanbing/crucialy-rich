@@ -8,6 +8,8 @@
 
 ### 新增
 
+- 新增安全 HTML 图片 Clipboard 解析，支持顶层图片、独立图片段落、alt 和正整数宽高，并拒绝危险地址及未知属性。
+- 新增 HTML 图片粘贴的 Command/History 生命周期、React 原生事件和 Chromium 端到端回归。
 - 新增 HTML 表格 Clipboard 解析，支持 `thead`、`tbody`、`tfoot`、`td`、`th`、非等宽行补齐、cell 多段落、行内 marks 和安全链接。
 - 新增 HTML 表格粘贴的 Command、History、React 原生事件、Demo 验收控制和 Playwright 回归覆盖。
 - 新增统一文本容器偏移映射，覆盖顶层文本块、列表项和表格段落。
