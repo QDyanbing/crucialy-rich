@@ -40,6 +40,12 @@ React 包导出 `createLocalImageResource(file)`。它只接受 `image/*` 文件
 
 本地入口只提供当前浏览器会话内的预览，不读取文件内容、不上传、不生成永久地址。生产环境应由外部上传适配器取得 HTTPS 地址，再执行 `insertImage`。
 
+## HTML 粘贴
+
+Clipboard parser 可把顶层 HTML `img` 和只包含一张图片的 paragraph 转换为 Image block。解析过程复用模型的 URL 白名单，保留纯文本 `alt` 和正整数 `width` / `height`；危险协议、相对地址、data URL、事件属性、CSS 尺寸和未知属性会被拒绝或忽略。
+
+解析后的图片通过 `paste` command 以 `split_block + insert_block` 插入，并作为一条 History 记录。React 原生 paste 事件不会直接把剪贴板 HTML 写入 DOM。
+
 ## 选中与删除
 
 `BlockSelection` 使用 `{ type: "block", path }` 表达完整块选区，与文本 `RangeSelection` 分离。`RichTextEditor` 通过 `blockSelection` 和 `onBlockSelectionChange` 暴露受控图片选区：点击图片输出块选区，选中图片带有 `data-selected="true"`。
@@ -51,6 +57,7 @@ React 包导出 `createLocalImageResource(file)`。它只接受 `image/*` 文件
 - Renderer 输出带模型 path、alt、状态及可选宽高的不可编辑 `img`。
 - HTML 序列化把 `img` 作为 void 元素，不输出结束标签。
 - React 复用统一 RenderedNode，并阻止浏览器直接编辑图片内部。
+- HTML 粘贴只支持独立图片 block，不把段落中的图文混排拆成多个 block。
 - 当前不支持上传进度适配器、图片替换、缩放手柄、图注、对齐和多图片块选择。
 
 完整验收记录见[图片闭环 QA](../qa/image.md)。

@@ -22,9 +22,11 @@
 
 HTML 使用 `parse5` 读取标准语法树，不使用正则解析标签。当前支持：
 
-- 块：`p`、`h1`–`h6`、`blockquote`、`pre`、`ul`、`ol`、`li`、`table`、`tr`、`td`、`th`。
+- 块：`p`、`h1`–`h6`、`blockquote`、`pre`、`ul`、`ol`、`li`、`img`、`table`、`tr`、`td`、`th`。
 - 行内：`strong`、`em`、`a`、`code`、`br`。
-- 属性：仅保留链接 `href`，并继续经过链接协议白名单。
+- 属性：保留链接 `href`，以及图片 `src`、`alt`、`width`、`height`；URL 继续经过各自协议白名单。
+
+HTML 图片支持顶层 `img`，以及除空白外只包含一个 `img` 的 `p`。`src` 只接受绝对 HTTP、HTTPS 和 blob 地址；`alt` 保留为纯文本，宽高仅接受正整数字符串。危险地址、事件属性、CSS 尺寸和其他未知属性不会进入模型。
 
 HTML 表格会按 `thead`、`tbody`、`tfoot` 的 DOM 顺序导入；`th` 降级为普通 `tableCell`，较短的行用空 cell 补齐到最宽行。cell 中的直接 `p` 会保留为多个 paragraph，行内 mark 和安全链接继续复用白名单。空表、空行和只含被过滤节点的表格会被拒绝，不会生成非法模型。
 
@@ -43,8 +45,8 @@ Markdown 使用 `marked` 转换为 HTML，再复用同一 HTML 白名单映射�
 - HTML/Markdown 结构化粘贴只在同一顶层文本块内的选区执行。
 - 现有表格内的二维填充仍只接受 `text/plain` TSV，不自动新增行列，也不支持跨 cell range 替换。
 - HTML 表格不保留 `colspan`、`rowspan` 和表头语义，不支持嵌套表格。
-- HTML 暂不支持图片、任务列表、复杂嵌套列表和 CSS 样式。
+- HTML 暂不支持图文混排、任务列表、复杂嵌套列表和 CSS 样式。
 - Markdown 暂不支持扩展语法的完整保真映射。
-- 剪贴板图片上传不属于本阶段范围。
+- data URL、剪贴板二进制图片上传和图片资源持久化不属于本阶段范围。
 
 完整结果见[粘贴闭环 QA](../qa/paste.md)。

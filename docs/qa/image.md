@@ -12,6 +12,7 @@
 | URL 安全   | 仅接受绝对 HTTP、HTTPS 和 blob 地址                | 通过 |
 | 规范化     | 移除危险图片并修复 attrs、状态和 children          | 通过 |
 | URL 插入   | 折叠光标处拆分文本块并插入图片                     | 通过 |
+| HTML 粘贴  | 安全图片和独立图片段落进入模型并保留受控属性       | 通过 |
 | 本地入口   | image 文件生成可释放的 object URL，不上传          | 通过 |
 | 语义渲染   | core、HTML 与 React 输出一致的 void img            | 通过 |
 | 块选区     | 点击图片输出独立 BlockSelection 和选中态           | 通过 |
@@ -27,7 +28,8 @@
 - 块选区：`packages/core/tests/selection/block.test.ts`。
 - Renderer 与公共 API：core/react 的 render 和 public API 测试。
 - 本地文件生命周期：`packages/react/tests/local-image.test.ts`。
-- 浏览器：`tests/e2e/demo-shell.spec.ts` 覆盖 URL 插入、点击选中、Delete 删除和本地文件预览。
+- HTML 粘贴：core parser、Command/History、React 原生事件和 Chromium 端到端测试。
+- 浏览器：`tests/e2e/demo-shell.spec.ts` 覆盖 URL 插入、HTML 粘贴、点击选中、Delete 删除和本地文件预览。
 
 ## 本地验收
 
@@ -37,4 +39,4 @@ pnpm check:all
 
 ## 结论
 
-第 19 周图片能力已形成代码、测试、中文 Demo、文档和浏览器验收闭环。上传服务仍由集成方提供，下一步进入第 20 周粘贴闭环。
+第 19 周图片能力已形成代码、测试、中文 Demo、文档和浏览器验收闭环，并补齐安全 HTML 图片粘贴。上传服务仍由集成方提供。
