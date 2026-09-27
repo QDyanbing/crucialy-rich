@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { isTableNode, parseHtml, validateDocument } from "../../src";
+import { isImageNode, isTableNode, parseHtml, validateDocument } from "../../src";
 
 describe("parseHtml", () => {
   it("maps paragraphs, inline marks, and safe links", () => {
@@ -38,6 +38,25 @@ describe("parseHtml", () => {
         { children: [{ text: "无序二" }] },
       ],
     });
+  });
+
+  it("maps a safe top-level HTML image", () => {
+    const fragment = parseHtml('<img src="https://example.com/cover.png">');
+    const image = fragment?.blocks[0];
+
+    expect(isImageNode(image)).toBe(true);
+    expect(image).toEqual({
+      alt: "",
+      children: [],
+      height: null,
+      src: "https://example.com/cover.png",
+      status: "ready",
+      type: "image",
+      width: null,
+    });
+    expect(
+      validateDocument({ children: fragment?.blocks ?? [], type: "document" }).valid,
+    ).toBe(true);
   });
 
   it("maps a basic HTML table", () => {

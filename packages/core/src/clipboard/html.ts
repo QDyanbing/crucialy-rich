@@ -4,6 +4,7 @@ import {
   createBulletList,
   createCodeBlock,
   createHeading,
+  createImage,
   createListItem,
   createOrderedList,
   createParagraph,
@@ -12,6 +13,7 @@ import {
   createTableRow,
   createText,
   normalizeLinkMark,
+  sanitizeImageSrc,
   type BlockNode,
   type HeadingLevel,
   type TableNode,
@@ -107,6 +109,12 @@ function parseList(node: HtmlElement): BlockNode {
     : createBulletList(items.length > 0 ? items : undefined);
 }
 
+function parseImage(node: HtmlElement): BlockNode | undefined {
+  const src = sanitizeImageSrc(getAttribute(node, "src"));
+
+  return src ? createImage(src) : undefined;
+}
+
 function parseTableCell(node: HtmlElement) {
   const paragraphs = node.childNodes
     .filter((child): child is HtmlElement => isElement(child) && child.tagName === "p")
@@ -192,6 +200,12 @@ function parseBlock(node: HtmlNode): BlockNode[] {
 
   if (node.tagName === "pre") {
     return [createCodeBlock([createText(getTextContent(node))])];
+  }
+
+  if (node.tagName === "img") {
+    const image = parseImage(node);
+
+    return image ? [image] : [];
   }
 
   if (node.tagName === "ul" || node.tagName === "ol") {
