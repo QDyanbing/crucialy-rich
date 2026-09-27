@@ -13,6 +13,7 @@ import {
   parsePlainText,
   PASTE_COMMAND_NAME,
   pasteCommand,
+  isImageNode,
   isTableNode,
 } from "../../src";
 
@@ -192,6 +193,44 @@ describe("pasteCommand", () => {
       ["姓名", "角色"],
       ["小明", "开发"],
     ]);
+    expect(result.selection?.anchor).toEqual({ offset: 0, path: [2, 0] });
+  });
+
+  it("inserts a parsed HTML image as a structured block", () => {
+    const document = createDocument([createParagraph([createText("前后")])]);
+    const result = pasteCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { offset: 1, path: [0, 0] },
+          focus: { offset: 1, path: [0, 0] },
+        },
+      },
+      payload: {
+        fragment: parseHtml(
+          '<img src="https://example.com/cover.png" alt="封面" width="640" height="360">',
+        )!,
+      },
+    });
+    const resultDocument = applyTransaction(document, result.transaction!);
+    const image = resultDocument.children[1];
+
+    expect(result.transaction?.operations.map((operation) => operation.type)).toEqual([
+      "split_block",
+      "insert_block",
+    ]);
+    expect(resultDocument.children.map((block) => block.type)).toEqual([
+      "paragraph",
+      "image",
+      "paragraph",
+    ]);
+    expect(isImageNode(image)).toBe(true);
+    expect(image).toMatchObject({
+      alt: "封面",
+      height: 360,
+      src: "https://example.com/cover.png",
+      width: 640,
+    });
     expect(result.selection?.anchor).toEqual({ offset: 0, path: [2, 0] });
   });
 
