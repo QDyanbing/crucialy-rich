@@ -2552,6 +2552,43 @@ test("pastes an HTML table through the native editor event", async ({ page }) =>
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
 
+test("pastes an HTML image through the native editor event", async ({ page }) => {
+  await page.goto("/");
+  await placeCaretInRenderedText(page, "[0,0]", 3);
+
+  const editor = page.getByLabel("已渲染文档");
+
+  await editor.evaluate((element) => {
+    const clipboardData = new DataTransfer();
+
+    clipboardData.setData(
+      "text/html",
+      '<img src="https://example.com/cover.png" alt="粘贴封面" width="640" height="360">',
+    );
+    clipboardData.setData("text/plain", "粘贴封面");
+    element.dispatchEvent(
+      new ClipboardEvent("paste", {
+        bubbles: true,
+        cancelable: true,
+        clipboardData,
+      }),
+    );
+  });
+
+  const image = editor.locator('img[data-crucialy-image="true"]');
+
+  await expect(image).toHaveCount(1);
+  await expect(image).toHaveAttribute("src", "https://example.com/cover.png");
+  await expect(image).toHaveAttribute("alt", "粘贴封面");
+  await expect(image).toHaveAttribute("width", "640");
+  await expect(image).toHaveAttribute("height", "360");
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"type": "insert_block"',
+  );
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
 test("pastes HTML and Markdown from the acceptance controls", async ({ page }) => {
   await page.goto("/");
   const editor = page.getByLabel("已渲染文档");
