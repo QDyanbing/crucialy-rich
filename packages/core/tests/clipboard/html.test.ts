@@ -104,6 +104,24 @@ describe("parseHtml", () => {
     });
   });
 
+  it("promotes a standalone paragraph image to an image block", () => {
+    const fragment = parseHtml(
+      '<p>\n  <img src="https://example.com/inside-paragraph.png" alt="段落图片">\n</p>',
+    );
+
+    expect(fragment?.blocks).toEqual([
+      {
+        alt: "段落图片",
+        children: [],
+        height: null,
+        src: "https://example.com/inside-paragraph.png",
+        status: "ready",
+        type: "image",
+        width: null,
+      },
+    ]);
+  });
+
   it("maps a basic HTML table", () => {
     const fragment = parseHtml(
       "<table><tr><td>姓名</td><td>角色</td></tr><tr><td>小明</td><td>开发</td></tr></table>",

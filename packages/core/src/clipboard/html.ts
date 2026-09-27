@@ -130,6 +130,17 @@ function parseImage(node: HtmlElement): BlockNode | undefined {
     : undefined;
 }
 
+function getStandaloneParagraphImage(node: HtmlElement): HtmlElement | undefined {
+  const content = node.childNodes.filter(
+    (child) => !isText(child) || child.value.trim().length > 0,
+  );
+  const child = content[0];
+
+  return content.length === 1 && child && isElement(child) && child.tagName === "img"
+    ? child
+    : undefined;
+}
+
 function parseTableCell(node: HtmlElement) {
   const paragraphs = node.childNodes
     .filter((child): child is HtmlElement => isElement(child) && child.tagName === "p")
@@ -197,6 +208,14 @@ function parseBlock(node: HtmlNode): BlockNode[] {
   }
 
   if (node.tagName === "p") {
+    const imageNode = getStandaloneParagraphImage(node);
+
+    if (imageNode) {
+      const image = parseImage(imageNode);
+
+      return image ? [image] : [];
+    }
+
     return [createParagraph(parseInlineChildren(node))];
   }
 
