@@ -84,6 +84,26 @@ describe("parseHtml", () => {
     });
   });
 
+  it("rejects unsafe image sources and unsupported attributes", () => {
+    expect(parseHtml('<img src="javascript:alert(1)" alt="危险图片">')).toBeUndefined();
+    expect(parseHtml('<img src="data:image/png;base64,abc">')).toBeUndefined();
+    expect(parseHtml('<img src="/relative.png">')).toBeUndefined();
+
+    const fragment = parseHtml(
+      '<img src="https://example.com/safe.png" width="0" height="360px" style="width: 640px" onerror="alert(1)">',
+    );
+
+    expect(fragment?.blocks[0]).toEqual({
+      alt: "",
+      children: [],
+      height: null,
+      src: "https://example.com/safe.png",
+      status: "ready",
+      type: "image",
+      width: null,
+    });
+  });
+
   it("maps a basic HTML table", () => {
     const fragment = parseHtml(
       "<table><tr><td>姓名</td><td>角色</td></tr><tr><td>小明</td><td>开发</td></tr></table>",
