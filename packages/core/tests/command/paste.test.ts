@@ -15,6 +15,7 @@ import {
   pasteCommand,
   isImageNode,
   isTableNode,
+  isTaskListNode,
 } from "../../src";
 
 describe("pasteCommand", () => {
@@ -232,6 +233,44 @@ describe("pasteCommand", () => {
       width: 640,
     });
     expect(result.selection?.anchor).toEqual({ offset: 0, path: [2, 0] });
+  });
+
+  it("inserts a parsed HTML task list as a structured block", () => {
+    const document = createDocument([createParagraph([createText("前后")])]);
+    const result = pasteCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { offset: 1, path: [0, 0] },
+          focus: { offset: 1, path: [0, 0] },
+        },
+      },
+      payload: {
+        fragment: parseHtml(
+          '<ul><li><input type="checkbox" checked>已完成</li><li><input type="checkbox">待处理</li></ul>',
+        )!,
+      },
+    });
+    const resultDocument = applyTransaction(document, result.transaction!);
+    const taskList = resultDocument.children[1];
+
+    expect(result.transaction?.operations.map((operation) => operation.type)).toEqual([
+      "split_block",
+      "insert_block",
+    ]);
+    expect(resultDocument.children.map((block) => block.type)).toEqual([
+      "paragraph",
+      "taskList",
+      "paragraph",
+    ]);
+    expect(isTaskListNode(taskList)).toBe(true);
+    expect(taskList).toMatchObject({
+      children: [
+        { checked: true, type: "taskItem" },
+        { checked: false, type: "taskItem" },
+      ],
+    });
+    expect(result.selection?.anchor).toEqual({ offset: 3, path: [1, 1, 0] });
   });
 
   it("pastes one TSV row across table cells", () => {
