@@ -73,6 +73,23 @@ describe("parseHtml", () => {
     ).toBe(true);
   });
 
+  it("preserves checked HTML task items", () => {
+    const fragment = parseHtml(
+      '<ul><li><input type="checkbox" checked>已完成</li><li><input type="checkbox">未完成</li></ul>',
+    );
+    const taskList = fragment?.blocks[0];
+
+    expect(isTaskListNode(taskList)).toBe(true);
+
+    if (!isTaskListNode(taskList)) {
+      throw new Error("expected parsed task list");
+    }
+
+    expect(taskList).toMatchObject({
+      children: [{ checked: true }, { checked: false }],
+    });
+  });
+
   it("maps a safe top-level HTML image", () => {
     const fragment = parseHtml('<img src="https://example.com/cover.png">');
     const image = fragment?.blocks[0];

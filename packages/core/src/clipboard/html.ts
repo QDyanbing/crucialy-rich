@@ -49,6 +49,10 @@ function getAttribute(node: HtmlElement, name: string): string | undefined {
   return node.attrs.find((attribute) => attribute.name === name)?.value;
 }
 
+function hasAttribute(node: HtmlElement, name: string): boolean {
+  return node.attrs.some((attribute) => attribute.name === name);
+}
+
 function appendInlineNodes(node: HtmlNode, marks: TextMarks, output: TextNode[]): void {
   if (isText(node)) {
     if (node.value.length > 0) {
@@ -121,7 +125,14 @@ function parseList(node: HtmlElement): BlockNode {
     taskCheckboxes.every((checkbox) => checkbox !== undefined)
   ) {
     return createTaskList(
-      itemNodes.map((item) => createTaskItem(parseInlineChildren(item, true))),
+      itemNodes.map((item, index) =>
+        createTaskItem(
+          parseInlineChildren(item, true),
+          taskCheckboxes[index]
+            ? hasAttribute(taskCheckboxes[index], "checked")
+            : false,
+        ),
+      ),
     );
   }
 
