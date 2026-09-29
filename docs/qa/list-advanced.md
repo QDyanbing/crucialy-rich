@@ -13,6 +13,7 @@
 | 任务列表模型     | taskList/taskItem 保存 checked                | 通过 |
 | 任务列表 Command | paragraph、普通列表和任务列表可互相切换       | 通过 |
 | checkbox         | 勾选状态通过 set_task_item_checked 写入 model | 通过 |
+| HTML 粘贴        | checkbox 无序列表保留任务文字与 checked 状态  | 通过 |
 | History          | 缩进、反缩进和 checked 均可撤销、重做         | 通过 |
 | 中文 Demo        | “嵌套与任务列表”覆盖键盘和勾选流程            | 通过 |
 
@@ -23,6 +24,7 @@
 - 结构操作：`indent-list-item.test.ts`、`outdent-list-item.test.ts`、`set-task-item-checked.test.ts`。
 - 输入：`tab.test.ts`、`backspace.test.ts`、`enter.test.ts`。
 - Command：`task-list.test.ts`。
+- HTML 粘贴：Clipboard parser、Paste Command/History、React 原生事件和 Chromium 端到端测试。
 - 浏览器：`tests/e2e/demo-shell.spec.ts` 的高级列表场景。
 
 ```sh
@@ -31,4 +33,4 @@ pnpm check:all
 
 ## 结论
 
-第 16 周列表增强范围已闭环。嵌套层级、键盘行为、任务状态、History 和中文 Demo 均有自动化覆盖；下一步进入第 17 周工具栏架构。
+第 16 周列表增强范围已闭环，并补齐 HTML 任务列表粘贴。嵌套层级、键盘行为、任务状态、History 和中文 Demo 均有自动化覆盖。

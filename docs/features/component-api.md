@@ -103,6 +103,7 @@ ref 命令事件的 `inputType` 为 `command`。受控模式不会自行替换 `
 - 纯文本 TSV 粘贴会从当前 cell 向右、向下填充，不改变表格尺寸。
 - 顶层 HTML 表格粘贴会经过 core 白名单解析，并作为一个结构化 block 和一条 History 记录插入。
 - 安全 HTML 图片粘贴会保留 alt 和正整数宽高，并通过同一 `insertFromPaste` transaction 插入 Image block。
+- HTML checkbox 列表粘贴会保留任务文字和 checked 状态，并通过 `insertFromPaste` 插入 taskList。
 - 宿主可在 `onKeyDown` 中用 `getHistoryShortcutAction` 接入撤销/重做快捷键；外部 `preventDefault` 后组件不会继续执行普通输入处理。
 - Ctrl/Meta 主修饰键组合可执行默认 boolean mark、标题、引用和列表 Command；绑定 payload 会透传，并输出 `formatShortcut` transaction。
 - Composition 候选阶段暂停普通输入、编辑快捷键和粘贴；结束时只输出一次 `insertCompositionText` transaction。
