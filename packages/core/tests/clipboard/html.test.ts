@@ -136,6 +136,36 @@ describe("parseHtml", () => {
     });
   });
 
+  it("keeps ambiguous checkbox lists as regular lists", () => {
+    const mixed = parseHtml(
+      '<ul><li><input type="checkbox">任务</li><li>普通项</li></ul>',
+    );
+    const nonLeading = parseHtml(
+      '<ul><li>正文<input type="checkbox">尾部控件</li></ul>',
+    );
+    const radio = parseHtml('<ul><li><input type="radio">单选项</li></ul>');
+    const ordered = parseHtml(
+      '<ol><li><input type="checkbox" checked>有序项</li></ol>',
+    );
+
+    expect(mixed?.blocks[0]).toMatchObject({
+      children: [{ type: "listItem" }, { type: "listItem" }],
+      type: "bulletList",
+    });
+    expect(nonLeading?.blocks[0]).toMatchObject({
+      children: [{ children: [{ text: "正文" }, { text: "尾部控件" }] }],
+      type: "bulletList",
+    });
+    expect(radio?.blocks[0]).toMatchObject({
+      children: [{ type: "listItem" }],
+      type: "bulletList",
+    });
+    expect(ordered?.blocks[0]).toMatchObject({
+      children: [{ type: "listItem" }],
+      type: "orderedList",
+    });
+  });
+
   it("maps a safe top-level HTML image", () => {
     const fragment = parseHtml('<img src="https://example.com/cover.png">');
     const image = fragment?.blocks[0];
