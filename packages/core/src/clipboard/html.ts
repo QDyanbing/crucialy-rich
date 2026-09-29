@@ -106,18 +106,34 @@ function parseInlineChildren(
   return output.length > 0 ? output : [createText()];
 }
 
+const TASK_CHECKBOX_WRAPPERS = new Set(["div", "label", "p", "span"]);
+
+function findLeadingTaskCheckbox(node: HtmlElement): HtmlElement | undefined {
+  const child = node.childNodes.find(
+    (candidate) => !isText(candidate) || candidate.value.trim().length > 0,
+  );
+
+  if (!child || !isElement(child)) {
+    return undefined;
+  }
+
+  if (
+    child.tagName === "input" &&
+    getAttribute(child, "type")?.toLowerCase() === "checkbox"
+  ) {
+    return child;
+  }
+
+  return TASK_CHECKBOX_WRAPPERS.has(child.tagName)
+    ? findLeadingTaskCheckbox(child)
+    : undefined;
+}
+
 function parseList(node: HtmlElement): BlockNode {
   const itemNodes = node.childNodes.filter(
     (child): child is HtmlElement => isElement(child) && child.tagName === "li",
   );
-  const taskCheckboxes = itemNodes.map((item) =>
-    item.childNodes.find(
-      (child): child is HtmlElement =>
-        isElement(child) &&
-        child.tagName === "input" &&
-        getAttribute(child, "type")?.toLowerCase() === "checkbox",
-    ),
-  );
+  const taskCheckboxes = itemNodes.map(findLeadingTaskCheckbox);
 
   if (
     node.tagName === "ul" &&

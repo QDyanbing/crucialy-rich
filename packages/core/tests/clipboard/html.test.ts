@@ -114,6 +114,28 @@ describe("parseHtml", () => {
     });
   });
 
+  it("recognizes leading task checkboxes inside common wrappers", () => {
+    const fragment = parseHtml(
+      '<ul data-type="taskList"><li><label><span><input type="checkbox" checked></span></label><div><p><strong>包装任务</strong></p></div></li><li><p><input type="checkbox">段落任务</p></li></ul>',
+    );
+
+    expect(fragment?.blocks[0]).toMatchObject({
+      children: [
+        {
+          checked: true,
+          children: [{ marks: { bold: true }, text: "包装任务" }],
+          type: "taskItem",
+        },
+        {
+          checked: false,
+          children: [{ text: "段落任务" }],
+          type: "taskItem",
+        },
+      ],
+      type: "taskList",
+    });
+  });
+
   it("maps a safe top-level HTML image", () => {
     const fragment = parseHtml('<img src="https://example.com/cover.png">');
     const image = fragment?.blocks[0];
