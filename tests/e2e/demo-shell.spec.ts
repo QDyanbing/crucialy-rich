@@ -2589,6 +2589,43 @@ test("pastes an HTML image through the native editor event", async ({ page }) =>
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
 
+test("pastes an HTML task list through the native editor event", async ({ page }) => {
+  await page.goto("/");
+  await placeCaretInRenderedText(page, "[0,0]", 3);
+
+  const editor = page.getByLabel("已渲染文档");
+
+  await editor.evaluate((element) => {
+    const clipboardData = new DataTransfer();
+
+    clipboardData.setData(
+      "text/html",
+      '<ul><li><input type="checkbox" checked>已完成</li><li><input type="checkbox">待处理</li></ul>',
+    );
+    clipboardData.setData("text/plain", "已完成\n待处理");
+    element.dispatchEvent(
+      new ClipboardEvent("paste", {
+        bubbles: true,
+        cancelable: true,
+        clipboardData,
+      }),
+    );
+  });
+
+  const taskList = editor.locator('ul[data-crucialy-list-type="task"]');
+  const checkboxes = taskList.locator('input[type="checkbox"]');
+
+  await expect(taskList.locator("li")).toHaveText(["已完成", "待处理"]);
+  await expect(checkboxes).toHaveCount(2);
+  await expect(checkboxes.nth(0)).toBeChecked();
+  await expect(checkboxes.nth(1)).not.toBeChecked();
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"type": "insert_block"',
+  );
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
 test("pastes HTML and Markdown from the acceptance controls", async ({ page }) => {
   await page.goto("/");
   const editor = page.getByLabel("已渲染文档");
