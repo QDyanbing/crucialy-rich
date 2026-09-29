@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { isImageNode, isTableNode, parseHtml, validateDocument } from "../../src";
+import {
+  isImageNode,
+  isTableNode,
+  isTaskListNode,
+  parseHtml,
+  validateDocument,
+} from "../../src";
 
 describe("parseHtml", () => {
   it("maps paragraphs, inline marks, and safe links", () => {
@@ -38,6 +44,33 @@ describe("parseHtml", () => {
         { children: [{ text: "无序二" }] },
       ],
     });
+  });
+
+  it("maps an unchecked HTML task list", () => {
+    const fragment = parseHtml(
+      '<ul><li><input type="checkbox">待处理</li><li><input type="checkbox">待复核</li></ul>',
+    );
+    const taskList = fragment?.blocks[0];
+
+    expect(isTaskListNode(taskList)).toBe(true);
+    expect(taskList).toEqual({
+      children: [
+        {
+          checked: false,
+          children: [{ text: "待处理", type: "text" }],
+          type: "taskItem",
+        },
+        {
+          checked: false,
+          children: [{ text: "待复核", type: "text" }],
+          type: "taskItem",
+        },
+      ],
+      type: "taskList",
+    });
+    expect(
+      validateDocument({ children: fragment?.blocks ?? [], type: "document" }).valid,
+    ).toBe(true);
   });
 
   it("maps a safe top-level HTML image", () => {

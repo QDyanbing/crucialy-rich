@@ -11,6 +11,8 @@ import {
   createQuote,
   createTableCell,
   createTableRow,
+  createTaskItem,
+  createTaskList,
   createText,
   normalizeImageDimension,
   normalizeLinkMark,
@@ -101,9 +103,31 @@ function parseInlineChildren(
 }
 
 function parseList(node: HtmlElement): BlockNode {
-  const items = node.childNodes
-    .filter((child): child is HtmlElement => isElement(child) && child.tagName === "li")
-    .map((item) => createListItem(parseInlineChildren(item, true)));
+  const itemNodes = node.childNodes.filter(
+    (child): child is HtmlElement => isElement(child) && child.tagName === "li",
+  );
+  const taskCheckboxes = itemNodes.map((item) =>
+    item.childNodes.find(
+      (child): child is HtmlElement =>
+        isElement(child) &&
+        child.tagName === "input" &&
+        getAttribute(child, "type")?.toLowerCase() === "checkbox",
+    ),
+  );
+
+  if (
+    node.tagName === "ul" &&
+    itemNodes.length > 0 &&
+    taskCheckboxes.every((checkbox) => checkbox !== undefined)
+  ) {
+    return createTaskList(
+      itemNodes.map((item) => createTaskItem(parseInlineChildren(item, true))),
+    );
+  }
+
+  const items = itemNodes.map((item) =>
+    createListItem(parseInlineChildren(item, true)),
+  );
 
   return node.tagName === "ol"
     ? createOrderedList(items.length > 0 ? items : undefined)
