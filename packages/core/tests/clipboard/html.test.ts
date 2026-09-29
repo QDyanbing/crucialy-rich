@@ -90,6 +90,30 @@ describe("parseHtml", () => {
     });
   });
 
+  it("preserves inline marks and safe links in HTML task items", () => {
+    const fragment = parseHtml(
+      '<ul><li><input type="checkbox"><strong>加粗</strong><em>斜体</em><a href="https://example.com/task">链接</a></li></ul>',
+    );
+    const taskList = fragment?.blocks[0];
+
+    expect(taskList).toMatchObject({
+      children: [
+        {
+          children: [
+            { marks: { bold: true }, text: "加粗" },
+            { marks: { italic: true }, text: "斜体" },
+            {
+              marks: { link: { href: "https://example.com/task" } },
+              text: "链接",
+            },
+          ],
+          type: "taskItem",
+        },
+      ],
+      type: "taskList",
+    });
+  });
+
   it("maps a safe top-level HTML image", () => {
     const fragment = parseHtml('<img src="https://example.com/cover.png">');
     const image = fragment?.blocks[0];
