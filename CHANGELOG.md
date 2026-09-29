@@ -8,6 +8,8 @@
 
 ### 新增
 
+- 新增 HTML 任务列表 Clipboard 解析，保留 checkbox checked、行内 marks 和安全链接，并兼容常见起始包装结构。
+- 新增任务列表粘贴的安全降级、Command/History 生命周期、React 原生事件和 Chromium 端到端回归。
 - 新增安全 HTML 图片 Clipboard 解析，支持顶层图片、独立图片段落、alt 和正整数宽高，并拒绝危险地址及未知属性。
 - 新增 HTML 图片粘贴的 Command/History 生命周期、React 原生事件和 Chromium 端到端回归。
 - 新增 HTML 表格 Clipboard 解析，支持 `thead`、`tbody`、`tfoot`、`td`、`th`、非等宽行补齐、cell 多段落、行内 marks 和安全链接。
