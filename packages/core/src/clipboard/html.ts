@@ -72,7 +72,7 @@ function appendInlineNodes(node: HtmlNode, marks: TextMarks, output: TextNode[])
 
   let nextMarks = marks;
 
-  if (node.tagName === "strong") {
+  if (node.tagName === "strong" || node.tagName === "b") {
     nextMarks = { ...marks, bold: true };
   } else if (node.tagName === "em") {
     nextMarks = { ...marks, italic: true };

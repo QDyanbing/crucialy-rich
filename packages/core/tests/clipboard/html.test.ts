@@ -29,6 +29,15 @@ describe("parseHtml", () => {
     });
   });
 
+  it("maps HTML b elements to bold marks", () => {
+    const fragment = parseHtml("<p><b>浏览器加粗</b></p>");
+
+    expect(fragment?.blocks[0]).toMatchObject({
+      children: [{ marks: { bold: true }, text: "浏览器加粗" }],
+      type: "paragraph",
+    });
+  });
+
   it("maps ordered and unordered lists", () => {
     const fragment = parseHtml(
       "<ul><li>无序一</li><li>无序二</li></ul><ol><li>有序一</li></ol>",
