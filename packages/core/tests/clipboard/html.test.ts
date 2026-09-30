@@ -71,6 +71,32 @@ describe("parseHtml", () => {
     });
   });
 
+  it("preserves nested mark aliases while sanitizing links", () => {
+    const fragment = parseHtml(
+      '<p><a href="https://example.com/docs"><b><i><u><del>组合样式</del></u></i></b></a><a href="javascript:alert(1)"><u>危险链接文本</u></a></p>',
+    );
+
+    expect(fragment?.blocks[0]).toMatchObject({
+      children: [
+        {
+          marks: {
+            bold: true,
+            italic: true,
+            link: { href: "https://example.com/docs" },
+            strike: true,
+            underline: true,
+          },
+          text: "组合样式",
+        },
+        {
+          marks: { underline: true },
+          text: "危险链接文本",
+        },
+      ],
+      type: "paragraph",
+    });
+  });
+
   it("maps ordered and unordered lists", () => {
     const fragment = parseHtml(
       "<ul><li>无序一</li><li>无序二</li></ul><ol><li>有序一</li></ol>",
