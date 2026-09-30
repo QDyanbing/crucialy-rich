@@ -2,7 +2,7 @@
 
 ## 执行信息
 
-- 日期：2026-09-29
+- 日期：2026-09-30
 - 版本：`0.1.0`
 - 分支：`master`
 - 命令：`pnpm check:all`
@@ -14,12 +14,12 @@
 | Prettier   | 通过 | 全仓文件格式一致                          |
 | ESLint     | 通过 | 0 warning、0 error                        |
 | TypeScript | 通过 | 根工程与 core/react/demo 包级检查全部通过 |
-| Vitest     | 通过 | 137 个测试文件，1020 项测试               |
+| Vitest     | 通过 | 139 个测试文件，1028 项测试               |
 | Core 构建  | 通过 | ESM、source map、类型声明生成成功         |
 | React 构建 | 通过 | ESM、source map、类型声明生成成功         |
 | Demo 构建  | 通过 | Vite 生产构建成功                         |
 | 包产物导入 | 通过 | core/react 运行时导出与声明文件校验成功   |
-| Playwright | 通过 | Chromium 112 项测试                       |
+| Playwright | 通过 | Chromium 113 项测试                       |
 
 ## 核心路径
 
@@ -28,6 +28,7 @@
 - HTML 表格解析、Command 插入、History 往返、React 原生事件和 Demo 两条浏览器粘贴路径均通过。
 - HTML 图片 URL/属性过滤、独立图片段落、Command/History、React 原生事件和 Chromium 粘贴路径均通过。
 - HTML 任务列表识别、checked/marks/link 保留、安全降级、Command/History、React 与 Chromium 粘贴路径均通过。
+- HTML `b/i/u/s/strike/del` 标记别名、嵌套组合、安全链接、Command/History、React 与 Chromium 粘贴路径均通过。
 - 受控、非受控、只读、ref 状态读取和 ref Command 执行测试通过。
 - Demo 的 16 个模型示例按五个验收区域展示，原有示例 ID 和行为保持不变。
 
