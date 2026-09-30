@@ -56,6 +56,21 @@ describe("parseHtml", () => {
     });
   });
 
+  it("maps HTML strike element aliases to strike marks", () => {
+    const fragment = parseHtml(
+      "<p><s>现代删除线</s><strike>传统删除线</strike><del>删除语义</del></p>",
+    );
+
+    expect(fragment?.blocks[0]).toMatchObject({
+      children: [
+        { marks: { strike: true }, text: "现代删除线" },
+        { marks: { strike: true }, text: "传统删除线" },
+        { marks: { strike: true }, text: "删除语义" },
+      ],
+      type: "paragraph",
+    });
+  });
+
   it("maps ordered and unordered lists", () => {
     const fragment = parseHtml(
       "<ul><li>无序一</li><li>无序二</li></ul><ol><li>有序一</li></ol>",
