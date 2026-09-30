@@ -2626,6 +2626,40 @@ test("pastes an HTML task list through the native editor event", async ({ page }
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
 
+test("pastes HTML mark aliases through the native editor event", async ({ page }) => {
+  await page.goto("/");
+  await placeCaretInRenderedText(page, "[0,0]", 3);
+
+  const editor = page.getByLabel("已渲染文档");
+
+  await editor.evaluate((element) => {
+    const clipboardData = new DataTransfer();
+
+    clipboardData.setData(
+      "text/html",
+      "<p><b><i><u><del>组合样式</del></u></i></b></p>",
+    );
+    clipboardData.setData("text/plain", "组合样式");
+    element.dispatchEvent(
+      new ClipboardEvent("paste", {
+        bubbles: true,
+        cancelable: true,
+        clipboardData,
+      }),
+    );
+  });
+
+  const markedText = editor.locator("strong", { hasText: "组合样式" });
+
+  await expect(markedText).toHaveCSS("font-style", "italic");
+  await expect(markedText).toHaveCSS("text-decoration-line", "underline line-through");
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"type": "insert_block"',
+  );
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
 test("pastes HTML and Markdown from the acceptance controls", async ({ page }) => {
   await page.goto("/");
   const editor = page.getByLabel("已渲染文档");
