@@ -47,6 +47,15 @@ describe("parseHtml", () => {
     });
   });
 
+  it("maps HTML u elements to underline marks", () => {
+    const fragment = parseHtml("<p><u>浏览器下划线</u></p>");
+
+    expect(fragment?.blocks[0]).toMatchObject({
+      children: [{ marks: { underline: true }, text: "浏览器下划线" }],
+      type: "paragraph",
+    });
+  });
+
   it("maps ordered and unordered lists", () => {
     const fragment = parseHtml(
       "<ul><li>无序一</li><li>无序二</li></ul><ol><li>有序一</li></ol>",

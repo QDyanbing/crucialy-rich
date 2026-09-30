@@ -76,6 +76,8 @@ function appendInlineNodes(node: HtmlNode, marks: TextMarks, output: TextNode[])
     nextMarks = { ...marks, bold: true };
   } else if (node.tagName === "em" || node.tagName === "i") {
     nextMarks = { ...marks, italic: true };
+  } else if (node.tagName === "u") {
+    nextMarks = { ...marks, underline: true };
   } else if (node.tagName === "a") {
     const link = normalizeLinkMark({ href: getAttribute(node, "href") });
 
