@@ -38,6 +38,15 @@ describe("parseHtml", () => {
     });
   });
 
+  it("maps HTML i elements to italic marks", () => {
+    const fragment = parseHtml("<p><i>浏览器斜体</i></p>");
+
+    expect(fragment?.blocks[0]).toMatchObject({
+      children: [{ marks: { italic: true }, text: "浏览器斜体" }],
+      type: "paragraph",
+    });
+  });
+
   it("maps ordered and unordered lists", () => {
     const fragment = parseHtml(
       "<ul><li>无序一</li><li>无序二</li></ul><ol><li>有序一</li></ol>",
