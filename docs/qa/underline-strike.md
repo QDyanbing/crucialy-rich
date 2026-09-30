@@ -9,6 +9,7 @@
 - Underline 与 Strike 支持选区应用、取消、跨 text、collapsed 输入继承和 active 状态。
 - Underline 与 Strike 可独立切换，不会移除 Bold、Italic 或彼此的状态。
 - renderer 在同一模型路径上合并 underline 和 line-through，避免装饰样式互相覆盖。
+- HTML Clipboard 将 `u` 以及 `s` / `strike` / `del` 规范化为对应 boolean mark，并保留嵌套组合。
 - 渲染树使用结构化 style，HTML 序列化与 React 集成分别转换为各自需要的格式。
 - Demo“文字标记”样例覆盖四种单独 mark、四种组合 mark 和跨 text 混合选区。
 - `DEFAULT_COMMAND_SHORTCUTS` 预留 Bold、Italic 和 Underline 映射，支持按 command 查询和按键盘输入匹配。
@@ -24,8 +25,11 @@
 - `packages/core/tests/command/integration.test.ts`
 - `packages/core/tests/render/render.test.ts`
 - `packages/core/tests/render/html.test.ts`
+- `packages/core/tests/clipboard/html.test.ts`
+- `packages/core/tests/command/html-mark-alias-paste-history.test.ts`
 - `packages/core/tests/public-api.test.ts`
 - `packages/react/tests/public-api.test.ts`
+- `packages/react/tests/html-mark-alias-paste.test.ts`
 - `tests/e2e/demo-shell.spec.ts`
 
 ## 手测场景

@@ -23,8 +23,10 @@
 HTML 使用 `parse5` 读取标准语法树，不使用正则解析标签。当前支持：
 
 - 块：`p`、`h1`–`h6`、`blockquote`、`pre`、`ul`、`ol`、`li`、`img`、`table`、`tr`、`td`、`th`。
-- 行内：`strong`、`em`、`a`、`code`、`br`。
+- 行内：`strong` / `b`、`em` / `i`、`u`、`s` / `strike` / `del`、`a`、`code`、`br`。
 - 属性：保留链接 `href`，以及图片 `src`、`alt`、`width`、`height`；URL 继续经过各自协议白名单。
+
+语义标签别名会统一映射到模型已有的 `bold`、`italic`、`underline` 和 `strike` 标记。别名可以嵌套组合，也可以与安全链接共存；危险链接会被移除，但其中的文字和合法标记仍会保留。
 
 HTML 任务列表要求顶层为 `ul`，且每个直属 `li` 的首个有效内容都是 `input[type="checkbox"]`。checkbox 可包在开头的 `label`、`p`、`div` 或 `span` 中；`checked` 映射为 taskItem 状态，任务文字继续保留行内 mark 和安全链接。混合列表、后置 checkbox、radio 和有序列表会降级为普通列表。
 
@@ -47,7 +49,7 @@ Markdown 使用 `marked` 转换为 HTML，再复用同一 HTML 白名单映射�
 - HTML/Markdown 结构化粘贴只在同一顶层文本块内的选区执行。
 - 现有表格内的二维填充仍只接受 `text/plain` TSV，不自动新增行列，也不支持跨 cell range 替换。
 - HTML 表格不保留 `colspan`、`rowspan` 和表头语义，不支持嵌套表格。
-- HTML 暂不支持图文混排、嵌套任务列表、复杂嵌套列表和 CSS 样式。
+- HTML 暂不支持图文混排、嵌套任务列表、复杂嵌套列表和通过内联 CSS 推断文字标记。
 - Markdown 暂不支持扩展语法的完整保真映射。
 - data URL、剪贴板二进制图片上传和图片资源持久化不属于本阶段范围。
 

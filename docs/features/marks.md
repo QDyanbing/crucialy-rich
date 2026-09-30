@@ -213,6 +213,10 @@ renderer 遇到 text marks 时会根据标记输出内联元素，并继续保�
 
 Demo 的“文字标记”样例覆盖普通、加粗、斜体、下划线、删除线、四种组合格式和跨 text 选区。四个 mark 按钮通过 `aria-pressed` 同步当前 active 状态。
 
+## HTML 粘贴映射
+
+Clipboard parser 将 `strong` / `b` 映射为 bold、`em` / `i` 映射为 italic、`u` 映射为 underline，并将 `s` / `strike` / `del` 映射为 strike。嵌套标签会合并到同一个 `TextNode.marks`，粘贴、History 和 React 渲染均保留组合结果；任意内联 CSS 仍不会被解释为 mark。
+
 ## 当前限制
 
 - 第 17 周 React Toolbar 已内置四种 boolean mark 默认项，React 编辑器也已绑定四种默认 mark 快捷键。
