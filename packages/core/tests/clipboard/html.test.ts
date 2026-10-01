@@ -590,6 +590,31 @@ describe("parseHtml", () => {
     });
   });
 
+  it("preserves link metadata inside HTML table cells", () => {
+    const fragment = parseHtml(
+      '<table><tr><td><a href="https://example.com/docs" target="_blank" rel="noopener noreferrer">表格链接</a></td></tr></table>',
+    );
+    const table = fragment?.blocks[0];
+
+    expect(isTableNode(table)).toBe(true);
+
+    if (!isTableNode(table)) {
+      throw new Error("expected parsed table");
+    }
+
+    expect(table.children[0]?.children[0]?.children[0]?.children[0]).toEqual({
+      marks: {
+        link: {
+          href: "https://example.com/docs",
+          rel: "noopener noreferrer",
+          target: "_blank",
+        },
+      },
+      text: "表格链接",
+      type: "text",
+    });
+  });
+
   it("declines empty and blocked-only HTML tables", () => {
     expect(parseHtml("<table></table>")).toBeUndefined();
     expect(parseHtml("<table><tr></tr></table>")).toBeUndefined();
