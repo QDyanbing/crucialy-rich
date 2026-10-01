@@ -90,6 +90,22 @@ describe("parseHtml", () => {
     });
   });
 
+  it("drops unsupported HTML link metadata without dropping the link", () => {
+    const fragment = parseHtml(
+      '<p><a href="https://example.com/docs" target="_parent" rel="noopener sponsored">降级链接</a></p>',
+    );
+
+    expect(fragment?.blocks[0]).toMatchObject({
+      children: [
+        {
+          marks: { link: { href: "https://example.com/docs" } },
+          text: "降级链接",
+        },
+      ],
+      type: "paragraph",
+    });
+  });
+
   it("maps HTML b elements to bold marks", () => {
     const fragment = parseHtml("<p><b>浏览器加粗</b></p>");
 
