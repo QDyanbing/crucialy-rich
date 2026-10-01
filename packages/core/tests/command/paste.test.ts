@@ -187,6 +187,43 @@ describe("pasteCommand", () => {
     expect(result.selection?.anchor).toEqual({ offset: 4, path: [1, 0] });
   });
 
+  it("pastes HTML link metadata without flattening it", () => {
+    const document = createDocument([createParagraph([createText("前后")])]);
+    const result = pasteCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { offset: 1, path: [0, 0] },
+          focus: { offset: 1, path: [0, 0] },
+        },
+      },
+      payload: {
+        fragment: parseHtml(
+          '<p><a href="https://example.com/docs" target="_blank" rel="noopener noreferrer"><b>链接文档</b></a></p>',
+        )!,
+      },
+    });
+    const resultDocument = applyTransaction(document, result.transaction!);
+
+    expect(resultDocument.children[1]).toMatchObject({
+      children: [
+        {
+          marks: {
+            bold: true,
+            link: {
+              href: "https://example.com/docs",
+              rel: "noopener noreferrer",
+              target: "_blank",
+            },
+          },
+          text: "链接文档",
+        },
+      ],
+      type: "paragraph",
+    });
+    expect(result.selection?.anchor).toEqual({ offset: 4, path: [1, 0] });
+  });
+
   it("inserts a parsed HTML table as a structured block", () => {
     const document = createDocument([createParagraph([createText("前后")])]);
     const result = pasteCommand.execute({
