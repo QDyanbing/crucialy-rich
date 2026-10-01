@@ -8,6 +8,8 @@
 
 ### 新增
 
+- 新增 HTML Clipboard 安全链接元数据解析，保留规范化后的 `target` 和 `rel`，非法可选属性降级省略。
+- 新增链接元数据粘贴的段落、组合 mark、任务列表、表格、Command/History、React 和 Chromium 回归。
 - 新增 HTML Clipboard 文字标记别名解析，将 `b/i/u/s/strike/del` 规范化为已有 boolean mark，并保留嵌套组合与安全链接。
 - 新增文字标记别名粘贴的 Command/History 生命周期、React 原生事件和 Chromium 端到端回归。
 - 新增 HTML 任务列表 Clipboard 解析，保留 checkbox checked、行内 marks 和安全链接，并兼容常见起始包装结构。
