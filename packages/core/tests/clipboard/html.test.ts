@@ -285,6 +285,33 @@ describe("parseHtml", () => {
     });
   });
 
+  it("preserves link metadata in HTML task items", () => {
+    const fragment = parseHtml(
+      '<ul><li><input type="checkbox"><a href="https://example.com/task" target="_blank" rel="nofollow noopener">任务链接</a></li></ul>',
+    );
+
+    expect(fragment?.blocks[0]).toMatchObject({
+      children: [
+        {
+          children: [
+            {
+              marks: {
+                link: {
+                  href: "https://example.com/task",
+                  rel: "nofollow noopener",
+                  target: "_blank",
+                },
+              },
+              text: "任务链接",
+            },
+          ],
+          type: "taskItem",
+        },
+      ],
+      type: "taskList",
+    });
+  });
+
   it("recognizes leading task checkboxes inside common wrappers", () => {
     const fragment = parseHtml(
       '<ul data-type="taskList"><li><label><span><input type="checkbox" checked></span></label><div><p><strong>包装任务</strong></p></div></li><li><p><input type="checkbox">段落任务</p></li></ul>',
