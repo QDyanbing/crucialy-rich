@@ -87,6 +87,7 @@ function appendInlineNodes(node: HtmlNode, marks: TextMarks, output: TextNode[])
   } else if (node.tagName === "a") {
     const link = normalizeLinkMark({
       href: getAttribute(node, "href"),
+      rel: getAttribute(node, "rel"),
       target: getAttribute(node, "target"),
     });
 

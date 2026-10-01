@@ -47,6 +47,27 @@ describe("parseHtml", () => {
     });
   });
 
+  it("preserves supported HTML link rel tokens", () => {
+    const fragment = parseHtml(
+      '<p><a href="https://example.com/docs" rel="nofollow noopener noreferrer">安全关系链接</a></p>',
+    );
+
+    expect(fragment?.blocks[0]).toMatchObject({
+      children: [
+        {
+          marks: {
+            link: {
+              href: "https://example.com/docs",
+              rel: "nofollow noopener noreferrer",
+            },
+          },
+          text: "安全关系链接",
+        },
+      ],
+      type: "paragraph",
+    });
+  });
+
   it("maps HTML b elements to bold marks", () => {
     const fragment = parseHtml("<p><b>浏览器加粗</b></p>");
 
