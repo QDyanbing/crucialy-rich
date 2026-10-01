@@ -174,6 +174,32 @@ describe("parseHtml", () => {
     });
   });
 
+  it("preserves link metadata with nested mark aliases", () => {
+    const fragment = parseHtml(
+      '<p><a href="https://example.com/docs" target="_blank" rel="noopener noreferrer"><b><i><u><del>组合链接</del></u></i></b></a></p>',
+    );
+
+    expect(fragment?.blocks[0]).toMatchObject({
+      children: [
+        {
+          marks: {
+            bold: true,
+            italic: true,
+            link: {
+              href: "https://example.com/docs",
+              rel: "noopener noreferrer",
+              target: "_blank",
+            },
+            strike: true,
+            underline: true,
+          },
+          text: "组合链接",
+        },
+      ],
+      type: "paragraph",
+    });
+  });
+
   it("maps ordered and unordered lists", () => {
     const fragment = parseHtml(
       "<ul><li>无序一</li><li>无序二</li></ul><ol><li>有序一</li></ol>",
