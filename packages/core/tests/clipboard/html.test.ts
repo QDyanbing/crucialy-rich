@@ -29,6 +29,24 @@ describe("parseHtml", () => {
     });
   });
 
+  it("preserves supported HTML link targets", () => {
+    const fragment = parseHtml(
+      '<p><a href="https://example.com/docs" target="_blank">新窗口链接</a></p>',
+    );
+
+    expect(fragment?.blocks[0]).toMatchObject({
+      children: [
+        {
+          marks: {
+            link: { href: "https://example.com/docs", target: "_blank" },
+          },
+          text: "新窗口链接",
+        },
+      ],
+      type: "paragraph",
+    });
+  });
+
   it("maps HTML b elements to bold marks", () => {
     const fragment = parseHtml("<p><b>浏览器加粗</b></p>");
 
