@@ -105,6 +105,7 @@ ref 命令事件的 `inputType` 为 `command`。受控模式不会自行替换 `
 - 安全 HTML 图片粘贴会保留 alt 和正整数宽高，并通过同一 `insertFromPaste` transaction 插入 Image block。
 - HTML checkbox 列表粘贴会保留任务文字和 checked 状态，并通过 `insertFromPaste` 插入 taskList。
 - HTML 文字标签别名粘贴会保留 bold、italic、underline 和 strike 的嵌套组合，并通过同一 `insertFromPaste` transaction 提交。
+- HTML 链接粘贴会保留规范化后的 href、target 和 rel，并通过同一 `insertFromPaste` transaction 提交。
 - 宿主可在 `onKeyDown` 中用 `getHistoryShortcutAction` 接入撤销/重做快捷键；外部 `preventDefault` 后组件不会继续执行普通输入处理。
 - Ctrl/Meta 主修饰键组合可执行默认 boolean mark、标题、引用和列表 Command；绑定 payload 会透传，并输出 `formatShortcut` transaction。
 - Composition 候选阶段暂停普通输入、编辑快捷键和粘贴；结束时只输出一次 `insertCompositionText` transaction。

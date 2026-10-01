@@ -26,6 +26,8 @@
 - `packages/core/tests/operation/set-link.test.ts`
 - `packages/core/tests/command/link.test.ts`
 - `packages/core/tests/command/cross-block-link-boundary.test.ts`
+- `packages/core/tests/clipboard/html.test.ts`
+- `packages/core/tests/command/html-link-metadata-paste-history.test.ts`
 - `packages/core/tests/history/snapshot.test.ts`
 - `packages/core/tests/public-api.test.ts`
 
@@ -36,8 +38,9 @@
 - `packages/core/tests/render/render.test.ts`
 - `packages/core/tests/render/html.test.ts`
 - `packages/react/tests/public-api.test.ts`
+- `packages/react/tests/html-link-metadata-paste.test.ts`
 
-覆盖安全 `<a>` 属性、HTML 转义、组合 marks、模型路径和 React 静态输出。
+覆盖安全 `<a>` 属性、HTML 转义、组合 marks、模型路径、React 静态输出，以及 HTML Clipboard 中 href/target/rel 的规范化和原生粘贴。
 
 ### 浏览器交互
 
