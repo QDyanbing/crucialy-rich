@@ -126,6 +126,12 @@ executeCommand(registry, UNSET_LINK_COMMAND_NAME, {
 
 `getSelectedLinkMark` 与 command 的执行条件不同：折叠光标位于链接文字中时也会返回 Link Mark。非折叠选区只有在单块或连续文本块中的所有有效文字节点拥有完全相同的 href、target 和 rel 时才返回结果；普通文字、不同目标链接、跨结构边界或非法选区均返回 `undefined`。
 
+## HTML 粘贴映射
+
+Clipboard parser 从安全 `<a>` 中读取 `href`、`target` 和 `rel`，并复用 `normalizeLinkMark` 生成模型标记。合法元数据会在普通段落、嵌套文字样式、任务列表和表格 cell 中保留；非法 target 或 rel 只会被省略，危险 href 则会移除整个 Link Mark，但继续保留可读文字和其他合法 mark。
+
+粘贴成功后，链接元数据随同一次 `insertFromPaste` transaction 进入 History。React renderer 和 HTML serializer 使用模型中的规范化值，不读取剪贴板原始属性。
+
 ## 渲染规则
 
 - Link Mark 渲染为 `<a>`，输出规范化后的 href 和可选 target / rel。
