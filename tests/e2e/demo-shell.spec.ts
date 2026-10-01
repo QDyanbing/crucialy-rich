@@ -2660,6 +2660,41 @@ test("pastes HTML mark aliases through the native editor event", async ({ page }
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
 
+test("pastes HTML link metadata through the native editor event", async ({ page }) => {
+  await page.goto("/");
+  await placeCaretInRenderedText(page, "[0,0]", 3);
+
+  const editor = page.getByLabel("已渲染文档");
+
+  await editor.evaluate((element) => {
+    const clipboardData = new DataTransfer();
+
+    clipboardData.setData(
+      "text/html",
+      '<p><a href="https://example.com/docs" target="_blank" rel="noopener noreferrer">链接文档</a></p>',
+    );
+    clipboardData.setData("text/plain", "链接文档");
+    element.dispatchEvent(
+      new ClipboardEvent("paste", {
+        bubbles: true,
+        cancelable: true,
+        clipboardData,
+      }),
+    );
+  });
+
+  const link = editor.locator("a", { hasText: "链接文档" });
+
+  await expect(link).toHaveAttribute("href", "https://example.com/docs");
+  await expect(link).toHaveAttribute("target", "_blank");
+  await expect(link).toHaveAttribute("rel", "noopener noreferrer");
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"type": "insert_block"',
+  );
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
 test("pastes HTML and Markdown from the acceptance controls", async ({ page }) => {
   await page.goto("/");
   const editor = page.getByLabel("已渲染文档");
