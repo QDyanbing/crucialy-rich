@@ -68,6 +68,28 @@ describe("parseHtml", () => {
     });
   });
 
+  it("normalizes pasted HTML link metadata", () => {
+    const fragment = parseHtml(
+      '<p><a href=" https://example.com/docs " target=" _BLANK " rel="NoReferrer noopener noopener">规范化链接</a></p>',
+    );
+
+    expect(fragment?.blocks[0]).toMatchObject({
+      children: [
+        {
+          marks: {
+            link: {
+              href: "https://example.com/docs",
+              rel: "noopener noreferrer",
+              target: "_blank",
+            },
+          },
+          text: "规范化链接",
+        },
+      ],
+      type: "paragraph",
+    });
+  });
+
   it("maps HTML b elements to bold marks", () => {
     const fragment = parseHtml("<p><b>浏览器加粗</b></p>");
 
