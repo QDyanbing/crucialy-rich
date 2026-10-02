@@ -387,6 +387,36 @@ describe("parseHtml", () => {
     });
   });
 
+  it("preserves nested HTML task list state", () => {
+    const fragment = parseHtml(
+      '<ul><li><input type="checkbox" checked>父任务<ul><li><input type="checkbox">子任务</li></ul></li></ul>',
+    );
+
+    expect(fragment?.blocks[0]).toMatchObject({
+      children: [
+        {
+          checked: true,
+          children: [{ text: "父任务" }],
+          nested: {
+            children: [
+              {
+                checked: false,
+                children: [{ text: "子任务" }],
+                type: "taskItem",
+              },
+            ],
+            type: "taskList",
+          },
+          type: "taskItem",
+        },
+      ],
+      type: "taskList",
+    });
+    expect(
+      validateDocument({ children: fragment?.blocks ?? [], type: "document" }).valid,
+    ).toBe(true);
+  });
+
   it("preserves inline marks and safe links in HTML task items", () => {
     const fragment = parseHtml(
       '<ul><li><input type="checkbox"><strong>加粗</strong><em>斜体</em><a href="https://example.com/task">链接</a></li></ul>',
