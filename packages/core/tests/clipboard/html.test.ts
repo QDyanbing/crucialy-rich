@@ -343,6 +343,27 @@ describe("parseHtml", () => {
     });
   });
 
+  it("keeps wrapped parent content separate from nested list text", () => {
+    const fragment = parseHtml(
+      "<ul><li><p><strong>包装父项</strong></p><ul><li><em>独立子项</em></li></ul></li></ul>",
+    );
+
+    expect(fragment?.blocks[0]).toMatchObject({
+      children: [
+        {
+          children: [{ marks: { bold: true }, text: "包装父项" }],
+          nested: {
+            children: [
+              {
+                children: [{ marks: { italic: true }, text: "独立子项" }],
+              },
+            ],
+          },
+        },
+      ],
+    });
+  });
+
   it("maps an unchecked HTML task list", () => {
     const fragment = parseHtml(
       '<ul><li><input type="checkbox">待处理</li><li><input type="checkbox">待复核</li></ul>',
