@@ -217,6 +217,27 @@ describe("parseHtml", () => {
     });
   });
 
+  it("maps nested unordered HTML lists", () => {
+    const fragment = parseHtml(
+      "<ul><li>父项<ul><li>子项</li></ul></li><li>同级项</li></ul>",
+    );
+
+    expect(fragment?.blocks[0]).toMatchObject({
+      children: [
+        {
+          children: [{ text: "父项" }],
+          nested: {
+            children: [{ children: [{ text: "子项" }], type: "listItem" }],
+            type: "bulletList",
+          },
+          type: "listItem",
+        },
+        { children: [{ text: "同级项" }], type: "listItem" },
+      ],
+      type: "bulletList",
+    });
+  });
+
   it("maps an unchecked HTML task list", () => {
     const fragment = parseHtml(
       '<ul><li><input type="checkbox">待处理</li><li><input type="checkbox">待复核</li></ul>',

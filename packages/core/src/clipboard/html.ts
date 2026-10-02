@@ -14,11 +14,13 @@ import {
   createTaskItem,
   createTaskList,
   createText,
+  MAX_LIST_DEPTH,
   normalizeImageDimension,
   normalizeLinkMark,
   sanitizeImageSrc,
   type BlockNode,
   type HeadingLevel,
+  type ListNode,
   type TableNode,
   type TextMarks,
   type TextNode,
@@ -141,7 +143,19 @@ function findLeadingTaskCheckbox(node: HtmlElement): HtmlElement | undefined {
     : undefined;
 }
 
-function parseList(node: HtmlElement): BlockNode {
+function parseNestedList(node: HtmlElement, depth: number): ListNode | undefined {
+  if (depth >= MAX_LIST_DEPTH) {
+    return undefined;
+  }
+
+  const nested = node.childNodes.find(
+    (child): child is HtmlElement => isElement(child) && child.tagName === "ul",
+  );
+
+  return nested ? parseList(nested, depth + 1) : undefined;
+}
+
+function parseList(node: HtmlElement, depth = 1): ListNode {
   const itemNodes = node.childNodes.filter(
     (child): child is HtmlElement => isElement(child) && child.tagName === "li",
   );
@@ -159,13 +173,14 @@ function parseList(node: HtmlElement): BlockNode {
           taskCheckboxes[index]
             ? hasAttribute(taskCheckboxes[index], "checked")
             : false,
+          parseNestedList(item, depth),
         ),
       ),
     );
   }
 
   const items = itemNodes.map((item) =>
-    createListItem(parseInlineChildren(item, true)),
+    createListItem(parseInlineChildren(item, true), parseNestedList(item, depth)),
   );
 
   return node.tagName === "ol"
