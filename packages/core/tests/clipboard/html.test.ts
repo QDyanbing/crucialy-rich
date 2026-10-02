@@ -310,6 +310,39 @@ describe("parseHtml", () => {
     ).toBe(true);
   });
 
+  it("preserves marks and links in nested HTML list items", () => {
+    const fragment = parseHtml(
+      '<ul><li><strong>父项</strong><ol><li><a href="https://example.com/docs" target="_blank" rel="noopener">子项链接</a></li></ol></li></ul>',
+    );
+
+    expect(fragment?.blocks[0]).toMatchObject({
+      children: [
+        {
+          children: [{ marks: { bold: true }, text: "父项" }],
+          nested: {
+            children: [
+              {
+                children: [
+                  {
+                    marks: {
+                      link: {
+                        href: "https://example.com/docs",
+                        rel: "noopener",
+                        target: "_blank",
+                      },
+                    },
+                    text: "子项链接",
+                  },
+                ],
+              },
+            ],
+            type: "orderedList",
+          },
+        },
+      ],
+    });
+  });
+
   it("maps an unchecked HTML task list", () => {
     const fragment = parseHtml(
       '<ul><li><input type="checkbox">待处理</li><li><input type="checkbox">待复核</li></ul>',
