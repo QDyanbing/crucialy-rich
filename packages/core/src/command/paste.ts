@@ -5,6 +5,7 @@ import {
   isTableNode,
   isTextBlockNode,
   type BlockNode,
+  type ListNode,
 } from "../model";
 import {
   applyDeleteText,
@@ -123,7 +124,35 @@ function resolvePasteTarget(input: CommandInput): PasteTarget | undefined {
   };
 }
 
-function getLastTextPoint(block: BlockNode, blockIndex: number) {
+function getLastListTextPoint(list: ListNode, path: number[]): Point | undefined {
+  const itemIndex = list.children.length - 1;
+  const item = list.children[itemIndex];
+
+  if (!item) {
+    return undefined;
+  }
+
+  if (item.nested) {
+    const nestedPoint = getLastListTextPoint(item.nested, [
+      ...path,
+      itemIndex,
+      item.children.length,
+    ]);
+
+    if (nestedPoint) {
+      return nestedPoint;
+    }
+  }
+
+  const textIndex = item.children.length - 1;
+  const text = item.children[textIndex];
+
+  return text
+    ? { offset: text.text.length, path: [...path, itemIndex, textIndex] }
+    : undefined;
+}
+
+function getLastTextPoint(block: BlockNode, blockIndex: number): Point | undefined {
   if (isTextBlockNode(block)) {
     const textIndex = block.children.length - 1;
     const text = block.children[textIndex];
@@ -134,14 +163,7 @@ function getLastTextPoint(block: BlockNode, blockIndex: number) {
   }
 
   if (isListNode(block)) {
-    const itemIndex = block.children.length - 1;
-    const item = block.children[itemIndex];
-    const textIndex = item ? item.children.length - 1 : -1;
-    const text = item?.children[textIndex];
-
-    return text
-      ? { offset: text.text.length, path: [blockIndex, itemIndex, textIndex] }
-      : undefined;
+    return getLastListTextPoint(block, [blockIndex]);
   }
 
   return undefined;

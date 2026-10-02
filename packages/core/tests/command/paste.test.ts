@@ -150,6 +150,44 @@ describe("pasteCommand", () => {
     expect(result.selection?.anchor).toEqual({ offset: 2, path: [2, 0, 0] });
   });
 
+  it("inserts nested HTML lists and moves the caret to the deepest last item", () => {
+    const document = createDocument([createParagraph([createText("前后")])]);
+    const result = pasteCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { offset: 1, path: [0, 0] },
+          focus: { offset: 1, path: [0, 0] },
+        },
+      },
+      payload: {
+        fragment: parseHtml("<ul><li>父项<ol><li>子项</li></ol></li></ul>")!,
+      },
+    });
+    const resultDocument = applyTransaction(document, result.transaction!);
+
+    expect(result.transaction?.operations.map((operation) => operation.type)).toEqual([
+      "split_block",
+      "insert_block",
+    ]);
+    expect(resultDocument.children[1]).toMatchObject({
+      children: [
+        {
+          children: [{ text: "父项" }],
+          nested: {
+            children: [{ children: [{ text: "子项" }] }],
+            type: "orderedList",
+          },
+        },
+      ],
+      type: "bulletList",
+    });
+    expect(result.selection?.anchor).toEqual({
+      offset: 2,
+      path: [1, 0, 1, 0, 0],
+    });
+  });
+
   it("pastes nested HTML mark aliases without flattening them", () => {
     const document = createDocument([createParagraph([createText("前后")])]);
     const result = pasteCommand.execute({
