@@ -238,6 +238,28 @@ describe("parseHtml", () => {
     });
   });
 
+  it("preserves nested ordered HTML list types", () => {
+    const fragment = parseHtml(
+      "<ul><li>步骤<ol><li>第一步</li><li>第二步</li></ol></li></ul>",
+    );
+
+    expect(fragment?.blocks[0]).toMatchObject({
+      children: [
+        {
+          children: [{ text: "步骤" }],
+          nested: {
+            children: [
+              { children: [{ text: "第一步" }] },
+              { children: [{ text: "第二步" }] },
+            ],
+            type: "orderedList",
+          },
+        },
+      ],
+      type: "bulletList",
+    });
+  });
+
   it("maps an unchecked HTML task list", () => {
     const fragment = parseHtml(
       '<ul><li><input type="checkbox">待处理</li><li><input type="checkbox">待复核</li></ul>',

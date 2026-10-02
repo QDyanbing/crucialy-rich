@@ -149,7 +149,8 @@ function parseNestedList(node: HtmlElement, depth: number): ListNode | undefined
   }
 
   const nested = node.childNodes.find(
-    (child): child is HtmlElement => isElement(child) && child.tagName === "ul",
+    (child): child is HtmlElement =>
+      isElement(child) && (child.tagName === "ul" || child.tagName === "ol"),
   );
 
   return nested ? parseList(nested, depth + 1) : undefined;
