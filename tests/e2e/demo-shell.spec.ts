@@ -2626,6 +2626,40 @@ test("pastes an HTML task list through the native editor event", async ({ page }
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
 
+test("pastes a nested HTML list through the native editor event", async ({ page }) => {
+  await page.goto("/");
+  await placeCaretInRenderedText(page, "[0,0]", 3);
+
+  const editor = page.getByLabel("已渲染文档");
+
+  await editor.evaluate((element) => {
+    const clipboardData = new DataTransfer();
+
+    clipboardData.setData("text/html", "<ul><li>父项<ol><li>子项</li></ol></li></ul>");
+    clipboardData.setData("text/plain", "父项\n子项");
+    element.dispatchEvent(
+      new ClipboardEvent("paste", {
+        bubbles: true,
+        cancelable: true,
+        clipboardData,
+      }),
+    );
+  });
+
+  const topList = editor.locator("ul").first();
+  const nestedList = topList.locator(":scope > li > ol");
+
+  await expect(topList.locator(":scope > li").first()).toContainText("父项");
+  await expect(nestedList.locator(":scope > li")).toHaveText("子项");
+  await expect(editor.locator('[data-crucialy-path="[1,0,1,0,0]"]')).toHaveText("子项");
+  await expect(page.getByLabel("锚点路径")).toHaveValue("1,0,1,0,0");
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"type": "insert_block"',
+  );
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
 test("pastes HTML mark aliases through the native editor event", async ({ page }) => {
   await page.goto("/");
   await placeCaretInRenderedText(page, "[0,0]", 3);
