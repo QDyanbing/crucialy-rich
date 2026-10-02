@@ -277,6 +277,39 @@ describe("parseHtml", () => {
     });
   });
 
+  it("caps pasted HTML lists at the model depth limit", () => {
+    const fragment = parseHtml(
+      "<ul><li>一级<ul><li>二级<ul><li>三级<ul><li>四级</li></ul></li></ul></li></ul></li></ul>",
+    );
+    const topList = fragment?.blocks[0];
+
+    expect(topList).toMatchObject({
+      children: [
+        {
+          nested: {
+            children: [
+              {
+                nested: {
+                  children: [
+                    {
+                      children: [{ text: "三级" }],
+                      type: "listItem",
+                    },
+                  ],
+                  type: "bulletList",
+                },
+              },
+            ],
+          },
+        },
+      ],
+      type: "bulletList",
+    });
+    expect(
+      validateDocument({ children: fragment?.blocks ?? [], type: "document" }).valid,
+    ).toBe(true);
+  });
+
   it("maps an unchecked HTML task list", () => {
     const fragment = parseHtml(
       '<ul><li><input type="checkbox">待处理</li><li><input type="checkbox">待复核</li></ul>',
