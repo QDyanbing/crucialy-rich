@@ -260,6 +260,23 @@ describe("parseHtml", () => {
     });
   });
 
+  it("preserves mixed HTML list types", () => {
+    const fragment = parseHtml("<ol><li>有序父项<ul><li>无序子项</li></ul></li></ol>");
+
+    expect(fragment?.blocks[0]).toMatchObject({
+      children: [
+        {
+          children: [{ text: "有序父项" }],
+          nested: {
+            children: [{ children: [{ text: "无序子项" }] }],
+            type: "bulletList",
+          },
+        },
+      ],
+      type: "orderedList",
+    });
+  });
+
   it("maps an unchecked HTML task list", () => {
     const fragment = parseHtml(
       '<ul><li><input type="checkbox">待处理</li><li><input type="checkbox">待复核</li></ul>',
