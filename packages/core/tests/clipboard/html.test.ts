@@ -432,6 +432,39 @@ describe("parseHtml", () => {
     });
   });
 
+  it("preserves inline styles in nested HTML list items", () => {
+    const fragment = parseHtml(
+      '<ul><li><span style="font-size: 16px; color: #123">父项</span><ol><li><span style="background-color: #fed">子项</span></li></ol></li></ul>',
+    );
+
+    expect(fragment?.blocks[0]).toMatchObject({
+      children: [
+        {
+          children: [
+            {
+              marks: { fontSize: 16, textColor: "#112233" },
+              text: "父项",
+            },
+          ],
+          nested: {
+            children: [
+              {
+                children: [
+                  {
+                    marks: { backgroundColor: "#ffeedd" },
+                    text: "子项",
+                  },
+                ],
+              },
+            ],
+            type: "orderedList",
+          },
+        },
+      ],
+      type: "bulletList",
+    });
+  });
+
   it("keeps wrapped parent content separate from nested list text", () => {
     const fragment = parseHtml(
       "<ul><li><p><strong>包装父项</strong></p><ul><li><em>独立子项</em></li></ul></li></ul>",
