@@ -262,6 +262,44 @@ describe("pasteCommand", () => {
     expect(result.selection?.anchor).toEqual({ offset: 4, path: [1, 0] });
   });
 
+  it("pastes HTML inline styles without flattening them", () => {
+    const document = createDocument([createParagraph([createText("前后")])]);
+    const result = pasteCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { offset: 1, path: [0, 0] },
+          focus: { offset: 1, path: [0, 0] },
+        },
+      },
+      payload: {
+        fragment: parseHtml(
+          '<p><span style="font-size: 18px; color: #369; background-color: #ffc">样式文本</span></p>',
+        )!,
+      },
+    });
+    const resultDocument = applyTransaction(document, result.transaction!);
+
+    expect(result.transaction?.operations.map((operation) => operation.type)).toEqual([
+      "split_block",
+      "insert_block",
+    ]);
+    expect(resultDocument.children[1]).toMatchObject({
+      children: [
+        {
+          marks: {
+            backgroundColor: "#ffffcc",
+            fontSize: 18,
+            textColor: "#336699",
+          },
+          text: "样式文本",
+        },
+      ],
+      type: "paragraph",
+    });
+    expect(result.selection?.anchor).toEqual({ offset: 4, path: [1, 0] });
+  });
+
   it("inserts a parsed HTML table as a structured block", () => {
     const document = createDocument([createParagraph([createText("前后")])]);
     const result = pasteCommand.execute({
