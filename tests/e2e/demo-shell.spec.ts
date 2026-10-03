@@ -2694,6 +2694,42 @@ test("pastes HTML mark aliases through the native editor event", async ({ page }
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
 
+test("pastes HTML inline styles through the native editor event", async ({ page }) => {
+  await page.goto("/");
+  await placeCaretInRenderedText(page, "[0,0]", 3);
+
+  const editor = page.getByLabel("已渲染文档");
+
+  await editor.evaluate((element) => {
+    const clipboardData = new DataTransfer();
+
+    clipboardData.setData(
+      "text/html",
+      '<p><span style="font-size: 18px; color: #369; background-color: #ffc">样式文本</span></p>',
+    );
+    clipboardData.setData("text/plain", "样式文本");
+    element.dispatchEvent(
+      new ClipboardEvent("paste", {
+        bubbles: true,
+        cancelable: true,
+        clipboardData,
+      }),
+    );
+  });
+
+  const styledText = editor.locator('[data-crucialy-path="[1,0]"]');
+
+  await expect(styledText).toHaveText("样式文本");
+  await expect(styledText).toHaveCSS("font-size", "18px");
+  await expect(styledText).toHaveCSS("color", "rgb(51, 102, 153)");
+  await expect(styledText).toHaveCSS("background-color", "rgb(255, 255, 204)");
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"type": "insert_block"',
+  );
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
 test("pastes HTML link metadata through the native editor event", async ({ page }) => {
   await page.goto("/");
   await placeCaretInRenderedText(page, "[0,0]", 3);
