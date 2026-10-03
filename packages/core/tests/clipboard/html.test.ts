@@ -74,6 +74,21 @@ describe("parseHtml", () => {
     });
   });
 
+  it("drops unsupported inline style values", () => {
+    const fragment = parseHtml(
+      '<p><span style="font-size: 7px; color: red; background: #fff">过小</span><span style="font-size: 73px; color: rgb(1, 2, 3); background-color: transparent">过大</span><span style="font-size: 16pt">错误单位</span></p>',
+    );
+
+    expect(fragment?.blocks[0]).toEqual({
+      children: [
+        { text: "过小", type: "text" },
+        { text: "过大", type: "text" },
+        { text: "错误单位", type: "text" },
+      ],
+      type: "paragraph",
+    });
+  });
+
   it("preserves supported HTML link targets", () => {
     const fragment = parseHtml(
       '<p><a href="https://example.com/docs" target="_blank">新窗口链接</a></p>',
