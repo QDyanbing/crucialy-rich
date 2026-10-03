@@ -14,6 +14,7 @@ import {
   createTaskItem,
   createTaskList,
   createText,
+  isValidFontSize,
   MAX_LIST_DEPTH,
   normalizeImageDimension,
   normalizeLinkMark,
@@ -55,6 +56,40 @@ function hasAttribute(node: HtmlElement, name: string): boolean {
   return node.attrs.some((attribute) => attribute.name === name);
 }
 
+function parseInlineStyleDeclarations(value: string | undefined): Map<string, string> {
+  const declarations = new Map<string, string>();
+
+  value?.split(";").forEach((declaration) => {
+    const separator = declaration.indexOf(":");
+
+    if (separator === -1) {
+      return;
+    }
+
+    const property = declaration.slice(0, separator).trim().toLowerCase();
+    const propertyValue = declaration.slice(separator + 1).trim();
+
+    if (property.length > 0 && propertyValue.length > 0) {
+      declarations.set(property, propertyValue);
+    }
+  });
+
+  return declarations;
+}
+
+function parseInlineStyleMarks(node: HtmlElement): TextMarks {
+  const declarations = parseInlineStyleDeclarations(getAttribute(node, "style"));
+  const marks: TextMarks = {};
+  const fontSizeValue = declarations.get("font-size")?.match(/^(\d+)px$/i)?.[1];
+  const fontSize = fontSizeValue === undefined ? undefined : Number(fontSizeValue);
+
+  if (isValidFontSize(fontSize)) {
+    marks.fontSize = fontSize;
+  }
+
+  return marks;
+}
+
 function appendInlineNodes(node: HtmlNode, marks: TextMarks, output: TextNode[]): void {
   if (isText(node)) {
     if (node.value.length > 0) {
@@ -72,20 +107,20 @@ function appendInlineNodes(node: HtmlNode, marks: TextMarks, output: TextNode[])
     return;
   }
 
-  let nextMarks = marks;
+  let nextMarks = { ...marks, ...parseInlineStyleMarks(node) };
 
   if (node.tagName === "strong" || node.tagName === "b") {
-    nextMarks = { ...marks, bold: true };
+    nextMarks = { ...nextMarks, bold: true };
   } else if (node.tagName === "em" || node.tagName === "i") {
-    nextMarks = { ...marks, italic: true };
+    nextMarks = { ...nextMarks, italic: true };
   } else if (node.tagName === "u") {
-    nextMarks = { ...marks, underline: true };
+    nextMarks = { ...nextMarks, underline: true };
   } else if (
     node.tagName === "s" ||
     node.tagName === "strike" ||
     node.tagName === "del"
   ) {
-    nextMarks = { ...marks, strike: true };
+    nextMarks = { ...nextMarks, strike: true };
   } else if (node.tagName === "a") {
     const link = normalizeLinkMark({
       href: getAttribute(node, "href"),
@@ -93,7 +128,7 @@ function appendInlineNodes(node: HtmlNode, marks: TextMarks, output: TextNode[])
       target: getAttribute(node, "target"),
     });
 
-    nextMarks = link ? { ...marks, link } : marks;
+    nextMarks = link ? { ...nextMarks, link } : nextMarks;
   }
 
   node.childNodes.forEach((child) => appendInlineNodes(child, nextMarks, output));

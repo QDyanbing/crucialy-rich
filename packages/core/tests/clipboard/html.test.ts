@@ -29,6 +29,20 @@ describe("parseHtml", () => {
     });
   });
 
+  it("preserves supported inline font sizes", () => {
+    const fragment = parseHtml(
+      '<p><span style="font-size: 18px">正文</span><strong style="font-size: 24PX">标题</strong></p>',
+    );
+
+    expect(fragment?.blocks[0]).toMatchObject({
+      children: [
+        { marks: { fontSize: 18 }, text: "正文" },
+        { marks: { bold: true, fontSize: 24 }, text: "标题" },
+      ],
+      type: "paragraph",
+    });
+  });
+
   it("preserves supported HTML link targets", () => {
     const fragment = parseHtml(
       '<p><a href="https://example.com/docs" target="_blank">新窗口链接</a></p>',
