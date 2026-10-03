@@ -8,6 +8,8 @@
 
 ### 新增
 
+- 新增 HTML Clipboard 行内样式解析，安全保留 `font-size`、`color` 和 `background-color`，非法值按属性降级省略。
+- 新增行内样式粘贴的嵌套 mark、链接、列表、表格、Command/History、React 原生事件和 Chromium 回归。
 - 新增 HTML Clipboard 嵌套列表解析，保留最多三层的有序、无序和任务子列表，以及 marks、链接与 checked 状态。
 - 新增嵌套列表 Paste Command/History、React 原生事件和 Chromium 回归，并将粘贴后光标定位到最深的最后项。
 - 新增 HTML Clipboard 安全链接元数据解析，保留规范化后的 `target` 和 `rel`，非法可选属性降级省略。
