@@ -89,6 +89,35 @@ describe("parseHtml", () => {
     });
   });
 
+  it("composes nested inline styles with marks and links", () => {
+    const fragment = parseHtml(
+      '<p><span style="font-size: 18px; color: #112233; background-color: #abc"><strong style="color: #445566">强调</strong><a href="https://example.com/docs" style="font-size: 20px; color: red">链接</a></span></p>',
+    );
+
+    expect(fragment?.blocks[0]).toMatchObject({
+      children: [
+        {
+          marks: {
+            backgroundColor: "#aabbcc",
+            bold: true,
+            fontSize: 18,
+            textColor: "#445566",
+          },
+          text: "强调",
+        },
+        {
+          marks: {
+            backgroundColor: "#aabbcc",
+            fontSize: 20,
+            link: { href: "https://example.com/docs" },
+            textColor: "#112233",
+          },
+          text: "链接",
+        },
+      ],
+    });
+  });
+
   it("preserves supported HTML link targets", () => {
     const fragment = parseHtml(
       '<p><a href="https://example.com/docs" target="_blank">新窗口链接</a></p>',
