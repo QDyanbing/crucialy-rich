@@ -43,6 +43,20 @@ describe("parseHtml", () => {
     });
   });
 
+  it("preserves supported inline text colors", () => {
+    const fragment = parseHtml(
+      '<p><span style="color: #ABC">短色值</span><em style="COLOR: #123456">完整色值</em></p>',
+    );
+
+    expect(fragment?.blocks[0]).toMatchObject({
+      children: [
+        { marks: { textColor: "#aabbcc" }, text: "短色值" },
+        { marks: { italic: true, textColor: "#123456" }, text: "完整色值" },
+      ],
+      type: "paragraph",
+    });
+  });
+
   it("preserves supported HTML link targets", () => {
     const fragment = parseHtml(
       '<p><a href="https://example.com/docs" target="_blank">新窗口链接</a></p>',

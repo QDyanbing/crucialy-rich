@@ -18,6 +18,7 @@ import {
   MAX_LIST_DEPTH,
   normalizeImageDimension,
   normalizeLinkMark,
+  sanitizeHexColor,
   sanitizeImageSrc,
   type BlockNode,
   type HeadingLevel,
@@ -85,6 +86,12 @@ function parseInlineStyleMarks(node: HtmlElement): TextMarks {
 
   if (isValidFontSize(fontSize)) {
     marks.fontSize = fontSize;
+  }
+
+  const textColor = sanitizeHexColor(declarations.get("color"));
+
+  if (textColor !== undefined) {
+    marks.textColor = textColor;
   }
 
   return marks;
