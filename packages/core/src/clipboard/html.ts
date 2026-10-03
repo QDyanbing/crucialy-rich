@@ -94,6 +94,12 @@ function parseInlineStyleMarks(node: HtmlElement): TextMarks {
     marks.textColor = textColor;
   }
 
+  const backgroundColor = sanitizeHexColor(declarations.get("background-color"));
+
+  if (backgroundColor !== undefined) {
+    marks.backgroundColor = backgroundColor;
+  }
+
   return marks;
 }
 

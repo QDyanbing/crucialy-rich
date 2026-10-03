@@ -57,6 +57,23 @@ describe("parseHtml", () => {
     });
   });
 
+  it("preserves supported inline background colors", () => {
+    const fragment = parseHtml(
+      '<p><span style="background-color: #FED">短色值</span><u style="BACKGROUND-COLOR: #abcdef">完整色值</u></p>',
+    );
+
+    expect(fragment?.blocks[0]).toMatchObject({
+      children: [
+        { marks: { backgroundColor: "#ffeedd" }, text: "短色值" },
+        {
+          marks: { backgroundColor: "#abcdef", underline: true },
+          text: "完整色值",
+        },
+      ],
+      type: "paragraph",
+    });
+  });
+
   it("preserves supported HTML link targets", () => {
     const fragment = parseHtml(
       '<p><a href="https://example.com/docs" target="_blank">新窗口链接</a></p>',
