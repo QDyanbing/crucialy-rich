@@ -8,6 +8,8 @@
 
 ### 新增
 
+- 新增 OrderedList 可选 `start` 模型、校验、规范化与语义渲染，退出或解除中间项后继续原编号。
+- 新增 HTML `ol[start]` 安全整数解析，以及 Clipboard、Command/History、React 原生事件和 Chromium 回归。
 - 新增 HTML Clipboard 行内样式解析，安全保留 `font-size`、`color` 和 `background-color`，非法值按属性降级省略。
 - 新增行内样式粘贴的嵌套 mark、链接、列表、表格、Command/History、React 原生事件和 Chromium 回归。
 - 新增 HTML Clipboard 嵌套列表解析，保留最多三层的有序、无序和任务子列表，以及 marks、链接与 checked 状态。

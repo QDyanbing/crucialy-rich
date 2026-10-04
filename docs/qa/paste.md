@@ -13,6 +13,7 @@
 | HTML 行内样式 | 保留安全字号、文字色、背景色及嵌套覆盖      | 通过 |
 | HTML 链接     | 保留安全 href、target、rel 并过滤非法元数据 | 通过 |
 | HTML 嵌套列表 | 保留三层有序、无序、任务子列表及深层选区    | 通过 |
+| HTML 起始编号 | 保留顶层与嵌套 ol 的安全整数 start          | 通过 |
 | HTML 表格     | 导入分区、表头 cell、多段落和非等宽行       | 通过 |
 | HTML 图片     | 导入安全 src、alt、正整数宽高和独立图片段落 | 通过 |
 | HTML 任务项   | 导入 checkbox 列表、checked、marks 和链接   | 通过 |
@@ -25,9 +26,9 @@
 ## 自动化覆盖
 
 - Clipboard parser：`packages/core/tests/clipboard`。
-- Paste command：`packages/core/tests/command/paste.test.ts`，HTML 标记别名、行内样式、链接元数据、嵌套列表、表格、图片和任务列表 History 往返见对应的 `html-*-paste-history.test.ts`。
-- React：`packages/react/tests/html-*-paste.test.ts` 覆盖文字标记别名、行内样式、链接元数据、嵌套列表、表格、图片和任务列表原生 HTML Clipboard 事件。
-- 浏览器：`tests/e2e/demo-shell.spec.ts` 覆盖原生纯文本、HTML 标记别名、行内样式、链接元数据、嵌套列表、表格、图片和任务列表 paste 事件，以及 HTML、Markdown 验收控制。
+- Paste command：`packages/core/tests/command/paste.test.ts`，HTML 标记别名、行内样式、链接元数据、有序列表起始编号、嵌套列表、表格、图片和任务列表 History 往返见对应的 `html-*-paste-history.test.ts`。
+- React：`packages/react/tests/html-*-paste.test.ts` 覆盖文字标记别名、行内样式、链接元数据、有序列表起始编号、嵌套列表、表格、图片和任务列表原生 HTML Clipboard 事件。
+- 浏览器：`tests/e2e/demo-shell.spec.ts` 覆盖原生纯文本、HTML 标记别名、行内样式、链接元数据、有序列表起始编号、嵌套列表、表格、图片和任务列表 paste 事件，以及 HTML、Markdown 验收控制。
 - 全量入口：`pnpm check:all`。
 
 ## 安全结论
@@ -36,4 +37,4 @@ Clipboard 原始内容不会直接注入编辑器 DOM。HTML 先由标准 parser
 
 ## 结论
 
-第 20 周粘贴能力已完成代码、测试、中文 Demo、文档和浏览器验收闭环，并在对应模型完成后补齐了 HTML 文字标记别名、安全行内样式、链接元数据、嵌套列表、顶层表格、安全图片与任务列表导入。
+第 20 周粘贴能力已完成代码、测试、中文 Demo、文档和浏览器验收闭环，并在对应模型完成后补齐了 HTML 文字标记别名、安全行内样式、链接元数据、有序列表起始编号、嵌套列表、顶层表格、安全图片与任务列表导入。
