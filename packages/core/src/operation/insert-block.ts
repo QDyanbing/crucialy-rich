@@ -62,7 +62,7 @@ function cloneBlock(block: BlockNode): BlockNode {
 
     return block.type === "bulletList"
       ? createBulletList(listItems)
-      : createOrderedList(listItems);
+      : createOrderedList(listItems, block.start);
   }
 
   const children = block.children.map((node) => createText(node.text, node.marks));

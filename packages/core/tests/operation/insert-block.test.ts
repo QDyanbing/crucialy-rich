@@ -4,6 +4,8 @@ import {
   createDivider,
   createDocument,
   createImage,
+  createListItem,
+  createOrderedList,
   createParagraph,
   createText,
   createTable,
@@ -87,6 +89,25 @@ describe("insert block operation", () => {
         : undefined,
     ).toBe("原始");
     expect(inserted).not.toBe(table);
+  });
+
+  it("preserves ordered list starts in detached block values", () => {
+    const list = createOrderedList([createListItem([createText("第四项")])], 4);
+    const operation = createInsertBlockOperation([1], list);
+
+    list.start = 9;
+    list.children[0]!.children[0]!.text = "已修改";
+
+    expect(operation.block).toEqual({
+      children: [
+        {
+          children: [{ text: "第四项", type: "text" }],
+          type: "listItem",
+        },
+      ],
+      start: 4,
+      type: "orderedList",
+    });
   });
 
   it("supports document boundaries and rejects invalid paths", () => {
