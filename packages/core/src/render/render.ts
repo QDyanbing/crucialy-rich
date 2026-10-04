@@ -108,6 +108,9 @@ function renderListNode(node: ListNode, path: Path): RenderedElementNode {
     attributes: {
       ...createModelPathAttributes(path),
       ...(node.type === "taskList" ? { "data-crucialy-list-type": "task" } : {}),
+      ...(node.type === "orderedList" && node.start !== undefined
+        ? { start: String(node.start) }
+        : {}),
     },
     children: node.children.map((item, itemIndex) => {
       const itemPath = [...path, itemIndex];

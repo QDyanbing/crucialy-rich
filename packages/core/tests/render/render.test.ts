@@ -203,7 +203,7 @@ describe("renderDocument", () => {
         createListItem([createText("无序一", { bold: true })]),
         createListItem([createText("无序二")]),
       ]),
-      createOrderedList([createListItem([createText("有序一")])]),
+      createOrderedList([createListItem([createText("有序一")])], 3),
     ]);
     const rendered = renderDocument(document);
 
@@ -224,6 +224,7 @@ describe("renderDocument", () => {
       tagName: "ul",
     });
     expect(rendered.children?.[1]).toMatchObject({
+      attributes: { start: "3" },
       children: [{ path: [1, 0], tagName: "li" }],
       path: [1],
       tagName: "ol",
