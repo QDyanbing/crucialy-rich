@@ -24,7 +24,7 @@ HTML 使用 `parse5` 读取标准语法树，不使用正则解析标签。当�
 
 - 块：`p`、`h1`–`h6`、`blockquote`、`pre`、`ul`、`ol`、`li`、`img`、`table`、`tr`、`td`、`th`。
 - 行内：`strong` / `b`、`em` / `i`、`u`、`s` / `strike` / `del`、`a`、`code`、`br`。
-- 属性：保留链接 `href`、`target`、`rel`，图片 `src`、`alt`、`width`、`height`，以及行内 `style` 中受支持的文字属性；URL 和样式值继续经过各自白名单。
+- 属性：保留链接 `href`、`target`、`rel`，有序列表 `start`，图片 `src`、`alt`、`width`、`height`，以及行内 `style` 中受支持的文字属性；URL、编号和样式值继续经过各自白名单。
 
 语义标签别名会统一映射到模型已有的 `bold`、`italic`、`underline` 和 `strike` 标记。别名可以嵌套组合，也可以与安全链接共存；危险链接会被移除，但其中的文字和合法标记仍会保留。
 
@@ -32,7 +32,7 @@ HTML 链接复用 Link Mark 的安全规则：`target` 只保留 `_self`、`_bla
 
 HTML 行内样式只映射模型已有的 `fontSize`、`textColor` 和 `backgroundColor`。`font-size` 接受 `8px`–`72px` 的整数，`color` 与 `background-color` 只接受 `#RGB` / `#RRGGBB`，并规范化为小写六位色值。样式遵循元素嵌套继承与内层合法值覆盖规则，可以和 boolean mark、安全链接、列表项及表格单元格组合；非法值只丢弃对应属性，不影响文字或其他合法 mark。
 
-HTML 列表会保留每个 `li` 的第一个直接 `ul` 或 `ol` 子列表，支持有序、无序和任务列表逐层组合，并按模型上限保留三层。父子项的 mark、安全链接和任务 checked 状态独立映射；Paste Command 把选区移动到最深的最后项末尾。
+HTML 列表会保留每个 `li` 的第一个直接 `ul` 或 `ol` 子列表，支持有序、无序和任务列表逐层组合，并按模型上限保留三层。每层 `ol[start]` 只接受安全整数，非法值回到默认编号；父子项的 mark、安全链接和任务 checked 状态独立映射。Paste Command 把选区移动到最深的最后项末尾。
 
 HTML 任务列表要求顶层为 `ul`，且每个直属 `li` 的首个有效内容都是 `input[type="checkbox"]`。checkbox 可包在开头的 `label`、`p`、`div` 或 `span` 中；`checked` 映射为 taskItem 状态，任务文字继续保留行内 mark 和安全链接。混合列表、后置 checkbox、radio 和有序列表会降级为普通列表。
 

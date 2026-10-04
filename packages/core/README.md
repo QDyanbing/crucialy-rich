@@ -209,7 +209,7 @@ const shortcutCommandName = getCommandNameFromShortcut({
 - 输入：基础文本输入与删除 helper、Composition 状态机、`getEditorShortcutAction`、`findMarkdownInputRule` 和 `createMarkdownInputRuleResult`。
 - 当前输入与 command 管线覆盖普通文本插入、同容器跨 text 与连续顶层文本块选区编辑、非折叠 Enter、段中删除、文本块合并/分裂、CodeBlock 换行/退出、相邻 void block 删除和输入后 selection 落点。
 - Command：默认注册表、状态查询、带 payload 的快捷键映射、跨连续文本块文字样式与链接、Heading、Quote、CodeBlock、Divider、BulletList、OrderedList、文本与 block command。
-- Clipboard：Markdown、HTML、纯文本解析优先级与 `paste` command；HTML 白名单覆盖标题、引用、代码、三层普通/任务列表、marks、安全链接、图片和顶层表格，`b/i/u/s/strike/del` 会映射到已有 boolean mark，安全 `font-size` / `color` / `background-color` 会映射到文字属性，链接保留规范化后的 target/rel，任务项保留 checked，图片复用 URL 安全规则，表格行会规范为矩形结构。
+- Clipboard：Markdown、HTML、纯文本解析优先级与 `paste` command；HTML 白名单覆盖标题、引用、代码、三层普通/任务列表、marks、安全链接、图片和顶层表格，`b/i/u/s/strike/del` 会映射到已有 boolean mark，安全 `font-size` / `color` / `background-color` 会映射到文字属性，`ol[start]` 保留安全整数编号，链接保留规范化后的 target/rel，任务项保留 checked，图片复用 URL 安全规则，表格行会规范为矩形结构。
 - History：`createHistorySnapshot`、`cloneHistorySnapshot`、`createHistoryEntry`、`cloneHistoryEntry`、`createHistoryState`、`clearHistory`、`recordHistory`、`canMergeHistoryEntries`、`mergeHistoryEntries`、`canUndo`、`canRedo`、`getUndoEntry`、`getRedoEntry`、`undoHistory`、`redoHistory`、`getHistoryShortcutAction`、`undoCommand`、`redoCommand`。
 
 ## 构建产物

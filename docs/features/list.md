@@ -19,9 +19,16 @@ interface TaskItemNode {
   children: TextNode[];
   nested?: ListNode;
 }
+
+interface OrderedListNode {
+  type: "orderedList";
+  children: ListItemNode[];
+  start?: number;
+}
 ```
 
 - `bulletList` 和 `orderedList` 只接收 `listItem`。
+- `orderedList.start` 是可选安全整数；省略时从 1 开始，也支持 0 和负数编号。
 - `taskList` 只接收带布尔 `checked` 的 `taskItem`。
 - 列表和列表项至少包含一个子节点；规范化会丢弃类型不匹配的项目并补齐空结构。
 - `nested` 最多递归三层，超过 `MAX_LIST_DEPTH` 的结构在校验阶段报错并在规范化阶段移除。
@@ -32,7 +39,7 @@ interface TaskItemNode {
 - ListItem：`[...listPath, itemIndex]`。
 - ListItem Text：`[...listPath, itemIndex, textIndex]`。
 - Nested List：`[...itemPath, item.children.length]`，随后继续追加 item 和 text 索引。
-- `bulletList` 渲染为 `ul`，`orderedList` 渲染为 `ol`，`taskList` 渲染为带任务语义的 `ul`。
+- `bulletList` 渲染为 `ul`，`orderedList` 渲染为 `ol` 并在需要时输出 `start`，`taskList` 渲染为带任务语义的 `ul`。
 - 任务项渲染 checkbox，勾选后通过 operation 写回 model，而不是只修改 DOM。
 
 ## Command
@@ -50,10 +57,11 @@ interface TaskItemNode {
 - Tab 使用 `indent_list_item` 把当前非首项移入前一项，Shift+Tab 使用 `outdent_list_item` 提升一级。
 - 顶层列表项开头 Backspace 使用 `unwrap_list_item` 转为 paragraph；嵌套项开头 Backspace 提升一级。
 - 缩进、反缩进、拆分和退出均保留当前项目已有的子列表。
+- 从有序列表中退出或解除中间项时，前后列表会保留并续接原编号。
 
 ## HTML 列表粘贴
 
-Clipboard parser 会把每个 `li` 的第一个直接 `ul` 或 `ol` 映射为该列表项的 `nested`。有序、无序类型可以逐层混合，最多导入 `MAX_LIST_DEPTH` 允许的三层；父项和子项各自保留文字 mark 与安全链接。粘贴后的折叠选区位于最深的最后列表项末尾。
+Clipboard parser 会把每个 `li` 的第一个直接 `ul` 或 `ol` 映射为该列表项的 `nested`。有序、无序类型可以逐层混合，最多导入 `MAX_LIST_DEPTH` 允许的三层；每层 `ol` 的安全整数 `start`、父子项文字 mark 与安全链接都会独立保留。粘贴后的折叠选区位于最深的最后列表项末尾。
 
 Clipboard parser 可识别 checkbox 驱动的 HTML 无序列表。只有每个直属 `li` 都以 checkbox 作为首个有效内容时，列表才转换为 `taskList`；checkbox 的 `checked` 属性进入模型，任务文字的 mark 和安全链接继续保留。常见的 `label`、`p`、`div`、`span` 起始包装可以逐层识别。
 
