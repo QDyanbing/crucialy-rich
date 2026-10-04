@@ -204,6 +204,18 @@ function parseNestedList(node: HtmlElement, depth: number): ListNode | undefined
   return nested ? parseList(nested, depth + 1) : undefined;
 }
 
+function parseOrderedListStart(node: HtmlElement): number | undefined {
+  const value = getAttribute(node, "start")?.trim();
+
+  if (!value || !/^[+-]?\d+$/.test(value)) {
+    return undefined;
+  }
+
+  const start = Number(value);
+
+  return Number.isSafeInteger(start) ? start : undefined;
+}
+
 function parseList(node: HtmlElement, depth = 1): ListNode {
   const itemNodes = node.childNodes.filter(
     (child): child is HtmlElement => isElement(child) && child.tagName === "li",
@@ -233,7 +245,10 @@ function parseList(node: HtmlElement, depth = 1): ListNode {
   );
 
   return node.tagName === "ol"
-    ? createOrderedList(items.length > 0 ? items : undefined)
+    ? createOrderedList(
+        items.length > 0 ? items : undefined,
+        parseOrderedListStart(node),
+      )
     : createBulletList(items.length > 0 ? items : undefined);
 }
 

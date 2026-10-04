@@ -306,6 +306,22 @@ describe("parseHtml", () => {
     });
   });
 
+  it("preserves an HTML ordered list start", () => {
+    const fragment = parseHtml("<ol start=4><li>第四项</li><li>第五项</li></ol>");
+
+    expect(fragment?.blocks[0]).toMatchObject({
+      children: [
+        { children: [{ text: "第四项" }] },
+        { children: [{ text: "第五项" }] },
+      ],
+      start: 4,
+      type: "orderedList",
+    });
+    expect(
+      validateDocument({ children: fragment?.blocks ?? [], type: "document" }).valid,
+    ).toBe(true);
+  });
+
   it("maps nested unordered HTML lists", () => {
     const fragment = parseHtml(
       "<ul><li>父项<ul><li>子项</li></ul></li><li>同级项</li></ul>",
