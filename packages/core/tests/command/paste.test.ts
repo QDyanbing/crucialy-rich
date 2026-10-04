@@ -188,6 +188,29 @@ describe("pasteCommand", () => {
     });
   });
 
+  it("pastes ordered list starts without resetting numbering", () => {
+    const document = createDocument([createParagraph([createText("前后")])]);
+    const result = pasteCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { offset: 1, path: [0, 0] },
+          focus: { offset: 1, path: [0, 0] },
+        },
+      },
+      payload: {
+        fragment: parseHtml("<ol start=4><li>第四项</li><li>第五项</li></ol>")!,
+      },
+    });
+    const resultDocument = applyTransaction(document, result.transaction!);
+
+    expect(resultDocument.children[1]).toMatchObject({
+      start: 4,
+      type: "orderedList",
+    });
+    expect(result.selection?.anchor).toEqual({ offset: 3, path: [1, 1, 0] });
+  });
+
   it("pastes nested HTML mark aliases without flattening them", () => {
     const document = createDocument([createParagraph([createText("前后")])]);
     const result = pasteCommand.execute({
