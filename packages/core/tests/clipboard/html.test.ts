@@ -365,6 +365,41 @@ describe("parseHtml", () => {
     });
   });
 
+  it("preserves nested ordered HTML list starts", () => {
+    const fragment = parseHtml(
+      '<ul><li>倒序步骤<ol start="-2"><li>倒数第二步</li><li>倒数第一步</li></ol></li></ul>',
+    );
+
+    expect(fragment?.blocks[0]).toMatchObject({
+      children: [
+        {
+          nested: {
+            start: -2,
+            type: "orderedList",
+          },
+        },
+      ],
+      type: "bulletList",
+    });
+  });
+
+  it.each(["1.5", "3px", "9007199254740992"])(
+    "drops unsupported HTML ordered list start %s",
+    (start) => {
+      const fragment = parseHtml(`<ol start="${start}"><li>默认编号</li></ol>`);
+
+      expect(fragment?.blocks[0]).toEqual({
+        children: [
+          {
+            children: [{ text: "默认编号", type: "text" }],
+            type: "listItem",
+          },
+        ],
+        type: "orderedList",
+      });
+    },
+  );
+
   it("preserves mixed HTML list types", () => {
     const fragment = parseHtml("<ol><li>有序父项<ul><li>无序子项</li></ul></li></ol>");
 
