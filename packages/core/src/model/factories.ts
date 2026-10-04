@@ -113,8 +113,11 @@ export function createBulletList(
 
 export function createOrderedList(
   children: ListItemNode[] = [createListItem()],
+  start?: number,
 ): OrderedListNode {
-  return { children, type: "orderedList" };
+  return start === undefined
+    ? { children, type: "orderedList" }
+    : { children, start, type: "orderedList" };
 }
 
 export function createTaskItem(

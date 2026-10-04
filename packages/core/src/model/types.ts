@@ -144,6 +144,7 @@ export interface BulletListNode {
 export interface OrderedListNode {
   type: "orderedList";
   children: ListEntryNode[];
+  start?: number;
 }
 
 export interface TaskListNode {

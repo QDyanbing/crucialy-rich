@@ -113,6 +113,22 @@ describe("model factories", () => {
     expect(paragraph.children.map((node) => node.text)).toEqual(["a", "b"]);
   });
 
+  it("creates an ordered list with a custom start", () => {
+    const list = createOrderedList([createListItem([createText("第三项")])], 3);
+
+    expect(list).toEqual({
+      children: [
+        {
+          children: [{ text: "第三项", type: "text" }],
+          type: "listItem",
+        },
+      ],
+      start: 3,
+      type: "orderedList",
+    });
+    expect(createOrderedList()).not.toHaveProperty("start");
+  });
+
   it("creates headings with a default empty text", () => {
     const defaultHeading = createHeading();
     const heading = createHeading(3, [createText("三级标题")]);
