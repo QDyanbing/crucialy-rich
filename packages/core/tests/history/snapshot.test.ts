@@ -7,6 +7,8 @@ import {
   createHeading,
   createHistorySnapshot,
   createImage,
+  createListItem,
+  createOrderedList,
   createParagraph,
   createQuote,
   createText,
@@ -148,5 +150,24 @@ describe("createHistorySnapshot", () => {
     ).toBe("快照");
     expect(cloned).not.toBe(table);
     expect(cloned?.children).not.toBe(table.children);
+  });
+
+  it("preserves ordered list starts in history snapshots", () => {
+    const list = createOrderedList([createListItem([createText("第六项")])], 6);
+    const snapshot = createHistorySnapshot(createDocument([list]));
+
+    list.start = 2;
+    list.children[0]!.children[0]!.text = "已修改";
+
+    expect(snapshot.document.children[0]).toEqual({
+      children: [
+        {
+          children: [{ text: "第六项", type: "text" }],
+          type: "listItem",
+        },
+      ],
+      start: 6,
+      type: "orderedList",
+    });
   });
 });
