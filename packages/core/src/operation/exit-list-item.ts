@@ -1,10 +1,6 @@
-import {
-  createParagraph,
-  isListNode,
-  type DocumentNode,
-  type ListNode,
-} from "../model";
+import { createParagraph, isListNode, type DocumentNode } from "../model";
 import { isValidPoint, type Point, type RangeSelection } from "../selection";
+import { createListSegment } from "./list-segment";
 import type { ExitListItemOperation } from "./types";
 
 export function createExitListItemOperation(point: Point): ExitListItemOperation {
@@ -36,10 +32,6 @@ function getTarget(document: DocumentNode, operation: ExitListItemOperation) {
   }
 
   return { blockIndex, itemIndex, list };
-}
-
-function createListSegment(list: ListNode, start: number, end?: number): ListNode {
-  return { children: list.children.slice(start, end), type: list.type };
 }
 
 export function applyExitListItem(

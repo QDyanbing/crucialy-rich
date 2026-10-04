@@ -1,6 +1,7 @@
-import { createParagraph, type DocumentNode, type ListNode } from "../model";
+import { createParagraph, type DocumentNode } from "../model";
 import type { Point, RangeSelection } from "../selection";
 import { getListItemTarget } from "./list-item-path";
+import { createListSegment } from "./list-segment";
 import type { UnwrapListItemOperation } from "./types";
 
 export function createUnwrapListItemOperation(point: Point): UnwrapListItemOperation {
@@ -18,10 +19,6 @@ function getUnwrapTarget(document: DocumentNode, operation: UnwrapListItemOperat
   }
 
   return target;
-}
-
-function createListSegment(list: ListNode, start: number, end?: number): ListNode {
-  return { children: list.children.slice(start, end), type: list.type };
 }
 
 export function applyUnwrapListItem(

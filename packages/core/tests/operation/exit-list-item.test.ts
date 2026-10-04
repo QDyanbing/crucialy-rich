@@ -6,6 +6,7 @@ import {
   createDocument,
   createExitListItemOperation,
   createListItem,
+  createOrderedList,
   createParagraph,
   createSelectionAfterExitListItem,
   createText,
@@ -48,5 +49,28 @@ describe("exit list item operation", () => {
     expect(applyExitListItem(document, operation)).toEqual(
       createDocument([createParagraph()]),
     );
+  });
+
+  it("continues ordered numbering after an exited item", () => {
+    const document = createDocument([
+      createOrderedList(
+        [
+          createListItem([createText("第四项")]),
+          createListItem(),
+          createListItem([createText("第六项")]),
+        ],
+        4,
+      ),
+    ]);
+    const operation = createExitListItemOperation({
+      offset: 0,
+      path: [0, 1, 0],
+    });
+
+    expect(applyExitListItem(document, operation).children).toEqual([
+      createOrderedList([createListItem([createText("第四项")])], 4),
+      createParagraph(),
+      createOrderedList([createListItem([createText("第六项")])], 6),
+    ]);
   });
 });
