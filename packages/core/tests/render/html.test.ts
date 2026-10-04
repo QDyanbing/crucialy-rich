@@ -97,6 +97,16 @@ describe("renderNodeToHtml", () => {
     );
   });
 
+  it("serializes custom ordered list starts", () => {
+    const document = createDocument([
+      createOrderedList([createListItem([createText("续编")])], -2),
+    ]);
+
+    expect(renderNodeToHtml(renderDocument(document))).toBe(
+      '<div data-crucialy-path="[]"><ol data-crucialy-path="[0]" start="-2"><li data-crucialy-path="[0,0]"><span data-crucialy-path="[0,0,0]">续编</span></li></ol></div>',
+    );
+  });
+
   it("serializes nested lists inside list items", () => {
     const document = createDocument([
       createBulletList([
