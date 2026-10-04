@@ -2660,6 +2660,43 @@ test("pastes a nested HTML list through the native editor event", async ({ page 
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
 
+test("pastes an ordered HTML list start through the native editor event", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await placeCaretInRenderedText(page, "[0,0]", 3);
+
+  const editor = page.getByLabel("已渲染文档");
+
+  await editor.evaluate((element) => {
+    const clipboardData = new DataTransfer();
+
+    clipboardData.setData(
+      "text/html",
+      "<ol start=4><li>第四项</li><li>第五项</li></ol>",
+    );
+    clipboardData.setData("text/plain", "第四项\n第五项");
+    element.dispatchEvent(
+      new ClipboardEvent("paste", {
+        bubbles: true,
+        cancelable: true,
+        clipboardData,
+      }),
+    );
+  });
+
+  const orderedList = editor.locator("ol").first();
+
+  await expect(orderedList).toHaveAttribute("start", "4");
+  await expect(orderedList.locator(":scope > li")).toHaveText(["第四项", "第五项"]);
+  await expect(page.getByLabel("锚点路径")).toHaveValue("1,1,0");
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"start": 4',
+  );
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
 test("pastes HTML mark aliases through the native editor event", async ({ page }) => {
   await page.goto("/");
   await placeCaretInRenderedText(page, "[0,0]", 3);
