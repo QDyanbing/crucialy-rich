@@ -159,11 +159,15 @@ function normalizeList(node: ListNode, depth: number): ListNode {
     .filter(isExpectedItem)
     .map((item) => normalizeListItem(item, depth));
   const fallback = node.type === "taskList" ? createTaskItem() : createListItem();
+  const normalizedChildren = children.length > 0 ? children : [fallback];
 
-  return {
-    children: children.length > 0 ? children : [fallback],
-    type: node.type,
-  };
+  if (node.type === "orderedList") {
+    return node.start !== undefined && Number.isSafeInteger(node.start)
+      ? { children: normalizedChildren, start: node.start, type: "orderedList" }
+      : { children: normalizedChildren, type: "orderedList" };
+  }
+
+  return { children: normalizedChildren, type: node.type };
 }
 
 function normalizeListItem(node: ListEntryNode, depth: number): ListEntryNode {

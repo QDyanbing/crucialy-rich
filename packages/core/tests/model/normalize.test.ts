@@ -248,6 +248,46 @@ describe("normalizeDocument", () => {
     });
   });
 
+  it("preserves valid ordered list starts and drops invalid values", () => {
+    const result = normalizeDocument({
+      children: [
+        {
+          children: [
+            {
+              children: [{ text: "倒数第二项", type: "text" }],
+              type: "listItem",
+            },
+          ],
+          start: -2,
+          type: "orderedList",
+        },
+        {
+          children: [
+            {
+              children: [{ text: "默认编号", type: "text" }],
+              type: "listItem",
+            },
+          ],
+          start: 1.5,
+          type: "orderedList",
+        },
+      ],
+      type: "document",
+    });
+
+    expect(result.children[0]).toMatchObject({ start: -2, type: "orderedList" });
+    expect(result.children[1]).toEqual({
+      children: [
+        {
+          children: [{ text: "默认编号", type: "text" }],
+          type: "listItem",
+        },
+      ],
+      type: "orderedList",
+    });
+    expect(validateDocument(result).valid).toBe(true);
+  });
+
   it("normalizes nested lists and trims unsupported depth", () => {
     const result = normalizeDocument({
       children: [
