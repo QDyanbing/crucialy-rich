@@ -110,6 +110,14 @@ function validateList(
   depth: number,
   errors: ValidationError[],
 ): void {
+  if (
+    list.type === "orderedList" &&
+    list.start !== undefined &&
+    !Number.isSafeInteger(list.start)
+  ) {
+    errors.push({ path, message: "orderedList start 必须是安全整数" });
+  }
+
   if (list.children.length === 0) {
     errors.push({ path, message: "list 至少需要一个 listItem" });
   }

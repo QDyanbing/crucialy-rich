@@ -64,11 +64,37 @@ describe("validateDocument", () => {
   it("accepts bullet and ordered list structures", () => {
     const document = createDocument([
       createBulletList([createListItem([createText("无序项")])]),
-      createOrderedList([createListItem([createText("有序项", { bold: true })])]),
+      createOrderedList([createListItem([createText("有序项", { bold: true })])], -2),
     ]);
 
     expect(validateDocument(document)).toEqual({ errors: [], valid: true });
   });
+
+  it.each([1.5, Number.NaN, Number.MAX_SAFE_INTEGER + 1, "3"])(
+    "rejects invalid ordered list start %s",
+    (start) => {
+      const result = validateDocument({
+        children: [
+          {
+            children: [
+              {
+                children: [{ text: "有序项", type: "text" }],
+                type: "listItem",
+              },
+            ],
+            start,
+            type: "orderedList",
+          },
+        ],
+        type: "document",
+      });
+
+      expect(result.errors).toContainEqual({
+        message: "orderedList start 必须是安全整数",
+        path: [0],
+      });
+    },
+  );
 
   it("accepts task items with persisted checked state", () => {
     const document = createDocument([
