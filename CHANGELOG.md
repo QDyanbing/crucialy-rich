@@ -8,6 +8,8 @@
 
 ### 新增
 
+- 新增 HTML `<hr>` 与 Markdown 水平分隔线 Clipboard 解析，统一映射为无属性 Divider。
+- 新增分隔线粘贴的混合块顺序、安全属性降级、Command/History、React 原生事件和 Chromium 回归。
 - 新增 OrderedList 可选 `start` 模型、校验、规范化与语义渲染，退出或解除中间项后继续原编号。
 - 新增 HTML `ol[start]` 安全整数解析，以及 Clipboard、Command/History、React 原生事件和 Chromium 回归。
 - 新增 HTML Clipboard 行内样式解析，安全保留 `font-size`、`color` 和 `background-color`，非法值按属性降级省略。
