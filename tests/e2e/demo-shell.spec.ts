@@ -2520,6 +2520,38 @@ test("pastes plain text through the native editor event", async ({ page }) => {
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
 
+test("pastes an HTML divider through the native editor event", async ({ page }) => {
+  await page.goto("/");
+  await placeCaretInRenderedText(page, "[0,0]", 3);
+
+  const editor = page.getByLabel("已渲染文档");
+
+  await editor.evaluate((element) => {
+    const clipboardData = new DataTransfer();
+
+    clipboardData.setData("text/html", '<hr onclick="alert(1)">');
+    clipboardData.setData("text/plain", "---");
+    element.dispatchEvent(
+      new ClipboardEvent("paste", {
+        bubbles: true,
+        cancelable: true,
+        clipboardData,
+      }),
+    );
+  });
+
+  const divider = editor.locator('hr[data-crucialy-path="[1]"]');
+
+  await expect(divider).toHaveCount(1);
+  await expect(divider).not.toHaveAttribute("onclick");
+  await expect(page.getByLabel("锚点路径")).toHaveValue("2,0");
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"type": "insert_block"',
+  );
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
 test("pastes an HTML table through the native editor event", async ({ page }) => {
   await page.goto("/");
   await placeCaretInRenderedText(page, "[0,0]", 3);
