@@ -3,6 +3,7 @@ import { parseFragment, type DefaultTreeAdapterMap } from "parse5";
 import {
   createBulletList,
   createCodeBlock,
+  createDivider,
   createHeading,
   createImage,
   createListItem,
@@ -376,6 +377,10 @@ function parseBlock(node: HtmlNode): BlockNode[] {
 
   if (node.tagName === "pre") {
     return [createCodeBlock([createText(getTextContent(node))])];
+  }
+
+  if (node.tagName === "hr") {
+    return [createDivider()];
   }
 
   if (node.tagName === "img") {

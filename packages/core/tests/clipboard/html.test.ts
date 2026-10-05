@@ -733,6 +733,18 @@ describe("parseHtml", () => {
     ).toBe(true);
   });
 
+  it("maps a top-level HTML horizontal rule", () => {
+    const fragment = parseHtml("<hr>");
+
+    expect(fragment).toEqual({
+      blocks: [{ children: [], type: "divider" }],
+      mimeType: "text/html",
+    });
+    expect(
+      validateDocument({ children: fragment?.blocks ?? [], type: "document" }).valid,
+    ).toBe(true);
+  });
+
   it("preserves HTML image alternative text", () => {
     const fragment = parseHtml(
       '<img src="https://example.com/cover.png" alt="中文 &amp; preview">',
