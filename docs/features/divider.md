@@ -38,6 +38,13 @@ interface DividerNode {
 
 `remove_block` 与 `insert_block` 一样是通用块 Operation，未来的图片等 void block 可复用相同删除行为。
 
+## Clipboard
+
+- HTML `<hr>` 映射为 Divider，`id`、`class`、`style`、事件处理器及其他来源属性不会进入模型。
+- Markdown `---` 等水平分隔线先由 Markdown parser 转为 `<hr>`，再复用同一白名单映射。
+- Paste Command 在当前文本位置分段并插入 Divider，完成后把折叠选区放到分隔线后的可编辑块起点。
+- HTML 与 Markdown 分隔线粘贴都生成一次 Transaction，并作为一条 History 记录撤销或重做。
+
 ## Demo 与验收
 
 Demo 提供“分隔线”命令按钮和“代码块与分隔线”中文混合样例。浏览器测试覆盖插入、后方继续输入、撤销/重做，以及两侧 Backspace/Delete 删除。完整记录见 [代码块和分割线闭环](../qa/code-block-divider.md)。
