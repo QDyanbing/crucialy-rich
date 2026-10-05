@@ -10,6 +10,7 @@ import {
   createText,
   executeCommand,
   parseHtml,
+  parseMarkdown,
   parsePlainText,
   PASTE_COMMAND_NAME,
   pasteCommand,
@@ -174,6 +175,31 @@ describe("pasteCommand", () => {
       createParagraph([createText("后")]),
     ]);
     expect(result.selection?.anchor).toEqual({ offset: 0, path: [2, 0] });
+  });
+
+  it("pastes a Markdown divider without flattening surrounding blocks", () => {
+    const document = createDocument([createParagraph([createText("前后")])]);
+    const result = pasteCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { offset: 1, path: [0, 0] },
+          focus: { offset: 1, path: [0, 0] },
+        },
+      },
+      payload: { fragment: parseMarkdown("上方\n\n---\n\n下方")! },
+    });
+    const resultDocument = applyTransaction(document, result.transaction!);
+
+    expect(resultDocument.children.map((block) => block.type)).toEqual([
+      "paragraph",
+      "paragraph",
+      "divider",
+      "paragraph",
+      "paragraph",
+    ]);
+    expect(resultDocument.children[2]).toEqual({ children: [], type: "divider" });
+    expect(result.selection?.anchor).toEqual({ offset: 2, path: [3, 0] });
   });
 
   it("inserts nested HTML lists and moves the caret to the deepest last item", () => {
