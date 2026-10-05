@@ -52,6 +52,7 @@ export function Demo() {
 - HTML 行内样式粘贴：原生 paste 会保留 `8–72px` 整数字号与十六进制文字色、背景色；非法值降级省略，列表和表格中的样式复用同一规则。
 - HTML 链接粘贴：安全链接会保留白名单内的 `target` 和 `rel`，非法可选属性降级省略，并通过同一 `insertFromPaste` transaction 提交。
 - HTML 列表粘贴：有序、无序和任务列表会保留最多三层的直接子列表，每层有序列表保留安全整数 `start`，选区落在最深的最后项末尾。
+- 分隔线粘贴：原生 HTML `<hr>` 和 Markdown 水平分隔线映射为 Divider，来源属性不会进入模型，选区落在分隔线后的可编辑位置。
 - 任务列表：checkbox 点击通过 `set_task_item_checked` transaction 写回 `checked`，并进入宿主的 History 流程；HTML checkbox 列表可通过原生 paste 导入。
 - 图片：支持 URL/本地 object URL 插入、块选区、删除和安全 HTML 图片粘贴。
 - 表格：支持单元格内输入、删除、Enter、Backspace/Delete 段落合并、点击高亮、纯文本 TSV 填充和顶层 HTML 表格粘贴。
