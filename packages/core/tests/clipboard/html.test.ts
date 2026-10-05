@@ -745,6 +745,22 @@ describe("parseHtml", () => {
     ).toBe(true);
   });
 
+  it("keeps HTML dividers between surrounding blocks", () => {
+    const fragment = parseHtml("<p>分隔线前</p><hr><blockquote>分隔线后</blockquote>");
+
+    expect(fragment?.blocks).toEqual([
+      {
+        children: [{ text: "分隔线前", type: "text" }],
+        type: "paragraph",
+      },
+      { children: [], type: "divider" },
+      {
+        children: [{ text: "分隔线后", type: "text" }],
+        type: "quote",
+      },
+    ]);
+  });
+
   it("preserves HTML image alternative text", () => {
     const fragment = parseHtml(
       '<img src="https://example.com/cover.png" alt="中文 &amp; preview">',
