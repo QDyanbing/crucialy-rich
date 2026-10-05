@@ -2552,6 +2552,37 @@ test("pastes an HTML divider through the native editor event", async ({ page }) 
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
 
+test("pastes a Markdown divider through the native editor event", async ({ page }) => {
+  await page.goto("/");
+  await placeCaretInRenderedText(page, "[0,0]", 3);
+
+  const editor = page.getByLabel("已渲染文档");
+
+  await editor.evaluate((element) => {
+    const clipboardData = new DataTransfer();
+
+    clipboardData.setData("text/markdown", "上方\n\n---\n\n下方");
+    clipboardData.setData("text/html", "<p>HTML 降级内容</p>");
+    clipboardData.setData("text/plain", "纯文本降级内容");
+    element.dispatchEvent(
+      new ClipboardEvent("paste", {
+        bubbles: true,
+        cancelable: true,
+        clipboardData,
+      }),
+    );
+  });
+
+  await expect(editor.locator('[data-crucialy-path="[1,0]"]')).toHaveText("上方");
+  await expect(editor.locator('hr[data-crucialy-path="[2]"]')).toHaveCount(1);
+  await expect(editor.locator('[data-crucialy-path="[3,0]"]')).toHaveText("下方");
+  await expect(editor).not.toContainText("HTML 降级内容");
+  await expect(page.getByLabel("锚点路径")).toHaveValue("3,0");
+  await expect(page.getByLabel("锚点偏移")).toHaveValue("2");
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
 test("pastes an HTML table through the native editor event", async ({ page }) => {
   await page.goto("/");
   await placeCaretInRenderedText(page, "[0,0]", 3);
