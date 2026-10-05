@@ -150,6 +150,32 @@ describe("pasteCommand", () => {
     expect(result.selection?.anchor).toEqual({ offset: 2, path: [2, 0, 0] });
   });
 
+  it("pastes an HTML divider and moves the caret after it", () => {
+    const document = createDocument([createParagraph([createText("前后")])]);
+    const result = pasteCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { offset: 1, path: [0, 0] },
+          focus: { offset: 1, path: [0, 0] },
+        },
+      },
+      payload: { fragment: parseHtml("<hr>")! },
+    });
+    const resultDocument = applyTransaction(document, result.transaction!);
+
+    expect(result.transaction?.operations.map((operation) => operation.type)).toEqual([
+      "split_block",
+      "insert_block",
+    ]);
+    expect(resultDocument.children).toEqual([
+      createParagraph([createText("前")]),
+      { children: [], type: "divider" },
+      createParagraph([createText("后")]),
+    ]);
+    expect(result.selection?.anchor).toEqual({ offset: 0, path: [2, 0] });
+  });
+
   it("inserts nested HTML lists and moves the caret to the deepest last item", () => {
     const document = createDocument([createParagraph([createText("前后")])]);
     const result = pasteCommand.execute({
