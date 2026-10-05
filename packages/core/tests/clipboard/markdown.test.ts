@@ -43,6 +43,25 @@ describe("parseMarkdown", () => {
     ).toBe(true);
   });
 
+  it("maps Markdown horizontal rules to dividers", () => {
+    const fragment = parseMarkdown("分隔线前\n\n---\n\n分隔线后");
+
+    expect(fragment).toEqual({
+      blocks: [
+        {
+          children: [{ text: "分隔线前", type: "text" }],
+          type: "paragraph",
+        },
+        { children: [], type: "divider" },
+        {
+          children: [{ text: "分隔线后", type: "text" }],
+          type: "paragraph",
+        },
+      ],
+      mimeType: "text/markdown",
+    });
+  });
+
   it("takes precedence over HTML and plain text in the default parser list", () => {
     const result = parseClipboardData(
       {
