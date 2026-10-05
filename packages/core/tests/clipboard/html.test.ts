@@ -761,6 +761,14 @@ describe("parseHtml", () => {
     ]);
   });
 
+  it("drops HTML divider attributes inside ordinary wrappers", () => {
+    const fragment = parseHtml(
+      '<section><hr id="remote" class="wide" style="border-color: red" onclick="alert(1)"><script>blocked()</script></section>',
+    );
+
+    expect(fragment?.blocks).toEqual([{ children: [], type: "divider" }]);
+  });
+
   it("preserves HTML image alternative text", () => {
     const fragment = parseHtml(
       '<img src="https://example.com/cover.png" alt="中文 &amp; preview">',
