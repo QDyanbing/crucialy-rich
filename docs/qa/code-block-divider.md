@@ -15,6 +15,7 @@
 | Divider 模型   | `children: []`，归类为 void block                       | 通过 |
 | Divider 插入   | `split_block + insert_block` 保留两侧内容               | 通过 |
 | Divider 渲染   | 输出只含 block path 的 void `hr`                        | 通过 |
+| Divider 粘贴   | HTML `hr` 与 Markdown 分隔线映射为 Divider              | 通过 |
 | 前方删除       | Divider 前方文本末尾按 Delete 删除 Divider              | 通过 |
 | 后方删除       | Divider 后方文本开头按 Backspace 删除 Divider           | 通过 |
 | 选区边界       | Divider 可由 block path 查询，但不产生内部 Point        | 通过 |
@@ -26,6 +27,7 @@
 - 模型：`packages/core/tests/model`。
 - CodeBlock：`packages/core/tests/command/code-block.test.ts`、`packages/core/tests/input/enter.test.ts`。
 - Divider：`packages/core/tests/command/divider.test.ts`、`packages/core/tests/operation/insert-block.test.ts`、`remove-block.test.ts`。
+- Clipboard：HTML/Markdown parser、Paste Command、History、React 原生事件与浏览器事件均覆盖 Divider。
 - void 边界：`packages/core/tests/input/backspace.test.ts`、`delete.test.ts`、`selection` 与 `render` 测试。
 - React 与公开 API：`packages/react/tests/public-api.test.ts`、`packages/core/tests/public-api.test.ts`。
 - 浏览器：`tests/e2e/demo-shell.spec.ts`。
@@ -53,4 +55,4 @@ pnpm check:all
 
 ## 结论
 
-CodeBlock 与 Divider 已达到“代码、测试、中文 Demo、文档、验收一起完成”的闭环标准，可以进入第 15 周列表模型设计。
+CodeBlock 与 Divider 已达到“代码、测试、中文 Demo、文档、验收一起完成”的闭环标准；后续补充的 HTML/Markdown 粘贴入口也已完成全链路回归。
