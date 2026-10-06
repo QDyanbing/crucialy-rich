@@ -12,6 +12,7 @@
 | HTML 分隔线   | 将顶层与容器中的 hr 转换为 Divider           | 通过 |
 | HTML 标记     | 规范化 b/i/u/s/strike/del 及其嵌套组合       | 通过 |
 | HTML 行内样式 | 保留安全字号、文字色、背景色及嵌套覆盖       | 通过 |
+| HTML mark CSS | 映射粗体、斜体、装饰线及合法重置值           | 通过 |
 | HTML 链接     | 保留安全 href、target、rel 并过滤非法元数据  | 通过 |
 | HTML 嵌套列表 | 保留三层有序、无序、任务子列表及深层选区     | 通过 |
 | HTML 起始编号 | 保留顶层与嵌套 ol 的安全整数 start           | 通过 |
@@ -27,9 +28,9 @@
 ## 自动化覆盖
 
 - Clipboard parser：`packages/core/tests/clipboard`。
-- Paste command：`packages/core/tests/command/paste.test.ts`，HTML/Markdown 分隔线及其他结构的 History 往返见对应的 `*-paste-history.test.ts`。
-- React：`packages/react/tests/*-paste.test.ts` 覆盖 HTML/Markdown 分隔线及其他原生 Clipboard 事件。
-- 浏览器：`tests/e2e/demo-shell.spec.ts` 覆盖原生纯文本、HTML/Markdown 分隔线、结构化 HTML paste 事件，以及 HTML、Markdown 验收控制。
+- Paste command：`packages/core/tests/command/paste.test.ts`，HTML/Markdown 分隔线、行内 mark CSS 及其他结构的 History 往返见对应的 `*-paste-history.test.ts`。
+- React：`packages/react/tests/*-paste.test.ts` 覆盖 HTML/Markdown 分隔线、行内 mark CSS 及其他原生 Clipboard 事件。
+- 浏览器：`tests/e2e/demo-shell.spec.ts` 覆盖原生纯文本、HTML/Markdown 分隔线、行内 mark CSS、结构化 HTML paste 事件，以及 HTML、Markdown 验收控制。
 - 全量入口：`pnpm check:all`。
 
 ## 安全结论
@@ -38,4 +39,4 @@ Clipboard 原始内容不会直接注入编辑器 DOM。HTML 先由标准 parser
 
 ## 结论
 
-第 20 周粘贴能力已完成代码、测试、中文 Demo、文档和浏览器验收闭环，并在对应模型完成后补齐了 HTML/Markdown 分隔线、HTML 文字标记别名、安全行内样式、链接元数据、有序列表起始编号、嵌套列表、顶层表格、安全图片与任务列表导入。
+第 20 周粘贴能力已完成代码、测试、中文 Demo、文档和浏览器验收闭环，并在对应模型完成后补齐了 HTML/Markdown 分隔线、HTML 文字标记别名、行内 mark CSS、安全文字属性、链接元数据、有序列表起始编号、嵌套列表、顶层表格、安全图片与任务列表导入。
