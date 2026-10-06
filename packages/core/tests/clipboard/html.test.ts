@@ -1110,6 +1110,30 @@ describe("parseHtml", () => {
     });
   });
 
+  it("preserves inline mark styles inside HTML table cells", () => {
+    const fragment = parseHtml(
+      '<table><tr><td><span style="font-weight: 700; font-style: italic; text-decoration: underline line-through">样式单元格</span></td></tr></table>',
+    );
+    const table = fragment?.blocks[0];
+
+    expect(isTableNode(table)).toBe(true);
+
+    if (!isTableNode(table)) {
+      throw new Error("expected parsed table");
+    }
+
+    expect(table.children[0]?.children[0]?.children[0]?.children[0]).toEqual({
+      marks: {
+        bold: true,
+        italic: true,
+        strike: true,
+        underline: true,
+      },
+      text: "样式单元格",
+      type: "text",
+    });
+  });
+
   it("sanitizes links inside HTML table cells", () => {
     const fragment = parseHtml(
       '<table><tr><td><a href="https://example.com/docs">安全链接</a></td><td><a href="javascript:alert(1)">危险链接</a></td></tr></table>',
