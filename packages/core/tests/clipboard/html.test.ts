@@ -58,6 +58,20 @@ describe("parseHtml", () => {
     });
   });
 
+  it("maps supported inline font styles to italic marks", () => {
+    const fragment = parseHtml(
+      '<p><span style="font-style: italic">斜体</span><span style="FONT-STYLE: OBLIQUE">倾斜</span></p>',
+    );
+
+    expect(fragment?.blocks[0]).toMatchObject({
+      children: [
+        { marks: { italic: true }, text: "斜体" },
+        { marks: { italic: true }, text: "倾斜" },
+      ],
+      type: "paragraph",
+    });
+  });
+
   it("preserves supported inline text colors", () => {
     const fragment = parseHtml(
       '<p><span style="color: #ABC">短色值</span><em style="COLOR: #123456">完整色值</em></p>',

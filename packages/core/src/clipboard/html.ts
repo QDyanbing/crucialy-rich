@@ -91,6 +91,12 @@ function isBoldFontWeight(value: string | undefined): boolean {
     : false;
 }
 
+function isItalicFontStyle(value: string | undefined): boolean {
+  const normalized = value?.trim().toLowerCase();
+
+  return normalized === "italic" || normalized === "oblique";
+}
+
 function parseInlineStyleMarks(node: HtmlElement): TextMarks {
   const declarations = parseInlineStyleDeclarations(getAttribute(node, "style"));
   const marks: TextMarks = {};
@@ -115,6 +121,10 @@ function parseInlineStyleMarks(node: HtmlElement): TextMarks {
 
   if (isBoldFontWeight(declarations.get("font-weight"))) {
     marks.bold = true;
+  }
+
+  if (isItalicFontStyle(declarations.get("font-style"))) {
+    marks.italic = true;
   }
 
   return marks;
