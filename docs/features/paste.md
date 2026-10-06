@@ -30,7 +30,15 @@ HTML 使用 `parse5` 读取标准语法树，不使用正则解析标签。当�
 
 HTML 链接复用 Link Mark 的安全规则：`target` 只保留 `_self`、`_blank`，`rel` 只保留 `nofollow`、`noopener`、`noreferrer` 并按固定顺序去重。非法可选属性会被省略，不会连同安全 `href`、文字和其他 mark 一起丢弃。
 
-HTML 行内样式只映射模型已有的 `fontSize`、`textColor` 和 `backgroundColor`。`font-size` 接受 `8px`–`72px` 的整数，`color` 与 `background-color` 只接受 `#RGB` / `#RRGGBB`，并规范化为小写六位色值。样式遵循元素嵌套继承与内层合法值覆盖规则，可以和 boolean mark、安全链接、列表项及表格单元格组合；非法值只丢弃对应属性，不影响文字或其他合法 mark。
+HTML 行内样式只映射模型已有的文字属性和 boolean mark。`font-size` 接受 `8px`–`72px` 的整数，`color` 与 `background-color` 只接受 `#RGB` / `#RRGGBB`，并规范化为小写六位色值。
+
+boolean mark 的 CSS 白名单如下：
+
+- `font-weight`：`bold`、`bolder` 和 `600`–`1000` 映射为 bold；`normal`、`lighter` 和 `1`–`599` 显式清除 bold。
+- `font-style`：`italic`、`oblique` 映射为 italic；`normal` 显式清除 italic。
+- `text-decoration` / `text-decoration-line`：识别 `underline` 与 `line-through`，`none` 清除两种装饰线。
+
+样式遵循元素嵌套继承与内层合法值覆盖规则，同一元素上的合法 CSS 声明可以覆盖 `strong`、`em`、`u`、`s` 等语义标签。boolean mark 可以和字号、颜色、安全链接、列表项及表格单元格组合；非法值只丢弃对应声明，不影响文字、继承 mark 或其他合法属性。
 
 HTML `<hr>` 映射为无子节点的 Divider，来源属性全部丢弃。它可以和其他受支持块按原顺序导入；当 Divider 是粘贴内容的最后一块时，Paste Command 把选区放到其后的可编辑段落起点。
 
@@ -57,7 +65,7 @@ Markdown 使用 `marked` 转换为 HTML，再复用同一 HTML 白名单映射�
 - HTML/Markdown 结构化粘贴只在同一顶层文本块内的选区执行。
 - 现有表格内的二维填充仍只接受 `text/plain` TSV，不自动新增行列，也不支持跨 cell range 替换。
 - HTML 表格不保留 `colspan`、`rowspan` 和表头语义，不支持嵌套表格。
-- HTML 暂不支持图文混排、单个列表项内的多个并列子列表和非直接子列表；内联 CSS 不会通过 `font-weight`、`font-style` 或 `text-decoration` 推断 boolean mark，也不接受命名色、`rgb()`、背景简写或非 px 字号。
+- HTML 暂不支持图文混排、单个列表项内的多个并列子列表和非直接子列表；内联 CSS 不接受命名色、`rgb()`、背景简写、非 px 字号，以及 boolean mark 白名单之外的值。
 - Markdown 暂不支持扩展语法的完整保真映射。
 - data URL、剪贴板二进制图片上传和图片资源持久化不属于本阶段范围。
 
