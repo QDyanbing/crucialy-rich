@@ -617,6 +617,39 @@ describe("parseHtml", () => {
     });
   });
 
+  it("preserves inline mark styles in nested HTML list items", () => {
+    const fragment = parseHtml(
+      '<ul><li><span style="font-weight: 700; text-decoration: underline">父项</span><ol><li><span style="font-style: italic; text-decoration-line: line-through">子项</span></li></ol></li></ul>',
+    );
+
+    expect(fragment?.blocks[0]).toMatchObject({
+      children: [
+        {
+          children: [
+            {
+              marks: { bold: true, underline: true },
+              text: "父项",
+            },
+          ],
+          nested: {
+            children: [
+              {
+                children: [
+                  {
+                    marks: { italic: true, strike: true },
+                    text: "子项",
+                  },
+                ],
+              },
+            ],
+            type: "orderedList",
+          },
+        },
+      ],
+      type: "bulletList",
+    });
+  });
+
   it("keeps wrapped parent content separate from nested list text", () => {
     const fragment = parseHtml(
       "<ul><li><p><strong>包装父项</strong></p><ul><li><em>独立子项</em></li></ul></li></ul>",
