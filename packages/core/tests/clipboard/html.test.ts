@@ -149,6 +149,24 @@ describe("parseHtml", () => {
     });
   });
 
+  it("drops unsupported inline mark styles without clearing inherited marks", () => {
+    const fragment = parseHtml(
+      '<p><span style="font-weight: 1200; font-style: slanted; text-decoration: overline">无支持样式</span><strong><span style="font-weight: heavy; text-decoration: blink">保留继承粗体</span></strong></p>',
+    );
+
+    expect(fragment?.blocks[0]).toEqual({
+      children: [
+        { text: "无支持样式", type: "text" },
+        {
+          marks: { bold: true },
+          text: "保留继承粗体",
+          type: "text",
+        },
+      ],
+      type: "paragraph",
+    });
+  });
+
   it("composes nested inline styles with marks and links", () => {
     const fragment = parseHtml(
       '<p><span style="font-size: 18px; color: #112233; background-color: #abc"><strong style="color: #445566">强调</strong><a href="https://example.com/docs" style="font-size: 20px; color: red">链接</a></span></p>',
