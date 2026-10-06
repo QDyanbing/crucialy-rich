@@ -79,6 +79,18 @@ function parseInlineStyleDeclarations(value: string | undefined): Map<string, st
   return declarations;
 }
 
+function isBoldFontWeight(value: string | undefined): boolean {
+  const normalized = value?.trim().toLowerCase();
+
+  if (normalized === "bold" || normalized === "bolder") {
+    return true;
+  }
+
+  return normalized !== undefined && /^\d+$/.test(normalized)
+    ? Number(normalized) >= 600 && Number(normalized) <= 1000
+    : false;
+}
+
 function parseInlineStyleMarks(node: HtmlElement): TextMarks {
   const declarations = parseInlineStyleDeclarations(getAttribute(node, "style"));
   const marks: TextMarks = {};
@@ -99,6 +111,10 @@ function parseInlineStyleMarks(node: HtmlElement): TextMarks {
 
   if (backgroundColor !== undefined) {
     marks.backgroundColor = backgroundColor;
+  }
+
+  if (isBoldFontWeight(declarations.get("font-weight"))) {
+    marks.bold = true;
   }
 
   return marks;

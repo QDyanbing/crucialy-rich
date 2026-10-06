@@ -43,6 +43,21 @@ describe("parseHtml", () => {
     });
   });
 
+  it("maps supported inline font weights to bold marks", () => {
+    const fragment = parseHtml(
+      '<p><span style="font-weight: bold">粗体</span><span style="FONT-WEIGHT: 700">数值粗体</span><span style="font-weight: bolder">更粗</span></p>',
+    );
+
+    expect(fragment?.blocks[0]).toMatchObject({
+      children: [
+        { marks: { bold: true }, text: "粗体" },
+        { marks: { bold: true }, text: "数值粗体" },
+        { marks: { bold: true }, text: "更粗" },
+      ],
+      type: "paragraph",
+    });
+  });
+
   it("preserves supported inline text colors", () => {
     const fragment = parseHtml(
       '<p><span style="color: #ABC">短色值</span><em style="COLOR: #123456">完整色值</em></p>',
