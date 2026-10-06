@@ -375,6 +375,45 @@ describe("pasteCommand", () => {
     expect(result.selection?.anchor).toEqual({ offset: 4, path: [1, 0] });
   });
 
+  it("pastes HTML inline mark styles without flattening them", () => {
+    const document = createDocument([createParagraph([createText("前后")])]);
+    const result = pasteCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { offset: 1, path: [0, 0] },
+          focus: { offset: 1, path: [0, 0] },
+        },
+      },
+      payload: {
+        fragment: parseHtml(
+          '<p><span style="font-weight: 700; font-style: italic; text-decoration: underline line-through">组合样式</span></p>',
+        )!,
+      },
+    });
+    const resultDocument = applyTransaction(document, result.transaction!);
+
+    expect(result.transaction?.operations.map((operation) => operation.type)).toEqual([
+      "split_block",
+      "insert_block",
+    ]);
+    expect(resultDocument.children[1]).toMatchObject({
+      children: [
+        {
+          marks: {
+            bold: true,
+            italic: true,
+            strike: true,
+            underline: true,
+          },
+          text: "组合样式",
+        },
+      ],
+      type: "paragraph",
+    });
+    expect(result.selection?.anchor).toEqual({ offset: 4, path: [1, 0] });
+  });
+
   it("inserts a parsed HTML table as a structured block", () => {
     const document = createDocument([createParagraph([createText("前后")])]);
     const result = pasteCommand.execute({
