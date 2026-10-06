@@ -178,6 +178,29 @@ describe("parseHtml", () => {
     });
   });
 
+  it("composes inline mark styles with semantic tags and links", () => {
+    const fragment = parseHtml(
+      '<p><span style="font-weight: 700; font-style: italic; text-decoration: underline line-through"><a href="https://example.com/docs"><strong style="color: #369">组合样式</strong></a></span></p>',
+    );
+
+    expect(fragment?.blocks[0]).toMatchObject({
+      children: [
+        {
+          marks: {
+            bold: true,
+            italic: true,
+            link: { href: "https://example.com/docs" },
+            strike: true,
+            textColor: "#336699",
+            underline: true,
+          },
+          text: "组合样式",
+        },
+      ],
+      type: "paragraph",
+    });
+  });
+
   it("preserves supported HTML link targets", () => {
     const fragment = parseHtml(
       '<p><a href="https://example.com/docs" target="_blank">新窗口链接</a></p>',
