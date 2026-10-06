@@ -87,6 +87,22 @@ describe("parseHtml", () => {
     });
   });
 
+  it("honors explicit inline style mark resets", () => {
+    const fragment = parseHtml(
+      '<p><strong style="font-weight: normal">普通</strong><em><span style="font-style: normal">正体</span></em><u><span style="text-decoration: none">无装饰</span></u><s><span style="text-decoration-line: underline">仅下划线</span></s></p>',
+    );
+
+    expect(fragment?.blocks[0]).toEqual({
+      children: [
+        { text: "普通", type: "text" },
+        { text: "正体", type: "text" },
+        { text: "无装饰", type: "text" },
+        { marks: { underline: true }, text: "仅下划线", type: "text" },
+      ],
+      type: "paragraph",
+    });
+  });
+
   it("preserves supported inline text colors", () => {
     const fragment = parseHtml(
       '<p><span style="color: #ABC">短色值</span><em style="COLOR: #123456">完整色值</em></p>',

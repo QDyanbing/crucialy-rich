@@ -79,49 +79,65 @@ function parseInlineStyleDeclarations(value: string | undefined): Map<string, st
   return declarations;
 }
 
-function isBoldFontWeight(value: string | undefined): boolean {
+function parseBoldFontWeight(value: string | undefined): boolean | undefined {
   const normalized = value?.trim().toLowerCase();
 
   if (normalized === "bold" || normalized === "bolder") {
     return true;
   }
 
-  return normalized !== undefined && /^\d+$/.test(normalized)
-    ? Number(normalized) >= 600 && Number(normalized) <= 1000
-    : false;
+  if (normalized === "normal" || normalized === "lighter") {
+    return false;
+  }
+
+  if (normalized === undefined || !/^\d+$/.test(normalized)) {
+    return undefined;
+  }
+
+  const weight = Number(normalized);
+
+  return weight >= 1 && weight <= 1000 ? weight >= 600 : undefined;
 }
 
-function isItalicFontStyle(value: string | undefined): boolean {
+function parseItalicFontStyle(value: string | undefined): boolean | undefined {
   const normalized = value?.trim().toLowerCase();
 
-  return normalized === "italic" || normalized === "oblique";
+  if (normalized === "italic" || normalized === "oblique") {
+    return true;
+  }
+
+  return normalized === "normal" ? false : undefined;
 }
 
 function parseTextDecorationMarks(
   declarations: ReadonlyMap<string, string>,
-): TextMarks {
-  const tokens = [
-    declarations.get("text-decoration"),
-    declarations.get("text-decoration-line"),
-  ]
-    .filter((value): value is string => value !== undefined)
-    .flatMap((value) => value.trim().toLowerCase().split(/\s+/));
-  const marks: TextMarks = {};
+): { strike: boolean; underline: boolean } | undefined {
+  const value =
+    declarations.get("text-decoration-line") ?? declarations.get("text-decoration");
 
-  if (tokens.includes("underline")) {
-    marks.underline = true;
+  if (value === undefined) {
+    return undefined;
   }
 
-  if (tokens.includes("line-through")) {
-    marks.strike = true;
+  const tokens = value.trim().toLowerCase().split(/\s+/);
+
+  if (
+    !tokens.includes("none") &&
+    !tokens.includes("underline") &&
+    !tokens.includes("line-through")
+  ) {
+    return undefined;
   }
 
-  return marks;
+  return {
+    strike: tokens.includes("line-through"),
+    underline: tokens.includes("underline"),
+  };
 }
 
-function parseInlineStyleMarks(node: HtmlElement): TextMarks {
+function applyInlineStyleMarks(node: HtmlElement, inherited: TextMarks): TextMarks {
   const declarations = parseInlineStyleDeclarations(getAttribute(node, "style"));
-  const marks: TextMarks = {};
+  const marks: TextMarks = { ...inherited };
   const fontSizeValue = declarations.get("font-size")?.match(/^(\d+)px$/i)?.[1];
   const fontSize = fontSizeValue === undefined ? undefined : Number(fontSizeValue);
 
@@ -141,15 +157,41 @@ function parseInlineStyleMarks(node: HtmlElement): TextMarks {
     marks.backgroundColor = backgroundColor;
   }
 
-  if (isBoldFontWeight(declarations.get("font-weight"))) {
-    marks.bold = true;
+  const bold = parseBoldFontWeight(declarations.get("font-weight"));
+
+  if (bold !== undefined) {
+    if (bold) {
+      marks.bold = true;
+    } else {
+      delete marks.bold;
+    }
   }
 
-  if (isItalicFontStyle(declarations.get("font-style"))) {
-    marks.italic = true;
+  const italic = parseItalicFontStyle(declarations.get("font-style"));
+
+  if (italic !== undefined) {
+    if (italic) {
+      marks.italic = true;
+    } else {
+      delete marks.italic;
+    }
   }
 
-  Object.assign(marks, parseTextDecorationMarks(declarations));
+  const decorations = parseTextDecorationMarks(declarations);
+
+  if (decorations !== undefined) {
+    if (decorations.underline) {
+      marks.underline = true;
+    } else {
+      delete marks.underline;
+    }
+
+    if (decorations.strike) {
+      marks.strike = true;
+    } else {
+      delete marks.strike;
+    }
+  }
 
   return marks;
 }
@@ -171,7 +213,7 @@ function appendInlineNodes(node: HtmlNode, marks: TextMarks, output: TextNode[])
     return;
   }
 
-  let nextMarks = { ...marks, ...parseInlineStyleMarks(node) };
+  let nextMarks = { ...marks };
 
   if (node.tagName === "strong" || node.tagName === "b") {
     nextMarks = { ...nextMarks, bold: true };
@@ -194,6 +236,8 @@ function appendInlineNodes(node: HtmlNode, marks: TextMarks, output: TextNode[])
 
     nextMarks = link ? { ...nextMarks, link } : nextMarks;
   }
+
+  nextMarks = applyInlineStyleMarks(node, nextMarks);
 
   node.childNodes.forEach((child) => appendInlineNodes(child, nextMarks, output));
 }
