@@ -2830,6 +2830,42 @@ test("pastes HTML inline styles through the native editor event", async ({ page 
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
 
+test("pastes HTML inline mark styles through the native editor event", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await placeCaretInRenderedText(page, "[0,0]", 3);
+
+  const editor = page.getByLabel("已渲染文档");
+
+  await editor.evaluate((element) => {
+    const clipboardData = new DataTransfer();
+
+    clipboardData.setData(
+      "text/html",
+      '<p><span style="font-weight: 700; font-style: italic; text-decoration: underline line-through">组合样式</span></p>',
+    );
+    clipboardData.setData("text/plain", "组合样式");
+    element.dispatchEvent(
+      new ClipboardEvent("paste", {
+        bubbles: true,
+        cancelable: true,
+        clipboardData,
+      }),
+    );
+  });
+
+  const styledText = editor.locator("strong", { hasText: "组合样式" });
+
+  await expect(styledText).toHaveCSS("font-style", "italic");
+  await expect(styledText).toHaveCSS("text-decoration-line", "underline line-through");
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"bold": true',
+  );
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
 test("pastes HTML link metadata through the native editor event", async ({ page }) => {
   await page.goto("/");
   await placeCaretInRenderedText(page, "[0,0]", 3);
