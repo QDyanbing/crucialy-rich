@@ -72,6 +72,21 @@ describe("parseHtml", () => {
     });
   });
 
+  it("maps supported inline text decorations to boolean marks", () => {
+    const fragment = parseHtml(
+      '<p><span style="text-decoration: underline">下划线</span><span style="text-decoration-line: line-through">删除线</span><span style="text-decoration: underline line-through">组合</span></p>',
+    );
+
+    expect(fragment?.blocks[0]).toMatchObject({
+      children: [
+        { marks: { underline: true }, text: "下划线" },
+        { marks: { strike: true }, text: "删除线" },
+        { marks: { strike: true, underline: true }, text: "组合" },
+      ],
+      type: "paragraph",
+    });
+  });
+
   it("preserves supported inline text colors", () => {
     const fragment = parseHtml(
       '<p><span style="color: #ABC">短色值</span><em style="COLOR: #123456">完整色值</em></p>',

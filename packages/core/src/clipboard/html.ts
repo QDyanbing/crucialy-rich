@@ -97,6 +97,28 @@ function isItalicFontStyle(value: string | undefined): boolean {
   return normalized === "italic" || normalized === "oblique";
 }
 
+function parseTextDecorationMarks(
+  declarations: ReadonlyMap<string, string>,
+): TextMarks {
+  const tokens = [
+    declarations.get("text-decoration"),
+    declarations.get("text-decoration-line"),
+  ]
+    .filter((value): value is string => value !== undefined)
+    .flatMap((value) => value.trim().toLowerCase().split(/\s+/));
+  const marks: TextMarks = {};
+
+  if (tokens.includes("underline")) {
+    marks.underline = true;
+  }
+
+  if (tokens.includes("line-through")) {
+    marks.strike = true;
+  }
+
+  return marks;
+}
+
 function parseInlineStyleMarks(node: HtmlElement): TextMarks {
   const declarations = parseInlineStyleDeclarations(getAttribute(node, "style"));
   const marks: TextMarks = {};
@@ -126,6 +148,8 @@ function parseInlineStyleMarks(node: HtmlElement): TextMarks {
   if (isItalicFontStyle(declarations.get("font-style"))) {
     marks.italic = true;
   }
+
+  Object.assign(marks, parseTextDecorationMarks(declarations));
 
   return marks;
 }
