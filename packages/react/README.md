@@ -49,7 +49,7 @@ export function Demo() {
 - `contentEditable`：开启普通文本输入、Backspace、Delete、Enter、列表 Tab 和 Shift+Tab。
 - 输入事件：通过模型 transaction 更新文档，并在输入后回传稳定模型选区；普通文本输入、非折叠删除选区、选区 Enter 分段和段首 Backspace 合并复用 core command。
 - HTML 文字粘贴：原生 paste 会保留 `b/i/u/s/strike/del` 对应的 bold、italic、underline 和 strike 组合，并输出 `insertFromPaste` transaction。
-- HTML 行内样式粘贴：原生 paste 会保留 `8–72px` 整数字号与十六进制文字色、背景色；非法值降级省略，列表和表格中的样式复用同一规则。
+- HTML 行内样式粘贴：原生 paste 会保留 `8–72px` 整数字号、十六进制文字色与背景色，并从白名单内的 `font-weight`、`font-style`、`text-decoration` 推断 boolean mark；合法重置值可清除继承 mark，非法值降级省略，列表和表格中的样式复用同一规则。
 - HTML 链接粘贴：安全链接会保留白名单内的 `target` 和 `rel`，非法可选属性降级省略，并通过同一 `insertFromPaste` transaction 提交。
 - HTML 列表粘贴：有序、无序和任务列表会保留最多三层的直接子列表，每层有序列表保留安全整数 `start`，选区落在最深的最后项末尾。
 - 分隔线粘贴：原生 HTML `<hr>` 和 Markdown 水平分隔线映射为 Divider，来源属性不会进入模型，选区落在分隔线后的可编辑位置。

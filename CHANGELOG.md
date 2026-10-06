@@ -8,6 +8,8 @@
 
 ### 新增
 
+- 新增 HTML Clipboard boolean mark 行内样式解析，支持安全 `font-weight`、`font-style`、`text-decoration` 与显式重置。
+- 新增行内 mark 样式的组合、安全降级、列表、表格、Command/History、React 原生事件和 Chromium 回归。
 - 新增 HTML `<hr>` 与 Markdown 水平分隔线 Clipboard 解析，统一映射为无属性 Divider。
 - 新增分隔线粘贴的混合块顺序、安全属性降级、Command/History、React 原生事件和 Chromium 回归。
 - 新增 OrderedList 可选 `start` 模型、校验、规范化与语义渲染，退出或解除中间项后继续原编号。
