@@ -88,9 +88,10 @@ describe("text mark helpers", () => {
     expect(setTextMark({ bold: true }, "bold", false)).toBeUndefined();
   });
 
-  it("keeps four boolean marks active together", () => {
+  it("keeps five boolean marks active together", () => {
     const marks = normalizeTextMarks({
       bold: true,
+      code: true,
       italic: true,
       strike: true,
       underline: true,
@@ -98,17 +99,20 @@ describe("text mark helpers", () => {
 
     expect(marks).toEqual({
       bold: true,
+      code: true,
       italic: true,
       strike: true,
       underline: true,
     });
     expect(removeTextMark(marks, "underline")).toEqual({
       bold: true,
+      code: true,
       italic: true,
       strike: true,
     });
     expect(setTextMark(marks, "strike", false)).toEqual({
       bold: true,
+      code: true,
       italic: true,
       underline: true,
     });

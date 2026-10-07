@@ -132,19 +132,22 @@ describe("model node types", () => {
   it("describes text marks on text nodes", () => {
     const underline: TextMarkType = "underline";
     const strike: TextMarkType = "strike";
+    const code: TextMarkType = "code";
     const text: TextNode = {
       type: "text",
       text: "hello",
       marks: {
         bold: true,
+        [code]: true,
         italic: true,
         [underline]: true,
         [strike]: true,
       },
     };
 
-    expect(TEXT_MARK_TYPES).toEqual(["bold", "italic", "underline", "strike"]);
+    expect(TEXT_MARK_TYPES).toEqual(["bold", "italic", "underline", "strike", "code"]);
     expect(text.marks?.bold).toBe(true);
+    expect(text.marks?.code).toBe(true);
     expect(text.marks?.italic).toBe(true);
     expect(text.marks?.underline).toBe(true);
     expect(text.marks?.strike).toBe(true);

@@ -44,7 +44,13 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.isTableNode).toBe("function");
     expect(typeof core.isTableCellNode).toBe("function");
     expect(typeof core.isTableRowNode).toBe("function");
-    expect(core.TEXT_MARK_TYPES).toEqual(["bold", "italic", "underline", "strike"]);
+    expect(core.TEXT_MARK_TYPES).toEqual([
+      "bold",
+      "italic",
+      "underline",
+      "strike",
+      "code",
+    ]);
     expect(core.TEXT_MARK_ATTRIBUTE_TYPES).toEqual([
       "fontSize",
       "textColor",
