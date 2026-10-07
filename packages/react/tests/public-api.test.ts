@@ -79,6 +79,18 @@ describe("@crucialy-rich/react public API", () => {
     expect(html).toContain("const value = 1;\nreturn value;");
   });
 
+  it("renders inline code marks through React", () => {
+    const html = renderToStaticMarkup(
+      createElement(RichTextEditor, {
+        value: createDocument([
+          createParagraph([createText("const value = 1", { code: true })]),
+        ]),
+      }),
+    );
+
+    expect(html).toContain('<code data-crucialy-path="[0,0]">const value = 1</code>');
+  });
+
   it("renders dividers through React", () => {
     const html = renderToStaticMarkup(
       createElement(RichTextEditor, {

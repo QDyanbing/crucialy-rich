@@ -1,5 +1,6 @@
 import {
   BOLD_COMMAND_NAME,
+  INLINE_CODE_COMMAND_NAME,
   ITALIC_COMMAND_NAME,
   SET_HEADING_COMMAND_NAME,
   SET_LINK_COMMAND_NAME,
@@ -50,6 +51,13 @@ export function createDefaultToolbarItems(
       id: "strike",
       label: "删除线",
       text: "S",
+      type: "command",
+    },
+    {
+      commandName: INLINE_CODE_COMMAND_NAME,
+      id: "inline-code",
+      label: "行内代码",
+      text: "</>",
       type: "command",
     },
     { id: "inline-block-separator", type: "separator" },
