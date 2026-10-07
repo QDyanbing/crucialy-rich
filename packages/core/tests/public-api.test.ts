@@ -291,11 +291,13 @@ describe("@crucialy-rich/core public API", () => {
 
   it("exposes the command API", () => {
     expect(typeof core.BOLD_COMMAND_NAME).toBe("string");
+    expect(typeof core.INLINE_CODE_COMMAND_NAME).toBe("string");
     expect(core.BOOLEAN_MARK_COMMANDS.map((command) => command.name)).toEqual([
       "bold",
       "italic",
       "underline",
       "strike",
+      "inlineCode",
     ]);
     expect(core.TEXT_STYLE_COMMANDS.map((command) => command.name)).toEqual([
       "setFontSize",
@@ -332,6 +334,7 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.canExecuteCommand).toBe("function");
     expect(typeof core.canExecuteDeleteSelectionCommand).toBe("function");
     expect(typeof core.canExecuteInsertTextCommand).toBe("function");
+    expect(typeof core.canExecuteInlineCodeCommand).toBe("function");
     expect(typeof core.canExecuteItalicCommand).toBe("function");
     expect(typeof core.canExecuteInsertDividerCommand).toBe("function");
     expect(typeof core.canExecuteInsertImageCommand).toBe("function");
@@ -360,6 +363,7 @@ describe("@crucialy-rich/core public API", () => {
       "italic",
       "underline",
       "strike",
+      "inlineCode",
       "setFontSize",
       "setTextColor",
       "setBackgroundColor",
@@ -413,6 +417,7 @@ describe("@crucialy-rich/core public API", () => {
     expect(core.DELETE_IMAGE_COMMAND_NAME).toBe("deleteImage");
     expect(core.INSERT_IMAGE_COMMAND_NAME).toBe("insertImage");
     expect(typeof core.isBoldCommandActive).toBe("function");
+    expect(typeof core.isInlineCodeCommandActive).toBe("function");
     expect(typeof core.isCodeBlockCommandActive).toBe("function");
     expect(typeof core.isItalicCommandActive).toBe("function");
     expect(typeof core.isLinkCommandActive).toBe("function");
@@ -422,6 +427,7 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.isTextMarkCommandActive).toBe("function");
     expect(typeof core.isUnderlineCommandActive).toBe("function");
     expect(typeof core.italicCommand).toBe("object");
+    expect(typeof core.inlineCodeCommand).toBe("object");
     expect(typeof core.mergeBlockCommand).toBe("object");
     expect(typeof core.queryCommandState).toBe("function");
     expect(typeof core.splitBlockCommand).toBe("object");

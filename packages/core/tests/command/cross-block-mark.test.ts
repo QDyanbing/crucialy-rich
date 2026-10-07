@@ -10,6 +10,7 @@ import {
   createQuote,
   createText,
   hasTextMark,
+  inlineCodeCommand,
   isTextBlockNode,
   italicCommand,
   strikeCommand,
@@ -23,6 +24,7 @@ const MARK_COMMANDS: Array<{ command: Command; mark: TextMarkType }> = [
   { command: italicCommand, mark: "italic" },
   { command: underlineCommand, mark: "underline" },
   { command: strikeCommand, mark: "strike" },
+  { command: inlineCodeCommand, mark: "code" },
 ];
 
 describe("cross-block text mark commands", () => {

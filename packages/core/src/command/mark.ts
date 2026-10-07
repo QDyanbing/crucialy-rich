@@ -213,4 +213,5 @@ export const BOOLEAN_MARK_COMMANDS: readonly Command[] = [
   italicCommand,
   underlineCommand,
   strikeCommand,
+  inlineCodeCommand,
 ];
