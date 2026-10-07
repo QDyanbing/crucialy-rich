@@ -2,7 +2,7 @@
 
 ## 执行信息
 
-- 日期：2026-10-06
+- 日期：2026-10-07
 - 版本：`0.1.0`
 - 分支：`master`
 - 命令：`pnpm check:all`
@@ -14,12 +14,12 @@
 | Prettier   | 通过 | 全仓文件格式一致                          |
 | ESLint     | 通过 | 0 warning、0 error                        |
 | TypeScript | 通过 | 根工程与 core/react/demo 包级检查全部通过 |
-| Vitest     | 通过 | 153 个测试文件，1097 项测试               |
+| Vitest     | 通过 | 156 个测试文件，1111 项测试               |
 | Core 构建  | 通过 | ESM、source map、类型声明生成成功         |
 | React 构建 | 通过 | ESM、source map、类型声明生成成功         |
 | Demo 构建  | 通过 | Vite 生产构建成功                         |
 | 包产物导入 | 通过 | core/react 运行时导出与声明文件校验成功   |
-| Playwright | 通过 | Chromium 120 项测试                       |
+| Playwright | 通过 | Chromium 123 项测试                       |
 
 ## 核心路径
 
@@ -32,6 +32,7 @@
 - HTML `b/i/u/s/strike/del` 标记别名、嵌套组合、安全链接、Command/History、React 与 Chromium 粘贴路径均通过。
 - HTML `font-size`、`color`、`background-color` 白名单、嵌套覆盖、安全降级、列表/表格复用、Command/History、React 与 Chromium 粘贴路径均通过。
 - HTML `font-weight`、`font-style`、`text-decoration` boolean mark 映射、合法重置、组合继承、安全降级、列表/表格复用、Command/History、React 与 Chromium 粘贴路径均通过。
+- Inline Code 模型、编辑保留、Command、语义渲染、默认 Toolbar、HTML/Markdown 粘贴、History、React 与 Chromium 路径均通过。
 - HTML 链接 target/rel 规范化、安全降级、任务列表与表格复用、Command/History、React 与 Chromium 粘贴路径均通过。
 - HTML 三层嵌套普通/任务列表、混合类型、marks/链接、深层选区、Command/History、React 与 Chromium 粘贴路径均通过。
 - OrderedList 安全整数起始编号、规范化、渲染、前后段续编、HTML 粘贴、Command/History、React 与 Chromium 路径均通过。

@@ -1,12 +1,12 @@
 # QA：文字标记模型验收
 
-当前文字标记范围覆盖 bold / italic / underline / strike 的完整 boolean 闭环，fontSize / textColor / backgroundColor 三种属性 Mark 闭环，以及结构化 Link Mark 闭环。
+当前文字标记范围覆盖 bold / italic / underline / strike / code 的完整 boolean 闭环，fontSize / textColor / backgroundColor 三种属性 Mark 闭环，以及结构化 Link Mark 闭环。
 
 ## 已完成范围
 
 - `TextNode` 支持可选 `marks` 字段。
-- `TEXT_MARK_TYPES` 固定为 `bold`、`italic`、`underline` 和 `strike`。
-- 同一个 text 节点可以同时启用四种 boolean mark。
+- `TEXT_MARK_TYPES` 固定为 `bold`、`italic`、`underline`、`strike` 和 `code`。
+- 同一个 text 节点可以同时启用五种 boolean mark。
 - `createText(text, marks)` 支持创建带 marks 的 text 节点，并复制 marks 对象。
 - 新增 `normalizeTextMarks`、`hasTextMark`、`addTextMark`、`removeTextMark`、`setTextMark`、`toggleTextMark` 和 `areTextMarksEqual`。
 - 新增 `mergeAdjacentTextNodes`，用于合并相邻同 marks text 节点。
@@ -18,16 +18,17 @@
 - 新增 `italicCommand`，支持选区斜体、取消斜体、collapsed 后续输入继承 italic，并覆盖 bold+italic 叠加。
 - 新增 `underlineCommand`，支持选区下划线、取消、collapsed 输入继承、跨 text 切换和 active 状态。
 - 新增 `strikeCommand`，支持选区删除线、取消、collapsed 输入继承、跨 text 切换和 active 状态。
+- 新增 `inlineCodeCommand`，支持选区行内代码、取消、collapsed 输入继承、跨块切换和 active 状态。
 - Bold/Italic command 支持 paragraph、heading、quote 中同一个 block 内跨 text selection。
-- renderer 会把 bold text 渲染为 `<strong>`，italic text 渲染为 `<em>`，underline text 渲染为 `<u>`，strike text 渲染为 `<s>`，并覆盖四种 mark 组合渲染。
-- demo 操作区新增“加粗”“斜体”“下划线”和“删除线”按钮，并记录 history。
+- renderer 会把 bold text 渲染为 `<strong>`，italic text 渲染为 `<em>`，underline text 渲染为 `<u>`，strike text 渲染为 `<s>`，code text 渲染为 `<code>`，并覆盖组合渲染。
+- 默认 Toolbar 提供“加粗”“斜体”“下划线”“删除线”和“行内代码”按钮，并记录 history。
 - demo 文档 JSON 选区映射会展示当前 text marks。
 - `insert_text`、`delete_text`、`split_block` 和 `merge_block` 已有 mark 保留测试。
 - `createHistorySnapshot` 会深拷贝 text marks。
 - Underline 与 Strike 均已完成 command、renderer 和 demo。
-- 四种 mark command 已由 `BOOLEAN_MARK_COMMANDS` 统一组织。
+- 五种 mark command 已由 `BOOLEAN_MARK_COMMANDS` 统一组织。
 - Bold、Italic、Underline 和 Strike 已提供可查询、可由 React 编辑器执行的默认快捷键配置。
-- `TextMarks` 支持 `fontSize`、`textColor` 和 `backgroundColor`，并可与四种 boolean mark 共存。
+- `TextMarks` 支持 `fontSize`、`textColor` 和 `backgroundColor`，并可与五种 boolean mark 共存。
 - 属性 Mark 已接入基础值校验、helper、规范化、合并判断、编辑保留和 History 快照。
 - core 公共入口已导出属性类型、常量和 helper。
 - `fontSize` 已限制为 `8–72` 的整数，并完成 operation、Command、安全渲染、中文 demo 与 E2E 闭环。
@@ -56,6 +57,7 @@
 - `packages/core/tests/command/italic.test.ts`
 - `packages/core/tests/command/strike.test.ts`
 - `packages/core/tests/command/underline.test.ts`
+- `packages/core/tests/command/inline-code.test.ts`
 - `packages/core/tests/command/mark-interaction.test.ts`
 - `packages/core/tests/command/shortcut.test.ts`
 - `packages/core/tests/command/integration.test.ts`
@@ -68,16 +70,19 @@
 - `packages/core/tests/render/render.test.ts`
 - `packages/core/tests/render/html.test.ts`
 - `packages/core/tests/history/snapshot.test.ts`
+- `packages/core/tests/clipboard/html.test.ts`
+- `packages/core/tests/clipboard/markdown.test.ts`
 - `packages/core/tests/public-api.test.ts`
+- `packages/react/tests/inline-code-paste.test.ts`
 - `tests/e2e/demo-shell.spec.ts`
 
 ## 当前限制
 
-- 第 17 周 React Toolbar 已提供四种 boolean mark 默认项。
+- React Toolbar 已提供五种 boolean mark 默认项。
 - 四种 boolean mark 默认快捷键已绑定 React 编辑器键盘事件，并通过统一 command transaction 进入宿主 History。
 - boolean mark 与三种文字属性 command 已支持连续顶层 paragraph、heading、quote，并覆盖反向选区、混合状态和 History 往返。
 - boolean mark、三种文字属性与 Link Mark 均支持连续顶层 paragraph、heading、quote；CodeBlock、Divider、Image、List 和 Table 仍是样式范围边界。
 
 ## 结论
 
-四种 boolean mark、三种文字属性与 Link Mark 均已完成独立能力、组合场景和 History 验收。
+五种 boolean mark、三种文字属性与 Link Mark 均已完成独立能力、组合场景和 History 验收。

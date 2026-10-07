@@ -13,6 +13,7 @@
 | HTML 标记     | 规范化 b/i/u/s/strike/del 及其嵌套组合       | 通过 |
 | HTML 行内样式 | 保留安全字号、文字色、背景色及嵌套覆盖       | 通过 |
 | HTML mark CSS | 映射粗体、斜体、装饰线及合法重置值           | 通过 |
+| HTML 行内代码 | 将 code 元素映射为 Inline Code mark          | 通过 |
 | HTML 链接     | 保留安全 href、target、rel 并过滤非法元数据  | 通过 |
 | HTML 嵌套列表 | 保留三层有序、无序、任务子列表及深层选区     | 通过 |
 | HTML 起始编号 | 保留顶层与嵌套 ol 的安全整数 start           | 通过 |
@@ -20,7 +21,7 @@
 | HTML 图片     | 导入安全 src、alt、正整数宽高和独立图片段落  | 通过 |
 | HTML 任务项   | 导入 checkbox 列表、checked、marks 和链接    | 通过 |
 | HTML 安全     | 丢弃脚本、事件属性、危险资源和非法样式值     | 通过 |
-| Markdown      | 转换标题、引用、代码、列表、分隔线和行内标记 | 通过 |
+| Markdown      | 转换标题、引用、代码块、行内代码、列表和标记 | 通过 |
 | React         | paste 事件生成 Transaction，不直接写 DOM     | 通过 |
 | History       | 每次粘贴作为一次历史记录                     | 通过 |
 | 中文 Demo     | 提供纯文本、HTML、Markdown 验收区            | 通过 |
@@ -28,9 +29,9 @@
 ## 自动化覆盖
 
 - Clipboard parser：`packages/core/tests/clipboard`。
-- Paste command：`packages/core/tests/command/paste.test.ts`，HTML/Markdown 分隔线、行内 mark CSS 及其他结构的 History 往返见对应的 `*-paste-history.test.ts`。
-- React：`packages/react/tests/*-paste.test.ts` 覆盖 HTML/Markdown 分隔线、行内 mark CSS 及其他原生 Clipboard 事件。
-- 浏览器：`tests/e2e/demo-shell.spec.ts` 覆盖原生纯文本、HTML/Markdown 分隔线、行内 mark CSS、结构化 HTML paste 事件，以及 HTML、Markdown 验收控制。
+- Paste command：`packages/core/tests/command/paste.test.ts`，HTML/Markdown 行内代码、分隔线、行内 mark CSS 及其他结构的 History 往返见对应的 `*-paste-history.test.ts`。
+- React：`packages/react/tests/*-paste.test.ts` 覆盖 HTML/Markdown 行内代码、分隔线、行内 mark CSS 及其他原生 Clipboard 事件。
+- 浏览器：`tests/e2e/demo-shell.spec.ts` 覆盖原生纯文本、HTML/Markdown 行内代码与分隔线、行内 mark CSS、结构化 HTML paste 事件，以及 HTML、Markdown 验收控制。
 - 全量入口：`pnpm check:all`。
 
 ## 安全结论
@@ -39,4 +40,4 @@ Clipboard 原始内容不会直接注入编辑器 DOM。HTML 先由标准 parser
 
 ## 结论
 
-第 20 周粘贴能力已完成代码、测试、中文 Demo、文档和浏览器验收闭环，并在对应模型完成后补齐了 HTML/Markdown 分隔线、HTML 文字标记别名、行内 mark CSS、安全文字属性、链接元数据、有序列表起始编号、嵌套列表、顶层表格、安全图片与任务列表导入。
+第 20 周粘贴能力已完成代码、测试、中文 Demo、文档和浏览器验收闭环，并在对应模型完成后补齐了 HTML/Markdown 行内代码与分隔线、HTML 文字标记别名、行内 mark CSS、安全文字属性、链接元数据、有序列表起始编号、嵌套列表、顶层表格、安全图片与任务列表导入。
