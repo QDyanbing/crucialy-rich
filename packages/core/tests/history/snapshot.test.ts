@@ -22,6 +22,7 @@ describe("createHistorySnapshot", () => {
         createText("你好", {
           backgroundColor: "#fff4cc",
           bold: true,
+          code: true,
           fontSize: 16,
           italic: true,
           link: {
@@ -54,6 +55,7 @@ describe("createHistorySnapshot", () => {
     expect(snapshot.document.children[0]?.children[0]?.marks).toEqual({
       backgroundColor: "#fff4cc",
       bold: true,
+      code: true,
       fontSize: 16,
       italic: true,
       link: {

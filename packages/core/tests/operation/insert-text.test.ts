@@ -152,6 +152,7 @@ describe("applyInsertText", () => {
       createParagraph([
         createText("你好", {
           bold: true,
+          code: true,
           link: { href: "https://example.com/docs" },
         }),
       ]),
@@ -169,6 +170,7 @@ describe("applyInsertText", () => {
 
     expect(result.children[0]?.children[0]?.marks).toEqual({
       bold: true,
+      code: true,
       link: { href: "https://example.com/docs" },
     });
   });

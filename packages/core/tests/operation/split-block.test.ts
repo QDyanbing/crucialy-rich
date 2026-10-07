@@ -107,6 +107,7 @@ describe("applySplitBlock", () => {
         createText("你好世界", {
           backgroundColor: "#fff4cc",
           bold: true,
+          code: true,
           fontSize: 16,
           italic: true,
           link: { href: "https://example.com/docs" },
@@ -125,6 +126,7 @@ describe("applySplitBlock", () => {
     expect(result.children[0]?.children[0]?.marks).toEqual({
       backgroundColor: "#fff4cc",
       bold: true,
+      code: true,
       fontSize: 16,
       italic: true,
       link: { href: "https://example.com/docs" },
@@ -133,6 +135,7 @@ describe("applySplitBlock", () => {
     expect(result.children[1]?.children[0]?.marks).toEqual({
       backgroundColor: "#fff4cc",
       bold: true,
+      code: true,
       fontSize: 16,
       italic: true,
       link: { href: "https://example.com/docs" },
