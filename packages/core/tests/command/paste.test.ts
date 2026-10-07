@@ -151,6 +151,33 @@ describe("pasteCommand", () => {
     expect(result.selection?.anchor).toEqual({ offset: 2, path: [2, 0, 0] });
   });
 
+  it.each([
+    ["HTML", parseHtml("<p>运行 <code>pnpm test</code></p>")!],
+    ["Markdown", parseMarkdown("运行 `pnpm test`")!],
+  ])("pastes %s inline code without flattening its mark", (_, fragment) => {
+    const document = createDocument([createParagraph([createText("前后")])]);
+    const result = pasteCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { offset: 1, path: [0, 0] },
+          focus: { offset: 1, path: [0, 0] },
+        },
+      },
+      payload: { fragment },
+    });
+    const resultDocument = applyTransaction(document, result.transaction!);
+
+    expect(resultDocument.children[1]).toEqual({
+      children: [
+        { text: "运行 ", type: "text" },
+        { marks: { code: true }, text: "pnpm test", type: "text" },
+      ],
+      type: "paragraph",
+    });
+    expect(result.selection?.anchor).toEqual({ offset: 9, path: [1, 1] });
+  });
+
   it("pastes an HTML divider and moves the caret after it", () => {
     const document = createDocument([createParagraph([createText("前后")])]);
     const result = pasteCommand.execute({
