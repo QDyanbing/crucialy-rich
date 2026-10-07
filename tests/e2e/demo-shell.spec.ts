@@ -174,6 +174,25 @@ test("applies formatting from the fixed toolbar", async ({ page }) => {
   await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
 });
 
+test("toggles inline code from the fixed toolbar", async ({ page }) => {
+  await page.goto("/");
+  await selectRenderedTextRange(page, "[0,0]", 0, 2);
+
+  const fixedToolbar = page.getByRole("toolbar", { name: "固定格式工具栏" });
+  const editor = page.getByLabel("已渲染文档");
+
+  await fixedToolbar
+    .getByRole("button", { name: "固定工具栏行内代码", exact: true })
+    .click();
+
+  await expect(editor.locator("code")).toHaveText("你好");
+  await expect(page.getByLabel("文档 JSON", { exact: true })).toContainText(
+    '"code": true',
+  );
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
 test("applies formatting and history keyboard shortcuts", async ({ page }) => {
   await page.goto("/");
   await selectRenderedTextRange(page, "[0,0]", 0, 2);
@@ -2579,6 +2598,70 @@ test("pastes a Markdown divider through the native editor event", async ({ page 
   await expect(editor).not.toContainText("HTML 降级内容");
   await expect(page.getByLabel("锚点路径")).toHaveValue("3,0");
   await expect(page.getByLabel("锚点偏移")).toHaveValue("2");
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
+test("pastes HTML inline code through the native editor event", async ({ page }) => {
+  await page.goto("/");
+  await placeCaretInRenderedText(page, "[0,0]", 3);
+
+  const editor = page.getByLabel("已渲染文档");
+
+  await editor.evaluate((element) => {
+    const clipboardData = new DataTransfer();
+
+    clipboardData.setData("text/html", "<p>运行 <code>pnpm test</code></p>");
+    clipboardData.setData("text/plain", "运行 pnpm test");
+    element.dispatchEvent(
+      new ClipboardEvent("paste", {
+        bubbles: true,
+        cancelable: true,
+        clipboardData,
+      }),
+    );
+  });
+
+  await expect(editor.locator('code[data-crucialy-path="[1,1]"]')).toHaveText(
+    "pnpm test",
+  );
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"code": true',
+  );
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
+test("pastes Markdown inline code through the native editor event", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await placeCaretInRenderedText(page, "[0,0]", 3);
+
+  const editor = page.getByLabel("已渲染文档");
+
+  await editor.evaluate((element) => {
+    const clipboardData = new DataTransfer();
+
+    clipboardData.setData("text/markdown", "运行 `pnpm test`");
+    clipboardData.setData("text/html", "<p>HTML 降级内容</p>");
+    clipboardData.setData("text/plain", "纯文本降级内容");
+    element.dispatchEvent(
+      new ClipboardEvent("paste", {
+        bubbles: true,
+        cancelable: true,
+        clipboardData,
+      }),
+    );
+  });
+
+  await expect(editor.locator('code[data-crucialy-path="[1,1]"]')).toHaveText(
+    "pnpm test",
+  );
+  await expect(editor).not.toContainText("降级内容");
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"code": true',
+  );
   await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
