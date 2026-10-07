@@ -43,6 +43,21 @@ describe("parseMarkdown", () => {
     ).toBe(true);
   });
 
+  it("maps Markdown inline code without creating a code block", () => {
+    const fragment = parseMarkdown("运行 `pnpm test` 完成检查");
+
+    expect(fragment?.blocks).toEqual([
+      {
+        children: [
+          { text: "运行 ", type: "text" },
+          { marks: { code: true }, text: "pnpm test", type: "text" },
+          { text: " 完成检查", type: "text" },
+        ],
+        type: "paragraph",
+      },
+    ]);
+  });
+
   it("maps Markdown horizontal rules to dividers", () => {
     const fragment = parseMarkdown("分隔线前\n\n---\n\n分隔线后");
 

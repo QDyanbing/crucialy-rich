@@ -221,6 +221,8 @@ function appendInlineNodes(node: HtmlNode, marks: TextMarks, output: TextNode[])
     nextMarks = { ...nextMarks, italic: true };
   } else if (node.tagName === "u") {
     nextMarks = { ...nextMarks, underline: true };
+  } else if (node.tagName === "code") {
+    nextMarks = { ...nextMarks, code: true };
   } else if (
     node.tagName === "s" ||
     node.tagName === "strike" ||

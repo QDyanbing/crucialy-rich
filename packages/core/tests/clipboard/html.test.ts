@@ -323,6 +323,19 @@ describe("parseHtml", () => {
     });
   });
 
+  it("maps HTML code elements to inline code marks", () => {
+    const fragment = parseHtml("<p>运行 <code>pnpm test</code> 完成检查</p>");
+
+    expect(fragment?.blocks[0]).toEqual({
+      children: [
+        { text: "运行 ", type: "text" },
+        { marks: { code: true }, text: "pnpm test", type: "text" },
+        { text: " 完成检查", type: "text" },
+      ],
+      type: "paragraph",
+    });
+  });
+
   it("maps HTML strike element aliases to strike marks", () => {
     const fragment = parseHtml(
       "<p><s>现代删除线</s><strike>传统删除线</strike><del>删除语义</del></p>",
