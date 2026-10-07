@@ -1,20 +1,21 @@
 # 文字标记模型
 
-文字标记用于描述 text 节点上的内联格式。第 9 周 Bold 和 Italic 已闭环；第 10 周已完成 boolean mark 叠加规则、Underline 和 Strike；第 11 周已完成字号与颜色属性闭环；第 12 周已完成结构化 Link Mark、链接 command、安全渲染和交互闭环。属性设计详见[文字属性 Mark](./text-style.md)与[Link Mark](./link.md)。
+文字标记用于描述 text 节点上的内联格式。第 9 周 Bold 和 Italic 已闭环；第 10 周已完成 boolean mark 叠加规则、Underline 和 Strike；后续补齐了 Inline Code；第 11 周已完成字号与颜色属性闭环；第 12 周已完成结构化 Link Mark、链接 command、安全渲染和交互闭环。属性设计详见[文字属性 Mark](./text-style.md)与[Link Mark](./link.md)。
 
 ## 数据结构
 
-当前支持四个 boolean text mark：
+当前支持五个 boolean text mark：
 
 - `bold`：加粗。
 - `italic`：斜体。
 - `underline`：下划线，已接入 command、renderer 和 demo。
 - `strike`：删除线，已接入 command、renderer 和 demo。
+- `code`：行内代码，已接入 command、renderer、Toolbar 和 Clipboard。
 
 ```ts
-const TEXT_MARK_TYPES = ["bold", "italic", "underline", "strike"] as const;
+const TEXT_MARK_TYPES = ["bold", "italic", "underline", "strike", "code"] as const;
 
-type TextMarkType = "bold" | "italic" | "underline" | "strike";
+type TextMarkType = "bold" | "italic" | "underline" | "strike" | "code";
 interface TextMarkAttributes {
   fontSize: number;
   textColor: string;
@@ -39,7 +40,7 @@ boolean mark 只记录启用状态，值固定为 `true`；属性 Mark 记录具
 
 ## 叠加规则
 
-- 四种 boolean mark 相互独立，同一个 text 节点可以同时启用任意组合。
+- 五种 boolean mark 相互独立，同一个 text 节点可以同时启用任意组合。
 - 添加、移除或切换某一种 mark 时，其他已启用 mark 保持不变。
 - `normalizeTextMarks` 会同时保留合法 boolean mark 和属性 Mark。
 - 相邻 text 节点只有在 boolean mark 状态与属性值完全一致时才会合并。
@@ -70,7 +71,7 @@ boolean mark 只记录启用状态，值固定为 `true`；属性 Mark 记录具
 
 - `marks` 省略时合法。
 - `marks` 必须是普通对象。
-- boolean key 只能是 `bold`、`italic`、`underline` 或 `strike`，value 必须是 `true`。
+- boolean key 只能是 `bold`、`italic`、`underline`、`strike` 或 `code`，value 必须是 `true`。
 - 属性 key 只能是 `fontSize`、`textColor` 或 `backgroundColor`，value 必须满足对应的基础约束。
 - `textColor` 和 `backgroundColor` 仅接受 `#RGB` / `#RRGGBB`，规范化后统一存储为小写六位十六进制。
 - `link` 必须包含 HTTP、HTTPS 或 mailto href；target 与 rel 必须来自支持列表。
@@ -180,6 +181,20 @@ const strikeCommand: Command;
 
 `strikeCommand` 已加入默认 command registry，demo 操作区可通过“删除线”按钮调用，并会记录 history。
 
+## Inline Code Command
+
+`inlineCodeCommand` 通过 `toggle_mark` 切换 `code`。
+
+```ts
+const INLINE_CODE_COMMAND_NAME = "inlineCode";
+
+const inlineCodeCommand: Command;
+```
+
+执行规则与其他 boolean mark command 一致，支持单块或跨连续文本块的选区应用、取消、collapsed 后续输入继承和 active 状态读取。`code` 与 bold、italic、underline、strike、文字属性及安全链接可以共存。
+
+`inlineCodeCommand` 已加入默认 command registry，并作为“行内代码”加入默认 React Toolbar；当前没有预设键盘快捷键，宿主可通过自定义快捷键表接入。
+
 ## 快捷键
 
 `DEFAULT_COMMAND_SHORTCUTS` 当前提供四组 boolean mark 跨平台主修饰键映射：
@@ -195,7 +210,7 @@ const strikeCommand: Command;
 
 `createTextMarkCommand`、`canExecuteTextMarkCommand` 和 `isTextMarkCommandActive` 已作为公共 API 导出。后续新增文字 mark 时可以复用相同的选区校验、transaction 创建和 active 状态计算。
 
-`BOOLEAN_MARK_COMMANDS` 按 bold、italic、underline、strike 的模型顺序统一组织四种 command，默认 command registry 会直接复用该集合。
+`BOOLEAN_MARK_COMMANDS` 按 bold、italic、underline、strike、code 的模型顺序统一组织五种 command，默认 command registry 会直接复用该集合。
 
 ## 渲染
 
@@ -205,20 +220,21 @@ renderer 遇到 text marks 时会根据标记输出内联元素，并继续保�
 - `marks.italic === true` 输出 `<em>`。
 - `marks.underline === true` 输出 `<u>`。
 - `marks.strike === true` 输出 `<s>`。
+- `marks.code === true` 输出 `<code>`；与其他 mark 组合时继续保持单一模型路径元素。
 - `bold + italic` 组合输出 `<strong style="font-style: italic;">`，保持 text path 元素下仍是直接文本节点，便于当前 DOM 映射逻辑复用。
 - underline 与 bold/italic 叠加时通过同一个 text path 元素的 `text-decoration: underline;` 表达，避免嵌套模型路径元素。
 - strike 与其他 mark 叠加时通过同一个 text path 元素的 `text-decoration: line-through;` 表达。
 - underline 与 strike 同时启用时合并为 `text-decoration: underline line-through;`，避免装饰属性互相覆盖。
 - 合法字号、文字颜色和背景色会写入同一个 text path 元素的结构化 style，不增加额外模型路径。
 
-Demo 的“文字标记”样例覆盖普通、加粗、斜体、下划线、删除线、四种组合格式和跨 text 选区。四个 mark 按钮通过 `aria-pressed` 同步当前 active 状态。
+Demo 的“文字标记”样例覆盖普通、加粗、斜体、下划线、删除线、组合格式和跨 text 选区。默认 Toolbar 额外提供“行内代码”按钮，并通过 `aria-pressed` 同步当前 active 状态。
 
 ## HTML 粘贴映射
 
-Clipboard parser 将 `strong` / `b` 映射为 bold、`em` / `i` 映射为 italic、`u` 映射为 underline，并将 `s` / `strike` / `del` 映射为 strike。嵌套标签会合并到同一个 `TextNode.marks`，粘贴、History 和 React 渲染均保留组合结果；任意内联 CSS 仍不会被解释为 mark。
+Clipboard parser 将 `strong` / `b` 映射为 bold、`em` / `i` 映射为 italic、`u` 映射为 underline、`s` / `strike` / `del` 映射为 strike，并将行内 `code` 映射为 Inline Code。Markdown 反引号代码经同一白名单映射。嵌套标签会合并到同一个 `TextNode.marks`，粘贴、History 和 React 渲染均保留组合结果；受支持的 boolean mark CSS 规则见[粘贴](./paste.md)。
 
 ## 当前限制
 
-- 第 17 周 React Toolbar 已内置四种 boolean mark 默认项，React 编辑器也已绑定四种默认 mark 快捷键。
+- React Toolbar 已内置五种 boolean mark 默认项；编辑器为前四种样式提供默认 mark 快捷键，Inline Code 暂无预设快捷键。
 - boolean mark 与文字属性 command 支持连续顶层 paragraph、heading、quote；每个 block 对应一条 operation，并在同一 transaction 中提交。
 - boolean mark、三种文字属性与 Link Mark 均支持连续顶层 paragraph、heading、quote；CodeBlock、Divider、Image、List 和 Table 仍是跨块样式边界。

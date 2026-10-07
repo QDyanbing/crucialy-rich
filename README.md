@@ -10,15 +10,15 @@
 
 ## 当前阶段
 
-已完成工程初始化、文档模型第一版、模型选区第一版、基础模型渲染第一版、DOM 与模型位置映射第一版、选区双向同步第一版、React 组件 API 第一版、渲染闭环验收、`insertText`、`deleteText`、`toggle_mark`、`set_link`、`set_block_type`、`splitBlock`、`mergeBlock` operation 第一版、Transaction 第一版、Operation 闭环验收、`beforeinput insertText` 第一版、Backspace 第一版、Delete 第一版、Enter 第一版、基础编辑闭环验收、Command 基础接口、文本编辑命令、Block 编辑命令、Bold 命令、Italic 命令、Underline 命令、Strike 命令、Heading 命令、Quote 命令、Mark 切分与合并第一版、Bold/Italic 闭环验收、Underline/Strike 闭环验收、标题和引用闭环验收、四种 boolean mark 叠加规则、mark 快捷键映射、Command 状态读取、Command 闭环验收、History 撤销/重做第一版、连续输入合并第一版、撤销重做快捷键第一版、text marks 属性模型、字号闭环、安全文字颜色与背景色闭环、文字属性综合验收、Link Mark 模型以及链接设置/取消 command 第一版。
+已完成工程初始化、文档模型第一版、模型选区第一版、基础模型渲染第一版、DOM 与模型位置映射第一版、选区双向同步第一版、React 组件 API 第一版、渲染闭环验收、`insertText`、`deleteText`、`toggle_mark`、`set_link`、`set_block_type`、`splitBlock`、`mergeBlock` operation 第一版、Transaction 第一版、Operation 闭环验收、`beforeinput insertText` 第一版、Backspace 第一版、Delete 第一版、Enter 第一版、基础编辑闭环验收、Command 基础接口、文本编辑命令、Block 编辑命令、Bold 命令、Italic 命令、Underline 命令、Strike 命令、Inline Code 命令、Heading 命令、Quote 命令、Mark 切分与合并第一版、Bold/Italic 闭环验收、Underline/Strike 闭环验收、标题和引用闭环验收、五种 boolean mark 叠加规则、mark 快捷键映射、Command 状态读取、Command 闭环验收、History 撤销/重做第一版、连续输入合并第一版、撤销重做快捷键第一版、text marks 属性模型、字号闭环、安全文字颜色与背景色闭环、文字属性综合验收、Link Mark 模型以及链接设置/取消 command 第一版。
 
 当前 React 组件已支持通过 `value` / `defaultValue` 展示文档模型，普通文本输入、非折叠删除选区、选区 Enter 分段、段首 Backspace 合并和段尾 Delete 合并会优先复用 command；组件会通过 `onTransaction` 暴露真实输入 transaction。演示页按钮命令和真实输入都会记录 history，并支持撤销、重做、Ctrl/Meta + Z、Ctrl/Meta + Shift + Z、Ctrl/Meta + Y、连续 typing 合并和 undoStack/redoStack 状态查看。
 
 非折叠选区编辑已支持同一文本容器内跨 text 节点，以及跨连续顶层 paragraph、heading、quote、codeBlock。输入替换、Backspace、Delete、Enter、选区映射和 History 往返共用 `delete_text` / `delete_range` operation；列表、表格、图片和分隔线等结构边界暂不参与跨块删除。
 
-四种 boolean mark、字号、文字颜色、背景色与 Link Mark 已支持跨连续顶层 paragraph、heading、quote 应用和取消；command 会把范围拆成逐块 operation，并在同一 transaction 中统一状态、恢复正向或反向选区。CodeBlock、列表、表格和 void block 仍是样式范围边界。
+五种 boolean mark、字号、文字颜色、背景色与 Link Mark 已支持跨连续顶层 paragraph、heading、quote 应用和取消；command 会把范围拆成逐块 operation，并在同一 transaction 中统一状态、恢复正向或反向选区。CodeBlock、列表、表格和 void block 仍是样式范围边界。
 
-text marks schema 当前支持 `bold`、`italic`、`underline` 和 `strike` 共存，四种 boolean mark 均已完成 command、renderer、demo 和 history 闭环。第 11 周已完成 `8–72px` 字号、安全文字颜色与背景色，以及三种属性的跨 text、反向选区、默认注册表和混合样例验收；颜色只接受 `#RGB` / `#RRGGBB`，并统一规范化为小写六位格式。
+text marks schema 当前支持 `bold`、`italic`、`underline`、`strike` 和 `code` 共存，五种 boolean mark 均已完成 command、renderer、Toolbar 和 history 闭环。第 11 周已完成 `8–72px` 字号、安全文字颜色与背景色，以及三种属性的跨 text、反向选区、默认注册表和混合样例验收；颜色只接受 `#RGB` / `#RRGGBB`，并统一规范化为小写六位格式。
 
 第 12 周链接闭环已完成：包括结构化 Link Mark、HTTP/HTTPS/mailto URL sanitize、target/rel 白名单、`set_link` operation、`setLink` / `unsetLink` command、`core.link` 功能命名空间、统一链接选区状态读取、安全 `<a>` 渲染、编辑态点击拦截、只读态原生跳转、菜单选区快照与恢复、History 生命周期以及中文创建/编辑/取消验收样例。
 
@@ -32,13 +32,13 @@ Quote 内按 Enter 会保留引用格式分段；空 Quote 再按 Enter 则原�
 
 第 16 周“列表缩进和任务列表闭环”已全部完成：支持最多三层嵌套列表、Tab/Shift+Tab 缩进与反缩进、列表项开头 Backspace、嵌套项 Enter、taskList/taskItem checked 模型、任务列表切换、checkbox 状态持久化、History 和中文浏览器验收。
 
-第 17 周“工具栏闭环”已全部完成：React 包提供 Toolbar 配置、Command 状态映射、默认按钮、固定工具栏、悬浮工具栏、选区位置计算与点击前选区快照；Demo 支持固定/悬浮模式开关、真实命令执行、History 和中文浏览器验收。
+第 17 周“工具栏闭环”已全部完成并继续扩展：React 包提供 Toolbar 配置、Command 状态映射、包括行内代码在内的默认按钮、固定工具栏、悬浮工具栏、选区位置计算与点击前选区快照；Demo 支持固定/悬浮模式开关、真实命令执行、History 和中文浏览器验收。
 
 第 18 周“斜杠菜单闭环”已全部完成：React 包提供 Slash Command 配置校验、默认块命令目录、中文/英文关键词过滤、paragraph 折叠光标触发识别、浮层定位、Escape 关闭、上下键循环选择和 Enter/鼠标执行；`/query` 清理与目标命令合并为一个 Transaction，支持跨 mark 文本节点和一次撤销。
 
 第 19 周“图片闭环”已全部完成：core 支持安全 ImageNode、URL 清洗、校验/规范化、语义化 `img` 渲染、`insertImage` / `deleteImage` 命令和独立 BlockSelection；React 支持图片点击选中、Backspace/Delete 删除及本地 object URL 预览，Demo 提供中文 URL、本地和删除流程，真实上传由外部接入。
 
-第 20 周“粘贴闭环”已全部完成并继续扩展：core 提供可扩展 Clipboard parser、Markdown/HTML/纯文本优先级、安全 HTML 白名单和 `paste` 命令；纯文本换行转换为 paragraph，结构化内容保留标题、引用、代码、分隔线、marks、三层普通/任务列表、安全图片和顶层表格，`b/i/u/s/strike/del` 与白名单内的 `font-weight`、`font-style`、`text-decoration` 会规范化为已有文字标记，安全链接保留白名单内的 target/rel，行内样式保留安全字号、文字色和背景色，有序列表保留安全整数起始编号。React 通过 `onPaste` 生成统一 Transaction，Demo 与 Playwright 覆盖三种中文粘贴流程及 HTML/Markdown 分隔线、HTML 标记别名、行内 mark 样式、链接元数据、嵌套列表与续编编号、表格、图片、任务列表导入。
+第 20 周“粘贴闭环”已全部完成并继续扩展：core 提供可扩展 Clipboard parser、Markdown/HTML/纯文本优先级、安全 HTML 白名单和 `paste` 命令；纯文本换行转换为 paragraph，结构化内容保留标题、引用、代码块、行内代码、分隔线、marks、三层普通/任务列表、安全图片和顶层表格，`b/i/u/s/strike/del/code` 与白名单内的 `font-weight`、`font-style`、`text-decoration` 会规范化为已有文字标记，安全链接保留白名单内的 target/rel，行内样式保留安全字号、文字色和背景色，有序列表保留安全整数起始编号。React 通过 `onPaste` 生成统一 Transaction，Demo 与 Playwright 覆盖三种中文粘贴流程及 HTML/Markdown 行内代码与分隔线、HTML 标记别名、行内 mark 样式、链接元数据、嵌套列表与续编编号、表格、图片、任务列表导入。
 
 第 21 周“基础表格闭环”已全部完成：core 支持 table/tableRow/tableCell 模型、矩形结构校验与修复、完整模型 Path、语义渲染、默认 3×3 插入、整表删除以及行列增删命令；Demo 和 Playwright 提供中文验收流程。
 

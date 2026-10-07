@@ -48,7 +48,7 @@ export function Demo() {
 - `ref`：暴露 `focus`、`getElement`、`getDocument`、`getSelection` 和 `executeCommand`。
 - `contentEditable`：开启普通文本输入、Backspace、Delete、Enter、列表 Tab 和 Shift+Tab。
 - 输入事件：通过模型 transaction 更新文档，并在输入后回传稳定模型选区；普通文本输入、非折叠删除选区、选区 Enter 分段和段首 Backspace 合并复用 core command。
-- HTML 文字粘贴：原生 paste 会保留 `b/i/u/s/strike/del` 对应的 bold、italic、underline 和 strike 组合，并输出 `insertFromPaste` transaction。
+- HTML/Markdown 文字粘贴：原生 paste 会保留 `b/i/u/s/strike/del/code` 与 Markdown 反引号对应的 boolean mark 组合，并输出 `insertFromPaste` transaction。
 - HTML 行内样式粘贴：原生 paste 会保留 `8–72px` 整数字号、十六进制文字色与背景色，并从白名单内的 `font-weight`、`font-style`、`text-decoration` 推断 boolean mark；合法重置值可清除继承 mark，非法值降级省略，列表和表格中的样式复用同一规则。
 - HTML 链接粘贴：安全链接会保留白名单内的 `target` 和 `rel`，非法可选属性降级省略，并通过同一 `insertFromPaste` transaction 提交。
 - HTML 列表粘贴：有序、无序和任务列表会保留最多三层的直接子列表，每层有序列表保留安全整数 `start`，选区落在最深的最后项末尾。
@@ -58,12 +58,12 @@ export function Demo() {
 - 表格：支持单元格内输入、删除、Enter、Backspace/Delete 段落合并、点击高亮、纯文本 TSV 填充和顶层 HTML 表格粘贴。
 - 快捷键：支持 Mod+B/I/U、Mod+Shift+X、Mod+Alt+0–6、Mod+Shift+7/8/9；History 快捷键继续由宿主状态接管。
 - 输入规则：支持 paragraph 开头的标题、列表、引用和代码块 Markdown 前缀。
-- 文字样式：四种 boolean mark 与字号、文字颜色、背景色可应用到连续顶层 paragraph、heading、quote，并作为一个 transaction 进入宿主 History。
+- 文字样式：五种 boolean mark 与字号、文字颜色、背景色可应用到连续顶层 paragraph、heading、quote，并作为一个 transaction 进入宿主 History。
 - `label`、`className` 和基础 DOM 事件属性。
 
 Toolbar 当前支持：
 
-- `createDefaultToolbarItems`：创建 Bold、Italic、Underline、Strike、Link、H2 和 Quote 默认配置。
+- `createDefaultToolbarItems`：创建 Bold、Italic、Underline、Strike、Inline Code、Link、H2 和 Quote 默认配置。
 - `FixedToolbar`：根据 document/selection 展示 active 和 disabled，并通过 `onCommand` 输出执行结果。
 - `FloatingToolbar`：根据非折叠 selection 和宿主提供的 `anchorRect` 显示在选区附近。
 - pointerdown 选区快照：点击工具栏后仍把命令应用到原选区。

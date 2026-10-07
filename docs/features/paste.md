@@ -54,7 +54,7 @@ HTML 表格会按 `thead`、`tbody`、`tfoot` 的 DOM 顺序导入；`th` 降级
 
 ## Markdown
 
-Markdown 使用 `marked` 转换为 HTML，再复用同一 HTML 白名单映射。当前覆盖标题、引用、代码块、水平分隔线、有序/无序列表、bold 和 italic；原始 HTML 同样受白名单限制。
+Markdown 使用 `marked` 转换为 HTML，再复用同一 HTML 白名单映射。当前覆盖标题、引用、代码块、行内代码、水平分隔线、有序/无序列表、bold 和 italic；原始 HTML 同样受白名单限制。
 
 ## React 接入
 

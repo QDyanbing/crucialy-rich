@@ -43,7 +43,7 @@ Toolbar 不复制 Bold、Link 或 Block Type 的状态判断规则，模型能�
 
 `createDefaultToolbarItems` 当前按顺序提供：
 
-- 加粗、斜体、下划线、删除线。
+- 加粗、斜体、下划线、删除线、行内代码。
 - 链接。
 - 标题层级，默认为二级标题。
 - 引用。

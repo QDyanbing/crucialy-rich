@@ -8,6 +8,8 @@
 
 ### 新增
 
+- 新增 Inline Code boolean mark、`inlineCodeCommand`、语义 `<code>` 渲染与默认 React Toolbar 入口。
+- 新增 HTML `<code>` 与 Markdown 反引号行内代码粘贴，以及 Command/History、React 原生事件和 Chromium 回归。
 - 新增 HTML Clipboard boolean mark 行内样式解析，支持安全 `font-weight`、`font-style`、`text-decoration` 与显式重置。
 - 新增行内 mark 样式的组合、安全降级、列表、表格、Command/History、React 原生事件和 Chromium 回归。
 - 新增 HTML `<hr>` 与 Markdown 水平分隔线 Clipboard 解析，统一映射为无属性 Divider。
