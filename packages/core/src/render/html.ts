@@ -14,6 +14,7 @@ function renderStyle(node: RenderedElementNode): string | undefined {
       ? `background-color: ${node.style.backgroundColor};`
       : undefined,
     node.style?.color ? `color: ${node.style.color};` : undefined,
+    node.style?.fontFamily ? `font-family: ${node.style.fontFamily};` : undefined,
     node.style?.fontSize ? `font-size: ${node.style.fontSize};` : undefined,
     node.style?.fontStyle ? `font-style: ${node.style.fontStyle};` : undefined,
     node.style?.fontWeight ? `font-weight: ${node.style.fontWeight};` : undefined,

@@ -161,6 +161,30 @@ describe("renderDocument", () => {
     });
   });
 
+  it("renders inline code marks as code elements", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("const value = 1", {
+          bold: true,
+          code: true,
+          italic: true,
+          underline: true,
+        }),
+      ]),
+    ]);
+
+    expect(renderDocument(document).children?.[0]?.children?.[0]).toMatchObject({
+      path: [0, 0],
+      style: {
+        fontStyle: "italic",
+        fontWeight: "700",
+        textDecoration: "underline",
+      },
+      tagName: "code",
+      text: "const value = 1",
+    });
+  });
+
   it("renders dividers as void elements with model paths", () => {
     const document = createDocument([createDivider()]);
 

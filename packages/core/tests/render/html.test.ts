@@ -64,6 +64,16 @@ describe("renderNodeToHtml", () => {
     );
   });
 
+  it("serializes inline code marks as semantic code elements", () => {
+    const document = createDocument([
+      createParagraph([createText("const value = 1", { code: true })]),
+    ]);
+
+    expect(renderNodeToHtml(renderDocument(document))).toContain(
+      '<code data-crucialy-path="[0,0]">const value = 1</code>',
+    );
+  });
+
   it("serializes dividers as void hr elements", () => {
     const document = createDocument([createDivider()]);
 

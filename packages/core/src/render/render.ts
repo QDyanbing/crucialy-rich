@@ -44,6 +44,7 @@ function createRenderedNode(
 function renderTextNode(node: TextNode, path: Path): RenderedElementNode {
   const backgroundColor = getTextMarkAttribute(node.marks, "backgroundColor");
   const bold = hasTextMark(node.marks, "bold");
+  const code = hasTextMark(node.marks, "code");
   const fontSize = getTextMarkAttribute(node.marks, "fontSize");
   const textColor = getTextMarkAttribute(node.marks, "textColor");
   const italic = hasTextMark(node.marks, "italic");
@@ -56,13 +57,14 @@ function renderTextNode(node: TextNode, path: Path): RenderedElementNode {
   ].filter((decoration): decoration is string => decoration !== undefined);
   const needsDecorationStyle =
     decorations.length > 0 &&
-    (link !== undefined || bold || italic || decorations.length > 1);
+    (link !== undefined || bold || code || italic || decorations.length > 1);
   const style: RenderedElementStyle = {
     ...(backgroundColor === undefined ? {} : { backgroundColor }),
     ...(textColor === undefined ? {} : { color: textColor }),
+    ...(code && link ? { fontFamily: "monospace" } : {}),
     ...(fontSize === undefined ? {} : { fontSize: `${fontSize}px` as const }),
-    ...(italic && (bold || link) ? { fontStyle: "italic" } : {}),
-    ...(bold && link ? { fontWeight: "700" } : {}),
+    ...(italic && (bold || code || link) ? { fontStyle: "italic" } : {}),
+    ...(bold && (code || link) ? { fontWeight: "700" } : {}),
     ...(needsDecorationStyle ? { textDecoration: decorations.join(" ") } : {}),
   };
   const options = {
@@ -82,6 +84,10 @@ function renderTextNode(node: TextNode, path: Path): RenderedElementNode {
 
   if (link) {
     return createRenderedNode("a", path, options);
+  }
+
+  if (code) {
+    return createRenderedNode("code", path, options);
   }
 
   if (bold) {

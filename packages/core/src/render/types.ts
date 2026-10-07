@@ -32,6 +32,7 @@ export type RenderedTagName =
 export interface RenderedElementStyle {
   backgroundColor?: string;
   color?: string;
+  fontFamily?: "monospace";
   fontSize?: `${number}px`;
   fontStyle?: "italic";
   fontWeight?: "700";
