@@ -1,5 +1,9 @@
 export { createTransactionAcceptanceReport } from "./acceptance";
-export { applyClearMarks, createClearMarksOperation } from "./clear-marks";
+export {
+  applyClearMarks,
+  createClearMarksOperation,
+  createSelectionAfterClearMarks,
+} from "./clear-marks";
 export {
   applyExitListItem,
   createExitListItemOperation,

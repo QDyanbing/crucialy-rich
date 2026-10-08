@@ -5,6 +5,7 @@ import {
   applyClearMarks,
   cloneOperation,
   createClearMarksOperation,
+  createSelectionAfterClearMarks,
 } from "../../src/operation";
 
 describe("clear marks operation", () => {
@@ -74,5 +75,61 @@ describe("clear marks operation", () => {
         type: "text",
       },
     ]);
+    expect(createSelectionAfterClearMarks(document, operation)).toEqual({
+      anchor: { path: [0, 1], offset: 0 },
+      focus: { path: [0, 1], offset: 2 },
+    });
+  });
+
+  it("merges cleared text across sibling nodes and restores its selection", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("甲乙", { bold: true }),
+        createText("丙丁", { italic: true }),
+        createText("戊己", { textColor: "#1677ff" }),
+      ]),
+    ]);
+    const operation = createClearMarksOperation({
+      anchor: { path: [0, 0], offset: 1 },
+      focus: { path: [0, 2], offset: 1 },
+    });
+
+    expect(applyClearMarks(document, operation).children[0]?.children).toEqual([
+      { marks: { bold: true }, text: "甲", type: "text" },
+      { text: "乙丙丁戊", type: "text" },
+      { marks: { textColor: "#1677ff" }, text: "己", type: "text" },
+    ]);
+    expect(createSelectionAfterClearMarks(document, operation)).toEqual({
+      anchor: { path: [0, 1], offset: 0 },
+      focus: { path: [0, 1], offset: 4 },
+    });
+  });
+
+  it("creates a plain collapsed placeholder for following input", () => {
+    const document = createDocument([
+      createParagraph([createText("样式文字", { bold: true, fontSize: 20 })]),
+    ]);
+    const operation = createClearMarksOperation({
+      anchor: { path: [0, 0], offset: 2 },
+      focus: { path: [0, 0], offset: 2 },
+    });
+
+    expect(applyClearMarks(document, operation).children[0]?.children).toEqual([
+      {
+        marks: { bold: true, fontSize: 20 },
+        text: "样式",
+        type: "text",
+      },
+      { text: "", type: "text" },
+      {
+        marks: { bold: true, fontSize: 20 },
+        text: "文字",
+        type: "text",
+      },
+    ]);
+    expect(createSelectionAfterClearMarks(document, operation)).toEqual({
+      anchor: { path: [0, 1], offset: 0 },
+      focus: { path: [0, 1], offset: 0 },
+    });
   });
 });

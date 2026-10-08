@@ -8,6 +8,7 @@ import {
 import { isCollapsed, type RangeSelection } from "../selection";
 import {
   compactTextParts,
+  createSelectionAfterTextMarkChange,
   createTextPart,
   getTextMarkRangeTarget,
   type TextMarkRangeTarget,
@@ -96,4 +97,20 @@ export function applyClearMarks(
         : block,
     ),
   };
+}
+
+export function createSelectionAfterClearMarks(
+  document: DocumentNode,
+  operation: ClearMarksOperation,
+): RangeSelection {
+  const target = getTextMarkRangeTarget(document, operation.range, "clear marks");
+  const nextDocument = applyClearMarks(document, operation);
+
+  return createSelectionAfterTextMarkChange(
+    document,
+    target,
+    nextDocument,
+    undefined,
+    "clear marks",
+  );
 }
