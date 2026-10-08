@@ -1,4 +1,5 @@
 export { createTransactionAcceptanceReport } from "./acceptance";
+export { applyClearMarks, createClearMarksOperation } from "./clear-marks";
 export {
   applyExitListItem,
   createExitListItemOperation,
@@ -96,6 +97,7 @@ export type {
 } from "./summary";
 export type {
   BlockTypeSpec,
+  ClearMarksOperation,
   DeleteRangeOperation,
   DeleteTextOperation,
   ExitListItemOperation,

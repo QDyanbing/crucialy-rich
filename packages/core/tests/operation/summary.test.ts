@@ -4,6 +4,7 @@ import { createDivider } from "../../src/model";
 
 import {
   BLOCK_OPERATION_TYPES,
+  createClearMarksOperation,
   createDeleteTextOperation,
   createInsertTextOperation,
   createInsertBlockOperation,
@@ -30,6 +31,7 @@ describe("operation type registry", () => {
       "insert_text",
       "delete_text",
       "delete_range",
+      "clear_marks",
       "toggle_mark",
       "set_mark_attribute",
       "set_link",
@@ -49,6 +51,7 @@ describe("operation type registry", () => {
     expect(TEXT_OPERATION_TYPES).toEqual([
       "insert_text",
       "delete_text",
+      "clear_marks",
       "toggle_mark",
       "set_mark_attribute",
       "set_link",
@@ -88,6 +91,10 @@ describe("operation scope classification", () => {
       },
       "bold",
     );
+    const clearMarksOperation = createClearMarksOperation({
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 1 },
+    });
     const setMarkAttributeOperation = createSetMarkAttributeOperation(
       {
         anchor: { path: [0, 0], offset: 0 },
@@ -111,6 +118,7 @@ describe("operation scope classification", () => {
     expect(isTextOperation(insertOperation)).toBe(true);
     expect(isTextOperation(deleteOperation)).toBe(true);
     expect(isTextOperation(toggleMarkOperation)).toBe(true);
+    expect(isTextOperation(clearMarksOperation)).toBe(true);
     expect(isTextOperation(setMarkAttributeOperation)).toBe(true);
     expect(isTextOperation(setLinkOperation)).toBe(true);
     expect(isTextOperation(setTableCellTextOperation)).toBe(true);
@@ -233,6 +241,21 @@ describe("summarizeOperation", () => {
       targetPath: [0, 0],
       textLength: 2,
       type: "toggle_mark",
+    });
+  });
+
+  it("summarizes clear marks operations", () => {
+    const operation = createClearMarksOperation({
+      anchor: { path: [0, 0], offset: 4 },
+      focus: { path: [0, 0], offset: 1 },
+    });
+
+    expect(summarizeOperation(operation)).toEqual({
+      collapsedRange: false,
+      scope: "text",
+      targetPath: [0, 0],
+      textLength: 3,
+      type: "clear_marks",
     });
   });
 

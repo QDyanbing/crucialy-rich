@@ -18,6 +18,7 @@ export const OPERATION_TYPES = [
   "insert_text",
   "delete_text",
   "delete_range",
+  "clear_marks",
   "toggle_mark",
   "set_mark_attribute",
   "set_link",
@@ -51,6 +52,11 @@ export interface DeleteTextOperation {
 export interface DeleteRangeOperation {
   range: RangeSelection;
   type: "delete_range";
+}
+
+export interface ClearMarksOperation {
+  range: RangeSelection;
+  type: "clear_marks";
 }
 
 export interface ToggleMarkOperation {
@@ -140,6 +146,7 @@ export interface SetTableCellTextOperation {
 }
 
 export type Operation =
+  | ClearMarksOperation
   | DeleteRangeOperation
   | DeleteTextOperation
   | ExitListItemOperation

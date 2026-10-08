@@ -171,6 +171,7 @@ export function createSelectionAfterDeleteInput(input: DeleteInput): RangeSelect
   }
 
   switch (operation.type) {
+    case "clear_marks":
     case "delete_range":
       return createCollapsedSelection(input.selection.anchor);
     case "delete_text":

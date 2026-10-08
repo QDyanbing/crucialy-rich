@@ -7,6 +7,7 @@ import type {
 import type { Path } from "../selection";
 import { isCollapsed, normalizeRange } from "../selection";
 import type {
+  ClearMarksOperation,
   DeleteRangeOperation,
   DeleteTextOperation,
   ExitListItemOperation,
@@ -31,6 +32,7 @@ import type {
 } from "./types";
 
 export type TextOperation =
+  | ClearMarksOperation
   | DeleteTextOperation
   | InsertTextOperation
   | SetLinkOperation
@@ -78,6 +80,7 @@ export interface TransactionSummary {
 export const TEXT_OPERATION_TYPES = [
   "insert_text",
   "delete_text",
+  "clear_marks",
   "toggle_mark",
   "set_mark_attribute",
   "set_link",
@@ -101,6 +104,7 @@ export const BLOCK_OPERATION_TYPES = [
 
 export function isTextOperation(operation: Operation): operation is TextOperation {
   return (
+    operation.type === "clear_marks" ||
     operation.type === "insert_text" ||
     operation.type === "delete_text" ||
     operation.type === "set_mark_attribute" ||
@@ -129,6 +133,17 @@ export function isBlockOperation(operation: Operation): operation is BlockOperat
 
 export function summarizeOperation(operation: Operation): OperationSummary {
   switch (operation.type) {
+    case "clear_marks": {
+      const range = normalizeRange(operation.range);
+
+      return {
+        collapsedRange: isCollapsed(range),
+        scope: "text",
+        targetPath: [...range.anchor.path],
+        textLength: range.focus.offset - range.anchor.offset,
+        type: "clear_marks",
+      };
+    }
     case "delete_range": {
       const range = normalizeRange(operation.range);
 

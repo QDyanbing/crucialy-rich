@@ -149,6 +149,7 @@ export function createSelectionAfterBackspaceInput(
   }
 
   switch (operation.type) {
+    case "clear_marks":
     case "delete_range":
       return createCollapsedSelection(input.selection.anchor);
     case "delete_text":

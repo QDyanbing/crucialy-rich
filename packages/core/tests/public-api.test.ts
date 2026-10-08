@@ -215,6 +215,7 @@ describe("@crucialy-rich/core public API", () => {
       "insert_text",
       "delete_text",
       "delete_range",
+      "clear_marks",
       "toggle_mark",
       "set_mark_attribute",
       "set_link",
