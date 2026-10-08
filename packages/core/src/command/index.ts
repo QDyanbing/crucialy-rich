@@ -19,6 +19,11 @@ export {
 } from "./block-selection";
 export { BLOCK_TYPE_COMMANDS } from "./block-type";
 export {
+  canExecuteClearFormattingCommand,
+  CLEAR_FORMATTING_COMMAND_NAME,
+  clearFormattingCommand,
+} from "./clear-formatting";
+export {
   canExecuteSetCodeBlockCommand,
   isCodeBlockCommandActive,
   SET_CODE_BLOCK_COMMAND_NAME,
