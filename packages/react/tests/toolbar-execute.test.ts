@@ -1,6 +1,7 @@
 import {
   applyTransaction,
   BOLD_COMMAND_NAME,
+  CLEAR_FORMATTING_COMMAND_NAME,
   createDefaultCommandRegistry,
   createDocument,
   createParagraph,
@@ -44,5 +45,48 @@ describe("executeToolbarCommand", () => {
     expect(nextDocument.children[0]).toMatchObject({
       children: [{ marks: { bold: true }, text: "工具栏", type: "text" }],
     });
+  });
+
+  it("clears selected formatting through a toolbar item", () => {
+    const document = createDocument([
+      createParagraph([
+        createText("工具栏", {
+          bold: true,
+          fontSize: 20,
+          link: { href: "https://example.com/" },
+        }),
+      ]),
+    ]);
+    const selection = {
+      anchor: { offset: 0, path: [0, 0] },
+      focus: { offset: 3, path: [0, 0] },
+    };
+    const registry = createDefaultCommandRegistry();
+    const [item] = resolveToolbarItems(
+      [
+        {
+          commandName: CLEAR_FORMATTING_COMMAND_NAME,
+          id: "clear-formatting",
+          label: "清除格式",
+          type: "command" as const,
+        },
+      ],
+      registry,
+      { document, selection },
+    );
+
+    if (!item || item.type !== "command") {
+      throw new Error("Missing clear formatting toolbar command.");
+    }
+
+    const event = executeToolbarCommand(item, registry, { document, selection });
+    const nextDocument = applyTransaction(document, event.result.transaction!);
+
+    expect(item.state).toMatchObject({ disabled: false, registered: true });
+    expect(event.result.ok).toBe(true);
+    expect(event.result.transaction?.operations[0]?.type).toBe("clear_marks");
+    expect(nextDocument.children[0]?.children).toEqual([
+      { text: "工具栏", type: "text" },
+    ]);
   });
 });

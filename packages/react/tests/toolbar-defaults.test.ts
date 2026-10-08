@@ -1,5 +1,6 @@
 import {
   BOLD_COMMAND_NAME,
+  CLEAR_FORMATTING_COMMAND_NAME,
   INLINE_CODE_COMMAND_NAME,
   ITALIC_COMMAND_NAME,
   SET_HEADING_COMMAND_NAME,
@@ -24,10 +25,23 @@ describe("createDefaultToolbarItems", () => {
       UNDERLINE_COMMAND_NAME,
       STRIKE_COMMAND_NAME,
       INLINE_CODE_COMMAND_NAME,
+      CLEAR_FORMATTING_COMMAND_NAME,
       SET_LINK_COMMAND_NAME,
       SET_HEADING_COMMAND_NAME,
       TOGGLE_QUOTE_COMMAND_NAME,
     ]);
+  });
+
+  it("defines a Chinese clear formatting control", () => {
+    expect(
+      createDefaultToolbarItems().find(
+        (item) => item.type === "command" && item.id === "clear-formatting",
+      ),
+    ).toMatchObject({
+      commandName: CLEAR_FORMATTING_COMMAND_NAME,
+      label: "清除格式",
+      text: "Tx",
+    });
   });
 
   it("accepts host link and heading options", () => {
