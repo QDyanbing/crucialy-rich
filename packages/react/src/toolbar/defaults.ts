@@ -1,5 +1,6 @@
 import {
   BOLD_COMMAND_NAME,
+  CLEAR_FORMATTING_COMMAND_NAME,
   INLINE_CODE_COMMAND_NAME,
   ITALIC_COMMAND_NAME,
   SET_HEADING_COMMAND_NAME,
@@ -58,6 +59,13 @@ export function createDefaultToolbarItems(
       id: "inline-code",
       label: "行内代码",
       text: "</>",
+      type: "command",
+    },
+    {
+      commandName: CLEAR_FORMATTING_COMMAND_NAME,
+      id: "clear-formatting",
+      label: "清除格式",
+      text: "Tx",
       type: "command",
     },
     { id: "inline-block-separator", type: "separator" },
