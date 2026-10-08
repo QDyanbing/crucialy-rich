@@ -23,6 +23,11 @@ interface DeleteRangeOperation {
   range: RangeSelection;
 }
 
+interface ClearMarksOperation {
+  type: "clear_marks";
+  range: RangeSelection;
+}
+
 interface ToggleMarkOperation {
   type: "toggle_mark";
   mark: TextMarkType;
@@ -90,7 +95,7 @@ interface TransactionAcceptanceReport {
 
 字段说明：
 
-- `type`：当前支持十八种已注册 operation，包含文本范围、通用块操作以及列表拆分、退出、缩进、反缩进、拆出和任务状态更新。
+- `type`：当前支持十九种已注册 operation，包含文本范围、通用块操作以及列表拆分、退出、缩进、反缩进、拆出和任务状态更新。
 - `point`：插入、分段或合并位置，必须指向 text 节点内的合法偏移。
 - `text`：要插入的文本。
 - `range`：`delete_text` 可覆盖同一文本容器内的多个 text 节点；`delete_range` 可覆盖连续的顶层文本块；mark 范围当前必须落在同一个 block 内。
@@ -162,6 +167,18 @@ interface TransactionAcceptanceReport {
 - collapsed range 会创建带目标 mark 的空 text，后续输入可以继承该 mark。
 - 非法 mark、非法 point 或跨 block range 会抛出 `RangeError`。
 - `createSelectionAfterToggleMark` 会在切分和合并后重新映射选区。
+
+## 创建和应用清除格式操作
+
+使用 `createClearMarksOperation(range)` 创建操作，使用 `applyClearMarks(document, operation)` 返回更新后的文档。
+
+当前规则：
+
+- operation 保持单块原子边界，支持 paragraph、heading、quote 中跨多个 text 节点和反向选区。
+- 非折叠 range 会一次移除选中片段的全部 boolean mark、字号、文字颜色、背景色和链接，同时保留未选中片段原格式。
+- collapsed range 会在光标处创建纯文本空节点，后续输入不再继承原位置格式。
+- 应用后合并相邻纯文本节点，`createSelectionAfterClearMarks` 会按文本偏移恢复选区。
+- CodeBlock 或跨 block range 会抛出 `RangeError`；跨块清理由 command 拆成多条 operation 后放入同一 transaction。
 
 ## 创建和应用属性 Mark 操作
 

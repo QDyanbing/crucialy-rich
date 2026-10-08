@@ -17,6 +17,7 @@ Command 系统负责把“可执行的编辑意图”包装成统一接口。当
 - 提供 `boldCommand`、`italicCommand`、`underlineCommand` 和 `strikeCommand`，支持单块或跨连续文本块统一应用/取消，以及 collapsed selection 的后续输入占位。
 - 提供 `setFontSizeCommand`、`setTextColorCommand` 和 `setBackgroundColorCommand`，支持单块或跨连续文本块设置/取消安全属性值，以及 collapsed selection 的后续输入占位。
 - 提供 `setLinkCommand` 和 `unsetLinkCommand`，支持单块或跨连续文本块设置、覆盖和取消安全链接。
+- 提供 `clearFormattingCommand`，一次移除单块或跨连续文本块选区中的全部文字格式和链接，并支持 collapsed selection 的后续纯文本输入占位。
 - 提供 `setHeadingCommand`，支持单块或多块设置 1–6 级标题、切换层级或恢复 paragraph，并保留模型选区。
 - 提供 `toggleQuoteCommand`，支持单块或多块统一切换 Quote 或恢复 paragraph，并保留模型选区。
 - 提供 `setCodeBlockCommand`，支持单块或多块切换纯文本 CodeBlock，并可恢复 paragraph。
@@ -113,6 +114,10 @@ function queryCommandState(
 const BOLD_COMMAND_NAME = "bold";
 
 const boldCommand: Command;
+
+const CLEAR_FORMATTING_COMMAND_NAME = "clearFormatting";
+
+const clearFormattingCommand: Command;
 
 const ITALIC_COMMAND_NAME = "italic";
 
@@ -213,6 +218,7 @@ const mergeBlockCommand: Command;
 - `setTextColorCommand` 接受 `{ textColor: string | null }`；只允许 `#RGB` / `#RRGGBB`，`null` 表示取消文字颜色。
 - `setBackgroundColorCommand` 接受 `{ backgroundColor: string | null }`；使用相同颜色白名单，`null` 表示取消背景色。
 - `setLinkCommand` 为每个命中的连续文本块生成一条 `set_link` operation，并在同一 transaction 中应用；`unsetLinkCommand` 使用相同范围规则取消链接。
+- `clearFormattingCommand` 为每个命中的连续文本块生成一条 `clear_marks` operation；一次移除所有 boolean mark、文字属性和链接，并把跨块结果记录为一条 History transaction。
 - `setHeadingCommand` 接受 `{ level: 1 | 2 | 3 | 4 | 5 | 6 | null }`；数字把全部命中 block 设为同级标题，`null` 恢复 paragraph，并返回 `set_block_type` transaction。
 - `toggleQuoteCommand` 无需 payload；混合范围统一切换为 Quote，全部为 Quote 时统一恢复 paragraph，并返回 `set_block_type` transaction。
 - `setCodeBlockCommand` 接受可选 `{ enabled }`，进入 CodeBlock 时移除 marks，退出时恢复 paragraph。

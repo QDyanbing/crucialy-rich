@@ -195,6 +195,25 @@ const inlineCodeCommand: Command;
 
 `inlineCodeCommand` 已加入默认 command registry，并作为“行内代码”加入默认 React Toolbar；当前没有预设键盘快捷键，宿主可通过自定义快捷键表接入。
 
+## 清除格式
+
+`clearFormattingCommand` 通过 `clear_marks` 一次移除选区中的全部文字格式。
+
+```ts
+const CLEAR_FORMATTING_COMMAND_NAME = "clearFormatting";
+
+const clearFormattingCommand: Command;
+```
+
+执行规则：
+
+- 支持 paragraph、heading、quote 的单块或连续顶层跨块选区，并保持正向或反向选区方向。
+- 同时移除 bold、italic、underline、strike、code、fontSize、textColor、backgroundColor 和 link。
+- 不修改选区外的文字与格式；清除后会合并相邻纯文本节点并恢复模型选区。
+- collapsed selection 会建立纯文本输入位置，使后续输入不继承当前格式。
+- CodeBlock、Divider、Image、List 和 Table 是范围边界，命中时整条 command 不执行。
+- command 已加入默认 Registry 和默认 React Toolbar，并作为一个 transaction 参与 History 撤销与重做。
+
 ## 快捷键
 
 `DEFAULT_COMMAND_SHORTCUTS` 当前提供四组 boolean mark 跨平台主修饰键映射：
@@ -227,7 +246,7 @@ renderer 遇到 text marks 时会根据标记输出内联元素，并继续保�
 - underline 与 strike 同时启用时合并为 `text-decoration: underline line-through;`，避免装饰属性互相覆盖。
 - 合法字号、文字颜色和背景色会写入同一个 text path 元素的结构化 style，不增加额外模型路径。
 
-Demo 的“文字标记”样例覆盖普通、加粗、斜体、下划线、删除线、组合格式和跨 text 选区。默认 Toolbar 额外提供“行内代码”按钮，并通过 `aria-pressed` 同步当前 active 状态。
+Demo 的“文字标记”样例覆盖普通、加粗、斜体、下划线、删除线、组合格式和跨 text 选区。默认 Toolbar 额外提供“行内代码”和“清除格式”按钮；boolean mark 按钮通过 `aria-pressed` 同步当前 active 状态。
 
 ## HTML 粘贴映射
 

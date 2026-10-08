@@ -8,6 +8,8 @@
 
 ### 新增
 
+- 新增 `clear_marks` operation 与 `clearFormattingCommand`，可一次移除选区内的 boolean mark、字号、文字颜色、背景色和链接。
+- 新增默认 React Toolbar“清除格式”入口，以及跨块选区、折叠光标、History 和 Chromium 回归覆盖。
 - 新增 Inline Code boolean mark、`inlineCodeCommand`、语义 `<code>` 渲染与默认 React Toolbar 入口。
 - 新增 HTML `<code>` 与 Markdown 反引号行内代码粘贴，以及 Command/History、React 原生事件和 Chromium 回归。
 - 新增 HTML Clipboard boolean mark 行内样式解析，支持安全 `font-weight`、`font-style`、`text-decoration` 与显式重置。

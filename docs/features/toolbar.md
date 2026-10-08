@@ -43,12 +43,12 @@ Toolbar 不复制 Bold、Link 或 Block Type 的状态判断规则，模型能�
 
 `createDefaultToolbarItems` 当前按顺序提供：
 
-- 加粗、斜体、下划线、删除线、行内代码。
+- 加粗、斜体、下划线、删除线、行内代码、清除格式。
 - 链接。
 - 标题层级，默认为二级标题。
 - 引用。
 
-宿主可通过 `headingLevel` 和 `link` 覆盖默认 payload，也可以完全使用自定义配置。
+“清除格式”调用 core 的 `clearFormattingCommand`，会在一个 transaction 中移除选区内全部文字标记、属性和链接。宿主可通过 `headingLevel` 和 `link` 覆盖默认 payload，也可以完全使用自定义配置。
 
 ## 状态职责
 

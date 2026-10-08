@@ -59,11 +59,12 @@ export function Demo() {
 - 快捷键：支持 Mod+B/I/U、Mod+Shift+X、Mod+Alt+0–6、Mod+Shift+7/8/9；History 快捷键继续由宿主状态接管。
 - 输入规则：支持 paragraph 开头的标题、列表、引用和代码块 Markdown 前缀。
 - 文字样式：五种 boolean mark 与字号、文字颜色、背景色可应用到连续顶层 paragraph、heading、quote，并作为一个 transaction 进入宿主 History。
+- 清除格式：默认 Command 与 Toolbar 可一次移除选区中的全部 boolean mark、文字属性和链接，并支持 History 撤销/重做。
 - `label`、`className` 和基础 DOM 事件属性。
 
 Toolbar 当前支持：
 
-- `createDefaultToolbarItems`：创建 Bold、Italic、Underline、Strike、Inline Code、Link、H2 和 Quote 默认配置。
+- `createDefaultToolbarItems`：创建 Bold、Italic、Underline、Strike、Inline Code、清除格式、Link、H2 和 Quote 默认配置。
 - `FixedToolbar`：根据 document/selection 展示 active 和 disabled，并通过 `onCommand` 输出执行结果。
 - `FloatingToolbar`：根据非折叠 selection 和宿主提供的 `anchorRect` 显示在选区附近。
 - pointerdown 选区快照：点击工具栏后仍把命令应用到原选区。
