@@ -193,6 +193,55 @@ test("toggles inline code from the fixed toolbar", async ({ page }) => {
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
 
+test("clears selected formatting from the fixed toolbar and restores history", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await selectRenderedTextRange(page, "[0,0]", 0, 2);
+
+  const fixedToolbar = page.getByRole("toolbar", { name: "固定格式工具栏" });
+  const editor = page.getByLabel("已渲染文档");
+  const documentJson = page.getByLabel("文档 JSON", { exact: true });
+
+  await fixedToolbar
+    .getByRole("button", { name: "固定工具栏加粗", exact: true })
+    .click();
+  await fixedToolbar
+    .getByRole("button", { name: "固定工具栏斜体", exact: true })
+    .click();
+
+  await expect(editor.locator("strong")).toHaveText("你好");
+  await expect(editor.locator("strong")).toHaveAttribute(
+    "style",
+    "font-style: italic;",
+  );
+
+  await fixedToolbar
+    .getByRole("button", { name: "固定工具栏清除格式", exact: true })
+    .click();
+
+  await expect(editor.locator("strong")).toHaveCount(0);
+  await expect(editor.locator("em")).toHaveCount(0);
+  await expect(documentJson).not.toContainText('"bold": true');
+  await expect(documentJson).not.toContainText('"italic": true');
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"type": "clear_marks"',
+  );
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 3');
+
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect(editor.locator("strong")).toHaveText("你好");
+  await expect(editor.locator("strong")).toHaveAttribute(
+    "style",
+    "font-style: italic;",
+  );
+
+  await page.getByRole("button", { name: "重做", exact: true }).click();
+  await expect(editor.locator("strong")).toHaveCount(0);
+  await expect(editor.locator("em")).toHaveCount(0);
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
 test("applies formatting and history keyboard shortcuts", async ({ page }) => {
   await page.goto("/");
   await selectRenderedTextRange(page, "[0,0]", 0, 2);
