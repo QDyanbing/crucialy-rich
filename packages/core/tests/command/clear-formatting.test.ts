@@ -7,10 +7,12 @@ import {
   clearFormattingCommand,
   createCodeBlock,
   createDocument,
+  createDefaultCommandRegistry,
   createHeading,
   createParagraph,
   createQuote,
   createText,
+  executeCommand,
 } from "../../src";
 
 describe("clearFormattingCommand", () => {
@@ -164,5 +166,27 @@ describe("clearFormattingCommand", () => {
       ok: false,
       status: "skipped",
     });
+  });
+
+  it("executes through the default command registry", () => {
+    const document = createDocument([
+      createParagraph([createText("正文", { bold: true })]),
+    ]);
+    const result = executeCommand(
+      createDefaultCommandRegistry(),
+      CLEAR_FORMATTING_COMMAND_NAME,
+      {
+        context: {
+          document,
+          selection: {
+            anchor: { path: [0, 0], offset: 0 },
+            focus: { path: [0, 0], offset: 2 },
+          },
+        },
+      },
+    );
+
+    expect(result.ok).toBe(true);
+    expect(result.transaction?.operations[0]?.type).toBe("clear_marks");
   });
 });

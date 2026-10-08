@@ -1,5 +1,6 @@
 import { mergeBlockCommand, splitBlockCommand } from "./block";
 import { BLOCK_TYPE_COMMANDS } from "./block-type";
+import { clearFormattingCommand } from "./clear-formatting";
 import { BOOLEAN_MARK_COMMANDS } from "./mark";
 import { createCommandRegistry, type CommandRegistry } from "./registry";
 import { LINK_COMMANDS } from "./link";
@@ -25,6 +26,7 @@ export const DEFAULT_COMMANDS: readonly Command[] = [
   ...BOOLEAN_MARK_COMMANDS,
   ...TEXT_STYLE_COMMANDS,
   ...LINK_COMMANDS,
+  clearFormattingCommand,
   ...BLOCK_TYPE_COMMANDS,
   ...LIST_COMMANDS,
   deleteSelectionCommand,

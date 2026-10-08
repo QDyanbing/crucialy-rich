@@ -200,6 +200,9 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.createToggleMarkOperation).toBe("function");
     expect(typeof core.applyToggleMark).toBe("function");
     expect(typeof core.createSelectionAfterToggleMark).toBe("function");
+    expect(typeof core.createClearMarksOperation).toBe("function");
+    expect(typeof core.applyClearMarks).toBe("function");
+    expect(typeof core.createSelectionAfterClearMarks).toBe("function");
     expect(typeof core.createSetMarkAttributeOperation).toBe("function");
     expect(typeof core.applySetMarkAttribute).toBe("function");
     expect(typeof core.createSelectionAfterSetMarkAttribute).toBe("function");
@@ -292,6 +295,7 @@ describe("@crucialy-rich/core public API", () => {
 
   it("exposes the command API", () => {
     expect(typeof core.BOLD_COMMAND_NAME).toBe("string");
+    expect(typeof core.CLEAR_FORMATTING_COMMAND_NAME).toBe("string");
     expect(typeof core.INLINE_CODE_COMMAND_NAME).toBe("string");
     expect(core.BOOLEAN_MARK_COMMANDS.map((command) => command.name)).toEqual([
       "bold",
@@ -332,6 +336,7 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.UNDERLINE_COMMAND_NAME).toBe("string");
     expect(typeof core.UNSET_LINK_COMMAND_NAME).toBe("string");
     expect(typeof core.canExecuteBoldCommand).toBe("function");
+    expect(typeof core.canExecuteClearFormattingCommand).toBe("function");
     expect(typeof core.canExecuteCommand).toBe("function");
     expect(typeof core.canExecuteDeleteSelectionCommand).toBe("function");
     expect(typeof core.canExecuteInsertTextCommand).toBe("function");
@@ -370,6 +375,7 @@ describe("@crucialy-rich/core public API", () => {
       "setBackgroundColor",
       "setLink",
       "unsetLink",
+      "clearFormatting",
       "setCodeBlock",
       "setHeading",
       "toggleQuote",
@@ -394,6 +400,7 @@ describe("@crucialy-rich/core public API", () => {
       "splitBlock",
     ]);
     expect(typeof core.boldCommand).toBe("object");
+    expect(typeof core.clearFormattingCommand).toBe("object");
     expect(typeof core.deleteSelectionCommand).toBe("object");
     expect(typeof core.executeCommand).toBe("function");
     expect(typeof core.getCommandNameFromShortcut).toBe("function");
