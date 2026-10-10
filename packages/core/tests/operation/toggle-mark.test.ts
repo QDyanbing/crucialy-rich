@@ -7,8 +7,11 @@ import {
   createListItem,
   createOrderedList,
   createParagraph,
+  createTableCell,
+  createTableRow,
   createText,
   isListNode,
+  isTableNode,
 } from "../../src/model";
 import {
   applyToggleMark,
@@ -82,6 +85,44 @@ describe("applyToggleMark", () => {
     expect(createSelectionAfterToggleMark(document, operation)).toEqual({
       anchor: { path: [0, 0, 1], offset: 0 },
       focus: { path: [0, 0, 1], offset: 2 },
+    });
+  });
+
+  it("toggles a mark inside one table paragraph", () => {
+    const document = createDocument([
+      {
+        children: [
+          createTableRow([
+            createTableCell([createParagraph([createText("单元格")])]),
+            createTableCell([createParagraph([createText("相邻内容")])]),
+          ]),
+        ],
+        type: "table",
+      },
+    ]);
+    const operation = createToggleMarkOperation(
+      {
+        anchor: { path: [0, 0, 0, 0, 0], offset: 0 },
+        focus: { path: [0, 0, 0, 0, 0], offset: 3 },
+      },
+      "italic",
+    );
+    const result = applyToggleMark(document, operation);
+    const table = result.children[0];
+
+    if (!isTableNode(table)) {
+      throw new Error("Expected a table result.");
+    }
+
+    expect(table.children[0]?.children[0]?.children[0]?.children).toEqual([
+      { marks: { italic: true }, text: "单元格", type: "text" },
+    ]);
+    expect(table.children[0]?.children[1]?.children[0]?.children).toEqual([
+      { text: "相邻内容", type: "text" },
+    ]);
+    expect(createSelectionAfterToggleMark(document, operation)).toEqual({
+      anchor: { path: [0, 0, 0, 0, 0], offset: 0 },
+      focus: { path: [0, 0, 0, 0, 0], offset: 3 },
     });
   });
 
