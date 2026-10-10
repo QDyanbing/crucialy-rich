@@ -3,8 +3,14 @@ import { describe, expect, it } from "vitest";
 import {
   createDocument,
   createHeading,
+  createListItem,
+  createOrderedList,
   createParagraph,
+  createTableCell,
+  createTableRow,
   createText,
+  isListNode,
+  isTableNode,
 } from "../../src/model";
 import {
   applySetLink,
@@ -15,6 +21,77 @@ import {
 } from "../../src/operation";
 
 describe("set link operation", () => {
+  it("sets a link inside a list item", () => {
+    const document = createDocument([
+      createOrderedList([createListItem([createText("列表链接")])]),
+    ]);
+    const operation = createSetLinkOperation(
+      {
+        anchor: { path: [0, 0, 0], offset: 2 },
+        focus: { path: [0, 0, 0], offset: 4 },
+      },
+      { href: "https://example.com/list" },
+    );
+    const result = applySetLink(document, operation);
+    const list = result.children[0];
+
+    if (!isListNode(list)) {
+      throw new Error("Expected an ordered list result.");
+    }
+
+    expect(list.children[0]?.children).toEqual([
+      { text: "列表", type: "text" },
+      {
+        marks: { link: { href: "https://example.com/list" } },
+        text: "链接",
+        type: "text",
+      },
+    ]);
+    expect(createSelectionAfterSetLink(document, operation)).toEqual({
+      anchor: { path: [0, 0, 1], offset: 0 },
+      focus: { path: [0, 0, 1], offset: 2 },
+    });
+  });
+
+  it("sets a link inside one table paragraph", () => {
+    const document = createDocument([
+      {
+        children: [
+          createTableRow([
+            createTableCell([createParagraph([createText("单元格链接")])]),
+          ]),
+        ],
+        type: "table",
+      },
+    ]);
+    const operation = createSetLinkOperation(
+      {
+        anchor: { path: [0, 0, 0, 0, 0], offset: 3 },
+        focus: { path: [0, 0, 0, 0, 0], offset: 5 },
+      },
+      { href: "https://example.com/table" },
+    );
+    const result = applySetLink(document, operation);
+    const table = result.children[0];
+
+    if (!isTableNode(table)) {
+      throw new Error("Expected a table result.");
+    }
+
+    expect(table.children[0]?.children[0]?.children[0]?.children).toEqual([
+      { text: "单元格", type: "text" },
+      {
+        marks: { link: { href: "https://example.com/table" } },
+        text: "链接",
+        type: "text",
+      },
+    ]);
+    expect(createSelectionAfterSetLink(document, operation)).toEqual({
+      anchor: { path: [0, 0, 0, 0, 1], offset: 0 },
+      focus: { path: [0, 0, 0, 0, 1], offset: 2 },
+    });
+  });
+
   it("creates a normalized operation with isolated values", () => {
     const anchorPath = [0, 0];
     const focusPath = [0, 0];

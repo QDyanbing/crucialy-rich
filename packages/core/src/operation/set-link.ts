@@ -1,6 +1,5 @@
 import {
   createText,
-  isTextBlockNode,
   mergeAdjacentTextNodes,
   normalizeLinkMark,
   removeLinkMark,
@@ -18,6 +17,7 @@ import {
   getTextMarkRangeTarget,
   type TextMarkRangeTarget,
 } from "./text-mark-range";
+import { replaceTextContainer } from "./text-target";
 import type { SetLinkOperation } from "./types";
 
 export function createSetLinkOperation(
@@ -151,34 +151,26 @@ export function applySetLink(
   document: DocumentNode,
   operation: SetLinkOperation,
 ): DocumentNode {
-  const target = getTextMarkRangeTarget(document, operation.range, "set link");
+  const target = getTextMarkRangeTarget(document, operation.range, "set link", true);
   const link = normalizeOperationLink(operation.link);
 
-  return {
-    ...document,
-    children: document.children.map((block, blockIndex) =>
-      blockIndex === target.blockIndex && isTextBlockNode(block)
-        ? {
-            ...block,
-            children: mergeAdjacentTextNodes([
-              ...block.children.slice(0, target.startTextIndex),
-              ...createRangeReplacement(block.children, target, link),
-              ...block.children.slice(target.endTextIndex + 1),
-            ]),
-          }
-        : block,
-    ),
-  };
+  return replaceTextContainer(document, target.containerPath, {
+    ...target.container,
+    children: mergeAdjacentTextNodes([
+      ...target.container.children.slice(0, target.startTextIndex),
+      ...createRangeReplacement(target.container.children, target, link),
+      ...target.container.children.slice(target.endTextIndex + 1),
+    ]),
+  });
 }
 
 export function createSelectionAfterSetLink(
   document: DocumentNode,
   operation: SetLinkOperation,
 ): RangeSelection {
-  const target = getTextMarkRangeTarget(document, operation.range, "set link");
+  const target = getTextMarkRangeTarget(document, operation.range, "set link", true);
   const link = normalizeOperationLink(operation.link);
-  const textNode =
-    document.children[target.blockIndex]?.children[target.startTextIndex];
+  const textNode = target.container.children[target.startTextIndex];
 
   if (!textNode) {
     throw new RangeError("set link range must reference text nodes");
