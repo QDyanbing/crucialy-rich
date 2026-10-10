@@ -1,22 +1,31 @@
 import {
   areTextMarksEqual,
   createText,
+  isListEntryNode,
   isTextBlockNode,
   type DocumentNode,
+  type ListEntryNode,
   type TextMarks,
+  type TextBlockNode,
   type TextNode,
 } from "../model";
 import {
-  getBlockTextOffset,
-  getPointAtBlockTextOffset,
+  getNodeAtPath,
+  getPointAtTextContainerOffset,
+  getTextContainerOffset,
   isCollapsed,
+  isSameTextContainer,
   isValidPoint,
   normalizeRange,
+  type Path,
   type RangeSelection,
 } from "../selection";
+import { getTextTarget } from "./text-target";
 
 export interface TextMarkRangeTarget {
   blockIndex: number;
+  container: ListEntryNode | TextBlockNode;
+  containerPath: Path;
   endTextIndex: number;
   range: RangeSelection;
   startTextIndex: number;
@@ -26,6 +35,7 @@ export function getTextMarkRangeTarget(
   document: DocumentNode,
   selection: RangeSelection,
   operationLabel: string,
+  allowNested = false,
 ): TextMarkRangeTarget {
   const range = normalizeRange(selection);
 
@@ -33,30 +43,34 @@ export function getTextMarkRangeTarget(
     throw new RangeError(`${operationLabel} range must reference text nodes`);
   }
 
-  const [anchorBlockIndex, anchorTextIndex] = range.anchor.path;
-  const [focusBlockIndex, focusTextIndex] = range.focus.path;
+  const anchorTarget = getTextTarget(document, range.anchor);
+  const focusTarget = getTextTarget(document, range.focus);
+  const anchorBlockIndex = range.anchor.path[0];
 
   if (
-    range.anchor.path.length !== 2 ||
-    range.focus.path.length !== 2 ||
     anchorBlockIndex === undefined ||
-    anchorTextIndex === undefined ||
-    focusBlockIndex === undefined ||
-    focusTextIndex === undefined ||
-    anchorBlockIndex !== focusBlockIndex
+    !anchorTarget ||
+    !focusTarget ||
+    !isSameTextContainer(range.anchor, range.focus)
   ) {
     throw new RangeError(`${operationLabel} range must stay inside one block`);
   }
 
-  if (document.children[anchorBlockIndex]?.type === "codeBlock") {
+  if (!allowNested && anchorTarget.containerPath.length !== 1) {
+    throw new RangeError(`${operationLabel} range must stay inside one block`);
+  }
+
+  if (anchorTarget.container.type === "codeBlock") {
     throw new RangeError(`${operationLabel} does not support code blocks`);
   }
 
   return {
     blockIndex: anchorBlockIndex,
-    endTextIndex: focusTextIndex,
+    container: anchorTarget.container,
+    containerPath: anchorTarget.containerPath,
+    endTextIndex: focusTarget.textIndex,
     range,
-    startTextIndex: anchorTextIndex,
+    startTextIndex: anchorTarget.textIndex,
   };
 }
 
@@ -70,20 +84,20 @@ export function compactTextParts(parts: Array<TextNode | undefined>): TextNode[]
 
 function findCollapsedMarkPlaceholder(
   document: DocumentNode,
-  blockIndex: number,
+  containerPath: Path,
   textOffset: number,
   expectedMarks: TextMarks | undefined,
 ) {
-  const block = document.children[blockIndex];
+  const container = getNodeAtPath(document, containerPath);
 
-  if (!isTextBlockNode(block)) {
+  if (!isTextBlockNode(container) && !isListEntryNode(container)) {
     return undefined;
   }
 
   let cursor = 0;
 
-  for (let textIndex = 0; textIndex < block.children.length; textIndex += 1) {
-    const currentText = block.children[textIndex]!;
+  for (let textIndex = 0; textIndex < container.children.length; textIndex += 1) {
+    const currentText = container.children[textIndex]!;
 
     if (
       currentText.text.length === 0 &&
@@ -92,7 +106,7 @@ function findCollapsedMarkPlaceholder(
     ) {
       return {
         offset: 0,
-        path: [blockIndex, textIndex],
+        path: [...containerPath, textIndex],
       };
     }
 
@@ -109,8 +123,8 @@ export function createSelectionAfterTextMarkChange(
   collapsedMarks: TextMarks | undefined,
   operationLabel: string,
 ): RangeSelection {
-  const startOffset = getBlockTextOffset(document, target.range.anchor);
-  const endOffset = getBlockTextOffset(document, target.range.focus);
+  const startOffset = getTextContainerOffset(document, target.range.anchor);
+  const endOffset = getTextContainerOffset(document, target.range.focus);
 
   if (startOffset === undefined || endOffset === undefined) {
     throw new RangeError(`${operationLabel} range must reference text nodes`);
@@ -120,11 +134,11 @@ export function createSelectionAfterTextMarkChange(
     const point =
       findCollapsedMarkPlaceholder(
         nextDocument,
-        target.blockIndex,
+        target.containerPath,
         startOffset,
         collapsedMarks,
       ) ??
-      getPointAtBlockTextOffset(nextDocument, target.blockIndex, startOffset, {
+      getPointAtTextContainerOffset(nextDocument, target.containerPath, startOffset, {
         affinity: "forward",
       });
 
@@ -141,15 +155,18 @@ export function createSelectionAfterTextMarkChange(
     };
   }
 
-  const anchor = getPointAtBlockTextOffset(
+  const anchor = getPointAtTextContainerOffset(
     nextDocument,
-    target.blockIndex,
+    target.containerPath,
     startOffset,
     { affinity: "forward" },
   );
-  const focus = getPointAtBlockTextOffset(nextDocument, target.blockIndex, endOffset, {
-    affinity: "backward",
-  });
+  const focus = getPointAtTextContainerOffset(
+    nextDocument,
+    target.containerPath,
+    endOffset,
+    { affinity: "backward" },
+  );
 
   if (!anchor || !focus) {
     throw new RangeError(`${operationLabel} selection cannot be mapped`);

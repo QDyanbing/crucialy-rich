@@ -4,8 +4,11 @@ import {
   createCodeBlock,
   createDocument,
   createHeading,
+  createListItem,
+  createOrderedList,
   createParagraph,
   createText,
+  isListNode,
 } from "../../src/model";
 import {
   applyToggleMark,
@@ -53,6 +56,35 @@ describe("createToggleMarkOperation", () => {
 });
 
 describe("applyToggleMark", () => {
+  it("toggles a mark inside a list item", () => {
+    const document = createDocument([
+      createOrderedList([createListItem([createText("列表文字")])]),
+    ]);
+    const operation = createToggleMarkOperation(
+      {
+        anchor: { path: [0, 0, 0], offset: 1 },
+        focus: { path: [0, 0, 0], offset: 3 },
+      },
+      "bold",
+    );
+    const result = applyToggleMark(document, operation);
+    const list = result.children[0];
+
+    if (!isListNode(list)) {
+      throw new Error("Expected an ordered list result.");
+    }
+
+    expect(list.children[0]?.children).toEqual([
+      { text: "列", type: "text" },
+      { marks: { bold: true }, text: "表文", type: "text" },
+      { text: "字", type: "text" },
+    ]);
+    expect(createSelectionAfterToggleMark(document, operation)).toEqual({
+      anchor: { path: [0, 0, 1], offset: 0 },
+      focus: { path: [0, 0, 1], offset: 2 },
+    });
+  });
+
   it("toggles a selected range inside one text node", () => {
     const document = createDocument([createParagraph([createText("你好世界")])]);
     const result = applyToggleMark(

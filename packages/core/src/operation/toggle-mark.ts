@@ -1,7 +1,6 @@
 import {
   createText,
   hasTextMark,
-  isTextBlockNode,
   mergeAdjacentTextNodes,
   setTextMark,
   toggleTextMark,
@@ -12,6 +11,7 @@ import {
 import type { RangeSelection } from "../selection";
 import { isCollapsed } from "../selection";
 import type { ToggleMarkOperation } from "./types";
+import { replaceTextContainer } from "./text-target";
 import {
   compactTextParts,
   createSelectionAfterTextMarkChange,
@@ -155,35 +155,25 @@ export function applyToggleMark(
   document: DocumentNode,
   operation: ToggleMarkOperation,
 ): DocumentNode {
-  const target = getTextMarkRangeTarget(document, operation.range, "toggle mark");
+  const target = getTextMarkRangeTarget(document, operation.range, "toggle mark", true);
 
-  return {
-    ...document,
-    children: document.children.map((block, currentBlockIndex) =>
-      currentBlockIndex === target.blockIndex && isTextBlockNode(block)
-        ? {
-            ...block,
-            children: mergeAdjacentTextNodes([
-              ...block.children.slice(0, target.startTextIndex),
-              ...createToggleMarkReplacement(block.children, target, operation),
-              ...block.children.slice(target.endTextIndex + 1),
-            ]),
-          }
-        : block,
-    ),
-  };
+  return replaceTextContainer(document, target.containerPath, {
+    ...target.container,
+    children: mergeAdjacentTextNodes([
+      ...target.container.children.slice(0, target.startTextIndex),
+      ...createToggleMarkReplacement(target.container.children, target, operation),
+      ...target.container.children.slice(target.endTextIndex + 1),
+    ]),
+  });
 }
 
 export function createSelectionAfterToggleMark(
   document: DocumentNode,
   operation: ToggleMarkOperation,
 ): RangeSelection {
-  const target = getTextMarkRangeTarget(document, operation.range, "toggle mark");
+  const target = getTextMarkRangeTarget(document, operation.range, "toggle mark", true);
   const nextDocument = applyToggleMark(document, operation);
-  const block = document.children[target.blockIndex];
-  const textNode = isTextBlockNode(block)
-    ? block.children[target.startTextIndex]
-    : undefined;
+  const textNode = target.container.children[target.startTextIndex];
 
   if (!textNode) {
     throw new RangeError("toggle mark range must reference text nodes");
