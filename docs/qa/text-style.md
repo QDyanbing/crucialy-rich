@@ -43,5 +43,5 @@ pnpm test:e2e
 
 ## 当前边界
 
-- 三种文字属性 command 支持连续顶层 paragraph、heading、quote；结构节点、CodeBlock、List 和 Table 仍是范围边界。
+- 三种文字属性 command 支持连续顶层 paragraph、heading、quote，以及同一列表项或同一表格单元格段落；CodeBlock、void block、跨列表项和跨单元格选区仍是范围边界。
 - 默认 React Toolbar 不包含文字属性项，由宿主自定义 ToolbarItem 或直接调用 command。

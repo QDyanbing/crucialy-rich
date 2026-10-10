@@ -67,10 +67,10 @@ pnpm check:all
 
 ## 当前边界
 
-- 链接 command 当前支持连续顶层 paragraph、heading 和 quote 中的非折叠文字选区。
+- 链接 command 当前支持连续顶层 paragraph、heading 和 quote，以及同一列表项或同一表格单元格段落中的非折叠文字选区。
 - href 当前只接受绝对 HTTP、HTTPS 和 mailto 地址。
 - DOM 选区恢复使用规范化后的正向范围，不保留反向选择方向。
-- CodeBlock、Divider、Image、List、Table、通用浮层组件和站内相对链接仍不在当前链接范围。
+- CodeBlock、Divider、Image、跨列表项、跨单元格、通用浮层组件和站内相对链接仍不在当前链接范围。
 
 ## 结论
 

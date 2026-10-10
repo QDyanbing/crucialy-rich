@@ -12,14 +12,14 @@
 - 新增 `mergeAdjacentTextNodes`，用于合并相邻同 marks text 节点。
 - `validateDocument` 会拒绝非对象、未知 mark 和非 `true` mark 值。
 - `normalizeDocument` 会保留合法 marks，丢弃未知或未启用 marks，并合并相邻同 marks text 节点。
-- 新增 `toggle_mark` operation，支持同一个 block 内切换 mark。
+- 新增 `toggle_mark` operation，支持同一顶层文本块、列表项或表格单元格段落内切换 mark。
 - mark 切换后 selection 会按 paragraph text offset 映射到合并后的 text 节点。
 - 新增 `boldCommand`，支持选区加粗、取消加粗和 collapsed 后续输入继承 bold。
 - 新增 `italicCommand`，支持选区斜体、取消斜体、collapsed 后续输入继承 italic，并覆盖 bold+italic 叠加。
 - 新增 `underlineCommand`，支持选区下划线、取消、collapsed 输入继承、跨 text 切换和 active 状态。
 - 新增 `strikeCommand`，支持选区删除线、取消、collapsed 输入继承、跨 text 切换和 active 状态。
 - 新增 `inlineCodeCommand`，支持选区行内代码、取消、collapsed 输入继承、跨块切换和 active 状态。
-- Bold/Italic command 支持 paragraph、heading、quote 中同一个 block 内跨 text selection。
+- Bold/Italic command 支持 paragraph、heading、quote、列表项或表格单元格段落的同一文本容器内跨 text selection。
 - renderer 会把 bold text 渲染为 `<strong>`，italic text 渲染为 `<em>`，underline text 渲染为 `<u>`，strike text 渲染为 `<s>`，code text 渲染为 `<code>`，并覆盖组合渲染。
 - 默认 Toolbar 提供“加粗”“斜体”“下划线”“删除线”和“行内代码”按钮，并记录 history。
 - demo 文档 JSON 选区映射会展示当前 text marks。
@@ -80,8 +80,8 @@
 
 - React Toolbar 已提供五种 boolean mark 默认项。
 - 四种 boolean mark 默认快捷键已绑定 React 编辑器键盘事件，并通过统一 command transaction 进入宿主 History。
-- boolean mark 与三种文字属性 command 已支持连续顶层 paragraph、heading、quote，并覆盖反向选区、混合状态和 History 往返。
-- boolean mark、三种文字属性与 Link Mark 均支持连续顶层 paragraph、heading、quote；CodeBlock、Divider、Image、List 和 Table 仍是样式范围边界。
+- boolean mark 与三种文字属性 command 已支持连续顶层 paragraph、heading、quote，以及同一列表项或同一表格单元格段落，并覆盖反向选区、混合状态和 History 往返。
+- boolean mark、三种文字属性与 Link Mark 均支持上述范围；CodeBlock、Divider、Image、跨列表项和跨单元格选区仍是样式范围边界。
 
 ## 结论
 

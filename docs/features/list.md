@@ -74,6 +74,6 @@ Clipboard parser 可识别 checkbox 驱动的 HTML 无序列表。只有每个�
 - 已存在的目标子列表必须与当前项目兼容；任务项目不会被缩进到普通列表，反之亦然。
 - 当前列表项直接包含 text 和可选 nested list，不支持在单个列表项中混放 paragraph、heading、quote 或 void block。
 - HTML 粘贴每个 `li` 只保留第一个直接子列表；超过三层的后续结构会被省略，checkbox 必须位于每个直属项的起始包装链。
-- 跨 text、跨 item 的范围删除与样式命令尚未实现。
+- 同一 item 内支持跨 text 的 boolean mark、文字属性、链接和清除格式；跨 item 的范围删除与格式化仍保持拒绝。
 
 验收记录见[基础列表 QA](../qa/list-basic.md)和[列表增强 QA](../qa/list-advanced.md)。

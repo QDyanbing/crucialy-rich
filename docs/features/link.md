@@ -84,7 +84,7 @@ interface SetLinkOperation {
 
 - 传入 Link Mark 时会先规范化，危险 href 会抛出 `RangeError`。
 - 传入 `null` 会取消选区内的链接。
-- 支持 paragraph、heading、quote 中同一 block 内跨多个 text 节点设置、覆盖和取消。
+- 支持 paragraph、heading、quote、列表项或表格单元格段落的同一文本容器内跨多个 text 节点设置、覆盖和取消。
 - 单条 operation 保持单 block 约束；跨块 command 会为每个连续文本块创建一条 operation，并组合到同一 transaction。
 - 只修改选区覆盖的文字，并保留 boolean mark、字号和颜色。
 - `applySetLink` 会再次校验手工构造的 operation，不能绕过 href 安全规则。
@@ -122,7 +122,7 @@ executeCommand(registry, UNSET_LINK_COMMAND_NAME, {
 });
 ```
 
-两条命令要求非折叠的有效文字选区，支持单块或跨连续顶层 paragraph、heading、quote。`setLink` 会拒绝不安全 payload；`unsetLink` 仅在选区至少覆盖一个 Link Mark 时可用。跨块成功结果在同一 transaction 中包含逐块 `set_link` operation，并恢复正向或反向模型选区，可作为一条记录接入 History。
+两条命令要求非折叠的有效文字选区，支持单块或跨连续顶层 paragraph、heading、quote，也支持同一列表项或同一表格单元格段落。`setLink` 会拒绝不安全 payload；`unsetLink` 仅在选区至少覆盖一个 Link Mark 时可用。跨块成功结果在同一 transaction 中包含逐块 `set_link` operation，并恢复正向或反向模型选区，可作为一条记录接入 History。
 
 `getSelectedLinkMark` 与 command 的执行条件不同：折叠光标位于链接文字中时也会返回 Link Mark。非折叠选区只有在单块或连续文本块中的所有有效文字节点拥有完全相同的 href、target 和 rel 时才返回结果；普通文字、不同目标链接、跨结构边界或非法选区均返回 `undefined`。
 
@@ -170,7 +170,7 @@ Clipboard parser 从安全 `<a>` 中读取 `href`、`target` 和 `rel`，并复�
 
 ## 当前边界
 
-- 链接 command 支持连续顶层 paragraph、heading 和 quote 中的非折叠文字选区；CodeBlock、Divider、Image、List 和 Table 是范围边界。
-- 单条 `set_link` operation 仍只处理一个 block，跨块行为由 command 组合多条 operation。
+- 链接 command 支持连续顶层 paragraph、heading 和 quote，以及同一列表项或同一表格单元格段落中的非折叠文字选区；CodeBlock、Divider、Image、跨列表项和跨单元格选区是范围边界。
+- 单条 `set_link` operation 只处理一个文本容器，跨顶层文本块行为由 command 组合多条 operation。
 - href 当前只接受绝对 HTTP、HTTPS 和 mailto 地址。
 - DOM 选区恢复不保留反向选择方向。

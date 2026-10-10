@@ -239,7 +239,7 @@ const mergeBlockCommand: Command;
 ## 当前限制
 
 - 文本插入和删除 command 支持同一文本容器或连续顶层文本块 range；暂不跨越列表、表格和 void block 等结构边界。
-- boolean mark、文字属性和链接 command 支持 paragraph、heading、quote 的单块或连续顶层跨块 selection；CodeBlock、Divider、Image、List 和 Table 不接受跨块 marks。
+- boolean mark、文字属性、链接和清除格式 command 支持 paragraph、heading、quote 的单块或连续顶层跨块 selection，也支持同一列表项或同一表格单元格段落；CodeBlock、Divider、Image、跨列表项和跨单元格 selection 不接受 marks。
 - `splitBlockCommand` 支持 collapsed、同容器和连续顶层文本块 selection；`mergeBlockCommand` 与 `insertDividerCommand` 仍只处理 collapsed selection。
 - 快捷键模块不处理权限；宿主提供自定义 registry 时，React 编辑器会使用该 registry 执行命中的默认快捷键名称。
 - History 模块已提供 `undoCommand` 和 `redoCommand`；默认 Command 注册表暂不内置 history command。

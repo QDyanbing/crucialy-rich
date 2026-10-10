@@ -8,6 +8,8 @@
 
 ### 新增
 
+- 新增同一列表项、同一表格单元格段落内的 boolean mark、文字属性、链接与清除格式能力。
+- 新增嵌套文本格式的 Core operation/command、React 快捷键与 Chromium Toolbar 回归覆盖。
 - 新增 `clear_marks` operation 与 `clearFormattingCommand`，可一次移除选区内的 boolean mark、字号、文字颜色、背景色和链接。
 - 新增默认 React Toolbar“清除格式”入口，以及跨块选区、折叠光标、History 和 Chromium 回归覆盖。
 - 新增 Inline Code boolean mark、`inlineCodeCommand`、语义 `<code>` 渲染与默认 React Toolbar 入口。

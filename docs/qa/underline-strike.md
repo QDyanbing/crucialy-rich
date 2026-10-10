@@ -46,7 +46,7 @@
 
 ## 当前边界
 
-- mark command 仍限制在同一个 block 内，当前支持 paragraph、heading 和 quote。
+- mark command 限制在同一文本容器内，当前支持 paragraph、heading、quote、列表项和表格单元格段落。
 - 第 17 周 React Toolbar 已提供 Underline 和 Strike 默认项。
 - 后续扩展已将 Mod+Shift+X 设为默认 Strike 快捷键，并绑定 React 编辑器键盘事件。
 

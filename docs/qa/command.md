@@ -88,7 +88,7 @@ Command 验收覆盖注册、查询、状态读取、执行结果、文本编辑
 ## 当前限制
 
 - 文本 command 支持同一文本容器和连续顶层文本块 range selection。
-- boolean mark、文字属性和链接 command 支持 paragraph、heading、quote 中的单块或连续顶层跨块 selection；结构节点、CodeBlock、List 和 Table 保持拒绝。
+- boolean mark、文字属性、链接和清除格式 command 支持 paragraph、heading、quote 中的单块或连续顶层跨块 selection，也支持同一列表项或同一表格单元格段落；CodeBlock、void block、跨列表项和跨单元格 selection 保持拒绝。
 - `splitBlockCommand` 支持 collapsed、同容器和连续顶层文本块 selection；`mergeBlockCommand` / `insertDividerCommand` 仍只支持 collapsed selection。
 - Heading/Quote command 支持连续顶层 block 范围，不支持非连续多选。
 - collapsed Backspace/Delete 的单字符删除仍保留 input helper；跨段合并路径会优先复用 block command。

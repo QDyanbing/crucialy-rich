@@ -91,7 +91,7 @@ History snapshot 现在会深拷贝 text marks，撤销/重做记录不会丢失
 
 ## Toggle Mark Operation
 
-`toggle_mark` 用于在同一 block 内切换 mark，当前 block 可以是 paragraph、heading 或 quote。
+`toggle_mark` 用于在同一文本容器内切换 mark，当前文本容器可以是 paragraph、heading、quote、列表项或表格单元格段落。
 
 ```ts
 interface ToggleMarkOperation {
@@ -104,11 +104,11 @@ interface ToggleMarkOperation {
 
 当前规则：
 
-- range 必须落在同一个 block 内。
+- range 必须落在同一个文本容器内。
 - 非折叠 range 会按 text 边界切分 before / selected / after，只修改 selected 覆盖到的 text 片段。
 - 选区内存在未激活的目标 mark 时会统一添加；全部已激活时会统一移除，避免混合选区逐节点反转。
 - `active` 可由 command 显式指定统一目标状态；省略时继续按当前 range 自动判断。
-- 同一 block 内跨多个 text 节点时会统一修改目标 mark，并合并相邻同 marks 的 text 节点。
+- 同一文本容器内跨多个 text 节点时会统一修改目标 mark，并合并相邻同 marks 的 text 节点。
 - selection 会在合并后的文档中按 paragraph text offset 重新映射。
 - collapsed range 会在光标处创建一个空 text 节点，并把切换后的 marks 写到该空节点上。
 - collapsed 后续输入会插入到该空 text 节点内，从而继承 mark。
@@ -127,7 +127,7 @@ const boldCommand: Command;
 
 - selection 必须存在。
 - anchor 和 focus 必须都指向合法 text point。
-- 当前支持同一个 block 内的 selection。
+- 当前支持同一顶层文本块、列表项或表格单元格段落内的 selection。
 - 成功时返回包含 `toggle_mark` 的 transaction。
 - `queryCommandState` 会通过 `isActive` 返回当前 selection 所在 text 节点是否已经加粗。
 
@@ -147,7 +147,7 @@ const italicCommand: Command;
 
 - selection 必须存在。
 - anchor 和 focus 必须都指向合法 text point。
-- 当前支持同一个 block 内的 selection。
+- 当前支持同一顶层文本块、列表项或表格单元格段落内的 selection。
 - 成功时返回包含 `toggle_mark` 的 transaction。
 - `queryCommandState` 会通过 `isActive` 返回当前 selection 所在 text 节点是否已经斜体。
 
@@ -207,11 +207,11 @@ const clearFormattingCommand: Command;
 
 执行规则：
 
-- 支持 paragraph、heading、quote 的单块或连续顶层跨块选区，并保持正向或反向选区方向。
+- 支持 paragraph、heading、quote 的单块或连续顶层跨块选区，以及同一列表项或同一表格单元格段落，并保持正向或反向选区方向。
 - 同时移除 bold、italic、underline、strike、code、fontSize、textColor、backgroundColor 和 link。
 - 不修改选区外的文字与格式；清除后会合并相邻纯文本节点并恢复模型选区。
 - collapsed selection 会建立纯文本输入位置，使后续输入不继承当前格式。
-- CodeBlock、Divider、Image、List 和 Table 是范围边界，命中时整条 command 不执行。
+- CodeBlock、Divider、Image、跨列表项和跨单元格选区是范围边界，命中时整条 command 不执行。
 - command 已加入默认 Registry 和默认 React Toolbar，并作为一个 transaction 参与 History 撤销与重做。
 
 ## 快捷键
@@ -255,5 +255,5 @@ Clipboard parser 将 `strong` / `b` 映射为 bold、`em` / `i` 映射为 italic
 ## 当前限制
 
 - React Toolbar 已内置五种 boolean mark 默认项；编辑器为前四种样式提供默认 mark 快捷键，Inline Code 暂无预设快捷键。
-- boolean mark 与文字属性 command 支持连续顶层 paragraph、heading、quote；每个 block 对应一条 operation，并在同一 transaction 中提交。
-- boolean mark、三种文字属性与 Link Mark 均支持连续顶层 paragraph、heading、quote；CodeBlock、Divider、Image、List 和 Table 仍是跨块样式边界。
+- boolean mark 与文字属性 command 支持连续顶层 paragraph、heading、quote，以及同一列表项或同一表格单元格段落；每个文本容器对应一条 operation，并在同一 transaction 中提交。
+- boolean mark、三种文字属性与 Link Mark 均支持上述范围；CodeBlock、Divider、Image、跨列表项和跨单元格选区仍是样式边界。

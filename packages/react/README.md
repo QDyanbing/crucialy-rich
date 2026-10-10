@@ -58,7 +58,7 @@ export function Demo() {
 - 表格：支持单元格内输入、删除、Enter、Backspace/Delete 段落合并、点击高亮、纯文本 TSV 填充和顶层 HTML 表格粘贴。
 - 快捷键：支持 Mod+B/I/U、Mod+Shift+X、Mod+Alt+0–6、Mod+Shift+7/8/9；History 快捷键继续由宿主状态接管。
 - 输入规则：支持 paragraph 开头的标题、列表、引用和代码块 Markdown 前缀。
-- 文字样式：五种 boolean mark 与字号、文字颜色、背景色可应用到连续顶层 paragraph、heading、quote，并作为一个 transaction 进入宿主 History。
+- 文字样式：五种 boolean mark 与字号、文字颜色、背景色可应用到连续顶层 paragraph、heading、quote，以及同一列表项或同一表格单元格段落，并作为一个 transaction 进入宿主 History。
 - 清除格式：默认 Command 与 Toolbar 可一次移除选区中的全部 boolean mark、文字属性和链接，并支持 History 撤销/重做。
 - `label`、`className` 和基础 DOM 事件属性。
 

@@ -78,6 +78,7 @@ renderer 输出 `table > tbody > tr > td > p` 语义结构，并为模型节点�
 
 ## 当前限制
 
+- 同一 cell 的同一 paragraph 内支持 boolean mark、文字属性、链接和清除格式；暂不支持跨 paragraph 或跨 cell 的格式化选区。
 - 暂不支持跨 cell 范围选择、合并单元格和表头。
 - HTML 导入不保留 `colspan`、`rowspan`、`th` 语义或嵌套表格结构。
 - TSV 超出当前表格范围时不会自动扩表。

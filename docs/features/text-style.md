@@ -104,7 +104,7 @@ createText("示例", {
 
 ## 当前边界
 
-- 三种文字属性均支持 paragraph、heading、quote 中的单块选区与连续顶层跨块选区，并保留正向或反向选择方向。
-- CodeBlock、Divider、Image、List 和 Table 不参与跨块文字属性范围。
+- 三种文字属性均支持 paragraph、heading、quote 中的单块与连续顶层跨块选区，也支持同一列表项或同一表格单元格段落，并保留正向或反向选择方向。
+- CodeBlock、Divider、Image、跨列表项和跨单元格选区不参与文字属性范围。
 - 默认 React Toolbar 尚未包含文字属性项；宿主可通过自定义 ToolbarItem 接入对应 command。
 - `TEXT_STYLE_COMMANDS` 按字号、文字颜色、背景色统一组织三种 command，综合验收记录见 `docs/qa/text-style.md`。

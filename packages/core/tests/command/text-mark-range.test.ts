@@ -30,6 +30,7 @@ describe("text mark command ranges", () => {
     ).toEqual([
       {
         blockIndex: 0,
+        containerPath: [0],
         range: {
           anchor: { path: [0, 0], offset: 1 },
           focus: { path: [0, 0], offset: 3 },
@@ -37,6 +38,7 @@ describe("text mark command ranges", () => {
       },
       {
         blockIndex: 1,
+        containerPath: [1],
         range: {
           anchor: { path: [1, 0], offset: 0 },
           focus: { path: [1, 0], offset: 2 },
@@ -44,6 +46,7 @@ describe("text mark command ranges", () => {
       },
       {
         blockIndex: 2,
+        containerPath: [2],
         range: {
           anchor: { path: [2, 0], offset: 0 },
           focus: { path: [2, 0], offset: 2 },

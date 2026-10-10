@@ -98,7 +98,7 @@ interface TransactionAcceptanceReport {
 - `type`：当前支持十九种已注册 operation，包含文本范围、通用块操作以及列表拆分、退出、缩进、反缩进、拆出和任务状态更新。
 - `point`：插入、分段或合并位置，必须指向 text 节点内的合法偏移。
 - `text`：要插入的文本。
-- `range`：`delete_text` 可覆盖同一文本容器内的多个 text 节点；`delete_range` 可覆盖连续的顶层文本块；mark 范围当前必须落在同一个 block 内。
+- `range`：`delete_text` 可覆盖同一文本容器内的多个 text 节点；`delete_range` 可覆盖连续的顶层文本块；mark 范围必须落在同一个文本容器内。
 - `mark`：要切换的 text mark，当前用于 `toggle_mark`。
 - `attribute` / `value`：要设置的属性 Mark 和新值；`null` 表示移除属性。
 - `link`：要设置的 Link Mark；`null` 表示取消链接。
@@ -162,10 +162,10 @@ interface TransactionAcceptanceReport {
 
 当前规则：
 
-- range 必须落在同一个 block 内，支持 paragraph、heading、quote 中跨多个 text 节点和反向选区。
+- range 必须落在同一个文本容器内，支持 paragraph、heading、quote、列表项或表格单元格段落中跨多个 text 节点和反向选区。
 - 非折叠 range 会按边界切分 text，统一切换目标 mark，并合并相邻同 marks 节点。
 - collapsed range 会创建带目标 mark 的空 text，后续输入可以继承该 mark。
-- 非法 mark、非法 point 或跨 block range 会抛出 `RangeError`。
+- 非法 mark、非法 point 或跨文本容器 range 会抛出 `RangeError`。
 - `createSelectionAfterToggleMark` 会在切分和合并后重新映射选区。
 
 ## 创建和应用清除格式操作
@@ -174,11 +174,11 @@ interface TransactionAcceptanceReport {
 
 当前规则：
 
-- operation 保持单块原子边界，支持 paragraph、heading、quote 中跨多个 text 节点和反向选区。
+- operation 保持单文本容器原子边界，支持 paragraph、heading、quote、列表项或表格单元格段落中跨多个 text 节点和反向选区。
 - 非折叠 range 会一次移除选中片段的全部 boolean mark、字号、文字颜色、背景色和链接，同时保留未选中片段原格式。
 - collapsed range 会在光标处创建纯文本空节点，后续输入不再继承原位置格式。
 - 应用后合并相邻纯文本节点，`createSelectionAfterClearMarks` 会按文本偏移恢复选区。
-- CodeBlock 或跨 block range 会抛出 `RangeError`；跨块清理由 command 拆成多条 operation 后放入同一 transaction。
+- CodeBlock 或跨文本容器 range 会抛出 `RangeError`；跨顶层文本块清理由 command 拆成多条 operation 后放入同一 transaction。
 
 ## 创建和应用属性 Mark 操作
 
@@ -186,11 +186,11 @@ interface TransactionAcceptanceReport {
 
 当前规则：
 
-- range 必须落在同一个 block 内，支持 paragraph、heading、quote 中跨多个 text 节点和反向选区。
+- range 必须落在同一个文本容器内，支持 paragraph、heading、quote、列表项或表格单元格段落中跨多个 text 节点和反向选区。
 - 非折叠 range 会按边界切分 text，只更新选中部分，并合并相邻同 marks 节点。
 - collapsed range 会创建带目标属性的空 text，后续输入可继承属性。
 - `value: null` 会移除目标属性，同时保留其他 mark。
-- 非法属性值、非法 point 或跨 block range 会抛出 `RangeError`。
+- 非法属性值、非法 point 或跨文本容器 range 会抛出 `RangeError`。
 - `createSelectionAfterSetMarkAttribute` 会在切分和合并后重新映射选区。
 
 ## 创建和应用链接操作
@@ -199,12 +199,12 @@ interface TransactionAcceptanceReport {
 
 当前规则：
 
-- range 必须是同一个 block 内的非折叠文字选区，支持 paragraph、heading、quote 中跨多个 text 节点和反向选区。
+- range 必须是同一个文本容器内的非折叠文字选区，支持 paragraph、heading、quote、列表项或表格单元格段落中跨多个 text 节点和反向选区。
 - 跨块链接由 command 按文本块拆分为多条 `set_link` operation，并放入同一 transaction；operation 本身不放宽单块原子边界。
 - `link` 会在创建和应用阶段执行 href、target 与 rel 安全校验；`null` 表示取消链接。
 - 设置、覆盖或取消链接时会保留其他 boolean mark 和文字属性。
 - 应用后会合并相邻同 marks 节点，并通过 `createSelectionAfterSetLink` 重新映射选区。
-- 非法链接、collapsed range、非法 point 或跨 block range 会抛出 `RangeError`。
+- 非法链接、collapsed range、非法 point 或跨文本容器 range 会抛出 `RangeError`。
 
 ## 创建和应用 Block Type 操作
 
@@ -411,5 +411,5 @@ interface TransactionAcceptanceReport {
 - 合并暂不支持跨多段批量合并，也不会跨 void block。
 - 单条 `set_block_type` 仍只处理一个顶层 block；Heading/Quote command 已能在同一 transaction 中组合多条 operation 完成跨块切换，语义 renderer 已支持 `h1`–`h6` 与 `blockquote`。
 - transaction 当前只负责批量应用和结束 normalize；History 已使用快照策略提供撤销/重做，operation 层本身暂不生成 undo/redo inverse 信息。
-- text operation 会保留现有 text marks；单条 `toggle_mark` 和 `set_mark_attribute` 仍限定在一个 block 内，Mark command 已能在同一 transaction 中组合多条 operation 完成连续文本块样式更新。
+- text operation 会保留现有 text marks；单条 `toggle_mark`、`set_mark_attribute`、`set_link` 和 `clear_marks` 限定在一个文本容器内，可处理顶层文本块、列表项或表格单元格段落。Mark command 可在同一 transaction 中组合多条 operation 完成连续顶层文本块样式更新。
 - 普通 `beforeinput insertText`、同容器及连续顶层文本块的非折叠选区替换、Backspace、Delete 和 Enter 已接入输入事件管线，并复用当前 command、operation 和 transaction 更新模型。

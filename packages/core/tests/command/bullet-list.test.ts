@@ -91,7 +91,7 @@ describe("toggleBulletListCommand", () => {
     expect(toggleBulletListCommand.execute(input).status).toBe("skipped");
   });
 
-  it("disables commands that only support top-level text blocks", () => {
+  it("enables marks but keeps block commands disabled inside list items", () => {
     const document = createDocument([
       createBulletList([createListItem([createText("项目")])]),
     ]);
@@ -107,7 +107,7 @@ describe("toggleBulletListCommand", () => {
     };
     const registry = createDefaultCommandRegistry();
 
-    expect(queryCommandState(registry, BOLD_COMMAND_NAME, input).disabled).toBe(true);
+    expect(queryCommandState(registry, BOLD_COMMAND_NAME, input).disabled).toBe(false);
     expect(queryCommandState(registry, SET_HEADING_COMMAND_NAME, input).disabled).toBe(
       true,
     );
