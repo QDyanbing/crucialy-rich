@@ -1,17 +1,22 @@
-import { isTextBlockNode, type DocumentNode } from "../model";
+import { isListEntryNode, isTextBlockNode, type DocumentNode } from "../model";
 import {
   comparePoint,
   getBlockTextOffset,
+  getNodeAtPath,
   getPointAtBlockTextOffset,
+  getTextContainerPath,
   isCollapsed,
+  isSameTextContainer,
   isValidPoint,
   normalizeRange,
+  type Path,
   type Point,
   type RangeSelection,
 } from "../selection";
 
 export interface TextMarkCommandRange {
   blockIndex: number;
+  containerPath: Path;
   range: RangeSelection;
 }
 
@@ -53,12 +58,28 @@ export function getTextMarkCommandRanges(
   const [startBlockIndex] = range.anchor.path;
   const [endBlockIndex] = range.focus.path;
 
-  if (
-    range.anchor.path.length !== 2 ||
-    range.focus.path.length !== 2 ||
-    startBlockIndex === undefined ||
-    endBlockIndex === undefined
-  ) {
+  if (startBlockIndex === undefined || endBlockIndex === undefined) {
+    return undefined;
+  }
+
+  if (isSameTextContainer(range.anchor, range.focus)) {
+    const containerPath = getTextContainerPath(range.anchor);
+    const container = containerPath
+      ? getNodeAtPath(document, containerPath)
+      : undefined;
+
+    if (
+      !containerPath ||
+      (!isTextBlockNode(container) && !isListEntryNode(container)) ||
+      container.type === "codeBlock"
+    ) {
+      return undefined;
+    }
+
+    return [{ blockIndex: startBlockIndex, containerPath, range }];
+  }
+
+  if (range.anchor.path.length !== 2 || range.focus.path.length !== 2) {
     return undefined;
   }
 
@@ -87,7 +108,7 @@ export function getTextMarkCommandRanges(
     const blockRange = { anchor, focus };
 
     if (startBlockIndex === endBlockIndex || !isCollapsed(blockRange)) {
-      ranges.push({ blockIndex, range: blockRange });
+      ranges.push({ blockIndex, containerPath: [blockIndex], range: blockRange });
     }
   }
 

@@ -1,6 +1,7 @@
 import {
   areLinkMarksEqual,
   getLinkMark,
+  isListEntryNode,
   isTextBlockNode,
   normalizeLinkMark,
   type LinkMarkAttributes,
@@ -12,7 +13,7 @@ import {
   createSetLinkOperation,
   createTransaction,
 } from "../operation";
-import { isCollapsed } from "../selection";
+import { getNodeAtPath, isCollapsed } from "../selection";
 import { createCommandSkipped, createCommandSuccess } from "./result";
 import {
   getTextMarkCommandRanges,
@@ -36,26 +37,26 @@ function getSelectedTextNodes(
   ranges: TextMarkCommandRange[],
 ): TextNode[] {
   return ranges.flatMap((target) => {
-    const block = input.context.document.children[target.blockIndex];
+    const container = getNodeAtPath(input.context.document, target.containerPath);
 
-    if (!isTextBlockNode(block)) {
+    if (!isTextBlockNode(container) && !isListEntryNode(container)) {
       return [];
     }
 
-    const startTextIndex = target.range.anchor.path[1];
-    const endTextIndex = target.range.focus.path[1];
+    const startTextIndex = target.range.anchor.path.at(-1);
+    const endTextIndex = target.range.focus.path.at(-1);
 
     if (startTextIndex === undefined || endTextIndex === undefined) {
       return [];
     }
 
     if (isCollapsed(target.range)) {
-      const textNode = block.children[startTextIndex];
+      const textNode = container.children[startTextIndex];
 
       return textNode ? [textNode] : [];
     }
 
-    return block.children
+    return container.children
       .slice(startTextIndex, endTextIndex + 1)
       .filter((node, index) => {
         const textIndex = startTextIndex + index;
