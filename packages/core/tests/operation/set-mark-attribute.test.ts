@@ -6,8 +6,11 @@ import {
   createOrderedList,
   createParagraph,
   createQuote,
+  createTableCell,
+  createTableRow,
   createText,
   isListNode,
+  isTableNode,
 } from "../../src/model";
 import {
   applySetMarkAttribute,
@@ -43,6 +46,43 @@ describe("set mark attribute operation", () => {
     expect(createSelectionAfterSetMarkAttribute(document, operation)).toEqual({
       anchor: { path: [0, 0, 1], offset: 0 },
       focus: { path: [0, 0, 1], offset: 2 },
+    });
+  });
+
+  it("creates a styled placeholder inside a table paragraph", () => {
+    const document = createDocument([
+      {
+        children: [
+          createTableRow([
+            createTableCell([createParagraph([createText("单元格输入")])]),
+          ]),
+        ],
+        type: "table",
+      },
+    ]);
+    const operation = createSetMarkAttributeOperation(
+      {
+        anchor: { path: [0, 0, 0, 0, 0], offset: 3 },
+        focus: { path: [0, 0, 0, 0, 0], offset: 3 },
+      },
+      "fontSize",
+      20,
+    );
+    const result = applySetMarkAttribute(document, operation);
+    const table = result.children[0];
+
+    if (!isTableNode(table)) {
+      throw new Error("Expected a table result.");
+    }
+
+    expect(table.children[0]?.children[0]?.children[0]?.children).toEqual([
+      { text: "单元格", type: "text" },
+      { marks: { fontSize: 20 }, text: "", type: "text" },
+      { text: "输入", type: "text" },
+    ]);
+    expect(createSelectionAfterSetMarkAttribute(document, operation)).toEqual({
+      anchor: { path: [0, 0, 0, 0, 1], offset: 0 },
+      focus: { path: [0, 0, 0, 0, 1], offset: 0 },
     });
   });
 
