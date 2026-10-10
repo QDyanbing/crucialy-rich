@@ -1,6 +1,5 @@
 import {
   createText,
-  isTextBlockNode,
   mergeAdjacentTextNodes,
   type DocumentNode,
   type TextNode,
@@ -13,6 +12,7 @@ import {
   getTextMarkRangeTarget,
   type TextMarkRangeTarget,
 } from "./text-mark-range";
+import { replaceTextContainer } from "./text-target";
 import type { ClearMarksOperation } from "./types";
 
 export function createClearMarksOperation(range: RangeSelection): ClearMarksOperation {
@@ -80,30 +80,23 @@ export function applyClearMarks(
   document: DocumentNode,
   operation: ClearMarksOperation,
 ): DocumentNode {
-  const target = getTextMarkRangeTarget(document, operation.range, "clear marks");
+  const target = getTextMarkRangeTarget(document, operation.range, "clear marks", true);
 
-  return {
-    ...document,
-    children: document.children.map((block, currentBlockIndex) =>
-      currentBlockIndex === target.blockIndex && isTextBlockNode(block)
-        ? {
-            ...block,
-            children: mergeAdjacentTextNodes([
-              ...block.children.slice(0, target.startTextIndex),
-              ...createClearMarksReplacement(block.children, target),
-              ...block.children.slice(target.endTextIndex + 1),
-            ]),
-          }
-        : block,
-    ),
-  };
+  return replaceTextContainer(document, target.containerPath, {
+    ...target.container,
+    children: mergeAdjacentTextNodes([
+      ...target.container.children.slice(0, target.startTextIndex),
+      ...createClearMarksReplacement(target.container.children, target),
+      ...target.container.children.slice(target.endTextIndex + 1),
+    ]),
+  });
 }
 
 export function createSelectionAfterClearMarks(
   document: DocumentNode,
   operation: ClearMarksOperation,
 ): RangeSelection {
-  const target = getTextMarkRangeTarget(document, operation.range, "clear marks");
+  const target = getTextMarkRangeTarget(document, operation.range, "clear marks", true);
   const nextDocument = applyClearMarks(document, operation);
 
   return createSelectionAfterTextMarkChange(

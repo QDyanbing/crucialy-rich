@@ -1,6 +1,16 @@
 import { describe, expect, it } from "vitest";
 
-import { createDocument, createParagraph, createText } from "../../src/model";
+import {
+  createDocument,
+  createListItem,
+  createOrderedList,
+  createParagraph,
+  createTableCell,
+  createTableRow,
+  createText,
+  isListNode,
+  isTableNode,
+} from "../../src/model";
 import {
   applyClearMarks,
   cloneOperation,
@@ -9,6 +19,95 @@ import {
 } from "../../src/operation";
 
 describe("clear marks operation", () => {
+  it("clears all marks inside a list item", () => {
+    const document = createDocument([
+      createOrderedList([
+        createListItem([
+          createText("列表格式", {
+            bold: true,
+            fontSize: 20,
+            link: { href: "https://example.com/" },
+          }),
+        ]),
+      ]),
+    ]);
+    const operation = createClearMarksOperation({
+      anchor: { path: [0, 0, 0], offset: 2 },
+      focus: { path: [0, 0, 0], offset: 4 },
+    });
+    const result = applyClearMarks(document, operation);
+    const list = result.children[0];
+
+    if (!isListNode(list)) {
+      throw new Error("Expected an ordered list result.");
+    }
+
+    expect(list.children[0]?.children).toEqual([
+      {
+        marks: {
+          bold: true,
+          fontSize: 20,
+          link: { href: "https://example.com/" },
+        },
+        text: "列表",
+        type: "text",
+      },
+      { text: "格式", type: "text" },
+    ]);
+    expect(createSelectionAfterClearMarks(document, operation)).toEqual({
+      anchor: { path: [0, 0, 1], offset: 0 },
+      focus: { path: [0, 0, 1], offset: 2 },
+    });
+  });
+
+  it("clears all marks inside one table paragraph", () => {
+    const document = createDocument([
+      {
+        children: [
+          createTableRow([
+            createTableCell([
+              createParagraph([
+                createText("单元格格式", {
+                  backgroundColor: "#fff2e8",
+                  italic: true,
+                  textColor: "#1677ff",
+                }),
+              ]),
+            ]),
+          ]),
+        ],
+        type: "table",
+      },
+    ]);
+    const operation = createClearMarksOperation({
+      anchor: { path: [0, 0, 0, 0, 0], offset: 3 },
+      focus: { path: [0, 0, 0, 0, 0], offset: 5 },
+    });
+    const result = applyClearMarks(document, operation);
+    const table = result.children[0];
+
+    if (!isTableNode(table)) {
+      throw new Error("Expected a table result.");
+    }
+
+    expect(table.children[0]?.children[0]?.children[0]?.children).toEqual([
+      {
+        marks: {
+          backgroundColor: "#fff2e8",
+          italic: true,
+          textColor: "#1677ff",
+        },
+        text: "单元格",
+        type: "text",
+      },
+      { text: "格式", type: "text" },
+    ]);
+    expect(createSelectionAfterClearMarks(document, operation)).toEqual({
+      anchor: { path: [0, 0, 0, 0, 1], offset: 0 },
+      focus: { path: [0, 0, 0, 0, 1], offset: 2 },
+    });
+  });
+
   it("clones the input range", () => {
     const anchorPath = [0, 0];
     const focusPath = [0, 0];
