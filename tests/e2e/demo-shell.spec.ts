@@ -633,6 +633,42 @@ test("renders the ordered and unordered list sample", async ({ page }) => {
   await expect(page.getByLabel("模型校验状态")).toContainText("合法");
 });
 
+test("formats text inside list items and table cells", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("lists");
+  await selectRenderedTextRange(page, "[0,1,0]", 0, 7);
+
+  const fixedToolbar = page.getByRole("toolbar", { name: "固定格式工具栏" });
+  const editor = page.getByLabel("已渲染文档");
+
+  await fixedToolbar
+    .getByRole("button", { name: "固定工具栏加粗", exact: true })
+    .click();
+  await expect(editor.locator('strong[data-crucialy-path="[0,1,0]"]')).toHaveText(
+    "无序列表第二项",
+  );
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+
+  await fixedToolbar
+    .getByRole("button", { name: "固定工具栏清除格式", exact: true })
+    .click();
+  await expect(editor.locator('strong[data-crucialy-path="[0,1,0]"]')).toHaveCount(0);
+
+  await page.getByLabel("模型示例").selectOption("tables");
+  await selectRenderedTextRange(page, "[0,0,0,0,0]", 0, 2);
+  await fixedToolbar
+    .getByRole("button", { name: "固定工具栏斜体", exact: true })
+    .click();
+
+  await expect(editor.locator('em[data-crucialy-path="[0,0,0,0,0]"]')).toHaveText(
+    "姓名",
+  );
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"type": "toggle_mark"',
+  );
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
 test("switches paragraphs between ordered and unordered lists", async ({ page }) => {
   await page.goto("/");
   await setDebuggerSelection(page, "0,0", 0, 2);
