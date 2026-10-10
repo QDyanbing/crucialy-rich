@@ -2,9 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import {
   createDocument,
+  createListItem,
+  createOrderedList,
   createParagraph,
   createQuote,
   createText,
+  isListNode,
 } from "../../src/model";
 import {
   applySetMarkAttribute,
@@ -14,6 +17,35 @@ import {
 } from "../../src/operation";
 
 describe("set mark attribute operation", () => {
+  it("sets a text color inside a list item", () => {
+    const document = createDocument([
+      createOrderedList([createListItem([createText("列表颜色")])]),
+    ]);
+    const operation = createSetMarkAttributeOperation(
+      {
+        anchor: { path: [0, 0, 0], offset: 2 },
+        focus: { path: [0, 0, 0], offset: 4 },
+      },
+      "textColor",
+      "#1677ff",
+    );
+    const result = applySetMarkAttribute(document, operation);
+    const list = result.children[0];
+
+    if (!isListNode(list)) {
+      throw new Error("Expected an ordered list result.");
+    }
+
+    expect(list.children[0]?.children).toEqual([
+      { text: "列表", type: "text" },
+      { marks: { textColor: "#1677ff" }, text: "颜色", type: "text" },
+    ]);
+    expect(createSelectionAfterSetMarkAttribute(document, operation)).toEqual({
+      anchor: { path: [0, 0, 1], offset: 0 },
+      focus: { path: [0, 0, 1], offset: 2 },
+    });
+  });
+
   it("creates an operation with cloned range paths", () => {
     const anchorPath = [0, 0];
     const focusPath = [0, 0];

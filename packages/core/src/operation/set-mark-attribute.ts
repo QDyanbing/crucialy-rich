@@ -1,7 +1,6 @@
 import {
   createText,
   isValidTextMarkAttributeValue,
-  isTextBlockNode,
   mergeAdjacentTextNodes,
   normalizeTextMarks,
   removeTextMarkAttribute,
@@ -19,6 +18,7 @@ import {
   getTextMarkRangeTarget,
   type TextMarkRangeTarget,
 } from "./text-mark-range";
+import { replaceTextContainer } from "./text-target";
 import type { SetMarkAttributeOperation } from "./types";
 
 export function createSetMarkAttributeOperation<
@@ -147,23 +147,17 @@ export function applySetMarkAttribute(
     document,
     operation.range,
     "set mark attribute",
+    true,
   );
 
-  return {
-    ...document,
-    children: document.children.map((block, blockIndex) =>
-      blockIndex === target.blockIndex && isTextBlockNode(block)
-        ? {
-            ...block,
-            children: mergeAdjacentTextNodes([
-              ...block.children.slice(0, target.startTextIndex),
-              ...createRangeReplacement(block.children, target, operation),
-              ...block.children.slice(target.endTextIndex + 1),
-            ]),
-          }
-        : block,
-    ),
-  };
+  return replaceTextContainer(document, target.containerPath, {
+    ...target.container,
+    children: mergeAdjacentTextNodes([
+      ...target.container.children.slice(0, target.startTextIndex),
+      ...createRangeReplacement(target.container.children, target, operation),
+      ...target.container.children.slice(target.endTextIndex + 1),
+    ]),
+  });
 }
 
 export function createSelectionAfterSetMarkAttribute(
@@ -174,9 +168,9 @@ export function createSelectionAfterSetMarkAttribute(
     document,
     operation.range,
     "set mark attribute",
+    true,
   );
-  const textNode =
-    document.children[target.blockIndex]?.children[target.startTextIndex];
+  const textNode = target.container.children[target.startTextIndex];
 
   if (!textNode) {
     throw new RangeError("set mark attribute range must reference text nodes");
