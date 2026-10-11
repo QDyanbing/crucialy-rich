@@ -7,6 +7,8 @@ import {
   createHeading,
   createParagraph,
   createQuote,
+  createTableCell,
+  createTableRow,
   createText,
 } from "../../src";
 import {
@@ -100,6 +102,44 @@ describe("text mark command ranges", () => {
     expect(restoreTextMarkCommandSelection(document, selection, nextDocument)).toEqual({
       anchor: { path: [1, 0], offset: 2 },
       focus: { path: [0, 1], offset: 0 },
+    });
+  });
+
+  it("restores endpoints in separate table paragraphs", () => {
+    const document = createDocument([
+      {
+        children: [
+          createTableRow([
+            createTableCell([
+              createParagraph([createText("第一段")]),
+              createParagraph([createText("第二段")]),
+            ]),
+          ]),
+        ],
+        type: "table",
+      },
+    ]);
+    const selection = {
+      anchor: { path: [0, 0, 0, 1, 0], offset: 2 },
+      focus: { path: [0, 0, 0, 0, 0], offset: 1 },
+    };
+    const nextDocument = createDocument([
+      {
+        children: [
+          createTableRow([
+            createTableCell([
+              createParagraph([createText("第"), createText("一段", { bold: true })]),
+              createParagraph([createText("第二", { bold: true }), createText("段")]),
+            ]),
+          ]),
+        ],
+        type: "table",
+      },
+    ]);
+
+    expect(restoreTextMarkCommandSelection(document, selection, nextDocument)).toEqual({
+      anchor: { path: [0, 0, 0, 1, 0], offset: 2 },
+      focus: { path: [0, 0, 0, 0, 1], offset: 0 },
     });
   });
 });

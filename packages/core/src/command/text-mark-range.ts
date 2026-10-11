@@ -1,10 +1,10 @@
 import { isListEntryNode, isTextBlockNode, type DocumentNode } from "../model";
 import {
   comparePoint,
-  getBlockTextOffset,
   getNodeAtPath,
-  getPointAtBlockTextOffset,
+  getPointAtTextContainerOffset,
   getTextContainerPath,
+  getTextContainerOffset,
   isCollapsed,
   isSameTextContainer,
   isValidPoint,
@@ -120,30 +120,33 @@ export function restoreTextMarkCommandSelection(
   selection: RangeSelection,
   nextDocument: DocumentNode,
 ): RangeSelection | undefined {
-  const anchorBlockIndex = selection.anchor.path[0];
-  const focusBlockIndex = selection.focus.path[0];
-  const anchorOffset = getBlockTextOffset(document, selection.anchor);
-  const focusOffset = getBlockTextOffset(document, selection.focus);
+  const anchorContainerPath = getTextContainerPath(selection.anchor);
+  const focusContainerPath = getTextContainerPath(selection.focus);
+  const anchorOffset = getTextContainerOffset(document, selection.anchor);
+  const focusOffset = getTextContainerOffset(document, selection.focus);
   const forward = comparePoint(selection.anchor, selection.focus) <= 0;
 
   if (
-    anchorBlockIndex === undefined ||
-    focusBlockIndex === undefined ||
+    !anchorContainerPath ||
+    !focusContainerPath ||
     anchorOffset === undefined ||
     focusOffset === undefined
   ) {
     return undefined;
   }
 
-  const anchor = getPointAtBlockTextOffset(
+  const anchor = getPointAtTextContainerOffset(
     nextDocument,
-    anchorBlockIndex,
+    anchorContainerPath,
     anchorOffset,
     { affinity: forward ? "forward" : "backward" },
   );
-  const focus = getPointAtBlockTextOffset(nextDocument, focusBlockIndex, focusOffset, {
-    affinity: forward ? "backward" : "forward",
-  });
+  const focus = getPointAtTextContainerOffset(
+    nextDocument,
+    focusContainerPath,
+    focusOffset,
+    { affinity: forward ? "backward" : "forward" },
+  );
 
   return anchor && focus ? { anchor, focus } : undefined;
 }
