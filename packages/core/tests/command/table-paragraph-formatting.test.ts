@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   applyTransaction,
   boldCommand,
+  clearFormattingCommand,
   createDocument,
   createParagraph,
   createTableCell,
@@ -107,5 +108,49 @@ describe("table paragraph formatting commands", () => {
         ),
       ),
     ).toBe(true);
+  });
+
+  it("clears formatting across paragraphs in the same cell", () => {
+    const document = createDocument([
+      {
+        children: [
+          createTableRow([
+            createTableCell([
+              createParagraph([
+                createText("第一段", {
+                  bold: true,
+                  fontSize: 20,
+                  link: { href: "https://example.com/cell" },
+                }),
+              ]),
+              createParagraph([
+                createText("第二段", {
+                  italic: true,
+                  textColor: "#1677ff",
+                }),
+              ]),
+            ]),
+          ]),
+        ],
+        type: "table",
+      },
+    ]);
+    const result = clearFormattingCommand.execute({
+      context: { document, selection: forwardSelection },
+    });
+
+    expect(result.transaction?.operations).toHaveLength(2);
+    expect(result.selection).toEqual(forwardSelection);
+
+    const table = applyTransaction(document, result.transaction!).children[0];
+
+    if (!isTableNode(table)) {
+      throw new Error("Expected a table result.");
+    }
+
+    expect(table.children[0]?.children[0]?.children).toEqual([
+      createParagraph([createText("第一段")]),
+      createParagraph([createText("第二段")]),
+    ]);
   });
 });

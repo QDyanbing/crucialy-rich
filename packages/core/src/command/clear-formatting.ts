@@ -9,6 +9,7 @@ import {
   getTextMarkCommandRanges,
   restoreTextMarkCommandSelection,
 } from "./text-mark-range";
+import { isSameTextContainer } from "../selection";
 import type { Command, CommandInput } from "./types";
 
 export const CLEAR_FORMATTING_COMMAND_NAME = "clearFormatting";
@@ -40,14 +41,14 @@ export const clearFormattingCommand: Command = {
 
     const operations = ranges.map(({ range }) => createClearMarksOperation(range));
     const transaction = createTransaction(operations);
-    const nextSelection =
-      selection.anchor.path[0] === selection.focus.path[0]
-        ? createSelectionAfterClearMarks(input.context.document, operations[0]!)
-        : restoreTextMarkCommandSelection(
-            input.context.document,
-            selection,
-            applyTransaction(input.context.document, transaction),
-          );
+    const singleContainer = isSameTextContainer(selection.anchor, selection.focus);
+    const nextSelection = singleContainer
+      ? createSelectionAfterClearMarks(input.context.document, operations[0]!)
+      : restoreTextMarkCommandSelection(
+          input.context.document,
+          selection,
+          applyTransaction(input.context.document, transaction),
+        );
 
     if (!nextSelection) {
       return createCommandSkipped(
