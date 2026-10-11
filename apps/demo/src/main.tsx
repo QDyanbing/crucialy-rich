@@ -312,6 +312,9 @@ const modelExamples: ModelExample[] = [
         const column = index % 3;
         table.children[row]!.children[column]!.children[0]!.children[0]!.text = label;
       });
+      table.children[0]!.children[0]!.children.push(
+        createParagraph([createText("同一单元格第二段")]),
+      );
 
       return createDocument([
         table,
