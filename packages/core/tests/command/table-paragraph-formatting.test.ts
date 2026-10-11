@@ -13,6 +13,7 @@ import {
   isTableNode,
   setFontSizeCommand,
   setLinkCommand,
+  setTextColorCommand,
 } from "../../src";
 
 function createMultiParagraphTable() {
@@ -123,6 +124,44 @@ describe("table paragraph formatting commands", () => {
         paragraph.children.every((text) => text.marks?.fontSize === 20),
       ),
     ).toBe(true);
+  });
+
+  it("removes a text attribute from a reversed cell range", () => {
+    const document = createDocument([
+      {
+        children: [
+          createTableRow([
+            createTableCell([
+              createParagraph([
+                createText("第一段", { bold: true, textColor: "#1677ff" }),
+              ]),
+              createParagraph([createText("第二段", { textColor: "#1677ff" })]),
+            ]),
+          ]),
+        ],
+        type: "table",
+      },
+    ]);
+    const selection = {
+      anchor: { path: [0, 0, 0, 1, 0], offset: 3 },
+      focus: { path: [0, 0, 0, 0, 0], offset: 0 },
+    };
+    const result = setTextColorCommand.execute({
+      context: { document, selection },
+      payload: { textColor: null },
+    });
+    const table = applyTransaction(document, result.transaction!).children[0];
+
+    expect(result.selection).toEqual(selection);
+
+    if (!isTableNode(table)) {
+      throw new Error("Expected a table result.");
+    }
+
+    expect(table.children[0]?.children[0]?.children).toEqual([
+      createParagraph([createText("第一段", { bold: true })]),
+      createParagraph([createText("第二段")]),
+    ]);
   });
 
   it("sets a link across paragraphs in the same cell", () => {
