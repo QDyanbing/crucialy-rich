@@ -9,6 +9,7 @@ import {
   createTableCell,
   createTableRow,
   createText,
+  isBoldCommandActive,
   isTableNode,
   setFontSizeCommand,
   setLinkCommand,
@@ -60,6 +61,45 @@ describe("table paragraph formatting commands", () => {
         paragraph.children.every((text) => text.marks?.bold === true),
       ),
     ).toBe(true);
+  });
+
+  it("reads and removes a boolean mark from a reversed cell range", () => {
+    const document = createDocument([
+      {
+        children: [
+          createTableRow([
+            createTableCell([
+              createParagraph([createText("第一段", { bold: true })]),
+              createParagraph([createText("第二段", { bold: true })]),
+            ]),
+          ]),
+        ],
+        type: "table",
+      },
+    ]);
+    const selection = {
+      anchor: { path: [0, 0, 0, 1, 0], offset: 3 },
+      focus: { path: [0, 0, 0, 0, 0], offset: 0 },
+    };
+    const input = { context: { document, selection } };
+
+    expect(isBoldCommandActive(input)).toBe(true);
+
+    const result = boldCommand.execute(input);
+
+    expect(result.transaction?.operations).toEqual([
+      expect.objectContaining({ active: false, type: "toggle_mark" }),
+      expect.objectContaining({ active: false, type: "toggle_mark" }),
+    ]);
+    expect(result.selection).toEqual(selection);
+    expect(
+      isBoldCommandActive({
+        context: {
+          document: applyTransaction(document, result.transaction!),
+          selection: result.selection,
+        },
+      }),
+    ).toBe(false);
   });
 
   it("sets a text attribute across paragraphs in the same cell", () => {
