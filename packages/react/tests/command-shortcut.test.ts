@@ -42,6 +42,30 @@ function selectRenderedText(container: HTMLElement, path = "[0,0]") {
   selection.addRange(range);
 }
 
+function selectRenderedTextRange(
+  container: HTMLElement,
+  startPath: string,
+  endPath: string,
+) {
+  const startText = container.querySelector(
+    `[data-crucialy-path="${startPath}"]`,
+  )?.firstChild;
+  const endText = container.querySelector(
+    `[data-crucialy-path="${endPath}"]`,
+  )?.firstChild;
+  const selection = window.getSelection();
+
+  if (!startText?.textContent || !endText?.textContent || !selection) {
+    throw new Error("Missing rendered shortcut range target.");
+  }
+
+  const range = document.createRange();
+  range.setStart(startText, 0);
+  range.setEnd(endText, endText.textContent.length);
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
 describe("RichTextEditor command shortcuts", () => {
   it("forwards heading shortcut payloads", () => {
     const container = document.createElement("div");
@@ -188,5 +212,54 @@ describe("RichTextEditor command shortcuts", () => {
     });
 
     expect(container.querySelector("td em")?.textContent).toBe("表格快捷键");
+  });
+
+  it("executes one mark shortcut across table cell paragraphs", () => {
+    const container = document.createElement("div");
+    const handleTransaction = vi.fn();
+    const root = createRoot(container);
+
+    roots.push(root);
+    document.body.append(container);
+
+    act(() => {
+      root.render(
+        createElement(RichTextEditor, {
+          contentEditable: true,
+          defaultValue: createDocument([
+            {
+              children: [
+                createTableRow([
+                  createTableCell([
+                    createParagraph([createText("第一段")]),
+                    createParagraph([createText("第二段")]),
+                  ]),
+                ]),
+              ],
+              type: "table",
+            },
+          ]),
+          onTransaction: handleTransaction,
+        }),
+      );
+    });
+
+    const editor = container.firstElementChild;
+    selectRenderedTextRange(container, "[0,0,0,0,0]", "[0,0,0,1,0]");
+
+    act(() => {
+      editor?.dispatchEvent(
+        new KeyboardEvent("keydown", {
+          bubbles: true,
+          ctrlKey: true,
+          key: "b",
+        }),
+      );
+    });
+
+    expect(container.querySelectorAll("td strong")).toHaveLength(2);
+    expect(handleTransaction).toHaveBeenCalledWith(
+      expect.objectContaining({ inputType: "formatShortcut" }),
+    );
   });
 });
