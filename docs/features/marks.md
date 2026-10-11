@@ -207,7 +207,7 @@ const clearFormattingCommand: Command;
 
 执行规则：
 
-- 支持 paragraph、heading、quote 的单块或连续顶层跨块选区，以及同一列表项或同一表格单元格段落，并保持正向或反向选区方向。
+- 支持 paragraph、heading、quote 的单块或连续顶层跨块选区，以及同一列表项或同一表格单元格内的连续 paragraph，并保持正向或反向选区方向。
 - 同时移除 bold、italic、underline、strike、code、fontSize、textColor、backgroundColor 和 link。
 - 不修改选区外的文字与格式；清除后会合并相邻纯文本节点并恢复模型选区。
 - collapsed selection 会建立纯文本输入位置，使后续输入不继承当前格式。
@@ -255,5 +255,5 @@ Clipboard parser 将 `strong` / `b` 映射为 bold、`em` / `i` 映射为 italic
 ## 当前限制
 
 - React Toolbar 已内置五种 boolean mark 默认项；编辑器为前四种样式提供默认 mark 快捷键，Inline Code 暂无预设快捷键。
-- boolean mark 与文字属性 command 支持连续顶层 paragraph、heading、quote，以及同一列表项或同一表格单元格段落；每个文本容器对应一条 operation，并在同一 transaction 中提交。
+- boolean mark 与文字属性 command 支持连续顶层 paragraph、heading、quote，以及同一列表项或同一表格单元格内的连续 paragraph；每个文本容器对应一条 operation，并在同一 transaction 中提交。
 - boolean mark、三种文字属性与 Link Mark 均支持上述范围；CodeBlock、Divider、Image、跨列表项和跨单元格选区仍是样式边界。
