@@ -3,17 +3,21 @@ import { describe, expect, it } from "vitest";
 import {
   applyTransaction,
   boldCommand,
+  canExecuteUnsetLinkCommand,
   clearFormattingCommand,
   createDocument,
   createParagraph,
   createTableCell,
   createTableRow,
   createText,
+  getSelectedLinkMark,
   isBoldCommandActive,
+  isLinkCommandActive,
   isTableNode,
   setFontSizeCommand,
   setLinkCommand,
   setTextColorCommand,
+  unsetLinkCommand,
 } from "../../src";
 
 function createMultiParagraphTable() {
@@ -187,6 +191,46 @@ describe("table paragraph formatting commands", () => {
         ),
       ),
     ).toBe(true);
+  });
+
+  it("reads and removes one link across cell paragraphs", () => {
+    const link = { href: "https://example.com/cell" };
+    const document = createDocument([
+      {
+        children: [
+          createTableRow([
+            createTableCell([
+              createParagraph([createText("第一段", { bold: true, link })]),
+              createParagraph([createText("第二段", { link })]),
+            ]),
+          ]),
+        ],
+        type: "table",
+      },
+    ]);
+    const selection = {
+      anchor: { path: [0, 0, 0, 1, 0], offset: 3 },
+      focus: { path: [0, 0, 0, 0, 0], offset: 0 },
+    };
+    const input = { context: { document, selection } };
+
+    expect(getSelectedLinkMark(input)).toEqual(link);
+    expect(isLinkCommandActive(input)).toBe(true);
+    expect(canExecuteUnsetLinkCommand(input)).toBe(true);
+
+    const result = unsetLinkCommand.execute(input);
+    const table = applyTransaction(document, result.transaction!).children[0];
+
+    expect(result.selection).toEqual(selection);
+
+    if (!isTableNode(table)) {
+      throw new Error("Expected a table result.");
+    }
+
+    expect(table.children[0]?.children[0]?.children).toEqual([
+      createParagraph([createText("第一段", { bold: true })]),
+      createParagraph([createText("第二段")]),
+    ]);
   });
 
   it("clears formatting across paragraphs in the same cell", () => {
