@@ -11,6 +11,7 @@ import {
   getTextMarkCommandRanges,
   restoreTextMarkCommandSelection,
 } from "./text-mark-range";
+import { isSameTextContainer } from "../selection";
 import type { Command, CommandInput } from "./types";
 
 export interface TextMarkAttributeCommandConfig<
@@ -50,14 +51,14 @@ export function createTextMarkAttributeCommand<
         createSetMarkAttributeOperation(range, config.attribute, value),
       );
       const transaction = createTransaction(operations);
-      const nextSelection =
-        selection.anchor.path[0] === selection.focus.path[0]
-          ? createSelectionAfterSetMarkAttribute(input.context.document, operations[0]!)
-          : restoreTextMarkCommandSelection(
-              input.context.document,
-              selection,
-              applyTransaction(input.context.document, transaction),
-            );
+      const singleContainer = isSameTextContainer(selection.anchor, selection.focus);
+      const nextSelection = singleContainer
+        ? createSelectionAfterSetMarkAttribute(input.context.document, operations[0]!)
+        : restoreTextMarkCommandSelection(
+            input.context.document,
+            selection,
+            applyTransaction(input.context.document, transaction),
+          );
 
       if (!nextSelection) {
         return createCommandSkipped(config.commandName, config.invalidReason);

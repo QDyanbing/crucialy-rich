@@ -9,6 +9,7 @@ import {
   createTableRow,
   createText,
   isTableNode,
+  setFontSizeCommand,
 } from "../../src";
 
 function createMultiParagraphTable() {
@@ -55,6 +56,29 @@ describe("table paragraph formatting commands", () => {
     expect(
       table.children[0]?.children[0]?.children.every((paragraph) =>
         paragraph.children.every((text) => text.marks?.bold === true),
+      ),
+    ).toBe(true);
+  });
+
+  it("sets a text attribute across paragraphs in the same cell", () => {
+    const document = createMultiParagraphTable();
+    const result = setFontSizeCommand.execute({
+      context: { document, selection: forwardSelection },
+      payload: { fontSize: 20 },
+    });
+
+    expect(result.transaction?.operations).toHaveLength(2);
+    expect(result.selection).toEqual(forwardSelection);
+
+    const table = applyTransaction(document, result.transaction!).children[0];
+
+    if (!isTableNode(table)) {
+      throw new Error("Expected a table result.");
+    }
+
+    expect(
+      table.children[0]?.children[0]?.children.every((paragraph) =>
+        paragraph.children.every((text) => text.marks?.fontSize === 20),
       ),
     ).toBe(true);
   });
