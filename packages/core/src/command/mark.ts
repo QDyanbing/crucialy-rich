@@ -10,7 +10,7 @@ import {
   createToggleMarkOperation,
   createTransaction,
 } from "../operation";
-import { getNodeAtPath, isCollapsed } from "../selection";
+import { getNodeAtPath, isCollapsed, isSameTextContainer } from "../selection";
 import { createCommandSkipped, createCommandSuccess } from "./result";
 import {
   getTextMarkCommandRanges,
@@ -149,22 +149,21 @@ export function createTextMarkCommand(config: TextMarkCommandConfig): Command {
         );
       }
 
-      const active =
-        selection.anchor.path[0] !== selection.focus.path[0]
-          ? !isTextMarkCommandActive(input, config.mark)
-          : undefined;
+      const singleContainer = isSameTextContainer(selection.anchor, selection.focus);
+      const active = singleContainer
+        ? undefined
+        : !isTextMarkCommandActive(input, config.mark);
       const operations = ranges.map(({ range }) =>
         createToggleMarkOperation(range, config.mark, active),
       );
       const transaction = createTransaction(operations);
-      const nextSelection =
-        selection.anchor.path[0] === selection.focus.path[0]
-          ? createSelectionAfterToggleMark(input.context.document, operations[0]!)
-          : restoreTextMarkCommandSelection(
-              input.context.document,
-              selection,
-              applyTransaction(input.context.document, transaction),
-            );
+      const nextSelection = singleContainer
+        ? createSelectionAfterToggleMark(input.context.document, operations[0]!)
+        : restoreTextMarkCommandSelection(
+            input.context.document,
+            selection,
+            applyTransaction(input.context.document, transaction),
+          );
 
       if (!nextSelection) {
         return createCommandSkipped(
