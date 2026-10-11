@@ -1,6 +1,7 @@
 import { isListEntryNode, isTextBlockNode, type DocumentNode } from "../model";
 import {
   comparePoint,
+  getCellPathFromPoint,
   getNodeAtPath,
   getPointAtTextContainerOffset,
   getTextContainerPath,
@@ -24,25 +25,85 @@ function clonePoint(point: Point): Point {
   return { offset: point.offset, path: [...point.path] };
 }
 
-function getBlockBoundaryPoint(
+function arePathsEqual(left: Path, right: Path): boolean {
+  return (
+    left.length === right.length && left.every((part, index) => part === right[index])
+  );
+}
+
+function getTextContainerBoundaryPoint(
   document: DocumentNode,
-  blockIndex: number,
+  containerPath: Path,
   edge: "end" | "start",
 ): Point | undefined {
-  const block = document.children[blockIndex];
+  const container = getNodeAtPath(document, containerPath);
 
-  if (!isTextBlockNode(block) || block.type === "codeBlock") {
+  if (!isTextBlockNode(container) || container.type === "codeBlock") {
     return undefined;
   }
 
   if (edge === "start") {
-    return { offset: 0, path: [blockIndex, 0] };
+    return { offset: 0, path: [...containerPath, 0] };
   }
 
-  const textIndex = block.children.length - 1;
-  const text = block.children[textIndex];
+  const textIndex = container.children.length - 1;
+  const text = container.children[textIndex];
 
-  return text ? { offset: text.text.length, path: [blockIndex, textIndex] } : undefined;
+  return text
+    ? { offset: text.text.length, path: [...containerPath, textIndex] }
+    : undefined;
+}
+
+function getTableParagraphRanges(
+  document: DocumentNode,
+  range: RangeSelection,
+): TextMarkCommandRange[] | undefined {
+  const cellPath = getCellPathFromPoint(document, range.anchor);
+  const focusCellPath = getCellPathFromPoint(document, range.focus);
+  const startParagraphIndex = range.anchor.path[3];
+  const endParagraphIndex = range.focus.path[3];
+  const blockIndex = range.anchor.path[0];
+
+  if (
+    !cellPath ||
+    !focusCellPath ||
+    !arePathsEqual(cellPath, focusCellPath) ||
+    startParagraphIndex === undefined ||
+    endParagraphIndex === undefined ||
+    blockIndex === undefined
+  ) {
+    return undefined;
+  }
+
+  const ranges: TextMarkCommandRange[] = [];
+
+  for (
+    let paragraphIndex = startParagraphIndex;
+    paragraphIndex <= endParagraphIndex;
+    paragraphIndex += 1
+  ) {
+    const containerPath = [...cellPath, paragraphIndex];
+    const anchor =
+      paragraphIndex === startParagraphIndex
+        ? clonePoint(range.anchor)
+        : getTextContainerBoundaryPoint(document, containerPath, "start");
+    const focus =
+      paragraphIndex === endParagraphIndex
+        ? clonePoint(range.focus)
+        : getTextContainerBoundaryPoint(document, containerPath, "end");
+
+    if (!anchor || !focus) {
+      return undefined;
+    }
+
+    const paragraphRange = { anchor, focus };
+
+    if (!isCollapsed(paragraphRange)) {
+      ranges.push({ blockIndex, containerPath, range: paragraphRange });
+    }
+  }
+
+  return ranges.length > 0 ? ranges : undefined;
 }
 
 export function getTextMarkCommandRanges(
@@ -79,6 +140,12 @@ export function getTextMarkCommandRanges(
     return [{ blockIndex: startBlockIndex, containerPath, range }];
   }
 
+  const tableParagraphRanges = getTableParagraphRanges(document, range);
+
+  if (tableParagraphRanges) {
+    return tableParagraphRanges;
+  }
+
   if (range.anchor.path.length !== 2 || range.focus.path.length !== 2) {
     return undefined;
   }
@@ -95,11 +162,11 @@ export function getTextMarkCommandRanges(
     const anchor =
       blockIndex === startBlockIndex
         ? clonePoint(range.anchor)
-        : getBlockBoundaryPoint(document, blockIndex, "start");
+        : getTextContainerBoundaryPoint(document, [blockIndex], "start");
     const focus =
       blockIndex === endBlockIndex
         ? clonePoint(range.focus)
-        : getBlockBoundaryPoint(document, blockIndex, "end");
+        : getTextContainerBoundaryPoint(document, [blockIndex], "end");
 
     if (!anchor || !focus) {
       return undefined;

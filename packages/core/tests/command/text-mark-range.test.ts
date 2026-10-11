@@ -85,6 +85,76 @@ describe("text mark command ranges", () => {
     ).toBeUndefined();
   });
 
+  it("segments continuous paragraphs inside one table cell", () => {
+    const document = createDocument([
+      {
+        children: [
+          createTableRow([
+            createTableCell([
+              createParagraph([createText("第一段")]),
+              createParagraph([createText("第二段")]),
+              createParagraph([createText("第三段")]),
+            ]),
+          ]),
+        ],
+        type: "table",
+      },
+    ]);
+
+    expect(
+      getTextMarkCommandRanges(document, {
+        anchor: { path: [0, 0, 0, 0, 0], offset: 1 },
+        focus: { path: [0, 0, 0, 2, 0], offset: 2 },
+      }),
+    ).toEqual([
+      {
+        blockIndex: 0,
+        containerPath: [0, 0, 0, 0],
+        range: {
+          anchor: { path: [0, 0, 0, 0, 0], offset: 1 },
+          focus: { path: [0, 0, 0, 0, 0], offset: 3 },
+        },
+      },
+      {
+        blockIndex: 0,
+        containerPath: [0, 0, 0, 1],
+        range: {
+          anchor: { path: [0, 0, 0, 1, 0], offset: 0 },
+          focus: { path: [0, 0, 0, 1, 0], offset: 3 },
+        },
+      },
+      {
+        blockIndex: 0,
+        containerPath: [0, 0, 0, 2],
+        range: {
+          anchor: { path: [0, 0, 0, 2, 0], offset: 0 },
+          focus: { path: [0, 0, 0, 2, 0], offset: 2 },
+        },
+      },
+    ]);
+  });
+
+  it("rejects a table range that crosses cells", () => {
+    const document = createDocument([
+      {
+        children: [
+          createTableRow([
+            createTableCell([createParagraph([createText("左侧")])]),
+            createTableCell([createParagraph([createText("右侧")])]),
+          ]),
+        ],
+        type: "table",
+      },
+    ]);
+
+    expect(
+      getTextMarkCommandRanges(document, {
+        anchor: { path: [0, 0, 0, 0, 0], offset: 0 },
+        focus: { path: [0, 0, 1, 0, 0], offset: 2 },
+      }),
+    ).toBeUndefined();
+  });
+
   it("restores a reversed range after text nodes split", () => {
     const document = createDocument([
       createParagraph([createText("第一段")]),
