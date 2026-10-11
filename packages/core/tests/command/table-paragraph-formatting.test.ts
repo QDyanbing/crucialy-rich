@@ -92,7 +92,11 @@ describe("table paragraph formatting commands", () => {
 
     const result = boldCommand.execute(input);
 
-    expect(result.transaction?.operations).toEqual([
+    if (!result.transaction || !result.selection) {
+      throw new Error("Bold command should update the table paragraph range.");
+    }
+
+    expect(result.transaction.operations).toEqual([
       expect.objectContaining({ active: false, type: "toggle_mark" }),
       expect.objectContaining({ active: false, type: "toggle_mark" }),
     ]);

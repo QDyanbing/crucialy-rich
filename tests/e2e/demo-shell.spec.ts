@@ -3189,15 +3189,15 @@ test("edits selects and pastes TSV into table cells", async ({ page }) => {
   await expect(firstCell).toHaveAttribute("data-selected", "true");
   await expect(page.getByLabel("当前单元格路径")).toHaveText("当前单元格：0 → 0 → 0");
 
-  await firstCell.locator("p").click();
+  await firstCell.locator("p").first().click();
   await page.keyboard.press("End");
   await page.keyboard.type("项");
   await expect(firstCell).toContainText("姓名项");
 
   await page.keyboard.press("Enter");
-  await expect(firstCell.locator("p")).toHaveCount(2);
+  await expect(firstCell.locator("p")).toHaveCount(3);
   await page.keyboard.press("Backspace");
-  await expect(firstCell.locator("p")).toHaveCount(1);
+  await expect(firstCell.locator("p")).toHaveCount(2);
   await expect(firstCell).toContainText("姓名项");
 
   await firstCell.click();
