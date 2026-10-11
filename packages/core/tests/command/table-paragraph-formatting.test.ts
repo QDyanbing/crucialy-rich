@@ -10,6 +10,7 @@ import {
   createText,
   isTableNode,
   setFontSizeCommand,
+  setLinkCommand,
 } from "../../src";
 
 function createMultiParagraphTable() {
@@ -79,6 +80,31 @@ describe("table paragraph formatting commands", () => {
     expect(
       table.children[0]?.children[0]?.children.every((paragraph) =>
         paragraph.children.every((text) => text.marks?.fontSize === 20),
+      ),
+    ).toBe(true);
+  });
+
+  it("sets a link across paragraphs in the same cell", () => {
+    const document = createMultiParagraphTable();
+    const result = setLinkCommand.execute({
+      context: { document, selection: forwardSelection },
+      payload: { href: "https://example.com/cell" },
+    });
+
+    expect(result.transaction?.operations).toHaveLength(2);
+    expect(result.selection).toEqual(forwardSelection);
+
+    const table = applyTransaction(document, result.transaction!).children[0];
+
+    if (!isTableNode(table)) {
+      throw new Error("Expected a table result.");
+    }
+
+    expect(
+      table.children[0]?.children[0]?.children.every((paragraph) =>
+        paragraph.children.every(
+          (text) => text.marks?.link?.href === "https://example.com/cell",
+        ),
       ),
     ).toBe(true);
   });

@@ -13,7 +13,7 @@ import {
   createSetLinkOperation,
   createTransaction,
 } from "../operation";
-import { getNodeAtPath, isCollapsed } from "../selection";
+import { getNodeAtPath, isCollapsed, isSameTextContainer } from "../selection";
 import { createCommandSkipped, createCommandSuccess } from "./result";
 import {
   getTextMarkCommandRanges,
@@ -154,14 +154,14 @@ function createLinkCommandResult(
   );
   const transaction = createTransaction(operations);
   const selection = input.context.selection!;
-  const nextSelection =
-    selection.anchor.path[0] === selection.focus.path[0]
-      ? createSelectionAfterSetLink(input.context.document, operations[0]!)
-      : restoreTextMarkCommandSelection(
-          input.context.document,
-          selection,
-          applyTransaction(input.context.document, transaction),
-        );
+  const singleContainer = isSameTextContainer(selection.anchor, selection.focus);
+  const nextSelection = singleContainer
+    ? createSelectionAfterSetLink(input.context.document, operations[0]!)
+    : restoreTextMarkCommandSelection(
+        input.context.document,
+        selection,
+        applyTransaction(input.context.document, transaction),
+      );
 
   if (!nextSelection) {
     return createCommandSkipped(
