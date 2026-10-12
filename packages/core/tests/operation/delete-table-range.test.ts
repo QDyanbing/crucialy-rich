@@ -10,6 +10,7 @@ import {
   createTableCell,
   createTableRow,
   createText,
+  validateDocument,
   type ParagraphNode,
   type RangeSelection,
 } from "../../src";
@@ -67,4 +68,88 @@ describe("delete range inside a table cell", () => {
       expect(document).toEqual(snapshot);
     },
   );
+
+  it("keeps one editable empty paragraph after deleting all cell text", () => {
+    const document = tableDocument([
+      createParagraph([createText("第一段")]),
+      createParagraph([createText("第二段")]),
+    ]);
+    const operation = createDeleteRangeOperation({
+      anchor: { path: [0, 0, 0, 0, 0], offset: 0 },
+      focus: { path: [0, 0, 0, 1, 0], offset: 3 },
+    });
+    const result = applyDeleteRange(document, operation);
+
+    expect(result).toEqual(tableDocument([createParagraph()]));
+    expect(validateDocument(result).valid).toBe(true);
+    expect(createSelectionAfterDeleteRange(document, operation)).toEqual({
+      anchor: { path: [0, 0, 0, 0, 0], offset: 0 },
+      focus: { path: [0, 0, 0, 0, 0], offset: 0 },
+    });
+  });
+
+  it("deletes a paragraph break without removing either boundary text", () => {
+    const document = tableDocument([
+      createParagraph([createText("前段")]),
+      createParagraph([createText("后段")]),
+    ]);
+    const operation = createDeleteRangeOperation({
+      anchor: { path: [0, 0, 0, 0, 0], offset: 2 },
+      focus: { path: [0, 0, 0, 1, 0], offset: 0 },
+    });
+
+    expect(applyDeleteRange(document, operation)).toEqual(
+      tableDocument([createParagraph([createText("前段后段")])]),
+    );
+    expect(createSelectionAfterDeleteRange(document, operation).anchor).toEqual({
+      path: [0, 0, 0, 0, 0],
+      offset: 2,
+    });
+  });
+
+  it("preserves boundary text nodes and links outside the selected fragments", () => {
+    const link = { href: "https://example.com/retained" };
+    const document = tableDocument([
+      createParagraph([createText("保", { bold: true }), createText("删除")]),
+      createParagraph(),
+      createParagraph([createText("剪掉"), createText("尾", { link })]),
+    ]);
+    const operation = createDeleteRangeOperation({
+      anchor: { path: [0, 0, 0, 0, 1], offset: 0 },
+      focus: { path: [0, 0, 0, 2, 0], offset: 2 },
+    });
+
+    expect(applyDeleteRange(document, operation)).toEqual(
+      tableDocument([
+        createParagraph([createText("保", { bold: true }), createText("尾", { link })]),
+      ]),
+    );
+    expect(createSelectionAfterDeleteRange(document, operation).anchor).toEqual({
+      path: [0, 0, 0, 0, 0],
+      offset: 1,
+    });
+  });
+
+  it.each([
+    { name: "same paragraph", focus: { path: [0, 0, 0, 0, 0], offset: 1 } },
+    { name: "another cell", focus: { path: [0, 0, 1, 0, 0], offset: 1 } },
+    { name: "outside the table", focus: { path: [1, 0], offset: 1 } },
+    { name: "missing paragraph", focus: { path: [0, 0, 0, 2, 0], offset: 1 } },
+    { name: "invalid offset", focus: { path: [0, 0, 0, 1, 0], offset: 99 } },
+  ])("rejects $name without mutating the document", ({ focus }) => {
+    const document = tableDocument([
+      createParagraph([createText("第一段")]),
+      createParagraph([createText("第二段")]),
+    ]);
+    const snapshot = structuredClone(document);
+    const range = { anchor: { path: [0, 0, 0, 0, 0], offset: 0 }, focus };
+    const operation = createDeleteRangeOperation(range);
+
+    expect(canDeleteRange(document, range)).toBe(false);
+    expect(() => applyDeleteRange(document, operation)).toThrow(RangeError);
+    expect(() => createSelectionAfterDeleteRange(document, operation)).toThrow(
+      RangeError,
+    );
+    expect(document).toEqual(snapshot);
+  });
 });
