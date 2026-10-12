@@ -5,8 +5,8 @@ import {
   type TextBlockNode,
 } from "../model";
 import {
-  getBlockTextOffset,
-  getPointAtBlockTextOffset,
+  getPointAtTextContainerOffset,
+  getTextContainerOffset,
   isCollapsed,
   isValidPoint,
   normalizeRange,
@@ -76,6 +76,34 @@ export function canDeleteRange(document: DocumentNode, range: RangeSelection): b
   );
 }
 
+function mergeRangeBoundaryBlocks<T extends TextBlockNode>(
+  startBlock: T,
+  endBlock: TextBlockNode,
+  range: RangeSelection,
+): T {
+  const startTextIndex = range.anchor.path.at(-1)!;
+  const endTextIndex = range.focus.path.at(-1)!;
+  const startText = startBlock.children[startTextIndex]!;
+  const endText = endBlock.children[endTextIndex]!;
+  const prefix = startText.text.slice(0, range.anchor.offset);
+  const suffix = endText.text.slice(range.focus.offset);
+  const boundaryChildren = [
+    ...startBlock.children.slice(0, startTextIndex),
+    ...(prefix ? [{ ...startText, text: prefix }] : []),
+    ...(suffix ? [{ ...endText, text: suffix }] : []),
+    ...endBlock.children.slice(endTextIndex + 1),
+  ];
+  const children = mergeAdjacentTextNodes(
+    startBlock.type === "codeBlock"
+      ? boundaryChildren.map((text) => ({ text: text.text, type: "text" as const }))
+      : boundaryChildren,
+  );
+  return {
+    ...startBlock,
+    children: children.length > 0 ? children : [{ ...startText, text: "" }],
+  };
+}
+
 export function applyDeleteRange(
   document: DocumentNode,
   operation: DeleteRangeOperation,
@@ -88,27 +116,11 @@ export function applyDeleteRange(
     );
   }
 
-  const startTextIndex = target.range.anchor.path[1]!;
-  const endTextIndex = target.range.focus.path[1]!;
-  const startText = target.startBlock.children[startTextIndex]!;
-  const endText = target.endBlock.children[endTextIndex]!;
-  const prefix = startText.text.slice(0, target.range.anchor.offset);
-  const suffix = endText.text.slice(target.range.focus.offset);
-  const boundaryChildren = [
-    ...target.startBlock.children.slice(0, startTextIndex),
-    ...(prefix ? [{ ...startText, text: prefix }] : []),
-    ...(suffix ? [{ ...endText, text: suffix }] : []),
-    ...target.endBlock.children.slice(endTextIndex + 1),
-  ];
-  const children = mergeAdjacentTextNodes(
-    target.startBlock.type === "codeBlock"
-      ? boundaryChildren.map((text) => ({ text: text.text, type: "text" as const }))
-      : boundaryChildren,
+  const mergedBlock = mergeRangeBoundaryBlocks(
+    target.startBlock,
+    target.endBlock,
+    target.range,
   );
-  const mergedBlock: TextBlockNode = {
-    ...target.startBlock,
-    children: children.length > 0 ? children : [{ ...startText, text: "" }],
-  };
 
   return {
     ...document,
@@ -132,14 +144,17 @@ export function createSelectionAfterDeleteRange(
     );
   }
 
-  const textOffset = getBlockTextOffset(document, target.range.anchor);
+  const textOffset = getTextContainerOffset(document, target.range.anchor);
   const nextDocument = applyDeleteRange(document, operation);
   const point =
     textOffset === undefined
       ? undefined
-      : getPointAtBlockTextOffset(nextDocument, target.startBlockIndex, textOffset, {
-          affinity: "backward",
-        });
+      : getPointAtTextContainerOffset(
+          nextDocument,
+          target.range.anchor.path.slice(0, -1),
+          textOffset,
+          { affinity: "backward" },
+        );
 
   if (!point) {
     throw new RangeError("deleted block range selection could not be restored");
