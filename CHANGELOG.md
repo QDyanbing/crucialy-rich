@@ -8,6 +8,8 @@
 
 ### 新增
 
+- 扩展 `delete_range`，支持同一表格单元格连续 paragraph 的选区删除、输入替换、中文组合输入和选区 Enter；保留边界格式、邻格与表格结构。
+- 新增同 cell 跨段落范围编辑的 Core 边界、Command、History、React 事件和 Chromium 回归，补齐选区恢复、整格删空及继续输入验收。
 - 新增同一列表项、同一表格单元格内连续 paragraph 的 boolean mark、文字属性、链接与清除格式能力。
 - 新增嵌套及 cell 多段落格式的 Core operation/command、React 快捷键、History 与 Chromium Toolbar 回归覆盖。
 - 新增 `clear_marks` operation 与 `clearFormattingCommand`，可一次移除选区内的 boolean mark、字号、文字颜色、背景色和链接。

@@ -2,7 +2,7 @@
 
 ## 执行信息
 
-- 日期：2026-10-11
+- 日期：2026-10-12
 - 版本：`0.1.0`
 - 分支：`master`
 - 命令：`pnpm check:all`
@@ -14,12 +14,12 @@
 | Prettier   | 通过 | 全仓文件格式一致                          |
 | ESLint     | 通过 | 0 warning、0 error                        |
 | TypeScript | 通过 | 根工程与 core/react/demo 包级检查全部通过 |
-| Vitest     | 通过 | 162 个测试文件，1150 项测试               |
+| Vitest     | 通过 | 166 个测试文件，1176 项测试               |
 | Core 构建  | 通过 | ESM、source map、类型声明生成成功         |
 | React 构建 | 通过 | ESM、source map、类型声明生成成功         |
 | Demo 构建  | 通过 | Vite 生产构建成功                         |
 | 包产物导入 | 通过 | core/react 运行时导出与声明文件校验成功   |
-| Playwright | 通过 | Chromium 126 项测试                       |
+| Playwright | 通过 | Chromium 131 项测试                       |
 
 ## 核心路径
 
@@ -35,6 +35,7 @@
 - Inline Code 模型、编辑保留、Command、语义渲染、默认 Toolbar、HTML/Markdown 粘贴、History、React 与 Chromium 路径均通过。
 - 清除格式 operation、单块与跨块 Command、collapsed 输入占位、默认 Toolbar、History 和 Chromium 路径均通过。
 - 列表项及同一表格单元格连续段落内的 boolean mark、文字属性、链接、清除格式、正反向状态、History、React 快捷键和 Toolbar Chromium 路径均通过。
+- 同一 cell 跨段落范围删除、输入替换、Composition 事件提交、选区 Enter、边界 marks/link 保留、空段落、结构拒绝、选区映射及 History 的 Core/React/Chromium 路径通过；邻格与行列结构不变。
 - HTML 链接 target/rel 规范化、安全降级、任务列表与表格复用、Command/History、React 与 Chromium 粘贴路径均通过。
 - HTML 三层嵌套普通/任务列表、混合类型、marks/链接、深层选区、Command/History、React 与 Chromium 粘贴路径均通过。
 - OrderedList 安全整数起始编号、规范化、渲染、前后段续编、HTML 粘贴、Command/History、React 与 Chromium 路径均通过。
