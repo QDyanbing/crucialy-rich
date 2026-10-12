@@ -765,6 +765,67 @@ test("replaces a table cell paragraph range with Chinese composition", async ({
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
 
+for (const key of ["Backspace", "Delete"] as const) {
+  test(`deletes a table cell paragraph range with ${key}`, async ({ page }) => {
+    await page.goto("/");
+    await page.getByLabel("模型示例").selectOption("tables");
+    await selectRenderedTextAcrossNodes(page, "[0,0,0,0,0]", 1, "[0,0,0,1,0]", 5);
+    await page.keyboard.press(key);
+
+    const editor = page.getByLabel("已渲染文档");
+    const cell = editor.locator("td").first();
+    await expect(cell.locator("p")).toHaveText(["姓第二段"]);
+    await expect(page.getByLabel("锚点路径")).toHaveValue("0,0,0,0,0");
+    await expect(page.getByLabel("锚点偏移")).toHaveValue("1");
+    await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+
+    await page.getByRole("button", { name: "撤销", exact: true }).click();
+    await expect(cell.locator("p")).toHaveText(["姓名", "同一单元格第二段"]);
+    await expect(page.getByLabel("焦点路径")).toHaveValue("0,0,0,1,0");
+    await expect(page.getByLabel("焦点偏移")).toHaveValue("5");
+    await page.getByRole("button", { name: "重做", exact: true }).click();
+    await expect(cell.locator("p")).toHaveText(["姓第二段"]);
+    await expect(editor.locator("td")).toHaveCount(9);
+    await expect(editor.locator("td").nth(1)).toHaveText("角色");
+    await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+  });
+}
+
+test("splits a table cell paragraph range with Enter and restores history", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("tables");
+  await selectRenderedTextAcrossNodes(page, "[0,0,0,0,0]", 1, "[0,0,0,1,0]", 5);
+  await page.keyboard.press("Enter");
+
+  const editor = page.getByLabel("已渲染文档");
+  const cell = editor.locator("td").first();
+  await expect(cell.locator("p")).toHaveText(["姓", "第二段"]);
+  await expect(page.getByLabel("锚点路径")).toHaveValue("0,0,0,1,0");
+  await expect(page.getByLabel("锚点偏移")).toHaveValue("0");
+  const transaction = JSON.parse(
+    (await page.getByLabel("最近 Transaction", { exact: true }).textContent()) ?? "{}",
+  ) as { operations: { type: string }[] };
+  expect(transaction.operations.map((operation) => operation.type)).toEqual([
+    "delete_range",
+    "split_block",
+  ]);
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect(cell.locator("p")).toHaveText(["姓名", "同一单元格第二段"]);
+  await page.getByRole("button", { name: "重做", exact: true }).click();
+  await expect(cell.locator("p")).toHaveText(["姓", "第二段"]);
+
+  await insertEditorText(page, "续");
+  await expect(cell.locator("p")).toHaveText(["姓", "续第二段"]);
+  await expect(page.getByLabel("锚点偏移")).toHaveValue("1");
+  await expect(editor.locator("td")).toHaveCount(9);
+  await expect(editor.locator("td").nth(1)).toHaveText("角色");
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
 test("switches paragraphs between ordered and unordered lists", async ({ page }) => {
   await page.goto("/");
   await setDebuggerSelection(page, "0,0", 0, 2);
