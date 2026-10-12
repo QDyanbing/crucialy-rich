@@ -14,7 +14,7 @@
 
 当前 React 组件已支持通过 `value` / `defaultValue` 展示文档模型，普通文本输入、非折叠删除选区、选区 Enter 分段、段首 Backspace 合并和段尾 Delete 合并会优先复用 command；组件会通过 `onTransaction` 暴露真实输入 transaction。演示页按钮命令和真实输入都会记录 history，并支持撤销、重做、Ctrl/Meta + Z、Ctrl/Meta + Shift + Z、Ctrl/Meta + Y、连续 typing 合并和 undoStack/redoStack 状态查看。
 
-非折叠选区编辑已支持同一文本容器内跨 text 节点，以及跨连续顶层 paragraph、heading、quote、codeBlock。输入替换、Backspace、Delete、Enter、选区映射和 History 往返共用 `delete_text` / `delete_range` operation；列表、表格、图片和分隔线等结构边界暂不参与跨块删除。
+非折叠选区编辑已支持同一文本容器内跨 text 节点、跨连续顶层 paragraph、heading、quote、codeBlock，以及同一表格单元格内的连续 paragraph。输入替换、Backspace、Delete、Enter、选区映射和 History 往返共用 `delete_text` / `delete_range` operation；跨列表项、跨单元格、进出表格、图片和分隔线等结构边界暂不参与范围删除。
 
 五种 boolean mark、字号、文字颜色、背景色与 Link Mark 已支持跨连续顶层 paragraph、heading、quote，以及同一列表项或同一表格单元格内的连续 paragraph 应用和取消；command 会把范围拆成逐文本容器 operation，并在同一 transaction 中统一状态、恢复正向或反向选区。CodeBlock、void block、跨列表项和跨单元格选择仍是样式范围边界。
 
@@ -44,7 +44,7 @@ Quote 内按 Enter 会保留引用格式分段；空 Quote 再按 Enter 则原�
 
 第 21 周“基础表格闭环”已全部完成：core 支持 table/tableRow/tableCell 模型、矩形结构校验与修复、完整模型 Path、语义渲染、默认 3×3 插入、整表删除以及行列增删命令；Demo 和 Playwright 提供中文验收流程。
 
-第 22 周“表格编辑闭环”已全部完成：单元格支持文字输入、删除、Enter 分段和段落边界合并；core 提供 CellSelection、当前 cell 定位、`set_table_cell_text` 与 TSV 网格粘贴；React 支持 cell 点击回调和可控高亮，Demo 显示当前 cell path，Playwright 覆盖完整交互。
+第 22 周“表格编辑闭环”已全部完成并继续扩展：单元格支持文字输入、删除、Enter 分段和段落边界合并，也支持同一 cell 内跨段落的选区删除、输入替换、中文组合输入及选区 Enter；core 提供 CellSelection、当前 cell 定位、`set_table_cell_text` 与 TSV 网格粘贴；React 支持 cell 点击回调和可控高亮，Demo 显示当前 cell path，Playwright 覆盖编辑及 History 往返。
 
 第 23 周“键盘与输入法闭环”已全部完成并继续扩展：支持 Composition 状态与中文候选词单次提交、boolean mark、标题、引用、列表和撤销重做统一快捷键解析，以及 paragraph 开头的标题、列表、引用和代码块 Markdown 输入规则。
 

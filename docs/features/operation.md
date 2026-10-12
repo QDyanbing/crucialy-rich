@@ -149,11 +149,12 @@ interface TransactionAcceptanceReport {
 
 当前规则：
 
-- 只接受跨越两个或更多连续顶层文本块的非折叠 range。
+- 接受跨越两个或更多连续顶层文本块，或同一表格单元格内两个或更多连续 paragraph 的非折叠 range；正向和反向选区使用相同规则。
 - 支持 paragraph、heading、quote 和 codeBlock，结果保留起始块类型与起始边界之前的内容。
 - 删除范围内的中间块被移除，终点之后的文本拼接到起始块。
 - CodeBlock 作为起始块时会移除拼接文本的 marks，保证纯文本约束。
-- 不跨越 Divider、Image、List 或 Table 等结构节点；命中这些边界时抛出 `RangeError`。
+- 同 cell 范围只合并目标 cell 的段落，不改变行列或邻格内容；整格文字删空时保留一个空 paragraph。
+- 不跨越 Divider、Image、List、不同 cell 或进出 Table 的结构边界；命中这些边界时抛出 `RangeError`。
 - `createSelectionAfterDeleteRange` 会把选区折叠到保留内容的起始偏移。
 
 ## 创建和应用 Boolean Mark 操作
@@ -407,9 +408,9 @@ interface TransactionAcceptanceReport {
 ## 当前限制
 
 - 当前实现文本、Mark、链接、Block Type、block split/merge 和通用 block insert/remove。
-- 删除支持同一文本容器内跨 text 节点，以及连续顶层文本块范围；暂不跨越列表、表格或 void block 等结构边界。
+- 删除支持同一文本容器内跨 text 节点、连续顶层文本块范围，以及同一 cell 内连续 paragraph 范围；暂不跨越列表项、cell、进出表格或 void block 等结构边界。
 - 合并暂不支持跨多段批量合并，也不会跨 void block。
 - 单条 `set_block_type` 仍只处理一个顶层 block；Heading/Quote command 已能在同一 transaction 中组合多条 operation 完成跨块切换，语义 renderer 已支持 `h1`–`h6` 与 `blockquote`。
 - transaction 当前只负责批量应用和结束 normalize；History 已使用快照策略提供撤销/重做，operation 层本身暂不生成 undo/redo inverse 信息。
 - text operation 会保留现有 text marks；单条 `toggle_mark`、`set_mark_attribute`、`set_link` 和 `clear_marks` 限定在一个文本容器内，可处理顶层文本块、列表项或表格单元格段落。Mark command 可在同一 transaction 中组合多条 operation，完成连续顶层文本块或同一表格单元格内连续 paragraph 的样式更新。
-- 普通 `beforeinput insertText`、同容器及连续顶层文本块的非折叠选区替换、Backspace、Delete 和 Enter 已接入输入事件管线，并复用当前 command、operation 和 transaction 更新模型。
+- 普通 `beforeinput insertText`、同容器、连续顶层文本块及同 cell 连续 paragraph 的非折叠选区替换、Backspace、Delete 和 Enter 已接入输入事件管线，并复用当前 command、operation 和 transaction 更新模型。

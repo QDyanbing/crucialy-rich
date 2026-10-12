@@ -63,6 +63,9 @@ renderer 输出 `table > tbody > tr > td > p` 语义结构，并为模型节点�
 - 普通输入和字符删除复用 `insert_text` / `delete_text`。
 - Enter 把当前 paragraph 拆成同一 cell 内的两个 paragraph。
 - paragraph 开头的 Backspace 与结尾的 Delete 只合并同一 cell 内的相邻 paragraph。
+- 同一 cell 内跨连续 paragraph 的非折叠选区可通过 Backspace/Delete 删除、普通输入或中文组合输入替换；共用 `delete_range` 合并边界，保留范围之外的文字、marks 和邻格内容。
+- 选区 Enter 先删除范围，再在起点分段；两个 operation 组成一个 transaction，光标落在同一 cell 的新 paragraph 开头。
+- 跨段落删除支持正向和反向选区；整格文字被删后保留一个可编辑空 paragraph，撤销恢复原段落及原选区，重做恢复结果及光标。
 - 表格文本范围读取以制表符分隔 cell、换行分隔 row，供调试器和选区工具使用。
 - `set_table_cell_text` 用一个 paragraph 替换目标 cell 内容，主要供二维粘贴事务复用。
 
@@ -79,7 +82,7 @@ renderer 输出 `table > tbody > tr > td > p` 语义结构，并为模型节点�
 ## 当前限制
 
 - 同一 cell 内的连续 paragraph 支持 boolean mark、文字属性、链接和清除格式，并作为一个 transaction 进入 History；暂不支持跨 cell 的格式化选区。
-- 暂不支持跨 cell 范围选择、合并单元格和表头。
+- 暂不支持跨 cell 或进出表格的范围编辑、合并单元格和表头；同 cell 跨段落编辑不会新增或删除行列。
 - HTML 导入不保留 `colspan`、`rowspan`、`th` 语义或嵌套表格结构。
 - TSV 超出当前表格范围时不会自动扩表。
 

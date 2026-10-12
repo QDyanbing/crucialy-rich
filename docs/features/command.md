@@ -27,9 +27,9 @@ Command 系统负责把“可执行的编辑意图”包装成统一接口。当
 - 提供 `BLOCK_TYPE_COMMANDS`，集中暴露 Heading 与 Quote command，并由默认注册表统一装配。
 - 提供 `createTextMarkAttributeCommand` 内部工厂，统一字号和颜色的选区校验、operation 创建与 selection 映射。
 - 提供 `createTextMarkCommand`、`canExecuteTextMarkCommand` 和 `isTextMarkCommandActive`，供文字格式命令复用。
-- 提供 `insertTextCommand`，支持 collapsed selection 插入文本、同一文本容器跨 text 节点替换，以及连续顶层文本块替换。
-- 提供 `deleteSelectionCommand`，支持同一文本容器跨 text 节点删除，以及连续顶层文本块删除。
-- 提供 `splitBlockCommand`，支持 collapsed selection 直接分段，也支持先删除同容器或连续顶层文本块选区再分段，并复用列表、表格和 CodeBlock 的 Enter 规则。
+- 提供 `insertTextCommand`，支持 collapsed selection 插入文本、同一文本容器跨 text 节点替换、连续顶层文本块替换及同 cell 连续 paragraph 替换。
+- 提供 `deleteSelectionCommand`，支持同一文本容器跨 text 节点删除、连续顶层文本块删除及同 cell 连续 paragraph 删除。
+- 提供 `splitBlockCommand`，支持 collapsed selection 直接分段，也支持先删除同容器、连续顶层文本块或同 cell 连续 paragraph 选区再分段，并复用列表、表格和 CodeBlock 的 Enter 规则。
 - 提供 `mergeBlockCommand`，支持 collapsed selection 位于非首文本块开头时合并上一文本块，遇到 void block 时跳过。
 
 ## Core API
@@ -238,9 +238,9 @@ const mergeBlockCommand: Command;
 
 ## 当前限制
 
-- 文本插入和删除 command 支持同一文本容器或连续顶层文本块 range；暂不跨越列表、表格和 void block 等结构边界。
+- 文本插入和删除 command 支持同一文本容器、连续顶层文本块或同 cell 连续 paragraph range；暂不跨越列表项、cell、进出表格和 void block 等结构边界。
 - boolean mark、文字属性、链接和清除格式 command 支持 paragraph、heading、quote 的单块或连续顶层跨块 selection，也支持同一列表项或同一表格单元格内的连续 paragraph；CodeBlock、Divider、Image、跨列表项和跨单元格 selection 不接受 marks。
-- `splitBlockCommand` 支持 collapsed、同容器和连续顶层文本块 selection；`mergeBlockCommand` 与 `insertDividerCommand` 仍只处理 collapsed selection。
+- `splitBlockCommand` 支持 collapsed、同容器、连续顶层文本块和同 cell 连续 paragraph selection；`mergeBlockCommand` 与 `insertDividerCommand` 仍只处理 collapsed selection。
 - 快捷键模块不处理权限；宿主提供自定义 registry 时，React 编辑器会使用该 registry 执行命中的默认快捷键名称。
 - History 模块已提供 `undoCommand` 和 `redoCommand`；默认 Command 注册表暂不内置 history command。
 - 当前没有批量 command pipeline。

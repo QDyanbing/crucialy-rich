@@ -1,6 +1,6 @@
 # 输入事件（第一版）
 
-输入事件负责把浏览器编辑意图转换为模型 transaction。当前阶段已接入 `beforeinput insertText`、Backspace、Delete 和 Enter；同一文本容器或连续顶层文本块中的非折叠选区可以通过输入、删除或 Enter 完成替换、删除与分段。
+输入事件负责把浏览器编辑意图转换为模型 transaction。当前阶段已接入 `beforeinput insertText`、Backspace、Delete 和 Enter；同一文本容器、连续顶层文本块或同一表格单元格内连续 paragraph 的非折叠选区可以通过输入、删除或 Enter 完成替换、删除与分段。
 
 ## 当前范围
 
@@ -13,18 +13,18 @@
 - 通过 `onChange` 输出最新 `DocumentNode`。
 - 输入后通过 `createSelectionAfterInsertTextInput` 计算新的折叠选区。
 - 支持 collapsed selection 下的 Backspace。
-- 支持同一文本容器及连续顶层文本块 selection 的 Backspace 删除。
+- 支持同一文本容器、连续顶层文本块及同 cell 连续 paragraph selection 的 Backspace 删除。
 - 段中 Backspace 会删除光标前一个字符。
 - 段首 Backspace 会合并上一段。
 - 文本块开头的 Backspace 会删除紧邻的前一个 void block，并修正 block path。
 - Backspace 后通过 `createSelectionAfterBackspaceInput` 计算新的折叠选区。
 - 支持 collapsed selection 下的 Delete。
-- 支持同一文本容器及连续顶层文本块 selection 的 Delete 删除。
+- 支持同一文本容器、连续顶层文本块及同 cell 连续 paragraph selection 的 Delete 删除。
 - 段中 Delete 会删除光标后一个字符。
 - 段尾 Delete 会合并下一段。
 - 文本块末尾的 Delete 会删除紧邻的后一个 void block，并保持当前 Point。
 - Delete 后通过 `createSelectionAfterDeleteInput` 计算新的折叠选区。
-- 支持 collapsed selection，以及同一文本容器或连续顶层文本块 selection 下的 Enter。
+- 支持 collapsed selection，以及同一文本容器、连续顶层文本块或同 cell 连续 paragraph selection 下的 Enter。
 - 非折叠 selection 会先通过共享范围删除计划折叠到起点，再执行当前位置的 Enter 规则。
 - block 首部、中间、尾部和空 block Enter 会分裂当前 block，并保留 block type、heading level 和 text marks。
 - 空 Quote 的 Enter 会原地转为 paragraph；非空 Quote 仍分裂为两个 Quote。
@@ -155,7 +155,7 @@ function createSelectionAfterTabInput(input: TabInput): RangeSelection;
 - `onCompositionStateChange`：输入法开始、更新和结束时输出当前 Composition 状态。
 - `onCompositionStart` / `onCompositionUpdate` / `onCompositionEnd`：外部回调先执行，内部随后维护候选状态和最终提交。
 - 普通文本输入复用 `insertTextCommand`。
-- 同一文本容器内跨 text 节点、或跨连续顶层文本块的普通文本输入会先删除选区，再插入输入文本。
+- 同一文本容器内跨 text 节点、跨连续顶层文本块或同 cell 连续 paragraph 的普通文本输入会先删除选区，再插入输入文本。
 - 非折叠 selection 下的 Backspace/Delete 复用 `deleteSelectionCommand`。
 - Enter 复用 `splitBlockCommand`；非折叠选区会在同一 transaction 中先删除再分段。
 - 段首 Backspace 复用 `mergeBlockCommand`。
@@ -185,7 +185,7 @@ function createSelectionAfterTabInput(input: TabInput): RangeSelection;
 - 在段中按 Delete 删除后一个字符。
 - 在第一段段尾按 Delete 合并下一段。
 - 在段首、段中、段尾或空段按 Enter 分裂段落。
-- 选中同一文本容器或连续顶层文本块后按 Enter，删除选区并在起点建立新段落边界。
+- 选中同一文本容器、连续顶层文本块或同 cell 连续 paragraph 后按 Enter，删除选区并在起点建立新段落边界。
 - 在 CodeBlock 内输入多行，并通过连续两次 Enter 退出。
 - 在 Quote 末尾按 Enter 创建空引用，再按 Enter 退出为正文；全选 Quote 内容后按 Enter 也会退出。
 - 从 Divider 后方按 Backspace 或前方按 Delete 删除分隔线。
@@ -204,10 +204,10 @@ function createSelectionAfterTabInput(input: TabInput): RangeSelection;
 
 ## 当前限制
 
-- 普通 `insertText`、Backspace 和 Delete 支持 collapsed selection、同一文本容器内跨 text 节点选区，以及连续顶层文本块选区。
-- 跨块编辑暂不跨越 Divider、Image、List、Table 等结构节点；列表项和表格段落仅支持各自文本容器内部的范围。
+- 普通 `insertText`、Backspace 和 Delete 支持 collapsed selection、同一文本容器内跨 text 节点选区、连续顶层文本块选区及同 cell 连续 paragraph 选区。
+- 范围编辑暂不跨越 Divider、Image、列表项、不同 cell 或进出 Table 的结构边界；列表项仅支持各自文本容器内部的范围。
 - 暂不处理拖拽输入。
-- 非折叠 Enter 与其他范围编辑使用相同结构边界：不跨越 Divider、Image、List 或 Table；列表项和表格段落内部仍可按各自规则分段。
+- 非折叠 Enter 与其他范围编辑使用相同结构边界：不跨越 Divider、Image、列表项、不同 cell 或进出 Table；同 cell 跨段落选区分段后，光标仍停留在该 cell。
 - 组件本身不持有 history 状态，撤销重做快捷键需要宿主接入 history 状态。
 
 输入法、快捷键和输入规则的独立契约见[中文输入法](./ime.md)、[编辑快捷键](./shortcuts.md)和 [Markdown 输入规则](./input-rules.md)。
