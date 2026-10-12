@@ -705,6 +705,66 @@ test("formats multiple paragraphs inside one table cell", async ({ page }) => {
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
 
+test("replaces a table cell paragraph range and continues typing", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("tables");
+  await selectRenderedTextAcrossNodes(page, "[0,0,0,0,0]", 1, "[0,0,0,1,0]", 5);
+
+  await insertEditorText(page, "新");
+  const editor = page.getByLabel("已渲染文档");
+  const cell = editor.locator("td").first();
+  await expect(cell.locator("p")).toHaveCount(1);
+  await expect(cell).toHaveText("姓新第二段");
+  await expect(page.getByLabel("锚点路径")).toHaveValue("0,0,0,0,0");
+  await expect(page.getByLabel("锚点偏移")).toHaveValue("2");
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"type": "delete_range"',
+  );
+
+  await insertEditorText(page, "续");
+  await expect(cell).toHaveText("姓新续第二段");
+  await expect(page.getByLabel("锚点偏移")).toHaveValue("3");
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect(cell.locator("p")).toHaveText(["姓名", "同一单元格第二段"]);
+  await page.getByRole("button", { name: "重做", exact: true }).click();
+  await expect(cell).toHaveText("姓新续第二段");
+  await expect(editor.locator("td")).toHaveCount(9);
+  await expect(editor.locator("td").nth(1)).toHaveText("角色");
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
+test("replaces a table cell paragraph range with Chinese composition", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("tables");
+  await selectRenderedTextAcrossNodes(page, "[0,0,0,0,0]", 1, "[0,0,0,1,0]", 5);
+
+  const editor = page.getByLabel("已渲染文档");
+  await editor.evaluate((element) => {
+    element.dispatchEvent(new CompositionEvent("compositionstart", { bubbles: true }));
+    element.dispatchEvent(
+      new CompositionEvent("compositionupdate", { bubbles: true, data: "中文" }),
+    );
+    element.dispatchEvent(
+      new CompositionEvent("compositionend", { bubbles: true, data: "中文" }),
+    );
+  });
+
+  const cell = editor.locator("td").first();
+  await expect(cell).toHaveText("姓中文第二段");
+  await expect(cell.locator("p")).toHaveCount(1);
+  await expect(page.getByLabel("锚点偏移")).toHaveValue("3");
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect(cell.locator("p")).toHaveText(["姓名", "同一单元格第二段"]);
+  await page.getByRole("button", { name: "重做", exact: true }).click();
+  await expect(cell).toHaveText("姓中文第二段");
+  await expect(editor.locator("td")).toHaveCount(9);
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
 test("switches paragraphs between ordered and unordered lists", async ({ page }) => {
   await page.goto("/");
   await setDebuggerSelection(page, "0,0", 0, 2);
