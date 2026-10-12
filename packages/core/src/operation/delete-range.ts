@@ -1,20 +1,27 @@
 import {
+  isParagraphNode,
+  isTableCellNode,
+  isTableNode,
   isTextBlockNode,
   mergeAdjacentTextNodes,
   type DocumentNode,
   type TextBlockNode,
 } from "../model";
 import {
+  getCellSelectionFromRange,
+  getNodeAtPath,
   getPointAtTextContainerOffset,
   getTextContainerOffset,
   isCollapsed,
   isValidPoint,
   normalizeRange,
+  type Path,
   type RangeSelection,
 } from "../selection";
 import type { DeleteRangeOperation } from "./types";
 
 interface DeleteRangeTarget {
+  cellPath?: Path;
   endBlock: TextBlockNode;
   endBlockIndex: number;
   range: RangeSelection;
@@ -44,13 +51,56 @@ export function getDeleteRangeTarget(
 
   if (
     isCollapsed(range) ||
+    !isValidPoint(document, range.anchor) ||
+    !isValidPoint(document, range.focus)
+  ) {
+    return undefined;
+  }
+
+  const cellPath = getCellSelectionFromRange(document, range)?.path;
+
+  if (cellPath) {
+    const cell = getNodeAtPath(document, cellPath);
+    const startParagraphIndex = range.anchor.path[3];
+    const endParagraphIndex = range.focus.path[3];
+
+    if (
+      !isTableCellNode(cell) ||
+      startParagraphIndex === undefined ||
+      endParagraphIndex === undefined ||
+      startParagraphIndex >= endParagraphIndex
+    ) {
+      return undefined;
+    }
+
+    const paragraphs = cell.children.slice(startParagraphIndex, endParagraphIndex + 1);
+    const startBlock = paragraphs[0];
+    const endBlock = paragraphs.at(-1);
+
+    if (
+      !isParagraphNode(startBlock) ||
+      !isParagraphNode(endBlock) ||
+      !paragraphs.every(isParagraphNode)
+    ) {
+      return undefined;
+    }
+
+    return {
+      cellPath,
+      endBlock,
+      endBlockIndex: endParagraphIndex,
+      range,
+      startBlock,
+      startBlockIndex: startParagraphIndex,
+    };
+  }
+
+  if (
     range.anchor.path.length !== 2 ||
     range.focus.path.length !== 2 ||
     startBlockIndex === undefined ||
     endBlockIndex === undefined ||
-    startBlockIndex >= endBlockIndex ||
-    !isValidPoint(document, range.anchor) ||
-    !isValidPoint(document, range.focus)
+    startBlockIndex >= endBlockIndex
   ) {
     return undefined;
   }
@@ -112,7 +162,7 @@ export function applyDeleteRange(
 
   if (!target) {
     throw new RangeError(
-      "delete range must cross top-level text blocks without structural nodes",
+      "delete range must cross top-level text blocks or paragraphs in one table cell",
     );
   }
 
@@ -121,6 +171,45 @@ export function applyDeleteRange(
     target.endBlock,
     target.range,
   );
+
+  if (target.cellPath) {
+    const [blockIndex, rowIndex, cellIndex] = target.cellPath;
+    const table = blockIndex === undefined ? undefined : document.children[blockIndex];
+
+    if (!isTableNode(table) || !isParagraphNode(mergedBlock)) {
+      throw new RangeError("delete range must reference table paragraphs");
+    }
+
+    return {
+      ...document,
+      children: document.children.map((block, index) =>
+        index === blockIndex
+          ? {
+              ...table,
+              children: table.children.map((row, currentRowIndex) =>
+                currentRowIndex === rowIndex
+                  ? {
+                      ...row,
+                      children: row.children.map((cell, currentCellIndex) =>
+                        currentCellIndex === cellIndex
+                          ? {
+                              ...cell,
+                              children: [
+                                ...cell.children.slice(0, target.startBlockIndex),
+                                mergedBlock,
+                                ...cell.children.slice(target.endBlockIndex + 1),
+                              ],
+                            }
+                          : cell,
+                      ),
+                    }
+                  : row,
+              ),
+            }
+          : block,
+      ),
+    };
+  }
 
   return {
     ...document,
@@ -140,7 +229,7 @@ export function createSelectionAfterDeleteRange(
 
   if (!target) {
     throw new RangeError(
-      "delete range must cross top-level text blocks without structural nodes",
+      "delete range must cross top-level text blocks or paragraphs in one table cell",
     );
   }
 
