@@ -27,6 +27,23 @@ async function insertEditorText(page: Page, data: string) {
   await page.keyboard.insertText(data);
 }
 
+async function pasteEditorClipboard(page: Page, mimeType: string, data: string) {
+  await page.getByLabel("已渲染文档").evaluate(
+    (editor, clipboard) => {
+      const clipboardData = new DataTransfer();
+      clipboardData.setData(clipboard.mimeType, clipboard.data);
+      editor.dispatchEvent(
+        new ClipboardEvent("paste", {
+          bubbles: true,
+          cancelable: true,
+          clipboardData,
+        }),
+      );
+    },
+    { mimeType, data },
+  );
+}
+
 async function selectRenderedTextRange(
   page: Page,
   path: string,
@@ -2757,6 +2774,69 @@ test("inserts, selects, and deletes image blocks", async ({ page }) => {
   await expect(documentJson).toContainText('"src": "blob:');
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
+
+for (const clipboard of [
+  {
+    mimeType: "text/plain",
+    data: "第一行\n第二行",
+    texts: ["你好，第一行", "第二行模型已就绪。"],
+    offset: "3",
+    continued: "第二行续模型已就绪。",
+  },
+  {
+    mimeType: "text/html",
+    data: "<p><strong>中文粘贴</strong></p>",
+    texts: ["你好，", "中文粘贴", "模型已就绪。"],
+    offset: "4",
+    continued: "中文粘贴续",
+  },
+  {
+    mimeType: "text/markdown",
+    data: "# 中文粘贴",
+    texts: ["你好，", "中文粘贴", "模型已就绪。"],
+    offset: "4",
+    continued: "中文粘贴续",
+  },
+]) {
+  test(`replaces a cross-block range with native ${clipboard.mimeType} paste`, async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await selectRenderedTextAcrossNodes(page, "[0,0]", 3, "[1,0]", 2);
+    await pasteEditorClipboard(page, clipboard.mimeType, clipboard.data);
+
+    const editor = page.getByLabel("已渲染文档");
+    const blocks = editor.locator(":scope > p, :scope > h1");
+    await expect(blocks).toHaveText(clipboard.texts);
+    await expect(page.getByLabel("锚点路径")).toHaveValue("1,0");
+    await expect(page.getByLabel("锚点偏移")).toHaveValue(clipboard.offset);
+    await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+      '"type": "delete_range"',
+    );
+    await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+    if (clipboard.mimeType === "text/html") {
+      await expect(editor.locator("strong")).toHaveText("中文粘贴");
+    }
+    if (clipboard.mimeType === "text/markdown") {
+      await expect(editor.locator("h1")).toHaveText("中文粘贴");
+    }
+
+    await page.getByRole("button", { name: "撤销", exact: true }).click();
+    await expect(editor.locator("p")).toHaveText([
+      "你好，crucialy-rich。",
+      "选区模型已就绪。",
+    ]);
+    await expect(page.getByLabel("焦点路径")).toHaveValue("1,0");
+    await expect(page.getByLabel("焦点偏移")).toHaveValue("2");
+    await page.getByRole("button", { name: "重做", exact: true }).click();
+    await expect(blocks).toHaveText(clipboard.texts);
+
+    await insertEditorText(page, "续");
+    await expect(blocks.nth(1)).toHaveText(clipboard.continued);
+    await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 2');
+    await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+  });
+}
 
 test("pastes plain text through the native editor event", async ({ page }) => {
   await page.goto("/");
