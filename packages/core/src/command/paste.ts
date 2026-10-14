@@ -8,8 +8,6 @@ import {
   type ListNode,
 } from "../model";
 import {
-  applyDeleteText,
-  createDeleteTextOperation,
   createInsertBlockOperation,
   createInsertTextOperation,
   createSelectionAfterInsertText,
@@ -22,8 +20,6 @@ import {
 import {
   isCollapsed,
   isValidPoint,
-  getBlockTextOffset,
-  getPointAtBlockTextOffset,
   getCellSelectionFromRange,
   normalizeRange,
   type CellSelection,
@@ -37,6 +33,7 @@ import {
   type ClipboardMimeType,
 } from "../clipboard";
 import { createCommandSkipped, createCommandSuccess } from "./result";
+import { createRangeDeletionPlan, type RangeDeletionOperation } from "./range-deletion";
 import type { Command, CommandInput } from "./types";
 
 export const PASTE_COMMAND_NAME = "paste";
@@ -47,6 +44,7 @@ export interface PasteCommandPayload {
 
 interface PasteTarget {
   cellSelection?: CellSelection;
+  deletion?: RangeDeletionOperation;
   fragment: ClipboardFragment;
   insertionPoint: Point;
   range: RangeSelection;
@@ -93,33 +91,22 @@ function resolvePasteTarget(input: CommandInput): PasteTarget | undefined {
     return undefined;
   }
 
-  let insertionPoint: Point = {
-    offset: range.anchor.offset,
-    path: [...range.anchor.path],
-  };
+  const deletion = isCollapsed(range)
+    ? undefined
+    : createRangeDeletionPlan(input.context.document, range);
 
-  if (!isCollapsed(range) && topLevelTarget) {
-    const textOffset = getBlockTextOffset(input.context.document, range.anchor);
-    const documentAfterDelete = applyDeleteText(
-      input.context.document,
-      createDeleteTextOperation(range),
-    );
-    const pointAfterDelete =
-      textOffset === undefined
-        ? undefined
-        : getPointAtBlockTextOffset(documentAfterDelete, anchorBlockIndex, textOffset);
-
-    if (!pointAfterDelete) {
-      return undefined;
-    }
-
-    insertionPoint = pointAfterDelete;
+  if (!isCollapsed(range) && !deletion) {
+    return undefined;
   }
 
   return {
     ...(cellSelection ? { cellSelection } : {}),
+    ...(deletion ? { deletion: deletion.operation } : {}),
     fragment: payload.fragment as ClipboardFragment,
-    insertionPoint,
+    insertionPoint: deletion?.selection.anchor ?? {
+      offset: range.anchor.offset,
+      path: [...range.anchor.path],
+    },
     range,
   };
 }
@@ -177,9 +164,7 @@ function createPlainTextPasteResult(target: PasteTarget) {
   const lines = target.fragment.blocks.map((block) =>
     block.children.map((node) => node.text).join(""),
   );
-  const operations: Operation[] = isCollapsed(target.range)
-    ? []
-    : [createDeleteTextOperation(target.range)];
+  const operations: Operation[] = target.deletion ? [target.deletion] : [];
   let point = {
     offset: target.insertionPoint.offset,
     path: [...target.insertionPoint.path],
@@ -260,9 +245,7 @@ function createRichPasteResult(target: PasteTarget) {
     return undefined;
   }
 
-  const operations: Operation[] = isCollapsed(target.range)
-    ? []
-    : [createDeleteTextOperation(target.range)];
+  const operations: Operation[] = target.deletion ? [target.deletion] : [];
 
   operations.push(createSplitBlockOperation(target.insertionPoint));
   target.fragment.blocks.forEach((block, index) => {
