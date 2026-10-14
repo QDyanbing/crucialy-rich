@@ -189,7 +189,7 @@ function createTableGridPasteResult(
   document: CommandInput["context"]["document"],
   target: PasteTarget,
 ) {
-  if (!target.cellSelection) {
+  if (!target.cellSelection || !isCollapsed(target.range)) {
     return undefined;
   }
 

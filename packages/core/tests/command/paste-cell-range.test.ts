@@ -22,12 +22,77 @@ function tableDocument(paragraphs: ParagraphNode[]) {
           createTableCell(paragraphs),
           createTableCell([createParagraph([createText("邻格")])]),
         ]),
+        createTableRow([
+          createTableCell([createParagraph([createText("下格")])]),
+          createTableCell([createParagraph([createText("下邻格")])]),
+        ]),
       ],
     },
   ]);
 }
 
 describe("paste over table cell text ranges", () => {
+  describe.each(["forward", "backward"])("%s range", (direction) => {
+    it.each(["甲\n乙", "甲\t乙\n丙\t丁"])(
+      "replaces selected paragraphs with %j without filling adjacent cells",
+      (text) => {
+        const document = tableDocument([
+          createParagraph([createText("开头")]),
+          createParagraph([createText("结尾")]),
+        ]);
+        const start = { path: [0, 0, 0, 0, 0], offset: 1 };
+        const end = { path: [0, 0, 0, 1, 0], offset: 1 };
+        const result = pasteCommand.execute({
+          context: {
+            document,
+            selection: {
+              anchor: direction === "forward" ? start : end,
+              focus: direction === "forward" ? end : start,
+            },
+          },
+          payload: { fragment: parsePlainText(text)! },
+        });
+        const lines = text.split("\n");
+
+        expect(
+          result.transaction?.operations.map((operation) => operation.type),
+        ).toEqual(["delete_range", "insert_text", "split_block", "insert_text"]);
+        expect(applyTransaction(document, result.transaction!)).toEqual(
+          tableDocument([
+            createParagraph([createText(`开${lines[0]}`)]),
+            createParagraph([createText(`${lines[1]}尾`)]),
+          ]),
+        );
+        expect(result.selection?.anchor).toEqual({
+          path: [0, 0, 0, 1, 0],
+          offset: lines[1]!.length,
+        });
+      },
+    );
+  });
+
+  it("keeps TSV inside a selected paragraph instead of replacing whole cells", () => {
+    const document = tableDocument([createParagraph([createText("开旧尾")])]);
+    const result = pasteCommand.execute({
+      context: {
+        document,
+        selection: {
+          anchor: { path: [0, 0, 0, 0, 0], offset: 1 },
+          focus: { path: [0, 0, 0, 0, 0], offset: 2 },
+        },
+      },
+      payload: { fragment: parsePlainText("甲\t乙")! },
+    });
+
+    expect(result.transaction?.operations.map((operation) => operation.type)).toEqual([
+      "delete_text",
+      "insert_text",
+    ]);
+    expect(applyTransaction(document, result.transaction!)).toEqual(
+      tableDocument([createParagraph([createText("开甲\t乙尾")])]),
+    );
+  });
+
   it("maps the insertion point after removing marked text nodes", () => {
     const document = tableDocument([
       createParagraph([
