@@ -75,13 +75,11 @@ function resolvePasteTarget(input: CommandInput): PasteTarget | undefined {
 
   const range = normalizeRange(selection);
   const [anchorBlockIndex] = range.anchor.path;
-  const [focusBlockIndex] = range.focus.path;
   const cellSelection = getCellSelectionFromRange(input.context.document, range);
   const topLevelTarget =
     range.anchor.path.length === 2 &&
     range.focus.path.length === 2 &&
-    anchorBlockIndex !== undefined &&
-    anchorBlockIndex === focusBlockIndex;
+    anchorBlockIndex !== undefined;
 
   if (!topLevelTarget && !cellSelection) {
     return undefined;
