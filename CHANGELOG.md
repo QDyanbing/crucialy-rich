@@ -8,6 +8,8 @@
 
 ### 新增
 
+- 新增连续顶层文本块的纯文本、HTML、Markdown 范围粘贴，以及同一 cell 连续 paragraph 的纯文本/TSV 选区替换。
+- 新增范围粘贴的 Core 边界、History、React Clipboard 事件与 Chromium 回归，覆盖选区恢复、格式保留、邻格不变和继续输入。
 - 扩展 `delete_range`，支持同一表格单元格连续 paragraph 的选区删除、输入替换、中文组合输入和选区 Enter；保留边界格式、邻格与表格结构。
 - 新增同 cell 跨段落范围编辑的 Core 边界、Command、History、React 事件和 Chromium 回归，补齐选区恢复、整格删空及继续输入验收。
 - 新增同一列表项、同一表格单元格内连续 paragraph 的 boolean mark、文字属性、链接与清除格式能力。
@@ -176,6 +178,7 @@
 
 ### 变更
 
+- 表格二维 TSV 填充仅在折叠光标下执行；有文本选区时只替换当前 cell 的选中文字，不覆盖邻格。
 - 更新项目、QA、包和协作文档，使其匹配已完成的模型与选区范围。
 - 更新包主页元信息，统一使用 `master` 分支。
 - 澄清贡献、模型属性和选区演示调试器相关文档。
@@ -222,6 +225,7 @@
 
 ### 修复
 
+- 修复同 cell 跨段落粘贴仍生成 `delete_text` 导致应用报错，以及删除 marked text 节点后粘贴插入位置未重映射的问题。
 - 修复 History 快照把 heading 和 quote 错误克隆为 paragraph，导致 Block Type 操作无法正确 undo/redo 的问题。
 - 修复 Demo 独立类型检查因 `rootDir` 与 workspace 源码路径冲突而失败的问题。
 - 修复标题选择器把引用或混合选区错误显示为正文，导致无法直接恢复 paragraph 的问题。

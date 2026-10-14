@@ -17,6 +17,8 @@
 - History：跨块替换记录为一个历史项，撤销恢复原块结构，重做恢复替换结果。
 - 同 cell History：删除、替换和 Enter 各自记录一项，恢复反向选区，重做恢复光标；撤销后新编辑清空 redo。
 - 同 cell 输入：React 事件与 Chromium 覆盖普通替换、中文组合输入、Backspace/Delete、选区 Enter、继续输入和 History，邻格与行列数不变。
+- 范围粘贴：顶层连续文本块接受纯文本/HTML/Markdown，同 cell 连续 paragraph 接受纯文本及 TSV；复用删除计划恢复插入位置，有文本选区时不做二维填充。
+- 粘贴 History 与原生事件：Core、React 和 Chromium 覆盖一次撤销/重做、原选区恢复、邻格保留与粘贴后继续输入。
 - Demo：中文“跨块选区编辑”样例提供三段、三种 marks 和预置跨块选区。
 
 ## 边界矩阵

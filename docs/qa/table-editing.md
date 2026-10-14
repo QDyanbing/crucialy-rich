@@ -23,6 +23,8 @@
 | 输入替换       | 普通文本与中文组合输入替换同 cell 跨段落选区        | 通过 |
 | 选区 Enter     | 删除后在原 cell 分段，光标可继续在新段落输入        | 通过 |
 | 编辑 History   | 删除、替换与 Enter 一次撤销/重做，恢复原选区        | 通过 |
+| 范围粘贴       | 同 cell 跨段落纯文本/TSV 替换，保留邻格和后缀       | 通过 |
+| TSV 选区策略   | 非折叠文本选区不填网格，折叠光标仍支持二维填充      | 通过 |
 | 结构边界       | Core 拒绝跨 cell、进出表格与非法 Point 的范围操作   | 通过 |
 | Demo           | 显示当前 cell path、选中态和 TSV 示例入口           | 通过 |
 | 浏览器回归     | 编辑、TSV 和两条 HTML 表格粘贴路径完成后模型合法    | 通过 |
@@ -33,6 +35,7 @@
 - React 测试覆盖可编辑语义表格、唯一 cell 选中态、跨段落格式快捷键、范围替换/删除/Enter/Composition 和原生 HTML Clipboard 事件；文本输入事件按 Chromium 的 React 18 `textInput` 路径模拟。
 - Playwright 覆盖真实点击、文字输入、Enter、Backspace、同一 cell 多段落 Toolbar 格式化、跨段落编辑与 History、Composition 事件、2×2 TSV 粘贴、验收控制 HTML 表格粘贴和原生 HTML 表格 paste 事件。
 - 完整质量门禁使用 `pnpm check:all`。
+- 范围粘贴的 Core/React/Chromium 验证包含正反向选区、多行与 TSV、删除后插入点、邻格与尺寸不变、History、重做后的继续输入。
 
 ## 结论
 
