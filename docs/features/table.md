@@ -71,7 +71,9 @@ renderer 输出 `table > tbody > tr > td > p` 语义结构，并为模型节点�
 
 ## TSV 粘贴
 
-`getPlainTextTableGrid` 把纯文本 fragment 解析为二维字符串数组。`paste` command 从当前 cell 开始生成多个 `set_table_cell_text` operation；只有整个网格都能落入现有行列时才执行，否则退回 cell 内普通文本粘贴。粘贴不会新增或删除行列。
+`getPlainTextTableGrid` 把纯文本 fragment 解析为二维字符串数组。`paste` command 在折叠光标下从当前 cell 开始生成多个 `set_table_cell_text` operation；只有整个网格都能落入现有行列时才执行，否则退回 cell 内普通文本粘贴。粘贴不会新增或删除行列。
+
+同 cell 有文本选区时，纯文本或 TSV 只替换选中文字：单段范围先执行 `delete_text`，跨连续 paragraph 范围先执行 `delete_range`，再插入并按换行分段。即使 TSV 能填入现有表格也不会覆盖邻格；撤销与重做恢复段落结构和选区。
 
 ## HTML 表格粘贴
 

@@ -14,9 +14,19 @@
 
 ## 纯文本
 
-`parsePlainText` 统一 CRLF、CR 和 LF，每一行生成一个 paragraph，连续换行保留为空 paragraph。`paste` 命令让首行衔接光标前文本、末行衔接光标后文本，并支持替换同一文本块内跨 mark 的选区。
+`parsePlainText` 统一 CRLF、CR 和 LF，每一行生成一个 paragraph，连续换行保留为空 paragraph。`paste` 命令让首行衔接光标前文本、末行衔接光标后文本；多行内容按目标文本块类型分段，并支持同一文本块、连续顶层文本块及同一 cell 连续 paragraph 的选区替换。
 
-在表格 cell 内，带制表符的一行文本或多行纯文本会解析为二维网格，并从当前 cell 开始向右、向下写入。网格完整落在现有表格范围内时，每个目标 cell 会被一个 paragraph 替换；超出剩余行列时整次操作降级为当前 cell 内的普通文本粘贴，不扩表、不截断数据。
+在表格 cell 内的折叠光标处，带制表符的一行文本或多行纯文本会解析为二维网格，并从当前 cell 开始向右、向下写入。网格完整落在现有表格范围内时，每个目标 cell 会被一个 paragraph 替换；超出剩余行列时整次操作降级为当前 cell 内的普通文本粘贴，不扩表、不截断数据。
+
+有文本选区时不执行二维填充：即使 TSV 网格能够完整落入表格，也只替换该 cell 内的选区，制表符保留为文字，换行保留为同 cell 段落边界，不覆盖邻格。
+
+## 范围替换
+
+- 纯文本、HTML 和 Markdown 支持同一顶层文本块或连续顶层 paragraph、heading、quote、codeBlock 的选区替换。
+- 同一 cell 内支持纯文本替换单段或连续多段 paragraph；HTML/Markdown block fragment 不直接插入 cell。
+- 正向和反向选区共用范围删除计划：单容器生成 `delete_text`，跨顶层块或同 cell 跨段落生成 `delete_range`，再从删除后映射的光标处粘贴。
+- 结构化内容仍作为独立 block 插入起始块的前后边界之间，保留 fragment 的文字样式与块类型；纯文本继承目标位置的格式。
+- 删除与粘贴组成一个 transaction、一条 History；撤销恢复原文档和原选区，重做恢复粘贴结果和光标，之后可继续输入。
 
 ## HTML
 
@@ -62,8 +72,8 @@ Markdown 使用 `marked` 转换为 HTML，再复用同一 HTML 白名单映射�
 
 ## 当前边界
 
-- HTML/Markdown 结构化粘贴只在同一顶层文本块内的选区执行。
-- 现有表格内的二维填充仍只接受 `text/plain` TSV，不自动新增行列，也不支持跨 cell range 替换。
+- 范围粘贴不跨越 Divider、Image、列表项、不同 cell 或进出 Table 的结构边界；列表项内的粘贴仍未接入。
+- 现有表格内的二维填充只在折叠光标下接受 `text/plain` TSV，不自动新增行列，也不支持跨 cell range 替换。
 - HTML 表格不保留 `colspan`、`rowspan` 和表头语义，不支持嵌套表格。
 - HTML 暂不支持图文混排、单个列表项内的多个并列子列表和非直接子列表；内联 CSS 不接受命名色、`rgb()`、背景简写、非 px 字号，以及 boolean mark 白名单之外的值。
 - Markdown 暂不支持扩展语法的完整保真映射。
