@@ -59,6 +59,14 @@ interface OrderedListNode {
 - 缩进、反缩进、拆分和退出均保留当前项目已有的子列表。
 - 从有序列表中退出或解除中间项时，前后列表会保留并续接原编号。
 
+## 列表项内纯文本粘贴
+
+- `paste` command 支持同一列表项的折叠光标插入，以及同项跨 text 的正向或反向选区替换，覆盖普通、有序、任务和最多三层嵌套列表。
+- 单行插入复用 `insert_text`；选区替换先执行 `delete_text` 并映射插入位置，保留未选中文字与格式。
+- 换行复用 `split_list_item`，连续空行保留为空列表项；不会因为空行退出列表或改变缩进。
+- 有序列表保留 `start`；原任务项保留 checked，新拆分项未完成；原子列表跟随后缀移动到最后一个拆分项，邻项和祖先结构不变。
+- 一次粘贴是一条 Transaction 和 History 记录，撤销恢复结构和原选区，重做恢复光标；后续输入仍可独立撤销。
+
 ## HTML 列表粘贴
 
 Clipboard parser 会把每个 `li` 的第一个直接 `ul` 或 `ol` 映射为该列表项的 `nested`。有序、无序类型可以逐层混合，最多导入 `MAX_LIST_DEPTH` 允许的三层；每层 `ol` 的安全整数 `start`、父子项文字 mark 与安全链接都会独立保留。粘贴后的折叠选区位于最深的最后列表项末尾。
@@ -75,5 +83,6 @@ Clipboard parser 可识别 checkbox 驱动的 HTML 无序列表。只有每个�
 - 当前列表项直接包含 text 和可选 nested list，不支持在单个列表项中混放 paragraph、heading、quote 或 void block。
 - HTML 粘贴每个 `li` 只保留第一个直接子列表；超过三层的后续结构会被省略，checkbox 必须位于每个直属项的起始包装链。
 - 同一 item 内支持跨 text 的 boolean mark、文字属性、链接和清除格式；跨 item 的范围删除与格式化仍保持拒绝。
+- 列表项内只支持纯文本 fragment；跨 item、父子项混选、进出列表及 HTML/Markdown block 粘贴仍未支持。
 
 验收记录见[基础列表 QA](../qa/list-basic.md)和[列表增强 QA](../qa/list-advanced.md)。
