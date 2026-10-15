@@ -8,6 +8,8 @@
 
 ### 新增
 
+- 新增同一普通、有序、任务列表项内的纯文本插入、正反向选区替换和多行拆项，支持最多三层嵌套路径并保留空行、编号、格式、任务状态和已有子列表。
+- 新增列表项内纯文本粘贴的 Core/History、React Clipboard、宿主拦截与 Chromium 回归，验证一次撤销/重做和后续输入；跨项及项内 HTML/Markdown block 粘贴仍未支持。
 - 新增连续顶层文本块的纯文本、HTML、Markdown 范围粘贴，以及同一 cell 连续 paragraph 的纯文本/TSV 选区替换。
 - 新增范围粘贴的 Core 边界、History、React Clipboard 事件与 Chromium 回归，覆盖选区恢复、格式保留、邻格不变和继续输入。
 - 扩展 `delete_range`，支持同一表格单元格连续 paragraph 的选区删除、输入替换、中文组合输入和选区 Enter；保留边界格式、邻格与表格结构。

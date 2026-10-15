@@ -32,6 +32,7 @@
 
 ## 自动化覆盖
 
+- 同一列表项纯文本：Core 覆盖三种列表、最多三层嵌套、正反向跨 mark 选区、空行、start/checked、原子树、History 与拒绝边界；React 与 Chromium 覆盖原生事件及继续输入。
 - Clipboard parser：`packages/core/tests/clipboard`。
 - Paste command：`packages/core/tests/command/paste.test.ts`，HTML/Markdown 行内代码、分隔线、行内 mark CSS 及其他结构的 History 往返见对应的 `*-paste-history.test.ts`。
 - 范围粘贴：`paste-block-range.test.ts`、`paste-cell-range.test.ts`、`paste-range-boundary.test.ts` 覆盖三种格式、正反向范围、空行、删除后 text 索引映射、CodeBlock 纯文本约束及结构边界。
@@ -49,4 +50,4 @@ Clipboard 原始内容不会直接注入编辑器 DOM。HTML 先由标准 parser
 
 第 20 周粘贴能力已完成代码、测试、中文 Demo、文档和浏览器验收闭环，并在对应模型完成后补齐了 HTML/Markdown 行内代码与分隔线、HTML 文字标记别名、行内 mark CSS、安全文字属性、链接元数据、有序列表起始编号、嵌套列表、顶层表格、安全图片与任务列表导入。
 
-范围粘贴已扩展到连续顶层文本块及同 cell 连续 paragraph。结构化 HTML/Markdown fragment 仍不插入现有 cell，列表项内与跨 cell 粘贴仍未支持。
+范围粘贴已扩展到连续顶层文本块、同 cell 连续 paragraph 及同一列表项内的纯文本。结构化 HTML/Markdown fragment 仍不插入现有 cell 或 item；跨列表项、跨 cell 及进出列表/表格的范围粘贴仍未支持。
