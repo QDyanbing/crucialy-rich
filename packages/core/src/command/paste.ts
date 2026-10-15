@@ -13,8 +13,10 @@ import {
   createInsertTextOperation,
   createSelectionAfterInsertText,
   createSelectionAfterSplitBlock,
+  createSelectionAfterSplitListItem,
   createSetTableCellTextOperation,
   createSplitBlockOperation,
+  createSplitListItemOperation,
   createTransaction,
   type Operation,
 } from "../operation";
@@ -98,7 +100,7 @@ function resolvePasteTarget(input: CommandInput): PasteTarget | undefined {
     return undefined;
   }
 
-  if (listItem && payload.fragment.blocks.length !== 1) {
+  if (listItem && !payload.fragment.blocks.every(isParagraphNode)) {
     return undefined;
   }
 
@@ -189,10 +191,15 @@ function createPlainTextPasteResult(target: PasteTarget) {
     point = createSelectionAfterInsertText(insertOperation).anchor;
 
     if (index < lines.length - 1) {
-      const splitOperation = createSplitBlockOperation(point);
+      const splitOperation = target.listItem
+        ? createSplitListItemOperation(point)
+        : createSplitBlockOperation(point);
 
       operations.push(splitOperation);
-      point = createSelectionAfterSplitBlock(splitOperation).anchor;
+      point =
+        splitOperation.type === "split_list_item"
+          ? createSelectionAfterSplitListItem(splitOperation).anchor
+          : createSelectionAfterSplitBlock(splitOperation).anchor;
     }
   });
 
