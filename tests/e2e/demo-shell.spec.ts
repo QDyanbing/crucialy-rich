@@ -914,6 +914,77 @@ for (const target of [
   });
 }
 
+test("pastes plain text in nested lists while retaining the original subtree", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("advanced-lists");
+  await selectRenderedTextRange(page, "[0,0,0]", 1, 2);
+  await pasteEditorClipboard(page, "text/plain", "甲\n乙");
+
+  const editor = page.getByLabel("已渲染文档");
+  const items = editor.locator('ul[data-crucialy-path="[0]"] > li');
+  await expect(items).toHaveCount(4);
+  await expect(editor.locator('[data-crucialy-path="[0,0,0]"]')).toHaveText("父甲");
+  await expect(editor.locator('[data-crucialy-path="[0,1,0]"]')).toHaveText("乙项目");
+  await expect(editor.locator('[data-crucialy-path="[0,1,1,0,0]"]')).toHaveText(
+    "已有子项",
+  );
+  await expect(items.first().locator("ul")).toHaveCount(0);
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect(items).toHaveCount(3);
+  await expect(editor.locator('[data-crucialy-path="[0,0,1,0,0]"]')).toHaveText(
+    "已有子项",
+  );
+  await page.getByRole("button", { name: "重做", exact: true }).click();
+  await expect(editor.locator('[data-crucialy-path="[0,1,1,0,0]"]')).toHaveText(
+    "已有子项",
+  );
+
+  await placeCaretInRenderedText(page, "[0,1,1,0,0]", 2);
+  await pasteEditorClipboard(page, "text/plain", "小\n项");
+  const nestedItems = editor.locator('ul[data-crucialy-path="[0,1,1]"] > li');
+  await expect(nestedItems).toHaveText(["已有小", "项子项"]);
+  await expect(page.getByLabel("锚点路径")).toHaveValue("0,1,1,1,0");
+  await insertEditorText(page, "续");
+  await expect(nestedItems.nth(1)).toHaveText("项续子项");
+  await expect(editor.locator('[data-crucialy-path="[0,1,0]"]')).toHaveText("乙项目");
+  await expect(items.nth(2)).toHaveText("可缩进项目");
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
+test("preserves task state during multiline plain paste and history", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("advanced-lists");
+  await selectRenderedTextRange(page, "[1,1,0]", 2, 4);
+  await pasteEditorClipboard(page, "text/plain", "甲\n乙");
+
+  const editor = page.getByLabel("已渲染文档");
+  const tasks = editor.locator('ul[data-crucialy-path="[1]"] > li');
+  const checkboxes = tasks.getByRole("checkbox");
+  await expect(tasks).toHaveText(["编写列表测试", "完成甲", "乙文档"]);
+  await expect(checkboxes.nth(0)).not.toBeChecked();
+  await expect(checkboxes.nth(1)).toBeChecked();
+  await expect(checkboxes.nth(2)).not.toBeChecked();
+  await expect(page.getByLabel("锚点路径")).toHaveValue("1,2,0");
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect(tasks).toHaveText(["编写列表测试", "完成中文文档"]);
+  await expect(checkboxes.nth(1)).toBeChecked();
+  await page.getByRole("button", { name: "重做", exact: true }).click();
+  await expect(tasks).toHaveText(["编写列表测试", "完成甲", "乙文档"]);
+  await expect(checkboxes.nth(1)).toBeChecked();
+  await expect(checkboxes.nth(2)).not.toBeChecked();
+  await insertEditorText(page, "续");
+  await expect(tasks.nth(2)).toHaveText("乙续文档");
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
 test("splits and exits list items with Enter", async ({ page }) => {
   await page.goto("/");
   await page.getByLabel("模型示例").selectOption("lists");
