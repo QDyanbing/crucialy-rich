@@ -863,6 +863,57 @@ test("switches paragraphs between ordered and unordered lists", async ({ page })
   );
 });
 
+for (const target of [
+  { block: 0, tag: "ul", prefix: "无序" },
+  { block: 1, tag: "ol", prefix: "有序" },
+]) {
+  test(`pastes multiline plain text inside a ${target.tag} list item`, async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await page.getByLabel("模型示例").selectOption("lists");
+    const editor = page.getByLabel("已渲染文档");
+    const list = editor.locator(
+      `${target.tag}[data-crucialy-path="[${target.block}]"]`,
+    );
+    const items = list.locator(":scope > li");
+    const original = [`${target.prefix}列表第一项`, `${target.prefix}列表第二项`];
+    await selectRenderedTextRange(page, `[${target.block},0,0]`, 2, 4);
+    await pasteEditorClipboard(page, "text/plain", "甲\n\n乙");
+
+    await expect(items).toHaveText([
+      `${target.prefix}甲`,
+      "",
+      "乙第一项",
+      original[1]!,
+    ]);
+    await expect(page.getByLabel("锚点路径")).toHaveValue(`${target.block},2,0`);
+    await expect(page.getByLabel("锚点偏移")).toHaveValue("1");
+    await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+      '"type": "split_list_item"',
+    );
+    await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+    await expect(editor.locator('p[data-crucialy-path="[2]"]')).toHaveText(
+      "列表后可以继续编辑正文。",
+    );
+
+    await page.getByRole("button", { name: "撤销", exact: true }).click();
+    await expect(items).toHaveText(original);
+    await expect(page.getByLabel("焦点偏移")).toHaveValue("4");
+    await page.getByRole("button", { name: "重做", exact: true }).click();
+    await expect(items).toHaveText([
+      `${target.prefix}甲`,
+      "",
+      "乙第一项",
+      original[1]!,
+    ]);
+    await insertEditorText(page, "续");
+    await expect(items.nth(2)).toHaveText("乙续第一项");
+    await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 2');
+    await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+  });
+}
+
 test("splits and exits list items with Enter", async ({ page }) => {
   await page.goto("/");
   await page.getByLabel("模型示例").selectOption("lists");
