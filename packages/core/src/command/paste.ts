@@ -1,5 +1,6 @@
 import {
   isBlockNode,
+  isListEntryNode,
   isListNode,
   isParagraphNode,
   isTableNode,
@@ -20,6 +21,8 @@ import {
 import {
   isCollapsed,
   isValidPoint,
+  isSameTextContainer,
+  getNodeAtPath,
   getCellSelectionFromRange,
   normalizeRange,
   type CellSelection,
@@ -47,6 +50,7 @@ interface PasteTarget {
   deletion?: RangeDeletionOperation;
   fragment: ClipboardFragment;
   insertionPoint: Point;
+  listItem: boolean;
   range: RangeSelection;
 }
 
@@ -76,16 +80,25 @@ function resolvePasteTarget(input: CommandInput): PasteTarget | undefined {
   const range = normalizeRange(selection);
   const [anchorBlockIndex] = range.anchor.path;
   const cellSelection = getCellSelectionFromRange(input.context.document, range);
+  const listItem =
+    isSameTextContainer(range.anchor, range.focus) &&
+    isListEntryNode(
+      getNodeAtPath(input.context.document, range.anchor.path.slice(0, -1)),
+    );
   const topLevelTarget =
     range.anchor.path.length === 2 &&
     range.focus.path.length === 2 &&
     anchorBlockIndex !== undefined;
 
-  if (!topLevelTarget && !cellSelection) {
+  if (!topLevelTarget && !cellSelection && !listItem) {
     return undefined;
   }
 
-  if (cellSelection && payload.fragment.mimeType !== "text/plain") {
+  if ((cellSelection || listItem) && payload.fragment.mimeType !== "text/plain") {
+    return undefined;
+  }
+
+  if (listItem && payload.fragment.blocks.length !== 1) {
     return undefined;
   }
 
@@ -101,6 +114,7 @@ function resolvePasteTarget(input: CommandInput): PasteTarget | undefined {
     ...(cellSelection ? { cellSelection } : {}),
     ...(deletion ? { deletion: deletion.operation } : {}),
     fragment: payload.fragment as ClipboardFragment,
+    listItem,
     insertionPoint: deletion?.selection.anchor ?? {
       offset: range.anchor.offset,
       path: [...range.anchor.path],
