@@ -2,11 +2,13 @@
 
 import {
   createDocument,
+  createCommandRegistry,
   createBulletList,
   createListItem,
   createOrderedList,
   createTaskItem,
   createTaskList,
+  pasteCommand,
   createParagraph,
   createTable,
   createText,
@@ -77,6 +79,106 @@ function cellDocument() {
 }
 
 describe("RichTextEditor clipboard format fallback", () => {
+  it("respects a registry that accepts HTML but declines Markdown", () => {
+    const commandRegistry = createCommandRegistry([
+      {
+        ...pasteCommand,
+        canExecute: ({ payload }) =>
+          (payload as { fragment: { mimeType: string } }).fragment.mimeType ===
+          "text/html",
+      },
+    ]);
+    const { container, onTransaction } = renderEditor(
+      createDocument([createParagraph([createText("开旧尾")])]),
+      { commandRegistry },
+    );
+    selectText(container, "[0,0]", 1, 2);
+    paste(container, {
+      "text/markdown": "# MD",
+      "text/html": "<p><strong>HTML</strong></p>",
+      "text/plain": "纯",
+    });
+    expect(container.querySelector("strong")?.textContent).toBe("HTML");
+    expect(container.querySelector("h1")).toBeNull();
+    expect(onTransaction).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not execute a paste command disabled for every candidate", () => {
+    const canExecute = vi.fn(() => false);
+    const execute = vi.fn(pasteCommand.execute);
+    const { container, onTransaction } = renderEditor(cellDocument(), {
+      commandRegistry: createCommandRegistry([
+        { ...pasteCommand, canExecute, execute },
+      ]),
+    });
+    selectText(container, "[0,0,0,0,0]", 1);
+    expect(
+      paste(container, {
+        "text/markdown": "MD",
+        "text/html": "<p>HTML</p>",
+        "text/plain": "纯",
+      }).defaultPrevented,
+    ).toBe(true);
+    expect(canExecute).toHaveBeenCalledTimes(3);
+    expect(execute).not.toHaveBeenCalled();
+    expect(onTransaction).not.toHaveBeenCalled();
+  });
+
+  it("blocks clipboard writes when the registry has no paste command", () => {
+    const { container, onTransaction } = renderEditor(cellDocument(), {
+      commandRegistry: createCommandRegistry(),
+    });
+    selectText(container, "[0,0,0,0,0]", 1);
+    expect(paste(container, { "text/plain": "不可插入" }).defaultPrevented).toBe(true);
+    expect(onTransaction).not.toHaveBeenCalled();
+  });
+
+  it("does not retry another format after command execution fails", () => {
+    const execute = vi.fn(() => {
+      throw new Error("Host command failure.");
+    });
+    const { container, onTransaction } = renderEditor(cellDocument(), {
+      commandRegistry: createCommandRegistry([
+        { ...pasteCommand, canExecute: () => true, execute },
+      ]),
+    });
+    selectText(container, "[0,0,0,0,0]", 1);
+    expect(
+      paste(container, { "text/html": "<p>HTML</p>", "text/plain": "纯" })
+        .defaultPrevented,
+    ).toBe(true);
+    expect(execute).toHaveBeenCalledTimes(1);
+    expect(container.querySelector("td")?.textContent).toBe("开旧尾");
+    expect(onTransaction).not.toHaveBeenCalled();
+  });
+
+  it("leaves readonly paste to the host without querying commands", () => {
+    const canExecute = vi.fn(() => true);
+    const { container, onTransaction } = renderEditor(cellDocument(), {
+      contentEditable: false,
+      commandRegistry: createCommandRegistry([{ ...pasteCommand, canExecute }]),
+    });
+    selectText(container, "[0,0,0,0,0]", 1);
+    expect(paste(container, { "text/plain": "纯" }).defaultPrevented).toBe(false);
+    expect(canExecute).not.toHaveBeenCalled();
+    expect(onTransaction).not.toHaveBeenCalled();
+  });
+
+  it("honors the host onPaste cancellation before querying candidates", () => {
+    const canExecute = vi.fn(() => true);
+    const { container, onTransaction } = renderEditor(cellDocument(), {
+      onPaste: (event) => event.preventDefault(),
+      commandRegistry: createCommandRegistry([{ ...pasteCommand, canExecute }]),
+    });
+    selectText(container, "[0,0,0,0,0]", 1);
+    expect(
+      paste(container, { "text/html": "<p>HTML</p>", "text/plain": "纯" })
+        .defaultPrevented,
+    ).toBe(true);
+    expect(canExecute).not.toHaveBeenCalled();
+    expect(onTransaction).not.toHaveBeenCalled();
+  });
+
   it.each([
     {
       name: "ordered",
