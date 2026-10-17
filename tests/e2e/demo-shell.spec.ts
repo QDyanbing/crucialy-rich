@@ -3143,6 +3143,66 @@ test("falls back to a TSV grid at a collapsed cell caret", async ({ page }) => {
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
 
+for (const target of [
+  {
+    name: "cells",
+    sample: "tables",
+    start: "[0,0,0,0,0]",
+    end: "[0,0,1,0,0]",
+    continued: "姓续名",
+  },
+  {
+    name: "list items",
+    sample: "lists",
+    start: "[0,0,0]",
+    end: "[0,1,0]",
+    continued: "无续序列表第一项",
+  },
+]) {
+  test(`blocks unmanaged clipboard writes across ${target.name}`, async ({ page }) => {
+    await page.goto("/");
+    await page.getByLabel("模型示例").selectOption(target.sample);
+    await selectRenderedTextAcrossNodes(page, target.start, 1, target.end, 1);
+    const documentJson = page.getByLabel("文档 JSON", { exact: true });
+    const before = await documentJson.textContent();
+    expect(
+      await pasteEditorClipboardFormats(page, {
+        "text/markdown": "# 不可插入",
+        "text/html": "<p>不可插入</p>",
+        "text/plain": "不可插入",
+      }),
+    ).toBe(true);
+    await expect(documentJson).toHaveText(before!);
+    await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+    await placeCaretInRenderedText(page, target.start, 1);
+    await insertEditorText(page, "续");
+    await expect(
+      page.getByLabel("已渲染文档").locator(`[data-crucialy-path="${target.start}"]`),
+    ).toHaveText(target.continued);
+    await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+  });
+}
+
+test("blocks rich-only clipboard data inside a cell without changing history", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("tables");
+  await selectRenderedTextRange(page, "[0,0,0,0,0]", 0, 2);
+  const documentJson = page.getByLabel("文档 JSON", { exact: true });
+  const before = await documentJson.textContent();
+  expect(
+    await pasteEditorClipboardFormats(page, { "text/html": "<h1>不可插入</h1>" }),
+  ).toBe(true);
+  await expect(documentJson).toHaveText(before!);
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+  await insertEditorText(page, "续");
+  await expect(
+    page.getByLabel("已渲染文档").locator('[data-crucialy-path="[0,0,0,0,0]"]'),
+  ).toHaveText("续");
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
 test("pastes plain text through the native editor event", async ({ page }) => {
   await page.goto("/");
   await placeCaretInRenderedText(page, "[0,0]", 3);
