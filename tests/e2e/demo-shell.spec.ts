@@ -44,6 +44,25 @@ async function pasteEditorClipboard(page: Page, mimeType: string, data: string) 
   );
 }
 
+async function pasteEditorClipboardFormats(
+  page: Page,
+  formats: Record<string, string>,
+) {
+  return page.getByLabel("已渲染文档").evaluate((editor, data) => {
+    const clipboardData = new DataTransfer();
+    for (const [mimeType, value] of Object.entries(data)) {
+      clipboardData.setData(mimeType, value);
+    }
+    const event = new ClipboardEvent("paste", {
+      bubbles: true,
+      cancelable: true,
+      clipboardData,
+    });
+    editor.dispatchEvent(event);
+    return event.defaultPrevented;
+  }, formats);
+}
+
 async function selectRenderedTextRange(
   page: Page,
   path: string,
@@ -984,6 +1003,61 @@ test("preserves task state during multiline plain paste and history", async ({
   await expect(tasks.nth(2)).toHaveText("乙续文档");
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
+
+for (const target of [
+  {
+    name: "ordered",
+    sample: "lists",
+    path: "[1,0,0]",
+    caret: "1,1,0",
+    original: ["有序列表第一项", "有序列表第二项"],
+    expected: ["有序甲", "乙第一项", "有序列表第二项"],
+    index: 1,
+    continued: "乙续第一项",
+  },
+  {
+    name: "task",
+    sample: "advanced-lists",
+    path: "[1,1,0]",
+    caret: "1,2,0",
+    original: ["编写列表测试", "完成中文文档"],
+    expected: ["编写列表测试", "完成甲", "乙文档"],
+    index: 2,
+    continued: "乙续文档",
+  },
+]) {
+  test(`falls back from rich clipboard formats in a ${target.name} list`, async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await page.getByLabel("模型示例").selectOption(target.sample);
+    await selectRenderedTextRange(page, target.path, 2, 4);
+    expect(
+      await pasteEditorClipboardFormats(page, {
+        "text/markdown": "# 不应导入",
+        "text/html": "<b>不应导入</b>",
+        "text/plain": "甲\n乙",
+      }),
+    ).toBe(true);
+    const list = page.getByLabel("已渲染文档").locator('[data-crucialy-path="[1]"]');
+    const items = list.locator(":scope > li");
+    await expect(items).toHaveText(target.expected);
+    await expect(list.locator("h1, strong")).toHaveCount(0);
+    await expect(page.getByLabel("锚点路径")).toHaveValue(target.caret);
+    await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+    if (target.name === "task") {
+      await expect(items.nth(1).getByRole("checkbox")).toBeChecked();
+      await expect(items.nth(2).getByRole("checkbox")).not.toBeChecked();
+    }
+    await page.getByRole("button", { name: "撤销", exact: true }).click();
+    await expect(items).toHaveText(target.original);
+    await page.getByRole("button", { name: "重做", exact: true }).click();
+    await expect(items).toHaveText(target.expected);
+    await insertEditorText(page, "续");
+    await expect(items.nth(target.index)).toHaveText(target.continued);
+    await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+  });
+}
 
 test("splits and exits list items with Enter", async ({ page }) => {
   await page.goto("/");
