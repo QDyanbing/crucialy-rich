@@ -6,10 +6,54 @@ import {
   createParagraph,
   createText,
   parseClipboardData,
+  DEFAULT_CLIPBOARD_PARSERS,
   type ClipboardParser,
 } from "../../src";
 
 describe("parseClipboardData", () => {
+  it("continues to plain text when the consumer rejects a rich fragment", () => {
+    const source = {
+      types: ["text/html", "text/plain"],
+      getData: (type: string) =>
+        type === "text/html" ? "<p>富文本</p>" : "原始纯文本",
+    };
+    expect(
+      parseClipboardData(
+        source,
+        DEFAULT_CLIPBOARD_PARSERS,
+        (fragment) => fragment.mimeType === "text/plain",
+      ),
+    ).toEqual({
+      blocks: [createParagraph([createText("原始纯文本")])],
+      mimeType: "text/plain",
+    });
+  });
+
+  it("keeps the existing MIME priority when no filter is supplied", () => {
+    const source = {
+      types: ["text/plain", "text/html", "text/markdown"],
+      getData: (type: string) =>
+        type === "text/markdown"
+          ? "# 标题"
+          : type === "text/html"
+            ? "<p>HTML</p>"
+            : "纯文本",
+    };
+    expect(parseClipboardData(source, DEFAULT_CLIPBOARD_PARSERS)?.mimeType).toBe(
+      "text/markdown",
+    );
+  });
+
+  it("returns no fragment when the consumer rejects every available format", () => {
+    expect(
+      parseClipboardData(
+        { types: ["text/html"], getData: () => "<p>只提供 HTML</p>" },
+        DEFAULT_CLIPBOARD_PARSERS,
+        () => false,
+      ),
+    ).toBeUndefined();
+  });
+
   it("uses the first parser that returns a fragment", () => {
     const htmlParse = vi.fn(() => ({
       blocks: [createParagraph([createText("HTML")])],

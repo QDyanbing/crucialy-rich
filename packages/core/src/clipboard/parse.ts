@@ -3,6 +3,7 @@ import type { ClipboardDataSource, ClipboardFragment, ClipboardParser } from "./
 export function parseClipboardData(
   source: ClipboardDataSource,
   parsers: readonly ClipboardParser[],
+  acceptFragment?: (fragment: ClipboardFragment) => boolean,
 ): ClipboardFragment | undefined {
   for (const parser of parsers) {
     if (!source.types.includes(parser.mimeType)) {
@@ -17,7 +18,7 @@ export function parseClipboardData(
 
     const fragment = parser.parse(value);
 
-    if (fragment) {
+    if (fragment && (!acceptFragment || acceptFragment(fragment))) {
       return fragment;
     }
   }
