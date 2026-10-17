@@ -17,6 +17,7 @@ import {
   createTabInputTransaction,
   createTransaction,
   cancelComposition,
+  canExecuteCommand,
   DELETE_SELECTION_COMMAND_NAME,
   DELETE_IMAGE_COMMAND_NAME,
   domSelectionToModelSelection,
@@ -755,20 +756,29 @@ function RichTextEditorComponent(
     }
 
     const modelSelection = getModelSelectionFromDom(event.currentTarget, document);
+    if (!modelSelection) {
+      return;
+    }
+    const context = { document, selection: modelSelection };
     const fragment = parseClipboardData(
       {
         getData: (mimeType) => event.clipboardData.getData(mimeType),
         types: Array.from(event.clipboardData.types),
       },
       DEFAULT_CLIPBOARD_PARSERS,
+      (candidate) =>
+        canExecuteCommand(registry, PASTE_COMMAND_NAME, {
+          context,
+          payload: { fragment: candidate },
+        }),
     );
 
-    if (!modelSelection || !fragment) {
+    if (!fragment) {
       return;
     }
 
     const result = executeCoreCommand(registry, PASTE_COMMAND_NAME, {
-      context: { document, selection: modelSelection },
+      context,
       payload: { fragment },
     });
     const input = createKeyboardInputResultFromCommandResult(
