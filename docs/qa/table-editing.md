@@ -31,6 +31,7 @@
 
 ## 自动化覆盖
 
+- 原生混合 MIME 在 cell 中降级到实际纯文本，选区只替换当前 cell，折叠光标保留 TSV 填格；富格式独占与跨 cell 范围取消默认写入，模型和 History 不变，后续编辑仍可继续。
 - Vitest 覆盖 CellSelection、cell 定位、嵌套文本 operation、多段落格式与范围编辑 command、输入边界、renderer、TSV parser、HTML table parser、cell 内容替换、paste command 和 History 往返。
 - React 测试覆盖可编辑语义表格、唯一 cell 选中态、跨段落格式快捷键、范围替换/删除/Enter/Composition 和原生 HTML Clipboard 事件；文本输入事件按 Chromium 的 React 18 `textInput` 路径模拟。
 - Playwright 覆盖真实点击、文字输入、Enter、Backspace、同一 cell 多段落 Toolbar 格式化、跨段落编辑与 History、Composition 事件、2×2 TSV 粘贴、验收控制 HTML 表格粘贴和原生 HTML 表格 paste 事件。

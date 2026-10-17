@@ -8,6 +8,8 @@
 
 ### 新增
 
+- `parseClipboardData` 新增可选候选过滤器，支持按目标能力继续尝试后续格式，保留默认 MIME 优先级与原调用兼容性。
+- React 原生粘贴按当前 Command Registry 选择格式，列表与 cell 可回退到剪贴板实际提供的纯文本；补齐 Core/History、React、Chromium 与构建产物回归。
 - 新增同一普通、有序、任务列表项内的纯文本插入、正反向选区替换和多行拆项，支持最多三层嵌套路径并保留空行、编号、格式、任务状态和已有子列表。
 - 新增列表项内纯文本粘贴的 Core/History、React Clipboard、宿主拦截与 Chromium 回归，验证一次撤销/重做和后续输入；跨项及项内 HTML/Markdown block 粘贴仍未支持。
 - 新增连续顶层文本块的纯文本、HTML、Markdown 范围粘贴，以及同一 cell 连续 paragraph 的纯文本/TSV 选区替换。
@@ -227,6 +229,7 @@
 
 ### 修复
 
+- 修复不兼容的富格式阻断列表/cell 纯文本粘贴，以及未处理粘贴可能落入浏览器默认 DOM 修改的问题；无可用候选或命令失败时保持模型与 History 不变。
 - 修复同 cell 跨段落粘贴仍生成 `delete_text` 导致应用报错，以及删除 marked text 节点后粘贴插入位置未重映射的问题。
 - 修复 History 快照把 heading 和 quote 错误克隆为 paragraph，导致 Block Type 操作无法正确 undo/redo 的问题。
 - 修复 Demo 独立类型检查因 `rootDir` 与 workspace 源码路径冲突而失败的问题。

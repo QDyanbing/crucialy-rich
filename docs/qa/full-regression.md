@@ -2,7 +2,7 @@
 
 ## 执行信息
 
-- 日期：2026-10-15
+- 日期：2026-10-17
 - 版本：`0.1.0`
 - 分支：`master`
 - 命令：`pnpm check:all`
@@ -14,16 +14,17 @@
 | Prettier   | 通过 | 全仓文件格式一致                          |
 | ESLint     | 通过 | 0 warning、0 error                        |
 | TypeScript | 通过 | 根工程与 core/react/demo 包级检查全部通过 |
-| Vitest     | 通过 | 176 个测试文件，1240 项测试               |
+| Vitest     | 通过 | 180 个测试文件，1269 项测试               |
 | Core 构建  | 通过 | ESM、source map、类型声明生成成功         |
 | React 构建 | 通过 | ESM、source map、类型声明生成成功         |
 | Demo 构建  | 通过 | Vite 生产构建成功                         |
-| 包产物导入 | 通过 | core/react 运行时导出与声明文件校验成功   |
-| Playwright | 通过 | Chromium 140 项测试                       |
+| 包产物导入 | 通过 | 导出/声明与 Clipboard 过滤产物冒烟通过    |
+| Playwright | 通过 | Chromium 147 项测试                       |
 
 ## 核心路径
 
 - 文档模型、Selection、Operation、Transaction、Command 和 History 全量单测通过。
+- Clipboard 可选候选过滤、默认优先级兼容、目标降级、实际纯文本保留、History、默认 DOM 写入保护、宿主/只读/Registry 策略、失败不重试及构建产物调用的 Core/React/Chromium 路径通过。
 - 同一普通/有序/任务列表项内纯文本插入与替换、多行拆项、空项保留、二/三层嵌套、原子树归属、start/checked、History、宿主拦截及继续输入的 Core/React/Chromium 路径通过，跨项与富片段继续被 Core 拒绝。
 - 基础编辑、文字样式、链接、块结构、列表、图片、粘贴、表格、输入法、快捷键和输入规则浏览器回归通过。
 - HTML 表格解析、Command 插入、History 往返、React 原生事件和 Demo 两条浏览器粘贴路径均通过。

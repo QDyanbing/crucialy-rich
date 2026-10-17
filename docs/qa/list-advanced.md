@@ -25,6 +25,7 @@
 
 ## 自动化入口
 
+- 混合 MIME：React 与 Chromium 验证有序、任务及嵌套项降级到实际纯文本，保留编号、checked、拆项、History 与继续输入；跨项拒绝时取消默认粘贴。
 - 模型：`packages/core/tests/model`。
 - 嵌套路径与渲染：`packages/core/tests/selection`、`packages/core/tests/render`。
 - 结构操作：`indent-list-item.test.ts`、`outdent-list-item.test.ts`、`set-task-item-checked.test.ts`。
