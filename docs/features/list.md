@@ -66,6 +66,7 @@ interface OrderedListNode {
 - 换行复用 `split_list_item`，连续空行保留为空列表项；不会因为空行退出列表或改变缩进。
 - 有序列表保留 `start`；原任务项保留 checked，新拆分项未完成；原子列表跟随后缀移动到最后一个拆分项，邻项和祖先结构不变。
 - 一次粘贴是一条 Transaction 和 History 记录，撤销恢复结构和原选区，重做恢复光标；后续输入仍可独立撤销。
+- React 原生剪贴板同时含 Markdown/HTML 和纯文本时，按当前 Command 能力跳过不兼容富片段，回退到实际提供的纯文本。只有富格式或跨 item 选区时阻止默认写入，不修改模型和 History。
 
 ## HTML 列表粘贴
 

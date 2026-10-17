@@ -75,6 +75,8 @@ renderer 输出 `table > tbody > tr > td > p` 语义结构，并为模型节点�
 
 同 cell 有文本选区时，纯文本或 TSV 只替换选中文字：单段范围先执行 `delete_text`，跨连续 paragraph 范围先执行 `delete_range`，再插入并按换行分段。即使 TSV 能填入现有表格也不会覆盖邻格；撤销与重做恢复段落结构和选区。
 
+React 原生剪贴板同时提供 HTML/Markdown 和纯文本时，会跳过 cell 不接受的富片段并回退到实际纯文本；折叠光标可继续做 TSV 填格，文本选区则只做 cell 内替换。只有富片段或跨 cell 选区时阻止默认写入，不猜造纯文本，也不新增 History。
+
 ## HTML 表格粘贴
 
 `parseHtml` 可把顶层 HTML `table` 转换为模型表格，支持直接 `tr` 和 `thead`、`tbody`、`tfoot` 分区。`th` 以普通 cell 导入，行宽不一致时按最宽行补空 cell；每个 cell 至少生成一个 paragraph，并保留其中的多个直接 paragraph、行内 mark 和安全链接。

@@ -95,12 +95,16 @@ Markdown 使用 `marked` 转换为 HTML，再复用同一 HTML 白名单映射�
 
 ## React 接入
 
-`RichTextEditor` 监听 `onPaste`，将 `DataTransfer` 包装为 `ClipboardDataSource`，解析后执行 `PASTE_COMMAND_NAME`。成功时阻止浏览器默认写入，并通过 `onChange`、`onSelectionChange` 和 `onTransaction` 返回模型结果；外部 `onPaste` 先执行，并可通过 `preventDefault()` 接管行为。
+`RichTextEditor` 监听 `onPaste`，将 `DataTransfer` 包装为 `ClipboardDataSource`，用当前 Registry 的 `canExecuteCommand` 过滤候选，再执行一次 `PASTE_COMMAND_NAME`。默认顶层目标仍优先 Markdown/HTML；列表与 cell 拒绝富片段后，可继续读取剪贴板实际提供的 `text/plain`，保留普通纯文本粘贴的选区和 TSV 规则。
+
+可编辑编辑器接管事件后即阻止默认写入；没有有效选区、没有可用片段、命令未注册/禁用/失败或正在组合输入时，不把未处理内容交给浏览器修改 DOM，也不新增 History。成功时通过 `onChange`、`onSelectionChange` 和 `onTransaction` 返回模型结果；命令执行失败后不会再尝试执行其他格式。
+
+外部 `onPaste` 始终先执行，可通过 `preventDefault()` 完全接管，组件随后不读取候选或执行命令；只读组件不主动阻止宿主的默认粘贴行为。自定义 Registry 的 `canExecute` 决定候选是否可用，而不是由 React 硬编码 cell 或列表的 MIME 选择。
 
 ## 当前边界
 
 - 范围粘贴不跨越 Divider、Image、不同列表项、不同 cell 或进出列表/表格的结构边界。
-- 列表项内只接受 `text/plain` fragment；不导入 HTML/Markdown block，也不把优先解析出的富 fragment 自动转为纯文本。
+- 列表项内只接受 `text/plain` fragment；不导入 HTML/Markdown block。React 原生粘贴可回退到剪贴板提供的纯文本，但不会自行把富片段转为纯文本；只有富格式时阻止粘贴并保持模型不变。
 - 现有表格内的二维填充只在折叠光标下接受 `text/plain` TSV，不自动新增行列，也不支持跨 cell range 替换。
 - HTML 表格不保留 `colspan`、`rowspan` 和表头语义，不支持嵌套表格。
 - HTML 暂不支持图文混排、单个列表项内的多个并列子列表和非直接子列表；内联 CSS 不接受命名色、`rgb()`、背景简写、非 px 字号，以及 boolean mark 白名单之外的值。
