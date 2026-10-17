@@ -2,6 +2,11 @@
 
 import {
   createDocument,
+  createBulletList,
+  createListItem,
+  createOrderedList,
+  createTaskItem,
+  createTaskList,
   createParagraph,
   createTable,
   createText,
@@ -72,6 +77,65 @@ function cellDocument() {
 }
 
 describe("RichTextEditor clipboard format fallback", () => {
+  it.each([
+    {
+      name: "ordered",
+      list: createOrderedList([createListItem([createText("开旧尾")])], 4),
+      path: [0, 0, 0],
+    },
+    {
+      name: "task",
+      list: createTaskList([createTaskItem([createText("开旧尾")], true)]),
+      path: [0, 0, 0],
+    },
+    {
+      name: "nested",
+      list: createBulletList([
+        createListItem(
+          [createText("父项")],
+          createBulletList([createListItem([createText("开旧尾")])]),
+        ),
+      ]),
+      path: [0, 0, 1, 0, 0],
+    },
+  ])("falls back from Markdown and HTML inside a $name item", ({ list, path }) => {
+    const { container, onTransaction } = renderEditor(createDocument([list]));
+    selectText(container, JSON.stringify(path), 1, 2);
+    const event = paste(container, {
+      "text/markdown": "# 富文本",
+      "text/html": "<b>富文本</b>",
+      "text/plain": "甲\n乙",
+    });
+    const listPath = JSON.stringify(path.slice(0, -2));
+    expect(event.defaultPrevented).toBe(true);
+    expect(
+      Array.from(
+        container.querySelectorAll(`[data-crucialy-path="${listPath}"] > li`),
+        (item) => item.textContent,
+      ),
+    ).toEqual(["开甲", "乙尾"]);
+    expect(onTransaction).toHaveBeenCalledTimes(1);
+    expect(onTransaction.mock.calls[0]?.[0]).toMatchObject({
+      selection: { anchor: { path: [...path.slice(0, -2), 1, 0], offset: 1 } },
+      transaction: {
+        operations: [
+          { type: "delete_text" },
+          { type: "insert_text", text: "甲" },
+          { type: "split_list_item" },
+          { type: "insert_text", text: "乙" },
+        ],
+      },
+    });
+    if (list.type === "orderedList") {
+      expect(container.querySelector("ol")?.getAttribute("start")).toBe("4");
+    }
+    if (list.type === "taskList") {
+      expect(
+        Array.from(container.querySelectorAll("input"), (input) => input.checked),
+      ).toEqual([true, false]);
+    }
+  });
+
   it("blocks a rich-only cell paste without guessing a plain-text replacement", () => {
     const { container, onTransaction } = renderEditor(cellDocument());
     selectText(container, "[0,0,0,0,0]", 1, 2);
