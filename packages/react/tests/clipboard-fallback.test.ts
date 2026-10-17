@@ -72,6 +72,51 @@ function cellDocument() {
 }
 
 describe("RichTextEditor clipboard format fallback", () => {
+  it("blocks a rich-only cell paste without guessing a plain-text replacement", () => {
+    const { container, onTransaction } = renderEditor(cellDocument());
+    selectText(container, "[0,0,0,0,0]", 1, 2);
+    const event = paste(container, { "text/html": "<b>不可插入</b>" });
+    expect(event.defaultPrevented).toBe(true);
+    expect(container.querySelector("td")?.textContent).toBe("开旧尾");
+    expect(onTransaction).not.toHaveBeenCalled();
+  });
+
+  it("blocks an empty or unsupported clipboard without changing the model", () => {
+    const { container, onTransaction } = renderEditor(cellDocument());
+    selectText(container, "[0,0,0,0,0]", 1);
+    expect(paste(container, {}).defaultPrevented).toBe(true);
+    expect(paste(container, { "image/png": "binary" }).defaultPrevented).toBe(true);
+    expect(container.querySelector("td")?.textContent).toBe("开旧尾");
+    expect(onTransaction).not.toHaveBeenCalled();
+  });
+
+  it("blocks paste when the browser selection is outside the editor", () => {
+    const { container, onTransaction } = renderEditor(cellDocument());
+    const outside = document.createTextNode("外部文字");
+    document.body.append(outside);
+    const range = document.createRange();
+    range.setStart(outside, 1);
+    range.collapse(true);
+    const selection = window.getSelection()!;
+    selection.removeAllRanges();
+    selection.addRange(range);
+    expect(paste(container, { "text/plain": "不可插入" }).defaultPrevented).toBe(true);
+    expect(onTransaction).not.toHaveBeenCalled();
+  });
+
+  it("blocks paste during composition without submitting candidate text", () => {
+    const { container, onTransaction } = renderEditor(cellDocument());
+    selectText(container, "[0,0,0,0,0]", 1);
+    act(() => {
+      container.firstElementChild?.dispatchEvent(
+        new CompositionEvent("compositionstart", { bubbles: true }),
+      );
+    });
+    expect(paste(container, { "text/plain": "不可插入" }).defaultPrevented).toBe(true);
+    expect(container.querySelector("td")?.textContent).toBe("开旧尾");
+    expect(onTransaction).not.toHaveBeenCalled();
+  });
+
   it("uses the supplied plain text when a cell cannot accept HTML", () => {
     const { container, onTransaction } = renderEditor(cellDocument());
     selectText(container, "[0,0,0,0,0]", 1, 2);

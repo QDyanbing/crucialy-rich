@@ -751,7 +751,13 @@ function RichTextEditorComponent(
   function handlePaste(event: ClipboardEvent<HTMLDivElement>) {
     onPaste?.(event);
 
-    if (event.defaultPrevented || !editable || compositionRef.current.active) {
+    if (event.defaultPrevented || !editable) {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (compositionRef.current.active) {
       return;
     }
 
@@ -788,7 +794,6 @@ function RichTextEditorComponent(
     );
 
     if (input) {
-      event.preventDefault();
       commitInputResult(input);
     }
   }
