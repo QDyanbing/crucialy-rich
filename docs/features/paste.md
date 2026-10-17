@@ -10,7 +10,32 @@
 2. `text/html`
 3. `text/plain`
 
-第一个返回 fragment 的 parser 获胜；缺少数据或解析器拒绝时继续降级。
+第一个返回且被可选过滤器接受的 fragment 获胜；缺少数据、解析器拒绝或过滤器返回 false 时继续尝试后续 parser。不传过滤器时保持原有顺序和行为。
+
+## 解析过滤 API
+
+```ts
+function parseClipboardData(
+  source: ClipboardDataSource,
+  parsers: readonly ClipboardParser[],
+  acceptFragment?: (fragment: ClipboardFragment) => boolean,
+): ClipboardFragment | undefined;
+```
+
+过滤器只在 parser 实际返回 fragment 后调用；缺失 MIME、空数据或 parser 返回 undefined 时不调用。候选一旦被接受就停止读取后续格式，同 MIME 的自定义 parser 也可继续尝试。过滤器应使用无副作用的能力查询，而不是执行编辑命令；它不替代 HTML 安全白名单或文档校验。
+
+例如，宿主可用当前 Registry 的 Paste Command 判断目标能力：
+
+```ts
+const fragment = parseClipboardData(source, DEFAULT_CLIPBOARD_PARSERS, (candidate) =>
+  canExecuteCommand(registry, PASTE_COMMAND_NAME, {
+    context: { document, selection },
+    payload: { fragment: candidate },
+  }),
+);
+```
+
+只有剪贴板提供的格式才会参与降级，不会从已拒绝的 HTML/Markdown 片段临时生成纯文本。所有候选均被拒绝时返回 undefined，不生成 Transaction 或 History。
 
 ## 纯文本
 
