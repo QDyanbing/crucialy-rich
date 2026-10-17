@@ -3079,6 +3079,70 @@ for (const text of ["第一行\n第二行", "甲\t乙\n丙\t丁"]) {
   });
 }
 
+test("falls back from rich formats for a selected cell paragraph range", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("tables");
+  const editor = page.getByLabel("已渲染文档");
+  const cells = editor.locator("td");
+  const neighbors = await cells.evaluateAll((elements) =>
+    elements.slice(1).map((element) => element.textContent),
+  );
+  await selectRenderedTextAcrossNodes(page, "[0,0,0,0,0]", 1, "[0,0,0,1,0]", 5);
+  expect(
+    await pasteEditorClipboardFormats(page, {
+      "text/html": "<p><b>富内容</b></p>",
+      "text/plain": "甲\t乙\n丙\t丁",
+    }),
+  ).toBe(true);
+  const paragraphs = cells.first().locator("p");
+  await expect(paragraphs).toHaveText(["姓甲\t乙", "丙\t丁第二段"]);
+  expect(
+    await cells.evaluateAll((elements) =>
+      elements.slice(1).map((element) => element.textContent),
+    ),
+  ).toEqual(neighbors);
+  await expect(cells).toHaveCount(9);
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  await expect(page.getByLabel("最近 Transaction", { exact: true })).toContainText(
+    '"type": "delete_range"',
+  );
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect(paragraphs).toHaveText(["姓名", "同一单元格第二段"]);
+  await page.getByRole("button", { name: "重做", exact: true }).click();
+  await insertEditorText(page, "续");
+  await expect(paragraphs.nth(1)).toHaveText("丙\t丁续第二段");
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
+test("falls back to a TSV grid at a collapsed cell caret", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("tables");
+  const cells = page.getByLabel("已渲染文档").locator("td");
+  const original = await cells.allTextContents();
+  await placeCaretInRenderedText(page, "[0,0,0,0,0]", 1);
+  expect(
+    await pasteEditorClipboardFormats(page, {
+      "text/markdown": "# 富内容",
+      "text/html": "<table><tr><td>富内容</td></tr></table>",
+      "text/plain": "甲\t乙\n丙\t丁",
+    }),
+  ).toBe(true);
+  await expect(cells).toHaveCount(9);
+  await expect(cells.nth(0)).toHaveText("甲");
+  await expect(cells.nth(1)).toHaveText("乙");
+  await expect(cells.nth(3)).toHaveText("丙");
+  await expect(cells.nth(4)).toHaveText("丁");
+  await expect(page.getByLabel("锚点路径")).toHaveValue("0,1,1,0,0");
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect(cells).toHaveText(original);
+  await page.getByRole("button", { name: "重做", exact: true }).click();
+  await expect(cells.nth(4)).toHaveText("丁");
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
 test("pastes plain text through the native editor event", async ({ page }) => {
   await page.goto("/");
   await placeCaretInRenderedText(page, "[0,0]", 3);
