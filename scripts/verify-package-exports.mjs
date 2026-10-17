@@ -7,13 +7,50 @@ const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const publicPackages = [
   {
     directory: "packages/core",
-    expectedExports: ["createCompositionState", "createDocument", "executeCommand"],
+    expectedExports: [
+      "createCompositionState",
+      "createDocument",
+      "executeCommand",
+      "parseClipboardData",
+      "DEFAULT_CLIPBOARD_PARSERS",
+    ],
   },
   {
     directory: "packages/react",
     expectedExports: ["FixedToolbar", "FloatingSlashMenu", "RichTextEditor"],
   },
 ];
+
+function verifyClipboardFiltering(core) {
+  const point = { path: [0, 0, 0, 0, 0], offset: 0 };
+  const document = core.createDocument([core.createTable(1, 2)]);
+  const context = { document, selection: { anchor: point, focus: point } };
+  const source = {
+    types: ["text/markdown", "text/html", "text/plain"],
+    getData: (type) =>
+      type === "text/markdown"
+        ? "# markdown"
+        : type === "text/html"
+          ? "<p>html</p>"
+          : "plain",
+  };
+  const fragment = core.parseClipboardData(
+    source,
+    core.DEFAULT_CLIPBOARD_PARSERS,
+    (candidate) =>
+      core.canExecutePasteCommand({ context, payload: { fragment: candidate } }),
+  );
+  assert.equal(fragment?.mimeType, "text/plain");
+  const result = core.pasteCommand.execute({ context, payload: { fragment } });
+  assert.equal(result.status, "success");
+  const next = core.applyTransaction(document, result.transaction);
+  assert.equal(core.getNodeAtPath(next, point.path)?.text, "plain");
+  assert.equal(core.validateDocument(next).valid, true);
+  assert.equal(
+    core.parseClipboardData(source, core.DEFAULT_CLIPBOARD_PARSERS)?.mimeType,
+    "text/markdown",
+  );
+}
 
 for (const packageConfig of publicPackages) {
   const packageRoot = resolve(repositoryRoot, packageConfig.directory);
@@ -47,6 +84,10 @@ for (const packageConfig of publicPackages) {
       declarations.includes(exportName),
       `${manifest.name} declarations are missing ${exportName}.`,
     );
+  }
+
+  if (packageConfig.directory === "packages/core") {
+    verifyClipboardFiltering(runtime);
   }
 
   process.stdout.write(`Verified ${manifest.name}@${manifest.version}\n`);
