@@ -710,6 +710,34 @@ test("blocks rich-only code paste and preserves the selected code", async ({
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
 
+for (const target of ["end", "whole selection"]) {
+  test(`keeps newline-only code paste inside the block at ${target}`, async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await page.getByLabel("模型示例").selectOption("code-block");
+    const editor = page.getByLabel("已渲染文档");
+    const code = editor.locator("pre code");
+    const original = (await code.textContent())!;
+    const start = target === "end" ? original.length : 0;
+    await selectRenderedTextRange(page, "[0,0]", start, original.length);
+    await pasteEditorClipboard(page, "text/plain", "\n\n");
+    const expected = target === "end" ? `${original}\n\n` : "\n\n";
+    await expect.poll(() => code.textContent()).toBe(expected);
+    await expect(editor.locator("pre")).toHaveCount(1);
+    await expect(editor.locator("p")).toHaveText("代码块后可以继续编辑正文。");
+    await expect(page.getByLabel("锚点路径")).toHaveValue("0,0");
+    await expect(page.getByLabel("锚点偏移")).toHaveValue(String(expected.length));
+    await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+    await page.getByRole("button", { name: "撤销", exact: true }).click();
+    await expect.poll(() => code.textContent()).toBe(original);
+    await page.getByRole("button", { name: "重做", exact: true }).click();
+    await insertEditorText(page, "续");
+    await expect.poll(() => code.textContent()).toBe(`${expected}续`);
+    await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+  });
+}
+
 test("toggles a paragraph code block from the demo control", async ({ page }) => {
   await page.goto("/");
 
