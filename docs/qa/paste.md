@@ -6,7 +6,7 @@
 | ------------- | ------------------------------------------------- | ---- |
 | Parser 调度   | Markdown、HTML、纯文本按顺序解析并可降级          | 通过 |
 | 纯文本单行    | 在光标处插入且不拆块                              | 通过 |
-| 纯文本多行    | 换行转 paragraph，保留空行                        | 通过 |
+| 纯文本多行    | 普通块分段、列表拆项，CodeBlock 保留内部换行      | 通过 |
 | 替换选区      | 支持正反向及同块跨 mark 文本节点                  | 通过 |
 | 顶层范围替换  | 纯文本、HTML、Markdown 替换连续文本块，恢复光标   | 通过 |
 | cell 范围替换 | 纯文本及 TSV 替换同 cell 连续 paragraph，保留邻格 | 通过 |
@@ -32,6 +32,8 @@
 
 ## 自动化覆盖
 
+- CodeBlock：Core/History 与 React 覆盖单块多行、CRLF、缩进、空行、UTF-16 offset、正反向跨 text/跨块替换、归一化光标、富格式降级和空纯文本拒绝；Chromium 六条用例检查精确 textContent、换行不退出、History 与继续输入。
+- 纯文本片段契约：paragraph、CodeBlock、列表和 cell 的能力查询与 execute 一致拒绝非 paragraph blocks；自定义同 MIME parser 的无效候选被跳过，后续有效候选仍可接受。
 - 候选过滤：`clipboard/filter.test.ts` 和 `clipboard/parse.test.ts` 覆盖可选过滤器、默认优先级、自定义同 MIME parser、缺失/空/拒绝结果及惰性读取；不传过滤器保持兼容。
 - 按目标降级：`command/clipboard-target.test.ts`、`history/clipboard-fallback.test.ts` 覆盖顶层富格式优先、列表/cell 使用实际纯文本、无纯文本时拒绝、跨 cell 拒绝及单条 History 恢复。
 - React `clipboard-fallback.test.ts` 覆盖混合 MIME、只读、宿主接管、自定义 Registry、禁用/缺失/失败命令、无效选区、无可用格式和组合输入；失败后不重复执行其他格式。

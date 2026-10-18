@@ -60,3 +60,5 @@ pnpm check:all
 ## 结论
 
 CodeBlock 与 Divider 已达到“代码、测试、中文 Demo、文档、验收一起完成”的闭环标准；后续补充的 HTML/Markdown 粘贴入口也已完成全链路回归。
+
+2026-10-18 的 CodeBlock 纯文本粘贴补全已通过 `pnpm check:all`，包括既有 Enter/退出行为回归；全量数量与构建结果见[全量回归](./full-regression.md)。
