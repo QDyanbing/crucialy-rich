@@ -101,7 +101,10 @@ function resolvePasteTarget(input: CommandInput): PasteTarget | undefined {
     return undefined;
   }
 
-  if ((cellSelection || listItem) && payload.fragment.mimeType !== "text/plain") {
+  if (
+    (cellSelection || listItem || codeBlock) &&
+    payload.fragment.mimeType !== "text/plain"
+  ) {
     return undefined;
   }
 
