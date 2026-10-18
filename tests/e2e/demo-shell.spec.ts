@@ -620,6 +620,43 @@ test("edits and exits a multiline code block", async ({ page }) => {
   await expect(page.getByLabel("模型校验状态")).toContainText("合法");
 });
 
+for (const target of ["caret", "selection"]) {
+  test(`pastes multiline plain text into code at a ${target}`, async ({ page }) => {
+    await page.goto("/");
+    await page.getByLabel("模型示例").selectOption("code-block");
+    const original = "const value = 1;\nreturn value;";
+    const text = "line1\n\n\tline2\n";
+    const end = target === "caret" ? 6 : 11;
+    await selectRenderedTextRange(page, "[0,0]", 6, end);
+    await pasteEditorClipboard(page, "text/plain", text);
+    const editor = page.getByLabel("已渲染文档");
+    const code = editor.locator("pre code");
+    const expected = `${original.slice(0, 6)}${text}${original.slice(end)}`;
+    await expect.poll(() => code.textContent()).toBe(expected);
+    await expect(editor.locator("pre")).toHaveCount(1);
+    await expect(editor.locator("p")).toHaveText("代码块后可以继续编辑正文。");
+    await expect(page.getByLabel("锚点路径")).toHaveValue("0,0");
+    await expect(page.getByLabel("锚点偏移")).toHaveValue(String(6 + text.length));
+    await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+    const transaction = JSON.parse(
+      (await page.getByLabel("最近 Transaction", { exact: true }).textContent()) ??
+        "{}",
+    ) as { operations: { type: string }[] };
+    expect(transaction.operations.map((operation) => operation.type)).toEqual(
+      target === "caret" ? ["insert_text"] : ["delete_text", "insert_text"],
+    );
+    await page.getByRole("button", { name: "撤销", exact: true }).click();
+    await expect.poll(() => code.textContent()).toBe(original);
+    await page.getByRole("button", { name: "重做", exact: true }).click();
+    await expect.poll(() => code.textContent()).toBe(expected);
+    await insertEditorText(page, "续");
+    await expect
+      .poll(() => code.textContent())
+      .toBe(`${original.slice(0, 6)}${text}续${original.slice(end)}`);
+    await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+  });
+}
+
 test("toggles a paragraph code block from the demo control", async ({ page }) => {
   await page.goto("/");
 
