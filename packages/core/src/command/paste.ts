@@ -108,7 +108,10 @@ function resolvePasteTarget(input: CommandInput): PasteTarget | undefined {
     return undefined;
   }
 
-  if (listItem && !payload.fragment.blocks.every(isParagraphNode)) {
+  if (
+    payload.fragment.mimeType === "text/plain" &&
+    !payload.fragment.blocks.every(isParagraphNode)
+  ) {
     return undefined;
   }
 
