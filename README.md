@@ -20,7 +20,9 @@
 
 同一普通、有序或任务列表项内已支持纯文本插入、选区替换和多行拆项，覆盖最多三层嵌套路径。粘贴保留编号、边界格式、任务状态和已有子列表，空行保留为空项；跨列表项及列表内 HTML/Markdown block 粘贴仍未支持。
 
-React 原生粘贴会按当前 Command 能力选择格式：顶层保留 Markdown/HTML 优先级，列表与 cell 可降级到剪贴板实际提供的纯文本。无可用格式或选区不受支持时阻止默认 DOM 写入，不新增 History；宿主 `onPaste` 接管与只读行为保持独立。
+React 原生粘贴会按当前 Command 能力选择格式：普通顶层块保留 Markdown/HTML 优先级，CodeBlock、列表与 cell 可降级到剪贴板实际提供的纯文本。无可用格式或选区不受支持时阻止默认 DOM 写入，不新增 History；宿主 `onPaste` 接管与只读行为保持独立。
+
+CodeBlock 多行粘贴保留在单个纯文本代码块内，统一 CRLF/CR 为 LF，保留缩进、制表符、空行、末尾换行和字面标签，不触发 Enter 的退出规则。正反向选区替换、归一化后的光标、一次撤销/重做与继续输入均有 Core、React、Chromium 和包产物验证。
 
 五种 boolean mark、字号、文字颜色、背景色与 Link Mark 已支持跨连续顶层 paragraph、heading、quote，以及同一列表项或同一表格单元格内的连续 paragraph 应用和取消；command 会把范围拆成逐文本容器 operation，并在同一 transaction 中统一状态、恢复正向或反向选区。CodeBlock、void block、跨列表项和跨单元格选择仍是样式范围边界。
 

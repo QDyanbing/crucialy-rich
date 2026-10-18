@@ -98,7 +98,7 @@ Markdown 使用 `marked` 转换为 HTML，再复用同一 HTML 白名单映射�
 
 ## React 接入
 
-`RichTextEditor` 监听 `onPaste`，将 `DataTransfer` 包装为 `ClipboardDataSource`，用当前 Registry 的 `canExecuteCommand` 过滤候选，再执行一次 `PASTE_COMMAND_NAME`。默认顶层目标仍优先 Markdown/HTML；列表与 cell 拒绝富片段后，可继续读取剪贴板实际提供的 `text/plain`，保留普通纯文本粘贴的选区和 TSV 规则。
+`RichTextEditor` 监听 `onPaste`，将 `DataTransfer` 包装为 `ClipboardDataSource`，用当前 Registry 的 `canExecuteCommand` 过滤候选，再执行一次 `PASTE_COMMAND_NAME`。普通顶层目标仍优先 Markdown/HTML；CodeBlock、列表与 cell 拒绝富片段后，可继续读取剪贴板实际提供的 `text/plain`，分别保留代码换行、列表拆项、cell 选区与 TSV 规则。
 
 可编辑编辑器接管事件后即阻止默认写入；没有有效选区、没有可用片段、命令未注册/禁用/失败或正在组合输入时，不把未处理内容交给浏览器修改 DOM，也不新增 History。成功时通过 `onChange`、`onSelectionChange` 和 `onTransaction` 返回模型结果；命令执行失败后不会再尝试执行其他格式。
 

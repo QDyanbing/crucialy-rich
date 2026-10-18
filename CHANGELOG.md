@@ -8,6 +8,7 @@
 
 ### 新增
 
+- 新增 CodeBlock 粘贴的 Core 边界、History、React Clipboard、Chromium 和构建产物验收，覆盖字面代码、缩进、空行、格式降级、仅换行粘贴及继续输入。
 - `parseClipboardData` 新增可选候选过滤器，支持按目标能力继续尝试后续格式，保留默认 MIME 优先级与原调用兼容性。
 - React 原生粘贴按当前 Command Registry 选择格式，列表与 cell 可回退到剪贴板实际提供的纯文本；补齐 Core/History、React、Chromium 与构建产物回归。
 - 新增同一普通、有序、任务列表项内的纯文本插入、正反向选区替换和多行拆项，支持最多三层嵌套路径并保留空行、编号、格式、任务状态和已有子列表。
@@ -229,6 +230,8 @@
 
 ### 修复
 
+- 修复 CodeBlock 多行纯文本粘贴会拆成多个块的问题；多行统一插入为带 LF 的代码文本，富剪贴板降级到实际纯文本而不导入结构化内容。
+- 修复 CodeBlock 多 text 节点归一化后粘贴光标路径失效，并统一所有目标对 `text/plain` 非 paragraph 片段的能力判断和执行拒绝行为。
 - 修复不兼容的富格式阻断列表/cell 纯文本粘贴，以及未处理粘贴可能落入浏览器默认 DOM 修改的问题；无可用候选或命令失败时保持模型与 History 不变。
 - 修复同 cell 跨段落粘贴仍生成 `delete_text` 导致应用报错，以及删除 marked text 节点后粘贴插入位置未重映射的问题。
 - 修复 History 快照把 heading 和 quote 错误克隆为 paragraph，导致 Block Type 操作无法正确 undo/redo 的问题。
