@@ -657,6 +657,59 @@ for (const target of ["caret", "selection"]) {
   });
 }
 
+test("falls back from rich clipboard formats to literal code text", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("code-block");
+  const editor = page.getByLabel("已渲染文档");
+  const code = editor.locator("pre code");
+  const original = (await code.textContent())!;
+  await selectRenderedTextRange(page, "[0,0]", 6, 11);
+  const text = "<b>literal</b>\n`code`";
+  expect(
+    await pasteEditorClipboardFormats(page, {
+      "text/markdown": "# 不应导入",
+      "text/html": "<p><b>不应导入</b></p>",
+      "text/plain": text,
+    }),
+  ).toBe(true);
+  const expected = `${original.slice(0, 6)}${text}${original.slice(11)}`;
+  await expect.poll(() => code.textContent()).toBe(expected);
+  await expect(code.locator("b, strong, a")).toHaveCount(0);
+  await expect(editor.locator("pre")).toHaveCount(1);
+  await expect(editor.locator("p")).toHaveCount(1);
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect.poll(() => code.textContent()).toBe(original);
+  await page.getByRole("button", { name: "重做", exact: true }).click();
+  await expect.poll(() => code.textContent()).toBe(expected);
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
+test("blocks rich-only code paste and preserves the selected code", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("code-block");
+  const code = page.getByLabel("已渲染文档").locator("pre code");
+  const original = (await code.textContent())!;
+  await selectRenderedTextRange(page, "[0,0]", 6, 11);
+  expect(
+    await pasteEditorClipboardFormats(page, {
+      "text/html": "<p>富内容</p>",
+      "text/markdown": "# 富内容",
+    }),
+  ).toBe(true);
+  await expect.poll(() => code.textContent()).toBe(original);
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+  await insertEditorText(page, "newValue");
+  await expect
+    .poll(() => code.textContent())
+    .toBe(`${original.slice(0, 6)}newValue${original.slice(11)}`);
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
 test("toggles a paragraph code block from the demo control", async ({ page }) => {
   await page.goto("/");
 
