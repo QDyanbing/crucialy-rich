@@ -1,5 +1,6 @@
 import {
   isBlockNode,
+  isCodeBlockNode,
   isListEntryNode,
   isListNode,
   isParagraphNode,
@@ -49,6 +50,7 @@ export interface PasteCommandPayload {
 
 interface PasteTarget {
   cellSelection?: CellSelection;
+  codeBlock: boolean;
   deletion?: RangeDeletionOperation;
   fragment: ClipboardFragment;
   insertionPoint: Point;
@@ -81,6 +83,9 @@ function resolvePasteTarget(input: CommandInput): PasteTarget | undefined {
 
   const range = normalizeRange(selection);
   const [anchorBlockIndex] = range.anchor.path;
+  const codeBlock = isCodeBlockNode(
+    getNodeAtPath(input.context.document, range.anchor.path.slice(0, -1)),
+  );
   const cellSelection = getCellSelectionFromRange(input.context.document, range);
   const listItem =
     isSameTextContainer(range.anchor, range.focus) &&
@@ -115,6 +120,7 @@ function resolvePasteTarget(input: CommandInput): PasteTarget | undefined {
   return {
     ...(cellSelection ? { cellSelection } : {}),
     ...(deletion ? { deletion: deletion.operation } : {}),
+    codeBlock,
     fragment: payload.fragment as ClipboardFragment,
     listItem,
     insertionPoint: deletion?.selection.anchor ?? {
@@ -179,6 +185,17 @@ function createPlainTextPasteResult(target: PasteTarget) {
     block.children.map((node) => node.text).join(""),
   );
   const operations: Operation[] = target.deletion ? [target.deletion] : [];
+  if (target.codeBlock) {
+    const insertOperation = createInsertTextOperation(
+      target.insertionPoint,
+      lines.join("\n"),
+    );
+    operations.push(insertOperation);
+    return {
+      operations,
+      point: createSelectionAfterInsertText(insertOperation).anchor,
+    };
+  }
   let point = {
     offset: target.insertionPoint.offset,
     path: [...target.insertionPoint.path],
