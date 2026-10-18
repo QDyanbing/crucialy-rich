@@ -52,6 +52,50 @@ function verifyClipboardFiltering(core) {
   );
 }
 
+function verifyCodePaste(core) {
+  const document = core.createDocument([
+    core.createCodeBlock([core.createText("pre"), core.createText("tail")]),
+  ]);
+  const point = { path: [0, 1], offset: 0 };
+  const context = { document, selection: { anchor: point, focus: point } };
+  const text = "line1\n\tline2";
+  const fragment = core.parseClipboardData(
+    {
+      types: ["text/html", "text/plain"],
+      getData: (type) => (type === "text/html" ? "<p>rich</p>" : "line1\r\n\tline2"),
+    },
+    core.DEFAULT_CLIPBOARD_PARSERS,
+    (candidate) =>
+      core.canExecutePasteCommand({ context, payload: { fragment: candidate } }),
+  );
+  assert.equal(fragment?.mimeType, "text/plain");
+  const result = core.pasteCommand.execute({ context, payload: { fragment } });
+  assert.equal(result.status, "success");
+  assert.deepEqual(
+    result.transaction.operations.map((operation) => operation.type),
+    ["insert_text"],
+  );
+  const next = core.applyTransaction(document, result.transaction);
+  assert.deepEqual(
+    next,
+    core.createDocument([core.createCodeBlock([core.createText(`pre${text}tail`)])]),
+  );
+  assert.deepEqual(result.selection.anchor, { path: [0, 0], offset: 3 + text.length });
+  assert.equal(core.isValidPoint(next, result.selection.anchor), true);
+  assert.equal(
+    core.canExecutePasteCommand({
+      context,
+      payload: {
+        fragment: {
+          mimeType: "text/plain",
+          blocks: [core.createHeading(1, [core.createText("invalid")])],
+        },
+      },
+    }),
+    false,
+  );
+}
+
 for (const packageConfig of publicPackages) {
   const packageRoot = resolve(repositoryRoot, packageConfig.directory);
   const manifest = JSON.parse(
@@ -88,6 +132,7 @@ for (const packageConfig of publicPackages) {
 
   if (packageConfig.directory === "packages/core") {
     verifyClipboardFiltering(runtime);
+    verifyCodePaste(runtime);
   }
 
   process.stdout.write(`Verified ${manifest.name}@${manifest.version}\n`);
