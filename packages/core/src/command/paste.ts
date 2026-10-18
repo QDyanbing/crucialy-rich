@@ -26,6 +26,7 @@ import {
   isValidPoint,
   isSameTextContainer,
   getNodeAtPath,
+  getTextContainerOffset,
   getCellSelectionFromRange,
   normalizeRange,
   type CellSelection,
@@ -50,7 +51,7 @@ export interface PasteCommandPayload {
 
 interface PasteTarget {
   cellSelection?: CellSelection;
-  codeBlock: boolean;
+  codeBlockOffset?: number;
   deletion?: RangeDeletionOperation;
   fragment: ClipboardFragment;
   insertionPoint: Point;
@@ -83,9 +84,11 @@ function resolvePasteTarget(input: CommandInput): PasteTarget | undefined {
 
   const range = normalizeRange(selection);
   const [anchorBlockIndex] = range.anchor.path;
-  const codeBlock = isCodeBlockNode(
+  const codeBlockOffset = isCodeBlockNode(
     getNodeAtPath(input.context.document, range.anchor.path.slice(0, -1)),
-  );
+  )
+    ? getTextContainerOffset(input.context.document, range.anchor)
+    : undefined;
   const cellSelection = getCellSelectionFromRange(input.context.document, range);
   const listItem =
     isSameTextContainer(range.anchor, range.focus) &&
@@ -102,7 +105,7 @@ function resolvePasteTarget(input: CommandInput): PasteTarget | undefined {
   }
 
   if (
-    (cellSelection || listItem || codeBlock) &&
+    (cellSelection || listItem || codeBlockOffset !== undefined) &&
     payload.fragment.mimeType !== "text/plain"
   ) {
     return undefined;
@@ -126,7 +129,7 @@ function resolvePasteTarget(input: CommandInput): PasteTarget | undefined {
   return {
     ...(cellSelection ? { cellSelection } : {}),
     ...(deletion ? { deletion: deletion.operation } : {}),
-    codeBlock,
+    ...(codeBlockOffset === undefined ? {} : { codeBlockOffset }),
     fragment: payload.fragment as ClipboardFragment,
     listItem,
     insertionPoint: deletion?.selection.anchor ?? {
@@ -191,15 +194,17 @@ function createPlainTextPasteResult(target: PasteTarget) {
     block.children.map((node) => node.text).join(""),
   );
   const operations: Operation[] = target.deletion ? [target.deletion] : [];
-  if (target.codeBlock) {
-    const insertOperation = createInsertTextOperation(
-      target.insertionPoint,
-      lines.join("\n"),
-    );
+  if (target.codeBlockOffset !== undefined) {
+    const text = lines.join("\n");
+    const insertOperation = createInsertTextOperation(target.insertionPoint, text);
     operations.push(insertOperation);
     return {
       operations,
-      point: createSelectionAfterInsertText(insertOperation).anchor,
+      // CodeBlock normalization merges all plain text nodes into one.
+      point: {
+        path: [target.insertionPoint.path[0]!, 0],
+        offset: target.codeBlockOffset + text.length,
+      },
     };
   }
   let point = {
