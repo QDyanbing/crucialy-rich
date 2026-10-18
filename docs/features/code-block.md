@@ -42,6 +42,15 @@ History 快照会按 CodeBlock 类型深拷贝文本和选区，撤销、重做�
 - 光标位于代码块末尾且文本已经以 `\n` 结尾时，再次 Enter 会在后方创建 paragraph 并退出代码块。
 - `splitBlockCommand` 与 React `RichTextEditor` 共用上述规则。
 
+## 粘贴行为
+
+- CodeBlock 目标只接受纯文本 fragment。React 原生剪贴板同时含 HTML/Markdown 与 `text/plain` 时回退到实际纯文本；没有非空纯文本候选时阻止默认写入，不修改模型或 History。
+- CRLF/CR 统一为 LF，缩进、制表符、连续空行、末尾换行及标签/反引号字面值原样保留在同一个 CodeBlock 中，不生成 paragraph 或多个代码块。
+- 粘贴不复用 Enter 的双换行退出规则；只有换行的内容仍是代码文本，空字符串则没有可用 fragment。
+- 支持同 CodeBlock 内跨 text 的正反向选区替换；连续顶层范围以规范化选区的起始文本块确定粘贴策略，起点为 CodeBlock 时结果保留为纯代码，跨结构节点仍拒绝。
+- 范围删除和一次文本插入组成一条 Transaction。结束 normalize 合并 code text 后，光标按原起点的文本偏移加插入长度映射到合并节点，使用 UTF-16 offset。
+- 一次撤销恢复原结构和选区，重做恢复代码与光标，随后可继续输入；构建产物也执行对应公开 API 冒烟检查。
+
 ## 渲染
 
 CodeBlock 使用 `pre > code` 语义结构：

@@ -24,6 +24,9 @@
 
 ## 自动化覆盖
 
+- CodeBlock 粘贴：`paste-code-block.test.ts`、`paste-code-range.test.ts`、`history/code-paste.test.ts` 覆盖单块多行、CRLF、缩进、空行、末尾/全选换行、正反向范围、结构拒绝、归一化光标与 History。
+- 纯文本契约：`paste-fragment-contract.test.ts` 验证四类目标拒绝伪装为 `text/plain` 的非 paragraph 片段，以及过滤器能继续选择有效的同 MIME parser。
+- React `code-paste.test.ts` 验证原生多行、选区替换、混合格式降级、字面标签和富格式独占/空纯文本拒绝；包产物冒烟验证原节点合并后光标有效。
 - 模型：`packages/core/tests/model`。
 - CodeBlock：`packages/core/tests/command/code-block.test.ts`、`packages/core/tests/input/enter.test.ts`。
 - Divider：`packages/core/tests/command/divider.test.ts`、`packages/core/tests/operation/insert-block.test.ts`、`remove-block.test.ts`。
@@ -34,6 +37,7 @@
 
 ## 浏览器场景
 
+- 六条 CodeBlock 粘贴用例验证精确 textContent、光标、一次 History、重做后输入、富格式降级/拒绝及仅换行不退出代码块；原有 Enter 退出规则保持不变。
 - 中文混合样例同时渲染 CodeBlock、Divider 和后续 paragraph。
 - 在普通段落中间插入 Divider，检查两侧文字、选区落点和 Transaction。
 - 插入后执行撤销、重做，并在 Divider 后继续输入。
@@ -51,7 +55,7 @@ pnpm check:all
 ## 当前边界
 
 - RangeSelection 仍由 text Point 组成，Divider 本身不承载内部光标；删除通过相邻文本 Point 表达。
-- 当前未实现 List、Image 或通用 NodeSelection；`insert_block` / `remove_block` 已为后续 void block 留出复用基础。
+- CodeBlock 范围粘贴不跨越 List、Table、Image 或 Divider 等结构节点；本轮不新增通用 NodeSelection。
 
 ## 结论
 
