@@ -155,6 +155,7 @@ function createSelectionAfterTabInput(input: TabInput): RangeSelection;
 - `onCompositionStateChange`：输入法开始、更新和结束时输出当前 Composition 状态。
 - `onCompositionStart` / `onCompositionUpdate` / `onCompositionEnd`：外部回调先执行，内部随后维护候选状态和最终提交。
 - 普通文本输入复用 `insertTextCommand`。
+- Clipboard 粘贴走独立 `pasteCommand`，不把粘贴换行模拟为 Enter：CodeBlock 使用一次带 LF 的文本插入，保留空行与末尾换行而不退出代码块。
 - 同一文本容器内跨 text 节点、跨连续顶层文本块或同 cell 连续 paragraph 的普通文本输入会先删除选区，再插入输入文本。
 - 非折叠 selection 下的 Backspace/Delete 复用 `deleteSelectionCommand`。
 - Enter 复用 `splitBlockCommand`；非折叠选区会在同一 transaction 中先删除再分段。

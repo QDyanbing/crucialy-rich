@@ -227,6 +227,7 @@ const mergeBlockCommand: Command;
 - `insertTextCommand` 成功时返回包含 `insert_text` 的 transaction；同容器 range 先生成 `delete_text`，跨块 range 先生成 `delete_range`。
 - `deleteSelectionCommand` 成功时按范围返回 `delete_text` 或 `delete_range` transaction。
 - `pasteCommand` 同样复用范围删除计划，支持连续顶层文本块的纯文本/HTML/Markdown 替换、同 cell 连续 paragraph 的纯文本替换，以及同一普通/有序/任务列表项内的纯文本插入和替换；列表换行复用 `split_list_item`，TSV 二维填充只在 cell 折叠光标下执行。
+- 起点为 CodeBlock 时，`pasteCommand` 只接受纯文本，多行合并为一次 `insert_text`，删除与插入仍组成一条 Transaction；结束 normalize 后按代码文本偏移恢复光标。
 - `splitBlockCommand` 在 collapsed selection 下返回 Enter 对应 transaction；非折叠 selection 下先加入 `delete_text` 或 `delete_range`，再加入分段、列表分裂或 CodeBlock 换行 operation。
 - `mergeBlockCommand` 成功时返回包含 `merge_block` 的 transaction。
 - React 编辑器的普通文本输入会复用 `insertTextCommand`。
@@ -240,7 +241,7 @@ const mergeBlockCommand: Command;
 ## 当前限制
 
 - 文本插入和删除 command 支持同一文本容器、连续顶层文本块或同 cell 连续 paragraph range；暂不跨越列表项、cell、进出表格和 void block 等结构边界。
-- `pasteCommand` 不接受跨列表项、跨 cell 或进出列表/表格的选区；列表项和 cell 内只接受 `text/plain` fragment。结构化 fragment 仍按独立顶层 block 插入，不改变列表项或 cell schema。
+- `pasteCommand` 不接受跨列表项、跨 cell 或进出列表/表格的选区；CodeBlock、列表项和 cell 内只接受 `text/plain` fragment。结构化 fragment 仍按独立顶层 block 插入，不改变这些目标的纯文本或嵌套 schema；所有目标的纯文本 fragment 均须由 paragraph blocks 组成。
 - boolean mark、文字属性、链接和清除格式 command 支持 paragraph、heading、quote 的单块或连续顶层跨块 selection，也支持同一列表项或同一表格单元格内的连续 paragraph；CodeBlock、Divider、Image、跨列表项和跨单元格 selection 不接受 marks。
 - `splitBlockCommand` 支持 collapsed、同容器、连续顶层文本块和同 cell 连续 paragraph selection；`mergeBlockCommand` 与 `insertDividerCommand` 仍只处理 collapsed selection。
 - 快捷键模块不处理权限；宿主提供自定义 registry 时，React 编辑器会使用该 registry 执行命中的默认快捷键名称。

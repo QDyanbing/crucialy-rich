@@ -39,7 +39,7 @@ const fragment = parseClipboardData(source, DEFAULT_CLIPBOARD_PARSERS, (candidat
 
 ## 纯文本
 
-`parsePlainText` 统一 CRLF、CR 和 LF，每一行生成一个 paragraph，连续换行保留为空 paragraph。`paste` 命令让首行衔接光标前文本、末行衔接光标后文本；顶层和 cell 内按目标文本块类型分段，列表内按列表项拆分，支持同一文本块、连续顶层文本块、同一 cell 连续 paragraph 及同一列表项内的选区替换。
+`parsePlainText` 统一 CRLF、CR 和 LF，每一行生成一个 paragraph，连续换行保留为空 paragraph。`paste` 命令让首行衔接光标前文本、末行衔接光标后文本；CodeBlock 内合为一段带 LF 的纯文本，其他顶层块和 cell 按目标文本块类型分段，列表内按列表项拆分，支持各自范围内的选区替换。
 
 在表格 cell 内的折叠光标处，带制表符的一行文本或多行纯文本会解析为二维网格，并从当前 cell 开始向右、向下写入。网格完整落在现有表格范围内时，每个目标 cell 会被一个 paragraph 替换；超出剩余行列时整次操作降级为当前 cell 内的普通文本粘贴，不扩表、不截断数据。
 
@@ -47,13 +47,16 @@ const fragment = parseClipboardData(source, DEFAULT_CLIPBOARD_PARSERS, (candidat
 
 ## 范围替换
 
-- 纯文本、HTML 和 Markdown 支持同一顶层文本块或连续顶层 paragraph、heading、quote、codeBlock 的选区替换。
+- 纯文本支持同一顶层文本块或连续顶层 paragraph、heading、quote、codeBlock 的选区替换；HTML/Markdown 要求规范化选区的起点不在 CodeBlock 内。
+- CodeBlock 多行粘贴用一条 `insert_text` 保存 LF，不拆块、不执行 Enter 退出规则，保留缩进、空行、制表符和字面标签。选区删除后仍按代码起点处理，归一化光标映射到合并后的 text 节点。
 - 同一 cell 内支持纯文本替换单段或连续多段 paragraph；HTML/Markdown block fragment 不直接插入 cell。
 - 同一普通、有序或任务列表项内支持纯文本插入与选区替换，包括最多三层嵌套路径和跨 mark 的正反向选区；换行使用 `split_list_item`，连续空行保留为空项，不套用 Enter 的退出或反缩进规则。
 - 多行列表粘贴保留原编号、前后文字与格式；原任务项保留 checked，新项默认为未完成，已有子列表随保留后缀移到最后一个拆分项。
 - 正向和反向选区共用范围删除计划：单容器生成 `delete_text`，跨顶层块或同 cell 跨段落生成 `delete_range`，再从删除后映射的光标处粘贴。
 - 结构化内容仍作为独立 block 插入起始块的前后边界之间，保留 fragment 的文字样式与块类型；纯文本继承目标位置的格式。
 - 删除与粘贴组成一个 transaction、一条 History；撤销恢复原文档和原选区，重做恢复粘贴结果和光标，之后可继续输入。
+
+所有目标的 `text/plain` fragment 都只接受 paragraph blocks；伪装为纯文本的 heading、table 等片段会在 `canExecutePasteCommand` 和 execute 中一致拒绝，过滤器可继续尝试有效候选。
 
 ## HTML
 
