@@ -77,6 +77,54 @@ function paste(container: HTMLElement, formats: Record<string, string>) {
 }
 
 describe("RichTextEditor CodeBlock plain clipboard paste", () => {
+  it("falls back to literal plain code rather than importing HTML or Markdown", () => {
+    const { container, onTransaction } = renderCode(["前后"]);
+    selectCode(container, [0, 0], 1);
+    const text = "<b>`x`</b>\n\tvalue";
+    expect(
+      paste(container, {
+        "text/markdown": "# 标题",
+        "text/html": "<p><b>富内容</b></p>",
+        "text/plain": text,
+      }).defaultPrevented,
+    ).toBe(true);
+    expect(container.querySelector("pre code")?.textContent).toBe(`前${text}后`);
+    expect(container.querySelector("strong, b, h1")).toBeNull();
+    expect(onTransaction).toHaveBeenCalledTimes(1);
+    expect(onTransaction.mock.calls[0]?.[0].after).toEqual(
+      createDocument([
+        createCodeBlock([createText(`前${text}后`)]),
+        createParagraph([createText("后方正文")]),
+      ]),
+    );
+  });
+
+  it.each(["text/html", "text/markdown"])(
+    "does not modify code for a rich-only %s clipboard",
+    (type) => {
+      const { container, onTransaction } = renderCode(["前旧后"]);
+      selectCode(container, [0, 0], 1, 2);
+      expect(
+        paste(container, {
+          [type]: type === "text/html" ? "<p>富内容</p>" : "# 富内容",
+        }).defaultPrevented,
+      ).toBe(true);
+      expect(container.querySelector("pre code")?.textContent).toBe("前旧后");
+      expect(onTransaction).not.toHaveBeenCalled();
+    },
+  );
+
+  it("does not erase a selected code range when the supplied plain text is empty", () => {
+    const { container, onTransaction } = renderCode(["前旧后"]);
+    selectCode(container, [0, 0], 1, 2);
+    expect(
+      paste(container, { "text/html": "<p>富内容</p>", "text/plain": "" })
+        .defaultPrevented,
+    ).toBe(true);
+    expect(container.querySelector("pre code")?.textContent).toBe("前旧后");
+    expect(onTransaction).not.toHaveBeenCalled();
+  });
+
   it.each([
     {
       texts: ["前后"],
