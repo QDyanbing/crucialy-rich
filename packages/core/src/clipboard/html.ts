@@ -29,6 +29,7 @@ import {
   type TextNode,
 } from "../model";
 import type { ClipboardFragment, ClipboardParser } from "./types";
+import { isOfficeHtml } from "./office";
 
 type HtmlNode = DefaultTreeAdapterMap["childNode"];
 type HtmlElement = DefaultTreeAdapterMap["element"];
@@ -505,6 +506,10 @@ function parseBlock(node: HtmlNode): BlockNode[] {
 }
 
 export function parseHtml(value: string): ClipboardFragment | undefined {
+  if (isOfficeHtml(value)) {
+    return undefined;
+  }
+
   const blocks = parseFragment(value).childNodes.flatMap(parseBlock);
 
   return blocks.length > 0 ? { blocks, mimeType: "text/html" } : undefined;

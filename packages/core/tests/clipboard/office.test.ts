@@ -4,6 +4,8 @@ import {
   createText,
   DEFAULT_CLIPBOARD_PARSERS,
   parseClipboardData,
+  parseHtml,
+  parseMarkdown,
   type ClipboardFragment,
 } from "../../src";
 
@@ -15,6 +17,39 @@ function parse(formats: Record<string, string>) {
 }
 
 describe("Office clipboard plain text fallback", () => {
+  it.each([
+    '<p class="other MsoNormal">Word</p>',
+    '<div><p CLASS="msolistparagraph">Word</p></div>',
+    '<span style="color:#000; MSO-bidi-font-weight:bold">Word</span>',
+    '<html xmlns:w="urn:schemas-microsoft-com:office:word"><body><p>Word</p></body></html>',
+    '<html xmlns:x="urn:schemas-microsoft-com:office:excel"><body><table><tr><td>Excel</td></tr></table></body></html>',
+    '<html><head><meta name="Generator" content="Microsoft Word 16"></head><body><p>Word</p></body></html>',
+    '<meta name="generator" content="Microsoft Office Excel 16"><p>Excel</p>',
+    '<meta name="generator" content="Microsoft PowerPoint 16"><p>Slides</p>',
+    "<style>.item { mso-list:l0 level1; }</style><p>Word</p>",
+  ])("rejects Office rich import for %s", (html) => {
+    expect(parseHtml(html)).toBeUndefined();
+    expect(parseMarkdown(html)).toBeUndefined();
+    expect(parse({ "text/html": html, "text/plain": "plain" })?.mimeType).toBe(
+      "text/plain",
+    );
+  });
+
+  it.each([
+    "<p>mso-list: text about Microsoft Word</p>",
+    '<!-- <p class="MsoNormal">comment</p> --><p>ordinary</p>',
+    '<script>const text = "mso-list:l0";</script><p>ordinary</p>',
+    '<p title="mso-list:l0" data-office="MsoNormal">ordinary</p>',
+    '<p class="almostMsoNormal" style="color:#abc">ordinary</p>',
+    '<meta name="generator" content="Microsoft unrelated"><p>ordinary</p>',
+    '<p xmlns:example="urn:example:office">ordinary</p>',
+  ])("does not classify plain content or unrelated metadata as Office: %s", (html) => {
+    expect(parseHtml(html)?.mimeType).toBe("text/html");
+    expect(parse({ "text/html": html, "text/plain": "plain" })?.mimeType).toBe(
+      "text/html",
+    );
+  });
+
   it("prefers supplied plain text over Office HTML and Markdown", () => {
     expect(
       parse({
