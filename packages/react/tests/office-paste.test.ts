@@ -2,6 +2,12 @@
 
 import {
   createDocument,
+  createCodeBlock,
+  createListItem,
+  createOrderedList,
+  createTaskItem,
+  createTaskList,
+  createTable,
   createParagraph,
   createText,
   type DocumentNode,
@@ -73,6 +79,82 @@ const officeFormats = {
 };
 
 describe("RichTextEditor Office clipboard policy", () => {
+  it("preserves literal code and does not split the block", () => {
+    const { container, onTransaction } = renderEditor(
+      createDocument([createCodeBlock([createText("开旧尾")])]),
+    );
+    selectText(container);
+    paste(container, { ...officeFormats, "text/plain": "<b>甲</b>\n\t乙\n" });
+    expect(container.querySelectorAll("pre")).toHaveLength(1);
+    expect(container.querySelector("code")?.textContent).toBe("开<b>甲</b>\n\t乙\n尾");
+    expect(onTransaction).toHaveBeenCalledTimes(1);
+    expect(onTransaction.mock.calls[0]?.[0].selection.anchor).toEqual({
+      path: [0, 0],
+      offset: 13,
+    });
+  });
+
+  it.each([
+    {
+      name: "ordered",
+      node: createOrderedList([createListItem([createText("开旧尾")])], 7),
+    },
+    {
+      name: "task",
+      node: createTaskList([createTaskItem([createText("开旧尾")], true)]),
+    },
+  ])(
+    "preserves $name list state when splitting plain Office lines",
+    ({ name, node }) => {
+      const { container, onTransaction } = renderEditor(createDocument([node]));
+      selectText(container, "[0,0,0]");
+      paste(container, officeFormats);
+      expect(
+        Array.from(container.querySelectorAll("li"), (item) => item.textContent),
+      ).toEqual(["开甲", "乙尾"]);
+      if (name === "ordered")
+        expect(container.querySelector("ol")?.getAttribute("start")).toBe("7");
+      if (name === "task")
+        expect(
+          Array.from(container.querySelectorAll("input"), (input) => input.checked),
+        ).toEqual([true, false]);
+      expect(onTransaction).toHaveBeenCalledTimes(1);
+    },
+  );
+
+  it.each([true, false])(
+    "uses existing cell rules for Office TSV (range: %s)",
+    (range) => {
+      const table = createTable(2, 2);
+      table.children[0]!.children[0]!.children = [
+        createParagraph([createText("开旧尾")]),
+      ];
+      const { container, onTransaction } = renderEditor(createDocument([table]));
+      selectText(container, "[0,0,0,0,0]", 1, range ? 2 : 1);
+      paste(container, { ...officeFormats, "text/plain": "甲\t乙\r\n丙\t丁" });
+      const cells = container.querySelectorAll("td");
+      expect(cells).toHaveLength(4);
+      if (range) {
+        expect(
+          Array.from(cells[0]!.querySelectorAll("p"), (p) => p.textContent),
+        ).toEqual(["开甲\t乙", "丙\t丁尾"]);
+        expect(
+          Array.from(cells)
+            .slice(1)
+            .map((cell) => cell.textContent),
+        ).toEqual(["", "", ""]);
+      } else {
+        expect(Array.from(cells, (cell) => cell.textContent)).toEqual([
+          "甲",
+          "乙",
+          "丙",
+          "丁",
+        ]);
+      }
+      expect(onTransaction).toHaveBeenCalledTimes(1);
+    },
+  );
+
   it("replaces selected prose with supplied plain text in one transaction", () => {
     const { container, onTransaction, onChange } = renderEditor();
     selectText(container);
