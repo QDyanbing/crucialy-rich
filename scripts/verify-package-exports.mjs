@@ -52,6 +52,71 @@ function verifyClipboardFiltering(core) {
   );
 }
 
+function verifyOfficePaste(core) {
+  const html =
+    '<html><head><meta name="Generator" content="Microsoft Word 16"></head><body><h1>rich</h1></body></html>';
+  const formats = {
+    "text/html": html,
+    "text/markdown": "# rich",
+    "text/plain": "line1\r\nline2",
+  };
+  const source = {
+    types: Object.keys(formats),
+    getData: (type) => formats[type] ?? "",
+  };
+  const fragment = core.parseClipboardData(source, core.DEFAULT_CLIPBOARD_PARSERS);
+  assert.deepEqual(fragment, core.parsePlainText(formats["text/plain"]));
+  assert.equal(core.parseHtml(html), undefined);
+  assert.equal(core.parseMarkdown(html), undefined);
+  assert.equal(
+    core.parseClipboardData(
+      { types: ["text/html", "text/markdown"], getData: source.getData },
+      core.DEFAULT_CLIPBOARD_PARSERS,
+    ),
+    undefined,
+  );
+
+  const document = core.createDocument([
+    core.createParagraph([core.createText("old")]),
+  ]);
+  const result = core.pasteCommand.execute({
+    context: {
+      document,
+      selection: {
+        anchor: { path: [0, 0], offset: 0 },
+        focus: { path: [0, 0], offset: 3 },
+      },
+    },
+    payload: { fragment },
+  });
+  assert.equal(result.status, "success");
+  const after = core.applyTransaction(document, result.transaction);
+  assert.deepEqual(
+    after,
+    core.createDocument([
+      core.createParagraph([core.createText("line1")]),
+      core.createParagraph([core.createText("line2")]),
+    ]),
+  );
+  assert.equal(core.validateDocument(after).valid, true);
+  assert.deepEqual(result.selection.anchor, { path: [1, 0], offset: 5 });
+
+  let richParserCalls = 0;
+  const parsers = [
+    {
+      mimeType: "text/html",
+      parse: () => {
+        richParserCalls++;
+        return core.parsePlainText("wrong");
+      },
+    },
+    { mimeType: "text/plain", parse: () => undefined },
+    core.plainTextClipboardParser,
+  ];
+  assert.deepEqual(core.parseClipboardData(source, parsers), fragment);
+  assert.equal(richParserCalls, 0);
+}
+
 function verifyCodePaste(core) {
   const document = core.createDocument([
     core.createCodeBlock([core.createText("pre"), core.createText("tail")]),
@@ -133,6 +198,7 @@ for (const packageConfig of publicPackages) {
   if (packageConfig.directory === "packages/core") {
     verifyClipboardFiltering(runtime);
     verifyCodePaste(runtime);
+    verifyOfficePaste(runtime);
   }
 
   process.stdout.write(`Verified ${manifest.name}@${manifest.version}\n`);
