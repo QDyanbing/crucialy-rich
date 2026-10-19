@@ -3089,6 +3089,70 @@ test("inserts, selects, and deletes image blocks", async ({ page }) => {
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
 
+test("replaces a prose range with Office plain text and restores history", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await selectRenderedTextAcrossNodes(page, "[0,0]", 3, "[1,0]", 2);
+  expect(
+    await pasteEditorClipboardFormats(page, {
+      "text/html":
+        '<html><head><meta name="Generator" content="Microsoft Word 16"></head><body><h1><b>Office rich</b></h1></body></html>',
+      "text/markdown": "# Markdown rich",
+      "text/plain": "第一行\r\n\r\n第二行",
+    }),
+  ).toBe(true);
+  const editor = page.getByLabel("已渲染文档");
+  await expect(editor.locator("p")).toHaveText([
+    "你好，第一行",
+    "",
+    "第二行模型已就绪。",
+  ]);
+  await expect(editor.locator("h1, strong")).toHaveCount(0);
+  await expect(page.getByLabel("锚点路径")).toHaveValue("2,0");
+  await expect(page.getByLabel("锚点偏移")).toHaveValue("3");
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect(editor.locator("p")).toHaveText([
+    "你好，crucialy-rich。",
+    "选区模型已就绪。",
+  ]);
+  await expect(page.getByLabel("焦点路径")).toHaveValue("1,0");
+  await expect(page.getByLabel("焦点偏移")).toHaveValue("2");
+  await page.getByRole("button", { name: "重做", exact: true }).click();
+  await expect(editor.locator("p")).toHaveText([
+    "你好，第一行",
+    "",
+    "第二行模型已就绪。",
+  ]);
+  await insertEditorText(page, "续");
+  await expect(editor.locator("p").last()).toHaveText("第二行续模型已就绪。");
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
+for (const plain of [undefined, ""]) {
+  test(`blocks Office rich-only paste without deleting prose (${JSON.stringify(plain)})`, async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await selectRenderedTextRange(page, "[0,0]", 3, 7);
+    expect(
+      await pasteEditorClipboardFormats(page, {
+        "text/html": '<p class="MsoNormal"><b>Office rich</b></p>',
+        "text/markdown": "# Markdown rich",
+        ...(plain === undefined ? {} : { "text/plain": plain }),
+      }),
+    ).toBe(true);
+    await expect(page.getByLabel("已渲染文档").locator("p")).toHaveText([
+      "你好，crucialy-rich。",
+      "选区模型已就绪。",
+    ]);
+    await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+    await expect(page.getByLabel("锚点偏移")).toHaveValue("3");
+    await expect(page.getByLabel("焦点偏移")).toHaveValue("7");
+  });
+}
+
 for (const clipboard of [
   {
     mimeType: "text/plain",
