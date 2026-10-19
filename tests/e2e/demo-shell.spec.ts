@@ -3089,6 +3089,79 @@ test("inserts, selects, and deletes image blocks", async ({ page }) => {
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
 
+test("pastes Office code as literal text with a stable caret", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("code-block");
+  const editor = page.getByLabel("已渲染文档");
+  const code = editor.locator("pre code");
+  const original = (await code.textContent())!;
+  await selectRenderedTextRange(page, "[0,0]", 6, 11);
+  const text = "<b>甲</b>\n\t乙\n";
+  await pasteEditorClipboardFormats(page, {
+    "text/html": '<p style="mso-list:l0"><b>Office rich</b></p>',
+    "text/plain": text,
+  });
+  const expected = `${original.slice(0, 6)}${text}${original.slice(11)}`;
+  await expect.poll(() => code.textContent()).toBe(expected);
+  await expect(editor.locator("pre")).toHaveCount(1);
+  await expect(code.locator("b, strong")).toHaveCount(0);
+  await expect(page.getByLabel("锚点偏移")).toHaveValue(String(6 + text.length));
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect.poll(() => code.textContent()).toBe(original);
+  await page.getByRole("button", { name: "重做", exact: true }).click();
+  await insertEditorText(page, "续");
+  await expect
+    .poll(() => code.textContent())
+    .toBe(`${original.slice(0, 6)}${text}续${original.slice(11)}`);
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
+for (const range of [false, true]) {
+  test(`uses Office spreadsheet TSV without importing a nested table (range: ${range})`, async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await page.getByLabel("模型示例").selectOption("tables");
+    const editor = page.getByLabel("已渲染文档");
+    const cells = editor.locator("td");
+    const original = await cells.allTextContents();
+    await selectRenderedTextRange(page, "[0,0,0,0,0]", 1, range ? 2 : 1);
+    expect(
+      await pasteEditorClipboardFormats(page, {
+        "text/html":
+          '<html xmlns:x="urn:schemas-microsoft-com:office:excel"><body><table><tr><td>Office rich</td></tr></table></body></html>',
+        "text/plain": "甲\t乙\r\n丙\t丁",
+      }),
+    ).toBe(true);
+    await expect(editor.locator("table")).toHaveCount(1);
+    await expect(cells).toHaveCount(9);
+    if (range) {
+      await expect(cells.first().locator("p")).toHaveText([
+        "姓甲\t乙",
+        "丙\t丁",
+        "同一单元格第二段",
+      ]);
+      expect((await cells.allTextContents()).slice(1)).toEqual(original.slice(1));
+    } else {
+      for (const [index, text] of [
+        [0, "甲"],
+        [1, "乙"],
+        [3, "丙"],
+        [4, "丁"],
+      ] as const) {
+        await expect(cells.nth(index)).toHaveText(text);
+      }
+    }
+    const pasted = await cells.allTextContents();
+    await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+    await page.getByRole("button", { name: "撤销", exact: true }).click();
+    expect(await cells.allTextContents()).toEqual(original);
+    await page.getByRole("button", { name: "重做", exact: true }).click();
+    expect(await cells.allTextContents()).toEqual(pasted);
+    await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+  });
+}
+
 test("replaces a prose range with Office plain text and restores history", async ({
   page,
 }) => {
