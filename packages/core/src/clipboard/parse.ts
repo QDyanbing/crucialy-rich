@@ -6,6 +6,10 @@ export function parseClipboardData(
   parsers: readonly ClipboardParser[],
   acceptFragment?: (fragment: ClipboardFragment) => boolean,
 ): ClipboardFragment | undefined {
+  if (!parsers.some((parser) => source.types.includes(parser.mimeType))) {
+    return undefined;
+  }
+
   const html = source.types.includes("text/html") ? source.getData("text/html") : "";
   const plainTextOnly = html.length > 0 && isOfficeHtml(html);
 

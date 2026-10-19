@@ -7,6 +7,7 @@ import {
   parseHtml,
   parseMarkdown,
   type ClipboardFragment,
+  type ClipboardParser,
 } from "../../src";
 
 function parse(formats: Record<string, string>) {
@@ -17,6 +18,40 @@ function parse(formats: Record<string, string>) {
 }
 
 describe("Office clipboard plain text fallback", () => {
+  it("does not inspect Office HTML when no parser matches", () => {
+    const getData = vi.fn(() => '<p class="MsoNormal">rich</p>');
+    expect(parseClipboardData({ types: ["text/html"], getData }, [])).toBeUndefined();
+    expect(
+      parseClipboardData({ types: ["text/html"], getData }, [
+        { mimeType: "text/plain", parse: () => undefined },
+      ]),
+    ).toBeUndefined();
+    expect(getData).not.toHaveBeenCalled();
+  });
+
+  it("skips custom rich parsers but continues to later plain parsers", () => {
+    const rich = vi.fn(() => undefined);
+    const declined = vi.fn(() => undefined);
+    const parsers: ClipboardParser[] = [
+      { mimeType: "text/html", parse: rich },
+      { mimeType: "text/markdown", parse: rich },
+      { mimeType: "text/plain", parse: declined },
+      DEFAULT_CLIPBOARD_PARSERS[2]!,
+    ];
+    const getData = vi.fn((type: string) =>
+      type === "text/html" ? '<p class="MsoNormal">rich</p>' : "plain",
+    );
+    expect(
+      parseClipboardData(
+        { types: ["text/html", "text/markdown", "text/plain"], getData },
+        parsers,
+      )?.mimeType,
+    ).toBe("text/plain");
+    expect(rich).not.toHaveBeenCalled();
+    expect(declined).toHaveBeenCalledOnce();
+    expect(getData.mock.calls.filter(([type]) => type === "text/html")).toHaveLength(1);
+  });
+
   it.each([
     '<p class="other MsoNormal">Word</p>',
     '<div><p CLASS="msolistparagraph">Word</p></div>',
