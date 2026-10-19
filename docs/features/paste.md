@@ -4,7 +4,7 @@
 
 ## 架构
 
-`ClipboardDataSource` 只暴露 MIME types 与 `getData()`，`ClipboardParser` 把单一格式转换为 `ClipboardFragment`。`parseClipboardData` 按 parser 数组顺序调用，默认优先级为：
+`ClipboardDataSource` 只暴露 MIME types 与 `getData()`，`ClipboardParser` 把单一格式转换为 `ClipboardFragment`。`parseClipboardData` 先检查来源是否带 Office HTML 标记，普通来源按 parser 数组顺序调用，默认优先级为：
 
 1. `text/markdown`
 2. `text/html`
@@ -22,7 +22,7 @@ function parseClipboardData(
 ): ClipboardFragment | undefined;
 ```
 
-过滤器只在 parser 实际返回 fragment 后调用；缺失 MIME、空数据或 parser 返回 undefined 时不调用。候选一旦被接受就停止读取后续格式，同 MIME 的自定义 parser 也可继续尝试。过滤器应使用无副作用的能力查询，而不是执行编辑命令；它不替代 HTML 安全白名单或文档校验。
+过滤器只在 parser 实际返回 fragment 后调用；缺失 MIME、空数据或 parser 返回 undefined 时不调用。存在匹配 parser 且来源提供 `text/html` 时，会先读取一次 HTML 做 Office 识别，之后复用该值；这一步发生在 Markdown parser 之前。候选一旦被接受就停止读取剩余格式，同 MIME 的自定义 parser 也可继续尝试。没有匹配 parser 时不读取任何数据。过滤器应使用无副作用的能力查询，而不是执行编辑命令；它不替代 HTML 安全白名单或文档校验。
 
 例如，宿主可用当前 Registry 的 Paste Command 判断目标能力：
 
@@ -44,6 +44,23 @@ const fragment = parseClipboardData(source, DEFAULT_CLIPBOARD_PARSERS, (candidat
 在表格 cell 内的折叠光标处，带制表符的一行文本或多行纯文本会解析为二维网格，并从当前 cell 开始向右、向下写入。网格完整落在现有表格范围内时，每个目标 cell 会被一个 paragraph 替换；超出剩余行列时整次操作降级为当前 cell 内的普通文本粘贴，不扩表、不截断数据。
 
 有文本选区时不执行二维填充：即使 TSV 网格能够完整落入表格，也只替换该 cell 内的选区，制表符保留为文字，换行保留为同 cell 段落边界，不覆盖邻格。
+
+## Office 降级
+
+与六个月计划的范围一致，Office 来源只做纯文本降级，不承诺 Word 排版或 Excel 表格的富格式保真。
+
+通过 `parse5` 标准语法树识别以下标记，任一命中即跳过该来源的 HTML/Markdown parser（包括自定义 parser），只尝试 `text/plain` parser：
+
+- class 中以 `Mso` 加字母开头的独立类名，例如 `MsoNormal`、`MsoListParagraph`，不区分大小写。
+- 行内 style 或样式表中的 `mso-*:` 声明。
+- `xmlns` / `xmlns:*` 的 Office、Word、Excel、PowerPoint `urn:schemas-microsoft-com:office:*` 命名空间。
+- generator meta 的 Microsoft Word、Excel、PowerPoint 标记，可含 Office 前缀及版本号。
+
+完整文档的 `html`、`head` 元数据与正文片段都参与识别；注释、脚本文字、普通正文、title/data 属性中的相同字样不作为来源标记。Office 命名空间的背景可参考 [Microsoft Word 文档](https://learn.microsoft.com/en-us/archive/msdn-magazine/2003/november/the-xml-files-xml-in-microsoft-office-word-2003)。这是有限标记识别，不是通用 Office 文件检测器；不含这些标记的来源仍按普通 HTML 策略处理。
+
+降级只使用剪贴板实际提供的非空 `text/plain`，不从 HTML 猜测文字、编号或表格结构。没有纯文本、纯文本为空，或目标拒绝纯文本时，不删除选区、不新增 History；可编辑 React 接管事件后仍阻止默认 DOM 写入。直接调用 `parseHtml` 或向 `parseMarkdown` 传入包含这些标记的原始 HTML 时，返回 undefined，不自行生成纯文本。
+
+纯文本继续复用目标规则：正文按换行分段，CodeBlock 保留 LF、缩进和字面标签，列表拆项并保留编号/checked，cell 的折叠光标允许范围内的 TSV 二维填充，有选区则只替换该 cell 内文字。成功粘贴为一次 Transaction/History，可撤销、重做和继续输入。来源降级不扩展原有跨项、跨 cell 等选区能力边界。
 
 ## 范围替换
 
@@ -112,6 +129,7 @@ Markdown 使用 `marked` 转换为 HTML，再复用同一 HTML 白名单映射�
 - HTML 表格不保留 `colspan`、`rowspan` 和表头语义，不支持嵌套表格。
 - HTML 暂不支持图文混排、单个列表项内的多个并列子列表和非直接子列表；内联 CSS 不接受命名色、`rgb()`、背景简写、非 px 字号，以及 boolean mark 白名单之外的值。
 - Markdown 暂不支持扩展语法的完整保真映射。
+- Office 未做真实桌面 Word/Excel/PowerPoint 的跨操作系统剪贴板兼容性验收；目前自动化验证的是显式 Office 标记与混合 MIME 事件管线。
 - data URL、剪贴板二进制图片上传和图片资源持久化不属于本阶段范围。
 
 完整结果见[粘贴闭环 QA](../qa/paste.md)。

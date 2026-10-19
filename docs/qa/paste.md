@@ -32,9 +32,10 @@
 
 ## 自动化覆盖
 
+- Office：`clipboard/office.test.ts`、`history/office-paste.test.ts` 与 React `office-paste.test.ts` 验证完整文档/片段的标记识别、误判边界、无匹配 parser 不读取、自定义 parser 降级、空纯文本拒绝、正反向选区、单条 History、代码换行、列表编号/checked、cell TSV、宿主接管及只读。Chromium 六条用例覆盖正文与代码续编、cell TSV/选区、History 和 rich-only 拒绝；构建产物公开入口同时验证。
 - CodeBlock：Core/History 与 React 覆盖单块多行、CRLF、缩进、空行、UTF-16 offset、正反向跨 text/跨块替换、归一化光标、富格式降级和空纯文本拒绝；Chromium 六条用例检查精确 textContent、换行不退出、History 与继续输入。
 - 纯文本片段契约：paragraph、CodeBlock、列表和 cell 的能力查询与 execute 一致拒绝非 paragraph blocks；自定义同 MIME parser 的无效候选被跳过，后续有效候选仍可接受。
-- 候选过滤：`clipboard/filter.test.ts` 和 `clipboard/parse.test.ts` 覆盖可选过滤器、默认优先级、自定义同 MIME parser、缺失/空/拒绝结果及惰性读取；不传过滤器保持兼容。
+- 候选过滤：`clipboard/filter.test.ts` 和 `clipboard/parse.test.ts` 覆盖可选过滤器、普通来源默认优先级、自定义同 MIME parser、缺失/空/拒绝结果及停止后续格式读取；提供 HTML 且有匹配 parser 时先做 Office 来源预检。
 - 按目标降级：`command/clipboard-target.test.ts`、`history/clipboard-fallback.test.ts` 覆盖顶层富格式优先、列表/cell 使用实际纯文本、无纯文本时拒绝、跨 cell 拒绝及单条 History 恢复。
 - React `clipboard-fallback.test.ts` 覆盖混合 MIME、只读、宿主接管、自定义 Registry、禁用/缺失/失败命令、无效选区、无可用格式和组合输入；失败后不重复执行其他格式。
 - Chromium 七条降级与拒绝用例覆盖有序/任务列表、cell 跨段落、折叠 TSV、跨项/跨 cell 和富格式独占；检查默认事件取消、History、邻格、任务状态与继续输入。
@@ -60,3 +61,5 @@ React 可编辑编辑器接管后即取消 paste 默认写入；无法处理、�
 第 20 周粘贴能力已完成代码、测试、中文 Demo、文档和浏览器验收闭环，并在对应模型完成后补齐了 HTML/Markdown 行内代码与分隔线、HTML 文字标记别名、行内 mark CSS、安全文字属性、链接元数据、有序列表起始编号、嵌套列表、顶层表格、安全图片与任务列表导入。
 
 范围粘贴已扩展到连续顶层文本块、同 cell 连续 paragraph 及同一列表项内的纯文本。结构化 HTML/Markdown fragment 仍不插入现有 cell 或 item；跨列表项、跨 cell 及进出列表/表格的范围粘贴仍未支持。
+
+已补齐计划中的 Office 纯文本降级策略。当前使用构造的 Office HTML 和浏览器 Clipboard 事件验证，不代表真实桌面 Office、各操作系统与全部 Office 版本均已验收；无已知标记的 HTML 仍按普通来源处理。

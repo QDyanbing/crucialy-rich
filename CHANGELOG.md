@@ -8,6 +8,8 @@
 
 ### 新增
 
+- 新增 Office HTML 来源识别与纯文本降级，覆盖 Mso 类名、mso 样式、Office 命名空间和生成器元数据；只使用实际提供的纯文本，无可用纯文本时保持文档不变。
+- 新增 Office 粘贴的 Core/History、React、Chromium 和构建产物验证，覆盖正文范围替换、代码换行、列表状态、cell TSV、宿主接管及只读；直接 HTML/Markdown 入口拒绝已识别的 Office 标记。
 - 新增 CodeBlock 粘贴的 Core 边界、History、React Clipboard、Chromium 和构建产物验收，覆盖字面代码、缩进、空行、格式降级、仅换行粘贴及继续输入。
 - `parseClipboardData` 新增可选候选过滤器，支持按目标能力继续尝试后续格式，保留默认 MIME 优先级与原调用兼容性。
 - React 原生粘贴按当前 Command Registry 选择格式，列表与 cell 可回退到剪贴板实际提供的纯文本；补齐 Core/History、React、Chromium 与构建产物回归。

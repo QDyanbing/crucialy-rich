@@ -2,27 +2,30 @@
 
 ## 执行信息
 
-- 日期：2026-10-18
+- 日期：2026-10-19
 - 版本：`0.1.0`
 - 分支：`master`
 - 命令：`pnpm check:all`
 
 ## 自动化结果
 
-| 检查项     | 结果 | 说明                                           |
-| ---------- | ---- | ---------------------------------------------- |
-| Prettier   | 通过 | 全仓文件格式一致                               |
-| ESLint     | 通过 | 0 warning、0 error                             |
-| TypeScript | 通过 | 根工程与 core/react/demo 包级检查全部通过      |
-| Vitest     | 通过 | 185 个测试文件，1307 项测试                    |
-| Core 构建  | 通过 | ESM、source map、类型声明生成成功              |
-| React 构建 | 通过 | ESM、source map、类型声明生成成功              |
-| Demo 构建  | 通过 | Vite 生产构建成功                              |
-| 包产物导入 | 通过 | 导出/声明、Clipboard 与 CodeBlock 产物冒烟通过 |
-| Playwright | 通过 | Chromium 153 项测试                            |
+| 检查项     | 结果 | 说明                                                   |
+| ---------- | ---- | ------------------------------------------------------ |
+| Prettier   | 通过 | 全仓文件格式一致                                       |
+| ESLint     | 通过 | 0 warning、0 error                                     |
+| TypeScript | 通过 | 根工程与 core/react/demo 包级检查全部通过              |
+| Vitest     | 通过 | 188 个测试文件，1343 项测试                            |
+| Core 构建  | 通过 | ESM、source map、类型声明生成成功                      |
+| React 构建 | 通过 | ESM、source map、类型声明生成成功                      |
+| Demo 构建  | 通过 | Vite 生产构建成功                                      |
+| 包产物导入 | 通过 | 导出/声明、Clipboard、CodeBlock 与 Office 产物冒烟通过 |
+| Playwright | 通过 | Chromium 159 项测试                                    |
+
+Demo 主 JS 产物约 500.11 KB，Vite 给出超过 500 KB 的非阻断分包提示；构建退出码为 0，本轮未调整打包策略。
 
 ## 核心路径
 
+- Office 来源的 Mso 类名、mso 样式、命名空间和 generator 元数据识别、误判边界、实际纯文本降级、rich-only 拒绝、直接富格式入口拒绝、无匹配 parser 不读取、自定义 parser、正反向范围和 History 的 Core/React/包产物验证通过；Chromium 六条用例验证正文、代码、cell TSV 与选区、History 和续编。未执行真实桌面 Word/Excel/PowerPoint 的跨平台剪贴板兼容性验收。
 - 文档模型、Selection、Operation、Transaction、Command 和 History 全量单测通过。
 - CodeBlock 多行粘贴、LF/缩进/空行、规范化起点策略、片段形状拒绝、富格式降级、归一化光标、UTF-16 offset、History、继续输入与构建产物冒烟通过；代码块单节点和既有 Enter 退出规则保持正常。
 - Clipboard 可选候选过滤、默认优先级兼容、目标降级、实际纯文本保留、History、默认 DOM 写入保护、宿主/只读/Registry 策略、失败不重试及构建产物调用的 Core/React/Chromium 路径通过。
