@@ -1,5 +1,17 @@
 import { expect, test, type Page } from "@playwright/test";
 
+async function mockMixedClipboardImage(page: Page) {
+  await page.route("https://example.com/mixed.png", (route) =>
+    route.fulfill({
+      contentType: "image/png",
+      body: Buffer.from(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+        "base64",
+      ),
+    }),
+  );
+}
+
 async function placeCaretInRenderedText(page: Page, path: string, offset: number) {
   await page
     .getByLabel("已渲染文档")
@@ -3637,6 +3649,81 @@ test("pastes an HTML table through the native editor event", async ({ page }) =>
     '"type": "insert_block"',
   );
   await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
+for (const trailing of [false, true]) {
+  test(`pastes mixed HTML images with history and continued typing (trailing: ${trailing})`, async ({
+    page,
+  }) => {
+    await mockMixedClipboardImage(page);
+    await page.goto("/");
+    await selectRenderedTextAcrossNodes(page, "[0,0]", 3, "[1,0]", 2);
+    expect(
+      await pasteEditorClipboardFormats(page, {
+        "text/html": `<p><b>前</b><span><img src="https://example.com/mixed.png" alt="配图" width="64" onerror="bad()"></span>${trailing ? "" : "<i>后</i>"}</p>`,
+        "text/plain": "不应降级",
+      }),
+    ).toBe(true);
+    const editor = page.getByLabel("已渲染文档");
+    const image = editor.locator("img");
+    const texts = trailing
+      ? ["你好，", "前", "模型已就绪。"]
+      : ["你好，", "前", "后", "模型已就绪。"];
+    await expect(editor.locator("p")).toHaveText(texts);
+    await expect(editor.locator(":scope > *")).toHaveCount(trailing ? 4 : 5);
+    await expect(editor.locator("strong")).toHaveText("前");
+    if (!trailing) await expect(editor.locator("em")).toHaveText("后");
+    await expect(image).toHaveAttribute("alt", "配图");
+    await expect(image).not.toHaveAttribute("onerror");
+    await expect
+      .poll(() =>
+        image.evaluate(
+          (node) =>
+            node instanceof HTMLImageElement && node.complete && node.naturalWidth > 0,
+        ),
+      )
+      .toBe(true);
+    await expect(page.getByLabel("锚点路径")).toHaveValue("3,0");
+    await expect(page.getByLabel("锚点偏移")).toHaveValue(trailing ? "0" : "1");
+    await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+    await page.getByRole("button", { name: "撤销", exact: true }).click();
+    await expect(image).toHaveCount(0);
+    await expect(editor.locator("p")).toHaveText([
+      "你好，crucialy-rich。",
+      "选区模型已就绪。",
+    ]);
+    await page.getByRole("button", { name: "重做", exact: true }).click();
+    await expect(editor.locator("p")).toHaveText(texts);
+    await insertEditorText(page, "续");
+    await expect(editor.locator("p").nth(2)).toHaveText(
+      trailing ? "续模型已就绪。" : "后续",
+    );
+    await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+  });
+}
+
+test("pastes consecutive mixed HTML images without extra paragraphs", async ({
+  page,
+}) => {
+  await mockMixedClipboardImage(page);
+  await page.goto("/");
+  await placeCaretInRenderedText(page, "[0,0]", 3);
+  await pasteEditorClipboard(
+    page,
+    "text/html",
+    '<p><span><img src="https://example.com/mixed.png" alt="一"></span><img src="https://example.com/mixed.png" alt="二"></p>',
+  );
+  const editor = page.getByLabel("已渲染文档");
+  await expect(editor.locator("img")).toHaveCount(2);
+  await expect(editor.locator(":scope > *")).toHaveCount(5);
+  await expect(editor.locator("p")).toHaveText([
+    "你好，",
+    "crucialy-rich。",
+    "选区模型已就绪。",
+  ]);
+  await expect(page.getByLabel("锚点路径")).toHaveValue("3,0");
+  await expect(page.getByLabel("锚点偏移")).toHaveValue("0");
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
 
