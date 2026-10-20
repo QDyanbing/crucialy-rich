@@ -42,7 +42,7 @@ React 包导出 `createLocalImageResource(file)`。它只接受 `image/*` 文件
 
 ## HTML 粘贴
 
-Clipboard parser 可把顶层 HTML `img` 和只包含一张图片的 paragraph 转换为 Image block。解析过程复用模型的 URL 白名单，保留纯文本 `alt` 和正整数 `width` / `height`；危险协议、相对地址、data URL、事件属性、CSS 尺寸和未知属性会被拒绝或忽略。
+Clipboard parser 可把顶层 HTML `img`、独立图片 paragraph 和普通 paragraph 中的图文混排转换为 Image block。混排按源顺序拆成文字 paragraph 和图片块，支持行内包装里的图片；图片前后文字保留独立 marks 与安全链接，图片不继承包装链接。Markdown 段落图片复用同一映射。解析过程复用模型的 URL 白名单，保留纯文本 `alt` 和正整数 `width` / `height`；危险协议、相对地址、data URL、事件属性、CSS 尺寸和未知属性会被拒绝或忽略。
 
 解析后的图片通过 `paste` command 以 `split_block + insert_block` 插入，并作为一条 History 记录。React 原生 paste 事件不会直接把剪贴板 HTML 写入 DOM。
 
@@ -57,7 +57,7 @@ Clipboard parser 可把顶层 HTML `img` 和只包含一张图片的 paragraph �
 - Renderer 输出带模型 path、alt、状态及可选宽高的不可编辑 `img`。
 - HTML 序列化把 `img` 作为 void 元素，不输出结束标签。
 - React 复用统一 RenderedNode，并阻止浏览器直接编辑图片内部。
-- HTML 粘贴只支持独立图片 block，不把段落中的图文混排拆成多个 block。
+- 混排粘贴生成独立图片 block，不引入行内图片、图片链接或文字环绕；heading、quote、列表项和 cell 内不提升混排图片。具体规则见[粘贴文档](./paste.md#html)。
 - 当前不支持上传进度适配器、图片替换、缩放手柄、图注、对齐和多图片块选择。
 
 完整验收记录见[图片闭环 QA](../qa/image.md)。

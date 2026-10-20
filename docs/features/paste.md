@@ -103,7 +103,11 @@ HTML 列表会保留每个 `li` 的第一个直接 `ul` 或 `ol` 子列表，支
 
 HTML 任务列表要求顶层为 `ul`，且每个直属 `li` 的首个有效内容都是 `input[type="checkbox"]`。checkbox 可包在开头的 `label`、`p`、`div` 或 `span` 中；`checked` 映射为 taskItem 状态，任务文字继续保留行内 mark 和安全链接。混合列表、后置 checkbox、radio 和有序列表会降级为普通列表。
 
-HTML 图片支持顶层 `img`，以及除空白外只包含一个 `img` 的 `p`。`src` 只接受绝对 HTTP、HTTPS 和 blob 地址；`alt` 保留为纯文本，宽高仅接受正整数字符串。危险地址、事件属性、CSS 尺寸和其他未知属性不会进入模型。
+HTML 图片支持顶层 `img`、独立图片段落及 `p` 内的图文混排。混排按原顺序转为文字 paragraph 和块级 Image；`span`、粗体、链接等行内包装中的图片同样可提升为块。图片前后文字分别保留各自的 marks、安全链接、空白和 `br` 换行；只有实际存在的文字片段才生成 paragraph，连续图片不会凭空补空段落。原有独立图片段落外围的排版空白仍被省略。
+
+`src` 只接受绝对 HTTP、HTTPS 和 blob 地址；`alt` 保留为纯文本，宽高仅接受正整数字符串。危险地址、事件属性、CSS 尺寸和其他未知属性不会进入模型。无效混排图片直接省略，不分断或吞掉相邻文字；图片本身不继承文字 marks、包装链接或行内环绕样式。
+
+一次混排粘贴仍复用顶层富片段插入规则，保留目标前后边界，不把首尾文本强行合并进目标段落。片段以文字结尾时光标停在该文字末尾，以图片结尾时停在图片后的可编辑段落起点；范围删除和全部插入作为一条 History，可撤销、重做并继续输入。CodeBlock、列表和 cell 的富格式限制不变，可降级到实际提供的纯文本；Office 来源策略也不变。
 
 HTML 表格会按 `thead`、`tbody`、`tfoot` 的 DOM 顺序导入；`th` 降级为普通 `tableCell`，较短的行用空 cell 补齐到最宽行。cell 中的直接 `p` 会保留为多个 paragraph，行内 mark 和安全链接继续复用白名单。空表、空行和只含被过滤节点的表格会被拒绝，不会生成非法模型。
 
@@ -111,7 +115,7 @@ HTML 表格会按 `thead`、`tbody`、`tfoot` 的 DOM 顺序导入；`th` 降级
 
 ## Markdown
 
-Markdown 使用 `marked` 转换为 HTML，再复用同一 HTML 白名单映射。当前覆盖标题、引用、代码块、行内代码、水平分隔线、有序/无序列表、bold 和 italic；原始 HTML 同样受白名单限制。
+Markdown 使用 `marked` 转换为 HTML，再复用同一 HTML 白名单映射。当前覆盖标题、引用、代码块、行内代码、水平分隔线、有序/无序列表、bold 和 italic，以及段落中的独立、连续和混排图片（含引用式图片语法）；原始 HTML 同样受白名单限制。代码中的图片语法保持字面文字，图片 URL 和属性继续复用 HTML 白名单。
 
 ## React 接入
 
@@ -127,7 +131,8 @@ Markdown 使用 `marked` 转换为 HTML，再复用同一 HTML 白名单映射�
 - 列表项内只接受 `text/plain` fragment；不导入 HTML/Markdown block。React 原生粘贴可回退到剪贴板提供的纯文本，但不会自行把富片段转为纯文本；只有富格式时阻止粘贴并保持模型不变。
 - 现有表格内的二维填充只在折叠光标下接受 `text/plain` TSV，不自动新增行列，也不支持跨 cell range 替换。
 - HTML 表格不保留 `colspan`、`rowspan` 和表头语义，不支持嵌套表格。
-- HTML 暂不支持图文混排、单个列表项内的多个并列子列表和非直接子列表；内联 CSS 不接受命名色、`rgb()`、背景简写、非 px 字号，以及 boolean mark 白名单之外的值。
+- 图文混排提升只作用于普通 `p`，不扩展 heading、quote、CodeBlock、列表项或 cell 的内部模型；图片仍是顶层 void block，不支持行内图片、图片链接和文字环绕。
+- HTML 暂不支持单个列表项内的多个并列子列表和非直接子列表；内联 CSS 不接受命名色、`rgb()`、背景简写、非 px 字号，以及 boolean mark 白名单之外的值。
 - Markdown 暂不支持扩展语法的完整保真映射。
 - Office 未做真实桌面 Word/Excel/PowerPoint 的跨操作系统剪贴板兼容性验收；目前自动化验证的是显式 Office 标记与混合 MIME 事件管线。
 - data URL、剪贴板二进制图片上传和图片资源持久化不属于本阶段范围。

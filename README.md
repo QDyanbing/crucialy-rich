@@ -26,6 +26,8 @@ CodeBlock 多行粘贴保留在单个纯文本代码块内，统一 CRLF/CR 为 
 
 带已识别 Office HTML 标记的剪贴板只使用实际提供的纯文本，不导入 Word/Excel 富格式；缺失或空纯文本时保持选区内容不变。支持正文、代码块、列表及 cell 的既有纯文本规则，具体标记、API 行为和兼容性边界见[粘贴文档](./docs/features/paste.md#office-降级)。
 
+HTML／Markdown 普通段落的图文混排已支持按原顺序拆成文字段落和独立图片块，包括行内包装图片、连续图片及图片结尾。保留文字样式、安全图片属性、范围替换和单次 History；不引入行内图片、图片链接或文字环绕，也不扩展列表／cell 的富片段插入范围。
+
 五种 boolean mark、字号、文字颜色、背景色与 Link Mark 已支持跨连续顶层 paragraph、heading、quote，以及同一列表项或同一表格单元格内的连续 paragraph 应用和取消；command 会把范围拆成逐文本容器 operation，并在同一 transaction 中统一状态、恢复正向或反向选区。CodeBlock、void block、跨列表项和跨单元格选择仍是样式范围边界。
 
 清除格式已接入默认 Command Registry 和 React Toolbar，可在一次 transaction 中移除选区内全部 boolean mark、文字属性和链接；支持单块、跨连续顶层文本块、同一列表项、同一表格单元格内的连续 paragraph、正反向选区、折叠光标后续纯文本输入及 History 撤销/重做。

@@ -8,6 +8,8 @@
 
 ### 新增
 
+- 新增 HTML／Markdown 普通段落图文混排导入，按源顺序保留文字段落和独立图片块，支持行内包装、连续图片、文字样式及引用式 Markdown 图片；安全白名单、Office 与受限目标的纯文本降级保持不变。
+- 新增图文混排的 Parser、Command/History、React、Chromium 和构建产物回归，覆盖正反向范围、末尾图片光标、撤销重做、继续输入及图片资源加载。
 - 新增 Office HTML 来源识别与纯文本降级，覆盖 Mso 类名、mso 样式、Office 命名空间和生成器元数据；只使用实际提供的纯文本，无可用纯文本时保持文档不变。
 - 新增 Office 粘贴的 Core/History、React、Chromium 和构建产物验证，覆盖正文范围替换、代码换行、列表状态、cell TSV、宿主接管及只读；直接 HTML/Markdown 入口拒绝已识别的 Office 标记。
 - 新增 CodeBlock 粘贴的 Core 边界、History、React Clipboard、Chromium 和构建产物验收，覆盖字面代码、缩进、空行、格式降级、仅换行粘贴及继续输入。
