@@ -3727,6 +3727,93 @@ test("pastes consecutive mixed HTML images without extra paragraphs", async ({
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
 
+test("pastes mixed Markdown images before HTML and plain candidates", async ({
+  page,
+}) => {
+  await mockMixedClipboardImage(page);
+  await page.goto("/");
+  await placeCaretInRenderedText(page, "[0,0]", 3);
+  await pasteEditorClipboardFormats(page, {
+    "text/markdown": "**前**![配图](https://example.com/mixed.png)*后*",
+    "text/html": "<p>不应导入 HTML</p>",
+    "text/plain": "不应降级",
+  });
+  const editor = page.getByLabel("已渲染文档");
+  await expect(editor.locator("p")).toHaveText([
+    "你好，",
+    "前",
+    "后",
+    "crucialy-rich。",
+    "选区模型已就绪。",
+  ]);
+  await expect(editor.locator("strong")).toHaveText("前");
+  await expect(editor.locator("em")).toHaveText("后");
+  await expect
+    .poll(() =>
+      editor
+        .locator("img")
+        .evaluate(
+          (node) =>
+            node instanceof HTMLImageElement && node.complete && node.naturalWidth > 0,
+        ),
+    )
+    .toBe(true);
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect(editor.locator("img")).toHaveCount(0);
+  await page.getByRole("button", { name: "重做", exact: true }).click();
+  await insertEditorText(page, "续");
+  await expect(editor.locator("p").nth(2)).toHaveText("后续");
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
+for (const target of ["code-block", "tables"]) {
+  test(`keeps mixed image paste plain inside ${target}`, async ({ page }) => {
+    await page.goto("/");
+    await page.getByLabel("模型示例").selectOption(target);
+    const path = target === "tables" ? "[0,0,0,0,0]" : "[0,0]";
+    const editor = page.getByLabel("已渲染文档");
+    const text = editor.locator(`[data-crucialy-path="${path}"]`);
+    const original = (await text.textContent())!;
+    await selectRenderedTextRange(page, path, 1, 2);
+    expect(
+      await pasteEditorClipboardFormats(page, {
+        "text/markdown": "前![配图](https://example.com/mixed.png)后",
+        "text/html": '<p>前<img src="https://example.com/mixed.png">后</p>',
+        "text/plain": "纯",
+      }),
+    ).toBe(true);
+    await expect(text).toHaveText(`${original.slice(0, 1)}纯${original.slice(2)}`);
+    await expect(editor.locator("img")).toHaveCount(0);
+    await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+    await page.getByRole("button", { name: "撤销", exact: true }).click();
+    await expect(text).toHaveText(original);
+    await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+  });
+}
+
+test("blocks mixed image rich-only Office paste without deleting selected text", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await selectRenderedTextRange(page, "[0,0]", 3, 7);
+  expect(
+    await pasteEditorClipboardFormats(page, {
+      "text/html":
+        '<p class="MsoNormal">前<img src="https://example.com/mixed.png">后</p>',
+      "text/markdown": "前![配图](https://example.com/mixed.png)后",
+    }),
+  ).toBe(true);
+  const editor = page.getByLabel("已渲染文档");
+  await expect(editor.locator("img")).toHaveCount(0);
+  await expect(editor.locator("p")).toHaveText([
+    "你好，crucialy-rich。",
+    "选区模型已就绪。",
+  ]);
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+  await expect(page.getByLabel("焦点偏移")).toHaveValue("7");
+});
+
 test("pastes an HTML image through the native editor event", async ({ page }) => {
   await page.goto("/");
   await placeCaretInRenderedText(page, "[0,0]", 3);
