@@ -22,7 +22,7 @@
 | HTML 嵌套列表 | 保留三层有序、无序、任务子列表及深层选区          | 通过 |
 | HTML 起始编号 | 保留顶层与嵌套 ol 的安全整数 start                | 通过 |
 | HTML 表格     | 导入分区、表头 cell、多段落和非等宽行             | 通过 |
-| HTML 图片     | 导入安全 src、alt、正整数宽高和独立图片段落       | 通过 |
+| HTML 图片     | 导入安全属性、独立图片和普通段落图文混排          | 通过 |
 | HTML 任务项   | 导入 checkbox 列表、checked、marks 和链接         | 通过 |
 | HTML 安全     | 丢弃脚本、事件属性、危险资源和非法样式值          | 通过 |
 | Markdown      | 转换标题、引用、代码块、行内代码、列表和标记      | 通过 |
@@ -32,6 +32,7 @@
 
 ## 自动化覆盖
 
+- 图文混排：`clipboard/html-mixed-image.test.ts`、`clipboard/markdown-mixed-image.test.ts` 和 `command/mixed-image-paste-history.test.ts` 覆盖块顺序、包装 marks/链接、连续/末尾图片、空白换行、安全降级、引用式图片语法、代码字面文字、容器边界、正反向选区、单次 History 与续编。React `mixed-image-paste.test.ts` 验证原生事件与受限目标、Office 策略；Chromium 七条用例验证图片实际加载、属性过滤、MIME 优先级、History 和降级，构建产物公开入口同时通过。
 - Office：`clipboard/office.test.ts`、`history/office-paste.test.ts` 与 React `office-paste.test.ts` 验证完整文档/片段的标记识别、误判边界、无匹配 parser 不读取、自定义 parser 降级、空纯文本拒绝、正反向选区、单条 History、代码换行、列表编号/checked、cell TSV、宿主接管及只读。Chromium 六条用例覆盖正文与代码续编、cell TSV/选区、History 和 rich-only 拒绝；构建产物公开入口同时验证。
 - CodeBlock：Core/History 与 React 覆盖单块多行、CRLF、缩进、空行、UTF-16 offset、正反向跨 text/跨块替换、归一化光标、富格式降级和空纯文本拒绝；Chromium 六条用例检查精确 textContent、换行不退出、History 与继续输入。
 - 纯文本片段契约：paragraph、CodeBlock、列表和 cell 的能力查询与 execute 一致拒绝非 paragraph blocks；自定义同 MIME parser 的无效候选被跳过，后续有效候选仍可接受。
@@ -61,5 +62,7 @@ React 可编辑编辑器接管后即取消 paste 默认写入；无法处理、�
 第 20 周粘贴能力已完成代码、测试、中文 Demo、文档和浏览器验收闭环，并在对应模型完成后补齐了 HTML/Markdown 行内代码与分隔线、HTML 文字标记别名、行内 mark CSS、安全文字属性、链接元数据、有序列表起始编号、嵌套列表、顶层表格、安全图片与任务列表导入。
 
 范围粘贴已扩展到连续顶层文本块、同 cell 连续 paragraph 及同一列表项内的纯文本。结构化 HTML/Markdown fragment 仍不插入现有 cell 或 item；跨列表项、跨 cell 及进出列表/表格的范围粘贴仍未支持。
+
+普通 paragraph 的 HTML／Markdown 图文混排已支持按顺序拆成文字段落和独立图片块，不保留行内环绕和图片链接；heading、quote、列表项、cell、CodeBlock 内部模型与富片段插入限制保持不变。
 
 已补齐计划中的 Office 纯文本降级策略。当前使用构造的 Office HTML 和浏览器 Clipboard 事件验证，不代表真实桌面 Office、各操作系统与全部 Office 版本均已验收；无已知标记的 HTML 仍按普通来源处理。
