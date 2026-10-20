@@ -197,7 +197,12 @@ function applyInlineStyleMarks(node: HtmlElement, inherited: TextMarks): TextMar
   return marks;
 }
 
-function appendInlineNodes(node: HtmlNode, marks: TextMarks, output: TextNode[]): void {
+function appendInlineNodes(
+  node: HtmlNode,
+  marks: TextMarks,
+  output: TextNode[],
+  onImage?: (node: HtmlElement) => void,
+): void {
   if (isText(node)) {
     if (node.value.length > 0) {
       output.push(createText(node.value, marks));
@@ -206,6 +211,11 @@ function appendInlineNodes(node: HtmlNode, marks: TextMarks, output: TextNode[])
   }
 
   if (!isElement(node) || node.tagName === "script" || node.tagName === "style") {
+    return;
+  }
+
+  if (node.tagName === "img" && onImage) {
+    onImage(node);
     return;
   }
 
@@ -242,7 +252,9 @@ function appendInlineNodes(node: HtmlNode, marks: TextMarks, output: TextNode[])
 
   nextMarks = applyInlineStyleMarks(node, nextMarks);
 
-  node.childNodes.forEach((child) => appendInlineNodes(child, nextMarks, output));
+  node.childNodes.forEach((child) =>
+    appendInlineNodes(child, nextMarks, output, onImage),
+  );
 }
 
 function parseInlineChildren(
@@ -381,6 +393,38 @@ function getStandaloneParagraphImage(node: HtmlElement): HtmlElement | undefined
     : undefined;
 }
 
+function parseParagraph(node: HtmlElement): BlockNode[] {
+  const standaloneImage = getStandaloneParagraphImage(node);
+
+  if (standaloneImage) {
+    const image = parseImage(standaloneImage);
+    return image ? [image] : [];
+  }
+
+  const blocks: BlockNode[] = [];
+  const text: TextNode[] = [];
+  const flushText = () => {
+    if (text.length > 0) {
+      blocks.push(createParagraph([...text]));
+      text.length = 0;
+    }
+  };
+
+  node.childNodes.forEach((child) =>
+    appendInlineNodes(child, {}, text, (imageNode) => {
+      const image = parseImage(imageNode);
+
+      if (image) {
+        flushText();
+        blocks.push(image);
+      }
+    }),
+  );
+  flushText();
+
+  return blocks.length > 0 ? blocks : [createParagraph()];
+}
+
 function parseTableCell(node: HtmlElement) {
   const paragraphs = node.childNodes
     .filter((child): child is HtmlElement => isElement(child) && child.tagName === "p")
@@ -448,15 +492,7 @@ function parseBlock(node: HtmlNode): BlockNode[] {
   }
 
   if (node.tagName === "p") {
-    const imageNode = getStandaloneParagraphImage(node);
-
-    if (imageNode) {
-      const image = parseImage(imageNode);
-
-      return image ? [image] : [];
-    }
-
-    return [createParagraph(parseInlineChildren(node))];
+    return parseParagraph(node);
   }
 
   if (/^h[1-6]$/.test(node.tagName)) {
