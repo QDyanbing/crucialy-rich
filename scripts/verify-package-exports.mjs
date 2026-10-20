@@ -117,6 +117,60 @@ function verifyOfficePaste(core) {
   assert.equal(richParserCalls, 0);
 }
 
+function verifyMixedImagePaste(core) {
+  const document = core.createDocument([
+    core.createParagraph([core.createText("old")]),
+  ]);
+  const selection = {
+    anchor: { path: [0, 0], offset: 1 },
+    focus: { path: [0, 0], offset: 2 },
+  };
+  for (const trailing of [false, true]) {
+    const fragments = [
+      core.parseHtml(
+        `<p><b>before</b><span><img src="https://example.com/mixed.png" alt="image"></span>${trailing ? "" : "<i>after</i>"}</p>`,
+      ),
+      core.parseMarkdown(
+        `**before**![image](https://example.com/mixed.png)${trailing ? "" : "*after*"}`,
+      ),
+    ];
+    for (const fragment of fragments) {
+      assert.deepEqual(
+        fragment.blocks.map((block) => block.type),
+        trailing ? ["paragraph", "image"] : ["paragraph", "image", "paragraph"],
+      );
+      const result = core.pasteCommand.execute({
+        context: { document, selection },
+        payload: { fragment },
+      });
+      assert.equal(result.status, "success");
+      const after = core.applyTransaction(document, result.transaction);
+      assert.equal(core.validateDocument(after).valid, true);
+      assert.deepEqual(
+        after.children[2],
+        core.createImage("https://example.com/mixed.png", { alt: "image" }),
+      );
+      assert.deepEqual(result.selection.anchor, {
+        path: [3, 0],
+        offset: trailing ? 0 : 5,
+      });
+      assert.equal(core.isValidPoint(after, result.selection.anchor), true);
+      const history = core.recordHistory({
+        history: core.createHistoryState(),
+        before: core.createHistorySnapshot(document, selection),
+        after: core.createHistorySnapshot(after, result.selection),
+        transaction: result.transaction,
+      });
+      assert.equal(history.undoStack.length, 1);
+      const undone = core.undoHistory(history);
+      assert.deepEqual(undone.document, document);
+      const redone = core.redoHistory(undone.history);
+      assert.deepEqual(redone.document, after);
+      assert.deepEqual(redone.selection, result.selection);
+    }
+  }
+}
+
 function verifyCodePaste(core) {
   const document = core.createDocument([
     core.createCodeBlock([core.createText("pre"), core.createText("tail")]),
@@ -199,6 +253,7 @@ for (const packageConfig of publicPackages) {
     verifyClipboardFiltering(runtime);
     verifyCodePaste(runtime);
     verifyOfficePaste(runtime);
+    verifyMixedImagePaste(runtime);
   }
 
   process.stdout.write(`Verified ${manifest.name}@${manifest.version}\n`);
