@@ -835,6 +835,64 @@ test("formats text inside list items and table cells", async ({ page }) => {
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
 
+test("navigates table cells with Tab and Shift Tab without document changes", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("tables");
+  const editor = page.getByLabel("已渲染文档");
+  const json = page.getByLabel("文档 JSON", { exact: true });
+  const before = (await json.textContent())!;
+  await placeCaretInRenderedText(page, "[0,0,0,0,0]", 1);
+  await page.keyboard.press("Tab");
+  await expect(page.getByLabel("锚点路径")).toHaveValue("0,0,1,0,0");
+  await expect(page.getByLabel("锚点偏移")).toHaveValue("0");
+  await expect(page.getByLabel("当前单元格路径")).toContainText("0 → 0 → 1");
+  await expect(editor.locator('td[data-selected="true"]')).toHaveAttribute(
+    "data-crucialy-path",
+    "[0,0,1]",
+  );
+  await page.keyboard.press("Tab");
+  await page.keyboard.press("Tab");
+  await expect(page.getByLabel("锚点路径")).toHaveValue("0,1,0,0,0");
+  await page.keyboard.press("Shift+Tab");
+  await expect(page.getByLabel("锚点路径")).toHaveValue("0,0,2,0,0");
+  await expect(page.getByLabel("当前单元格路径")).toContainText("0 → 0 → 2");
+  await expect(json).toHaveText(before);
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+  await expect(editor.locator("tr")).toHaveCount(3);
+  await expect(editor.locator("td")).toHaveCount(9);
+});
+
+test("keeps table edge Tab available to the browser without adding rows", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("tables");
+  for (const target of [
+    { path: "[0,0,0,0,0]", shiftKey: true },
+    { path: "[0,2,2,0,0]", shiftKey: false },
+  ]) {
+    await placeCaretInRenderedText(page, target.path, 0);
+    const prevented = await page
+      .getByLabel("已渲染文档")
+      .evaluate((editor, shiftKey) => {
+        const event = new KeyboardEvent("keydown", {
+          key: "Tab",
+          shiftKey,
+          bubbles: true,
+          cancelable: true,
+        });
+        editor.dispatchEvent(event);
+        return event.defaultPrevented;
+      }, target.shiftKey);
+    expect(prevented).toBe(false);
+    await expect(page.getByLabel("已渲染文档").locator("td")).toHaveCount(9);
+    await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+  }
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
 test("formats multiple paragraphs inside one table cell", async ({ page }) => {
   await page.goto("/");
   await page.getByLabel("模型示例").selectOption("tables");
