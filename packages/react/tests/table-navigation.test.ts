@@ -2,6 +2,8 @@
 
 import {
   createDocument,
+  createBulletList,
+  createListItem,
   createCommandRegistry,
   createParagraph,
   createTable,
@@ -113,6 +115,83 @@ function domSelection(value: DocumentNode) {
 }
 
 describe("RichTextEditor table Tab navigation", () => {
+  it.each([{ ctrlKey: true }, { altKey: true }, { metaKey: true }])(
+    "does not intercept modified Tab %j",
+    (keys) => {
+      const { container, value, onSelectionChange, onTransaction } = renderEditor();
+      const selection = range(0, 0);
+      select(container, selection);
+      expect(tab(container, keys).defaultPrevented).toBe(false);
+      expect(domSelection(value)).toEqual(selection);
+      expect(onSelectionChange).not.toHaveBeenCalled();
+      expect(onTransaction).not.toHaveBeenCalled();
+    },
+  );
+
+  it("leaves readonly navigation to the host", () => {
+    const { container, onSelectionChange } = renderEditor({ contentEditable: false });
+    select(container, range(0, 0));
+    expect(tab(container).defaultPrevented).toBe(false);
+    expect(onSelectionChange).not.toHaveBeenCalled();
+  });
+
+  it("honors host cancellation before moving the caret", () => {
+    const { container, value, onSelectionChange } = renderEditor({
+      onKeyDown: (event) => event.preventDefault(),
+    });
+    const selection = range(0, 0);
+    select(container, selection);
+    expect(tab(container).defaultPrevented).toBe(true);
+    expect(domSelection(value)).toEqual(selection);
+    expect(onSelectionChange).not.toHaveBeenCalled();
+  });
+
+  it.each(["state", "native"])("does not navigate during %s composition", (mode) => {
+    const { container, value, onSelectionChange, onTransaction } = renderEditor();
+    const selection = range(0, 0);
+    select(container, selection);
+    if (mode === "state")
+      act(() => {
+        container.firstElementChild?.dispatchEvent(
+          new CompositionEvent("compositionstart", { bubbles: true }),
+        );
+      });
+    expect(tab(container, { isComposing: mode === "native" }).defaultPrevented).toBe(
+      false,
+    );
+    expect(domSelection(value)).toEqual(selection);
+    expect(onSelectionChange).not.toHaveBeenCalled();
+    expect(onTransaction).not.toHaveBeenCalled();
+  });
+
+  it("does not collapse or replace a cross-cell selection", () => {
+    const { container, value, onSelectionChange, onTransaction } = renderEditor();
+    const selection = { anchor: range(0, 0).anchor, focus: range(0, 1).focus };
+    select(container, selection);
+    expect(tab(container).defaultPrevented).toBe(false);
+    expect(domSelection(value)).toEqual(selection);
+    expect(onSelectionChange).not.toHaveBeenCalled();
+    expect(onTransaction).not.toHaveBeenCalled();
+  });
+
+  it("preserves list Tab indentation instead of treating it as cell navigation", () => {
+    const value = createDocument([
+      createBulletList([
+        createListItem([createText("父")]),
+        createListItem([createText("子")]),
+      ]),
+    ]);
+    const { container, onTransaction, onCellSelectionChange } = renderEditor({
+      defaultValue: value,
+    });
+    const point = { path: [0, 1, 0], offset: 0 };
+    select(container, { anchor: point, focus: point });
+    expect(tab(container).defaultPrevented).toBe(true);
+    expect(onTransaction).toHaveBeenCalledTimes(1);
+    expect(onTransaction.mock.calls[0]?.[0].inputType).toBe("indentListItem");
+    expect(onCellSelectionChange).not.toHaveBeenCalled();
+  });
+
   it.each([false, true])(
     "moves a same-cell multi-paragraph range without deleting text (backward: %s)",
     (backward) => {
