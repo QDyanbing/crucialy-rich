@@ -20,6 +20,8 @@ export {
   isValidCellSelection,
 } from "./cell";
 export { getNodeAtPath, hasNodeAtPath } from "./path";
+export { getAdjacentCellSelection } from "./cell-navigation";
+export type { CellNavigationDirection } from "./cell-navigation";
 export {
   getBlockTextOffset,
   getParagraphTextOffset,
