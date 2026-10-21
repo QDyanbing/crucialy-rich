@@ -958,6 +958,83 @@ test("navigates from TSV paste and undoes edits without a table Tab history entr
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
 
+test("does not intercept table Tab during composition or modifier shortcuts", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("tables");
+  await placeCaretInRenderedText(page, "[0,0,0,0,0]", 1);
+  const editor = page.getByLabel("已渲染文档");
+  const prevented = await editor.evaluate((element) => {
+    const results = [];
+    for (const options of [
+      { ctrlKey: true },
+      { altKey: true },
+      { metaKey: true },
+      { isComposing: true },
+    ]) {
+      const event = new KeyboardEvent("keydown", {
+        key: "Tab",
+        bubbles: true,
+        cancelable: true,
+        ...options,
+      });
+      element.dispatchEvent(event);
+      results.push(event.defaultPrevented);
+    }
+    element.dispatchEvent(new CompositionEvent("compositionstart", { bubbles: true }));
+    const event = new KeyboardEvent("keydown", {
+      key: "Tab",
+      bubbles: true,
+      cancelable: true,
+    });
+    element.dispatchEvent(event);
+    results.push(event.defaultPrevented);
+    element.dispatchEvent(
+      new CompositionEvent("compositionend", { bubbles: true, data: "" }),
+    );
+    return results;
+  });
+  expect(prevented).toEqual([false, false, false, false, false]);
+  await expect(page.getByLabel("锚点路径")).toHaveValue("0,0,0,0,0");
+  await expect(page.getByLabel("锚点偏移")).toHaveValue("1");
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+});
+
+test("does not use a foreign editor DOM selection for table Tab", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("tables");
+  const result = await page.getByLabel("已渲染文档").evaluate((editor) => {
+    const foreign = editor.cloneNode(true) as HTMLElement;
+    foreign.removeAttribute("aria-label");
+    document.body.append(foreign);
+    const text = foreign.querySelector(
+      '[data-crucialy-path="[0,0,0,0,0]"]',
+    )!.firstChild!;
+    const selection = window.getSelection()!;
+    const range = document.createRange();
+    range.setStart(text, 1);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    const event = new KeyboardEvent("keydown", {
+      key: "Tab",
+      bubbles: true,
+      cancelable: true,
+    });
+    editor.dispatchEvent(event);
+    const result = {
+      prevented: event.defaultPrevented,
+      stayedForeign: foreign.contains(selection.anchorNode),
+    };
+    foreign.remove();
+    return result;
+  });
+  expect(result).toEqual({ prevented: false, stayedForeign: true });
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+  await expect(page.getByLabel("当前单元格路径")).toContainText("未选择");
+});
+
 test("formats multiple paragraphs inside one table cell", async ({ page }) => {
   await page.goto("/");
   await page.getByLabel("模型示例").selectOption("tables");
