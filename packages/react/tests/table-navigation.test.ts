@@ -115,6 +115,51 @@ function domSelection(value: DocumentNode) {
 }
 
 describe("RichTextEditor table Tab navigation", () => {
+  it("does not use another editor's DOM selection for Tab or ref queries", () => {
+    const first = renderEditor();
+    const second = renderEditor();
+    select(second.container, range(0, 0));
+    expect(first.ref.current?.getSelection()).toBeUndefined();
+    expect(tab(first.container).defaultPrevented).toBe(false);
+    expect(first.onSelectionChange).not.toHaveBeenCalled();
+    expect(first.onCellSelectionChange).not.toHaveBeenCalled();
+    expect(second.ref.current?.getSelection()).toEqual(range(0, 0));
+  });
+
+  it("rejects a browser selection whose endpoints belong to different editors", () => {
+    const first = renderEditor();
+    const second = renderEditor();
+    const firstText = first.container.querySelector(
+      '[data-crucialy-path="[0,0,0,0,0]"]',
+    )!.firstChild!;
+    const secondText = second.container.querySelector(
+      '[data-crucialy-path="[0,0,0,0,0]"]',
+    )!.firstChild!;
+    window.getSelection()!.setBaseAndExtent(firstText, 0, secondText, 1);
+    expect(first.ref.current?.getSelection()).toBeUndefined();
+    expect(tab(first.container).defaultPrevented).toBe(false);
+    expect(first.onTransaction).not.toHaveBeenCalled();
+    expect(first.onSelectionChange).not.toHaveBeenCalled();
+  });
+
+  it("uses the latest DOM caret for repeated navigation and subsequent ref editing", () => {
+    const { container, ref, onTransaction } = renderEditor();
+    select(container, range(0, 0));
+    tab(container);
+    tab(container);
+    expect(ref.current?.getSelection()).toEqual(range(1, 0));
+    tab(container, { shiftKey: true });
+    expect(ref.current?.getSelection()).toEqual(range(0, 1));
+    act(() => {
+      ref.current?.executeCommand("insertText", { text: "新" });
+    });
+    expect(
+      container.querySelector('[data-crucialy-path="[0,0,1,0,0]"]')?.textContent,
+    ).toBe("新文字");
+    expect(onTransaction).toHaveBeenCalledTimes(1);
+    expect(onTransaction.mock.calls[0]?.[0].beforeSelection).toEqual(range(0, 1));
+  });
+
   it.each([{ ctrlKey: true }, { altKey: true }, { metaKey: true }])(
     "does not intercept modified Tab %j",
     (keys) => {

@@ -217,7 +217,9 @@ function createKeyboardInputResultFromCommandResult(
 function getModelSelectionFromDom(root: HTMLDivElement, document: DocumentNode) {
   const domSelection = root.ownerDocument.getSelection();
 
-  return domSelection
+  return domSelection &&
+    root.contains(domSelection.anchorNode) &&
+    root.contains(domSelection.focusNode)
     ? domSelectionToModelSelection(document, domSelection)
     : undefined;
 }
