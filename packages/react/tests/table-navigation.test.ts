@@ -273,7 +273,7 @@ describe("RichTextEditor table Tab navigation", () => {
         contentEditable: true,
         value,
         selection,
-        cellSelection,
+        ...(cellSelection ? { cellSelection } : {}),
         onCellSelectionChange: setCellSelection,
         onSelectionChange: (next) => {
           calls(next);
