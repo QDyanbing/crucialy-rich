@@ -58,6 +58,8 @@ Quote 内按 Enter 会保留引用格式分段；空 Quote 再按 Enter 则原�
 
 第 22 周“表格编辑闭环”已全部完成并继续扩展：单元格支持文字输入、删除、Enter 分段和段落边界合并，也支持同一 cell 内跨段落的选区删除、输入替换、中文组合输入及选区 Enter；core 提供 CellSelection、当前 cell 定位、`set_table_cell_text` 与 TSV 网格粘贴；React 支持 cell 点击回调和可控高亮，Demo 显示当前 cell path，Playwright 覆盖编辑及 History 往返。
 
+表格内已支持 Tab／Shift+Tab 按行前后换格并同步光标和高亮，不改文档、不新增 History、不自动扩表；源选区可为同一 cell 的多段范围，首尾无目标时保留浏览器默认行为。Core 导出 `getAdjacentCellSelection` 供宿主查询，多实例 React 编辑器只读取各自根节点内的 DOM 选区。
+
 第 23 周“键盘与输入法闭环”已全部完成并继续扩展：支持 Composition 状态与中文候选词单次提交、boolean mark、标题、引用、列表和撤销重做统一快捷键解析，以及 paragraph 开头的标题、列表、引用和代码块 Markdown 输入规则。
 
 第 24 周“组件 API、集成回归与发布闭环”已全部完成：`RichTextEditor` 提供 Command Registry 和 ref API，core/react 已形成 `0.1.0` ESM 发布产物，全量回归、Demo 示例索引、中文文档中心和发布说明草稿均已完成。当前 `0.1.0` 发布候选已就绪，尚未创建 tag 或发布 npm 包。
