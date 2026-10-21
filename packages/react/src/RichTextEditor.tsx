@@ -24,6 +24,7 @@ import {
   executeCommand as executeCoreCommand,
   finishComposition,
   getNodeAtPath,
+  getAdjacentCellSelection,
   getEditorShortcutAction,
   getElementModelPath,
   INSERT_TEXT_COMMAND_NAME,
@@ -670,6 +671,27 @@ function RichTextEditorComponent(
 
     if (!modelSelection) {
       return;
+    }
+
+    if (event.key === "Tab" && !event.altKey && !event.ctrlKey && !event.metaKey) {
+      const nextSelection = getAdjacentCellSelection(
+        document,
+        modelSelection,
+        event.shiftKey ? "previous" : "next",
+      );
+
+      if (
+        nextSelection &&
+        applyModelSelectionToDom(event.currentTarget, document, nextSelection)
+      ) {
+        event.preventDefault();
+        onSelectionChange?.(nextSelection);
+        onBlockSelectionChange?.(undefined);
+        onCellSelectionChange?.(
+          createCellSelection(nextSelection.anchor.path.slice(0, 3)),
+        );
+        return;
+      }
     }
 
     if (event.key === "Enter") {
