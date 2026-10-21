@@ -13,6 +13,7 @@
 - `[blockIndex, textIndex]`：普通文本块内的 text；Divider 下不存在该路径。
 - `[blockIndex, itemIndex, textIndex]`：列表项内的 text。
 - `[...itemPath, itemTextCount]`：列表项的 nested list；其后继续追加 item/text 索引。
+- `[blockIndex, rowIndex, cellIndex, paragraphIndex, textIndex]`：表格单元格 paragraph 内的 text。
 
 API：
 
@@ -61,6 +62,18 @@ API：
 - `isCollapsed(selection)`：判断 anchor/focus 是否为同一点。
 - `normalizeRange(selection)`：返回正向范围，保证 anchor 小于或等于 focus。
 - `compareRange(left, right)`：比较规范化后的范围。
+
+## 单元格导航查询
+
+```ts
+function getAdjacentCellSelection(
+  document: DocumentNode,
+  selection: RangeSelection,
+  direction?: "next" | "previous",
+): RangeSelection | undefined;
+```
+
+导出的 `CellNavigationDirection` 类型为 `"next" | "previous"`。默认向后，按行优先在当前表格中移动一格，目标为首段首 text 的 offset 0。支持同 cell 正反向范围，不修改文档；非法 Point、跨 cell／跨表范围、非矩形表格和首尾无目标时返回 undefined。不自动扩表，不跨到相邻表格或正文；结构编辑后应使用最新文档和仍合法的源选区重新计算，不提供旧选区自动映射。
 
 ## 文本切片
 

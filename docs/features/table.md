@@ -69,6 +69,16 @@ renderer 输出 `table > tbody > tr > td > p` 语义结构，并为模型节点�
 - 表格文本范围读取以制表符分隔 cell、换行分隔 row，供调试器和选区工具使用。
 - `set_table_cell_text` 用一个 paragraph 替换目标 cell 内容，主要供二维粘贴事务复用。
 
+## 键盘导航
+
+可编辑 React 编辑器在表格内接管不带 Ctrl/Meta/Alt 的 Tab 和 Shift+Tab：按行优先移动到下一个／上一个 cell，跨行时连接当前行与相邻行，目标总是该 cell 第一个 paragraph 的第一个 text 起点。源选区可折叠，也可为同 cell 内正向／反向多段范围；导航只折叠并移动选区，不删除选中文字。
+
+Core 提供纯查询 `getAdjacentCellSelection(document, selection, direction?)`，`direction` 为 `"next" | "previous"`，默认 `"next"`。它基于当前文档计算合法的折叠 `RangeSelection`，anchor/focus 的路径互不共享；非法源 Point、跨 cell／跨表范围、非矩形表格、无有效目标或超出首尾时返回 undefined，不修改文档或扩表。
+
+成功导航会立即回写当前编辑器的 DOM Selection，并调用 `onSelectionChange`、`onCellSelectionChange`，同时清除旧图片块选中态。它不依赖 Command Registry，也不产生 `onChange`、Transaction 或 History。受控宿主应回传新的 selection/cellSelection；未传 selection 的非受控用法也能继续从 DOM 光标导航或输入。
+
+首格 Shift+Tab、末格 Tab 不取消浏览器默认行为，不新增行列；组合输入期间、原生 `isComposing`、只读、宿主 `onKeyDown` 已取消事件或浏览器选区不完整位于当前编辑器内时，不执行导航。跨 cell 选区也不被导航改写。列表原有的 Tab 缩进规则不变。
+
 ## TSV 粘贴
 
 `getPlainTextTableGrid` 把纯文本 fragment 解析为二维字符串数组。`paste` command 在折叠光标下从当前 cell 开始生成多个 `set_table_cell_text` operation；只有整个网格都能落入现有行列时才执行，否则退回 cell 内普通文本粘贴。粘贴不会新增或删除行列。

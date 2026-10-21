@@ -13,7 +13,7 @@
 | `onSelectionChange`        | `(selection: RangeSelection) => void`                                             | 输入后输出新的模型选区。                       |
 | `cellSelection`            | `CellSelection`                                                                   | 受控单元格选中态。                             |
 | `commandRegistry`          | `CommandRegistry`                                                                 | 覆盖组件使用的默认 Command 注册表。            |
-| `onCellSelectionChange`    | `(selection: CellSelection \| undefined) => void`                                 | 点击表格单元格或离开表格时输出选中态。         |
+| `onCellSelectionChange`    | `(selection: CellSelection \| undefined) => void`                                 | 点击、Tab 换格或离开表格时输出选中态。         |
 | `onCompositionStateChange` | `(state: CompositionState) => void`                                               | 输入法组合状态变化时输出最新状态。             |
 | `onTransaction`            | `(event: RichTextEditorTransactionEvent) => void`                                 | 输入后输出 before、after、transaction 和选区。 |
 | `label`                    | `string`                                                                          | 编辑器区域的可访问名称。                       |
@@ -78,13 +78,14 @@ export function CommandEditor() {
 - `focus(options?)`：聚焦 contenteditable 根节点。
 - `getElement()`：返回根 `HTMLDivElement`，未挂载时返回 `null`。
 - `getDocument()`：返回组件当前使用的 `DocumentNode`。
-- `getSelection()`：优先读取 DOM Selection，并转换为模型选区。
+- `getSelection()`：优先读取两个端点都属于当前编辑器根节点的 DOM Selection，并转换为模型选区；不可用时回退到宿主显式传入的 selection，不借用其他实例的浏览器选区。
 - `executeCommand(name, payload?)`：使用当前文档、选区和 `commandRegistry` 执行命令；成功 transaction 通过 `onChange`、`onSelectionChange` 和 `onTransaction` 输出。
 
 ref 命令事件的 `inputType` 为 `command`。受控模式不会自行替换 `value`，宿主必须在 `onChange` 后回传新文档；非受控模式会更新内部文档。`contentEditable={false}` 只禁止用户输入，宿主仍可主动执行 ref 命令。
 
 ## 当前行为
 
+- 表格内 Tab／Shift+Tab 导航仅更新 DOM 选区及 `onSelectionChange`、`onCellSelectionChange`，不触发 `onChange` 或 `onTransaction`，并清除旧 blockSelection。受控选区和 cell 高亮由宿主回传；首尾无目标不阻止默认行为，具体边界见[表格](./table.md#键盘导航)。
 - 组件内部复用 `@crucialy-rich/core` 的 `renderDocument`。
 - 渲染出的节点会保留 `data-crucialy-path`，用于 DOM 与模型映射和选区同步。
 - `value` 优先级高于 `defaultValue`。

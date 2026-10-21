@@ -191,6 +191,7 @@ function createSelectionAfterTabInput(input: TabInput): RangeSelection;
 - 在 Quote 末尾按 Enter 创建空引用，再按 Enter 退出为正文；全选 Quote 内容后按 Enter 也会退出。
 - 从 Divider 后方按 Backspace 或前方按 Delete 删除分隔线。
 - 在列表中使用 Tab/Shift+Tab 缩进或反缩进，并在项目开头使用 Backspace 拆出或提升。
+- 在同一表格内用 Tab／Shift+Tab 移动到相邻 cell 起点，支持跨行，不产生 Transaction 或 History；同 cell 文字选区只折叠移动，不删除文字，首尾无目标时保留浏览器默认行为。
 - 切换任务列表并通过 checkbox 保存完成状态。
 - Enter 后可以继续在新段落输入文本。
 - 文档 JSON 会跟随输入更新。
