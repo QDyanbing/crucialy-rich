@@ -893,6 +893,71 @@ test("keeps table edge Tab available to the browser without adding rows", async 
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
 
+test("types after table Tab and restores only the editing history", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("tables");
+  const editor = page.getByLabel("已渲染文档");
+  const destination = editor.locator('[data-crucialy-path="[0,0,1,0,0]"]');
+  const original = (await destination.textContent())!;
+  await placeCaretInRenderedText(page, "[0,0,0,0,0]", 1);
+  await page.keyboard.press("Tab");
+  await insertEditorText(page, "导航");
+  await expect(destination).toHaveText(`导航${original}`);
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect(destination).toHaveText(original);
+  await expect(page.getByLabel("锚点路径")).toHaveValue("0,0,1,0,0");
+  await expect(page.getByLabel("锚点偏移")).toHaveValue("0");
+  await page.getByRole("button", { name: "重做", exact: true }).click();
+  await expect(destination).toHaveText(`导航${original}`);
+  await page.keyboard.press("Shift+Tab");
+  await expect(page.getByLabel("锚点路径")).toHaveValue("0,0,0,0,0");
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
+test("moves a table paragraph range with Tab without deleting selected text", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("tables");
+  const json = page.getByLabel("文档 JSON", { exact: true });
+  const before = (await json.textContent())!;
+  await selectRenderedTextAcrossNodes(page, "[0,0,0,0,0]", 1, "[0,0,0,1,0]", 3);
+  await page.keyboard.press("Tab");
+  await expect(page.getByLabel("锚点路径")).toHaveValue("0,0,1,0,0");
+  await expect(page.getByLabel("焦点路径")).toHaveValue("0,0,1,0,0");
+  await expect(json).toHaveText(before);
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+});
+
+test("navigates from TSV paste and undoes edits without a table Tab history entry", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("tables");
+  const json = page.getByLabel("文档 JSON", { exact: true });
+  const before = JSON.parse((await json.textContent())!);
+  await placeCaretInRenderedText(page, "[0,0,0,0,0]", 0);
+  await pasteEditorClipboard(page, "text/plain", "甲\t乙\n丙\t丁");
+  await expect(page.getByLabel("锚点路径")).toHaveValue("0,1,1,0,0");
+  await page.keyboard.press("Tab");
+  await expect(page.getByLabel("锚点路径")).toHaveValue("0,1,2,0,0");
+  await insertEditorText(page, "续");
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 2');
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect(page.getByLabel("已渲染文档").locator("td").first()).toHaveText("甲");
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect
+    .poll(async () => JSON.parse((await json.textContent())!))
+    .toEqual(before);
+  await expect(page.getByLabel("锚点路径")).toHaveValue("0,0,0,0,0");
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
 test("formats multiple paragraphs inside one table cell", async ({ page }) => {
   await page.goto("/");
   await page.getByLabel("模型示例").selectOption("tables");
