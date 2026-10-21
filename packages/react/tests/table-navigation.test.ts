@@ -2,14 +2,16 @@
 
 import {
   createDocument,
+  createCommandRegistry,
   createParagraph,
   createTable,
   createText,
   domSelectionToModelSelection,
   type DocumentNode,
   type RangeSelection,
+  type CellSelection,
 } from "@crucialy-rich/core";
-import { act, createElement, createRef } from "react";
+import { act, createElement, createRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
@@ -111,6 +113,76 @@ function domSelection(value: DocumentNode) {
 }
 
 describe("RichTextEditor table Tab navigation", () => {
+  it.each([false, true])(
+    "moves a same-cell multi-paragraph range without deleting text (backward: %s)",
+    (backward) => {
+      const table = createTable(1, 2);
+      table.children[0]!.children[0]!.children = [
+        createParagraph([createText("开头", { bold: true })]),
+        createParagraph([createText("结尾", { italic: true })]),
+      ];
+      const value = createDocument([table]);
+      const { container, onChange, onTransaction } = renderEditor({ value });
+      const anchor = { path: [0, 0, 0, 0, 0], offset: 1 };
+      const focus = { path: [0, 0, 0, 1, 0], offset: 1 };
+      select(
+        container,
+        backward ? { anchor: focus, focus: anchor } : { anchor, focus },
+      );
+      expect(tab(container).defaultPrevented).toBe(true);
+      expect(domSelection(value)).toEqual(range(0, 1));
+      expect(container.querySelector("strong")?.textContent).toBe("开头");
+      expect(container.querySelector("em")?.textContent).toBe("结尾");
+      expect(onChange).not.toHaveBeenCalled();
+      expect(onTransaction).not.toHaveBeenCalled();
+    },
+  );
+
+  it("keeps controlled selection, cell highlight and repeated navigation synchronized", () => {
+    const value = createDocument([createTable(2, 2)]);
+    const calls = vi.fn();
+    const changes = vi.fn();
+    function ControlledEditor() {
+      const [selection, setSelection] = useState(range(0, 0));
+      const [cellSelection, setCellSelection] = useState<CellSelection>();
+      return createElement(RichTextEditor, {
+        contentEditable: true,
+        value,
+        selection,
+        cellSelection,
+        onCellSelectionChange: setCellSelection,
+        onSelectionChange: (next) => {
+          calls(next);
+          setSelection(next);
+        },
+        onChange: changes,
+        onTransaction: changes,
+      });
+    }
+    const { container, root } = renderEditor();
+    act(() => root.render(createElement(ControlledEditor)));
+    expect(tab(container).defaultPrevented).toBe(true);
+    expect(tab(container).defaultPrevented).toBe(true);
+    expect(domSelection(value)).toEqual(range(1, 0));
+    expect(
+      container
+        .querySelector('td[data-selected="true"]')
+        ?.getAttribute("data-crucialy-path"),
+    ).toBe("[0,1,0]");
+    expect(calls).toHaveBeenCalledTimes(2);
+    expect(changes).not.toHaveBeenCalled();
+  });
+
+  it("does not depend on a document mutation command registry", () => {
+    const { container, value, onTransaction } = renderEditor({
+      commandRegistry: createCommandRegistry(),
+    });
+    select(container, range(0, 0));
+    expect(tab(container).defaultPrevented).toBe(true);
+    expect(domSelection(value)).toEqual(range(0, 1));
+    expect(onTransaction).not.toHaveBeenCalled();
+  });
+
   it.each([
     { from: range(0, 0, 0, 1), to: range(0, 1), shiftKey: false },
     { from: range(0, 1), to: range(1, 0), shiftKey: false },
