@@ -13,6 +13,7 @@ const publicPackages = [
       "executeCommand",
       "parseClipboardData",
       "DEFAULT_CLIPBOARD_PARSERS",
+      "getAdjacentCellSelection",
     ],
   },
   {
@@ -171,6 +172,49 @@ function verifyMixedImagePaste(core) {
   }
 }
 
+function verifyCellNavigation(core) {
+  const document = core.createDocument([
+    core.createParagraph(),
+    core.createTable(2, 2),
+  ]);
+  const original = structuredClone(document);
+  const range = (row, column, offset = 0) => {
+    const point = { path: [1, row, column, 0, 0], offset };
+    return { anchor: point, focus: { ...point, path: [...point.path] } };
+  };
+  const next = core.getAdjacentCellSelection(document, range(0, 1));
+  assert.deepEqual(next, range(1, 0));
+  assert.deepEqual(
+    core.getAdjacentCellSelection(document, next, "previous"),
+    range(0, 1),
+  );
+  assert.equal(core.getAdjacentCellSelection(document, range(1, 1)), undefined);
+  assert.equal(
+    core.getAdjacentCellSelection(document, range(0, 0), "previous"),
+    undefined,
+  );
+  assert.notEqual(next.anchor.path, next.focus.path);
+  assert.equal(core.isValidPoint(document, next.anchor), true);
+  assert.deepEqual(document, original);
+  const input = core.insertTextCommand.execute({
+    context: { document, selection: next },
+    payload: { text: "typed" },
+  });
+  assert.equal(input.status, "success");
+  const after = core.applyTransaction(document, input.transaction);
+  const history = core.recordHistory({
+    history: core.createHistoryState(),
+    before: core.createHistorySnapshot(document, next),
+    after: core.createHistorySnapshot(after, input.selection),
+    transaction: input.transaction,
+  });
+  assert.equal(history.undoStack.length, 1);
+  const undone = core.undoHistory(history);
+  assert.deepEqual(undone.document, original);
+  assert.deepEqual(undone.selection, next);
+  assert.deepEqual(core.redoHistory(undone.history).document, after);
+}
+
 function verifyCodePaste(core) {
   const document = core.createDocument([
     core.createCodeBlock([core.createText("pre"), core.createText("tail")]),
@@ -254,6 +298,8 @@ for (const packageConfig of publicPackages) {
     verifyCodePaste(runtime);
     verifyOfficePaste(runtime);
     verifyMixedImagePaste(runtime);
+    verifyCellNavigation(runtime);
+    assert.ok(declarations.includes("CellNavigationDirection"));
   }
 
   process.stdout.write(`Verified ${manifest.name}@${manifest.version}\n`);
