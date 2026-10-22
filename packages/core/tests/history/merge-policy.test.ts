@@ -7,6 +7,7 @@ import {
   createText,
   createTransaction,
   type HistoryEntry,
+  type HistoryMergePolicy,
   type RangeSelection,
 } from "../../src";
 
@@ -28,6 +29,65 @@ function entry(selection?: RangeSelection): HistoryEntry {
 }
 
 describe("History adjacent merge policy", () => {
+  it.each([false, true])(
+    "rejects expanded boundary selections (backward: %s)",
+    (backward) => {
+      const start = caret(0, 0).anchor;
+      const end = caret(0, 2).anchor;
+      const selection = backward
+        ? { anchor: end, focus: start }
+        : { anchor: start, focus: end };
+      expect(
+        canMergeHistoryEntries(entry(selection), entry(caret(0, 0)), "adjacent"),
+      ).toBe(false);
+      expect(
+        canMergeHistoryEntries(entry(caret(0, 0)), entry(selection), "adjacent"),
+      ).toBe(false);
+    },
+  );
+
+  it.each([-1, 9, NaN])("rejects matching but invalid caret offsets %s", (offset) => {
+    expect(
+      canMergeHistoryEntries(
+        entry(caret(0, offset)),
+        entry(caret(0, offset)),
+        "adjacent",
+      ),
+    ).toBe(false);
+  });
+
+  it("does not equate different text paths at the same visual boundary", () => {
+    const snapshot = createHistorySnapshot(
+      createDocument([
+        createParagraph([
+          createText("甲", { bold: true }),
+          createText("乙", { italic: true }),
+        ]),
+      ]),
+      caret(0, 1),
+    );
+    const previous = { ...entry(), after: snapshot };
+    const next = {
+      ...entry(),
+      before: createHistorySnapshot(snapshot.document, {
+        anchor: { path: [0, 1], offset: 0 },
+        focus: { path: [0, 1], offset: 0 },
+      }),
+    };
+    expect(canMergeHistoryEntries(previous, next, "adjacent")).toBe(false);
+  });
+
+  it("rejects invalid policies and does not mutate history entries", () => {
+    const previous = entry(caret());
+    const next = entry(caret());
+    const before = structuredClone({ previous, next });
+    expect(
+      canMergeHistoryEntries(previous, next, "invalid" as HistoryMergePolicy),
+    ).toBe(false);
+    canMergeHistoryEntries(previous, next, "adjacent");
+    expect({ previous, next }).toEqual(before);
+  });
+
   it("keeps the existing batch-only default across caret jumps", () => {
     expect(canMergeHistoryEntries(entry(caret()), entry(caret(1)))).toBe(true);
     expect(canMergeHistoryEntries(entry(), entry(), "batch")).toBe(true);

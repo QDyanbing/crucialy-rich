@@ -7,6 +7,7 @@ import {
   createParagraph,
   createTable,
   createText,
+  createTransaction,
   getAdjacentCellSelection,
   insertTextCommand,
   recordHistory,
@@ -51,6 +52,38 @@ function recordText(
 }
 
 describe("recordHistory adjacent policy", () => {
+  it("starts a separate entry when typing after undo leaves a redo branch", () => {
+    const document = createDocument([
+      createParagraph([createText("前后")]),
+      createParagraph([createText("其他")]),
+    ]);
+    const first = recordText(document, caret(), createHistoryState(), "甲");
+    const second = recordText(first.document, caret([1, 0], 0), first.history, "乙");
+    const undone = undoHistory(second.history)!;
+    const branch = recordText(undone.document, first.selection, undone.history, "新");
+    expect(branch.history.undoStack).toHaveLength(2);
+    expect(branch.history.redoStack).toHaveLength(0);
+    expect(undoHistory(branch.history)?.document).toEqual(first.document);
+    expect(second.history.redoStack).toHaveLength(0);
+    expect(undone.history.redoStack).toHaveLength(1);
+  });
+
+  it("does not clear redo or add a boundary for empty transactions", () => {
+    const document = createDocument([createParagraph([createText("前后")])]);
+    const first = recordText(document, caret(), createHistoryState(), "甲");
+    const undone = undoHistory(first.history)!;
+    const history = recordHistory({
+      history: undone.history,
+      batch: "typing",
+      mergePolicy: "adjacent",
+      transaction: createTransaction(),
+      before: createHistorySnapshot(undone.document, caret()),
+      after: createHistorySnapshot(undone.document, caret()),
+    });
+    expect(history).toEqual(undone.history);
+    expect(history.redoStack).toHaveLength(1);
+  });
+
   it("merges truly contiguous typing and restores the whole run", () => {
     const document = createDocument([createParagraph([createText("前后")])]);
     const first = recordText(document, caret(), createHistoryState(), "甲");
