@@ -3043,6 +3043,75 @@ test("merges consecutive typing into one history item", async ({ page }) => {
   await expect(page.getByLabel("History 状态")).toContainText('"redoStack": 1');
 });
 
+test("separates adjacent typing history across table Tab navigation", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("tables");
+  const editor = page.getByLabel("已渲染文档");
+  const first = editor.locator('[data-crucialy-path="[0,0,0,0,0]"]');
+  const second = editor.locator('[data-crucialy-path="[0,0,1,0,0]"]');
+  await placeCaretInRenderedText(page, "[0,0,0,0,0]", 1);
+  await insertEditorText(page, "甲");
+  await page.keyboard.press("Tab");
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  await insertEditorText(page, "乙");
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 2');
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect(first).toHaveText("姓甲名");
+  await expect(second).toHaveText("角色");
+  await expect(page.getByLabel("锚点路径")).toHaveValue("0,0,1,0,0");
+  await expect(page.getByLabel("锚点偏移")).toHaveValue("0");
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect(first).toHaveText("姓名");
+  await page.getByRole("button", { name: "重做", exact: true }).click();
+  await expect(first).toHaveText("姓甲名");
+  await expect(second).toHaveText("角色");
+  await page.getByRole("button", { name: "重做", exact: true }).click();
+  await expect(second).toHaveText("乙角色");
+  await expect(page.getByLabel("锚点路径")).toHaveValue("0,0,1,0,0");
+  await expect(page.getByLabel("锚点偏移")).toHaveValue("1");
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
+for (const destination of [
+  { name: "same paragraph", path: "[0,0]" },
+  { name: "another paragraph", path: "[1,0]" },
+]) {
+  test(`separates adjacent typing after a caret jump to ${destination.name}`, async ({
+    page,
+  }) => {
+    await page.goto("/");
+    const json = page.getByLabel("文档 JSON", { exact: true });
+    const initial = JSON.parse((await json.textContent())!);
+    await placeCaretInRenderedText(page, "[0,0]", 3);
+    await insertEditorText(page, "甲");
+    const firstEdit = JSON.parse((await json.textContent())!);
+    await placeCaretInRenderedText(page, destination.path, 0);
+    await insertEditorText(page, "乙");
+    const secondEdit = JSON.parse((await json.textContent())!);
+    await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 2');
+    await page.getByRole("button", { name: "撤销", exact: true }).click();
+    await expect
+      .poll(async () => JSON.parse((await json.textContent())!))
+      .toEqual(firstEdit);
+    await expect(page.getByLabel("锚点路径")).toHaveValue(
+      destination.path.slice(1, -1),
+    );
+    await expect(page.getByLabel("锚点偏移")).toHaveValue("0");
+    await page.getByRole("button", { name: "撤销", exact: true }).click();
+    await expect
+      .poll(async () => JSON.parse((await json.textContent())!))
+      .toEqual(initial);
+    await page.getByRole("button", { name: "重做", exact: true }).click();
+    await page.getByRole("button", { name: "重做", exact: true }).click();
+    await expect
+      .poll(async () => JSON.parse((await json.textContent())!))
+      .toEqual(secondEdit);
+    await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+  });
+}
+
 test("deletes the previous character with Backspace in the editor", async ({
   page,
 }) => {
