@@ -16,6 +16,8 @@
 
 非折叠选区编辑已支持同一文本容器内跨 text 节点、跨连续顶层 paragraph、heading、quote、codeBlock，以及同一表格单元格内的连续 paragraph。输入替换、Backspace、Delete、Enter、选区映射和 History 往返共用 `delete_text` / `delete_range` operation；跨列表项、跨单元格、进出表格、图片和分隔线等结构边界暂不参与范围删除。
 
+History 新增可选 `mergePolicy: "adjacent"`：连续 typing 保持合并，光标跳变、表格换格、选区替换及撤销后的新输入可独立撤销。Demo 已启用；Core 默认仍保留相同非空 batch 的既有合并规则，策略由宿主选择，具体边界见 [History 文档](./docs/features/history.md)。
+
 粘贴也复用范围删除计划：纯文本、HTML、Markdown 支持连续顶层文本块替换，纯文本支持同 cell 跨段落替换，并保留一次撤销/重做与光标恢复。表格二维 TSV 填充只在折叠光标下执行；选中 cell 内文字后粘贴 TSV 只替换选区，不覆盖邻格。
 
 同一普通、有序或任务列表项内已支持纯文本插入、选区替换和多行拆项，覆盖最多三层嵌套路径。粘贴保留编号、边界格式、任务状态和已有子列表，空行保留为空项；跨列表项及列表内 HTML/Markdown block 粘贴仍未支持。

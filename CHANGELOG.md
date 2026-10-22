@@ -8,6 +8,8 @@
 
 ### 新增
 
+- 新增 Core `HistoryMergePolicy` 与可选 `mergePolicy: "adjacent"`，仅在相同非空 batch 的合法折叠光标连续时合并；保留默认 batch 策略与快照结构，存在 redo 分支的新输入独立记录。
+- Demo 输入启用相邻合并策略，补齐 Core、React、Chromium 和构建包验收，覆盖换格、光标跳变、选区替换、撤销分支、快照与选区恢复。
 - 新增 Core `getAdjacentCellSelection` 与 `CellNavigationDirection`，支持按当前表格结构查询前后单元格起点，保留结构和选区边界，不修改文档。
 - React 新增表格 Tab／Shift+Tab 导航，支持跨行、同 cell 正反向范围、受控选区及当前 cell 高亮；无目标、组合输入、只读、修饰键及宿主接管时不执行换格，不生成 Transaction 或 History。
 - 修复同页多个编辑器共享 DOM 路径时误读其他实例选区的问题；新增 Core、React、Chromium 和构建产物验证，覆盖增删行列、TSV、续编、撤销与多实例隔离。

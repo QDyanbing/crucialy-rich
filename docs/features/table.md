@@ -77,7 +77,7 @@ Core 提供纯查询 `getAdjacentCellSelection(document, selection, direction?)`
 
 成功导航会立即回写当前编辑器的 DOM Selection，并调用 `onSelectionChange`、`onCellSelectionChange`，同时清除旧图片块选中态。它不依赖 Command Registry，也不产生 `onChange`、Transaction 或 History。受控宿主应回传新的 selection/cellSelection；未传 selection 的非受控用法也能继续从 DOM 光标导航或输入。
 
-导航不会重置宿主的输入 batch；现有 History 仍按相同非空 batch 合并记录，尚不按光标跳变自动拆分。需要在换格后分开撤销不同 cell 的连续 typing 时，宿主应在选区回调中划分输入批次，参见[History](./history.md)。
+导航不会重置宿主的输入 batch。History 默认仍按相同非空 batch 合并；需要换格后分开撤销不同 cell 的 typing 时，可在 `recordHistory` 中启用 `mergePolicy: "adjacent"`。Demo 已启用，导航本身仍不生成记录；更复杂的边界可由宿主调整 batch，参见[History](./history.md#可选的相邻输入策略)。
 
 首格 Shift+Tab、末格 Tab 不取消浏览器默认行为，不新增行列；组合输入期间、原生 `isComposing`、只读、宿主 `onKeyDown` 已取消事件或浏览器选区不完整位于当前编辑器内时，不执行导航。跨 cell 选区也不被导航改写。列表原有的 Tab 缩进规则不变。
 

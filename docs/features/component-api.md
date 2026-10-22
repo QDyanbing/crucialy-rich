@@ -136,3 +136,5 @@ Toolbar 通过 class name 暴露样式入口，不捆绑主题 CSS。完整契�
 ## 当前边界
 
 当前组件仍不内置 history 状态、链接菜单或序列化能力；悬浮 Toolbar 的 Range 矩形由宿主同步。Clipboard parser 与粘贴命令来自 core，图片上传仍由宿主接入。
+
+宿主可把 `onTransaction` 的前后快照、selection、transaction 和 batch 交给 Core `recordHistory`，并选择 `mergePolicy: "adjacent"`，让换格、光标跳变或选区替换后的输入分开撤销；该选项不是组件 prop，默认 batch 行为不变。接入与限制见 [History](./history.md#可选的相邻输入策略)。

@@ -14,6 +14,7 @@ History 模块负责记录可撤销编辑的前后快照，并提供基于快照
 - 提供 `clearHistory` 清空 history 状态。
 - 提供 `recordHistory` 把非空 transaction 记录到 undoStack，并清空 redoStack。
 - 提供 `canMergeHistoryEntries`、`mergeHistoryEntries`，用于按 batch 合并连续输入。
+- 提供可选 `HistoryMergePolicy`，在保持默认 batch 策略的同时，允许宿主启用相邻光标检查。
 - 提供 `canUndo`、`canRedo`、`getUndoEntry`、`getRedoEntry` 读取 history 状态。
 - 提供 `undoHistory`、`redoHistory` 执行栈迁移，并返回需要应用到编辑器的快照结果。
 - 提供 `undoCommand`、`redoCommand`，用于通过 command 管道触发撤销和重做。
@@ -48,6 +49,17 @@ interface HistoryChange {
   selection?: RangeSelection;
 }
 
+type HistoryMergePolicy = "batch" | "adjacent";
+
+interface RecordHistoryInput {
+  after: HistorySnapshot;
+  batch?: string;
+  before: HistorySnapshot;
+  history: HistoryState;
+  mergePolicy?: HistoryMergePolicy;
+  transaction: Transaction;
+}
+
 function createHistorySnapshot(
   document: DocumentNode,
   selection?: RangeSelection,
@@ -69,6 +81,7 @@ function recordHistory(input: RecordHistoryInput): HistoryState;
 function canMergeHistoryEntries(
   previous: HistoryEntry | undefined,
   next: HistoryEntry,
+  mergePolicy?: HistoryMergePolicy,
 ): previous is HistoryEntry;
 
 function mergeHistoryEntries(previous: HistoryEntry, next: HistoryEntry): HistoryEntry;
@@ -112,8 +125,31 @@ const redoCommand: Command;
 - 快照创建时会复制 document 和 selection，避免外部对象后续修改污染 history。
 - `recordHistory` 只记录非空 transaction。
 - 记录新的 transaction 后会清空 redoStack。
-- batch 是可选字符串；相同非空 batch 的连续记录会合并为一个 history entry。
+- batch 是可选字符串；默认 `mergePolicy: "batch"` 将相同非空 batch 的连续记录合并为一个 history entry，不检查选区跳变，兼容已有调用。
 - 当前 React 普通文本输入会使用 `typing` batch；Enter、Backspace、Delete 和 demo 按钮命令默认保持独立 history entry。
+
+## 可选的相邻输入策略
+
+宿主可为 `recordHistory` 传入 `mergePolicy: "adjacent"`，Demo 的真实输入已启用该策略。相同非空 batch 仍是合并前提，且上一条 `after.selection` 与下一条 `before.selection` 必须同时满足：
+
+- 都存在且为折叠选区。
+- 光标在各自文档快照中合法。
+- 模型 Point 的完整 path 和 offset 完全一致；视觉上相邻但 path 不同的文本节点不视为同一点。
+
+因此，连续 typing 可合并，移动光标、表格 Tab 换格或使用非折叠选区替换后会与前一条输入分开撤销。替换后在原终点继续 typing，仍可与该次替换合并。存在 redoStack 时，新输入始终开启独立 entry，再清空 redoStack；空 transaction 不记录、不清空 redo，也不创建边界。
+
+```ts
+history = recordHistory({
+  history,
+  mergePolicy: "adjacent",
+  ...(event.batch ? { batch: event.batch } : {}),
+  transaction: event.transaction,
+  before: createHistorySnapshot(event.before, event.beforeSelection),
+  after: createHistorySnapshot(event.after, event.selection),
+});
+```
+
+策略只作用于本次记录，不存入 `HistoryEntry` 或 `HistoryState`。`canMergeHistoryEntries` 的第三参数只检查 entry 对，不知道 redoStack；分支保护由 `recordHistory` 执行。低层 `mergeHistoryEntries` 仍是无条件合并 helper，调用方应先判断。
 
 ## 撤销与重做规则
 
@@ -134,7 +170,8 @@ const redoCommand: Command;
 
 ## 当前限制
 
-- 暂未实现按时间间隔、选区跳变或输入类型细分的复杂合并策略。
+- 暂未实现时间窗口、自动输入类型细分或完整文档快照连续性校验；宿主应保证传入的 before/after 快照按实际编辑顺序连续。
+- `adjacent` 只比较记录边界，不追踪中间的选区事件；光标离开后又回到同一点，或撤销后先完成重做使 redoStack 为空，均不强制开启新批次。需要这些边界时由宿主调整 batch。
 - 当前快照克隆覆盖 document、所有文本 block、Divider、text 和 text marks；CodeBlock 纯文本、Divider void 结构和 block path 在 undo/redo 中保持不变。
 
 ## 验收
@@ -144,6 +181,9 @@ const redoCommand: Command;
 - `packages/core/tests/history/state.test.ts`
 - `packages/core/tests/history/record.test.ts`
 - `packages/core/tests/history/merge.test.ts`
+- `packages/core/tests/history/merge-policy.test.ts`
+- `packages/core/tests/history/adjacent-record.test.ts`
+- `packages/react/tests/adjacent-history.test.ts`
 - `packages/core/tests/history/query.test.ts`
 - `packages/core/tests/history/undo.test.ts`
 - `packages/core/tests/history/redo.test.ts`
