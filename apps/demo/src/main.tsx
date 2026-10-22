@@ -1596,6 +1596,7 @@ function DemoApp() {
         after: createHistorySnapshot(event.after, event.selection),
         before: createHistorySnapshot(event.before, event.beforeSelection),
         history: currentHistory,
+        mergePolicy: "adjacent" as const,
         transaction: event.transaction,
       };
 
