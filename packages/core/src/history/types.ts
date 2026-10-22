@@ -2,6 +2,8 @@ import type { DocumentNode } from "../model";
 import type { Transaction } from "../operation";
 import type { RangeSelection } from "../selection";
 
+export type HistoryMergePolicy = "batch" | "adjacent";
+
 export interface HistorySnapshot {
   document: DocumentNode;
   selection?: RangeSelection;

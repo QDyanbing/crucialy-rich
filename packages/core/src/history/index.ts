@@ -23,6 +23,7 @@ export { undoHistory } from "./undo";
 export type {
   HistoryChange,
   HistoryEntry,
+  HistoryMergePolicy,
   HistorySnapshot,
   HistoryState,
   RecordHistoryInput,
