@@ -13,7 +13,10 @@ export function recordHistory(input: RecordHistoryInput): HistoryState {
   const nextEntry = createHistoryEntry(input);
   const previousEntry = input.history.undoStack.at(-1);
 
-  if (canMergeHistoryEntries(previousEntry, nextEntry)) {
+  if (
+    !(input.mergePolicy === "adjacent" && input.history.redoStack.length > 0) &&
+    canMergeHistoryEntries(previousEntry, nextEntry, input.mergePolicy)
+  ) {
     return {
       redoStack: [],
       undoStack: [

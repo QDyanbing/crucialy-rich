@@ -33,5 +33,6 @@ export interface RecordHistoryInput {
   batch?: string;
   before: HistorySnapshot;
   history: HistoryState;
+  mergePolicy?: HistoryMergePolicy;
   transaction: Transaction;
 }
