@@ -215,6 +215,56 @@ function verifyCellNavigation(core) {
   assert.deepEqual(core.redoHistory(undone.history).document, after);
 }
 
+function verifyHistoryMergePolicy(core) {
+  const initial = core.createDocument([
+    core.createParagraph([core.createText("abcd")]),
+  ]);
+  const caret = (offset) => ({
+    anchor: { path: [0, 0], offset },
+    focus: { path: [0, 0], offset },
+  });
+  function type(document, history, offset, text, mergePolicy) {
+    const selection = caret(offset);
+    const result = core.insertTextCommand.execute({
+      context: { document, selection },
+      payload: { text },
+    });
+    assert.equal(result.status, "success");
+    const after = core.applyTransaction(document, result.transaction);
+    return {
+      document: after,
+      history: core.recordHistory({
+        history,
+        batch: "typing",
+        ...(mergePolicy ? { mergePolicy } : {}),
+        before: core.createHistorySnapshot(document, selection),
+        after: core.createHistorySnapshot(after, result.selection),
+        transaction: result.transaction,
+      }),
+    };
+  }
+  for (const policy of [undefined, "batch", "adjacent"]) {
+    const first = type(initial, core.createHistoryState(), 1, "x", policy);
+    const contiguous = type(first.document, first.history, 2, "y", policy);
+    assert.equal(contiguous.history.undoStack.length, 1);
+    const jumped = type(contiguous.document, contiguous.history, 0, "z", policy);
+    assert.equal(jumped.history.undoStack.length, policy === "adjacent" ? 2 : 1);
+    const undone = core.undoHistory(jumped.history);
+    assert.deepEqual(
+      undone.document,
+      policy === "adjacent" ? contiguous.document : initial,
+    );
+    assert.deepEqual(core.redoHistory(undone.history).document, jumped.document);
+    assert.equal("mergePolicy" in jumped.history.undoStack[0], false);
+    if (policy === "adjacent") {
+      const branch = type(undone.document, undone.history, 3, "n", policy);
+      assert.equal(branch.history.undoStack.length, 2);
+      assert.equal(branch.history.redoStack.length, 0);
+      assert.deepEqual(core.undoHistory(branch.history).document, contiguous.document);
+    }
+  }
+}
+
 function verifyCodePaste(core) {
   const document = core.createDocument([
     core.createCodeBlock([core.createText("pre"), core.createText("tail")]),
@@ -299,7 +349,10 @@ for (const packageConfig of publicPackages) {
     verifyOfficePaste(runtime);
     verifyMixedImagePaste(runtime);
     verifyCellNavigation(runtime);
+    verifyHistoryMergePolicy(runtime);
     assert.ok(declarations.includes("CellNavigationDirection"));
+    assert.ok(declarations.includes("HistoryMergePolicy"));
+    assert.ok(declarations.includes("mergePolicy?: HistoryMergePolicy"));
   }
 
   process.stdout.write(`Verified ${manifest.name}@${manifest.version}\n`);
