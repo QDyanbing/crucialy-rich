@@ -81,6 +81,74 @@ function clipboard(container: HTMLElement, type: "copy" | "cut", fail = false) {
 }
 
 describe("RichTextEditor plain clipboard copy", () => {
+  it("supports readonly controlled values without using a command registry", () => {
+    const value = createDocument([createParagraph([createText("前甲乙后")])]);
+    const host = renderEditor(value, { value, contentEditable: false });
+    select(host.container);
+    expect(clipboard(host.container, "copy").data).toEqual({ "text/plain": "甲乙" });
+    expect(host.onTransaction).not.toHaveBeenCalled();
+  });
+
+  it("lets the host cancel and completely own clipboard contents", () => {
+    const onCopy = vi.fn((event) => {
+      event.clipboardData.setData("text/html", "<b>宿主</b>");
+      event.preventDefault();
+    });
+    const host = renderEditor(undefined, { onCopy });
+    select(host.container);
+    const result = clipboard(host.container, "copy");
+    expect(onCopy).toHaveBeenCalledTimes(1);
+    expect(result.data).toEqual({ "text/html": "<b>宿主</b>" });
+    expect(result.clearData).not.toHaveBeenCalled();
+  });
+
+  it("does not read a different editor or a range partly outside its root", () => {
+    const first = renderEditor();
+    const second = renderEditor();
+    select(second.container);
+    expect(clipboard(first.container, "copy").setData).not.toHaveBeenCalled();
+    const start =
+      first.container.querySelector("p span")?.firstChild ??
+      first.container.querySelector('[data-crucialy-path="[0,0]"]')!.firstChild!;
+    const end = second.container.querySelector(
+      '[data-crucialy-path="[0,0]"]',
+    )!.firstChild!;
+    window.getSelection()!.setBaseAndExtent(start, 1, end, 3);
+    expect(clipboard(first.container, "copy").setData).not.toHaveBeenCalled();
+    expect(first.onTransaction).not.toHaveBeenCalled();
+  });
+
+  it("reads model text rather than externally modified rendered text", () => {
+    const host = renderEditor();
+    host.container.querySelector(
+      '[data-crucialy-path="[0,0]"]',
+    )!.firstChild!.textContent = "前错误后";
+    select(host.container);
+    expect(clipboard(host.container, "copy").data).toEqual({ "text/plain": "甲乙" });
+  });
+
+  it("does not export an unfinished composition", () => {
+    const host = renderEditor();
+    select(host.container);
+    act(() =>
+      host.container.firstElementChild!.dispatchEvent(
+        new CompositionEvent("compositionstart", { bubbles: true }),
+      ),
+    );
+    expect(clipboard(host.container, "copy").setData).not.toHaveBeenCalled();
+    expect(host.onTransaction).not.toHaveBeenCalled();
+  });
+
+  it("contains clipboard write failures without changing the model", () => {
+    const host = renderEditor();
+    select(host.container);
+    const result = clipboard(host.container, "copy", true);
+    expect(result.event.defaultPrevented).toBe(true);
+    expect(result.data).toEqual({});
+    expect(host.onChange).not.toHaveBeenCalled();
+    expect(host.onTransaction).not.toHaveBeenCalled();
+  });
+
   it("copies model text without changing the document or publishing a transaction", () => {
     const host = renderEditor();
     select(host.container);
