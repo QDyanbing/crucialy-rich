@@ -67,14 +67,15 @@ export function applyModelSelectionToDom(
   selection: RangeSelection,
   domSelection = getOwnerDocument(root)?.getSelection(),
 ): boolean {
-  const range = createDomRangeFromModelSelection(root, document, selection);
+  const anchor = modelPointToDomPoint(root, document, selection.anchor);
+  const focus = modelPointToDomPoint(root, document, selection.focus);
 
-  if (!range || !domSelection) {
+  if (!anchor || !focus || !domSelection) {
     return false;
   }
 
   domSelection.removeAllRanges();
-  domSelection.addRange(range);
+  domSelection.setBaseAndExtent(anchor.node, anchor.offset, focus.node, focus.offset);
 
   return true;
 }

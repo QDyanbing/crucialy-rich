@@ -79,4 +79,57 @@ describe("domSelectionToModelSelection", () => {
     expect(selection?.anchorNode).toBe(document.querySelector("span")?.firstChild);
     expect(selection?.anchorOffset).toBe(4);
   });
+
+  it.each([
+    [1, 4],
+    [4, 1],
+  ])("round trips the original selection direction (%s, %s)", (start, end) => {
+    const model = createDocument([createParagraph([createText("Hello")])]);
+    const selection = {
+      anchor: { path: [0, 0], offset: start },
+      focus: { path: [0, 0], offset: end },
+    };
+    expect(applyModelSelectionToDom(document.body, model, selection)).toBe(true);
+    expect(domSelectionToModelSelection(model, window.getSelection()!)).toEqual(
+      selection,
+    );
+  });
+
+  it("keeps backward endpoints across blocks while DOM Range remains ordered", () => {
+    document.body.insertAdjacentHTML(
+      "beforeend",
+      '<p data-crucialy-path="[1]"><span data-crucialy-path="[1,0]">World</span></p>',
+    );
+    const model = createDocument([
+      createParagraph([createText("Hello")]),
+      createParagraph([createText("World")]),
+    ]);
+    const selection = {
+      anchor: { path: [1, 0], offset: 3 },
+      focus: { path: [0, 0], offset: 1 },
+    };
+    expect(applyModelSelectionToDom(document.body, model, selection)).toBe(true);
+    expect(domSelectionToModelSelection(model, window.getSelection()!)).toEqual(
+      selection,
+    );
+    const range = createDomRangeFromModelSelection(document.body, model, selection)!;
+    expect(range.startOffset).toBe(1);
+    expect(range.endOffset).toBe(3);
+  });
+
+  it("leaves the current DOM selection intact when either point is invalid", () => {
+    const model = createDocument([createParagraph([createText("Hello")])]);
+    const valid = {
+      anchor: { path: [0, 0], offset: 4 },
+      focus: { path: [0, 0], offset: 1 },
+    };
+    applyModelSelectionToDom(document.body, model, valid);
+    expect(
+      applyModelSelectionToDom(document.body, model, {
+        anchor: valid.anchor,
+        focus: { path: [9, 0], offset: 0 },
+      }),
+    ).toBe(false);
+    expect(domSelectionToModelSelection(model, window.getSelection()!)).toEqual(valid);
+  });
 });

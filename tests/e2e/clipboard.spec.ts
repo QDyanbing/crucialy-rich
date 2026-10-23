@@ -90,3 +90,61 @@ test("copies readonly link text without exporting HTML or href", async ({ page }
   });
   await expect(editor).toHaveText(before!);
 });
+
+for (const backward of [false, true]) {
+  test(`cuts model text and restores its range through history (backward: ${backward})`, async ({
+    page,
+  }) => {
+    await page.goto("/");
+    const json = page.getByLabel("文档 JSON", { exact: true });
+    const initial = JSON.parse((await json.textContent())!);
+    await selectText(page, "[0,0]", backward ? 3 : 0, "[0,0]", backward ? 0 : 3);
+    expect(await dispatchClipboard(page, "cut")).toEqual({
+      prevented: true,
+      text: "你好，",
+      types: ["text/plain"],
+    });
+    const cut = JSON.parse((await json.textContent())!);
+    await expect(page.getByLabel("已渲染文档").locator("p").first()).toHaveText(
+      "crucialy-rich。",
+    );
+    await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+    await page.getByRole("button", { name: "撤销", exact: true }).click();
+    await expect
+      .poll(async () => JSON.parse((await json.textContent())!))
+      .toEqual(initial);
+    await expect(page.getByLabel("锚点偏移")).toHaveValue(backward ? "3" : "0");
+    await expect(page.getByLabel("焦点偏移")).toHaveValue(backward ? "0" : "3");
+    await page.getByRole("button", { name: "重做", exact: true }).click();
+    await expect.poll(async () => JSON.parse((await json.textContent())!)).toEqual(cut);
+    await page.keyboard.insertText("续");
+    await expect(page.getByLabel("已渲染文档").locator("p").first()).toHaveText(
+      "续crucialy-rich。",
+    );
+    await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 2');
+    await page.getByRole("button", { name: "撤销", exact: true }).click();
+    await expect.poll(async () => JSON.parse((await json.textContent())!)).toEqual(cut);
+    await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+  });
+}
+
+test("cuts a cross-paragraph selection as one undoable transaction", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const json = page.getByLabel("文档 JSON", { exact: true });
+  const initial = JSON.parse((await json.textContent())!);
+  await selectText(page, "[0,0]", 3, "[1,0]", 2);
+  expect((await dispatchClipboard(page, "cut")).text).toBe("crucialy-rich。\n选区");
+  await expect(page.getByLabel("已渲染文档").locator("p")).toHaveText([
+    "你好，模型已就绪。",
+  ]);
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect
+    .poll(async () => JSON.parse((await json.textContent())!))
+    .toEqual(initial);
+  await expect(page.getByLabel("锚点路径")).toHaveValue("0,0");
+  await expect(page.getByLabel("焦点路径")).toHaveValue("1,0");
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
