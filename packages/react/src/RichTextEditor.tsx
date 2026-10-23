@@ -24,6 +24,7 @@ import {
   executeCommand as executeCoreCommand,
   finishComposition,
   getNodeAtPath,
+  getClipboardText,
   getAdjacentCellSelection,
   getEditorShortcutAction,
   getElementModelPath,
@@ -74,6 +75,7 @@ export interface RichTextEditorProps
     | "contentEditable"
     | "onBeforeInput"
     | "onClick"
+    | "onCopy"
     | "onCompositionEnd"
     | "onCompositionStart"
     | "onCompositionUpdate"
@@ -222,6 +224,17 @@ function getModelSelectionFromDom(root: HTMLDivElement, document: DocumentNode) 
     root.contains(domSelection.focusNode)
     ? domSelectionToModelSelection(document, domSelection)
     : undefined;
+}
+
+function writeClipboardText(event: ClipboardEvent<HTMLDivElement>, text: string) {
+  event.preventDefault();
+  try {
+    event.clipboardData.clearData();
+    event.clipboardData.setData("text/plain", text);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function createKeyboardInputResult(
@@ -431,6 +444,7 @@ function RichTextEditorComponent(
     onBlockSelectionChange,
     onCellSelectionChange,
     onClick,
+    onCopy,
     onCompositionEnd,
     onCompositionStart,
     onCompositionStateChange,
@@ -772,6 +786,16 @@ function RichTextEditorComponent(
     commitInputResult(input);
   }
 
+  function handleCopy(event: ClipboardEvent<HTMLDivElement>) {
+    onCopy?.(event);
+    if (event.defaultPrevented || compositionRef.current.active) return;
+    const modelSelection = getModelSelectionFromDom(event.currentTarget, document);
+    const text = modelSelection
+      ? getClipboardText(document, modelSelection)
+      : undefined;
+    if (text !== undefined) writeClipboardText(event, text);
+  }
+
   function handlePaste(event: ClipboardEvent<HTMLDivElement>) {
     onPaste?.(event);
 
@@ -963,6 +987,7 @@ function RichTextEditorComponent(
       data-crucialy-rich-editor="true"
       onBeforeInput={handleBeforeInput}
       onClick={handleClick}
+      onCopy={handleCopy}
       onCompositionEnd={handleCompositionEnd}
       onCompositionStart={handleCompositionStart}
       onCompositionUpdate={handleCompositionUpdate}
