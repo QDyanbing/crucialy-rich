@@ -8,6 +8,8 @@
 
 - `packages/core/tests/render/selection-sync.test.ts`：读取折叠浏览器选区、生成 DOM 范围、恢复浏览器选区。
 - `tests/e2e/demo-shell.spec.ts`：演示渲染区选区同步，以及链接弹层焦点转移后的非折叠选区恢复。
+- `packages/core/tests/render/selection-sync.test.ts`：2026-10-23 新增正反向端点往返、跨块方向、按序 DOM Range 及非法端点保留原选区的回归。
+- `tests/e2e/clipboard.spec.ts`：正反向剪切、撤销方向恢复、重做后继续输入均通过；完整浏览器回归同时验证既有链接与表格流程。
 
 命令：
 
@@ -28,9 +30,9 @@ pnpm test:e2e
 
 ## 当前限制
 
-- 不保留反向选区方向。
+- 通过 `Selection.setBaseAndExtent` 保留 anchor/focus 方向；浏览器需支持该接口。DOM Range 查询仍使用规范化顺序。
 - 选区同步模块不负责编辑输入、IME、删除或换行，这些行为由输入集成和命令层验证。
 
 ## 结论
 
-选区双向同步已经覆盖折叠、非折叠和链接弹层焦点转移后的受控恢复。
+选区双向同步已经覆盖折叠、正反向非折叠、跨块、剪切 History 和链接弹层焦点转移后的受控恢复。

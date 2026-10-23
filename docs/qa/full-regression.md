@@ -2,7 +2,7 @@
 
 ## 执行信息
 
-- 日期：2026-10-22
+- 日期：2026-10-23
 - 版本：`0.1.0`
 - 分支：`master`
 - 命令：`pnpm check:all`
@@ -14,17 +14,18 @@
 | Prettier   | 通过 | 全仓文件格式一致                                       |
 | ESLint     | 通过 | 0 warning、0 error                                     |
 | TypeScript | 通过 | 根工程与 core/react/demo 包级检查全部通过              |
-| Vitest     | 通过 | 200 个测试文件，1452 项测试                            |
+| Vitest     | 通过 | 204 个测试文件，1502 项测试                            |
 | Core 构建  | 通过 | ESM、source map、类型声明生成成功                      |
 | React 构建 | 通过 | ESM、source map、类型声明生成成功                      |
 | Demo 构建  | 通过 | Vite 生产构建成功                                      |
 | 包产物导入 | 通过 | 导出/声明、Clipboard、CodeBlock 与 Office 产物冒烟通过 |
-| Playwright | 通过 | Chromium 178 项测试                                    |
+| Playwright | 通过 | Chromium 187 项测试                                    |
 
-Demo 主 JS 产物约 501.45 KB，Vite 给出超过 500 KB 的非阻断分包提示；构建退出码为 0，本轮未调整打包策略。
+Demo 主 JS 产物约 502.01 KB，Vite 给出超过 500 KB 的非阻断分包提示；构建退出码为 0，本轮未调整打包策略。
 
 ## 核心路径
 
+- 模型纯文本复制、结构分隔与非法边界、剪切 Command/History、React 受控/非受控/只读/宿主/IME/Registry/写入失败/多实例保护，以及公共包类型与剪切粘贴往返均通过。新增九条 Chromium 用例覆盖只读链接、跨块、同 cell、跨 cell 拒绝、原生快捷键和 History；反向选区同步修复后，方向恢复与继续输入均通过。范围与跨平台限制见[复制与剪切验收](./copy-cut.md)。
 - History 可选相邻合并的 19 条 Core 与 4 条 React 测试通过，默认 batch 兼容、合法折叠 Point、缺失/非法/非折叠选区、不同模型 path、redo 分支与空事务均有覆盖。新增五条 Chromium 用例验证表格 Tab、段内/跨段光标跳变、选区替换及撤销后续编的分步撤销、重做与光标恢复；构建包验证两种策略、默认行为、类型声明和 entry 结构不变。
 - 表格相邻 cell 查询、行优先跨行导航、同 cell 正反向范围、非法/跨 cell/跨表边界、独立路径、当前行列尺寸、TSV/Enter 后导航及输入 History 的 Core 验证通过；React 受控/非受控、DOM/ref 同步、cell 高亮、IME/修饰键/宿主/只读保护、列表回归及多实例隔离通过。Chromium 七条导航用例和构建包导出/声明、输入撤销冒烟通过；导航不新增事务或扩表。
 - HTML／Markdown 普通段落的图文混排、包装图片、连续图片、URL/属性过滤、文字 marks/链接、换行、引用式 Markdown 图片、代码字面语法、容器边界、正反向范围、末尾图片光标、单条 History 与续编的 Core/React/包产物验证通过；Chromium 七条用例覆盖 HTML/Markdown 优先级、实际图片加载、撤销重做、受限目标纯文本降级和 Office rich-only 拒绝。

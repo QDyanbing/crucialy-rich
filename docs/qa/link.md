@@ -69,7 +69,7 @@ pnpm check:all
 
 - 链接 command 当前支持连续顶层 paragraph、heading 和 quote，以及同一列表项或同一表格单元格段落中的非折叠文字选区。
 - href 当前只接受绝对 HTTP、HTTPS 和 mailto 地址。
-- DOM 选区恢复使用规范化后的正向范围，不保留反向选择方向。
+- DOM 选区恢复已由共享同步层保留 anchor/focus 方向；按序范围查询不变，最新验证见[选区同步验收](./selection-sync.md)。
 - CodeBlock、Divider、Image、跨列表项、跨单元格、通用浮层组件和站内相对链接仍不在当前链接范围。
 
 ## 结论
