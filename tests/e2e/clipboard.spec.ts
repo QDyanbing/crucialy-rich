@@ -148,3 +148,65 @@ test("cuts a cross-paragraph selection as one undoable transaction", async ({
   await expect(page.getByLabel("焦点路径")).toHaveValue("1,0");
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
+
+test("copies table separators but blocks cross-cell cut", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("tables");
+  const json = page.getByLabel("文档 JSON", { exact: true });
+  const initial = await json.textContent();
+  await selectText(page, "[0,0,0,0,0]", 1, "[0,0,1,0,0]", 1);
+  expect((await dispatchClipboard(page, "copy")).text).toBe("名\n同一单元格第二段\t角");
+  expect(await dispatchClipboard(page, "cut")).toEqual({
+    prevented: true,
+    text: "",
+    types: [],
+  });
+  await expect(json).toHaveText(initial!);
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+});
+
+test("cuts a cell paragraph range without changing the neighboring cell", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("tables");
+  const json = page.getByLabel("文档 JSON", { exact: true });
+  const initial = JSON.parse((await json.textContent())!);
+  await selectText(page, "[0,0,0,0,0]", 1, "[0,0,0,1,0]", 2);
+  expect((await dispatchClipboard(page, "cut")).text).toBe("名\n同一");
+  const cells = page.getByLabel("已渲染文档").locator("td");
+  await expect(cells.first()).toHaveText("姓单元格第二段");
+  await expect(cells.nth(1)).toHaveText("角色");
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect
+    .poll(async () => JSON.parse((await json.textContent())!))
+    .toEqual(initial);
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
+test("round trips native clipboard shortcuts through copy cut and paste", async ({
+  page,
+  context,
+}) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.goto("/");
+  const json = page.getByLabel("文档 JSON", { exact: true });
+  const initial = JSON.parse((await json.textContent())!);
+  await selectText(page, "[0,0]", 0, "[0,0]", 3);
+  await page.keyboard.press("ControlOrMeta+C");
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe("你好，");
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+  await page.keyboard.press("ControlOrMeta+X");
+  await expect(page.getByLabel("已渲染文档").locator("p").first()).toHaveText(
+    "crucialy-rich。",
+  );
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe("你好，");
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  await page.keyboard.press("ControlOrMeta+V");
+  await expect
+    .poll(async () => JSON.parse((await json.textContent())!))
+    .toEqual(initial);
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 2');
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
