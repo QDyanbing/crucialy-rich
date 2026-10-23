@@ -3,6 +3,7 @@ export { htmlClipboardParser, parseHtml } from "./html";
 export { markdownClipboardParser, parseMarkdown } from "./markdown";
 export { parsePlainText, plainTextClipboardParser } from "./plain-text";
 export { getPlainTextTableGrid } from "./tsv";
+export { getClipboardText } from "./text";
 export type { TableClipboardGrid } from "./tsv";
 export {
   CLIPBOARD_ALLOWED_ATTRIBUTES,

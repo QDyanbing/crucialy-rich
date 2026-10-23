@@ -143,6 +143,18 @@ describe("@crucialy-rich/core public API", () => {
     expect(typeof core.splitTextByRange).toBe("function");
   });
 
+  it("exposes model-driven clipboard text without requiring the DOM", () => {
+    const document = core.createDocument([
+      core.createParagraph([core.createText("复制")]),
+    ]);
+    expect(
+      core.getClipboardText(document, {
+        anchor: { path: [0, 0], offset: 0 },
+        focus: { path: [0, 0], offset: 2 },
+      }),
+    ).toBe("复制");
+  });
+
   it("exposes the render API", () => {
     expect(typeof core.MODEL_PATH_ATTRIBUTE).toBe("string");
     expect(typeof core.createModelPathAttributes).toBe("function");
