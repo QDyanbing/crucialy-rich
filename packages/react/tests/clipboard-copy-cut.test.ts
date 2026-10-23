@@ -188,3 +188,46 @@ describe("RichTextEditor plain clipboard copy", () => {
     expect(result.setData).not.toHaveBeenCalled();
   });
 });
+
+describe("RichTextEditor plain clipboard cut", () => {
+  it.each([false, true])(
+    "cuts through deleteSelection once (backward: %s)",
+    (backward) => {
+      const host = renderEditor();
+      const selection: RangeSelection = {
+        anchor: { path: [0, 0], offset: backward ? 3 : 1 },
+        focus: { path: [0, 0], offset: backward ? 1 : 3 },
+      };
+      select(host.container, selection);
+      const result = clipboard(host.container, "cut");
+      expect(result.event.defaultPrevented).toBe(true);
+      expect(result.data).toEqual({ "text/plain": "甲乙" });
+      expect(host.container.textContent).toBe("前后");
+      expect(host.onChange).toHaveBeenCalledTimes(1);
+      expect(host.onTransaction).toHaveBeenCalledTimes(1);
+      expect(host.onTransaction.mock.calls[0]?.[0]).toMatchObject({
+        inputType: "deleteByCut",
+        before: host.value,
+        beforeSelection: selection,
+        selection: {
+          anchor: { path: [0, 0], offset: 1 },
+          focus: { path: [0, 0], offset: 1 },
+        },
+        transaction: { operations: [{ type: "delete_text" }] },
+      });
+      expect(host.onTransaction.mock.calls[0]?.[0].batch).toBeUndefined();
+    },
+  );
+
+  it("emits changes but does not replace a controlled value until the host accepts it", () => {
+    const value = createDocument([createParagraph([createText("前甲乙后")])]);
+    const host = renderEditor(value, { value });
+    select(host.container);
+    expect(clipboard(host.container, "cut").data).toEqual({ "text/plain": "甲乙" });
+    expect(host.onChange).toHaveBeenCalledTimes(1);
+    expect(host.onChange.mock.calls[0]?.[0]).toEqual(
+      createDocument([createParagraph([createText("前后")])]),
+    );
+    expect(host.container.textContent).toBe("前甲乙后");
+  });
+});

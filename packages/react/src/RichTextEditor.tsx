@@ -76,6 +76,7 @@ export interface RichTextEditorProps
     | "onBeforeInput"
     | "onClick"
     | "onCopy"
+    | "onCut"
     | "onCompositionEnd"
     | "onCompositionStart"
     | "onCompositionUpdate"
@@ -111,6 +112,7 @@ export interface RichTextEditorHandle {
 export type RichTextEditorInputType =
   | "command"
   | "deleteBackward"
+  | "deleteByCut"
   | "deleteImage"
   | "deleteForward"
   | "insertParagraph"
@@ -445,6 +447,7 @@ function RichTextEditorComponent(
     onCellSelectionChange,
     onClick,
     onCopy,
+    onCut,
     onCompositionEnd,
     onCompositionStart,
     onCompositionStateChange,
@@ -796,6 +799,30 @@ function RichTextEditorComponent(
     if (text !== undefined) writeClipboardText(event, text);
   }
 
+  function handleCut(event: ClipboardEvent<HTMLDivElement>) {
+    onCut?.(event);
+    if (event.defaultPrevented || !editable) return;
+    event.preventDefault();
+    if (compositionRef.current.active) return;
+    const modelSelection = getModelSelectionFromDom(event.currentTarget, document);
+    if (!modelSelection) return;
+    const text = getClipboardText(document, modelSelection);
+    if (text === undefined) return;
+    const input = createDeleteSelectionCommandResult(
+      registry,
+      document,
+      modelSelection,
+      "deleteByCut",
+    );
+    if (
+      input &&
+      input.transaction.operations.length > 0 &&
+      writeClipboardText(event, text)
+    ) {
+      commitInputResult(input);
+    }
+  }
+
   function handlePaste(event: ClipboardEvent<HTMLDivElement>) {
     onPaste?.(event);
 
@@ -988,6 +1015,7 @@ function RichTextEditorComponent(
       onBeforeInput={handleBeforeInput}
       onClick={handleClick}
       onCopy={handleCopy}
+      onCut={handleCut}
       onCompositionEnd={handleCompositionEnd}
       onCompositionStart={handleCompositionStart}
       onCompositionUpdate={handleCompositionUpdate}
