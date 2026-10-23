@@ -14,6 +14,7 @@ const publicPackages = [
       "parseClipboardData",
       "DEFAULT_CLIPBOARD_PARSERS",
       "getAdjacentCellSelection",
+      "getClipboardText",
     ],
   },
   {
@@ -215,6 +216,45 @@ function verifyCellNavigation(core) {
   assert.deepEqual(core.redoHistory(undone.history).document, after);
 }
 
+function verifyClipboardText(core) {
+  const document = core.createDocument([
+    core.createParagraph([core.createText("abc")]),
+    core.createParagraph([core.createText("xyz")]),
+  ]);
+  const selection = {
+    anchor: { path: [1, 0], offset: 1 },
+    focus: { path: [0, 0], offset: 1 },
+  };
+  const text = core.getClipboardText(document, selection);
+  assert.equal(text, "bc\nx");
+  assert.equal(
+    core.getClipboardText(document, {
+      anchor: selection.anchor,
+      focus: selection.anchor,
+    }),
+    undefined,
+  );
+  const cut = core.deleteSelectionCommand.execute({ context: { document, selection } });
+  assert.equal(cut.ok, true);
+  const after = core.applyTransaction(document, cut.transaction);
+  const history = core.recordHistory({
+    history: core.createHistoryState(),
+    transaction: cut.transaction,
+    before: core.createHistorySnapshot(document, selection),
+    after: core.createHistorySnapshot(after, cut.selection),
+  });
+  const undone = core.undoHistory(history);
+  assert.deepEqual(undone.document, document);
+  assert.deepEqual(undone.selection, selection);
+  assert.deepEqual(core.redoHistory(undone.history).document, after);
+  const pasted = core.pasteCommand.execute({
+    context: { document: after, selection: cut.selection },
+    payload: { fragment: core.parsePlainText(text) },
+  });
+  assert.equal(pasted.ok, true);
+  assert.deepEqual(core.applyTransaction(after, pasted.transaction), document);
+}
+
 function verifyHistoryMergePolicy(core) {
   const initial = core.createDocument([
     core.createParagraph([core.createText("abcd")]),
@@ -350,9 +390,16 @@ for (const packageConfig of publicPackages) {
     verifyMixedImagePaste(runtime);
     verifyCellNavigation(runtime);
     verifyHistoryMergePolicy(runtime);
+    verifyClipboardText(runtime);
     assert.ok(declarations.includes("CellNavigationDirection"));
     assert.ok(declarations.includes("HistoryMergePolicy"));
     assert.ok(declarations.includes("mergePolicy?: HistoryMergePolicy"));
+  }
+
+  if (packageConfig.directory === "packages/react") {
+    assert.ok(declarations.includes('"onCopy"'));
+    assert.ok(declarations.includes('"onCut"'));
+    assert.ok(declarations.includes('"deleteByCut"'));
   }
 
   process.stdout.write(`Verified ${manifest.name}@${manifest.version}\n`);
