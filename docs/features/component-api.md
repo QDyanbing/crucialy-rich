@@ -16,6 +16,7 @@
 | `onCellSelectionChange`    | `(selection: CellSelection \| undefined) => void`                                 | 点击、Tab 换格或离开表格时输出选中态。         |
 | `onCompositionStateChange` | `(state: CompositionState) => void`                                               | 输入法组合状态变化时输出最新状态。             |
 | `onTransaction`            | `(event: RichTextEditorTransactionEvent) => void`                                 | 输入后输出 before、after、transaction 和选区。 |
+| `onCopy` / `onCut`         | `ClipboardEventHandler<HTMLDivElement>`                                           | 宿主先处理复制／剪切，取消默认事件后完全接管。 |
 | `label`                    | `string`                                                                          | 编辑器区域的可访问名称。                       |
 | `className`                | `string`                                                                          | 传给编辑器根节点的样式类名。                   |
 | DOM 事件属性               | `onBeforeInput`、`onClick`、`onComposition*`、`onKeyDown`、`onMouseUp`、`onKeyUp` | 用于输入、链接交互和选区同步。                 |
@@ -97,6 +98,7 @@ ref 命令事件的 `inputType` 为 `command`。受控模式不会自行替换 `
 - 输入处理会复用当前 DOM selection，先转换为模型 selection，再创建输入 transaction。
 - 普通文本输入会通过 `insertTextCommand` 创建 transaction。
 - 非折叠 selection 下的 Backspace/Delete 会通过 `deleteSelectionCommand` 创建 transaction。
+- 原生复制输出模型选区的纯文本；剪切复用 `deleteSelection` 并输出独立 `deleteByCut` transaction，写入失败、禁用命令及不支持的范围不删除。只读支持复制，详见[复制与剪切](./copy-cut.md)。
 - Enter 会通过 `splitBlockCommand` 创建 transaction；受支持的非折叠 selection 会先删除再执行分段规则。
 - 段首 Backspace 会通过 `mergeBlockCommand` 创建 transaction。
 - 表格单元格内复用相同输入链路；Enter 只在当前 cell 内新增 paragraph，Backspace/Delete 不跨 cell 合并。
@@ -135,6 +137,6 @@ Toolbar 通过 class name 暴露样式入口，不捆绑主题 CSS。完整契�
 
 ## 当前边界
 
-当前组件仍不内置 history 状态、链接菜单或序列化能力；悬浮 Toolbar 的 Range 矩形由宿主同步。Clipboard parser 与粘贴命令来自 core，图片上传仍由宿主接入。
+当前组件仍不内置 history 状态、链接菜单或富格式剪贴板写出；悬浮 Toolbar 的 Range 矩形由宿主同步。Clipboard 纯文本读取、parser 与粘贴命令来自 core，图片上传仍由宿主接入。
 
 宿主可把 `onTransaction` 的前后快照、selection、transaction 和 batch 交给 Core `recordHistory`，并选择 `mergePolicy: "adjacent"`，让换格、光标跳变或选区替换后的输入分开撤销；该选项不是组件 prop，默认 batch 行为不变。接入与限制见 [History](./history.md#可选的相邻输入策略)。

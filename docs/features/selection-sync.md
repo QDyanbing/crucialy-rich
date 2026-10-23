@@ -12,13 +12,13 @@
 
 ## 模型选区到 DOM 选区
 
-`createDomRangeFromModelSelection(root, document, selection)` 会把模型选区转换为 DOM `Range`。
+`createDomRangeFromModelSelection(root, document, selection)` 会把模型选区转换为按文档顺序排列的 DOM `Range`，用于布局和范围查询，不表达选区方向。
 
-`applyModelSelectionToDom(root, document, selection)` 会把生成的 DOM 范围应用到浏览器选区：
+`applyModelSelectionToDom(root, document, selection)` 会把模型端点应用到浏览器选区：
 
 - 先清空当前浏览器选区。
-- 再添加由模型选区生成的范围。
-- 成功返回 `true`，无法映射时返回 `false`。
+- 再通过 `Selection.setBaseAndExtent` 设置原始 anchor/focus，保留反向选区方向。
+- 成功返回 `true`；任一端无法映射时返回 `false`，保留原 DOM 选区。
 
 ## 演示同步入口
 
@@ -41,6 +41,6 @@
 ## 当前限制
 
 - 当前验证折叠和非折叠选区，以及链接弹层中的单块与连续文本块非折叠选区恢复。
-- 恢复 DOM 选区时会使用规范化后的正向范围，不保留反向选择方向。
+- 已覆盖正反向选区、跨块恢复、剪切 History 往返和恢复后的继续输入；浏览器需支持 `Selection.setBaseAndExtent`。
 - 选区同步模块本身不处理 IME、beforeinput、输入、删除或换行，这些行为由输入集成和命令层负责。
 - 不处理跨复杂行内节点、标记、图片、表格等未来节点。
