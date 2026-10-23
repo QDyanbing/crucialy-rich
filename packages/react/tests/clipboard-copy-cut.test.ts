@@ -2,6 +2,11 @@
 
 import {
   createDocument,
+  createCommandRegistry,
+  createCommandSuccess,
+  createTable,
+  createTransaction,
+  deleteSelectionCommand,
   createParagraph,
   createText,
   type RangeSelection,
@@ -190,6 +195,115 @@ describe("RichTextEditor plain clipboard copy", () => {
 });
 
 describe("RichTextEditor plain clipboard cut", () => {
+  it("does not delete when writing to the clipboard fails", () => {
+    const host = renderEditor();
+    select(host.container);
+    const result = clipboard(host.container, "cut", true);
+    expect(result.event.defaultPrevented).toBe(true);
+    expect(result.data).toEqual({});
+    expect(host.container.textContent).toBe("前甲乙后");
+    expect(host.onChange).not.toHaveBeenCalled();
+    expect(host.onTransaction).not.toHaveBeenCalled();
+  });
+
+  it.each(["missing", "disabled", "throw", "empty"])(
+    "does not write or mutate for a %s deletion command",
+    (mode) => {
+      const commandRegistry = createCommandRegistry(
+        mode === "missing"
+          ? []
+          : [
+              {
+                ...deleteSelectionCommand,
+                canExecute: () => mode !== "disabled",
+                execute: () => {
+                  if (mode === "throw") throw new Error("Host deletion failed.");
+                  return createCommandSuccess(deleteSelectionCommand.name, {
+                    transaction: createTransaction(),
+                    selection: {
+                      anchor: { path: [0, 0], offset: 1 },
+                      focus: { path: [0, 0], offset: 1 },
+                    },
+                  });
+                },
+              },
+            ],
+      );
+      const host = renderEditor(undefined, { commandRegistry });
+      select(host.container);
+      const result = clipboard(host.container, "cut");
+      expect(result.event.defaultPrevented).toBe(true);
+      expect(result.setData).not.toHaveBeenCalled();
+      expect(host.container.textContent).toBe("前甲乙后");
+      expect(host.onTransaction).not.toHaveBeenCalled();
+    },
+  );
+
+  it("lets a host cut handler own the event before the registry runs", () => {
+    const execute = vi.fn(deleteSelectionCommand.execute);
+    const onCut = vi.fn((event) => event.preventDefault());
+    const host = renderEditor(undefined, {
+      commandRegistry: createCommandRegistry([{ ...deleteSelectionCommand, execute }]),
+      onCut,
+    });
+    select(host.container);
+    expect(clipboard(host.container, "cut").setData).not.toHaveBeenCalled();
+    expect(onCut).toHaveBeenCalledTimes(1);
+    expect(execute).not.toHaveBeenCalled();
+  });
+
+  it("does not turn readonly cut into an edit", () => {
+    const host = renderEditor(undefined, { contentEditable: false });
+    select(host.container);
+    const result = clipboard(host.container, "cut");
+    expect(result.event.defaultPrevented).toBe(false);
+    expect(result.setData).not.toHaveBeenCalled();
+    expect(host.onTransaction).not.toHaveBeenCalled();
+  });
+
+  it("blocks native cut during composition without deleting or exporting preedit text", () => {
+    const host = renderEditor();
+    select(host.container);
+    act(() =>
+      host.container.firstElementChild!.dispatchEvent(
+        new CompositionEvent("compositionstart", { bubbles: true }),
+      ),
+    );
+    const result = clipboard(host.container, "cut");
+    expect(result.event.defaultPrevented).toBe(true);
+    expect(result.setData).not.toHaveBeenCalled();
+    expect(host.onChange).not.toHaveBeenCalled();
+  });
+
+  it("does not use another editor's selection for cut", () => {
+    const first = renderEditor();
+    const second = renderEditor();
+    select(second.container);
+    const result = clipboard(first.container, "cut");
+    expect(result.event.defaultPrevented).toBe(true);
+    expect(result.setData).not.toHaveBeenCalled();
+    expect(first.onTransaction).not.toHaveBeenCalled();
+    expect(second.onTransaction).not.toHaveBeenCalled();
+  });
+
+  it("copies cross-cell text but refuses to cut the unsupported structural range", () => {
+    const table = createTable(1, 2);
+    for (const cell of table.children[0]!.children)
+      cell.children = [createParagraph([createText("文字")])];
+    const host = renderEditor(createDocument([table]));
+    select(host.container, {
+      anchor: { path: [0, 0, 0, 0, 0], offset: 1 },
+      focus: { path: [0, 0, 1, 0, 0], offset: 1 },
+    });
+    expect(clipboard(host.container, "copy").data).toEqual({ "text/plain": "字\t文" });
+    const result = clipboard(host.container, "cut");
+    expect(result.event.defaultPrevented).toBe(true);
+    expect(result.setData).not.toHaveBeenCalled();
+    expect(host.container.querySelectorAll("td")).toHaveLength(2);
+    expect(host.container.textContent).toBe("文字文字");
+    expect(host.onChange).not.toHaveBeenCalled();
+  });
+
   it.each([false, true])(
     "cuts through deleteSelection once (backward: %s)",
     (backward) => {
