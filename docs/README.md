@@ -47,6 +47,7 @@
 - [工具栏](./features/toolbar.md)
 - [斜杠菜单](./features/slash-menu.md)
 - [粘贴](./features/paste.md)
+- [纯文本复制与剪切](./features/copy-cut.md)
 - [中文输入法](./features/ime.md)
 - [编辑快捷键](./features/shortcuts.md)
 - [Markdown 输入规则](./features/input-rules.md)
@@ -59,6 +60,7 @@
 - [文字标记](./qa/marks.md)、[Bold/Italic](./qa/bold-italic.md)、[Underline/Strike](./qa/underline-strike.md)、[文字属性](./qa/text-style.md)、[链接](./qa/link.md)
 - [标题和引用](./qa/block-type.md)、[代码块和分割线](./qa/code-block-divider.md)、[基础列表](./qa/list-basic.md)、[列表增强](./qa/list-advanced.md)
 - [工具栏](./qa/toolbar.md)、[斜杠菜单](./qa/slash-menu.md)、[图片](./qa/image.md)、[粘贴](./qa/paste.md)
+- [复制与剪切](./qa/copy-cut.md)
 - [基础表格](./qa/table-basic.md)、[表格编辑](./qa/table-editing.md)、[输入法/快捷键/输入规则](./qa/ime-shortcuts-input-rules.md)
 
 ## 每周进度

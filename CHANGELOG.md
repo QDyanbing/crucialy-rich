@@ -8,6 +8,9 @@
 
 ### 新增
 
+- 新增 Core `getClipboardText`，从合法非折叠模型选区读取纯文本，保留块换行、列表文字及表格分隔；不输出 HTML、marks 或图片数据。
+- React 新增 `onCopy` / `onCut` 宿主接管与原生事件处理，剪切复用删除命令并输出独立 `deleteByCut` 事务；补齐只读、组合期、Registry、剪贴板失败、结构边界、撤销重做及原生快捷键回归。
+- 修复模型选区回写 DOM 丢失反向选择方向的问题，保留按序 DOM Range 查询，并验证剪切 History 恢复后的继续输入。
 - 新增 Core `HistoryMergePolicy` 与可选 `mergePolicy: "adjacent"`，仅在相同非空 batch 的合法折叠光标连续时合并；保留默认 batch 策略与快照结构，存在 redo 分支的新输入独立记录。
 - Demo 输入启用相邻合并策略，补齐 Core、React、Chromium 和构建包验收，覆盖换格、光标跳变、选区替换、撤销分支、快照与选区恢复。
 - 新增 Core `getAdjacentCellSelection` 与 `CellNavigationDirection`，支持按当前表格结构查询前后单元格起点，保留结构和选区边界，不修改文档。

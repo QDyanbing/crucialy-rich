@@ -60,6 +60,7 @@ export function Demo() {
 - 输入规则：支持 paragraph 开头的标题、列表、引用和代码块 Markdown 前缀。
 - 文字样式：五种 boolean mark 与字号、文字颜色、背景色可应用到连续顶层 paragraph、heading、quote，以及同一列表项或同一表格单元格内的连续 paragraph，并作为一个 transaction 进入宿主 History。
 - 清除格式：默认 Command 与 Toolbar 可一次移除选区中的全部 boolean mark、文字属性和链接，并支持 History 撤销/重做。
+- 复制／剪切：复制模型纯文本（含只读），剪切复用 Registry 的 `deleteSelection` 并输出独立 `deleteByCut` 事务；`onCopy` / `onCut` 可取消事件并由宿主接管，写入失败和不支持的范围不删除。详见[复制与剪切](../../docs/features/copy-cut.md)。
 - `label`、`className` 和基础 DOM 事件属性。
 
 Toolbar 当前支持：
