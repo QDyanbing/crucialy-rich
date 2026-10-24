@@ -153,6 +153,12 @@ describe("@crucialy-rich/core public API", () => {
         focus: { path: [0, 0], offset: 2 },
       }),
     ).toBe("复制");
+    expect(
+      core.getClipboardHtml(document, {
+        anchor: { path: [0, 0], offset: 0 },
+        focus: { path: [0, 0], offset: 2 },
+      }),
+    ).toBe("<p><span>复制</span></p>");
   });
 
   it("exposes the render API", () => {
