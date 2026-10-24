@@ -212,6 +212,7 @@ const shortcutCommandName = getCommandNameFromShortcut({
 - Clipboard：Markdown、HTML、纯文本解析优先级与 `paste` command；HTML 白名单覆盖标题、引用、代码块、行内代码、分隔线、三层普通/任务列表、marks、安全链接、图片和顶层表格，`b/i/u/s/strike/del/code` 与安全 `font-weight` / `font-style` / `text-decoration` 会映射到已有 boolean mark，安全 `font-size` / `color` / `background-color` 会映射到文字属性，`ol[start]` 保留安全整数编号，链接保留规范化后的 target/rel，任务项保留 checked，图片复用 URL 安全规则，表格行会规范为矩形结构；Markdown 行内代码和水平分隔线复用同一映射。
 - History：`createHistorySnapshot`、`cloneHistorySnapshot`、`createHistoryEntry`、`cloneHistoryEntry`、`createHistoryState`、`clearHistory`、`recordHistory`、`canMergeHistoryEntries`、`mergeHistoryEntries`、`canUndo`、`canRedo`、`getUndoEntry`、`getRedoEntry`、`undoHistory`、`redoHistory`、`getHistoryShortcutAction`、`undoCommand`、`redoCommand`。
 - 剪贴板写出：`getClipboardText(document, selection)` 读取纯文本，不依赖 DOM；非法、折叠或文字为空的范围返回 `undefined`。块换行、表格制表符与剪切接入边界见[复制与剪切](../../docs/features/copy-cut.md)。
+- 可选 HTML：`getClipboardHtml(document, selection)` 导出安全文字格式及文本块，单列表项/cell 内容按段落降级，不输出内部 DOM 属性；不支持完整范围时返回 `undefined`，由宿主选择纯文本回退。
 
 ## 构建产物
 

@@ -4,22 +4,23 @@
 
 ## 属性
 
-| 属性                       | 类型                                                                              | 说明                                           |
-| -------------------------- | --------------------------------------------------------------------------------- | ---------------------------------------------- |
-| `value`                    | `DocumentNode`                                                                    | 受控文档。传入后组件会按该文档渲染内容。       |
-| `defaultValue`             | `DocumentNode`                                                                    | 非受控初始文档。仅用于组件初始化时的渲染内容。 |
-| `onChange`                 | `(value: DocumentNode) => void`                                                   | 文本输入后输出最新文档。                       |
-| `selection`                | `RangeSelection`                                                                  | 受控模型选区，用于输入后回写 DOM selection。   |
-| `onSelectionChange`        | `(selection: RangeSelection) => void`                                             | 输入后输出新的模型选区。                       |
-| `cellSelection`            | `CellSelection`                                                                   | 受控单元格选中态。                             |
-| `commandRegistry`          | `CommandRegistry`                                                                 | 覆盖组件使用的默认 Command 注册表。            |
-| `onCellSelectionChange`    | `(selection: CellSelection \| undefined) => void`                                 | 点击、Tab 换格或离开表格时输出选中态。         |
-| `onCompositionStateChange` | `(state: CompositionState) => void`                                               | 输入法组合状态变化时输出最新状态。             |
-| `onTransaction`            | `(event: RichTextEditorTransactionEvent) => void`                                 | 输入后输出 before、after、transaction 和选区。 |
-| `onCopy` / `onCut`         | `ClipboardEventHandler<HTMLDivElement>`                                           | 宿主先处理复制／剪切，取消默认事件后完全接管。 |
-| `label`                    | `string`                                                                          | 编辑器区域的可访问名称。                       |
-| `className`                | `string`                                                                          | 传给编辑器根节点的样式类名。                   |
-| DOM 事件属性               | `onBeforeInput`、`onClick`、`onComposition*`、`onKeyDown`、`onMouseUp`、`onKeyUp` | 用于输入、链接交互和选区同步。                 |
+| 属性                       | 类型                                                                              | 说明                                            |
+| -------------------------- | --------------------------------------------------------------------------------- | ----------------------------------------------- |
+| `value`                    | `DocumentNode`                                                                    | 受控文档。传入后组件会按该文档渲染内容。        |
+| `defaultValue`             | `DocumentNode`                                                                    | 非受控初始文档。仅用于组件初始化时的渲染内容。  |
+| `onChange`                 | `(value: DocumentNode) => void`                                                   | 文本输入后输出最新文档。                        |
+| `selection`                | `RangeSelection`                                                                  | 受控模型选区，用于输入后回写 DOM selection。    |
+| `onSelectionChange`        | `(selection: RangeSelection) => void`                                             | 输入后输出新的模型选区。                        |
+| `cellSelection`            | `CellSelection`                                                                   | 受控单元格选中态。                              |
+| `commandRegistry`          | `CommandRegistry`                                                                 | 覆盖组件使用的默认 Command 注册表。             |
+| `clipboardFormat`          | `"plain" \| "html"`                                                               | 默认纯文本；HTML 模式追加可支持的文字格式片段。 |
+| `onCellSelectionChange`    | `(selection: CellSelection \| undefined) => void`                                 | 点击、Tab 换格或离开表格时输出选中态。          |
+| `onCompositionStateChange` | `(state: CompositionState) => void`                                               | 输入法组合状态变化时输出最新状态。              |
+| `onTransaction`            | `(event: RichTextEditorTransactionEvent) => void`                                 | 输入后输出 before、after、transaction 和选区。  |
+| `onCopy` / `onCut`         | `ClipboardEventHandler<HTMLDivElement>`                                           | 宿主先处理复制／剪切，取消默认事件后完全接管。  |
+| `label`                    | `string`                                                                          | 编辑器区域的可访问名称。                        |
+| `className`                | `string`                                                                          | 传给编辑器根节点的样式类名。                    |
+| DOM 事件属性               | `onBeforeInput`、`onClick`、`onComposition*`、`onKeyDown`、`onMouseUp`、`onKeyUp` | 用于输入、链接交互和选区同步。                  |
 
 ## 受控用法
 
@@ -137,6 +138,6 @@ Toolbar 通过 class name 暴露样式入口，不捆绑主题 CSS。完整契�
 
 ## 当前边界
 
-当前组件仍不内置 history 状态、链接菜单或富格式剪贴板写出；悬浮 Toolbar 的 Range 矩形由宿主同步。Clipboard 纯文本读取、parser 与粘贴命令来自 core，图片上传仍由宿主接入。
+当前组件仍不内置 history 状态、链接菜单或完整结构剪贴板写出；悬浮 Toolbar 的 Range 矩形由宿主同步。Clipboard 纯文本与可选 HTML 导出、parser 和粘贴命令来自 core，图片上传仍由宿主接入。`clipboardFormat="html"` 可保留受支持文字范围的格式，不支持的范围回退纯文本，不扩大剪切或粘贴目标能力。
 
 宿主可把 `onTransaction` 的前后快照、selection、transaction 和 batch 交给 Core `recordHistory`，并选择 `mergePolicy: "adjacent"`，让换格、光标跳变或选区替换后的输入分开撤销；该选项不是组件 prop，默认 batch 行为不变。接入与限制见 [History](./history.md#可选的相邻输入策略)。

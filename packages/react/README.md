@@ -62,6 +62,7 @@ export function Demo() {
 - 清除格式：默认 Command 与 Toolbar 可一次移除选区中的全部 boolean mark、文字属性和链接，并支持 History 撤销/重做。
 - 复制／剪切：复制模型纯文本（含只读），剪切复用 Registry 的 `deleteSelection` 并输出独立 `deleteByCut` 事务；`onCopy` / `onCut` 可取消事件并由宿主接管，写入失败和不支持的范围不删除。详见[复制与剪切](../../docs/features/copy-cut.md)。
 - `label`、`className` 和基础 DOM 事件属性。
+- `clipboardFormat`：默认 `plain`；设为 `html` 时同时输出纯文本和支持范围内的 HTML，未支持的跨结构选区回退完整纯文本，HTML 写入失败不提交剪切删除。
 
 Toolbar 当前支持：
 
