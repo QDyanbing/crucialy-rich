@@ -345,3 +345,37 @@ describe("RichTextEditor plain clipboard cut", () => {
     expect(host.container.textContent).toBe("前甲乙后");
   });
 });
+
+describe("RichTextEditor opt-in HTML clipboard", () => {
+  it.each([true, false])(
+    "writes both formats without a transaction when editable is %s",
+    (contentEditable) => {
+      const host = renderEditor(
+        createDocument([createParagraph([createText("前甲乙后", { bold: true })])]),
+        { clipboardFormat: "html", contentEditable },
+      );
+      select(host.container);
+      expect(clipboard(host.container, "copy").data).toEqual({
+        "text/plain": "甲乙",
+        "text/html": "<p><strong>甲乙</strong></p>",
+      });
+      expect(host.onChange).not.toHaveBeenCalled();
+      expect(host.onTransaction).not.toHaveBeenCalled();
+    },
+  );
+
+  it("cuts once after both formats are written", () => {
+    const host = renderEditor(
+      createDocument([createParagraph([createText("前甲乙后", { italic: true })])]),
+      { clipboardFormat: "html" },
+    );
+    select(host.container);
+    expect(clipboard(host.container, "cut").data).toEqual({
+      "text/plain": "甲乙",
+      "text/html": "<p><em>甲乙</em></p>",
+    });
+    expect(host.onTransaction).toHaveBeenCalledTimes(1);
+    expect(host.onTransaction.mock.calls[0]?.[0].inputType).toBe("deleteByCut");
+    expect(host.container.textContent).toBe("前后");
+  });
+});

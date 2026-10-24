@@ -25,6 +25,7 @@ import {
   finishComposition,
   getNodeAtPath,
   getClipboardText,
+  getClipboardHtml,
   getAdjacentCellSelection,
   getEditorShortcutAction,
   getElementModelPath,
@@ -89,6 +90,7 @@ export interface RichTextEditorProps
   defaultValue?: DocumentNode;
   blockSelection?: BlockSelection;
   cellSelection?: CellSelection;
+  clipboardFormat?: "plain" | "html";
   commandRegistry?: CommandRegistry;
   label?: string;
   onBlockSelectionChange?: (selection: BlockSelection | undefined) => void;
@@ -228,11 +230,16 @@ function getModelSelectionFromDom(root: HTMLDivElement, document: DocumentNode) 
     : undefined;
 }
 
-function writeClipboardText(event: ClipboardEvent<HTMLDivElement>, text: string) {
+function writeClipboardData(
+  event: ClipboardEvent<HTMLDivElement>,
+  text: string,
+  html?: string,
+) {
   event.preventDefault();
   try {
     event.clipboardData.clearData();
     event.clipboardData.setData("text/plain", text);
+    if (html !== undefined) event.clipboardData.setData("text/html", html);
     return true;
   } catch {
     return false;
@@ -437,6 +444,7 @@ function RichTextEditorComponent(
   {
     blockSelection,
     cellSelection,
+    clipboardFormat = "plain",
     className,
     commandRegistry,
     contentEditable,
@@ -796,7 +804,15 @@ function RichTextEditorComponent(
     const text = modelSelection
       ? getClipboardText(document, modelSelection)
       : undefined;
-    if (text !== undefined) writeClipboardText(event, text);
+    if (text !== undefined && modelSelection) {
+      writeClipboardData(
+        event,
+        text,
+        clipboardFormat === "html"
+          ? getClipboardHtml(document, modelSelection)
+          : undefined,
+      );
+    }
   }
 
   function handleCut(event: ClipboardEvent<HTMLDivElement>) {
@@ -817,7 +833,13 @@ function RichTextEditorComponent(
     if (
       input &&
       input.transaction.operations.length > 0 &&
-      writeClipboardText(event, text)
+      writeClipboardData(
+        event,
+        text,
+        clipboardFormat === "html"
+          ? getClipboardHtml(document, modelSelection)
+          : undefined,
+      )
     ) {
       commitInputResult(input);
     }
