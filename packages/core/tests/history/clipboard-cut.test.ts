@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   applyTransaction,
+  canExecutePasteCommand,
   createBulletList,
   createDocument,
   createHistorySnapshot,
@@ -11,6 +12,10 @@ import {
   createText,
   deleteSelectionCommand,
   getClipboardText,
+  getClipboardHtml,
+  parseClipboardData,
+  DEFAULT_CLIPBOARD_PARSERS,
+  pasteCommand,
   recordHistory,
   redoHistory,
   undoHistory,
@@ -79,7 +84,9 @@ describe("plain clipboard cut history", () => {
           : input.selection;
         const original = structuredClone(input.document);
         const copied = getClipboardText(input.document, selection);
+        const html = getClipboardHtml(input.document, selection);
         expect(copied).toBe(input.text);
+        expect(html).toBeDefined();
         const result = deleteSelectionCommand.execute({
           context: { document: input.document, selection },
         });
@@ -101,6 +108,36 @@ describe("plain clipboard cut history", () => {
         expect(redone.document).toEqual(after);
         expect(redone.selection).toEqual(result.selection);
         expect(getClipboardText(undone.document, undone.selection!)).toBe(copied);
+        expect(getClipboardHtml(undone.document, undone.selection!)).toBe(html);
+        const context = { document: after, selection: result.selection! };
+        const formats: Record<string, string> = {
+          "text/plain": copied!,
+          "text/html": html!,
+        };
+        const fragment = parseClipboardData(
+          {
+            types: Object.keys(formats),
+            getData: (mime) => formats[mime] ?? "",
+          },
+          DEFAULT_CLIPBOARD_PARSERS,
+          (candidate) =>
+            canExecutePasteCommand({ context, payload: { fragment: candidate } }),
+        );
+        expect(fragment?.mimeType).toBe(
+          kind === "paragraphs" ? "text/html" : "text/plain",
+        );
+        const pasted = pasteCommand.execute({ context, payload: { fragment } });
+        expect(pasted.ok).toBe(true);
+        const pastedDocument = applyTransaction(after, pasted.transaction!);
+        expect(validateDocument(pastedDocument).valid).toBe(true);
+        const pastedHistory = recordHistory({
+          history,
+          transaction: pasted.transaction!,
+          before: createHistorySnapshot(after, result.selection),
+          after: createHistorySnapshot(pastedDocument, pasted.selection),
+        });
+        expect(pastedHistory.undoStack).toHaveLength(2);
+        expect(undoHistory(pastedHistory)?.document).toEqual(after);
         expect(input.document).toEqual(original);
       },
     );
