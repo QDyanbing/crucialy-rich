@@ -244,7 +244,7 @@ test("copies styled model text as HTML and pastes it back with formatting", asyn
   await expect(editor.locator("strong")).toHaveText("加粗文本");
   await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
-  await page.screenshot({ path: "/tmp/crucialy-rich-clipboard-desktop.png" });
+  await page.screenshot({ path: test.info().outputPath("clipboard-desktop.png") });
 });
 
 test("switches HTML clipboard back to plain without editing the document", async ({
@@ -279,5 +279,79 @@ test("keeps the Chinese clipboard format control usable on mobile", async ({
   const bounds = (await control.boundingBox())!;
   expect(bounds.x).toBeGreaterThanOrEqual(0);
   expect(bounds.x + bounds.width).toBeLessThanOrEqual(390);
-  await page.screenshot({ path: "/tmp/crucialy-rich-clipboard-mobile.png" });
+  await page.screenshot({ path: test.info().outputPath("clipboard-mobile.png") });
+});
+
+for (const backward of [false, true]) {
+  test(`cuts HTML marks and restores the original range (backward: ${backward})`, async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await page.getByLabel("模型示例").selectOption("marks");
+    await page.getByLabel("复制格式").selectOption("html");
+    const json = page.getByLabel("文档 JSON", { exact: true });
+    const before = JSON.parse((await json.textContent())!);
+    await selectText(page, "[0,1]", backward ? 4 : 0, "[0,1]", backward ? 0 : 4);
+    const cut = await dispatchClipboard(page, "cut", "已渲染文档", true);
+    expect(cut.html).toBe("<p><strong>加粗文本</strong></p>");
+    expect(cut.types).toEqual(["text/plain", "text/html"]);
+    await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+    const deleted = JSON.parse((await json.textContent())!);
+    await page.getByRole("button", { name: "撤销", exact: true }).click();
+    await expect
+      .poll(async () => JSON.parse((await json.textContent())!))
+      .toEqual(before);
+    await expect(page.getByLabel("锚点偏移")).toHaveValue(backward ? "4" : "0");
+    await expect(page.getByLabel("焦点偏移")).toHaveValue(backward ? "0" : "4");
+    await page.getByRole("button", { name: "重做", exact: true }).click();
+    await expect
+      .poll(async () => JSON.parse((await json.textContent())!))
+      .toEqual(deleted);
+    await page.keyboard.insertText("续");
+    await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 2');
+    await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+  });
+}
+
+test("falls back to plain copy for cross-cell ranges in HTML mode", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("tables");
+  await page.getByLabel("复制格式").selectOption("html");
+  await selectText(page, "[0,0,0,0,0]", 1, "[0,0,1,0,0]", 1);
+  const copied = await dispatchClipboard(page, "copy", "已渲染文档", true);
+  expect(copied.text).toBe("名\n同一单元格第二段\t角");
+  expect(copied.html).toBe("");
+  expect(copied.types).toEqual(["text/plain"]);
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+});
+
+test("does not delete model text when the browser rejects the HTML clipboard write", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("复制格式").selectOption("html");
+  const json = page.getByLabel("文档 JSON", { exact: true });
+  const before = await json.textContent();
+  await selectText(page, "[0,0]", 0, "[0,0]", 3);
+  const prevented = await page.getByLabel("已渲染文档").evaluate((editor) => {
+    const clipboardData = new DataTransfer();
+    Object.defineProperty(clipboardData, "setData", {
+      value: (mime: string, value: string) => {
+        if (mime === "text/html") throw new DOMException("Clipboard rejected HTML.");
+        DataTransfer.prototype.setData.call(clipboardData, mime, value);
+      },
+    });
+    const event = new ClipboardEvent("cut", {
+      clipboardData,
+      bubbles: true,
+      cancelable: true,
+    });
+    editor.dispatchEvent(event);
+    return event.defaultPrevented;
+  });
+  expect(prevented).toBe(true);
+  await expect(json).toHaveText(before!);
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
 });
