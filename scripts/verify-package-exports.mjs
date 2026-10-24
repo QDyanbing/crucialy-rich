@@ -15,6 +15,7 @@ const publicPackages = [
       "DEFAULT_CLIPBOARD_PARSERS",
       "getAdjacentCellSelection",
       "getClipboardText",
+      "getClipboardHtml",
     ],
   },
   {
@@ -255,6 +256,41 @@ function verifyClipboardText(core) {
   assert.deepEqual(core.applyTransaction(after, pasted.transaction), document);
 }
 
+function verifyClipboardHtml(core) {
+  const document = core.createDocument([
+    core.createParagraph([
+      core.createText("rich<&", {
+        bold: true,
+        code: true,
+        italic: true,
+        textColor: "#123456",
+        link: {
+          href: "https://example.com/",
+          target: "_blank",
+          rel: "noopener noreferrer",
+        },
+      }),
+    ]),
+  ]);
+  const selection = {
+    anchor: { path: [0, 0], offset: 0 },
+    focus: { path: [0, 0], offset: 6 },
+  };
+  const html = core.getClipboardHtml(document, selection);
+  assert.ok(html.includes("<code>rich&lt;&amp;</code>"));
+  assert.equal(html.includes("data-crucialy"), false);
+  assert.deepEqual(core.parseHtml(html).blocks, document.children);
+  assert.equal(core.getClipboardText(document, selection), "rich<&");
+  const table = core.createTable(1, 2);
+  assert.equal(
+    core.getClipboardHtml(core.createDocument([table]), {
+      anchor: { path: [0, 0, 0, 0, 0], offset: 0 },
+      focus: { path: [0, 0, 1, 0, 0], offset: 0 },
+    }),
+    undefined,
+  );
+}
+
 function verifyHistoryMergePolicy(core) {
   const initial = core.createDocument([
     core.createParagraph([core.createText("abcd")]),
@@ -391,6 +427,7 @@ for (const packageConfig of publicPackages) {
     verifyCellNavigation(runtime);
     verifyHistoryMergePolicy(runtime);
     verifyClipboardText(runtime);
+    verifyClipboardHtml(runtime);
     assert.ok(declarations.includes("CellNavigationDirection"));
     assert.ok(declarations.includes("HistoryMergePolicy"));
     assert.ok(declarations.includes("mergePolicy?: HistoryMergePolicy"));
@@ -400,6 +437,7 @@ for (const packageConfig of publicPackages) {
     assert.ok(declarations.includes('"onCopy"'));
     assert.ok(declarations.includes('"onCut"'));
     assert.ok(declarations.includes('"deleteByCut"'));
+    assert.ok(declarations.includes('clipboardFormat?: "plain" | "html"'));
   }
 
   process.stdout.write(`Verified ${manifest.name}@${manifest.version}\n`);
