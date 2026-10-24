@@ -195,6 +195,11 @@ h3 {
   margin: 0;
 }
 
+.clipboard-format-control {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 .composition-status {
   color: #435149;
   font-size: 0.82rem;

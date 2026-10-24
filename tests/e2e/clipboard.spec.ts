@@ -30,21 +30,26 @@ async function dispatchClipboard(
   page: Page,
   type: "copy" | "cut",
   label = "已渲染文档",
+  includeHtml = false,
 ) {
-  return page.getByLabel(label).evaluate((editor, eventType) => {
-    const clipboardData = new DataTransfer();
-    const event = new ClipboardEvent(eventType, {
-      bubbles: true,
-      cancelable: true,
-      clipboardData,
-    });
-    editor.dispatchEvent(event);
-    return {
-      prevented: event.defaultPrevented,
-      text: clipboardData.getData("text/plain"),
-      types: Array.from(clipboardData.types),
-    };
-  }, type);
+  return page.getByLabel(label).evaluate(
+    (editor, options) => {
+      const clipboardData = new DataTransfer();
+      const event = new ClipboardEvent(options.type, {
+        bubbles: true,
+        cancelable: true,
+        clipboardData,
+      });
+      editor.dispatchEvent(event);
+      return {
+        prevented: event.defaultPrevented,
+        text: clipboardData.getData("text/plain"),
+        types: Array.from(clipboardData.types),
+        ...(options.includeHtml ? { html: clipboardData.getData("text/html") } : {}),
+      };
+    },
+    { type, includeHtml },
+  );
 }
 
 test("copies a backward model selection without changing history", async ({ page }) => {
@@ -209,4 +214,70 @@ test("round trips native clipboard shortcuts through copy cut and paste", async 
     .toEqual(initial);
   await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 2');
   await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
+test("copies styled model text as HTML and pastes it back with formatting", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("marks");
+  await page.getByLabel("复制格式").selectOption("html");
+  await selectText(page, "[0,1]", 0, "[0,1]", 4);
+  const copied = await dispatchClipboard(page, "copy", "已渲染文档", true);
+  expect(copied.text).toBe("加粗文本");
+  expect(copied.types).toEqual(["text/plain", "text/html"]);
+  expect(copied.html).toBe("<p><strong>加粗文本</strong></p>");
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+  await page.getByLabel("模型示例").selectOption("regular");
+  const editor = page.getByLabel("已渲染文档");
+  const length = (await editor.locator('[data-crucialy-path="[0,0]"]').textContent())!
+    .length;
+  await selectText(page, "[0,0]", 0, "[0,0]", length);
+  await editor.evaluate((element, data) => {
+    const clipboardData = new DataTransfer();
+    clipboardData.setData("text/plain", data.text);
+    clipboardData.setData("text/html", data.html!);
+    element.dispatchEvent(
+      new ClipboardEvent("paste", { bubbles: true, cancelable: true, clipboardData }),
+    );
+  }, copied);
+  await expect(editor.locator("strong")).toHaveText("加粗文本");
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+  await page.screenshot({ path: "/tmp/crucialy-rich-clipboard-desktop.png" });
+});
+
+test("switches HTML clipboard back to plain without editing the document", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const json = page.getByLabel("文档 JSON", { exact: true });
+  const before = await json.textContent();
+  await page.getByLabel("复制格式").selectOption("html");
+  await selectText(page, "[0,0]", 0, "[0,0]", 3);
+  expect((await dispatchClipboard(page, "copy", "已渲染文档", true)).html).toContain(
+    "你好，",
+  );
+  await page.getByLabel("复制格式").selectOption("plain");
+  await selectText(page, "[0,0]", 0, "[0,0]", 3);
+  const plain = await dispatchClipboard(page, "copy", "已渲染文档", true);
+  expect(plain.types).toEqual(["text/plain"]);
+  expect(plain.html).toBe("");
+  await expect(json).toHaveText(before!);
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+});
+
+test("keeps the Chinese clipboard format control usable on mobile", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  const control = page.getByLabel("复制格式");
+  await expect(control).toHaveValue("plain");
+  await control.selectOption("html");
+  await expect(control).toHaveValue("html");
+  const bounds = (await control.boundingBox())!;
+  expect(bounds.x).toBeGreaterThanOrEqual(0);
+  expect(bounds.x + bounds.width).toBeLessThanOrEqual(390);
+  await page.screenshot({ path: "/tmp/crucialy-rich-clipboard-mobile.png" });
 });

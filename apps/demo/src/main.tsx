@@ -1712,7 +1712,7 @@ function DemoApp() {
                 ? `组合中${compositionState.data ? `（${compositionState.data}）` : ""}`
                 : "空闲"}
             </output>
-            <label>
+            <label className="clipboard-format-control">
               <span>复制格式</span>
               <select
                 aria-label="复制格式"
