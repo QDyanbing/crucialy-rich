@@ -70,10 +70,14 @@ function select(
     );
 }
 
-function clipboard(container: HTMLElement, type: "copy" | "cut", fail = false) {
+function clipboard(
+  container: HTMLElement,
+  type: "copy" | "cut",
+  fail: boolean | "text/html" = false,
+) {
   const data: Record<string, string> = {};
   const setData = vi.fn((mime: string, text: string) => {
-    if (fail) throw new Error("Clipboard is unavailable.");
+    if (fail === true || fail === mime) throw new Error("Clipboard is unavailable.");
     data[mime] = text;
   });
   const clearData = vi.fn(() => {
@@ -347,6 +351,61 @@ describe("RichTextEditor plain clipboard cut", () => {
 });
 
 describe("RichTextEditor opt-in HTML clipboard", () => {
+  it.each(["copy", "cut"] as const)(
+    "keeps the model intact when the HTML write fails during %s",
+    (type) => {
+      const host = renderEditor(undefined, { clipboardFormat: "html" });
+      select(host.container);
+      const result = clipboard(host.container, type, "text/html");
+      expect(result.event.defaultPrevented).toBe(true);
+      expect(result.data).toEqual({ "text/plain": "甲乙" });
+      expect(host.container.textContent).toBe("前甲乙后");
+      expect(host.onChange).not.toHaveBeenCalled();
+      expect(host.onTransaction).not.toHaveBeenCalled();
+    },
+  );
+
+  it("falls back to complete plain text for cross-cell copy and still refuses cut", () => {
+    const table = createTable(1, 2);
+    for (const cell of table.children[0]!.children)
+      cell.children = [createParagraph([createText("文字")])];
+    const host = renderEditor(createDocument([table]), { clipboardFormat: "html" });
+    select(host.container, {
+      anchor: { path: [0, 0, 0, 0, 0], offset: 1 },
+      focus: { path: [0, 0, 1, 0, 0], offset: 1 },
+    });
+    expect(clipboard(host.container, "copy").data).toEqual({ "text/plain": "字\t文" });
+    expect(clipboard(host.container, "cut").setData).not.toHaveBeenCalled();
+    expect(host.onTransaction).not.toHaveBeenCalled();
+  });
+
+  it("respects a missing delete command before exporting rich clipboard data", () => {
+    const host = renderEditor(undefined, {
+      clipboardFormat: "html",
+      commandRegistry: createCommandRegistry([]),
+    });
+    select(host.container);
+    expect(clipboard(host.container, "cut").setData).not.toHaveBeenCalled();
+    expect(host.container.textContent).toBe("前甲乙后");
+  });
+
+  it("lets host cancellation bypass HTML export", () => {
+    const onCopy = vi.fn((event) => event.preventDefault());
+    const host = renderEditor(undefined, { clipboardFormat: "html", onCopy });
+    select(host.container);
+    expect(clipboard(host.container, "copy").setData).not.toHaveBeenCalled();
+    expect(onCopy).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps explicit plain mode compatible even when the selection has marks", () => {
+    const host = renderEditor(
+      createDocument([createParagraph([createText("前甲乙后", { code: true })])]),
+      { clipboardFormat: "plain" },
+    );
+    select(host.container);
+    expect(clipboard(host.container, "copy").data).toEqual({ "text/plain": "甲乙" });
+  });
+
   it.each([true, false])(
     "writes both formats without a transaction when editable is %s",
     (contentEditable) => {
