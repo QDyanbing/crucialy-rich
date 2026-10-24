@@ -47,7 +47,7 @@
 - [工具栏](./features/toolbar.md)
 - [斜杠菜单](./features/slash-menu.md)
 - [粘贴](./features/paste.md)
-- [纯文本复制与剪切](./features/copy-cut.md)
+- [复制与剪切](./features/copy-cut.md)
 - [中文输入法](./features/ime.md)
 - [编辑快捷键](./features/shortcuts.md)
 - [Markdown 输入规则](./features/input-rules.md)

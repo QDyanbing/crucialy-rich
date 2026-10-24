@@ -8,6 +8,8 @@
 
 ### 新增
 
+- 新增 Core `getClipboardHtml`，按完整文字选区导出安全 HTML，保留文字 marks、链接及文本块；单列表项/cell 内容按段落输出，跨结构范围不生成部分 HTML。
+- React 新增可选 `clipboardFormat="html"`，兼容默认纯文本，同时提供双格式复制/剪切、失败不删除与目标粘贴降级；Demo 增加中文格式选择，补齐 Core、React、Chromium、桌面/手机视口和构建包验证。
 - 新增 Core `getClipboardText`，从合法非折叠模型选区读取纯文本，保留块换行、列表文字及表格分隔；不输出 HTML、marks 或图片数据。
 - React 新增 `onCopy` / `onCut` 宿主接管与原生事件处理，剪切复用删除命令并输出独立 `deleteByCut` 事务；补齐只读、组合期、Registry、剪贴板失败、结构边界、撤销重做及原生快捷键回归。
 - 修复模型选区回写 DOM 丢失反向选择方向的问题，保留按序 DOM Range 查询，并验证剪切 History 恢复后的继续输入。

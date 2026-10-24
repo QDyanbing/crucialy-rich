@@ -18,7 +18,7 @@
 
 History 新增可选 `mergePolicy: "adjacent"`：连续 typing 保持合并，光标跳变、表格换格、选区替换及撤销后的新输入可独立撤销。Demo 已启用；Core 默认仍保留相同非空 batch 的既有合并规则，策略由宿主选择，具体边界见 [History 文档](./docs/features/history.md)。
 
-原生复制和剪切已接入模型：复制输出纯文本，支持只读、跨块、列表和表格分隔；剪切仅处理已有删除命令支持的范围，并作为独立 History 记录。写入剪贴板失败、命令不可用或跨结构剪切时不删除内容；宿主可通过 `onCopy` / `onCut` 接管。选区回写也已修复反向选择方向，详见[复制与剪切](./docs/features/copy-cut.md)。
+原生复制和剪切已接入模型：默认输出纯文本，可通过 `clipboardFormat="html"` 同时输出安全文字格式与文本块，支持只读、正文、单列表项和同 cell 段落；不支持完整 HTML 的范围回退纯文本。剪切仅处理已有删除命令支持的范围，并作为独立 History 记录；写入任一所需格式失败、命令不可用或跨结构剪切时不删除内容。宿主可通过 `onCopy` / `onCut` 接管，Demo 提供中文格式选择，详见[复制与剪切](./docs/features/copy-cut.md)。
 
 粘贴也复用范围删除计划：纯文本、HTML、Markdown 支持连续顶层文本块替换，纯文本支持同 cell 跨段落替换，并保留一次撤销/重做与光标恢复。表格二维 TSV 填充只在折叠光标下执行；选中 cell 内文字后粘贴 TSV 只替换选区，不覆盖邻格。
 
@@ -194,7 +194,7 @@ pnpm test:e2e
 - [斜杠菜单](./docs/features/slash-menu.md)
 - [图片](./docs/features/image.md)
 - [粘贴](./docs/features/paste.md)
-- [纯文本复制与剪切](./docs/features/copy-cut.md)
+- [复制与剪切](./docs/features/copy-cut.md)
 - [基础表格](./docs/features/table.md)
 - [提交规范](./docs/development/commit-convention.md)
 - [测试策略](./docs/qa/test-strategy.md)
