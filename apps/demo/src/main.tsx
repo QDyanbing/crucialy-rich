@@ -869,6 +869,7 @@ function DemoApp() {
     "https://images.unsplash.com/photo-1497250681960-ef046c08a56e",
   );
   const [pasteMimeType, setPasteMimeType] = useState<ClipboardMimeType>("text/plain");
+  const [clipboardFormat, setClipboardFormat] = useState<"plain" | "html">("plain");
   const [pasteValue, setPasteValue] = useState(PASTE_EXAMPLES["text/plain"]);
   const [blockSelection, setBlockSelection] = useState<BlockSelection>();
   const [cellSelection, setCellSelection] = useState<CellSelection>();
@@ -1711,6 +1712,19 @@ function DemoApp() {
                 ? `组合中${compositionState.data ? `（${compositionState.data}）` : ""}`
                 : "空闲"}
             </output>
+            <label>
+              <span>复制格式</span>
+              <select
+                aria-label="复制格式"
+                value={clipboardFormat}
+                onChange={(event) =>
+                  setClipboardFormat(event.target.value === "html" ? "html" : "plain")
+                }
+              >
+                <option value="plain">纯文本</option>
+                <option value="html">保留文字格式</option>
+              </select>
+            </label>
           </div>
           {showFixedToolbar ? (
             <FixedToolbar
@@ -1885,6 +1899,7 @@ function DemoApp() {
             {...(blockSelection ? { blockSelection } : {})}
             {...(cellSelection ? { cellSelection } : {})}
             className="rendered-document"
+            clipboardFormat={clipboardFormat}
             contentEditable
             label="已渲染文档"
             onCompositionStateChange={setCompositionState}
