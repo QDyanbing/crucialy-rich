@@ -7,19 +7,24 @@ import {
 import { renderDocument, renderNodeToHtml, type RenderedElementNode } from "../render";
 import { getNodeAtPath, type RangeSelection } from "../selection";
 import { getClipboardTextBlocks } from "./selection-blocks";
+import { getClipboardList } from "./selection-list";
+
+const clipboardAttributes: Partial<
+  Record<RenderedElementNode["tagName"], readonly string[]>
+> = {
+  a: ["href", "target", "rel"],
+  ol: ["start"],
+  input: ["type", "checked"],
+};
 
 function toClipboardNode(
   node: RenderedElementNode,
   document: DocumentNode,
 ): RenderedElementNode {
-  const attributes =
-    node.tagName === "a"
-      ? Object.fromEntries(
-          Object.entries(node.attributes).filter(
-            ([name]) => name === "href" || name === "target" || name === "rel",
-          ),
-        )
-      : {};
+  const allowed = clipboardAttributes[node.tagName] ?? [];
+  const attributes = Object.fromEntries(
+    Object.entries(node.attributes).filter(([name]) => allowed.includes(name)),
+  );
   const result: RenderedElementNode = {
     ...node,
     attributes,
@@ -59,7 +64,8 @@ export function getClipboardHtml(
   document: DocumentNode,
   selection: RangeSelection,
 ): string | undefined {
-  const blocks = getClipboardTextBlocks(document, selection);
+  const list = getClipboardList(document, selection);
+  const blocks = list ? [list] : getClipboardTextBlocks(document, selection);
   if (!blocks) return undefined;
   const fragment = normalizeDocument(createDocument(blocks));
   const rendered = renderDocument(fragment);
