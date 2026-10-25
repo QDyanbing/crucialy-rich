@@ -2,6 +2,7 @@ import {
   createDocument,
   isListItemNode,
   isListNode,
+  isTaskItemNode,
   normalizeDocument,
   type DocumentNode,
   type ListNode,
@@ -26,7 +27,7 @@ export function getClipboardList(
   const list = getNodeAtPath(document, path);
   const start = range.anchor.path.at(-2)!;
   const end = range.focus.path.at(-2)!;
-  if (!isListNode(list) || list.type === "taskList" || start >= end) return undefined;
+  if (!isListNode(list) || start >= end) return undefined;
   let firstNumber: number | undefined;
   if (list.type === "orderedList") {
     firstNumber = (list.start ?? 1) + start;
@@ -34,7 +35,12 @@ export function getClipboardList(
       return undefined;
   }
   const entries = list.children.slice(start, end + 1);
-  if (!entries.every(isListItemNode)) return undefined;
+  if (
+    !entries.every((entry) =>
+      list.type === "taskList" ? isTaskItemNode(entry) : isListItemNode(entry),
+    )
+  )
+    return undefined;
   const children = entries.map((entry, index) => {
     const { nested, ...item } = entry;
     const children = clipClipboardText(entry.children, [...path, start + index], range);
