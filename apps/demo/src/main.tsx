@@ -133,6 +133,7 @@ type ModelExampleId =
   | "code-divider"
   | "lists"
   | "advanced-lists"
+  | "list-clipboard"
   | "marks"
   | "links"
   | "images"
@@ -365,6 +366,47 @@ const modelExamples: ModelExample[] = [
     ]),
   },
   {
+    id: "list-clipboard",
+    label: "列表复制",
+    selection: {
+      anchor: { path: [0, 1, 0], offset: 1 },
+      focus: { path: [0, 2, 0], offset: 1 },
+    },
+    value: createDocument([
+      createBulletList([
+        createListItem([createText("未选前项")]),
+        createListItem(
+          [createText("前甲", { bold: true })],
+          createOrderedList(
+            [
+              createListItem([createText("子项甲")]),
+              createListItem([createText("子项乙")]),
+            ],
+            3,
+          ),
+        ),
+        createListItem(
+          [createText("乙后", { italic: true })],
+          createBulletList([createListItem([createText("未选后代")])]),
+        ),
+      ]),
+      createOrderedList(
+        [
+          createListItem([createText("未选编号项")]),
+          createListItem([createText("编号甲")]),
+          createListItem([createText("编号乙")]),
+        ],
+        5,
+      ),
+      createTaskList([
+        createTaskItem([createText("未选任务")]),
+        createTaskItem([createText("完成任务")], true),
+        createTaskItem([createText("待办任务")]),
+      ]),
+      createParagraph([createText("列表后保留正文。")]),
+    ]),
+  },
+  {
     id: "marks",
     label: "文字标记",
     selection: {
@@ -488,7 +530,7 @@ const modelExampleGroups: ModelExampleGroup[] = [
     label: "块结构",
   },
   {
-    exampleIds: ["lists", "advanced-lists", "tables"],
+    exampleIds: ["lists", "advanced-lists", "list-clipboard", "tables"],
     label: "复杂结构",
   },
   {
