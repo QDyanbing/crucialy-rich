@@ -2,6 +2,12 @@
 
 import {
   createDocument,
+  createBulletList,
+  createListItem,
+  createOrderedList,
+  createTaskItem,
+  createTaskList,
+  parseHtml,
   createCommandRegistry,
   createCommandSuccess,
   createTable,
@@ -88,6 +94,85 @@ function clipboard(
   act(() => container.firstElementChild!.dispatchEvent(event));
   return { event, data, setData, clearData };
 }
+
+describe("RichTextEditor sibling list clipboard", () => {
+  const range: RangeSelection = {
+    anchor: { path: [0, 1, 0], offset: 1 },
+    focus: { path: [0, 2, 0], offset: 1 },
+  };
+  const items = ["未选", "甲乙", "丙丁"].map((text) =>
+    createListItem([createText(text)]),
+  );
+
+  it.each(["bullet", "ordered", "task"])(
+    "copies %s structure without editing",
+    (type) => {
+      const list =
+        type === "ordered"
+          ? createOrderedList(items, 7)
+          : type === "task"
+            ? createTaskList(
+                items.map((item, index) => createTaskItem(item.children, index === 1)),
+              )
+            : createBulletList(items);
+      const host = renderEditor(createDocument([list]), { clipboardFormat: "html" });
+      select(host.container, range);
+      const copied = clipboard(host.container, "copy");
+      const blocks = parseHtml(copied.data["text/html"]!)?.blocks;
+      expect(copied.data["text/plain"]).toBe("乙\n丙");
+      expect(blocks?.[0]?.type).toBe(list.type);
+      expect(copied.data["text/html"]).not.toMatch(/未选|data-|aria-/);
+      if (type === "ordered") expect(copied.data["text/html"]).toContain('start="8"');
+      if (type === "task")
+        expect(blocks).toEqual([
+          createTaskList([
+            createTaskItem([createText("乙")], true),
+            createTaskItem([createText("丙")]),
+          ]),
+        ]);
+      expect(host.onChange).not.toHaveBeenCalled();
+      expect(host.onSelectionChange).not.toHaveBeenCalled();
+      expect(host.onTransaction).not.toHaveBeenCalled();
+    },
+  );
+
+  it("keeps default plain copy unchanged for the same sibling range", () => {
+    const host = renderEditor(createDocument([createBulletList(items)]));
+    select(host.container, range);
+    expect(clipboard(host.container, "copy").data).toEqual({ "text/plain": "乙\n丙" });
+  });
+
+  it("still refuses cross-item cut before writing either format", () => {
+    const host = renderEditor(createDocument([createBulletList(items)]), {
+      clipboardFormat: "html",
+    });
+    select(host.container, range);
+    const cut = clipboard(host.container, "cut");
+    expect(cut.event.defaultPrevented).toBe(true);
+    expect(cut.setData).not.toHaveBeenCalled();
+    expect(host.container.textContent).toBe("未选甲乙丙丁");
+    expect(host.onTransaction).not.toHaveBeenCalled();
+  });
+
+  it("copies the complete plain range when endpoints belong to different list levels", () => {
+    const host = renderEditor(
+      createDocument([
+        createBulletList([
+          createListItem(
+            [createText("父")],
+            createBulletList([createListItem([createText("子")])]),
+          ),
+        ]),
+      ]),
+      { clipboardFormat: "html" },
+    );
+    select(host.container, {
+      anchor: { path: [0, 0, 0], offset: 0 },
+      focus: { path: [0, 0, 1, 0, 0], offset: 1 },
+    });
+    expect(clipboard(host.container, "copy").data).toEqual({ "text/plain": "父\n子" });
+  });
+});
 
 describe("RichTextEditor plain clipboard copy", () => {
   it("supports readonly controlled values without using a command registry", () => {
