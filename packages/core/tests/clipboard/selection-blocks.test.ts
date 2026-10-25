@@ -6,9 +6,33 @@ import {
   createQuote,
   createText,
 } from "../../src";
-import { getClipboardTextBlocks } from "../../src/clipboard/selection-blocks";
+import {
+  clipClipboardText,
+  getClipboardTextBlocks,
+} from "../../src/clipboard/selection-blocks";
 
 describe("clipboard text block clipping", () => {
+  it("keeps an empty boundary container without copying neighboring text", () => {
+    expect(
+      clipClipboardText([createText("未选文字", { bold: true })], [0, 0], {
+        anchor: { path: [0, 0, 0], offset: 4 },
+        focus: { path: [0, 1, 0], offset: 1 },
+      }),
+    ).toEqual([createText()]);
+  });
+
+  it("clips multiple styled children with full nested model paths", () => {
+    const nodes = [
+      createText("前甲", { bold: true }),
+      createText("乙后", { italic: true }),
+    ];
+    expect(
+      clipClipboardText(nodes, [0, 0, 2, 1], {
+        anchor: { path: [0, 0, 2, 1, 0], offset: 1 },
+        focus: { path: [0, 0, 2, 1, 1], offset: 1 },
+      }),
+    ).toEqual([createText("甲", { bold: true }), createText("乙", { italic: true })]);
+  });
   it.each([false, true])(
     "clips only selected text and preserves marks (backward: %s)",
     (backward) => {

@@ -6,6 +6,7 @@ import {
   isTextBlockNode,
   type DocumentNode,
   type TextBlockNode,
+  type TextNode,
 } from "../model";
 import {
   comparePoint,
@@ -24,12 +25,12 @@ function samePath(left: Path, right: Path) {
   );
 }
 
-function clipBlock(
-  block: TextBlockNode,
+export function clipClipboardText(
+  nodes: TextNode[],
   path: Path,
   range: RangeSelection,
-): TextBlockNode {
-  const children = block.children.flatMap((node, index) => {
+): TextNode[] {
+  const children = nodes.flatMap((node, index) => {
     const point = { path: [...path, index], offset: 0 };
     const start = samePath(point.path, range.anchor.path)
       ? range.anchor.offset
@@ -43,7 +44,15 @@ function clipBlock(
         : node.text.length;
     return start < end ? [createText(node.text.slice(start, end), node.marks)] : [];
   });
-  return { ...block, children: children.length ? children : [createText()] };
+  return children.length ? children : [createText()];
+}
+
+function clipBlock(
+  block: TextBlockNode,
+  path: Path,
+  range: RangeSelection,
+): TextBlockNode {
+  return { ...block, children: clipClipboardText(block.children, path, range) };
 }
 
 export function getClipboardTextBlocks(
