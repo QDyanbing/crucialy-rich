@@ -8,6 +8,8 @@
 
 ### 新增
 
+- HTML 复制新增同一列表同一层级的跨项片段，保留 bullet/ordered/task 结构、首尾文字范围、调整后的起始编号和选区内子列表；末项之后的后代与未选祖先不复制。
+- 新增列表剪贴板的 Core、React、History、Chromium 与构建产物回归，以及中文“列表复制”样例；编号先校验再运算，非法或溢出、跨不同列表或层级回退纯文本，不扩大跨项剪切和粘贴目标范围。
 - 新增 Core `getClipboardHtml`，按完整文字选区导出安全 HTML，保留文字 marks、链接及文本块；单列表项/cell 内容按段落输出，跨结构范围不生成部分 HTML。
 - React 新增可选 `clipboardFormat="html"`，兼容默认纯文本，同时提供双格式复制/剪切、失败不删除与目标粘贴降级；Demo 增加中文格式选择，补齐 Core、React、Chromium、桌面/手机视口和构建包验证。
 - 新增 Core `getClipboardText`，从合法非折叠模型选区读取纯文本，保留块换行、列表文字及表格分隔；不输出 HTML、marks 或图片数据。

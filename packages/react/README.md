@@ -63,6 +63,7 @@ export function Demo() {
 - 复制／剪切：复制模型纯文本（含只读），剪切复用 Registry 的 `deleteSelection` 并输出独立 `deleteByCut` 事务；`onCopy` / `onCut` 可取消事件并由宿主接管，写入失败和不支持的范围不删除。详见[复制与剪切](../../docs/features/copy-cut.md)。
 - `label`、`className` 和基础 DOM 事件属性。
 - `clipboardFormat`：默认 `plain`；设为 `html` 时同时输出纯文本和支持范围内的 HTML，未支持的跨结构选区回退完整纯文本，HTML 写入失败不提交剪切删除。
+- 列表复制：HTML 模式可保留同一列表同一层级跨项选区的结构、编号和任务状态，嵌套内容只复制选区内部；单项片段、默认纯文本、跨项剪切拒绝及粘贴目标能力保持原有规则。
 
 Toolbar 当前支持：
 
