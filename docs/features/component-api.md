@@ -100,6 +100,7 @@ ref 命令事件的 `inputType` 为 `command`。受控模式不会自行替换 `
 - 普通文本输入会通过 `insertTextCommand` 创建 transaction。
 - 非折叠 selection 下的 Backspace/Delete 会通过 `deleteSelectionCommand` 创建 transaction。
 - 原生复制输出模型选区的纯文本；剪切复用 `deleteSelection` 并输出独立 `deleteByCut` transaction，写入失败、禁用命令及不支持的范围不删除。只读支持复制，详见[复制与剪切](./copy-cut.md)。
+- `clipboardFormat="html"` 还可复制同一列表同一层级的跨项结构、编号和任务状态；单项片段仍为 paragraph，跨项剪切和列表内富格式粘贴能力不变，不支持的结构范围回退完整纯文本。
 - Enter 会通过 `splitBlockCommand` 创建 transaction；受支持的非折叠 selection 会先删除再执行分段规则。
 - 段首 Backspace 会通过 `mergeBlockCommand` 创建 transaction。
 - 表格单元格内复用相同输入链路；Enter 只在当前 cell 内新增 paragraph，Backspace/Delete 不跨 cell 合并。
