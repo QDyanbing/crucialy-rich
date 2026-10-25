@@ -2,7 +2,7 @@
 
 ## 执行信息
 
-- 日期：2026-10-24
+- 日期：2026-10-25
 - 版本：`0.1.0`
 - 分支：`master`
 - 命令：`pnpm check:all`
@@ -14,18 +14,19 @@
 | Prettier   | 通过 | 全仓文件格式一致                                       |
 | ESLint     | 通过 | 0 warning、0 error                                     |
 | TypeScript | 通过 | 根工程与 core/react/demo 包级检查全部通过              |
-| Vitest     | 通过 | 209 个测试文件，1534 项测试                            |
+| Vitest     | 通过 | 215 个测试文件，1578 项测试                            |
 | Core 构建  | 通过 | ESM、source map、类型声明生成成功                      |
 | React 构建 | 通过 | ESM、source map、类型声明生成成功                      |
 | Demo 构建  | 通过 | Vite 生产构建成功                                      |
 | 包产物导入 | 通过 | 导出/声明、Clipboard、CodeBlock 与 Office 产物冒烟通过 |
-| Playwright | 通过 | Chromium 194 项测试                                    |
+| Playwright | 通过 | Chromium 200 项测试                                    |
 
-Demo 主 JS 产物约 505.54 KB，Vite 给出超过 500 KB 的非阻断分包提示；构建退出码为 0，本轮未调整打包策略。
+Demo 主 JS 产物约 506.85 KB，Vite 给出超过 500 KB 的非阻断分包提示；构建退出码为 0，本轮未调整打包策略。
 
 ## 核心路径
 
-- 可选 HTML 导出的范围裁剪、marks/链接安全白名单、代码与链接组合、默认链接下划线隔离、parser 往返及构建包运行时/声明验证通过。React 默认 plain 兼容、HTML 双格式与第二次写入失败不删除通过；新增七条 Chromium 用例覆盖模式切换、复制粘贴、正反向剪切、目标降级和手机控件，桌面/手机截图已检查。仍不导出完整列表或表格结构，不扩大剪切/粘贴目标范围。
+- 同层列表片段的 bullet/ordered/task 结构、正反向首尾裁剪、编号调整与加法前校验、checked、选区内子列表、未选后代/祖先隔离、跨层级拒绝、默认 plain 兼容、复制不入 History 及跨项剪切拒绝通过。新增六条 Chromium 用例与构建包验证复制/粘贴/撤销/重做，任务截图状态正确；不扩大跨项删除或粘贴目标范围。
+- 可选 HTML 导出的范围裁剪、marks/链接安全白名单、代码与链接组合、默认链接下划线隔离、parser 往返及构建包运行时/声明验证通过。React 默认 plain 兼容、HTML 双格式与第二次写入失败不删除通过；此前七条 Chromium 用例覆盖模式切换、复制粘贴、正反向剪切、目标降级和手机控件，桌面/手机截图已检查。仍不导出任意跨层级列表或表格结构，不扩大剪切/粘贴目标范围。
 - 模型纯文本复制、结构分隔与非法边界、剪切 Command/History、React 受控/非受控/只读/宿主/IME/Registry/写入失败/多实例保护，以及公共包类型与剪切粘贴往返均通过。新增九条 Chromium 用例覆盖只读链接、跨块、同 cell、跨 cell 拒绝、原生快捷键和 History；反向选区同步修复后，方向恢复与继续输入均通过。范围与跨平台限制见[复制与剪切验收](./copy-cut.md)。
 - History 可选相邻合并的 19 条 Core 与 4 条 React 测试通过，默认 batch 兼容、合法折叠 Point、缺失/非法/非折叠选区、不同模型 path、redo 分支与空事务均有覆盖。新增五条 Chromium 用例验证表格 Tab、段内/跨段光标跳变、选区替换及撤销后续编的分步撤销、重做与光标恢复；构建包验证两种策略、默认行为、类型声明和 entry 结构不变。
 - 表格相邻 cell 查询、行优先跨行导航、同 cell 正反向范围、非法/跨 cell/跨表边界、独立路径、当前行列尺寸、TSV/Enter 后导航及输入 History 的 Core 验证通过；React 受控/非受控、DOM/ref 同步、cell 高亮、IME/修饰键/宿主/只读保护、列表回归及多实例隔离通过。Chromium 七条导航用例和构建包导出/声明、输入撤销冒烟通过；导航不新增事务或扩表。
@@ -52,7 +53,7 @@ Demo 主 JS 产物约 505.54 KB，Vite 给出超过 500 KB 的非阻断分包提
 - HTML 三层嵌套普通/任务列表、混合类型、marks/链接、深层选区、Command/History、React 与 Chromium 粘贴路径均通过。
 - OrderedList 安全整数起始编号、规范化、渲染、前后段续编、HTML 粘贴、Command/History、React 与 Chromium 路径均通过。
 - 受控、非受控、只读、ref 状态读取和 ref Command 执行测试通过。
-- Demo 的 16 个模型示例按五个验收区域展示，原有示例 ID 和行为保持不变。
+- Demo 的 17 个模型示例按五个验收区域展示，新增中文“列表复制”样例，原有示例 ID 和行为保持不变。
 
 ## 结论
 
