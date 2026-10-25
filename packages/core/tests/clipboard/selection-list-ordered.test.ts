@@ -30,12 +30,12 @@ describe("ordered clipboard list numbering", () => {
     },
   );
 
-  it.each([Number.MAX_SAFE_INTEGER, Infinity, NaN, 1.5])(
+  it.each([Number.MAX_SAFE_INTEGER, Infinity, NaN, 1.5, "5", 5n, Symbol("start")])(
     "rejects unsafe start arithmetic for %s",
     (start) => {
       expect(
         getClipboardList(
-          createDocument([createOrderedList(entries, start)]),
+          createDocument([createOrderedList(entries, start as number)]),
           selection,
         ),
       ).toBeUndefined();

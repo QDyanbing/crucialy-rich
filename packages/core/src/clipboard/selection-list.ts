@@ -30,9 +30,10 @@ export function getClipboardList(
   if (!isListNode(list) || start >= end) return undefined;
   let firstNumber: number | undefined;
   if (list.type === "orderedList") {
-    firstNumber = (list.start ?? 1) + start;
-    if (!Number.isSafeInteger(list.start ?? 1) || !Number.isSafeInteger(firstNumber))
-      return undefined;
+    const originalStart = list.start ?? 1;
+    if (!Number.isSafeInteger(originalStart)) return undefined;
+    firstNumber = originalStart + start;
+    if (!Number.isSafeInteger(firstNumber)) return undefined;
   }
   const entries = list.children.slice(start, end + 1);
   if (
