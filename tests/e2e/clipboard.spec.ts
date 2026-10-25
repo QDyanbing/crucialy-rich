@@ -52,6 +52,25 @@ async function dispatchClipboard(
   );
 }
 
+async function pasteCopiedToRegular(
+  page: Page,
+  copied: { text: string; html?: string },
+) {
+  await page.getByLabel("模型示例").selectOption("regular");
+  const editor = page.getByLabel("已渲染文档");
+  const length = (await editor.locator('[data-crucialy-path="[0,0]"]').textContent())!
+    .length;
+  await selectText(page, "[0,0]", 0, "[0,0]", length);
+  await editor.evaluate((element, data) => {
+    const clipboardData = new DataTransfer();
+    clipboardData.setData("text/plain", data.text);
+    if (data.html) clipboardData.setData("text/html", data.html);
+    element.dispatchEvent(
+      new ClipboardEvent("paste", { bubbles: true, cancelable: true, clipboardData }),
+    );
+  }, copied);
+}
+
 test("copies a backward model selection without changing history", async ({ page }) => {
   await page.goto("/");
   const json = page.getByLabel("文档 JSON", { exact: true });
@@ -68,6 +87,69 @@ test("copies a backward model selection without changing history", async ({ page
   await expect(page.getByLabel("焦点偏移")).toHaveValue("0");
 });
 
+test("keeps copied task states through paste undo and redo", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("list-clipboard");
+  await page.getByLabel("复制格式").selectOption("html");
+  await selectText(page, "[2,1,0]", 0, "[2,2,0]", 4);
+  const copied = await dispatchClipboard(page, "copy", "已渲染文档", true);
+  expect(copied.text).toBe("完成任务\n待办任务");
+  expect(copied.html).not.toMatch(/未选任务|data-|aria-/);
+  await pasteCopiedToRegular(page, copied);
+  const editor = page.getByLabel("已渲染文档");
+  const tasks = editor.locator('input[type="checkbox"]');
+  await expect(tasks).toHaveCount(2);
+  await expect(tasks.nth(0)).toBeChecked();
+  await expect(tasks.nth(1)).not.toBeChecked();
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect(tasks).toHaveCount(0);
+  await page.getByRole("button", { name: "重做", exact: true }).click();
+  await expect(tasks).toHaveCount(2);
+  await expect(tasks.nth(0)).toBeChecked();
+  await expect(tasks.nth(1)).not.toBeChecked();
+  await editor.screenshot({ path: test.info().outputPath("task-list-clipboard.png") });
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
+test("does not cut sibling list items even after successful HTML copy", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("list-clipboard");
+  await page.getByLabel("复制格式").selectOption("html");
+  const json = page.getByLabel("文档 JSON", { exact: true });
+  const before = await json.textContent();
+  await selectText(page, "[0,1,0]", 1, "[0,2,0]", 1);
+  expect((await dispatchClipboard(page, "copy", "已渲染文档", true)).html).toContain(
+    "<ul>",
+  );
+  const cut = await dispatchClipboard(page, "cut", "已渲染文档", true);
+  expect(cut.prevented).toBe(true);
+  expect(cut.types).toEqual([]);
+  expect(cut.html).toBe("");
+  await expect(json).toHaveText(before!);
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+});
+
+test("keeps plain list copy and cross-level HTML fallback complete", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("list-clipboard");
+  await selectText(page, "[0,1,0]", 1, "[0,2,0]", 1);
+  const plain = await dispatchClipboard(page, "copy", "已渲染文档", true);
+  expect(plain.types).toEqual(["text/plain"]);
+  expect(plain.text).toBe("甲\n子项甲\n子项乙\n乙");
+  await page.getByLabel("复制格式").selectOption("html");
+  await selectText(page, "[0,1,0]", 0, "[0,1,1,1,0]", 3);
+  const fallback = await dispatchClipboard(page, "copy", "已渲染文档", true);
+  expect(fallback.types).toEqual(["text/plain"]);
+  expect(fallback.text).toBe("前甲\n子项甲\n子项乙");
+  expect(fallback.html).toBe("");
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+});
+
 test("copies paragraph boundaries as plain newlines", async ({ page }) => {
   await page.goto("/");
   await selectText(page, "[0,0]", 3, "[1,0]", 2);
@@ -77,6 +159,68 @@ test("copies paragraph boundaries as plain newlines", async ({ page }) => {
     types: ["text/plain"],
   });
   await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+});
+
+test("copies sibling bullet items with selected nested lists and pastes their structure", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("list-clipboard");
+  await page.getByLabel("复制格式").selectOption("html");
+  await selectText(page, "[0,1,0]", 1, "[0,2,0]", 1);
+  const copied = await dispatchClipboard(page, "copy", "已渲染文档", true);
+  expect(copied.text).toBe("甲\n子项甲\n子项乙\n乙");
+  expect(copied.html).toContain('<ol start="3">');
+  expect(copied.html).not.toMatch(/未选|data-|aria-/);
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+  await pasteCopiedToRegular(page, copied);
+  const editor = page.getByLabel("已渲染文档");
+  await expect(editor.locator("ul > li")).toHaveCount(2);
+  await expect(editor.locator("ol")).toHaveAttribute("start", "3");
+  await expect(editor.locator("ol > li")).toHaveText(["子项甲", "子项乙"]);
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
+test("copies ordered sibling items with their visible start number", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("list-clipboard");
+  await page.getByLabel("复制格式").selectOption("html");
+  await selectText(page, "[1,1,0]", 0, "[1,2,0]", 3);
+  const copied = await dispatchClipboard(page, "copy", "已渲染文档", true);
+  expect(copied.html).toContain('<ol start="6">');
+  expect(copied.text).toBe("编号甲\n编号乙");
+  await pasteCopiedToRegular(page, copied);
+  await expect(page.getByLabel("已渲染文档").locator("ol")).toHaveAttribute(
+    "start",
+    "6",
+  );
+  await expect(page.getByLabel("已渲染文档").locator("ol > li")).toHaveText([
+    "编号甲",
+    "编号乙",
+  ]);
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
+test("copies nested siblings without including their parent list entry", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("list-clipboard");
+  await page.getByLabel("复制格式").selectOption("html");
+  await selectText(page, "[0,1,1,0,0]", 0, "[0,1,1,1,0]", 3);
+  const copied = await dispatchClipboard(page, "copy", "已渲染文档", true);
+  expect(copied.html).toMatch(/^<ol start="3">/);
+  expect(copied.html).not.toMatch(/前甲|未选|<ul/);
+  expect(copied.text).toBe("子项甲\n子项乙");
+  await pasteCopiedToRegular(page, copied);
+  await expect(page.getByLabel("已渲染文档").locator("ol > li")).toHaveText([
+    "子项甲",
+    "子项乙",
+  ]);
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
 });
 
 test("copies readonly link text without exporting HTML or href", async ({ page }) => {
