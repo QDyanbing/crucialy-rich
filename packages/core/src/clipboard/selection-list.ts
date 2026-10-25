@@ -1,6 +1,5 @@
 import {
   createDocument,
-  isBulletListNode,
   isListItemNode,
   isListNode,
   normalizeDocument,
@@ -27,7 +26,13 @@ export function getClipboardList(
   const list = getNodeAtPath(document, path);
   const start = range.anchor.path.at(-2)!;
   const end = range.focus.path.at(-2)!;
-  if (!isBulletListNode(list) || start >= end) return undefined;
+  if (!isListNode(list) || list.type === "taskList" || start >= end) return undefined;
+  let firstNumber: number | undefined;
+  if (list.type === "orderedList") {
+    firstNumber = (list.start ?? 1) + start;
+    if (!Number.isSafeInteger(list.start ?? 1) || !Number.isSafeInteger(firstNumber))
+      return undefined;
+  }
   const entries = list.children.slice(start, end + 1);
   if (!entries.every(isListItemNode)) return undefined;
   const children = entries.map((entry, index) => {
@@ -37,7 +42,14 @@ export function getClipboardList(
       ? { ...item, children, nested }
       : { ...item, children };
   });
-  const fragment = normalizeDocument(createDocument([{ ...list, children }]))
-    .children[0];
+  const fragment = normalizeDocument(
+    createDocument([
+      {
+        ...list,
+        children,
+        ...(firstNumber === undefined ? {} : { start: firstNumber }),
+      },
+    ]),
+  ).children[0];
   return isListNode(fragment) ? fragment : undefined;
 }
