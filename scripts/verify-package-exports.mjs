@@ -291,6 +291,42 @@ function verifyClipboardHtml(core) {
   );
 }
 
+function verifyListClipboard(core) {
+  const entries = ["未选", "甲乙", "丙丁"].map((text) =>
+    core.createListItem([core.createText(text, { bold: true })]),
+  );
+  const lists = [
+    core.createOrderedList(entries, 5),
+    core.createTaskList(
+      entries.map((item, index) => core.createTaskItem(item.children, index === 1)),
+    ),
+  ];
+  const selection = {
+    anchor: { path: [0, 1, 0], offset: 1 },
+    focus: { path: [0, 2, 0], offset: 1 },
+  };
+  for (const list of lists) {
+    const document = core.createDocument([list]);
+    const original = structuredClone(document);
+    const html = core.getClipboardHtml(document, selection);
+    const parsed = core.parseHtml(html).blocks[0];
+    assert.equal(parsed.type, list.type);
+    assert.equal(core.getClipboardText(document, selection), "乙\n丙");
+    assert.deepEqual(
+      parsed.children.map((item) => item.children.map((node) => node.text).join("")),
+      ["乙", "丙"],
+    );
+    if (parsed.type === "orderedList") assert.equal(parsed.start, 6);
+    if (parsed.type === "taskList")
+      assert.deepEqual(
+        parsed.children.map((item) => item.checked),
+        [true, false],
+      );
+    assert.equal(/未选|data-|aria-|contenteditable/i.test(html), false);
+    assert.deepEqual(document, original);
+  }
+}
+
 function verifyHistoryMergePolicy(core) {
   const initial = core.createDocument([
     core.createParagraph([core.createText("abcd")]),
@@ -428,6 +464,7 @@ for (const packageConfig of publicPackages) {
     verifyHistoryMergePolicy(runtime);
     verifyClipboardText(runtime);
     verifyClipboardHtml(runtime);
+    verifyListClipboard(runtime);
     assert.ok(declarations.includes("CellNavigationDirection"));
     assert.ok(declarations.includes("HistoryMergePolicy"));
     assert.ok(declarations.includes("mergePolicy?: HistoryMergePolicy"));
