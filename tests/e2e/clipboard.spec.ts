@@ -507,6 +507,91 @@ for (const backward of [false, true]) {
   });
 }
 
+for (const backward of [false, true]) {
+  test(`preserves complete copied table rows through undo and redo (backward: ${backward})`, async ({
+    page,
+  }) => {
+    if (backward) await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+    const json = page.getByLabel("文档 JSON", { exact: true });
+    const regular = JSON.parse((await json.textContent())!);
+    await page.getByLabel("模型示例").selectOption("table-clipboard");
+    await page.getByLabel("复制格式").selectOption("html");
+    const before = await json.textContent();
+    await selectText(
+      page,
+      backward ? "[0,2,2,0,0]" : "[0,1,0,0,0]",
+      backward ? 2 : 0,
+      backward ? "[0,1,0,0,0]" : "[0,2,2,0,0]",
+      backward ? 0 : 2,
+    );
+    const copied = await dispatchClipboard(page, "copy", "已渲染文档", true);
+    expect(copied.text).toBe("甲一\t甲二\t甲三\n乙一\t乙二\t乙三");
+    expect(copied.html).not.toMatch(/未选|续段|data-|aria-/);
+    const cut = await dispatchClipboard(page, "cut", "已渲染文档", true);
+    expect(cut.prevented).toBe(true);
+    expect(cut.types).toEqual([]);
+    await expect(json).toHaveText(before!);
+    await pasteCopiedToRegular(page, copied);
+    const editor = page.getByLabel("已渲染文档");
+    await expect(editor.locator("table tr")).toHaveCount(2);
+    await expect(editor.locator("td")).toHaveText([
+      "甲一",
+      "甲二",
+      "甲三",
+      "乙一",
+      "乙二",
+      "乙三",
+    ]);
+    const pasted = JSON.parse((await json.textContent())!);
+    await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+    await page.getByRole("button", { name: "撤销", exact: true }).click();
+    await expect
+      .poll(async () => JSON.parse((await json.textContent())!))
+      .toEqual(regular);
+    await expect(editor.locator("table")).toHaveCount(0);
+    await page.getByRole("button", { name: "重做", exact: true }).click();
+    await expect
+      .poll(async () => JSON.parse((await json.textContent())!))
+      .toEqual(pasted);
+    await expect(editor.locator("td")).toHaveCount(6);
+    await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+    if (backward) {
+      const bounds = (await editor.locator("table").boundingBox())!;
+      expect(bounds.x).toBeGreaterThanOrEqual(0);
+      expect(bounds.x + bounds.width).toBeLessThanOrEqual(390);
+      await editor.screenshot({
+        path: test.info().outputPath("table-clipboard-mobile.png"),
+      });
+    }
+  });
+}
+
+test("keeps partial multi-row table copy plain and blocks native cut", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("table-clipboard");
+  const json = page.getByLabel("文档 JSON", { exact: true });
+  const before = await json.textContent();
+  await page.getByLabel("复制格式").selectOption("html");
+  await selectText(page, "[0,1,1,0,0]", 1, "[0,2,1,0,0]", 1);
+  const copied = await dispatchClipboard(page, "copy", "已渲染文档", true);
+  expect(copied.types).toEqual(["text/plain"]);
+  expect(copied.text).toBe("二\t甲三\n乙一\t乙");
+  expect(copied.html).toBe("");
+  const cut = await dispatchClipboard(page, "cut", "已渲染文档", true);
+  expect(cut.prevented).toBe(true);
+  expect(cut.types).toEqual([]);
+  await expect(json).toHaveText(before!);
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+  await page.getByLabel("复制格式").selectOption("plain");
+  await selectText(page, "[0,1,0,0,0]", 0, "[0,2,2,0,0]", 2);
+  const plain = await dispatchClipboard(page, "copy", "已渲染文档", true);
+  expect(plain.types).toEqual(["text/plain"]);
+  expect(plain.text).toBe("甲一\t甲二\t甲三\n乙一\t乙二\t乙三");
+});
+
 test("does not delete model text when the browser rejects the HTML clipboard write", async ({
   page,
 }) => {
