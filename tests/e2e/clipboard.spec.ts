@@ -457,19 +457,55 @@ for (const backward of [false, true]) {
   });
 }
 
-test("falls back to plain copy for cross-cell ranges in HTML mode", async ({
-  page,
-}) => {
+test("copies same-row cells as a table in HTML mode", async ({ page }) => {
   await page.goto("/");
   await page.getByLabel("模型示例").selectOption("tables");
   await page.getByLabel("复制格式").selectOption("html");
   await selectText(page, "[0,0,0,0,0]", 1, "[0,0,1,0,0]", 1);
   const copied = await dispatchClipboard(page, "copy", "已渲染文档", true);
   expect(copied.text).toBe("名\n同一单元格第二段\t角");
-  expect(copied.html).toBe("");
-  expect(copied.types).toEqual(["text/plain"]);
+  expect(copied.html).toContain("<table><tbody><tr><td>");
+  expect(copied.types).toEqual(["text/plain", "text/html"]);
   await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
 });
+
+for (const backward of [false, true]) {
+  test(`round trips a clipped same-row table fragment (backward: ${backward})`, async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await page.getByLabel("模型示例").selectOption("table-clipboard");
+    await page.getByLabel("复制格式").selectOption("html");
+    const json = page.getByLabel("文档 JSON", { exact: true });
+    const before = await json.textContent();
+    await selectText(
+      page,
+      backward ? "[0,0,2,0,0]" : "[0,0,1,1,0]",
+      1,
+      backward ? "[0,0,1,1,0]" : "[0,0,2,0,0]",
+      1,
+    );
+    const copied = await dispatchClipboard(page, "copy", "已渲染文档", true);
+    expect(copied.text).toBe("甲\n续段\t乙");
+    expect(copied.html).toContain("<strong>甲</strong>");
+    expect(copied.html).toContain("<em>乙</em>");
+    expect(copied.html).not.toMatch(/未选|前|后|data-|aria-/);
+    await expect(json).toHaveText(before!);
+    await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+    await pasteCopiedToRegular(page, copied);
+    const editor = page.getByLabel("已渲染文档");
+    await expect(editor.locator("table tr")).toHaveCount(1);
+    await expect(editor.locator("td")).toHaveText(["甲续段", "乙"]);
+    await expect(editor.locator("td strong")).toHaveText("甲");
+    await expect(editor.locator("td em")).toHaveText("乙");
+    await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+    await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+    if (!backward)
+      await editor.screenshot({
+        path: test.info().outputPath("table-clipboard-desktop.png"),
+      });
+  });
+}
 
 test("does not delete model text when the browser rejects the HTML clipboard write", async ({
   page,
