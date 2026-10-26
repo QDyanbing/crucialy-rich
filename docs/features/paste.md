@@ -127,6 +127,8 @@ Markdown 使用 `marked` 转换为 HTML，再复用同一 HTML 白名单映射�
 
 外部 `onPaste` 始终先执行，可通过 `preventDefault()` 完全接管，组件随后不读取候选或执行命令；只读组件不主动阻止宿主的默认粘贴行为。自定义 Registry 的 `canExecute` 决定候选是否可用，而不是由 React 硬编码 cell 或列表的 MIME 选择。
 
+自身复制的同一行跨 cell 片段或完整连续行也可作为 HTML 表格粘贴到正文，保留多段 cell 和安全文字格式，并形成一条 History。该来源能力不改变现有 cell 的富片段拒绝与 TSV 降级规则；多段 cell 的纯文本换行不保证二维往返，见[表格复制规则](./copy-cut.md#表格片段)。
+
 ## 当前边界
 
 - 范围粘贴不跨越 Divider、Image、不同列表项、不同 cell 或进出列表/表格的结构边界。

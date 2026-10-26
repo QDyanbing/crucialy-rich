@@ -95,6 +95,12 @@ React 原生剪贴板同时提供 HTML/Markdown 和纯文本时，会跳过 cell
 
 解析后的表格继续通过 `paste` command 作为结构化 block 插入，整个操作进入一个 Transaction 和一条 History 记录。React 原生 `paste` 事件和 Demo 粘贴验收控制共用这条路径。
 
+## HTML 表格复制
+
+显式开启 `clipboardFormat="html"` 后，同一行跨 cell 范围及完整连续行可导出结构化表格，保留多段文字、marks 和安全链接。首尾按文字范围裁剪；单 cell 仍按 paragraph 输出，部分跨行、跨表或进出表格回退完整纯文本，不解释为矩形选区。详细端点要求见[表格复制规则](./copy-cut.md#表格片段)。
+
+复制不新增 Transaction 或 History，只读同样支持；不扩大跨 cell 剪切、删除或 cell 内富片段粘贴范围。Demo 的“表格复制”样例包含未选前后内容、多段 cell、文字样式和完整行。
+
 ## 当前限制
 
 - 同一 cell 内的连续 paragraph 支持 boolean mark、文字属性、链接和清除格式，并作为一个 transaction 进入 History；暂不支持跨 cell 的格式化选区。

@@ -213,6 +213,7 @@ const shortcutCommandName = getCommandNameFromShortcut({
 - History：`createHistorySnapshot`、`cloneHistorySnapshot`、`createHistoryEntry`、`cloneHistoryEntry`、`createHistoryState`、`clearHistory`、`recordHistory`、`canMergeHistoryEntries`、`mergeHistoryEntries`、`canUndo`、`canRedo`、`getUndoEntry`、`getRedoEntry`、`undoHistory`、`redoHistory`、`getHistoryShortcutAction`、`undoCommand`、`redoCommand`。
 - 剪贴板写出：`getClipboardText(document, selection)` 读取纯文本，不依赖 DOM；非法、折叠或文字为空的范围返回 `undefined`。块换行、表格制表符与剪切接入边界见[复制与剪切](../../docs/features/copy-cut.md)。
 - 可选 HTML：`getClipboardHtml(document, selection)` 导出安全文字格式及文本块；单列表项/cell 内容按段落降级，同层跨列表项保留列表、编号和选区内子列表，不输出内部 DOM 属性。不支持完整范围或列表编号非法时返回 `undefined`，由宿主选择纯文本回退。
+- 表格 HTML：同一行跨 cell 片段或完整连续行保留表格、多段 cell 和安全文字格式；单 cell 仍输出 paragraph，部分跨行/跨表及非法源表格回退纯文本。不引入矩形选择或跨 cell 剪切，详见[表格片段](../../docs/features/copy-cut.md#表格片段)。
 
 ## 构建产物
 

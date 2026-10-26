@@ -44,11 +44,11 @@ function getClipboardHtml(
 
 - 支持单个文本容器、连续顶层 paragraph/heading/quote/codeBlock、同一 cell 内的连续 paragraph。
 - 单个列表项的选中文字按 paragraph 输出，不复制列表外壳、编号、任务状态、子列表或邻项；单元格内文字也只输出 paragraph，不生成 table。
-- 同一列表内、同一层级的跨项范围保留 bulletList、orderedList 或 taskList 结构，具体裁剪规则见下一节。
+- 同一列表内、同一层级的跨项范围保留 bulletList、orderedList 或 taskList 结构；同一表格的同一行跨 cell 片段或完整连续行保留 table 结构，具体裁剪规则见下文。
 - 保留被选文字的五种 boolean mark、安全字号/颜色/背景色及规范化的链接 href/target/rel。链接与行内代码组合使用嵌套 `code` 标签，不把链接默认视觉下划线写成额外 underline mark。
 - 首尾文字按模型 UTF-16 offset 裁剪，中间空段落保留；代码块保留字面文字和换行，不输出文字 marks。
 - 复用模型 marks 规范化、语义渲染和 HTML 转义；仅输出链接白名单属性、有序列表 `start`、checkbox `type`/`checked` 及安全样式，不包含编辑器 path、class、事件或其他内部 DOM 属性。
-- 非法、折叠、实际为空的选区，或跨不同列表/层级、跨 cell、进出表格、穿越 void/list 等不支持的范围，均返回 `undefined`；不生成截断的部分 HTML。
+- 非法、折叠、实际为空的选区，或跨不同列表/层级、部分跨行、跨表、进出表格、穿越 void/list 等不支持的范围，均返回 `undefined`；不生成截断的部分 HTML。
 
 React `clipboardFormat="html"` 会在有纯文本内容时写入 `text/plain`，并在该 API 可导出完整片段时追加 `text/html`；不支持 HTML 的范围只写完整纯文本。HTML 粘贴是否可用仍由目标 Command Registry 决定：正文可保留格式，当前列表和 cell 继续按已有规则回退实际纯文本。
 
@@ -63,6 +63,17 @@ React `clipboardFormat="html"` 会在有纯文本内容时写入 `text/plain`，
 - 跨父子层级、跨不同根列表或不同父项的子列表不拼接为部分列表，仍回退完整纯文本。所选直属项混用普通项/任务项时，也不导出被规范化后缺项的 HTML。
 
 只改变复制能力：单项片段仍按 paragraph 输出；跨项剪切、跨项删除和列表内富片段粘贴依然不支持。Demo 的“列表复制”样例包含首尾文字、可复制子列表、未选后代、有序起始编号和不同任务状态。
+
+## 表格片段
+
+使用已有 `RangeSelection`，不是矩形单元格选区。两个端点必须在同一张合法模型表格中、且位于不同 cell；正向和反向选区输出相同内容。单 cell 片段继续按 paragraph 输出，不增加表格外壳。
+
+- 同一行：只导出起止 cell 之间的连续列。首 cell 从起点 paragraph/text/UTF-16 offset 开始，末 cell 到终点为止；中间 cell、选中的空段落和多段内容完整保留。只选中制表分隔时，保留两个空边界 cell。
+- 跨行：只支持完整连续行。起点必须是首选中行第一个 cell 的第一个 paragraph/text 的 offset 0；终点必须是末选中行最后一个 cell 的最后 paragraph/text 末尾。选中行以自身为表格根，不复制前后未选行；单列表格同样支持。
+- 部分跨行范围不按矩形解释，也不补造未选 cell；返回 `undefined`，React 回退完整纯文本。不同表格、进出表格及源表格校验失败（含行列不齐或非法 marks）也回退，不借规范化静默修复源结构。
+- 输出 `table > tbody > tr > td > p`，保留文字 marks 和安全链接，不写出内部路径、cell 高亮、类名、事件、列宽或其他编辑器属性。导出不修改源文档，不共享可变片段对象。
+
+粘贴到正文时复用已有 HTML 表格 parser 和 `paste` 命令，产生一次 History；粘贴到现有 cell、列表或代码块仍只尝试实际提供的纯文本。纯文本中的段落换行与行分隔不做 TSV 引号转义，不承诺多段 cell 的二维往返。跨 cell 剪切、删除、任意矩形选择、合并单元格和表格内富片段粘贴均未扩大。Demo 提供中文“表格复制”样例。
 
 ## React 行为
 
@@ -88,6 +99,6 @@ React `clipboardFormat="html"` 会在有纯文本内容时写入 `text/plain`，
 
 复制可跨文本块、列表项和表格 cell，输出纯文本视图。剪切范围更窄，与 `deleteSelection` 保持一致：同一文本容器、连续顶层文本块、同一 cell 内的连续 paragraph。跨列表项、跨 cell、进出表格或跨越图片／Divider 的范围不执行剪切，也不退回浏览器默认删除。
 
-未实现任意跨层级列表选区、表格结构写出、Markdown 写出、图片块剪切、文件剪贴板或桌面 Office 专有格式复制。HTML 是块片段，粘贴到段落中遵循现有 block 插入规则，不保证任意部分选区的 HTML 剪切粘贴还原原始段落结构。同步 `setData` 成功代表事件写入完成，不承诺操作系统最终剪贴板提交结果；宿主仍需处理外部环境策略。
+未实现任意跨层级列表选区、部分跨行表格结构写出、Markdown 写出、图片块剪切、文件剪贴板或桌面 Office 专有格式复制。HTML 是块片段，粘贴到段落中遵循现有 block 插入规则，不保证任意部分选区的 HTML 剪切粘贴还原原始段落结构。同步 `setData` 成功代表事件写入完成，不承诺操作系统最终剪贴板提交结果；宿主仍需处理外部环境策略。
 
 验收见[复制与剪切 QA](../qa/copy-cut.md)，粘贴能力见[粘贴](./paste.md)。
