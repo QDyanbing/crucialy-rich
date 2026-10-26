@@ -175,6 +175,66 @@ describe("RichTextEditor sibling list clipboard", () => {
 });
 
 describe("RichTextEditor structured table copy", () => {
+  function tableValue() {
+    const table = createTable(2, 2);
+    for (const row of table.children)
+      for (const cell of row.children)
+        cell.children = [createParagraph([createText("文字")])];
+    return createDocument([table]);
+  }
+
+  it.each([false, true])(
+    "does not cut a supported HTML table range (complete rows: %s)",
+    (rows) => {
+      const host = renderEditor(tableValue(), { clipboardFormat: "html" });
+      select(host.container, {
+        anchor: { path: [0, 0, 0, 0, 0], offset: 0 },
+        focus: { path: [0, rows ? 1 : 0, 1, 0, 0], offset: 2 },
+      });
+      expect(clipboard(host.container, "copy").data["text/html"]).toContain("<table>");
+      const before = host.container.innerHTML;
+      const cut = clipboard(host.container, "cut");
+      expect(cut.event.defaultPrevented).toBe(true);
+      expect(cut.clearData).not.toHaveBeenCalled();
+      expect(cut.setData).not.toHaveBeenCalled();
+      expect(host.container.innerHTML).toBe(before);
+      expect(host.onChange).not.toHaveBeenCalled();
+      expect(host.onTransaction).not.toHaveBeenCalled();
+    },
+  );
+
+  it("keeps default plain copy and partial-row HTML fallback complete", () => {
+    const host = renderEditor(tableValue());
+    select(host.container, {
+      anchor: { path: [0, 0, 0, 0, 0], offset: 0 },
+      focus: { path: [0, 1, 1, 0, 0], offset: 2 },
+    });
+    expect(clipboard(host.container, "copy").data).toEqual({
+      "text/plain": "文字\t文字\n文字\t文字",
+    });
+    const rich = renderEditor(tableValue(), { clipboardFormat: "html" });
+    select(rich.container, {
+      anchor: { path: [0, 0, 0, 0, 0], offset: 1 },
+      focus: { path: [0, 1, 1, 0, 0], offset: 1 },
+    });
+    expect(clipboard(rich.container, "copy").data).toEqual({
+      "text/plain": "字\t文字\n文字\t文",
+    });
+  });
+
+  it("does not edit when the table HTML clipboard write is rejected", () => {
+    const host = renderEditor(tableValue(), { clipboardFormat: "html" });
+    select(host.container, {
+      anchor: { path: [0, 0, 0, 0, 0], offset: 0 },
+      focus: { path: [0, 0, 1, 0, 0], offset: 2 },
+    });
+    const copied = clipboard(host.container, "copy", "text/html");
+    expect(copied.event.defaultPrevented).toBe(true);
+    expect(copied.data).toEqual({ "text/plain": "文字\t文字" });
+    expect(host.onChange).not.toHaveBeenCalled();
+    expect(host.onTransaction).not.toHaveBeenCalled();
+  });
+
   it.each([false, true])("copies a styled row range with backward=%s", (backward) => {
     const table = createTable(1, 3);
     for (const [column, cell] of table.children[0]!.children.entries())
