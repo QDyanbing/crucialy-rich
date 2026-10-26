@@ -8,6 +8,7 @@ import { renderDocument, renderNodeToHtml, type RenderedElementNode } from "../r
 import { getNodeAtPath, type RangeSelection } from "../selection";
 import { getClipboardTextBlocks } from "./selection-blocks";
 import { getClipboardList } from "./selection-list";
+import { getClipboardTable } from "./selection-table";
 
 const clipboardAttributes: Partial<
   Record<RenderedElementNode["tagName"], readonly string[]>
@@ -64,8 +65,9 @@ export function getClipboardHtml(
   document: DocumentNode,
   selection: RangeSelection,
 ): string | undefined {
-  const list = getClipboardList(document, selection);
-  const blocks = list ? [list] : getClipboardTextBlocks(document, selection);
+  const structure =
+    getClipboardList(document, selection) ?? getClipboardTable(document, selection);
+  const blocks = structure ? [structure] : getClipboardTextBlocks(document, selection);
   if (!blocks) return undefined;
   const fragment = normalizeDocument(createDocument(blocks));
   const rendered = renderDocument(fragment);
