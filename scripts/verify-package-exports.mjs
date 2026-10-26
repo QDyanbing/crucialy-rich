@@ -282,10 +282,70 @@ function verifyClipboardHtml(core) {
   assert.deepEqual(core.parseHtml(html).blocks, document.children);
   assert.equal(core.getClipboardText(document, selection), "rich<&");
   const table = core.createTable(1, 2);
+  assert.deepEqual(
+    core.parseHtml(
+      core.getClipboardHtml(core.createDocument([table]), {
+        anchor: { path: [0, 0, 0, 0, 0], offset: 0 },
+        focus: { path: [0, 0, 1, 0, 0], offset: 0 },
+      }),
+    ).blocks,
+    [table],
+  );
+}
+
+function verifyTableClipboard(core) {
+  const table = core.createTable(3, 3);
+  for (const [rowIndex, row] of table.children.entries())
+    for (const [column, cell] of row.children.entries())
+      cell.children = [
+        core.createParagraph([
+          core.createText(`${rowIndex}:${column}`, { bold: true }),
+        ]),
+      ];
+  const document = core.createDocument([table]);
+  const original = structuredClone(document);
+  for (const [selection, expected] of [
+    [
+      {
+        anchor: { path: [0, 1, 1, 0, 0], offset: 1 },
+        focus: { path: [0, 1, 2, 0, 0], offset: 2 },
+      },
+      [":1", "1:"],
+    ],
+    [
+      {
+        anchor: { path: [0, 1, 0, 0, 0], offset: 0 },
+        focus: { path: [0, 2, 2, 0, 0], offset: 3 },
+      },
+      ["1:0", "1:1", "1:2", "2:0", "2:1", "2:2"],
+    ],
+  ]) {
+    const html = core.getClipboardHtml(document, selection);
+    const parsed = core.parseHtml(html).blocks[0];
+    assert.equal(parsed.type, "table");
+    assert.deepEqual(
+      parsed.children.flatMap((row) =>
+        row.children.map((cell) => cell.children[0].children[0].text),
+      ),
+      expected,
+    );
+    assert.equal(/data-|aria-|contenteditable|class=/i.test(html), false);
+    assert.deepEqual(
+      core.parseHtml(
+        core.getClipboardHtml(document, {
+          anchor: selection.focus,
+          focus: selection.anchor,
+        }),
+      ).blocks,
+      [parsed],
+    );
+    parsed.children[0].children[0].children[0].children[0].text = "修改";
+    assert.deepEqual(document, original);
+  }
   assert.equal(
-    core.getClipboardHtml(core.createDocument([table]), {
-      anchor: { path: [0, 0, 0, 0, 0], offset: 0 },
-      focus: { path: [0, 0, 1, 0, 0], offset: 0 },
+    core.getClipboardHtml(document, {
+      anchor: { path: [0, 0, 1, 0, 0], offset: 0 },
+      focus: { path: [0, 1, 1, 0, 0], offset: 3 },
     }),
     undefined,
   );
@@ -465,6 +525,7 @@ for (const packageConfig of publicPackages) {
     verifyClipboardText(runtime);
     verifyClipboardHtml(runtime);
     verifyListClipboard(runtime);
+    verifyTableClipboard(runtime);
     assert.ok(declarations.includes("CellNavigationDirection"));
     assert.ok(declarations.includes("HistoryMergePolicy"));
     assert.ok(declarations.includes("mergePolicy?: HistoryMergePolicy"));
