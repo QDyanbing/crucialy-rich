@@ -174,6 +174,57 @@ describe("RichTextEditor sibling list clipboard", () => {
   });
 });
 
+describe("RichTextEditor structured table copy", () => {
+  it.each([false, true])("copies a styled row range with backward=%s", (backward) => {
+    const table = createTable(1, 3);
+    for (const [column, cell] of table.children[0]!.children.entries())
+      cell.children = [createParagraph([createText(`${column}甲乙`, { bold: true })])];
+    const host = renderEditor(createDocument([table]), { clipboardFormat: "html" });
+    const anchor = { path: [0, 0, 1, 0, 0], offset: 1 };
+    const focus = { path: [0, 0, 2, 0, 0], offset: 2 };
+    select(
+      host.container,
+      backward ? { anchor: focus, focus: anchor } : { anchor, focus },
+    );
+    const copied = clipboard(host.container, "copy");
+    expect(copied.data["text/plain"]).toBe("甲乙\t2甲");
+    const expected = createTable(1, 2);
+    expected.children[0]!.children[0]!.children = [
+      createParagraph([createText("甲乙", { bold: true })]),
+    ];
+    expected.children[0]!.children[1]!.children = [
+      createParagraph([createText("2甲", { bold: true })]),
+    ];
+    expect(parseHtml(copied.data["text/html"]!)?.blocks).toEqual([expected]);
+    expect(host.onChange).not.toHaveBeenCalled();
+    expect(host.onSelectionChange).not.toHaveBeenCalled();
+    expect(host.onTransaction).not.toHaveBeenCalled();
+  });
+
+  it("copies complete rows from a readonly controlled editor without commands", () => {
+    const table = createTable(2, 2);
+    for (const row of table.children)
+      for (const cell of row.children)
+        cell.children = [createParagraph([createText("文字")])];
+    const value = createDocument([table]);
+    const host = renderEditor(value, {
+      value,
+      contentEditable: false,
+      clipboardFormat: "html",
+      commandRegistry: createCommandRegistry([]),
+    });
+    select(host.container, {
+      anchor: { path: [0, 0, 0, 0, 0], offset: 0 },
+      focus: { path: [0, 1, 1, 0, 0], offset: 2 },
+    });
+    const copied = clipboard(host.container, "copy");
+    expect(parseHtml(copied.data["text/html"]!)?.blocks).toEqual([table]);
+    expect(copied.data["text/plain"]).toBe("文字\t文字\n文字\t文字");
+    expect(host.onChange).not.toHaveBeenCalled();
+    expect(host.onTransaction).not.toHaveBeenCalled();
+  });
+});
+
 describe("RichTextEditor plain clipboard copy", () => {
   it("supports readonly controlled values without using a command registry", () => {
     const value = createDocument([createParagraph([createText("前甲乙后")])]);
@@ -450,7 +501,7 @@ describe("RichTextEditor opt-in HTML clipboard", () => {
     },
   );
 
-  it("falls back to complete plain text for cross-cell copy and still refuses cut", () => {
+  it("copies same-row HTML and still refuses cross-cell cut", () => {
     const table = createTable(1, 2);
     for (const cell of table.children[0]!.children)
       cell.children = [createParagraph([createText("文字")])];
@@ -459,7 +510,9 @@ describe("RichTextEditor opt-in HTML clipboard", () => {
       anchor: { path: [0, 0, 0, 0, 0], offset: 1 },
       focus: { path: [0, 0, 1, 0, 0], offset: 1 },
     });
-    expect(clipboard(host.container, "copy").data).toEqual({ "text/plain": "字\t文" });
+    const copied = clipboard(host.container, "copy");
+    expect(copied.data["text/plain"]).toBe("字\t文");
+    expect(copied.data["text/html"]).toContain("<table>");
     expect(clipboard(host.container, "cut").setData).not.toHaveBeenCalled();
     expect(host.onTransaction).not.toHaveBeenCalled();
   });
