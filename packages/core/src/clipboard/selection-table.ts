@@ -23,14 +23,36 @@ export function getClipboardTable(
     anchor.path.length !== 5 ||
     focus.path.length !== 5 ||
     anchor.path[0] !== focus.path[0] ||
-    anchor.path[1] !== focus.path[1] ||
-    anchor.path[2] === focus.path[2]
+    (anchor.path[1] === focus.path[1] && anchor.path[2] === focus.path[2])
   )
     return undefined;
   const table = document.children[anchor.path[0]!];
   if (!isTableNode(table) || !validateDocument(createDocument([table])).valid)
     return undefined;
   const rowIndex = anchor.path[1]!;
+  const endRow = focus.path[1]!;
+  if (rowIndex !== endRow) {
+    const lastRow = table.children[endRow]!;
+    const lastCell = lastRow.children.at(-1)!;
+    const lastParagraph = lastCell.children.at(-1)!;
+    // A linear range represents complete rows only at both outer text boundaries.
+    if (
+      anchor.path[2] !== 0 ||
+      anchor.path[3] !== 0 ||
+      anchor.path[4] !== 0 ||
+      anchor.offset !== 0 ||
+      focus.path[2] !== lastRow.children.length - 1 ||
+      focus.path[3] !== lastCell.children.length - 1 ||
+      focus.path[4] !== lastParagraph.children.length - 1 ||
+      focus.offset !== lastParagraph.children.at(-1)!.text.length
+    )
+      return undefined;
+    return normalizeDocument(
+      createDocument([
+        { type: "table", children: table.children.slice(rowIndex, endRow + 1) },
+      ]),
+    ).children[0] as TableNode;
+  }
   const row = table.children[rowIndex]!;
   const start = anchor.path[2]!;
   const end = focus.path[2]!;
