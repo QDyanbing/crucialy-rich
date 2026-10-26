@@ -134,6 +134,7 @@ type ModelExampleId =
   | "lists"
   | "advanced-lists"
   | "list-clipboard"
+  | "table-clipboard"
   | "marks"
   | "links"
   | "images"
@@ -321,6 +322,43 @@ const modelExamples: ModelExample[] = [
         table,
         createParagraph([createText("表格后方保留可编辑段落。")]),
       ]);
+    })(),
+  },
+  {
+    id: "table-clipboard",
+    label: "表格复制",
+    selection: {
+      anchor: { path: [0, 0, 1, 1, 0], offset: 1 },
+      focus: { path: [0, 0, 2, 0, 0], offset: 1 },
+    },
+    value: (() => {
+      const table = createTable(3, 3);
+      const labels = [
+        "未选前格",
+        "前甲",
+        "乙后",
+        "甲一",
+        "甲二",
+        "甲三",
+        "乙一",
+        "乙二",
+        "乙三",
+      ];
+      labels.forEach((text, index) => {
+        table.children[Math.floor(index / 3)]!.children[index % 3]!.children = [
+          createParagraph([createText(text)]),
+        ];
+      });
+      table.children[0]!.children[1]!.children = [
+        createParagraph([createText("未选前段")]),
+        createParagraph([createText("前甲", { bold: true })]),
+        createParagraph([createText("续段")]),
+      ];
+      table.children[0]!.children[2]!.children = [
+        createParagraph([createText("乙后", { italic: true })]),
+        createParagraph([createText("未选后段")]),
+      ];
+      return createDocument([table, createParagraph([createText("表格后保留正文。")])]);
     })(),
   },
   {
@@ -530,7 +568,13 @@ const modelExampleGroups: ModelExampleGroup[] = [
     label: "块结构",
   },
   {
-    exampleIds: ["lists", "advanced-lists", "list-clipboard", "tables"],
+    exampleIds: [
+      "lists",
+      "advanced-lists",
+      "list-clipboard",
+      "tables",
+      "table-clipboard",
+    ],
     label: "复杂结构",
   },
   {
