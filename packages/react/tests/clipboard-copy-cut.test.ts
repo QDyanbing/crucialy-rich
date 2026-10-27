@@ -2,6 +2,8 @@
 
 import {
   createDocument,
+  createDivider,
+  createImage,
   createBulletList,
   createListItem,
   createOrderedList,
@@ -94,6 +96,96 @@ function clipboard(
   act(() => container.firstElementChild!.dispatchEvent(event));
   return { event, data, setData, clearData };
 }
+
+describe("RichTextEditor mixed block clipboard", () => {
+  function mixedValue() {
+    return createDocument([
+      createParagraph([createText("前甲", { bold: true })]),
+      createOrderedList([createListItem([createText("列表")])], 5),
+      createDivider(),
+      createTable(1, 1),
+      createParagraph([createText("乙后", { italic: true })]),
+    ]);
+  }
+  const range = {
+    anchor: { path: [0, 0], offset: 1 },
+    focus: { path: [4, 0], offset: 1 },
+  };
+
+  it.each([false, true])(
+    "copies complete structures but refuses mixed cut (%s)",
+    (backward) => {
+      const host = renderEditor(mixedValue(), { clipboardFormat: "html" });
+      select(
+        host.container,
+        backward ? { anchor: range.focus, focus: range.anchor } : range,
+      );
+      const copied = clipboard(host.container, "copy");
+      expect(copied.data["text/plain"]).toBe("甲\n列表\n\n\n乙");
+      const expected = mixedValue().children;
+      expected[0] = createParagraph([createText("甲", { bold: true })]);
+      expected[4] = createParagraph([createText("乙", { italic: true })]);
+      expect(parseHtml(copied.data["text/html"]!)?.blocks).toEqual(expected);
+      const cut = clipboard(host.container, "cut");
+      expect(cut.event.defaultPrevented).toBe(true);
+      expect(cut.setData).not.toHaveBeenCalled();
+      expect(host.onChange).not.toHaveBeenCalled();
+      expect(host.onSelectionChange).not.toHaveBeenCalled();
+      expect(host.onTransaction).not.toHaveBeenCalled();
+    },
+  );
+
+  it("supports readonly controlled copy without a command registry", () => {
+    const value = mixedValue();
+    const host = renderEditor(value, {
+      value,
+      clipboardFormat: "html",
+      contentEditable: false,
+      commandRegistry: createCommandRegistry([]),
+    });
+    select(host.container, range);
+    expect(clipboard(host.container, "copy").data["text/html"]).toContain("<table>");
+    expect(host.onChange).not.toHaveBeenCalled();
+    expect(host.onTransaction).not.toHaveBeenCalled();
+  });
+
+  it("keeps the complete default plain range without HTML", () => {
+    const host = renderEditor(mixedValue());
+    select(host.container, range);
+    expect(clipboard(host.container, "copy").data).toEqual({
+      "text/plain": "甲\n列表\n\n\n乙",
+    });
+  });
+
+  it("keeps the source intact if the mixed HTML write fails", () => {
+    const host = renderEditor(mixedValue(), { clipboardFormat: "html" });
+    select(host.container, range);
+    const before = host.container.innerHTML;
+    const copied = clipboard(host.container, "copy", "text/html");
+    expect(copied.event.defaultPrevented).toBe(true);
+    expect(copied.data).toEqual({ "text/plain": "甲\n列表\n\n\n乙" });
+    expect(host.container.innerHTML).toBe(before);
+    expect(host.onTransaction).not.toHaveBeenCalled();
+  });
+
+  it("does not export partial HTML around an enclosed image", () => {
+    const value = mixedValue();
+    value.children[2] = createImage("https://example.com/image.png");
+    const host = renderEditor(value, { clipboardFormat: "html" });
+    select(host.container, range);
+    expect(clipboard(host.container, "copy").data).toEqual({
+      "text/plain": "甲\n列表\n\n\n乙",
+    });
+  });
+
+  it("lets host cancellation bypass mixed fragment export", () => {
+    const onCopy = vi.fn((event) => event.preventDefault());
+    const host = renderEditor(mixedValue(), { clipboardFormat: "html", onCopy });
+    select(host.container, range);
+    expect(clipboard(host.container, "copy").setData).not.toHaveBeenCalled();
+    expect(onCopy).toHaveBeenCalledOnce();
+  });
+});
 
 describe("RichTextEditor sibling list clipboard", () => {
   const range: RangeSelection = {
