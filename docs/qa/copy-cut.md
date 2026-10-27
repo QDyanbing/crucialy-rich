@@ -10,6 +10,8 @@
 
 2026-10-26 补充同一行跨 cell 及完整连续行 HTML 复制，覆盖多段 cell、首尾裁剪、样式、安全链接、源文档隔离、正文粘贴及 History。部分跨行/跨表仍回退完整纯文本，跨 cell 剪切和表格内富片段粘贴边界不变。Demo 新增中文“表格复制”样例。
 
+2026-10-27 补充顶层混合片段 HTML 复制：首尾在顶层文本块时，保留中间完整列表、表格和 Divider。验证首尾裁剪、原顺序、编号/checked、安全转义、非法源块与含图片回退、源模型隔离、正文粘贴和单条 History；结构内部端点与跨结构剪切边界不变。Demo 新增中文“混合结构复制”样例。
+
 ## 自动化覆盖
 
 - `packages/core/tests/clipboard/text.test.ts`：10 项，验证正反向选区、复制隔离、非法/折叠端点、空白和 UTF-16 字面文字。
@@ -25,10 +27,13 @@
 - `packages/core/tests/clipboard/selection-table.test.ts` 与 `selection-table-rows.test.ts`：共 10 项，覆盖双向裁剪、多段 cell、完整行与单列表格、片段克隆及部分跨行拒绝。
 - `packages/core/tests/clipboard/export-table-html.test.ts`、`export-table-boundaries.test.ts`、`export-table-safety.test.ts`：共 14 项，覆盖表格/parser 往返、未选行列/段落隔离、单 cell 兼容、空边界、UTF-16、链接/代码/样式、转义、非法源表格及跨表回退。
 - `packages/core/tests/history/table-clipboard.test.ts`：5 项，覆盖同一行/完整行的双向复制、正文粘贴、单条 History、撤销重做与源文档不变，以及现有 cell 的实际纯文本降级。
-- `packages/react/tests/clipboard-copy-cut.test.ts`：44 项，覆盖受控/非受控、只读、宿主接管、多编辑器与外部选区、模型文字优先、IME、写入失败、Registry 缺失/禁用/异常/空结果、跨 cell 保护及事务元数据；验证双格式失败不删除、列表与表格结构、默认 plain 兼容、跨层级/部分跨行完整回退和跨项/跨 cell 剪切拒绝。
-- `tests/e2e/clipboard.spec.ts`：27 项 Chromium 用例，覆盖纯文本/HTML、撤销重做、目标降级、原生快捷键及手机控件；本轮新增 5 项验证正反向同一行片段、完整行复制粘贴与撤销重做、手机表格布局、部分跨行回退和剪切拒绝，更新原有同一行 HTML 用例。
+- `packages/core/tests/clipboard/selection-fragment.test.ts`：4 项，验证混合片段双向裁剪、完整结构、克隆和空边界；纯文本块范围仍交给原有路径。
+- `packages/core/tests/clipboard/export-fragment-html.test.ts` 与 `export-fragment-boundaries.test.ts`：共 17 项，验证嵌套/有序/任务列表、表格/Divider、首尾块类型与 marks、代码字面内容、安全链接、UTF-16 复用、非法编号/marks/表格、图片与结构内部端点回退。
+- `packages/core/tests/history/fragment-clipboard.test.ts`：5 项，验证双向复制与正文范围替换、块顺序、前后文字/选区、单条 History、源模型隔离，以及列表/代码块/cell 的实际纯文本降级与 rich-only 拒绝。
+- `packages/react/tests/clipboard-copy-cut.test.ts`：51 项，覆盖受控/非受控、只读、宿主接管、多编辑器与外部选区、模型文字优先、IME、写入失败、Registry 缺失/禁用/异常/空结果、跨 cell 保护及事务元数据；本轮新增 7 项验证混合结构、默认 plain、只读/宿主、含图片回退、失败不编辑及跨结构剪切拒绝。
+- `tests/e2e/clipboard.spec.ts`：31 项 Chromium 用例，覆盖纯文本/HTML、撤销重做、目标降级、原生快捷键及手机控件；此前 5 项表格用例保留，本轮新增 4 项覆盖混合片段正反向复制粘贴与 History、桌面/手机布局、默认 plain、剪切拒绝、图片与结构内部端点回退。
 - 同一浏览器文件另验证真实系统复制、剪切、粘贴快捷键往返；只该用例申请测试上下文的剪贴板权限，其他用例使用独立 DataTransfer，不共享系统剪贴板。
-- `scripts/verify-package-exports.mjs`：构建包运行时与声明导出、`onCopy` / `onCut`、`deleteByCut` 与 `clipboardFormat` 类型，以及纯文本/HTML parser 往返、链接代码组合、列表编号/checked、同一行/完整行表格、未选内容过滤、片段隔离和部分跨行拒绝。
+- `scripts/verify-package-exports.mjs`：构建包运行时与声明导出、`onCopy` / `onCut`、`deleteByCut` 与 `clipboardFormat` 类型，以及纯文本/HTML parser 往返、链接代码组合、列表编号/checked、同一行/完整行表格、混合片段顺序、未选内容过滤、片段隔离和部分跨行/含图片回退。
 
 ## 本地结果
 
@@ -38,13 +43,16 @@
 
 新增任务列表粘贴后的编辑器截图已检查，两个 checkbox 分别保持已完成/待办状态；撤销后消失，重做后结构和状态恢复。编号校验在加法前执行，字符串、BigInt、Symbol、非整数及溢出均有回归，未触发隐式转换或异常。
 
-本轮桌面片段截图保留两格与首格的两个段落、粗体/斜体；手机 390×844 截图中的两行三列表格完整可读、不溢出或重叠。撤销/重做按解析后的 JSON 内容比较，不依赖对象属性的序列化顺序。
+2026-10-26 桌面片段截图保留两格与首格的两个段落、粗体/斜体；手机 390×844 截图中的两行三列表格完整可读、不溢出或重叠。撤销/重做按解析后的 JSON 内容比较，不依赖对象属性的序列化顺序。
+
+本轮桌面与手机混合片段截图已检查：标题、起始编号 5、两列表格、分隔线、已完成/待办任务和引用按原顺序显示，无未选前后文字，无表格溢出或内容重叠。
 
 反向选区验收曾暴露受控回写将选区规范化为正向的问题，现已改为保留 anchor/focus；重新设置前仍清空旧浏览器选区，确保通过撤销/重做按钮恢复后继续输入会进入编辑事务，而不是仅修改 DOM。
 
 ## 保留边界
 
-- 默认只输出纯文本；可选 HTML 支持文字、同层跨项列表、同一行跨 cell 与完整连续行表格片段，不导出任意跨层级列表、部分跨行/跨表结构、Markdown、图片块或文件。
+- 默认只输出纯文本；可选 HTML 支持文字、同层跨项列表、同一行跨 cell 与完整连续行表格片段，以及顶层正文之间的完整结构混排。不导出任意跨层级列表、部分跨行/跨表内部结构、Markdown、图片块或文件。
+- 混合片段要求两端在顶层文本块，含图片或所选源块校验失败时整段回退纯文本，不只导出剩余块；不扩大剪切或列表/代码块/cell 的富片段粘贴。
 - 列表单项和单 cell 文字按 paragraph 导出，不保留编号、checked、嵌套层级或表格外壳；目标粘贴仍按当前 Command 能力选择 HTML 或实际纯文本。
 - 同层跨项可保留所选列表结构、编号与 checked；最后项文字后的子列表不选入，嵌套片段不带祖先，跨不同列表/层级或编号非法仍回退。复制能力不扩展跨项剪切和列表目标富格式插入。
 - HTML 第二次写入失败时，纯文本可能已写入事件数据，不承诺剪贴板回滚，但文档和 History 不变。HTML block 片段粘贴不保证任意部分选区的原段落结构往返。
