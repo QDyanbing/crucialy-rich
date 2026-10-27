@@ -293,6 +293,36 @@ function verifyClipboardHtml(core) {
   );
 }
 
+function verifyMixedClipboard(core) {
+  const document = core.createDocument([
+    core.createParagraph([core.createText("前甲", { bold: true })]),
+    core.createOrderedList([core.createListItem([core.createText("列表")])], 7),
+    core.createDivider(),
+    core.createTable(1, 2),
+    core.createParagraph([core.createText("乙后", { italic: true })]),
+  ]);
+  const original = structuredClone(document);
+  const anchor = { path: [0, 0], offset: 1 };
+  const focus = { path: [4, 0], offset: 1 };
+  const html = core.getClipboardHtml(document, { anchor, focus });
+  const expected = structuredClone(document.children);
+  expected[0] = core.createParagraph([core.createText("甲", { bold: true })]);
+  expected[4] = core.createParagraph([core.createText("乙", { italic: true })]);
+  assert.deepEqual(core.parseHtml(html).blocks, expected);
+  assert.equal(core.getClipboardHtml(document, { anchor: focus, focus: anchor }), html);
+  assert.equal(/data-|aria-|contenteditable|class=/i.test(html), false);
+  const parsed = core.parseHtml(html).blocks;
+  parsed[1].children[0].children[0].text = "修改";
+  assert.deepEqual(document, original);
+  const withImage = structuredClone(document);
+  withImage.children[2] = core.createImage("https://example.com/image.png");
+  assert.equal(core.getClipboardHtml(withImage, { anchor, focus }), undefined);
+  assert.equal(
+    core.getClipboardText(withImage, { anchor, focus }),
+    core.getClipboardText(document, { anchor, focus }),
+  );
+}
+
 function verifyTableClipboard(core) {
   const table = core.createTable(3, 3);
   for (const [rowIndex, row] of table.children.entries())
@@ -526,6 +556,7 @@ for (const packageConfig of publicPackages) {
     verifyClipboardHtml(runtime);
     verifyListClipboard(runtime);
     verifyTableClipboard(runtime);
+    verifyMixedClipboard(runtime);
     assert.ok(declarations.includes("CellNavigationDirection"));
     assert.ok(declarations.includes("HistoryMergePolicy"));
     assert.ok(declarations.includes("mergePolicy?: HistoryMergePolicy"));
