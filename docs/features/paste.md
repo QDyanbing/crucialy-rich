@@ -131,6 +131,8 @@ Markdown 使用 `marked` 转换为 HTML，再复用同一 HTML 白名单映射�
 
 ## 当前边界
 
+复制来源新增[顶层混合片段](./copy-cut.md#顶层混合片段)：正文之间完整选中的列表、表格和 Divider 可一起粘贴到正文，并作为一条 History 撤销/重做。此来源不改变目标过滤：列表、CodeBlock 和 cell 仍只接受实际提供的纯文本，富格式单独提供时不粘贴。
+
 - 范围粘贴不跨越 Divider、Image、不同列表项、不同 cell 或进出列表/表格的结构边界。
 - 列表项内只接受 `text/plain` fragment；不导入 HTML/Markdown block。React 原生粘贴可回退到剪贴板提供的纯文本，但不会自行把富片段转为纯文本；只有富格式时阻止粘贴并保持模型不变。
 - 现有表格内的二维填充只在折叠光标下接受 `text/plain` TSV，不自动新增行列，也不支持跨 cell range 替换。

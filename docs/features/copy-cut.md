@@ -43,12 +43,13 @@ function getClipboardHtml(
 该 API 不依赖 DOM，输出完整选区对应的安全 HTML 片段：
 
 - 支持单个文本容器、连续顶层 paragraph/heading/quote/codeBlock、同一 cell 内的连续 paragraph。
+- 两端都在顶层文本块时，可保留中间完整选中的列表、表格和 Divider，见[顶层混合片段](#顶层混合片段)。
 - 单个列表项的选中文字按 paragraph 输出，不复制列表外壳、编号、任务状态、子列表或邻项；单元格内文字也只输出 paragraph，不生成 table。
 - 同一列表内、同一层级的跨项范围保留 bulletList、orderedList 或 taskList 结构；同一表格的同一行跨 cell 片段或完整连续行保留 table 结构，具体裁剪规则见下文。
 - 保留被选文字的五种 boolean mark、安全字号/颜色/背景色及规范化的链接 href/target/rel。链接与行内代码组合使用嵌套 `code` 标签，不把链接默认视觉下划线写成额外 underline mark。
 - 首尾文字按模型 UTF-16 offset 裁剪，中间空段落保留；代码块保留字面文字和换行，不输出文字 marks。
 - 复用模型 marks 规范化、语义渲染和 HTML 转义；仅输出链接白名单属性、有序列表 `start`、checkbox `type`/`checked` 及安全样式，不包含编辑器 path、class、事件或其他内部 DOM 属性。
-- 非法、折叠、实际为空的选区，或跨不同列表/层级、部分跨行、跨表、进出表格、穿越 void/list 等不支持的范围，均返回 `undefined`；不生成截断的部分 HTML。
+- 非法、折叠、实际为空的选区，或跨不同列表内部/层级、部分跨行、从表格或列表内部进出正文、含图片等不支持的范围，均返回 `undefined`；不生成截断的部分 HTML。
 
 React `clipboardFormat="html"` 会在有纯文本内容时写入 `text/plain`，并在该 API 可导出完整片段时追加 `text/html`；不支持 HTML 的范围只写完整纯文本。HTML 粘贴是否可用仍由目标 Command Registry 决定：正文可保留格式，当前列表和 cell 继续按已有规则回退实际纯文本。
 
@@ -74,6 +75,17 @@ React `clipboardFormat="html"` 会在有纯文本内容时写入 `text/plain`，
 - 输出 `table > tbody > tr > td > p`，保留文字 marks 和安全链接，不写出内部路径、cell 高亮、类名、事件、列宽或其他编辑器属性。导出不修改源文档，不共享可变片段对象。
 
 粘贴到正文时复用已有 HTML 表格 parser 和 `paste` 命令，产生一次 History；粘贴到现有 cell、列表或代码块仍只尝试实际提供的纯文本。纯文本中的段落换行与行分隔不做 TSV 引号转义，不承诺多段 cell 的二维往返。跨 cell 剪切、删除、任意矩形选择、合并单元格和表格内富片段粘贴均未扩大。Demo 提供中文“表格复制”样例。
+
+## 顶层混合片段
+
+规范化选区的两端都必须位于顶层 paragraph、heading、quote 或 codeBlock 的 text 中；中间块可包含完整文本块、普通/有序/任务列表、表格和 Divider，按原顺序导出。正向和反向结果相同。
+
+- 首尾文字按 UTF-16 offset 裁剪，保留块类型和选中的 marks；空边界和中间空段落不省略，代码块仍保留字面文字，不输出 marks。
+- 中间列表保留完整嵌套内容、原始有序编号和任务 checked；中间表格保留完整行列与多段 cell，不把首尾文字裁剪应用到结构内部。Divider 输出无编辑器属性的 `hr`。
+- 此路径要求所选源块通过模型校验；非法编号、marks、行列不齐等整段回退完整纯文本，不静默删除或修复结构。含图片也整段回退，不只输出剩余可支持块。
+- 端点在列表或表格内部时，仍只使用已有同层列表/同一行或完整行规则；不支持把内部片段与外部正文拼接。此能力不引入结构 BlockSelection、图片写出或跨结构剪切。
+
+正文目标复用既有 parser、`paste` 命令和单条 History；列表、代码块及 cell 目标仍只能使用同时提供的实际纯文本。复制不修改源模型或 History，Demo 提供“混合结构复制”样例。
 
 ## React 行为
 
