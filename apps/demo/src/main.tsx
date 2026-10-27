@@ -135,6 +135,7 @@ type ModelExampleId =
   | "advanced-lists"
   | "list-clipboard"
   | "table-clipboard"
+  | "mixed-clipboard"
   | "marks"
   | "links"
   | "images"
@@ -445,6 +446,42 @@ const modelExamples: ModelExample[] = [
     ]),
   },
   {
+    id: "mixed-clipboard",
+    label: "混合结构复制",
+    selection: {
+      anchor: { path: [1, 0], offset: 1 },
+      focus: { path: [6, 0], offset: 1 },
+    },
+    value: (() => {
+      const table = createTable(1, 2);
+      table.children[0]!.children[0]!.children = [
+        createParagraph([createText("表格甲", { bold: true })]),
+      ];
+      table.children[0]!.children[1]!.children = [
+        createParagraph([createText("表格乙", { italic: true })]),
+      ];
+      return createDocument([
+        createParagraph([createText("未选前段")]),
+        createHeading(2, [createText("前甲", { bold: true })]),
+        createOrderedList(
+          [
+            createListItem([createText("编号甲")]),
+            createListItem([createText("编号乙")]),
+          ],
+          5,
+        ),
+        table,
+        createDivider(),
+        createTaskList([
+          createTaskItem([createText("完成任务")], true),
+          createTaskItem([createText("待办任务")]),
+        ]),
+        createQuote([createText("乙后", { italic: true })]),
+        createParagraph([createText("未选后段")]),
+      ]);
+    })(),
+  },
+  {
     id: "marks",
     label: "文字标记",
     selection: {
@@ -574,6 +611,7 @@ const modelExampleGroups: ModelExampleGroup[] = [
       "list-clipboard",
       "tables",
       "table-clipboard",
+      "mixed-clipboard",
     ],
     label: "复杂结构",
   },
