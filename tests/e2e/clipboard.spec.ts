@@ -592,6 +592,116 @@ test("keeps partial multi-row table copy plain and blocks native cut", async ({
   expect(plain.text).toBe("甲一\t甲二\t甲三\n乙一\t乙二\t乙三");
 });
 
+for (const backward of [false, true]) {
+  test(`round trips a mixed clipboard fragment with one history entry (backward: ${backward})`, async ({
+    page,
+  }) => {
+    if (backward) await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+    const json = page.getByLabel("文档 JSON", { exact: true });
+    const regular = JSON.parse((await json.textContent())!);
+    await page.getByLabel("模型示例").selectOption("mixed-clipboard");
+    await page.getByLabel("复制格式").selectOption("html");
+    const source = await json.textContent();
+    await selectText(
+      page,
+      backward ? "[6,0]" : "[1,0]",
+      1,
+      backward ? "[1,0]" : "[6,0]",
+      1,
+    );
+    const copied = await dispatchClipboard(page, "copy", "已渲染文档", true);
+    expect(copied.types).toEqual(["text/plain", "text/html"]);
+    expect(copied.text).toBe(
+      "甲\n编号甲\n编号乙\n表格甲\t表格乙\n\n完成任务\n待办任务\n乙",
+    );
+    expect(copied.html).not.toMatch(/未选|data-|aria-|contenteditable/);
+    await expect(json).toHaveText(source!);
+    await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+    await pasteCopiedToRegular(page, copied);
+    const editor = page.getByLabel("已渲染文档");
+    await expect(editor.locator("h2")).toHaveText("甲");
+    await expect(editor.locator("ol")).toHaveAttribute("start", "5");
+    await expect(editor.locator("ol > li")).toHaveText(["编号甲", "编号乙"]);
+    await expect(editor.locator("td")).toHaveText(["表格甲", "表格乙"]);
+    await expect(editor.locator("hr")).toHaveCount(1);
+    await expect(editor.locator('input[type="checkbox"]').nth(0)).toBeChecked();
+    await expect(editor.locator('input[type="checkbox"]').nth(1)).not.toBeChecked();
+    await expect(editor.locator("blockquote")).toHaveText("乙");
+    const pasted = JSON.parse((await json.textContent())!);
+    expect(pasted.children.map((block: { type: string }) => block.type)).toEqual([
+      "paragraph",
+      "heading",
+      "orderedList",
+      "table",
+      "divider",
+      "taskList",
+      "quote",
+      "paragraph",
+      "paragraph",
+    ]);
+    await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+    await page.getByRole("button", { name: "撤销", exact: true }).click();
+    await expect
+      .poll(async () => JSON.parse((await json.textContent())!))
+      .toEqual(regular);
+    await page.getByRole("button", { name: "重做", exact: true }).click();
+    await expect
+      .poll(async () => JSON.parse((await json.textContent())!))
+      .toEqual(pasted);
+    await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+    const bounds = (await editor.locator("table").boundingBox())!;
+    expect(bounds.x).toBeGreaterThanOrEqual(0);
+    expect(bounds.x + bounds.width).toBeLessThanOrEqual(backward ? 390 : 1280);
+    await editor.screenshot({
+      path: test
+        .info()
+        .outputPath(
+          backward ? "mixed-clipboard-mobile.png" : "mixed-clipboard-desktop.png",
+        ),
+    });
+  });
+}
+
+test("retains plain mixed copy and refuses mixed cut in HTML mode", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("mixed-clipboard");
+  const json = page.getByLabel("文档 JSON", { exact: true });
+  const before = await json.textContent();
+  await selectText(page, "[1,0]", 1, "[6,0]", 1);
+  const plain = await dispatchClipboard(page, "copy", "已渲染文档", true);
+  expect(plain.types).toEqual(["text/plain"]);
+  expect(plain.text).toContain("表格甲\t表格乙");
+  await page.getByLabel("复制格式").selectOption("html");
+  await selectText(page, "[1,0]", 1, "[6,0]", 1);
+  const cut = await dispatchClipboard(page, "cut", "已渲染文档", true);
+  expect(cut.prevented).toBe(true);
+  expect(cut.types).toEqual([]);
+  await expect(json).toHaveText(before!);
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+});
+
+test("falls back for mixed ranges containing an image or structural endpoint", async ({
+  page,
+}) => {
+  await page.route("https://images.unsplash.com/**", (route) => route.abort());
+  await page.goto("/");
+  await page.getByLabel("复制格式").selectOption("html");
+  await page.getByLabel("模型示例").selectOption("images");
+  await selectText(page, "[0,0]", 0, "[2,0]", 4);
+  const image = await dispatchClipboard(page, "copy", "已渲染文档", true);
+  expect(image.types).toEqual(["text/plain"]);
+  expect(image.text).toBe("图片示例\n\n点击图片");
+  await page.getByLabel("模型示例").selectOption("mixed-clipboard");
+  await selectText(page, "[1,0]", 1, "[2,1,0]", 3);
+  const endpoint = await dispatchClipboard(page, "copy", "已渲染文档", true);
+  expect(endpoint.types).toEqual(["text/plain"]);
+  expect(endpoint.text).toBe("甲\n编号甲\n编号乙");
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+});
+
 test("does not delete model text when the browser rejects the HTML clipboard write", async ({
   page,
 }) => {
