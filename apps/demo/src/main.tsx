@@ -136,6 +136,7 @@ type ModelExampleId =
   | "list-clipboard"
   | "table-clipboard"
   | "mixed-clipboard"
+  | "image-clipboard"
   | "marks"
   | "links"
   | "images"
@@ -557,6 +558,25 @@ const modelExamples: ModelExample[] = [
     ]),
   },
   {
+    id: "image-clipboard",
+    label: "图文复制",
+    selection: {
+      anchor: { path: [1, 0], offset: 1 },
+      focus: { path: [3, 0], offset: 1 },
+    },
+    value: createDocument([
+      createParagraph([createText("未选前段")]),
+      createParagraph([createText("前甲", { bold: true })]),
+      createImage("https://images.unsplash.com/photo-1497250681960-ef046c08a56e", {
+        alt: "绿色植物",
+        width: 320,
+        height: 180,
+      }),
+      createParagraph([createText("乙后", { italic: true })]),
+      createParagraph([createText("未选后段")]),
+    ]),
+  },
+  {
     id: "images",
     label: "图片块",
     selection: {
@@ -616,7 +636,7 @@ const modelExampleGroups: ModelExampleGroup[] = [
     label: "复杂结构",
   },
   {
-    exampleIds: ["marks", "links", "images"],
+    exampleIds: ["marks", "links", "images", "image-clipboard"],
     label: "内容能力",
   },
   {

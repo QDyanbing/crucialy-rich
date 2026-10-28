@@ -189,7 +189,7 @@ test("groups every model example by acceptance area", async ({ page }) => {
       elements.map((element) => element.getAttribute("label")),
     ),
   ).toEqual(["输入与选区", "块结构", "复杂结构", "内容能力", "边界场景"]);
-  await expect(page.getByLabel("模型示例").locator("option")).toHaveCount(19);
+  await expect(page.getByLabel("模型示例").locator("option")).toHaveCount(20);
 });
 
 test("renders the cross-block editing acceptance sample", async ({ page }) => {
