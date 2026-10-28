@@ -1,5 +1,17 @@
 import { expect, test, type Page } from "@playwright/test";
 
+async function mockImageClipboard(page: Page) {
+  await page.route("https://images.unsplash.com/**", (route) =>
+    route.fulfill({
+      contentType: "image/png",
+      body: Buffer.from(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+        "base64",
+      ),
+    }),
+  );
+}
+
 async function selectText(
   page: Page,
   anchorPath: string,
@@ -702,6 +714,82 @@ test("copies enclosed web images but falls back for mixed structural endpoints",
   expect(endpoint.text).toBe("甲\n编号甲\n编号乙");
   await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
 });
+
+for (const backward of [false, true]) {
+  test(`round trips enclosed image references with one history entry (backward: ${backward})`, async ({
+    page,
+  }) => {
+    await mockImageClipboard(page);
+    if (backward) await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+    const json = page.getByLabel("文档 JSON", { exact: true });
+    const regular = JSON.parse((await json.textContent())!);
+    await page.getByLabel("模型示例").selectOption("image-clipboard");
+    await page.getByLabel("复制格式").selectOption("html");
+    const source = await json.textContent();
+    const editor = page.getByLabel("已渲染文档");
+    await expect
+      .poll(() =>
+        editor.locator("img").evaluate((img: HTMLImageElement) => img.naturalWidth),
+      )
+      .toBeGreaterThan(0);
+    await selectText(
+      page,
+      backward ? "[3,0]" : "[1,0]",
+      1,
+      backward ? "[1,0]" : "[3,0]",
+      1,
+    );
+    const copied = await dispatchClipboard(page, "copy", "已渲染文档", true);
+    expect(copied.text).toBe("甲\n\n乙");
+    expect(copied.html).toContain('alt="绿色植物"');
+    expect(copied.html).toContain('width="320"');
+    expect(copied.html).toContain('height="180"');
+    expect(copied.html).not.toMatch(/未选|data-|aria-|contenteditable|status=/);
+    await expect(json).toHaveText(source!);
+    await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+    await pasteCopiedToRegular(page, copied);
+    const image = editor.locator("img");
+    await expect(image).toHaveCount(1);
+    await expect(image).toHaveAttribute("alt", "绿色植物");
+    await expect(image).toHaveAttribute("width", "320");
+    await expect(image).toHaveAttribute("height", "180");
+    await expect(editor.locator("strong")).toHaveText("甲");
+    await expect(editor.locator("em")).toHaveText("乙");
+    const pasted = JSON.parse((await json.textContent())!);
+    expect(pasted.children[2]).toMatchObject({
+      type: "image",
+      alt: "绿色植物",
+      width: 320,
+      height: 180,
+      status: "ready",
+    });
+    await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+    await page.getByRole("button", { name: "撤销", exact: true }).click();
+    await expect
+      .poll(async () => JSON.parse((await json.textContent())!))
+      .toEqual(regular);
+    await expect(image).toHaveCount(0);
+    await page.getByRole("button", { name: "重做", exact: true }).click();
+    await expect
+      .poll(async () => JSON.parse((await json.textContent())!))
+      .toEqual(pasted);
+    await expect
+      .poll(() => image.evaluate((img: HTMLImageElement) => img.naturalWidth))
+      .toBeGreaterThan(0);
+    await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+    const bounds = (await image.boundingBox())!;
+    expect(bounds.x).toBeGreaterThanOrEqual(0);
+    expect(bounds.x + bounds.width).toBeLessThanOrEqual(backward ? 390 : 1280);
+    await editor.screenshot({
+      path: test
+        .info()
+        .outputPath(
+          backward ? "image-clipboard-mobile.png" : "image-clipboard-desktop.png",
+        ),
+    });
+  });
+}
 
 test("does not delete model text when the browser rejects the HTML clipboard write", async ({
   page,
