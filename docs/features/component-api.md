@@ -102,7 +102,8 @@ ref 命令事件的 `inputType` 为 `command`。受控模式不会自行替换 `
 - 原生复制输出模型选区的纯文本；剪切复用 `deleteSelection` 并输出独立 `deleteByCut` transaction，写入失败、禁用命令及不支持的范围不删除。只读支持复制，详见[复制与剪切](./copy-cut.md)。
 - `clipboardFormat="html"` 还可复制同一列表同一层级的跨项结构、编号和任务状态；单项片段仍为 paragraph，跨项剪切和列表内富格式粘贴能力不变，不支持的结构范围回退完整纯文本。
 - 同一表格同一行跨 cell 或完整连续行可复制 HTML 表格，保留文字样式与多段 cell；单 cell 仍输出 paragraph，部分跨行/跨表回退纯文本，跨 cell 剪切与 cell 内富片段粘贴能力不变。
-- 两端在顶层文本块的混合范围，可复制中间完整列表、表格和分隔线；首尾裁剪，保留原顺序，含图片/非法结构或端点进出结构内部仍回退纯文本，不扩大剪切范围。
+- 两端在顶层文本块的混合范围，可复制中间完整列表、表格、分隔线及安全图片引用；首尾裁剪，保留原顺序，不支持的图片/非法结构或端点进出结构内部仍回退纯文本，不扩大剪切范围。
+- 图片引用仅限模型 ready、无凭据的 HTTP/HTTPS，保留 alt 和正安全整数宽高；不复制文件、blob 或 loading/error，不验证远端资源，也不新增图片 BlockSelection 复制。
 - Enter 会通过 `splitBlockCommand` 创建 transaction；受支持的非折叠 selection 会先删除再执行分段规则。
 - 段首 Backspace 会通过 `mergeBlockCommand` 创建 transaction。
 - 表格单元格内复用相同输入链路；Enter 只在当前 cell 内新增 paragraph，Backspace/Delete 不跨 cell 合并。

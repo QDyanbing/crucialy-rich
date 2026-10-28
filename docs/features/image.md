@@ -46,6 +46,12 @@ Clipboard parser 可把顶层 HTML `img`、独立图片 paragraph 和普通 para
 
 解析后的图片通过 `paste` command 以 `split_block + insert_block` 插入，并作为一条 History 记录。React 原生 paste 事件不会直接把剪贴板 HTML 写入 DOM。
 
+## HTML 复制
+
+显式开启 `clipboardFormat="html"` 后，两端位于顶层文本块的选区可复制中间完整图片。只写出模型状态为 `ready`、不含账号密码的 HTTP/HTTPS URL 引用，保留转义的 alt 和正安全整数宽高；小数或过大尺寸只省略该属性，不改源模型。
+
+blob、loading/error、凭据 URL 或非法源模型使整个 HTML 片段回退纯文本，不丢掉图片后只导出其他块。复制不读取图片文件、不上传、不验证远端是否可达；正文粘贴可形成一条 History，受限目标仍使用实际纯文本。未新增独立图片块选区复制、图片文件 MIME 或跨图片剪切，完整规则见[图片引用](./copy-cut.md#图片引用)。
+
 ## 选中与删除
 
 `BlockSelection` 使用 `{ type: "block", path }` 表达完整块选区，与文本 `RangeSelection` 分离。`RichTextEditor` 通过 `blockSelection` 和 `onBlockSelectionChange` 暴露受控图片选区：点击图片输出块选区，选中图片带有 `data-selected="true"`。
