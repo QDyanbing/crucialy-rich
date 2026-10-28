@@ -791,6 +791,106 @@ for (const backward of [false, true]) {
   });
 }
 
+test("keeps image copy plain by default and refuses image range cut", async ({
+  page,
+}) => {
+  await mockImageClipboard(page);
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("image-clipboard");
+  const json = page.getByLabel("文档 JSON", { exact: true });
+  const before = await json.textContent();
+  await selectText(page, "[1,0]", 1, "[3,0]", 1);
+  const plain = await dispatchClipboard(page, "copy", "已渲染文档", true);
+  expect(plain.types).toEqual(["text/plain"]);
+  expect(plain.text).toBe("甲\n\n乙");
+  await page.getByLabel("复制格式").selectOption("html");
+  await selectText(page, "[1,0]", 1, "[3,0]", 1);
+  const cut = await dispatchClipboard(page, "cut", "已渲染文档", true);
+  expect(cut.prevented).toBe(true);
+  expect(cut.types).toEqual([]);
+  await expect(json).toHaveText(before!);
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+});
+
+test("uses actual plain fallback when an image fragment is pasted into code", async ({
+  page,
+}) => {
+  await mockImageClipboard(page);
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("image-clipboard");
+  await page.getByLabel("复制格式").selectOption("html");
+  await selectText(page, "[1,0]", 1, "[3,0]", 1);
+  const copied = await dispatchClipboard(page, "copy", "已渲染文档", true);
+  await page.getByLabel("模型示例").selectOption("code-block");
+  const editor = page.getByLabel("已渲染文档");
+  const length = (await editor.locator("pre code").textContent())!.length;
+  await selectText(page, "[0,0]", 0, "[0,0]", length);
+  await editor.evaluate((element, data) => {
+    const clipboardData = new DataTransfer();
+    clipboardData.setData("text/plain", data.text);
+    clipboardData.setData("text/html", data.html!);
+    element.dispatchEvent(
+      new ClipboardEvent("paste", { bubbles: true, cancelable: true, clipboardData }),
+    );
+  }, copied);
+  await expect(editor.locator("pre code")).toHaveText("甲\n\n乙");
+  await expect(editor.locator("img")).toHaveCount(0);
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+});
+
+test("does not export an imported temporary image as partial HTML", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await pasteCopiedToRegular(page, {
+    text: "甲\n\n乙",
+    html: '<p>甲</p><img src="blob:https://example.com/local"><p>乙</p>',
+  });
+  await page.getByLabel("复制格式").selectOption("html");
+  const json = page.getByLabel("文档 JSON", { exact: true });
+  const before = await json.textContent();
+  await selectText(page, "[1,0]", 0, "[3,0]", 1);
+  const copied = await dispatchClipboard(page, "copy", "已渲染文档", true);
+  expect(copied.types).toEqual(["text/plain"]);
+  expect(copied.text).toBe("甲\n\n乙");
+  await expect(json).toHaveText(before!);
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+});
+
+test("keeps the image model intact when HTML clipboard writing fails", async ({
+  page,
+}) => {
+  await mockImageClipboard(page);
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("image-clipboard");
+  await page.getByLabel("复制格式").selectOption("html");
+  const json = page.getByLabel("文档 JSON", { exact: true });
+  const before = await json.textContent();
+  await selectText(page, "[1,0]", 1, "[3,0]", 1);
+  const result = await page.getByLabel("已渲染文档").evaluate((editor) => {
+    const clipboardData = new DataTransfer();
+    Object.defineProperty(clipboardData, "setData", {
+      value: (mime: string, value: string) => {
+        if (mime === "text/html") throw new DOMException("HTML rejected");
+        DataTransfer.prototype.setData.call(clipboardData, mime, value);
+      },
+    });
+    const event = new ClipboardEvent("copy", {
+      bubbles: true,
+      cancelable: true,
+      clipboardData,
+    });
+    editor.dispatchEvent(event);
+    return {
+      prevented: event.defaultPrevented,
+      types: Array.from(clipboardData.types),
+    };
+  });
+  expect(result).toEqual({ prevented: true, types: ["text/plain"] });
+  await expect(json).toHaveText(before!);
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+});
+
 test("does not delete model text when the browser rejects the HTML clipboard write", async ({
   page,
 }) => {
