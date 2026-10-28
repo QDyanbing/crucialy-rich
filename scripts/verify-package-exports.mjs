@@ -293,6 +293,46 @@ function verifyClipboardHtml(core) {
   );
 }
 
+function verifyImageClipboard(core) {
+  const image = core.createImage("https://example.com/a.png", {
+    alt: "中文图片",
+    width: 120,
+    height: 80,
+  });
+  const document = core.createDocument([
+    core.createParagraph([core.createText("前甲", { bold: true })]),
+    image,
+    core.createParagraph([core.createText("乙后", { italic: true })]),
+  ]);
+  const original = structuredClone(document);
+  const anchor = { path: [0, 0], offset: 1 };
+  const focus = { path: [2, 0], offset: 1 };
+  const html = core.getClipboardHtml(document, { anchor, focus });
+  assert.deepEqual(core.parseHtml(html).blocks, [
+    core.createParagraph([core.createText("甲", { bold: true })]),
+    image,
+    core.createParagraph([core.createText("乙", { italic: true })]),
+  ]);
+  assert.equal(core.getClipboardHtml(document, { anchor: focus, focus: anchor }), html);
+  assert.equal(/data-|aria-|contenteditable|status=|class=/i.test(html), false);
+  const parsed = core.parseHtml(html).blocks;
+  parsed[1].alt = "修改";
+  assert.deepEqual(document, original);
+  for (const replacement of [
+    core.createImage("blob:https://example.com/local"),
+    core.createImage(image.src, { status: "loading" }),
+    core.createImage("https://user:secret@example.com/a.png"),
+  ]) {
+    const unsafe = core.createDocument([
+      document.children[0],
+      replacement,
+      document.children[2],
+    ]);
+    assert.equal(core.getClipboardHtml(unsafe, { anchor, focus }), undefined);
+    assert.equal(core.getClipboardText(unsafe, { anchor, focus }), "甲\n\n乙");
+  }
+}
+
 function verifyMixedClipboard(core) {
   const document = core.createDocument([
     core.createParagraph([core.createText("前甲", { bold: true })]),
@@ -557,6 +597,7 @@ for (const packageConfig of publicPackages) {
     verifyListClipboard(runtime);
     verifyTableClipboard(runtime);
     verifyMixedClipboard(runtime);
+    verifyImageClipboard(runtime);
     assert.ok(declarations.includes("CellNavigationDirection"));
     assert.ok(declarations.includes("HistoryMergePolicy"));
     assert.ok(declarations.includes("mergePolicy?: HistoryMergePolicy"));
