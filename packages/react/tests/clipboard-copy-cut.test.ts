@@ -97,6 +97,74 @@ function clipboard(
   return { event, data, setData, clearData };
 }
 
+describe("RichTextEditor enclosed image clipboard", () => {
+  function imageValue(
+    image = createImage("https://example.com/a.png", {
+      alt: "中文图片",
+      width: 120,
+      height: 80,
+    }),
+  ) {
+    return createDocument([
+      createParagraph([createText("前甲", { bold: true })]),
+      image,
+      createParagraph([createText("乙后", { italic: true })]),
+    ]);
+  }
+  const range = {
+    anchor: { path: [0, 0], offset: 1 },
+    focus: { path: [2, 0], offset: 1 },
+  };
+
+  it.each([false, true])(
+    "copies image metadata from the model in either direction (%s)",
+    (backward) => {
+      const value = imageValue();
+      const host = renderEditor(value, { clipboardFormat: "html" });
+      select(
+        host.container,
+        backward ? { anchor: range.focus, focus: range.anchor } : range,
+      );
+      const copied = clipboard(host.container, "copy");
+      expect(copied.data["text/plain"]).toBe("甲\n\n乙");
+      const expected = imageValue().children;
+      expected[0] = createParagraph([createText("甲", { bold: true })]);
+      expected[2] = createParagraph([createText("乙", { italic: true })]);
+      expect(parseHtml(copied.data["text/html"]!)?.blocks).toEqual(expected);
+      expect(host.onChange).not.toHaveBeenCalled();
+      expect(host.onSelectionChange).not.toHaveBeenCalled();
+      expect(host.onTransaction).not.toHaveBeenCalled();
+    },
+  );
+
+  it("supports readonly controlled copy without editing commands", () => {
+    const value = imageValue();
+    const host = renderEditor(value, {
+      value,
+      contentEditable: false,
+      clipboardFormat: "html",
+      commandRegistry: createCommandRegistry([]),
+    });
+    select(host.container, range);
+    expect(clipboard(host.container, "copy").data["text/html"]).toContain(
+      'alt="中文图片"',
+    );
+    expect(host.onTransaction).not.toHaveBeenCalled();
+  });
+
+  it("ignores altered DOM image attributes when exporting the model", () => {
+    const host = renderEditor(imageValue(), { clipboardFormat: "html" });
+    const image = host.container.querySelector("img")!;
+    image.setAttribute("src", "https://example.com/dom-only.png");
+    image.setAttribute("alt", "DOM 文字");
+    image.setAttribute("onerror", "unsafe");
+    select(host.container, range);
+    const html = clipboard(host.container, "copy").data["text/html"]!;
+    expect(html).toContain('src="https://example.com/a.png"');
+    expect(html).not.toMatch(/DOM 文字|dom-only|onerror=/);
+  });
+});
+
 describe("RichTextEditor mixed block clipboard", () => {
   function mixedValue() {
     return createDocument([
