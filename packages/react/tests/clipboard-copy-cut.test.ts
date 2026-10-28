@@ -116,6 +116,58 @@ describe("RichTextEditor enclosed image clipboard", () => {
     focus: { path: [2, 0], offset: 1 },
   };
 
+  it("keeps image copy plain by default and refuses cross-image cut", () => {
+    const host = renderEditor(imageValue());
+    select(host.container, range);
+    expect(clipboard(host.container, "copy").data).toEqual({
+      "text/plain": "甲\n\n乙",
+    });
+    const rich = renderEditor(imageValue(), { clipboardFormat: "html" });
+    select(rich.container, range);
+    const before = rich.container.innerHTML;
+    const cut = clipboard(rich.container, "cut");
+    expect(cut.event.defaultPrevented).toBe(true);
+    expect(cut.clearData).not.toHaveBeenCalled();
+    expect(cut.setData).not.toHaveBeenCalled();
+    expect(rich.container.innerHTML).toBe(before);
+    expect(rich.onTransaction).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    createImage("blob:https://example.com/local"),
+    createImage("https://example.com/a.png", { status: "loading" }),
+    createImage("https://example.com/a.png", { status: "error" }),
+    createImage("https://user:secret@example.com/a.png"),
+  ])(
+    "falls back to complete plain text for unsupported image $src ($status)",
+    (image) => {
+      const host = renderEditor(imageValue(image), { clipboardFormat: "html" });
+      select(host.container, range);
+      expect(clipboard(host.container, "copy").data).toEqual({
+        "text/plain": "甲\n\n乙",
+      });
+      expect(host.onTransaction).not.toHaveBeenCalled();
+    },
+  );
+
+  it("does not edit when the image HTML clipboard write is rejected", () => {
+    const host = renderEditor(imageValue(), { clipboardFormat: "html" });
+    select(host.container, range);
+    const result = clipboard(host.container, "copy", "text/html");
+    expect(result.event.defaultPrevented).toBe(true);
+    expect(result.data).toEqual({ "text/plain": "甲\n\n乙" });
+    expect(host.onChange).not.toHaveBeenCalled();
+    expect(host.onTransaction).not.toHaveBeenCalled();
+  });
+
+  it("lets the host cancel image format export", () => {
+    const onCopy = vi.fn((event) => event.preventDefault());
+    const host = renderEditor(imageValue(), { clipboardFormat: "html", onCopy });
+    select(host.container, range);
+    expect(clipboard(host.container, "copy").setData).not.toHaveBeenCalled();
+    expect(onCopy).toHaveBeenCalledOnce();
+  });
+
   it.each([false, true])(
     "copies image metadata from the model in either direction (%s)",
     (backward) => {
