@@ -315,7 +315,7 @@ function verifyMixedClipboard(core) {
   parsed[1].children[0].children[0].text = "修改";
   assert.deepEqual(document, original);
   const withImage = structuredClone(document);
-  withImage.children[2] = core.createImage("https://example.com/image.png");
+  withImage.children[2] = core.createImage("blob:https://example.com/local");
   assert.equal(core.getClipboardHtml(withImage, { anchor, focus }), undefined);
   assert.equal(
     core.getClipboardText(withImage, { anchor, focus }),

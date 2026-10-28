@@ -168,9 +168,9 @@ describe("RichTextEditor mixed block clipboard", () => {
     expect(host.onTransaction).not.toHaveBeenCalled();
   });
 
-  it("does not export partial HTML around an enclosed image", () => {
+  it("does not export partial HTML around a temporary image", () => {
     const value = mixedValue();
-    value.children[2] = createImage("https://example.com/image.png");
+    value.children[2] = createImage("blob:https://example.com/local");
     const host = renderEditor(value, { clipboardFormat: "html" });
     select(host.container, range);
     expect(clipboard(host.container, "copy").data).toEqual({

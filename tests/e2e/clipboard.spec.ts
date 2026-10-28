@@ -683,7 +683,7 @@ test("retains plain mixed copy and refuses mixed cut in HTML mode", async ({
   await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
 });
 
-test("falls back for mixed ranges containing an image or structural endpoint", async ({
+test("copies enclosed web images but falls back for mixed structural endpoints", async ({
   page,
 }) => {
   await page.route("https://images.unsplash.com/**", (route) => route.abort());
@@ -692,7 +692,8 @@ test("falls back for mixed ranges containing an image or structural endpoint", a
   await page.getByLabel("模型示例").selectOption("images");
   await selectText(page, "[0,0]", 0, "[2,0]", 4);
   const image = await dispatchClipboard(page, "copy", "已渲染文档", true);
-  expect(image.types).toEqual(["text/plain"]);
+  expect(image.types).toEqual(["text/plain", "text/html"]);
+  expect(image.html).toContain("<img");
   expect(image.text).toBe("图片示例\n\n点击图片");
   await page.getByLabel("模型示例").selectOption("mixed-clipboard");
   await selectText(page, "[1,0]", 1, "[2,1,0]", 3);

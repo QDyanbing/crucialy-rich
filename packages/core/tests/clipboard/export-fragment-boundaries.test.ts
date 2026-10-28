@@ -29,8 +29,8 @@ const range = {
 };
 
 describe("mixed clipboard structure and safety boundaries", () => {
-  it("falls back for an enclosed image without dropping it from a partial HTML fragment", () => {
-    const document = enclose(createImage("https://example.com/image.png"));
+  it("falls back for a temporary image without dropping it from a partial HTML fragment", () => {
+    const document = enclose(createImage("blob:https://example.com/local"));
     expect(getClipboardText(document, range)).toBe("甲\n\n乙");
     expect(getClipboardHtml(document, range)).toBeUndefined();
   });

@@ -1,6 +1,7 @@
 import {
   createDocument,
   isDividerNode,
+  isImageNode,
   isListNode,
   isTableNode,
   isTextBlockNode,
@@ -12,6 +13,7 @@ import {
 import { normalizeRange, type RangeSelection } from "../selection";
 import { clipClipboardText } from "./selection-blocks";
 import { getClipboardText } from "./text";
+import { getClipboardImage } from "./image";
 
 export function getClipboardBlockFragment(
   document: DocumentNode,
@@ -32,12 +34,18 @@ export function getClipboardBlockFragment(
         isTextBlockNode(block) ||
         isListNode(block) ||
         isTableNode(block) ||
-        isDividerNode(block),
+        isDividerNode(block) ||
+        isImageNode(block),
     ) ||
     !validateDocument(createDocument(blocks)).valid
   )
     return undefined;
-  const clipped = blocks.map((block, index) =>
+  const prepared = blocks.map((block) =>
+    isImageNode(block) ? getClipboardImage(block) : block,
+  );
+  if (!prepared.every((block): block is BlockNode => block !== undefined))
+    return undefined;
+  const clipped = prepared.map((block, index) =>
     isTextBlockNode(block)
       ? {
           ...block,

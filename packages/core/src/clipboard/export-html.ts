@@ -17,6 +17,7 @@ const clipboardAttributes: Partial<
   a: ["href", "target", "rel"],
   ol: ["start"],
   input: ["type", "checked"],
+  img: ["src", "alt", "width", "height"],
 };
 
 function toClipboardNode(
