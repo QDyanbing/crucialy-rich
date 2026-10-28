@@ -15,5 +15,9 @@ export function getClipboardImage(image: ImageNode): ImageNode | undefined {
     url.password
   )
     return undefined;
-  return createImage(url.href, { alt: image.alt });
+  return createImage(url.href, {
+    alt: image.alt,
+    width: Number.isSafeInteger(image.width) ? image.width : null,
+    height: Number.isSafeInteger(image.height) ? image.height : null,
+  });
 }
