@@ -293,6 +293,37 @@ function verifyClipboardHtml(core) {
   );
 }
 
+function verifyImageBlockClipboard(core) {
+  const image = core.createImage("https://example.com/block.png", {
+    alt: "图片",
+    width: 120,
+    height: 80,
+  });
+  const document = core.createDocument([
+    core.createParagraph([core.createText("未选文字")]),
+    image,
+  ]);
+  const selection = core.createBlockSelection([1]);
+  const html = core.getClipboardHtml(document, selection);
+  assert.deepEqual(core.parseHtml(html).blocks, [image]);
+  assert.equal(/未选|data-|aria-|contenteditable|status=/.test(html), false);
+  assert.equal(
+    core.getClipboardHtml(document, core.createBlockSelection([0])),
+    undefined,
+  );
+  assert.equal(
+    core.getClipboardHtml(document, core.createBlockSelection([9])),
+    undefined,
+  );
+  const temporary = core.createDocument([
+    core.createImage("blob:https://example.com/local"),
+  ]);
+  assert.equal(
+    core.getClipboardHtml(temporary, core.createBlockSelection([0])),
+    undefined,
+  );
+}
+
 function verifyImageClipboard(core) {
   const image = core.createImage("https://example.com/a.png", {
     alt: "中文图片",
@@ -598,6 +629,11 @@ for (const packageConfig of publicPackages) {
     verifyTableClipboard(runtime);
     verifyMixedClipboard(runtime);
     verifyImageClipboard(runtime);
+    verifyImageBlockClipboard(runtime);
+    assert.match(
+      declarations,
+      /getClipboardHtml\(document: DocumentNode, selection: RangeSelection \| BlockSelection\)/,
+    );
     assert.ok(declarations.includes("CellNavigationDirection"));
     assert.ok(declarations.includes("HistoryMergePolicy"));
     assert.ok(declarations.includes("mergePolicy?: HistoryMergePolicy"));

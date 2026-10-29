@@ -161,6 +161,19 @@ describe("@crucialy-rich/core public API", () => {
     ).toBe("<p><span>复制</span></p>");
   });
 
+  it("accepts image BlockSelection in the public HTML clipboard signature", () => {
+    const exportHtml: (
+      document: core.DocumentNode,
+      selection: core.RangeSelection | core.BlockSelection,
+    ) => string | undefined = core.getClipboardHtml;
+    const image = core.createImage("https://example.com/a.png", { alt: "图片" });
+    expect(
+      core.parseHtml(
+        exportHtml(core.createDocument([image]), core.createBlockSelection([0]))!,
+      )?.blocks,
+    ).toEqual([image]);
+  });
+
   it("exposes the render API", () => {
     expect(typeof core.MODEL_PATH_ATTRIBUTE).toBe("string");
     expect(typeof core.createModelPathAttributes).toBe("function");
