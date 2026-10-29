@@ -891,6 +891,69 @@ test("keeps the image model intact when HTML clipboard writing fails", async ({
   await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
 });
 
+for (const mobile of [false, true]) {
+  test(`copies a clicked image block and pastes it with one history entry (mobile: ${mobile})`, async ({
+    page,
+  }) => {
+    await mockImageClipboard(page);
+    if (mobile) await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+    const json = page.getByLabel("文档 JSON", { exact: true });
+    const regular = JSON.parse((await json.textContent())!);
+    await page.getByLabel("模型示例").selectOption("image-clipboard");
+    await page.getByLabel("复制格式").selectOption("html");
+    const before = await json.textContent();
+    const editor = page.getByLabel("已渲染文档");
+    await selectText(page, "[1,0]", 1, "[3,0]", 1);
+    await editor.locator("img").click();
+    await expect(editor.locator("img")).toHaveAttribute("data-selected", "true");
+    await expect(editor).toBeFocused();
+    const copied = await dispatchClipboard(page, "copy", "已渲染文档", true);
+    expect(copied.prevented).toBe(true);
+    expect(copied.text).toBe("");
+    expect(copied.types).toEqual(["text/plain", "text/html"]);
+    expect(copied.html).toContain('alt="绿色植物"');
+    expect(copied.html).not.toMatch(/<p|前甲|乙后|data-|aria-|contenteditable|status=/);
+    await expect(json).toHaveText(before!);
+    await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+    await pasteCopiedToRegular(page, copied);
+    const image = editor.locator("img");
+    await expect(image).toHaveCount(1);
+    await expect(image).toHaveAttribute("alt", "绿色植物");
+    await expect(image).toHaveAttribute("width", "320");
+    await expect(image).toHaveAttribute("height", "180");
+    const pasted = JSON.parse((await json.textContent())!);
+    expect(pasted.children.map((block: { type: string }) => block.type)).toEqual([
+      "paragraph",
+      "image",
+      "paragraph",
+      "paragraph",
+    ]);
+    await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+    await page.getByRole("button", { name: "撤销", exact: true }).click();
+    await expect
+      .poll(async () => JSON.parse((await json.textContent())!))
+      .toEqual(regular);
+    await expect(image).toHaveCount(0);
+    await page.getByRole("button", { name: "重做", exact: true }).click();
+    await expect
+      .poll(async () => JSON.parse((await json.textContent())!))
+      .toEqual(pasted);
+    await expect
+      .poll(() => image.evaluate((element: HTMLImageElement) => element.naturalWidth))
+      .toBeGreaterThan(0);
+    await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+    const bounds = (await image.boundingBox())!;
+    expect(bounds.x).toBeGreaterThanOrEqual(0);
+    expect(bounds.x + bounds.width).toBeLessThanOrEqual(mobile ? 390 : 1280);
+    await editor.screenshot({
+      path: test
+        .info()
+        .outputPath(mobile ? "image-block-mobile.png" : "image-block-desktop.png"),
+    });
+  });
+}
+
 test("does not delete model text when the browser rejects the HTML clipboard write", async ({
   page,
 }) => {
