@@ -85,7 +85,7 @@ export function getClipboardHtml(
   document: DocumentNode,
   selection: RangeSelection | BlockSelection,
 ): string | undefined {
-  if ("type" in selection) {
+  if (!("anchor" in selection)) {
     if (selection.type !== "block" || !isImageBlockSelection(document, selection))
       return undefined;
     const node = getNodeAtPath(document, selection.path);

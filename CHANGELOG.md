@@ -8,6 +8,8 @@
 
 ### 新增
 
+- `getClipboardHtml` 扩展为接受 `RangeSelection | BlockSelection`，块选区仅导出安全顶层图片；原范围契约与 `getClipboardText` 保持不变。
+- React HTML 模式支持聚焦根上的受控图片块复制，输出 HTML 与空纯文本，不使用遗留文字选区；默认 plain、非法图片与受限粘贴目标不猜造替代文字，图片剪切仍拒绝。补齐 Core、React、History、构建产物和桌面/手机浏览器回归。
 - 混合 HTML 复制新增已就绪 HTTP/HTTPS 图片引用，保留 alt 与正安全整数宽高，过滤内部属性并裁剪首尾文字；临时 blob、loading/error、凭据 URL 或非法模型整段回退纯文本，合法小数/过大尺寸省略相应属性。
 - 新增中文“图文复制”样例和 Core、React、History、构建产物、Chromium 桌面/手机验证；不复制图片文件、不验证远端可达性，不扩大图片块选区复制、跨图片剪切或受限粘贴目标能力。
 - HTML 复制新增两端位于顶层文本块的混合片段，保留中间完整列表、表格和 Divider，首尾裁剪并维持块顺序、编号、任务状态与安全文字格式；含图片、非法结构或结构内部与正文混选仍回退完整纯文本。

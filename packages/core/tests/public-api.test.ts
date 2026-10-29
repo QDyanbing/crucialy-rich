@@ -159,6 +159,14 @@ describe("@crucialy-rich/core public API", () => {
         focus: { path: [0, 0], offset: 2 },
       }),
     ).toBe("<p><span>复制</span></p>");
+    const enrichedRange = {
+      type: "range",
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 2 },
+    };
+    expect(core.getClipboardHtml(document, enrichedRange)).toBe(
+      "<p><span>复制</span></p>",
+    );
   });
 
   it("accepts image BlockSelection in the public HTML clipboard signature", () => {
