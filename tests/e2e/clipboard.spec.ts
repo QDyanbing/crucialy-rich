@@ -954,6 +954,88 @@ for (const mobile of [false, true]) {
   });
 }
 
+test("guards plain mode cut and focus for selected image blocks", async ({ page }) => {
+  await mockImageClipboard(page);
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("image-clipboard");
+  const editor = page.getByLabel("已渲染文档");
+  const json = page.getByLabel("文档 JSON", { exact: true });
+  const before = await json.textContent();
+  await selectText(page, "[1,0]", 0, "[1,0]", 2);
+  await editor.locator("img").click();
+  const plain = await dispatchClipboard(page, "copy", "已渲染文档", true);
+  expect(plain.prevented).toBe(true);
+  expect(plain.types).toEqual([]);
+  const cut = await dispatchClipboard(page, "cut", "已渲染文档", true);
+  expect(cut.prevented).toBe(true);
+  expect(cut.types).toEqual([]);
+  await page.getByLabel("复制格式").selectOption("html");
+  await page.getByLabel("复制格式").focus();
+  await expect(editor).not.toBeFocused();
+  expect((await dispatchClipboard(page, "copy", "已渲染文档", true)).types).toEqual([]);
+  await editor.locator("img").click();
+  expect((await dispatchClipboard(page, "copy", "已渲染文档", true)).html).toContain(
+    "<img",
+  );
+  await expect(json).toHaveText(before!);
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+});
+
+test("does not use a selected image when the DOM range is outside the editor", async ({
+  page,
+}) => {
+  await mockImageClipboard(page);
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("image-clipboard");
+  await page.getByLabel("复制格式").selectOption("html");
+  const editor = page.getByLabel("已渲染文档");
+  await editor.locator("img").click();
+  await page
+    .getByRole("heading", { level: 1, name: "crucialy-rich" })
+    .evaluate((heading) => {
+      const text = heading.firstChild!;
+      window.getSelection()!.setBaseAndExtent(text, 0, text, 4);
+    });
+  await expect(editor).toBeFocused();
+  const copied = await dispatchClipboard(page, "copy", "已渲染文档", true);
+  expect(copied.prevented).toBe(false);
+  expect(copied.types).toEqual([]);
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+});
+
+test("does not replace code with inferred text from a selected image block", async ({
+  page,
+}) => {
+  await mockImageClipboard(page);
+  await page.goto("/");
+  await page.getByLabel("模型示例").selectOption("image-clipboard");
+  await page.getByLabel("复制格式").selectOption("html");
+  const editor = page.getByLabel("已渲染文档");
+  await editor.locator("img").click();
+  const copied = await dispatchClipboard(page, "copy", "已渲染文档", true);
+  expect(copied.text).toBe("");
+  await page.getByLabel("模型示例").selectOption("code-block");
+  const json = page.getByLabel("文档 JSON", { exact: true });
+  const before = await json.textContent();
+  const length = (await editor.locator("pre code").textContent())!.length;
+  await selectText(page, "[0,0]", 0, "[0,0]", length);
+  const prevented = await editor.evaluate((element, data) => {
+    const clipboardData = new DataTransfer();
+    clipboardData.setData("text/plain", data.text);
+    clipboardData.setData("text/html", data.html!);
+    const event = new ClipboardEvent("paste", {
+      bubbles: true,
+      cancelable: true,
+      clipboardData,
+    });
+    element.dispatchEvent(event);
+    return event.defaultPrevented;
+  }, copied);
+  expect(prevented).toBe(true);
+  await expect(json).toHaveText(before!);
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+});
+
 test("does not delete model text when the browser rejects the HTML clipboard write", async ({
   page,
 }) => {
