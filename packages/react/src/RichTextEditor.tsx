@@ -800,6 +800,23 @@ function RichTextEditorComponent(
   function handleCopy(event: ClipboardEvent<HTMLDivElement>) {
     onCopy?.(event);
     if (event.defaultPrevented || compositionRef.current.active) return;
+    if (blockSelection) {
+      const root = event.currentTarget;
+      if (root.ownerDocument.activeElement !== root) return;
+      const domSelection = root.ownerDocument.getSelection();
+      if (
+        domSelection?.rangeCount &&
+        (!root.contains(domSelection.anchorNode) ||
+          !root.contains(domSelection.focusNode))
+      )
+        return;
+      event.preventDefault();
+      if (clipboardFormat === "html") {
+        const html = getClipboardHtml(document, blockSelection);
+        if (html !== undefined) writeClipboardData(event, "", html);
+      }
+      return;
+    }
     const modelSelection = getModelSelectionFromDom(event.currentTarget, document);
     const text = modelSelection
       ? getClipboardText(document, modelSelection)
@@ -819,7 +836,7 @@ function RichTextEditorComponent(
     onCut?.(event);
     if (event.defaultPrevented || !editable) return;
     event.preventDefault();
-    if (compositionRef.current.active) return;
+    if (compositionRef.current.active || blockSelection) return;
     const modelSelection = getModelSelectionFromDom(event.currentTarget, document);
     if (!modelSelection) return;
     const text = getClipboardText(document, modelSelection);

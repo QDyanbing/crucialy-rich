@@ -2,6 +2,7 @@
 
 import {
   createDocument,
+  createBlockSelection,
   createDivider,
   createImage,
   createBulletList,
@@ -96,6 +97,73 @@ function clipboard(
   act(() => container.firstElementChild!.dispatchEvent(event));
   return { event, data, setData, clearData };
 }
+
+describe("RichTextEditor selected image clipboard", () => {
+  const value = createDocument([
+    createParagraph([createText("前甲乙后")]),
+    createImage("https://example.com/a.png", {
+      alt: "中文图片",
+      width: 120,
+      height: 80,
+    }),
+    createParagraph([createText("正文")]),
+  ]);
+
+  function focusRoot(container: HTMLElement) {
+    const root = container.firstElementChild as HTMLElement;
+    root.tabIndex = 0;
+    root.focus();
+  }
+
+  it.each([false, true])(
+    "copies the selected image instead of an old range (%s)",
+    (oldRange) => {
+      const host = renderEditor(value, {
+        clipboardFormat: "html",
+        blockSelection: createBlockSelection([1]),
+      });
+      if (oldRange) select(host.container);
+      else window.getSelection()!.removeAllRanges();
+      focusRoot(host.container);
+      const copied = clipboard(host.container, "copy");
+      expect(copied.data["text/plain"]).toBe("");
+      expect(parseHtml(copied.data["text/html"]!)?.blocks).toEqual([value.children[1]]);
+      expect(host.onChange).not.toHaveBeenCalled();
+      expect(host.onSelectionChange).not.toHaveBeenCalled();
+      expect(host.onTransaction).not.toHaveBeenCalled();
+    },
+  );
+
+  it("supports a focused readonly controlled image selection without commands", () => {
+    const host = renderEditor(value, {
+      value,
+      contentEditable: false,
+      clipboardFormat: "html",
+      blockSelection: createBlockSelection([1]),
+      commandRegistry: createCommandRegistry([]),
+    });
+    window.getSelection()!.removeAllRanges();
+    focusRoot(host.container);
+    expect(clipboard(host.container, "copy").data["text/html"]).toContain(
+      'alt="中文图片"',
+    );
+    expect(host.onTransaction).not.toHaveBeenCalled();
+  });
+
+  it("does not cut old text when an image block selection is active", () => {
+    const host = renderEditor(value, {
+      clipboardFormat: "html",
+      blockSelection: createBlockSelection([1]),
+    });
+    select(host.container);
+    focusRoot(host.container);
+    const cut = clipboard(host.container, "cut");
+    expect(cut.event.defaultPrevented).toBe(true);
+    expect(cut.setData).not.toHaveBeenCalled();
+    expect(host.onChange).not.toHaveBeenCalled();
+    expect(host.onTransaction).not.toHaveBeenCalled();
+  });
+});
 
 describe("RichTextEditor enclosed image clipboard", () => {
   function imageValue(
