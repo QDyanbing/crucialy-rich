@@ -2,7 +2,7 @@
 
 ## 执行信息
 
-- 日期：2026-10-28
+- 日期：2026-10-29
 - 版本：`0.1.0`
 - 分支：`master`
 - 命令：`pnpm check:all`
@@ -14,17 +14,18 @@
 | Prettier   | 通过 | 全仓文件格式一致                                       |
 | ESLint     | 通过 | 0 warning、0 error                                     |
 | TypeScript | 通过 | 根工程与 core/react/demo 包级检查全部通过              |
-| Vitest     | 通过 | 231 个测试文件，1698 项测试                            |
+| Vitest     | 通过 | 233 个测试文件，1734 项测试                            |
 | Core 构建  | 通过 | ESM、source map、类型声明生成成功                      |
 | React 构建 | 通过 | ESM、source map、类型声明生成成功                      |
 | Demo 构建  | 通过 | Vite 生产构建成功                                      |
 | 包产物导入 | 通过 | 导出/声明、Clipboard、CodeBlock 与 Office 产物冒烟通过 |
-| Playwright | 通过 | Chromium 215 项测试                                    |
+| Playwright | 通过 | Chromium 220 项测试                                    |
 
-Demo 主 JS 产物约 510.13 KB，Vite 给出超过 500 KB 的非阻断分包提示；构建退出码为 0，本轮未调整打包策略。
+Demo 主 JS 产物约 510.57 KB，Vite 给出超过 500 KB 的非阻断分包提示；构建退出码为 0，本轮未调整打包策略。
 
 ## 核心路径
 
+- 独立图片 BlockSelection 导出的元数据/安全规则、非法路径/其他块拒绝、联合类型声明和带宿主 `type` 元数据的旧文字范围兼容通过。React 的聚焦/DOM 归属、无 Range/遗留文字、默认 plain、聚焦只读、宿主/IME、非法图片和写入失败保护通过；图片块剪切不误删文字。Core/History 与五条新增 Chromium 用例验证单张图片正文粘贴、一次撤销重做及受限目标对空纯文本的拒绝，桌面/手机离线夹具截图无溢出或邻文，不验证远端服务。
 - 安全图片引用的 ready/协议/凭据检查、alt 转义、宽高保留/省略、连续图片、选区边界、未选不支持图片隔离和整段回退通过。Core、React、History 与构建产物验证纯文本、只读、宿主、DOM 隔离、写入失败、正文图文粘贴/单条 History 及受限目标降级；六条新增 Chromium 用例通过。离线 PNG 解码与桌面/手机截图通过，不验证外部图片服务，不新增图片剪切或文件 MIME。
 - 顶层混合片段的首尾裁剪、块顺序、完整嵌套列表/表格/Divider、有序编号、任务 checked、安全 marks/链接、代码字面文字、空边界、片段隔离、非法源块/不支持图片/结构内部端点回退通过。Core、React、History 和构建产物验证默认 plain、只读、宿主接管、写入失败、正文粘贴、单条撤销重做与受限目标降级；此前四条 Chromium 用例及桌面/手机截图通过，不扩大跨结构剪切范围。
 - 表格 HTML 复制的同一行跨 cell/完整连续行、双向首尾裁剪、多段与空段 cell、未选行列隔离、安全文字格式/链接、非法源表格和部分跨行/跨表拒绝通过。Core、React、History 与构建产物验证纯文本兼容、只读、写入失败、正文粘贴及一次撤销重做；五条新增 Chromium 用例覆盖桌面/手机，截图无溢出或重叠。单 cell 仍为 paragraph，不扩大跨 cell 剪切或表格目标富片段插入。
@@ -56,7 +57,7 @@ Demo 主 JS 产物约 510.13 KB，Vite 给出超过 500 KB 的非阻断分包提
 - HTML 三层嵌套普通/任务列表、混合类型、marks/链接、深层选区、Command/History、React 与 Chromium 粘贴路径均通过。
 - OrderedList 安全整数起始编号、规范化、渲染、前后段续编、HTML 粘贴、Command/History、React 与 Chromium 路径均通过。
 - 受控、非受控、只读、ref 状态读取和 ref Command 执行测试通过。
-- Demo 的 20 个模型示例按五个验收区域展示，本轮新增中文“图文复制”样例，原有示例 ID 和行为保持不变。
+- Demo 的 20 个模型示例继续按五个验收区域展示，本轮复用中文“图文复制”样例验证点击选中复制，未新增示例 ID。
 
 ## 结论
 
