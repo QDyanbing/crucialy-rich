@@ -1,15 +1,23 @@
 import {
   createDocument,
+  isImageNode,
   isTextNode,
   normalizeDocument,
+  type BlockNode,
   type DocumentNode,
 } from "../model";
 import { renderDocument, renderNodeToHtml, type RenderedElementNode } from "../render";
-import { getNodeAtPath, type RangeSelection } from "../selection";
+import {
+  getNodeAtPath,
+  isImageBlockSelection,
+  type BlockSelection,
+  type RangeSelection,
+} from "../selection";
 import { getClipboardTextBlocks } from "./selection-blocks";
 import { getClipboardList } from "./selection-list";
 import { getClipboardTable } from "./selection-table";
 import { getClipboardBlockFragment } from "./selection-fragment";
+import { getClipboardImage } from "./image";
 
 const clipboardAttributes: Partial<
   Record<RenderedElementNode["tagName"], readonly string[]>
@@ -63,10 +71,27 @@ function toClipboardNode(
   return result;
 }
 
+function renderClipboardBlocks(blocks: BlockNode[]): string {
+  const fragment = normalizeDocument(createDocument(blocks));
+  const rendered = renderDocument(fragment);
+  return (
+    rendered.children
+      ?.map((node) => renderNodeToHtml(toClipboardNode(node, fragment)))
+      .join("") ?? ""
+  );
+}
+
 export function getClipboardHtml(
   document: DocumentNode,
-  selection: RangeSelection,
+  selection: RangeSelection | BlockSelection,
 ): string | undefined {
+  if ("type" in selection) {
+    if (selection.type !== "block" || !isImageBlockSelection(document, selection))
+      return undefined;
+    const node = getNodeAtPath(document, selection.path);
+    const image = isImageNode(node) ? getClipboardImage(node) : undefined;
+    return image ? renderClipboardBlocks([image]) : undefined;
+  }
   const structure =
     getClipboardList(document, selection) ?? getClipboardTable(document, selection);
   const blocks = structure
@@ -74,9 +99,5 @@ export function getClipboardHtml(
     : (getClipboardTextBlocks(document, selection) ??
       getClipboardBlockFragment(document, selection));
   if (!blocks) return undefined;
-  const fragment = normalizeDocument(createDocument(blocks));
-  const rendered = renderDocument(fragment);
-  return rendered.children
-    ?.map((node) => renderNodeToHtml(toClipboardNode(node, fragment)))
-    .join("");
+  return renderClipboardBlocks(blocks);
 }
