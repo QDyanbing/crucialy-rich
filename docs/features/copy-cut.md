@@ -17,7 +17,7 @@ function getClipboardText(
 - 文本块、列表项、嵌套列表之间以换行分隔；不生成项目符号、编号或任务 checkbox。
 - 表格 cell 之间使用制表符，行和 cell 内 paragraph 之间使用换行；多段 cell 文本不做 TSV 引号转义，不保证按原表格往返导入。
 - CodeBlock 的字面标签、缩进和换行原样保留。
-- 图片和 Divider 不输出内容或替代文字，但保留所在顶层块间的分隔换行。BlockSelection 复制不在本次范围内。
+- 图片和 Divider 不输出内容或替代文字，但保留所在顶层块间的分隔换行。纯文本 API 仍只接受 RangeSelection，不接受 BlockSelection。
 - 偏移与模型一致，使用 UTF-16 单元，不额外处理字素边界。
 
 ```ts
@@ -36,7 +36,7 @@ if (text !== undefined) {
 ```ts
 function getClipboardHtml(
   document: DocumentNode,
-  selection: RangeSelection,
+  selection: RangeSelection | BlockSelection,
 ): string | undefined;
 ```
 
@@ -44,6 +44,7 @@ function getClipboardHtml(
 
 - 支持单个文本容器、连续顶层 paragraph/heading/quote/codeBlock、同一 cell 内的连续 paragraph。
 - 两端都在顶层文本块时，可保留中间完整选中的列表、表格、Divider 和安全图片引用，见[顶层混合片段](#顶层混合片段)。
+- 也接受指向顶层安全图片的 BlockSelection，仅输出该图片，不扩大到其他块类型，见[图片块选区](#图片块选区)。
 - 单个列表项的选中文字按 paragraph 输出，不复制列表外壳、编号、任务状态、子列表或邻项；单元格内文字也只输出 paragraph，不生成 table。
 - 同一列表内、同一层级的跨项范围保留 bulletList、orderedList 或 taskList 结构；同一表格的同一行跨 cell 片段或完整连续行保留 table 结构，具体裁剪规则见下文。
 - 保留被选文字的五种 boolean mark、安全字号/颜色/背景色及规范化的链接 href/target/rel。链接与行内代码组合使用嵌套 `code` 标签，不把链接默认视觉下划线写成额外 underline mark。
@@ -83,20 +84,37 @@ React `clipboardFormat="html"` 会在有纯文本内容时写入 `text/plain`，
 - 首尾文字按 UTF-16 offset 裁剪，保留块类型和选中的 marks；空边界和中间空段落不省略，代码块仍保留字面文字，不输出 marks。
 - 中间列表保留完整嵌套内容、原始有序编号和任务 checked；中间表格保留完整行列与多段 cell，不把首尾文字裁剪应用到结构内部。Divider 输出无编辑器属性的 `hr`。
 - 此路径要求所选源块通过模型校验；非法编号、marks、行列不齐等整段回退完整纯文本，不静默删除或修复结构。含不支持的图片也整段回退，不只输出剩余可支持块。
-- 端点在列表或表格内部时，仍只使用已有同层列表/同一行或完整行规则；不支持把内部片段与外部正文拼接。此能力不引入结构 BlockSelection、独立图片块选区复制或跨结构剪切。
+- 端点在列表或表格内部时，仍只使用已有同层列表/同一行或完整行规则；不支持把内部片段与外部正文拼接。混合范围路径不处理结构 BlockSelection，也不扩大跨结构剪切。
 
 正文目标复用既有 parser、`paste` 命令和单条 History；列表、代码块及 cell 目标仍只能使用同时提供的实际纯文本。复制不修改源模型或 History，Demo 提供“混合结构复制”样例。
 
 ## 图片引用
 
-仅在两端为顶层文本块的混合范围内导出完整图片，允许多张连续图片或与列表/表格混排；未选图片不参与检查或导出。
+完整图片可来自两端为顶层文本块的混合范围，也可来自独立图片 BlockSelection。混合范围允许多张连续图片或与列表/表格混排；未选图片不参与检查或导出。两种路径共用以下安全规则。
 
 - 源模型必须合法且 `status === "ready"`，URL 必须是绝对 HTTP/HTTPS，且不能带 username/password。`loading`、`error`、临时 blob、相对路径、data URL 或带凭据的地址使整个 HTML 片段回退。
 - `src` 规范化后输出，`alt` 作为纯文本转义；宽高分别保留正安全整数。合法模型中的小数或超安全整数尺寸只省略相应属性，不修改源模型；负数、零或非有限尺寸属于非法模型，整段回退。
 - 仅保留 `src`、`alt`、`width`、`height`，不复制 status、内部路径、选中态、事件、CSS 或宿主附加字段。纯文本仍不输出图片 alt，只保留所在块的分隔换行。
 - 这是 URL 引用，不是图片文件/字节复制；复制不读取文件、不下载、不上传、不验证远端可访问性，也不获取剪贴板权限。`ready` 是模型状态，不保证浏览器已加载该 URL；实际资源能否显示由目标环境决定。
 
-正文粘贴复用现有图片 parser 和单条 History；列表/代码块/cell 仍只尝试实际纯文本。外部 HTML 图片导入仍遵循已有 blob 规则，不代表这些临时引用可再次写出。未新增图片 BlockSelection 复制、跨图片剪切或文件 MIME。Demo 提供中文“图文复制”样例。
+正文粘贴复用现有图片 parser 和单条 History；列表/代码块/cell 仍只尝试实际纯文本。外部 HTML 图片导入仍遵循已有 blob 规则，不代表这些临时引用可再次写出。未新增跨图片剪切或文件 MIME。Demo 提供中文“图文复制”样例。
+
+## 图片块选区
+
+```ts
+const html = getClipboardHtml(document, createBlockSelection([imageIndex]));
+```
+
+Core 只接受指向完整顶层图片的合法 BlockSelection，输出独立 `img`；其他块类型、非法路径及不支持的图片返回 `undefined`，不回退到其他文字。仍沿用同一 URL、状态、alt 和尺寸安全规则，不改变 RangeSelection 行为。
+
+React 使用已有受控 `blockSelection`。可编辑模式点击图片会聚焦根节点并通知 `onBlockSelectionChange`，宿主须回传选区。复制时根节点必须聚焦；若 DOM Selection 存在，其两个端点必须都属于当前根。没有 DOM Range 也可复制，根内遗留的文字选区不会覆盖显式图片块选区。
+
+- HTML 模式写入 `text/html` 和空字符串 `text/plain`，不把 alt 或 URL 作为纯文本，不触发模型/选区回调、Transaction 或 History。
+- 默认 plain 模式、非法块选区或不支持的图片会取消默认复制，但不写入任何格式，也不使用遗留文字选区。根未聚焦或 DOM 选区在根外时不接管复制。
+- 宿主 `onCopy`/`onCut` 仍优先，组合输入期间不导出图片。HTML 写入失败不修改模型或块选区，空纯文本可能已写入事件数据。
+- 可编辑模式有块选区时不执行剪切，避免误删遗留文字；只读 cut 仍交还浏览器。只读点击不产生块选区；宿主可回传块选区，通过 ref 根元素设置 `tabIndex` 并聚焦后使用复制。
+
+正文粘贴独立图片生成一次 History，并把光标放在图片后的文本块。列表/代码块/cell 拒绝该 HTML 时，空纯文本不会参与降级，不猜造替代文字，不删除目标选区。Demo 复用“图文复制”样例，格式选择后须点击图片使根重新聚焦。
 
 ## React 行为
 

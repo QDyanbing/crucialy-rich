@@ -50,7 +50,9 @@ Clipboard parser 可把顶层 HTML `img`、独立图片 paragraph 和普通 para
 
 显式开启 `clipboardFormat="html"` 后，两端位于顶层文本块的选区可复制中间完整图片。只写出模型状态为 `ready`、不含账号密码的 HTTP/HTTPS URL 引用，保留转义的 alt 和正安全整数宽高；小数或过大尺寸只省略该属性，不改源模型。
 
-blob、loading/error、凭据 URL 或非法源模型使整个 HTML 片段回退纯文本，不丢掉图片后只导出其他块。复制不读取图片文件、不上传、不验证远端是否可达；正文粘贴可形成一条 History，受限目标仍使用实际纯文本。未新增独立图片块选区复制、图片文件 MIME 或跨图片剪切，完整规则见[图片引用](./copy-cut.md#图片引用)。
+blob、loading/error、凭据 URL 或非法源模型使整个 HTML 范围片段回退纯文本，不丢掉图片后只导出其他块。复制不读取图片文件、不上传、不验证远端是否可达；正文粘贴可形成一条 History，受限目标仍使用实际纯文本。未新增图片文件 MIME 或跨图片剪切，完整规则见[图片引用](./copy-cut.md#图片引用)。
+
+`getClipboardHtml` 也接受指向单张顶层图片的 BlockSelection。React HTML 模式下，根聚焦且选区归属合法时可复制已选图片，输出 HTML 与空纯文本，不使用遗留文字。默认 plain 模式不导出图片；只读块选区和焦点由宿主管理，剪切不扩展，见[图片块选区](./copy-cut.md#图片块选区)。
 
 ## 选中与删除
 

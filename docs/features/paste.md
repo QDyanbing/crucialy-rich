@@ -135,6 +135,8 @@ Markdown 使用 `marked` 转换为 HTML，再复用同一 HTML 白名单映射�
 
 自身复制的混合片段也可包含 ready、无凭据的 HTTP/HTTPS [图片引用](./copy-cut.md#图片引用)，正文粘贴保留 alt/安全整数尺寸和单条 History；不携带图片字节或临时 blob。外部图片导入的 URL 规则不变，导入 blob 后再次复制仍只写纯文本；受限目标的实际纯文本降级不变。
 
+独立图片块复制只提供 HTML 与空纯文本，正文可插入图片并形成单条 History，光标落在后续文本。列表/CodeBlock/cell 拒绝 HTML 后，不会从 alt、URL 或空纯文本生成替代内容，目标选区和 History 保持不变。
+
 - 范围粘贴不跨越 Divider、Image、不同列表项、不同 cell 或进出列表/表格的结构边界。
 - 列表项内只接受 `text/plain` fragment；不导入 HTML/Markdown block。React 原生粘贴可回退到剪贴板提供的纯文本，但不会自行把富片段转为纯文本；只有富格式时阻止粘贴并保持模型不变。
 - 现有表格内的二维填充只在折叠光标下接受 `text/plain` TSV，不自动新增行列，也不支持跨 cell range 替换。

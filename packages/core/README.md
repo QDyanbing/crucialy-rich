@@ -216,6 +216,7 @@ const shortcutCommandName = getCommandNameFromShortcut({
 - 表格 HTML：同一行跨 cell 片段或完整连续行保留表格、多段 cell 和安全文字格式；单 cell 仍输出 paragraph，部分跨行/跨表及非法源表格回退纯文本。不引入矩形选择或跨 cell 剪切，详见[表格片段](../../docs/features/copy-cut.md#表格片段)。
 - 混合 HTML：两端位于顶层文本块时，保留中间完整列表、表格、Divider 和安全图片引用，按原顺序输出并裁剪首尾文字；不支持的图片、非法源块或结构内部与正文混选则回退完整纯文本，详见[顶层混合片段](../../docs/features/copy-cut.md#顶层混合片段)。
 - 图片引用仅接受 ready、无凭据的 HTTP/HTTPS，保留 alt 和正安全整数宽高，不复制文件字节、blob 或内部属性，不验证资源可达性；不扩大图片剪切或受限粘贴目标，详见[图片引用](../../docs/features/copy-cut.md#图片引用)。
+- `getClipboardHtml` 同时接受 `RangeSelection | BlockSelection`，后者仅支持单张安全顶层图片，不包含邻块或其他类型，非法选区返回 `undefined`。`getClipboardText` 仍只接受文字范围，见[图片块选区](../../docs/features/copy-cut.md#图片块选区)。
 
 ## 构建产物
 
