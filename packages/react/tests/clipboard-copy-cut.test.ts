@@ -115,6 +115,112 @@ describe("RichTextEditor selected image clipboard", () => {
     root.focus();
   }
 
+  it("does not copy stale text or native HTML in default plain mode", () => {
+    const host = renderEditor(value, { blockSelection: createBlockSelection([1]) });
+    focusRoot(host.container);
+    select(host.container);
+    const copied = clipboard(host.container, "copy");
+    expect(copied.event.defaultPrevented).toBe(true);
+    expect(copied.setData).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    createImage("blob:https://example.com/local"),
+    createImage("https://example.com/a.png", { status: "loading" }),
+    createImage("https://example.com/a.png", { status: "error" }),
+    createImage("https://user:secret@example.com/a.png"),
+  ])(
+    "does not fall back to old text for unsupported selected image $src ($status)",
+    (image) => {
+      const document = structuredClone(value);
+      document.children[1] = image;
+      const host = renderEditor(document, {
+        clipboardFormat: "html",
+        blockSelection: createBlockSelection([1]),
+      });
+      focusRoot(host.container);
+      select(host.container);
+      const copied = clipboard(host.container, "copy");
+      expect(copied.event.defaultPrevented).toBe(true);
+      expect(copied.setData).not.toHaveBeenCalled();
+      expect(host.onTransaction).not.toHaveBeenCalled();
+    },
+  );
+
+  it("does not use stale text when the controlled block path is invalid", () => {
+    const host = renderEditor(value, {
+      clipboardFormat: "html",
+      blockSelection: createBlockSelection([8]),
+    });
+    focusRoot(host.container);
+    select(host.container);
+    expect(clipboard(host.container, "copy").setData).not.toHaveBeenCalled();
+    expect(clipboard(host.container, "cut").setData).not.toHaveBeenCalled();
+    expect(host.onChange).not.toHaveBeenCalled();
+  });
+
+  it.each([false, true])(
+    "rejects an unfocused editor or DOM selection in another editor (%s)",
+    (outside) => {
+      const host = renderEditor(value, {
+        clipboardFormat: "html",
+        blockSelection: createBlockSelection([1]),
+      });
+      const other = renderEditor();
+      if (outside) focusRoot(host.container);
+      else focusRoot(other.container);
+      select(other.container);
+      expect(clipboard(host.container, "copy").setData).not.toHaveBeenCalled();
+    },
+  );
+
+  it("keeps host cancellation authoritative for selected image copy and cut", () => {
+    const cancel = vi.fn((event) => event.preventDefault());
+    const host = renderEditor(value, {
+      clipboardFormat: "html",
+      blockSelection: createBlockSelection([1]),
+      onCopy: cancel,
+      onCut: cancel,
+    });
+    window.getSelection()!.removeAllRanges();
+    focusRoot(host.container);
+    expect(clipboard(host.container, "copy").setData).not.toHaveBeenCalled();
+    expect(clipboard(host.container, "cut").setData).not.toHaveBeenCalled();
+    expect(cancel).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not export an image block during composition", () => {
+    const host = renderEditor(value, {
+      clipboardFormat: "html",
+      blockSelection: createBlockSelection([1]),
+    });
+    focusRoot(host.container);
+    select(host.container);
+    act(() =>
+      host.container.firstElementChild!.dispatchEvent(
+        new CompositionEvent("compositionstart", { bubbles: true }),
+      ),
+    );
+    expect(clipboard(host.container, "copy").setData).not.toHaveBeenCalled();
+    expect(clipboard(host.container, "cut").setData).not.toHaveBeenCalled();
+    expect(host.onTransaction).not.toHaveBeenCalled();
+  });
+
+  it("does not change the model or selection if image HTML writing fails", () => {
+    const host = renderEditor(value, {
+      clipboardFormat: "html",
+      blockSelection: createBlockSelection([1]),
+    });
+    window.getSelection()!.removeAllRanges();
+    focusRoot(host.container);
+    const copied = clipboard(host.container, "copy", "text/html");
+    expect(copied.event.defaultPrevented).toBe(true);
+    expect(copied.data).toEqual({ "text/plain": "" });
+    expect(host.onChange).not.toHaveBeenCalled();
+    expect(host.onSelectionChange).not.toHaveBeenCalled();
+    expect(host.onTransaction).not.toHaveBeenCalled();
+  });
+
   it.each([false, true])(
     "copies the selected image instead of an old range (%s)",
     (oldRange) => {
@@ -122,9 +228,9 @@ describe("RichTextEditor selected image clipboard", () => {
         clipboardFormat: "html",
         blockSelection: createBlockSelection([1]),
       });
+      focusRoot(host.container);
       if (oldRange) select(host.container);
       else window.getSelection()!.removeAllRanges();
-      focusRoot(host.container);
       const copied = clipboard(host.container, "copy");
       expect(copied.data["text/plain"]).toBe("");
       expect(parseHtml(copied.data["text/html"]!)?.blocks).toEqual([value.children[1]]);
@@ -155,8 +261,8 @@ describe("RichTextEditor selected image clipboard", () => {
       clipboardFormat: "html",
       blockSelection: createBlockSelection([1]),
     });
-    select(host.container);
     focusRoot(host.container);
+    select(host.container);
     const cut = clipboard(host.container, "cut");
     expect(cut.event.defaultPrevented).toBe(true);
     expect(cut.setData).not.toHaveBeenCalled();
