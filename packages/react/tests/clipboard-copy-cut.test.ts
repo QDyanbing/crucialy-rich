@@ -16,6 +16,7 @@ import {
   createTable,
   createTransaction,
   deleteSelectionCommand,
+  deleteImageCommand,
   createParagraph,
   createText,
   type RangeSelection,
@@ -82,7 +83,7 @@ function select(
 function clipboard(
   container: HTMLElement,
   type: "copy" | "cut",
-  fail: boolean | "text/html" = false,
+  fail: boolean | "text/html" | "clear" = false,
 ) {
   const data: Record<string, string> = {};
   const setData = vi.fn((mime: string, text: string) => {
@@ -90,6 +91,7 @@ function clipboard(
     data[mime] = text;
   });
   const clearData = vi.fn(() => {
+    if (fail === "clear") throw new Error("Clipboard cannot be cleared.");
     for (const key of Object.keys(data)) delete data[key];
   });
   const event = new Event(type, { bubbles: true, cancelable: true });
@@ -114,6 +116,108 @@ describe("RichTextEditor selected image clipboard", () => {
     root.tabIndex = 0;
     root.focus();
   }
+
+  it.each([true, "text/html", "clear"] as const)(
+    "preserves the image and all callbacks when clipboard writing fails at %s",
+    (fail) => {
+      const onBlockSelectionChange = vi.fn();
+      const host = renderEditor(value, {
+        clipboardFormat: "html",
+        blockSelection: createBlockSelection([1]),
+        onBlockSelectionChange,
+      });
+      focusRoot(host.container);
+      select(host.container);
+      const cut = clipboard(host.container, "cut", fail);
+      expect(cut.event.defaultPrevented).toBe(true);
+      expect(cut.data).toEqual(fail === "text/html" ? { "text/plain": "" } : {});
+      expect(host.container.querySelector("img")).not.toBeNull();
+      expect(host.onChange).not.toHaveBeenCalled();
+      expect(host.onSelectionChange).not.toHaveBeenCalled();
+      expect(host.onTransaction).not.toHaveBeenCalled();
+      expect(onBlockSelectionChange).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each(["missing", "disabled", "throws", "empty", "no-selection", "no-transaction"])(
+    "does not touch clipboard or image when deleteImage is %s",
+    (failure) => {
+      const point = { path: [1, 0], offset: 0 };
+      const registry = createCommandRegistry(
+        failure === "missing"
+          ? []
+          : [
+              {
+                ...deleteImageCommand,
+                canExecute: () => failure !== "disabled",
+                execute: () => {
+                  if (failure === "throws") throw new Error("Deletion refused.");
+                  return createCommandSuccess("deleteImage", {
+                    ...(failure === "no-selection"
+                      ? {}
+                      : { selection: { anchor: point, focus: point } }),
+                    ...(failure === "no-transaction"
+                      ? {}
+                      : { transaction: createTransaction([]) }),
+                  });
+                },
+              },
+            ],
+      );
+      const host = renderEditor(value, {
+        clipboardFormat: "html",
+        blockSelection: createBlockSelection([1]),
+        commandRegistry: registry,
+      });
+      focusRoot(host.container);
+      window.getSelection()!.removeAllRanges();
+      const cut = clipboard(host.container, "cut");
+      expect(cut.event.defaultPrevented).toBe(true);
+      expect(cut.clearData).not.toHaveBeenCalled();
+      expect(cut.setData).not.toHaveBeenCalled();
+      expect(host.container.querySelector("img")).not.toBeNull();
+      expect(host.onChange).not.toHaveBeenCalled();
+      expect(host.onTransaction).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([
+    { image: value.children[1]!, clipboardFormat: "plain" as const },
+    {
+      image: createImage("blob:https://example.com/local"),
+      clipboardFormat: "html" as const,
+    },
+    {
+      image: createImage("https://example.com/a.png", { status: "loading" }),
+      clipboardFormat: "html" as const,
+    },
+    {
+      image: createImage("https://example.com/a.png", { status: "error" }),
+      clipboardFormat: "html" as const,
+    },
+    {
+      image: createImage("https://user:secret@example.com/a.png"),
+      clipboardFormat: "html" as const,
+    },
+  ])(
+    "refuses image cut for $clipboardFormat / $image.src",
+    ({ image, clipboardFormat }) => {
+      const document = structuredClone(value);
+      document.children[1] = image;
+      const execute = vi.fn(deleteImageCommand.execute);
+      const host = renderEditor(document, {
+        clipboardFormat,
+        blockSelection: createBlockSelection([1]),
+        commandRegistry: createCommandRegistry([{ ...deleteImageCommand, execute }]),
+      });
+      focusRoot(host.container);
+      select(host.container);
+      expect(clipboard(host.container, "cut").setData).not.toHaveBeenCalled();
+      expect(execute).not.toHaveBeenCalled();
+      expect(host.onChange).not.toHaveBeenCalled();
+      expect(host.onTransaction).not.toHaveBeenCalled();
+    },
+  );
 
   it("does not copy stale text or native HTML in default plain mode", () => {
     const host = renderEditor(value, { blockSelection: createBlockSelection([1]) });
