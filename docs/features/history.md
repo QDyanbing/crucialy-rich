@@ -149,6 +149,8 @@ history = recordHistory({
 });
 ```
 
+图片删除/剪切的 `event.beforeSelection` 可能不存在：只有合法旧文字范围才记录，没有时省略，不伪造删除后的光标。上面的快照调用可直接接收 `undefined`；自行读取端点的接入方须判空。History 不保存图片 BlockSelection，撤销恢复模型但不自动恢复图片高亮，单图剪切与随后粘贴是两条独立记录。
+
 策略只作用于本次记录，不存入 `HistoryEntry` 或 `HistoryState`。`canMergeHistoryEntries` 的第三参数只检查 entry 对，不知道 redoStack；分支保护由 `recordHistory` 执行。低层 `mergeHistoryEntries` 仍是无条件合并 helper，调用方应先判断。
 
 ## 撤销与重做规则

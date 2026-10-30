@@ -52,13 +52,15 @@ Clipboard parser 可把顶层 HTML `img`、独立图片 paragraph 和普通 para
 
 blob、loading/error、凭据 URL 或非法源模型使整个 HTML 范围片段回退纯文本，不丢掉图片后只导出其他块。复制不读取图片文件、不上传、不验证远端是否可达；正文粘贴可形成一条 History，受限目标仍使用实际纯文本。未新增图片文件 MIME 或跨图片剪切，完整规则见[图片引用](./copy-cut.md#图片引用)。
 
-`getClipboardHtml` 也接受指向单张顶层图片的 BlockSelection。React HTML 模式下，根聚焦且选区归属合法时可复制已选图片，输出 HTML 与空纯文本，不使用遗留文字。默认 plain 模式不导出图片；只读块选区和焦点由宿主管理，剪切不扩展，见[图片块选区](./copy-cut.md#图片块选区)。
+`getClipboardHtml` 也接受指向单张顶层图片的 BlockSelection。React HTML 模式下，根聚焦且选区归属合法时可复制已选图片，输出 HTML 与空纯文本，不使用遗留文字。默认 plain 模式不导出图片；只读块选区和焦点由宿主管理，见[图片块选区](./copy-cut.md#图片块选区)。可编辑模式还可通过 `deleteImage` 剪切单张安全图片，全部格式写入成功才删除并清除块选区；失败不删除，不支持临时图片或跨图片文字范围剪切，见[单图剪切](./copy-cut.md#单图剪切)。
 
 ## 选中与删除
 
 `BlockSelection` 使用 `{ type: "block", path }` 表达完整块选区，与文本 `RangeSelection` 分离。`RichTextEditor` 通过 `blockSelection` 和 `onBlockSelectionChange` 暴露受控图片选区：点击图片输出块选区，选中图片带有 `data-selected="true"`。
 
 选中图片后按 Backspace 或 Delete 会执行 `deleteImage`。删除后优先把光标放到后方文本，再回退到前方文本；若没有可编辑文本，则插入空 paragraph，保证可以继续输入。
+
+图片删除和剪切没有合法旧文字选区时，事务省略 `beforeSelection`；宿主读取前须判空。撤销恢复图片模型及元数据，不自动恢复块高亮。
 
 ## 渲染与边界
 

@@ -1,6 +1,6 @@
 # 复制与剪切
 
-复制从模型选区读取文字，剪切只在写入剪贴板成功后提交删除命令的事务。默认只写纯文本，宿主可显式启用保留文字格式的 HTML；不导出 Markdown，不读取浏览器修改后的 DOM 内容。
+复制从模型选区读取内容，剪切只在写入剪贴板成功后提交删除命令的事务。默认只写纯文本，宿主可显式启用保留文字格式与单张安全图片的 HTML；不导出 Markdown，不读取浏览器修改后的 DOM 内容。
 
 ## Core 纯文本 API
 
@@ -112,9 +112,21 @@ React 使用已有受控 `blockSelection`。可编辑模式点击图片会聚焦
 - HTML 模式写入 `text/html` 和空字符串 `text/plain`，不把 alt 或 URL 作为纯文本，不触发模型/选区回调、Transaction 或 History。
 - 默认 plain 模式、非法块选区或不支持的图片会取消默认复制，但不写入任何格式，也不使用遗留文字选区。根未聚焦或 DOM 选区在根外时不接管复制。
 - 宿主 `onCopy`/`onCut` 仍优先，组合输入期间不导出图片。HTML 写入失败不修改模型或块选区，空纯文本可能已写入事件数据。
-- 可编辑模式有块选区时不执行剪切，避免误删遗留文字；只读 cut 仍交还浏览器。只读点击不产生块选区；宿主可回传块选区，通过 ref 根元素设置 `tabIndex` 并聚焦后使用复制。
+- 可编辑 HTML 模式支持单图剪切，见下一节；其他块选区不回退遗留文字删除。只读 cut 仍交还浏览器。只读点击不产生块选区；宿主可回传块选区，通过 ref 根元素设置 `tabIndex` 并聚焦后使用复制。
 
 正文粘贴独立图片生成一次 History，并把光标放在图片后的文本块。列表/代码块/cell 拒绝该 HTML 时，空纯文本不会参与降级，不猜造替代文字，不删除目标选区。Demo 复用“图文复制”样例，格式选择后须点击图片使根重新聚焦。
+
+## 单图剪切
+
+可编辑且 `clipboardFormat="html"` 时，受控图片 BlockSelection 可剪切单张安全图片；焦点与 DOM 选区归属规则和图片复制一致。先生成安全 HTML，再通过当前 Registry 执行 `deleteImage`，仅当结果成功、带 selection 和非空 transaction 且 ClipboardData 全部写入成功后提交删除。只注册 `deleteSelection` 不足以剪切图片；不新增命令或图片文件 MIME。
+
+- 写入空 `text/plain` 与图片 `text/html`；不读取、剪切或回退遗留文字。默认 plain、非法选区、blob/loading/error/凭据图片均取消默认剪切但不写出、不删除。
+- 宿主取消事件、输入法组合期、根未聚焦、DOM 端点越界、命令缺失/禁用/执行失败/缺结果及剪贴板不可用均不修改模型或选区。清空或任一格式写入抛错也不删除，后续 HTML 失败可能留下空纯文本，不承诺回滚系统剪贴板。
+- 成功后输出一次无 batch 的 `deleteByCut` 事务与文字光标，并通知 `onBlockSelectionChange(undefined)`。受控宿主须回传新 value、文字选区和清除后的块选区；组件不私自修改受控值。
+- 光标复用 `deleteImage`：优先后方文字，其次前方；没有可编辑文字时补空 paragraph，仍为同一条 History。单独粘贴是另一条记录，剪切和粘贴可分别撤销/重做。
+- 事务 `beforeSelection` 只保存合法旧文字选区，没有时省略；接入方须判空。History 不保存 BlockSelection，撤销恢复图片及元数据，但不自动恢复图片高亮。此规则也适用于 Backspace/Delete 图片删除。
+
+只读剪切仍交给宿主/浏览器。跨越图片的文字范围、多个图片块和其他类型 BlockSelection 不支持剪切；此能力不扩展列表/cell/代码块的富片段粘贴。Demo 继续复用“图文复制”样例：选择 HTML、点击图片，再使用剪切事件。
 
 ## React 行为
 
@@ -132,14 +144,14 @@ React 使用已有受控 `blockSelection`。可编辑模式点击图片会聚焦
 
 启用 HTML 时，只有全部所需格式写入成功才提交剪切删除；HTML 写入失败时纯文本可能已经写入事件数据，组件不承诺回滚剪贴板，但文档和 History 保持不变。
 
-复制不受 Command Registry 限制，不触发 `onChange`、`onSelectionChange` 或 `onTransaction`。剪切先用当前 Registry 执行 `deleteSelection`，要求返回成功、非空 transaction 和结果 selection；缺失、禁用、执行失败或空结果均不写入剪贴板，也不修改模型。自定义命令应遵守既有纯函数与合法 transaction 契约。
+复制不受 Command Registry 限制，不触发 `onChange`、`onSelectionChange` 或 `onTransaction`。文字剪切先用当前 Registry 执行 `deleteSelection`，图片块剪切使用 `deleteImage`，均要求返回成功、非空 transaction 和结果 selection；缺失、禁用、执行失败或空结果均不写入剪贴板，也不修改模型。自定义命令应遵守既有纯函数与合法 transaction 契约。
 
 剪切成功后输出 `inputType: "deleteByCut"`，不带 batch；宿主按已有 `onTransaction` 流程记录为独立 History。受控模式由宿主回传新文档和选区；非受控模式更新内部文档。前后快照保留原始选区方向，撤销后恢复选中文字，重做后回到删除起点；之后输入是另一条记录。
 
 ## 范围边界
 
-复制可跨文本块、列表项和表格 cell，输出纯文本视图。剪切范围更窄，与 `deleteSelection` 保持一致：同一文本容器、连续顶层文本块、同一 cell 内的连续 paragraph。跨列表项、跨 cell、进出表格或跨越图片／Divider 的范围不执行剪切，也不退回浏览器默认删除。
+复制可跨文本块、列表项和表格 cell，输出纯文本视图。文字剪切范围更窄，与 `deleteSelection` 保持一致：同一文本容器、连续顶层文本块、同一 cell 内的连续 paragraph。跨列表项、跨 cell、进出表格或跨越图片／Divider 的文字范围不执行剪切，也不退回浏览器默认删除；单图块剪切仅按上一节的独立规则处理。
 
-未实现任意跨层级列表选区、部分跨行表格结构写出、Markdown 写出、图片块剪切、文件剪贴板或桌面 Office 专有格式复制。HTML 是块片段，粘贴到段落中遵循现有 block 插入规则，不保证任意部分选区的 HTML 剪切粘贴还原原始段落结构。同步 `setData` 成功代表事件写入完成，不承诺操作系统最终剪贴板提交结果；宿主仍需处理外部环境策略。
+未实现任意跨层级列表选区、部分跨行表格结构写出、Markdown 写出、多图片块剪切、文件剪贴板或桌面 Office 专有格式复制。HTML 是块片段，粘贴到段落中遵循现有 block 插入规则，不保证任意部分选区的 HTML 剪切粘贴还原原始段落结构。同步 `setData` 成功代表事件写入完成，不承诺操作系统最终剪贴板提交结果；宿主仍需处理外部环境策略。
 
 验收见[复制与剪切 QA](../qa/copy-cut.md)，粘贴能力见[粘贴](./paste.md)。
