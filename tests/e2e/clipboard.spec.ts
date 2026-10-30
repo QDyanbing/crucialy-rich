@@ -954,6 +954,85 @@ for (const mobile of [false, true]) {
   });
 }
 
+for (const mobile of [false, true]) {
+  test(`cuts a clicked image and keeps cut and paste history separate (mobile: ${mobile})`, async ({
+    page,
+  }) => {
+    await mockImageClipboard(page);
+    if (mobile) await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+    await page.getByLabel("模型示例").selectOption("image-clipboard");
+    await page.getByLabel("复制格式").selectOption("html");
+    const editor = page.getByLabel("已渲染文档");
+    const json = page.getByLabel("文档 JSON", { exact: true });
+    const original = JSON.parse((await json.textContent())!);
+    await selectText(page, "[1,0]", 1, "[3,0]", 1);
+    await editor.locator("img").click();
+    const cut = await dispatchClipboard(page, "cut", "已渲染文档", true);
+    expect(cut.prevented).toBe(true);
+    expect(cut.text).toBe("");
+    expect(cut.types).toEqual(["text/plain", "text/html"]);
+    expect(cut.html).toContain('alt="绿色植物"');
+    expect(cut.html).not.toMatch(/<p|前甲|乙后|data-|aria-|status=/);
+    await expect(editor.locator("img")).toHaveCount(0);
+    const cutDocument = JSON.parse((await json.textContent())!);
+    expect(cutDocument.children).toEqual(
+      original.children.filter((_: unknown, index: number) => index !== 2),
+    );
+    await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+    await selectText(page, "[2,0]", 0);
+    await editor.evaluate((element, data) => {
+      const clipboardData = new DataTransfer();
+      clipboardData.setData("text/plain", data.text);
+      clipboardData.setData("text/html", data.html!);
+      element.dispatchEvent(
+        new ClipboardEvent("paste", {
+          bubbles: true,
+          cancelable: true,
+          clipboardData,
+        }),
+      );
+    }, cut);
+    const pasted = JSON.parse((await json.textContent())!);
+    const image = editor.locator("img");
+    await expect(image).toHaveCount(1);
+    await expect(image).toHaveAttribute("width", "320");
+    await expect(image).toHaveAttribute("height", "180");
+    await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 2');
+    const undo = page.getByRole("button", { name: "撤销", exact: true });
+    const redo = page.getByRole("button", { name: "重做", exact: true });
+    await undo.click();
+    await expect
+      .poll(async () => JSON.parse((await json.textContent())!))
+      .toEqual(cutDocument);
+    await undo.click();
+    await expect
+      .poll(async () => JSON.parse((await json.textContent())!))
+      .toEqual(original);
+    await expect(image).not.toHaveAttribute("data-selected", "true");
+    await redo.click();
+    await expect
+      .poll(async () => JSON.parse((await json.textContent())!))
+      .toEqual(cutDocument);
+    await redo.click();
+    await expect
+      .poll(async () => JSON.parse((await json.textContent())!))
+      .toEqual(pasted);
+    await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+    await expect
+      .poll(() => image.evaluate((element: HTMLImageElement) => element.naturalWidth))
+      .toBeGreaterThan(0);
+    const bounds = (await image.boundingBox())!;
+    expect(bounds.x).toBeGreaterThanOrEqual(0);
+    expect(bounds.x + bounds.width).toBeLessThanOrEqual(mobile ? 390 : 1280);
+    await editor.screenshot({
+      path: test
+        .info()
+        .outputPath(mobile ? "image-cut-mobile.png" : "image-cut-desktop.png"),
+    });
+  });
+}
+
 test("guards plain mode cut and focus for selected image blocks", async ({ page }) => {
   await mockImageClipboard(page);
   await page.goto("/");
