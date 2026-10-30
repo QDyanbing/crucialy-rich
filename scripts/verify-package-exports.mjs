@@ -643,6 +643,7 @@ for (const packageConfig of publicPackages) {
     assert.ok(declarations.includes('"onCopy"'));
     assert.ok(declarations.includes('"onCut"'));
     assert.ok(declarations.includes('"deleteByCut"'));
+    assert.match(declarations, /beforeSelection\?: RangeSelection/);
     assert.ok(declarations.includes('clipboardFormat?: "plain" | "html"'));
   }
 

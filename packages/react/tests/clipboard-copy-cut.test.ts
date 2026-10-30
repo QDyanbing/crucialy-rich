@@ -388,6 +388,95 @@ describe("RichTextEditor selected image clipboard", () => {
     expect(host.onTransaction).not.toHaveBeenCalled();
   });
 
+  it("leaves readonly image cut to the host without clearing block selection", () => {
+    const onBlockSelectionChange = vi.fn();
+    const host = renderEditor(value, {
+      contentEditable: false,
+      clipboardFormat: "html",
+      blockSelection: createBlockSelection([1]),
+      onBlockSelectionChange,
+    });
+    focusRoot(host.container);
+    window.getSelection()!.removeAllRanges();
+    const cut = clipboard(host.container, "cut");
+    expect(cut.event.defaultPrevented).toBe(false);
+    expect(cut.setData).not.toHaveBeenCalled();
+    expect(onBlockSelectionChange).not.toHaveBeenCalled();
+    expect(host.onChange).not.toHaveBeenCalled();
+    expect(host.onTransaction).not.toHaveBeenCalled();
+  });
+
+  it.each([false, true])(
+    "does not cut an image with foreign focus or DOM range (%s)",
+    (outside) => {
+      const onBlockSelectionChange = vi.fn();
+      const host = renderEditor(value, {
+        clipboardFormat: "html",
+        blockSelection: createBlockSelection([1]),
+        onBlockSelectionChange,
+      });
+      const other = renderEditor();
+      if (outside) focusRoot(host.container);
+      else focusRoot(other.container);
+      select(other.container);
+      const cut = clipboard(host.container, "cut");
+      expect(cut.event.defaultPrevented).toBe(true);
+      expect(cut.setData).not.toHaveBeenCalled();
+      expect(host.onChange).not.toHaveBeenCalled();
+      expect(host.onTransaction).not.toHaveBeenCalled();
+      expect(onBlockSelectionChange).not.toHaveBeenCalled();
+    },
+  );
+
+  it("waits for the host to echo the controlled document and cleared block selection", () => {
+    const onBlockSelectionChange = vi.fn();
+    const host = renderEditor(value, {
+      value,
+      clipboardFormat: "html",
+      blockSelection: createBlockSelection([1]),
+      commandRegistry: createCommandRegistry([deleteImageCommand]),
+      onBlockSelectionChange,
+    });
+    focusRoot(host.container);
+    window.getSelection()!.removeAllRanges();
+    expect(clipboard(host.container, "cut").data["text/html"]).toContain("<img");
+    expect(host.onChange).toHaveBeenCalledTimes(1);
+    expect(host.onTransaction).toHaveBeenCalledTimes(1);
+    expect(onBlockSelectionChange).toHaveBeenCalledExactlyOnceWith(undefined);
+    expect(host.container.querySelector("img")).not.toBeNull();
+    const next = host.onChange.mock.calls[0]![0];
+    act(() =>
+      host.root.render(
+        createElement(RichTextEditor, {
+          value: next,
+          contentEditable: true,
+          selection: host.onSelectionChange.mock.calls[0]![0],
+        }),
+      ),
+    );
+    expect(host.container.querySelector("img")).toBeNull();
+    expect(host.container.textContent).toBe("前甲乙后正文");
+    expect(value.children).toHaveLength(3);
+  });
+
+  it("does not delete or clear image selection when ClipboardData is unavailable", () => {
+    const onBlockSelectionChange = vi.fn();
+    const host = renderEditor(value, {
+      clipboardFormat: "html",
+      blockSelection: createBlockSelection([1]),
+      onBlockSelectionChange,
+    });
+    focusRoot(host.container);
+    window.getSelection()!.removeAllRanges();
+    const cut = new Event("cut", { bubbles: true, cancelable: true });
+    act(() => host.container.firstElementChild!.dispatchEvent(cut));
+    expect(cut.defaultPrevented).toBe(true);
+    expect(host.onChange).not.toHaveBeenCalled();
+    expect(host.onTransaction).not.toHaveBeenCalled();
+    expect(onBlockSelectionChange).not.toHaveBeenCalled();
+    expect(host.container.querySelector("img")).not.toBeNull();
+  });
+
   it("cuts only the image instead of stale text after both formats are written", () => {
     const onBlockSelectionChange = vi.fn();
     const host = renderEditor(value, {
