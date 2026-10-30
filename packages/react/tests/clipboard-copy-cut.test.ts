@@ -189,6 +189,34 @@ describe("RichTextEditor selected image clipboard", () => {
     expect(cancel).toHaveBeenCalledTimes(2);
   });
 
+  it.each([false, true])(
+    "refuses image copy with only one DOM endpoint inside (%s)",
+    (backward) => {
+      const host = renderEditor(value, {
+        clipboardFormat: "html",
+        blockSelection: createBlockSelection([1]),
+      });
+      const outside = document.createElement("p");
+      outside.textContent = "外部";
+      document.body.append(outside);
+      focusRoot(host.container);
+      const inside = host.container.querySelector("span")!.firstChild!;
+      const external = outside.firstChild!;
+      window
+        .getSelection()!
+        .setBaseAndExtent(
+          backward ? external : inside,
+          0,
+          backward ? inside : external,
+          1,
+        );
+      const copied = clipboard(host.container, "copy");
+      expect(copied.event.defaultPrevented).toBe(false);
+      expect(copied.setData).not.toHaveBeenCalled();
+      expect(host.onTransaction).not.toHaveBeenCalled();
+    },
+  );
+
   it("does not export an image block during composition", () => {
     const host = renderEditor(value, {
       clipboardFormat: "html",

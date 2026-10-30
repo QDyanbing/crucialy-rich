@@ -246,6 +246,15 @@ function writeClipboardData(
   }
 }
 
+function ownsBlockClipboardSelection(root: HTMLDivElement): boolean {
+  if (root.ownerDocument.activeElement !== root) return false;
+  const selection = root.ownerDocument.getSelection();
+  return (
+    !selection?.rangeCount ||
+    (root.contains(selection.anchorNode) && root.contains(selection.focusNode))
+  );
+}
+
 function createKeyboardInputResult(
   key: string,
   document: DocumentNode,
@@ -801,15 +810,7 @@ function RichTextEditorComponent(
     onCopy?.(event);
     if (event.defaultPrevented || compositionRef.current.active) return;
     if (blockSelection) {
-      const root = event.currentTarget;
-      if (root.ownerDocument.activeElement !== root) return;
-      const domSelection = root.ownerDocument.getSelection();
-      if (
-        domSelection?.rangeCount &&
-        (!root.contains(domSelection.anchorNode) ||
-          !root.contains(domSelection.focusNode))
-      )
-        return;
+      if (!ownsBlockClipboardSelection(event.currentTarget)) return;
       event.preventDefault();
       if (clipboardFormat === "html") {
         const html = getClipboardHtml(document, blockSelection);
