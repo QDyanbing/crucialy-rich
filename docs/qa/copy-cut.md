@@ -16,6 +16,8 @@
 
 2026-10-29 补充独立图片 BlockSelection HTML 复制，输出单张安全图片和空纯文本；验证焦点/DOM 归属、遗留文字保护、默认 plain、不支持图片、宿主/IME/失败、正文粘贴及 rich-only 目标拒绝。复用“图文复制”样例，不新增图片剪切或文件 MIME。
 
+2026-10-30 补充可编辑 HTML 单图剪切，复用 `deleteImage`，写入成功才删除和通知清除受控块选区；剪切、随后粘贴各占一次 History。修正图片删除的旧文字选区快照，没有合法范围时省略 `beforeSelection`。复用既有样例，不扩展跨图片文字范围剪切、文件 MIME 或受限粘贴目标。
+
 ## 自动化覆盖
 
 - `packages/core/tests/clipboard/text.test.ts`：10 项，验证正反向选区、复制隔离、非法/折叠端点、空白和 UTF-16 字面文字。
@@ -39,10 +41,11 @@
 - `packages/core/tests/history/image-clipboard.test.ts`：5 项，验证双向图文粘贴、alt/尺寸、单条 History、撤销/重做、源模型隔离，以及列表/代码块/cell 的实际纯文本降级与 rich-only 拒绝。
 - `packages/core/tests/clipboard/export-image-block.test.ts`：15 项，验证独立图片元数据、转义、状态/协议/凭据/尺寸、非法路径、其他块拒绝、无邻文和源模型隔离。
 - `packages/core/tests/history/image-block-clipboard.test.ts`：5 项，验证独立图片粘贴、正反向文字范围替换、光标/单条 History、快照恢复及列表/代码块/cell 对 HTML 与空纯文本的拒绝。
-- `packages/react/tests/clipboard-copy-cut.test.ts`：77 项，覆盖受控/非受控、只读、宿主接管、多编辑器与外部选区、模型文字优先、IME、写入失败、Registry 缺失/禁用/异常/空结果、跨 cell 保护及事务元数据；本轮新增 15 项验证图片块、无 DOM Range/遗留文字、聚焦只读、默认 plain、非法块/图片、焦点/外部选区、宿主/IME、写入失败及剪切保护。
-- `tests/e2e/clipboard.spec.ts`：42 项 Chromium 用例，覆盖纯文本/HTML、撤销重做、目标降级、原生快捷键及手机控件；本轮新增 5 项验证桌面/手机点击图片复制、只插入图片与单条 History、离线解码/尺寸、默认 plain、切换格式后的焦点、外部 DOM Range、剪切拒绝及代码目标不猜造替代文字。
+- `packages/core/tests/history/image-cut.test.ts`：3 项，验证单张图片剪切后补段落或保留邻文、单条 History、无旧文字选区、元数据/文档隔离，以及剪切/粘贴两条独立记录的撤销/重做。
+- `packages/react/tests/clipboard-copy-cut.test.ts`：102 项，覆盖受控/非受控、只读、宿主接管、多编辑器与外部选区、模型文字优先、IME、写入失败、Registry 缺失/禁用/异常/缺结果、跨 cell 保护及事务元数据；本轮新增 25 项，验证单 DOM 端点越界、单图剪切的写入/命令失败、默认 plain/不安全图片、旧选区缺省与合法性、仅图片文档、只读/受控回传、焦点归属和缺失 ClipboardData，并更新成功剪切时不删除遗留文字的断言。
+- `tests/e2e/clipboard.spec.ts`：48 项 Chromium 用例，覆盖纯文本/HTML、撤销重做、目标降级、原生快捷键及手机控件；本轮新增 6 项验证桌面/手机单图剪切与粘贴独立 History、三处 ClipboardData 写入失败和临时图片拒绝，并扩展失焦/外部选区的剪切保护。
 - 同一浏览器文件另验证真实系统复制、剪切、粘贴快捷键往返；只该用例申请测试上下文的剪贴板权限，其他用例使用独立 DataTransfer，不共享系统剪贴板。
-- `scripts/verify-package-exports.mjs`：构建包运行时与声明导出、`onCopy` / `onCut`、`deleteByCut` 与 `clipboardFormat` 类型，以及纯文本/HTML parser 往返、链接代码组合、列表编号/checked、同一行/完整行表格、混合片段/图片元数据、独立图片块与联合类型声明、未选内容过滤、片段隔离和不支持图片回退。
+- `scripts/verify-package-exports.mjs`：构建包运行时与声明导出、`onCopy` / `onCut`、`deleteByCut`、`clipboardFormat` 与可选 `beforeSelection` 类型，以及纯文本/HTML parser 往返、链接代码组合、列表编号/checked、同一行/完整行表格、混合片段/图片元数据、独立图片块与联合类型声明、未选内容过滤、片段隔离和不支持图片回退。
 
 ## 本地结果
 
@@ -60,18 +63,20 @@
 
 本轮独立图片桌面/手机截图继续使用同一离线夹具，无未选文字、溢出或重叠，重做后图片解码成功。焦点用例显式聚焦格式控件来模拟失焦；IME 和遗留 Range 用例先聚焦根、再设置文字范围，避免浏览器聚焦重置选区导致假覆盖。
 
+2026-10-30 单图剪切后的粘贴截图已检查，1280×720 与 390×844 两种视口均无溢出、重叠，邻段保持原文，离线夹具解码及 alt/宽高属性通过。连续两次撤销/重做分别恢复粘贴前、剪切前及最终文档，不恢复块高亮。HTML 写入失败可以留下空纯文本，但图片模型、块选区和 History 均保持不变。本轮全量回归为 234 个 Vitest 文件/1762 项测试、226 项 Chromium 用例；不验证远端照片内容或系统剪贴板最终提交。
+
 反向选区验收曾暴露受控回写将选区规范化为正向的问题，现已改为保留 anchor/focus；重新设置前仍清空旧浏览器选区，确保通过撤销/重做按钮恢复后继续输入会进入编辑事务，而不是仅修改 DOM。
 
 ## 保留边界
 
 - 默认只输出纯文本；可选 HTML 支持文字、同层跨项列表、同一行跨 cell 与完整连续行表格片段、顶层正文混排及单张安全图片 BlockSelection。不导出任意跨层级列表、部分跨行/跨表内部结构、Markdown、其他类型 BlockSelection 或文件。
-- 独立图片复制要求根聚焦，现有 DOM Range 不得越界；HTML 写图片和空纯文本，默认 plain/非法图片不写格式，不读取遗留文字。只读块选区和根可聚焦性由宿主管理；图片剪切不扩展，受限目标不会用 alt/URL 猜造文字。
+- 独立图片复制/可编辑单图剪切要求根聚焦，现有 DOM Range 不得越界；HTML 写图片和空纯文本，默认 plain/非法图片不写格式，不读取遗留文字。只读块选区和根可聚焦性由宿主管理，只读剪切不产生模型事务；受限目标不会用 alt/URL 猜造文字。
 - 混合片段要求两端在顶层文本块，不支持的图片或所选源块校验失败时整段回退纯文本，不只导出剩余块；不扩大剪切或列表/代码块/cell 的富片段粘贴。
 - 图片引用仅限模型 ready、无凭据的 HTTP/HTTPS；不输出 blob/loading/error 或字节 MIME，不验证远端资源。合法小数/过大尺寸省略相应属性，非法尺寸整段回退，源模型不变。
 - 列表单项和单 cell 文字按 paragraph 导出，不保留编号、checked、嵌套层级或表格外壳；目标粘贴仍按当前 Command 能力选择 HTML 或实际纯文本。
 - 同层跨项可保留所选列表结构、编号与 checked；最后项文字后的子列表不选入，嵌套片段不带祖先，跨不同列表/层级或编号非法仍回退。复制能力不扩展跨项剪切和列表目标富格式插入。
 - HTML 第二次写入失败时，纯文本可能已写入事件数据，不承诺剪贴板回滚，但文档和 History 不变。HTML block 片段粘贴不保证任意部分选区的原段落结构往返。
-- 复制范围可跨结构；剪切仍只覆盖现有删除命令支持的范围，不支持跨项、跨 cell 或穿越 void block 的删除。
+- 复制范围可跨结构；文字剪切仍只覆盖 `deleteSelection` 支持的范围，不支持跨项、跨 cell 或穿越 void block 的删除。单图剪切仅复用 `deleteImage`，不支持多个图片块或其他 BlockSelection。
 - 表格多段 cell 的纯文本输出不做 TSV 引号转义，不保证原表格往返。
 - 同步 ClipboardData 写入成功不等同于操作系统最终提交成功，组件不额外申请系统权限。
 - 浏览器回归仅在 Chromium 执行，未做真实桌面 Office、其他浏览器或系统菜单的跨平台人工验收。
