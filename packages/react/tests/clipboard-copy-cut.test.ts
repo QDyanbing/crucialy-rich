@@ -424,6 +424,54 @@ describe("RichTextEditor selected image clipboard", () => {
     );
     expect(onBlockSelectionChange).toHaveBeenCalledExactlyOnceWith(undefined);
   });
+
+  it.each(["cut", "Delete"])(
+    "does not invent a beforeSelection when the document only contains an image (%s)",
+    (action) => {
+      const host = renderEditor(createDocument([value.children[1]!]), {
+        clipboardFormat: "html",
+        blockSelection: createBlockSelection([0]),
+      });
+      focusRoot(host.container);
+      window.getSelection()!.removeAllRanges();
+      if (action === "cut") clipboard(host.container, "cut");
+      else
+        act(() =>
+          host.container.firstElementChild!.dispatchEvent(
+            new KeyboardEvent("keydown", {
+              key: action,
+              bubbles: true,
+              cancelable: true,
+            }),
+          ),
+        );
+      expect(host.onTransaction).toHaveBeenCalledTimes(1);
+      const change = host.onTransaction.mock.calls[0]![0];
+      expect(change).not.toHaveProperty("beforeSelection");
+      expect(change.after).toEqual(createDocument([createParagraph()]));
+      expect(change.selection.anchor).toEqual({ path: [0, 0], offset: 0 });
+    },
+  );
+
+  it.each([false, true])(
+    "uses only a valid host range before image cut (%s)",
+    (valid) => {
+      const selection = {
+        anchor: { path: valid ? [0, 0] : [8, 0], offset: 1 },
+        focus: { path: valid ? [0, 0] : [8, 0], offset: 3 },
+      };
+      const host = renderEditor(value, {
+        clipboardFormat: "html",
+        blockSelection: createBlockSelection([1]),
+        selection,
+      });
+      focusRoot(host.container);
+      window.getSelection()!.removeAllRanges();
+      clipboard(host.container, "cut");
+      const change = host.onTransaction.mock.calls[0]![0];
+      expect(change.beforeSelection).toEqual(valid ? selection : undefined);
+    },
+  );
 });
 
 describe("RichTextEditor enclosed image clipboard", () => {

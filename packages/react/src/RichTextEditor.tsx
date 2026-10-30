@@ -31,6 +31,7 @@ import {
   getElementModelPath,
   INSERT_TEXT_COMMAND_NAME,
   isCollapsed,
+  isValidPoint,
   isTextNode,
   MERGE_BLOCK_COMMAND_NAME,
   parseClipboardData,
@@ -131,7 +132,7 @@ export interface RichTextEditorTransactionEvent {
   after: DocumentNode;
   batch?: string;
   before: DocumentNode;
-  beforeSelection: RangeSelection;
+  beforeSelection?: RangeSelection;
   inputType: RichTextEditorInputType;
   selection: RangeSelection;
   transaction: Transaction;
@@ -194,7 +195,7 @@ const defaultCommandRegistry = createDefaultCommandRegistry();
 
 interface KeyboardInputResult {
   batch?: string;
-  beforeSelection: RangeSelection;
+  beforeSelection?: RangeSelection;
   inputType: RichTextEditorInputType;
   selection: RangeSelection;
   transaction: Transaction;
@@ -202,7 +203,7 @@ interface KeyboardInputResult {
 
 function createKeyboardInputResultFromCommandResult(
   result: CommandResult,
-  beforeSelection: RangeSelection,
+  beforeSelection: RangeSelection | undefined,
   inputType: KeyboardInputResult["inputType"],
   batch?: string,
 ): KeyboardInputResult | undefined {
@@ -211,7 +212,7 @@ function createKeyboardInputResultFromCommandResult(
   }
 
   const inputResult: KeyboardInputResult = {
-    beforeSelection,
+    ...(beforeSelection ? { beforeSelection } : {}),
     inputType,
     selection: result.selection,
     transaction: result.transaction,
@@ -352,6 +353,7 @@ function createDeleteImageCommandResult(
   registry: CommandRegistry,
   document: DocumentNode,
   blockSelection: BlockSelection,
+  beforeSelection?: RangeSelection,
 ): KeyboardInputResult | undefined {
   const result = executeCoreCommand(registry, DELETE_IMAGE_COMMAND_NAME, {
     context: { document },
@@ -361,7 +363,11 @@ function createDeleteImageCommandResult(
   return result.selection
     ? createKeyboardInputResultFromCommandResult(
         result,
-        result.selection,
+        beforeSelection &&
+          isValidPoint(document, beforeSelection.anchor) &&
+          isValidPoint(document, beforeSelection.focus)
+          ? beforeSelection
+          : undefined,
         "deleteImage",
       )
     : undefined;
@@ -578,7 +584,7 @@ function RichTextEditorComponent(
       const transactionEvent: RichTextEditorTransactionEvent = {
         after: nextDocument,
         before: document,
-        beforeSelection: input.beforeSelection,
+        ...(input.beforeSelection ? { beforeSelection: input.beforeSelection } : {}),
         inputType: input.inputType,
         selection: input.selection,
         transaction: input.transaction,
@@ -692,6 +698,7 @@ function RichTextEditorComponent(
         registry,
         document,
         blockSelection,
+        getModelSelectionFromDom(event.currentTarget, document) ?? selection,
       );
 
       if (deleteImageInput) {
@@ -846,7 +853,12 @@ function RichTextEditorComponent(
         return;
       const html = getClipboardHtml(document, blockSelection);
       if (html === undefined) return;
-      const input = createDeleteImageCommandResult(registry, document, blockSelection);
+      const input = createDeleteImageCommandResult(
+        registry,
+        document,
+        blockSelection,
+        getModelSelectionFromDom(event.currentTarget, document) ?? selection,
+      );
       if (
         input &&
         input.transaction.operations.length > 0 &&
@@ -854,10 +866,6 @@ function RichTextEditorComponent(
       ) {
         commitInputResult({
           ...input,
-          beforeSelection:
-            getModelSelectionFromDom(event.currentTarget, document) ??
-            selection ??
-            input.beforeSelection,
           inputType: "deleteByCut",
         });
         onBlockSelectionChange?.(undefined);

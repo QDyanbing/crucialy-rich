@@ -95,6 +95,7 @@ ref 命令事件的 `inputType` 为 `command`。受控模式不会自行替换 `
 - `contentEditable` 开启后，普通 `insertText`、Backspace、Delete 和 Enter 会通过 transaction 更新模型并触发 `onChange`。
 - 输入后会通过 `onSelectionChange` 输出新的折叠选区。
 - 非空 transaction 输入后会通过 `onTransaction` 输出输入前文档、输入后文档、输入前 selection、输入后 selection、transaction 和 inputType。
+- `beforeSelection` 为可选 `RangeSelection`：文字输入仍提供旧文字范围；图片删除/剪切只保存当前 DOM 或宿主传入的合法旧文字选区，没有时省略，不把删除后的光标冒充旧选区。接入方读取端点前须判断是否存在，传给 `createHistorySnapshot(event.before, event.beforeSelection)` 无需特殊分支。History 不保存图片块高亮，撤销恢复图片内容但不自动重选图片。
 - 普通文本输入的 `onTransaction` 事件会带有 `batch: "typing"`，宿主可用于连续输入合并。
 - 输入处理会复用当前 DOM selection，先转换为模型 selection，再创建输入 transaction。
 - 普通文本输入会通过 `insertTextCommand` 创建 transaction。
