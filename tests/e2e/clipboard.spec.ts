@@ -1052,6 +1052,7 @@ test("guards plain mode cut and focus for selected image blocks", async ({ page 
   await page.getByLabel("复制格式").focus();
   await expect(editor).not.toBeFocused();
   expect((await dispatchClipboard(page, "copy", "已渲染文档", true)).types).toEqual([]);
+  expect((await dispatchClipboard(page, "cut", "已渲染文档", true)).types).toEqual([]);
   await editor.locator("img").click();
   expect((await dispatchClipboard(page, "copy", "已渲染文档", true)).html).toContain(
     "<img",
@@ -1079,7 +1080,77 @@ test("does not use a selected image when the DOM range is outside the editor", a
   const copied = await dispatchClipboard(page, "copy", "已渲染文档", true);
   expect(copied.prevented).toBe(false);
   expect(copied.types).toEqual([]);
+  const cut = await dispatchClipboard(page, "cut", "已渲染文档", true);
+  expect(cut.prevented).toBe(true);
+  expect(cut.types).toEqual([]);
+  await expect(editor.locator("img")).toHaveCount(1);
   await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+});
+
+for (const failure of ["clear", "text/plain", "text/html"]) {
+  test(`preserves a selected image when clipboard rejects ${failure}`, async ({
+    page,
+  }) => {
+    await mockImageClipboard(page);
+    await page.goto("/");
+    await page.getByLabel("模型示例").selectOption("image-clipboard");
+    await page.getByLabel("复制格式").selectOption("html");
+    const editor = page.getByLabel("已渲染文档");
+    const json = page.getByLabel("文档 JSON", { exact: true });
+    const before = await json.textContent();
+    await editor.locator("img").click();
+    const result = await editor.evaluate((element, failure) => {
+      const clipboardData = new DataTransfer();
+      Object.defineProperty(clipboardData, "clearData", {
+        value: () => {
+          if (failure === "clear") throw new DOMException("Clear rejected");
+          DataTransfer.prototype.clearData.call(clipboardData);
+        },
+      });
+      Object.defineProperty(clipboardData, "setData", {
+        value: (mime: string, value: string) => {
+          if (failure === mime) throw new DOMException("Write rejected");
+          DataTransfer.prototype.setData.call(clipboardData, mime, value);
+        },
+      });
+      const event = new ClipboardEvent("cut", {
+        bubbles: true,
+        cancelable: true,
+        clipboardData,
+      });
+      element.dispatchEvent(event);
+      return {
+        prevented: event.defaultPrevented,
+        types: Array.from(clipboardData.types),
+      };
+    }, failure);
+    expect(result).toEqual({
+      prevented: true,
+      types: failure === "text/html" ? ["text/plain"] : [],
+    });
+    await expect(json).toHaveText(before!);
+    await expect(editor.locator("img")).toHaveAttribute("data-selected", "true");
+    await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 0');
+  });
+}
+
+test("does not cut a selected imported temporary image", async ({ page }) => {
+  await page.goto("/");
+  await pasteCopiedToRegular(page, {
+    text: "",
+    html: '<img src="blob:https://example.com/local" alt="临时图片">',
+  });
+  await page.getByLabel("复制格式").selectOption("html");
+  const editor = page.getByLabel("已渲染文档");
+  const json = page.getByLabel("文档 JSON", { exact: true });
+  const before = await json.textContent();
+  await editor.locator("img").click();
+  const cut = await dispatchClipboard(page, "cut", "已渲染文档", true);
+  expect(cut.prevented).toBe(true);
+  expect(cut.types).toEqual([]);
+  await expect(json).toHaveText(before!);
+  await expect(editor.locator("img")).toHaveAttribute("data-selected", "true");
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
 });
 
 test("does not replace code with inferred text from a selected image block", async ({
