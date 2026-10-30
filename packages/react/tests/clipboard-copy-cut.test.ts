@@ -284,18 +284,41 @@ describe("RichTextEditor selected image clipboard", () => {
     expect(host.onTransaction).not.toHaveBeenCalled();
   });
 
-  it("does not cut old text when an image block selection is active", () => {
+  it("cuts only the image instead of stale text after both formats are written", () => {
+    const onBlockSelectionChange = vi.fn();
     const host = renderEditor(value, {
       clipboardFormat: "html",
       blockSelection: createBlockSelection([1]),
+      onBlockSelectionChange,
     });
     focusRoot(host.container);
     select(host.container);
     const cut = clipboard(host.container, "cut");
     expect(cut.event.defaultPrevented).toBe(true);
-    expect(cut.setData).not.toHaveBeenCalled();
-    expect(host.onChange).not.toHaveBeenCalled();
-    expect(host.onTransaction).not.toHaveBeenCalled();
+    expect(cut.data["text/plain"]).toBe("");
+    expect(parseHtml(cut.data["text/html"]!)?.blocks).toEqual([value.children[1]]);
+    expect(host.container.querySelector("img")).toBeNull();
+    expect(host.container.textContent).toBe("前甲乙后正文");
+    expect(host.onChange).toHaveBeenCalledTimes(1);
+    expect(host.onTransaction).toHaveBeenCalledTimes(1);
+    const change = host.onTransaction.mock.calls[0]![0];
+    expect(change).toMatchObject({
+      before: value,
+      inputType: "deleteByCut",
+      beforeSelection: {
+        anchor: { path: [0, 0], offset: 1 },
+        focus: { path: [0, 0], offset: 3 },
+      },
+      selection: {
+        anchor: { path: [1, 0], offset: 0 },
+        focus: { path: [1, 0], offset: 0 },
+      },
+    });
+    expect(change).not.toHaveProperty("batch");
+    expect(cut.setData.mock.invocationCallOrder.at(-1)).toBeLessThan(
+      host.onChange.mock.invocationCallOrder[0]!,
+    );
+    expect(onBlockSelectionChange).toHaveBeenCalledExactlyOnceWith(undefined);
   });
 });
 

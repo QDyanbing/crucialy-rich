@@ -837,7 +837,33 @@ function RichTextEditorComponent(
     onCut?.(event);
     if (event.defaultPrevented || !editable) return;
     event.preventDefault();
-    if (compositionRef.current.active || blockSelection) return;
+    if (compositionRef.current.active) return;
+    if (blockSelection) {
+      if (
+        clipboardFormat !== "html" ||
+        !ownsBlockClipboardSelection(event.currentTarget)
+      )
+        return;
+      const html = getClipboardHtml(document, blockSelection);
+      if (html === undefined) return;
+      const input = createDeleteImageCommandResult(registry, document, blockSelection);
+      if (
+        input &&
+        input.transaction.operations.length > 0 &&
+        writeClipboardData(event, "", html)
+      ) {
+        commitInputResult({
+          ...input,
+          beforeSelection:
+            getModelSelectionFromDom(event.currentTarget, document) ??
+            selection ??
+            input.beforeSelection,
+          inputType: "deleteByCut",
+        });
+        onBlockSelectionChange?.(undefined);
+      }
+      return;
+    }
     const modelSelection = getModelSelectionFromDom(event.currentTarget, document);
     if (!modelSelection) return;
     const text = getClipboardText(document, modelSelection);
