@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   canMergeHistoryEntries,
+  createBlockSelection,
   createDocument,
   createHistorySnapshot,
   createParagraph,
@@ -29,6 +30,26 @@ function entry(selection?: RangeSelection): HistoryEntry {
 }
 
 describe("History adjacent merge policy", () => {
+  for (const policy of ["batch", "adjacent"] as const) {
+    it.each([
+      "previous-before",
+      "previous-after",
+      "next-before",
+      "next-after",
+    ] as const)(
+      `does not merge across a block selection in %s (${policy})`,
+      (position) => {
+        const previous = entry(caret());
+        const next = entry(caret());
+        const target = position.startsWith("previous") ? previous : next;
+        const boundary = position.endsWith("before") ? target.before : target.after;
+        boundary.blockSelection = createBlockSelection([0]);
+        const original = structuredClone({ previous, next });
+        expect(canMergeHistoryEntries(previous, next, policy)).toBe(false);
+        expect({ previous, next }).toEqual(original);
+      },
+    );
+  }
   it.each([false, true])(
     "rejects expanded boundary selections (backward: %s)",
     (backward) => {

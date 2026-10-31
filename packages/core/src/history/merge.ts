@@ -12,6 +12,14 @@ export function canMergeHistoryEntries(
     return false;
   }
 
+  if (
+    previous.before.blockSelection ||
+    previous.after.blockSelection ||
+    next.before.blockSelection ||
+    next.after.blockSelection
+  )
+    return false;
+
   if (mergePolicy === "batch") {
     return true;
   }
