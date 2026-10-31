@@ -15,6 +15,11 @@ import {
   createCommandSuccess,
   createTable,
   createTransaction,
+  createHistorySnapshot,
+  createHistoryState,
+  recordHistory,
+  undoHistory,
+  redoHistory,
   deleteSelectionCommand,
   deleteImageCommand,
   createParagraph,
@@ -116,6 +121,52 @@ describe("RichTextEditor selected image clipboard", () => {
     root.tabIndex = 0;
     root.focus();
   }
+
+  it.each(["cut", "Backspace", "Delete"])(
+    "records detached image selection from a %s transaction for host History",
+    (action) => {
+      const blockSelection = createBlockSelection([1]);
+      const host = renderEditor(value, { clipboardFormat: "html", blockSelection });
+      focusRoot(host.container);
+      window.getSelection()!.removeAllRanges();
+      if (action === "cut") clipboard(host.container, "cut");
+      else
+        act(() =>
+          host.container.firstElementChild!.dispatchEvent(
+            new KeyboardEvent("keydown", {
+              key: action,
+              bubbles: true,
+              cancelable: true,
+            }),
+          ),
+        );
+      expect(host.onTransaction).toHaveBeenCalledTimes(1);
+      const event = host.onTransaction.mock.calls[0]![0];
+      expect(event.beforeBlockSelection).toEqual(createBlockSelection([1]));
+      expect(event.beforeBlockSelection).not.toBe(blockSelection);
+      const history = recordHistory({
+        history: createHistoryState(),
+        transaction: event.transaction,
+        before: createHistorySnapshot(
+          event.before,
+          event.beforeSelection,
+          event.beforeBlockSelection,
+        ),
+        after: createHistorySnapshot(event.after, event.selection),
+      });
+      blockSelection.path[0] = 2;
+      expect(event.beforeBlockSelection.path).toEqual([1]);
+      event.beforeBlockSelection.path[0] = 0;
+      expect(blockSelection.path).toEqual([2]);
+      const undone = undoHistory(history)!;
+      expect(undone.document).toEqual(value);
+      expect(undone.blockSelection).toEqual(createBlockSelection([1]));
+      const redone = redoHistory(undone.history)!;
+      expect(redone.document).toEqual(event.after);
+      expect(redone).not.toHaveProperty("blockSelection");
+      expect(redone.selection).toEqual(event.selection);
+    },
+  );
 
   it.each([true, "text/html", "clear"] as const)(
     "preserves the image and all callbacks when clipboard writing fails at %s",
@@ -1210,6 +1261,9 @@ describe("RichTextEditor plain clipboard cut", () => {
         transaction: { operations: [{ type: "delete_text" }] },
       });
       expect(host.onTransaction.mock.calls[0]?.[0].batch).toBeUndefined();
+      expect(host.onTransaction.mock.calls[0]?.[0]).not.toHaveProperty(
+        "beforeBlockSelection",
+      );
     },
   );
 
