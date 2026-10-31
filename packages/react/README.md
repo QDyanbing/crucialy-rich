@@ -68,7 +68,7 @@ export function Demo() {
 - 混合复制：HTML 模式可保留两端正文之间的完整列表、表格、分隔线和安全图片引用，首尾文字仍裁剪；不支持的图片或进出结构内部的范围回退纯文本，默认 plain、只读、宿主事件及跨结构剪切拒绝不变。
 - 图文复制仅写出模型 ready、无凭据的 HTTP/HTTPS 引用、alt 与正安全整数尺寸；blob/loading/error 整段回退纯文本，不新增文件 MIME 或跨图片文字范围剪切。
 - 图片块复制复用受控 `blockSelection`，HTML 模式下要求根聚焦、DOM 选区没有越界，输出独立图片 HTML 和空纯文本，不读取遗留文字。可编辑单图剪切复用 `deleteImage`，写入成功后输出 `deleteByCut` 并通知清除块选区；失败不删除，默认 plain 不输出图片，只读不执行模型剪切，详见[单图剪切](../../docs/features/copy-cut.md#单图剪切)。
-- 图片删除/剪切没有合法旧文字范围时省略事务 `beforeSelection`，读取前须判空；撤销恢复图片而不自动恢复块高亮。
+- 图片删除/剪切没有合法旧文字范围时省略事务 `beforeSelection`，读取前须判空；另提供独立 `beforeBlockSelection`，宿主记录为 History 快照第三参数并回传撤销结果后，可恢复图片高亮。Demo 已接入；重做或文字快照没有块选区时须清除旧高亮，组件不自行管理 History。
 
 Toolbar 当前支持：
 

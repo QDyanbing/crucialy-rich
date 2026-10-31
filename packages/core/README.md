@@ -217,6 +217,7 @@ const shortcutCommandName = getCommandNameFromShortcut({
 - 混合 HTML：两端位于顶层文本块时，保留中间完整列表、表格、Divider 和安全图片引用，按原顺序输出并裁剪首尾文字；不支持的图片、非法源块或结构内部与正文混选则回退完整纯文本，详见[顶层混合片段](../../docs/features/copy-cut.md#顶层混合片段)。
 - 图片引用仅接受 ready、无凭据的 HTTP/HTTPS，保留 alt 和正安全整数宽高，不复制文件字节、blob 或内部属性，不验证资源可达性；不扩大跨图片文字剪切或受限粘贴目标。React 的单图剪切复用既有 `deleteImage`，Core 未新增命令，详见[单图剪切](../../docs/features/copy-cut.md#单图剪切)。
 - `getClipboardHtml` 同时接受 `RangeSelection | BlockSelection`，后者仅支持单张安全顶层图片，不包含邻块或其他类型，非法选区返回 `undefined`。`getClipboardText` 仍只接受文字范围，见[图片块选区](../../docs/features/copy-cut.md#图片块选区)。
+- History 块选区：`createHistorySnapshot(document, selection?, blockSelection?)` 可独立克隆块路径，`undoHistory` / `redoHistory` 及其 Command 结果透传可选 `blockSelection`。两种自动合并策略遇到任一前后快照含块选区均保留独立记录；旧调用不变，宿主须应用/清除选区并校验路径，见[块选区恢复](../../docs/features/history.md#块选区恢复)。
 
 ## 构建产物
 
