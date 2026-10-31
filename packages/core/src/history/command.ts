@@ -44,6 +44,9 @@ function createHistoryCommandSuccess(
   if (change.selection) {
     result.selection = change.selection;
   }
+  if (change.blockSelection) {
+    result.blockSelection = change.blockSelection;
+  }
 
   return createCommandSuccess(commandName, result);
 }

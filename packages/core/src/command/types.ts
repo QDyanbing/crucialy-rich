@@ -1,6 +1,6 @@
 import type { DocumentNode } from "../model";
 import type { Transaction } from "../operation";
-import type { RangeSelection } from "../selection";
+import type { BlockSelection, RangeSelection } from "../selection";
 import type { HistoryState } from "../history/types";
 
 export type CommandName = string;
@@ -18,6 +18,7 @@ export interface CommandInput<TPayload = unknown> {
 export type CommandResultStatus = "success" | "failure" | "skipped";
 
 export interface CommandResult {
+  blockSelection?: BlockSelection;
   commandName: CommandName;
   document?: DocumentNode;
   history?: HistoryState;

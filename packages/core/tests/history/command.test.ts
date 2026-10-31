@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  createBlockSelection,
+  createImage,
+  createRemoveBlockOperation,
   createCommandRegistry,
   createDocument,
   createHistorySnapshot,
@@ -35,6 +38,43 @@ function createEntry(before: string, after: string): HistoryEntry {
 }
 
 describe("history commands", () => {
+  it.each(["undo", "redo"] as const)(
+    "forwards detached block selection through %s command",
+    (action) => {
+      const document = createDocument([createImage("https://example.com/a.png")]);
+      const snapshot = createHistorySnapshot(
+        document,
+        undefined,
+        createBlockSelection([0]),
+      );
+      const entry = {
+        before: snapshot,
+        after: snapshot,
+        transaction: createTransaction([createRemoveBlockOperation([0])]),
+      };
+      const history =
+        action === "undo"
+          ? createHistoryState([entry])
+          : createHistoryState([], [entry]);
+      const original = structuredClone(history);
+      const result = executeCommand(
+        createCommandRegistry([undoCommand, redoCommand]),
+        action,
+        {
+          context: { document },
+          payload: { history },
+        },
+      );
+      expect(result.ok).toBe(true);
+      expect(result.blockSelection).toEqual(createBlockSelection([0]));
+      expect(result).not.toHaveProperty("selection");
+      expect(result).not.toHaveProperty("transaction");
+      result.blockSelection!.path[0] = 8;
+      expect(history).toEqual(original);
+      const stored = result.history!.undoStack[0] ?? result.history!.redoStack[0];
+      expect(stored!.before.blockSelection).toEqual(createBlockSelection([0]));
+    },
+  );
   it("executes undo through the command registry", () => {
     const entry = createEntry("你", "你好");
     const history = createHistoryState([entry]);
