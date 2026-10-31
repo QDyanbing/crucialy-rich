@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  cloneHistorySnapshot,
+  createBlockSelection,
   createCodeBlock,
   createDocument,
   createDivider,
@@ -16,6 +18,38 @@ import {
 } from "../../src";
 
 describe("createHistorySnapshot", () => {
+  it("clones an optional block selection without inventing a text range", () => {
+    const document = createDocument([createImage("https://example.com/a.png")]);
+    const block = createBlockSelection([0]);
+    const snapshot = createHistorySnapshot(document, undefined, block);
+    const clone = cloneHistorySnapshot(snapshot);
+    block.path[0] = 9;
+    snapshot.blockSelection!.path[0] = 8;
+    expect(clone.blockSelection).toEqual(createBlockSelection([0]));
+    expect(clone).not.toHaveProperty("selection");
+    expect(clone.blockSelection!.path).not.toBe(snapshot.blockSelection!.path);
+  });
+
+  it("keeps text and block snapshots independent when both are supplied", () => {
+    const selection = {
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 1 },
+    };
+    const snapshot = createHistorySnapshot(
+      createDocument([
+        createParagraph([createText("旧范围")]),
+        createImage("https://example.com/a.png"),
+      ]),
+      selection,
+      createBlockSelection([1]),
+    );
+    selection.anchor.offset = 8;
+    expect(snapshot.selection!.anchor.offset).toBe(0);
+    expect(snapshot.blockSelection).toEqual(createBlockSelection([1]));
+    expect(createHistorySnapshot(createDocument())).not.toHaveProperty(
+      "blockSelection",
+    );
+  });
   it("clones document and selection values", () => {
     const document = createDocument([
       createParagraph([

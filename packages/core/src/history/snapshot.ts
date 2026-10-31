@@ -12,7 +12,12 @@ import {
   type DocumentNode,
   type ListNode,
 } from "../model";
-import type { Point, RangeSelection } from "../selection";
+import {
+  cloneBlockSelection,
+  type BlockSelection,
+  type Point,
+  type RangeSelection,
+} from "../selection";
 import type { HistorySnapshot } from "./types";
 
 function cloneBlock(block: BlockNode): BlockNode {
@@ -117,17 +122,19 @@ function cloneSelection(selection: RangeSelection): RangeSelection {
 export function createHistorySnapshot(
   document: DocumentNode,
   selection?: RangeSelection,
+  blockSelection?: BlockSelection,
 ): HistorySnapshot {
-  return selection
-    ? {
-        document: cloneDocument(document),
-        selection: cloneSelection(selection),
-      }
-    : {
-        document: cloneDocument(document),
-      };
+  return {
+    document: cloneDocument(document),
+    ...(selection ? { selection: cloneSelection(selection) } : {}),
+    ...(blockSelection ? { blockSelection: cloneBlockSelection(blockSelection) } : {}),
+  };
 }
 
 export function cloneHistorySnapshot(snapshot: HistorySnapshot): HistorySnapshot {
-  return createHistorySnapshot(snapshot.document, snapshot.selection);
+  return createHistorySnapshot(
+    snapshot.document,
+    snapshot.selection,
+    snapshot.blockSelection,
+  );
 }
