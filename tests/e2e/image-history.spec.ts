@@ -33,6 +33,59 @@ async function imageClipboard(page: Page, type: "copy" | "cut") {
   }, type);
 }
 
+async function placeTextCaret(page: Page) {
+  await page.getByLabel("已渲染文档").evaluate((editor) => {
+    (editor as HTMLElement).focus();
+    const text = editor.querySelector('[data-crucialy-path="[1,0]"]')!.firstChild!;
+    window.getSelection()!.setBaseAndExtent(text, 1, text, 1);
+    editor.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+  });
+}
+
+test("clears a later image highlight when undo restores a text-only snapshot", async ({
+  page,
+}) => {
+  const editor = await prepareImage(page);
+  const json = page.getByLabel("文档 JSON", { exact: true });
+  const original = JSON.parse((await json.textContent())!);
+  await editor.locator('[data-crucialy-path="[1,0]"]').click();
+  await placeTextCaret(page);
+  await editor.press("x");
+  await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+  const image = editor.locator("img");
+  await image.click();
+  await expect(image).toHaveAttribute("data-selected", "true");
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect
+    .poll(async () => JSON.parse((await json.textContent())!))
+    .toEqual(original);
+  await expect(image).not.toHaveAttribute("data-selected", "true");
+  await page.getByRole("button", { name: "重做", exact: true }).click();
+  await expect(image).not.toHaveAttribute("data-selected", "true");
+});
+
+test("restores selected image through native history shortcuts", async ({ page }) => {
+  const editor = await prepareImage(page);
+  const image = editor.locator("img");
+  await image.click();
+  await editor.press("Delete");
+  await expect(image).toHaveCount(0);
+  await editor.press("ControlOrMeta+z");
+  await expect(image).toHaveAttribute("data-selected", "true");
+  await editor.press("ControlOrMeta+Shift+z");
+  await expect(image).toHaveCount(0);
+  await editor.press("ControlOrMeta+z");
+  await expect(image).toHaveAttribute("data-selected", "true");
+  await editor.locator('[data-crucialy-path="[1,0]"]').click();
+  await expect(image).not.toHaveAttribute("data-selected", "true");
+  await placeTextCaret(page);
+  await editor.press("x");
+  await expect(image).toHaveCount(1);
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect(image).not.toHaveAttribute("data-selected", "true");
+  await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+});
+
 for (const mobile of [false, true]) {
   for (const action of ["cut", "Backspace", "Delete"] as const) {
     test(`restores selected image after ${action} and allows another edit (mobile: ${mobile})`, async ({
