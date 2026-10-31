@@ -99,6 +99,9 @@ for (const mobile of [false, true]) {
       const undo = page.getByRole("button", { name: "撤销", exact: true });
       const redo = page.getByRole("button", { name: "重做", exact: true });
       await image.click();
+      await expect(page.getByRole("toolbar", { name: "悬浮格式工具栏" })).toHaveCount(
+        0,
+      );
       if (action === "cut")
         expect((await imageClipboard(page, "cut")).html).toContain("<img");
       else await editor.press(action);
@@ -109,6 +112,9 @@ for (const mobile of [false, true]) {
         .poll(async () => JSON.parse((await json.textContent())!))
         .toEqual(original);
       await expect(image).toHaveAttribute("data-selected", "true");
+      await expect(page.getByRole("toolbar", { name: "悬浮格式工具栏" })).toHaveCount(
+        0,
+      );
       await editor.focus();
       await editor.evaluate(() => window.getSelection()!.removeAllRanges());
       const copied = await imageClipboard(page, "copy");

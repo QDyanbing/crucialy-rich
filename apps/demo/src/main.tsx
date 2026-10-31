@@ -1322,6 +1322,7 @@ function DemoApp() {
     }
 
     setLastTransaction(change.entry.transaction);
+    setFloatingToolbarRect(null);
     setLastTransactionReport(null);
     setSlashMenuRect(null);
     setSlashMenuState(closeSlashMenu());
@@ -1329,6 +1330,11 @@ function DemoApp() {
 
   function handleToolbarCommand(event: ToolbarCommandEvent) {
     applyCommandResult(event.result, event.selection ?? modelSelection);
+  }
+
+  function handleBlockSelectionChange(selection: BlockSelection | undefined) {
+    setBlockSelection(selection);
+    if (selection) setFloatingToolbarRect(null);
   }
 
   function handleInsertText() {
@@ -2065,7 +2071,7 @@ function DemoApp() {
             label="已渲染文档"
             onCompositionStateChange={setCompositionState}
             onKeyDown={handleEditorKeyDown}
-            onBlockSelectionChange={setBlockSelection}
+            onBlockSelectionChange={handleBlockSelectionChange}
             onCellSelectionChange={setCellSelection}
             onKeyUp={handleBrowserSelectionSync}
             onMouseUp={handleBrowserSelectionSync}
@@ -2075,7 +2081,7 @@ function DemoApp() {
             suppressContentEditableWarning
             value={normalizedDocument}
           />
-          {showFloatingToolbar ? (
+          {showFloatingToolbar && !blockSelection ? (
             <FloatingToolbar
               anchorRect={floatingToolbarRect}
               document={normalizedDocument}
