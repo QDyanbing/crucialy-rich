@@ -174,6 +174,48 @@ function verifyMixedImagePaste(core) {
   }
 }
 
+function verifyHistoryBlockSelection(core) {
+  const document = core.createDocument([core.createImage("https://example.com/a.png")]);
+  const blockSelection = core.createBlockSelection([0]);
+  const cut = core.deleteImageCommand.execute({
+    context: { document },
+    payload: { selection: blockSelection },
+  });
+  const after = core.applyTransaction(document, cut.transaction);
+  const history = core.recordHistory({
+    history: core.createHistoryState(),
+    transaction: cut.transaction,
+    before: core.createHistorySnapshot(document, undefined, blockSelection),
+    after: core.createHistorySnapshot(after, cut.selection),
+  });
+  blockSelection.path[0] = 9;
+  const undone = core.undoCommand.execute({
+    context: { document: after },
+    payload: { history },
+  });
+  assert.equal(undone.ok, true);
+  assert.deepEqual(undone.blockSelection, core.createBlockSelection([0]));
+  assert.equal(undone.selection, undefined);
+  const redone = core.redoCommand.execute({
+    context: { document },
+    payload: { history: undone.history },
+  });
+  assert.deepEqual(redone.document, after);
+  assert.deepEqual(redone.selection, cut.selection);
+  assert.equal(Object.hasOwn(redone, "blockSelection"), false);
+  assert.deepEqual(
+    core.undoHistory(history).blockSelection,
+    core.createBlockSelection([0]),
+  );
+  assert.equal(
+    core.canMergeHistoryEntries(
+      { ...history.undoStack[0], batch: "typing" },
+      { ...history.undoStack[0], batch: "typing" },
+    ),
+    false,
+  );
+}
+
 function verifyCellNavigation(core) {
   const document = core.createDocument([
     core.createParagraph(),
@@ -623,6 +665,17 @@ for (const packageConfig of publicPackages) {
     verifyMixedImagePaste(runtime);
     verifyCellNavigation(runtime);
     verifyHistoryMergePolicy(runtime);
+    verifyHistoryBlockSelection(runtime);
+    for (const name of ["HistorySnapshot", "HistoryChange", "CommandResult"]) {
+      assert.match(
+        declarations,
+        new RegExp(`interface ${name} \\{[^}]*blockSelection\\?: BlockSelection`),
+      );
+    }
+    assert.match(
+      declarations,
+      /createHistorySnapshot\(document: DocumentNode, selection\?: RangeSelection, blockSelection\?: BlockSelection\)/,
+    );
     verifyClipboardText(runtime);
     verifyClipboardHtml(runtime);
     verifyListClipboard(runtime);
@@ -644,6 +697,7 @@ for (const packageConfig of publicPackages) {
     assert.ok(declarations.includes('"onCut"'));
     assert.ok(declarations.includes('"deleteByCut"'));
     assert.match(declarations, /beforeSelection\?: RangeSelection/);
+    assert.match(declarations, /beforeBlockSelection\?: BlockSelection/);
     assert.ok(declarations.includes('clipboardFormat?: "plain" | "html"'));
   }
 

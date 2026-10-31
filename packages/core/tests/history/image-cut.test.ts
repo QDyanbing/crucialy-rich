@@ -26,9 +26,14 @@ const image = createImage("https://example.com/a.png", {
 });
 
 describe("selected image cut history", () => {
-  it.each([false, true])(
-    "restores the exact source with one history entry (only image: %s)",
-    (onlyImage) => {
+  it.each([
+    { onlyImage: false, saveBlock: false },
+    { onlyImage: true, saveBlock: false },
+    { onlyImage: false, saveBlock: true },
+    { onlyImage: true, saveBlock: true },
+  ])(
+    "restores the exact source (only image: $onlyImage, save block: $saveBlock)",
+    ({ onlyImage, saveBlock }) => {
       const document = createDocument(
         onlyImage
           ? [image]
@@ -55,7 +60,11 @@ describe("selected image cut history", () => {
       expect(validateDocument(after).valid).toBe(true);
       const history = recordHistory({
         history: createHistoryState(),
-        before: createHistorySnapshot(document),
+        before: createHistorySnapshot(
+          document,
+          undefined,
+          saveBlock ? blockSelection : undefined,
+        ),
         after: createHistorySnapshot(after, result.selection),
         transaction: result.transaction!,
       });
@@ -63,10 +72,12 @@ describe("selected image cut history", () => {
       const undone = undoHistory(history)!;
       expect(undone.document).toEqual(original);
       expect(undone.selection).toBeUndefined();
+      expect(undone.blockSelection).toEqual(saveBlock ? blockSelection : undefined);
       expect(undone.history.undoStack).toHaveLength(0);
       const redone = redoHistory(undone.history)!;
       expect(redone.document).toEqual(after);
       expect(redone.selection).toEqual(result.selection);
+      expect(redone).not.toHaveProperty("blockSelection");
       expect(parseHtml(html)?.blocks).toEqual([image]);
       expect(document).toEqual(original);
     },
@@ -83,7 +94,7 @@ describe("selected image cut history", () => {
     const cutDocument = applyTransaction(document, cut.transaction!);
     const cutHistory = recordHistory({
       history: createHistoryState(),
-      before: createHistorySnapshot(document),
+      before: createHistorySnapshot(document, undefined, selection),
       after: createHistorySnapshot(cutDocument, cut.selection),
       transaction: cut.transaction!,
     });
@@ -105,6 +116,7 @@ describe("selected image cut history", () => {
     expect(undoPaste.selection).toEqual(cut.selection);
     const undoCut = undoHistory(undoPaste.history)!;
     expect(undoCut.document).toEqual(document);
+    expect(undoCut.blockSelection).toEqual(selection);
     const redoCut = redoHistory(undoCut.history)!;
     const redoPaste = redoHistory(redoCut.history)!;
     expect(redoPaste.document).toEqual(pastedDocument);
