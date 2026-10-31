@@ -8,6 +8,7 @@ import {
   canRedo,
   canUndo,
   cloneRangeSelection,
+  cloneBlockSelection,
   createBulletList,
   createCodeBlock,
   createCompositionState,
@@ -45,6 +46,7 @@ import {
   INSERT_TABLE_COMMAND_NAME,
   ITALIC_COMMAND_NAME,
   isCollapsed,
+  isImageBlockSelection,
   isValidPoint,
   MERGE_BLOCK_COMMAND_NAME,
   normalizeDocument,
@@ -1281,7 +1283,11 @@ function DemoApp() {
     setHistoryState((currentHistory) =>
       recordHistory({
         after: createHistorySnapshot(nextDocument, nextSelection),
-        before: createHistorySnapshot(normalizedDocument, beforeSelection),
+        before: createHistorySnapshot(
+          normalizedDocument,
+          beforeSelection,
+          blockSelection,
+        ),
         history: currentHistory,
         transaction,
       }),
@@ -1303,6 +1309,13 @@ function DemoApp() {
 
     setDocumentValue(change.document);
     setHistoryState(change.history);
+    setBlockSelection(
+      change.blockSelection &&
+        isImageBlockSelection(change.document, change.blockSelection)
+        ? cloneBlockSelection(change.blockSelection)
+        : undefined,
+    );
+    setCellSelection(undefined);
 
     if (change.selection) {
       setModelSelection(change.selection);
@@ -1739,7 +1752,11 @@ function DemoApp() {
     setHistoryState((currentHistory) => {
       const historyInput = {
         after: createHistorySnapshot(event.after, event.selection),
-        before: createHistorySnapshot(event.before, event.beforeSelection),
+        before: createHistorySnapshot(
+          event.before,
+          event.beforeSelection,
+          event.beforeBlockSelection,
+        ),
         history: currentHistory,
         mergePolicy: "adjacent" as const,
         transaction: event.transaction,

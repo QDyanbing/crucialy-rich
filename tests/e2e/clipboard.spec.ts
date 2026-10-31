@@ -1009,7 +1009,7 @@ for (const mobile of [false, true]) {
     await expect
       .poll(async () => JSON.parse((await json.textContent())!))
       .toEqual(original);
-    await expect(image).not.toHaveAttribute("data-selected", "true");
+    await expect(image).toHaveAttribute("data-selected", "true");
     await redo.click();
     await expect
       .poll(async () => JSON.parse((await json.textContent())!))
