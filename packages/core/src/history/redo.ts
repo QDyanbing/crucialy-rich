@@ -15,6 +15,7 @@ export function redoHistory(history: HistoryState): HistoryChange | undefined {
 
   const after = cloneHistorySnapshot(entry.after);
   const change: Omit<HistoryChange, "selection"> = {
+    ...(after.blockSelection ? { blockSelection: after.blockSelection } : {}),
     document: after.document,
     entry: cloneHistoryEntry(entry),
     history: {

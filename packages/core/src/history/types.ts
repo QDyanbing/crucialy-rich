@@ -23,6 +23,7 @@ export interface HistoryState {
 }
 
 export interface HistoryChange {
+  blockSelection?: BlockSelection;
   document: DocumentNode;
   entry: HistoryEntry;
   history: HistoryState;
