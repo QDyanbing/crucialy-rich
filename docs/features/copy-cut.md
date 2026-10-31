@@ -124,7 +124,7 @@ React 使用已有受控 `blockSelection`。可编辑模式点击图片会聚焦
 - 宿主取消事件、输入法组合期、根未聚焦、DOM 端点越界、命令缺失/禁用/执行失败/缺结果及剪贴板不可用均不修改模型或选区。清空或任一格式写入抛错也不删除，后续 HTML 失败可能留下空纯文本，不承诺回滚系统剪贴板。
 - 成功后输出一次无 batch 的 `deleteByCut` 事务与文字光标，并通知 `onBlockSelectionChange(undefined)`。受控宿主须回传新 value、文字选区和清除后的块选区；组件不私自修改受控值。
 - 光标复用 `deleteImage`：优先后方文字，其次前方；没有可编辑文字时补空 paragraph，仍为同一条 History。单独粘贴是另一条记录，剪切和粘贴可分别撤销/重做。
-- 事务 `beforeSelection` 只保存合法旧文字选区，没有时省略；接入方须判空。History 不保存 BlockSelection，撤销恢复图片及元数据，但不自动恢复图片高亮。此规则也适用于 Backspace/Delete 图片删除。
+- 事务 `beforeSelection` 只保存合法旧文字选区，没有时省略，接入方须判空；另外提供 `beforeBlockSelection`。宿主传给快照第三参数并回传撤销结果的块选区后，可恢复图片及高亮；Demo 已接入。重做后的快照不带块选区，宿主须清除旧高亮。此规则也适用于 Backspace/Delete 图片删除，详见[块选区恢复](./history.md#块选区恢复)。
 
 只读剪切仍交给宿主/浏览器。跨越图片的文字范围、多个图片块和其他类型 BlockSelection 不支持剪切；此能力不扩展列表/cell/代码块的富片段粘贴。Demo 继续复用“图文复制”样例：选择 HTML、点击图片，再使用剪切事件。
 

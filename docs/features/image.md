@@ -60,7 +60,7 @@ blob、loading/error、凭据 URL 或非法源模型使整个 HTML 范围片段�
 
 选中图片后按 Backspace 或 Delete 会执行 `deleteImage`。删除后优先把光标放到后方文本，再回退到前方文本；若没有可编辑文本，则插入空 paragraph，保证可以继续输入。
 
-图片删除和剪切没有合法旧文字选区时，事务省略 `beforeSelection`；宿主读取前须判空。撤销恢复图片模型及元数据，不自动恢复块高亮。
+图片删除和剪切没有合法旧文字选区时，事务省略 `beforeSelection`；宿主读取前须判空。事务另外提供 `beforeBlockSelection`，传给 History 快照第三参数后，宿主可回传撤销结果中的块选区来恢复高亮；未接入时仍只恢复内容。Demo 已接入，重做清除高亮并恢复文字光标，见[块选区恢复](./history.md#块选区恢复)。
 
 ## 渲染与边界
 

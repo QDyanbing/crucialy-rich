@@ -4,7 +4,7 @@ History 模块负责记录可撤销编辑的前后快照，并提供基于快照
 
 ## 当前范围
 
-- 定义 `HistorySnapshot`，保存文档模型和可选 selection。
+- 定义 `HistorySnapshot`，保存文档模型、可选文字 selection 和 blockSelection。
 - 定义 `HistoryEntry`，保存一次 transaction 的 before、after、transaction 和可选 batch 标记。
 - 定义 `HistoryState`，包含 undoStack 和 redoStack。
 - 定义 `HistoryChange`，描述一次撤销或重做后的文档、selection、entry 和新 history 状态。
@@ -26,6 +26,7 @@ History 模块负责记录可撤销编辑的前后快照，并提供基于快照
 
 ```ts
 interface HistorySnapshot {
+  blockSelection?: BlockSelection;
   document: DocumentNode;
   selection?: RangeSelection;
 }
@@ -43,6 +44,7 @@ interface HistoryState {
 }
 
 interface HistoryChange {
+  blockSelection?: BlockSelection;
   document: DocumentNode;
   entry: HistoryEntry;
   history: HistoryState;
@@ -63,6 +65,7 @@ interface RecordHistoryInput {
 function createHistorySnapshot(
   document: DocumentNode,
   selection?: RangeSelection,
+  blockSelection?: BlockSelection,
 ): HistorySnapshot;
 
 function createHistoryEntry(input: RecordHistoryInput): HistoryEntry;
@@ -125,7 +128,7 @@ const redoCommand: Command;
 - 快照创建时会复制 document 和 selection，避免外部对象后续修改污染 history。
 - `recordHistory` 只记录非空 transaction。
 - 记录新的 transaction 后会清空 redoStack。
-- batch 是可选字符串；默认 `mergePolicy: "batch"` 将相同非空 batch 的连续记录合并为一个 history entry，不检查选区跳变，兼容已有调用。
+- batch 是可选字符串；默认 `mergePolicy: "batch"` 将相同非空 batch 的连续记录合并为一个 history entry，不检查文字选区跳变。任一 entry 的 before/after 带 blockSelection 时，两种策略均拒绝自动合并，防止图片编辑并入 typing；没有块选区的旧调用不变。
 - 当前 React 普通文本输入会使用 `typing` batch；Enter、Backspace、Delete 和 demo 按钮命令默认保持独立 history entry。
 
 ## 可选的相邻输入策略
@@ -144,12 +147,16 @@ history = recordHistory({
   mergePolicy: "adjacent",
   ...(event.batch ? { batch: event.batch } : {}),
   transaction: event.transaction,
-  before: createHistorySnapshot(event.before, event.beforeSelection),
+  before: createHistorySnapshot(
+    event.before,
+    event.beforeSelection,
+    event.beforeBlockSelection,
+  ),
   after: createHistorySnapshot(event.after, event.selection),
 });
 ```
 
-图片删除/剪切的 `event.beforeSelection` 可能不存在：只有合法旧文字范围才记录，没有时省略，不伪造删除后的光标。上面的快照调用可直接接收 `undefined`；自行读取端点的接入方须判空。History 不保存图片 BlockSelection，撤销恢复模型但不自动恢复图片高亮，单图剪切与随后粘贴是两条独立记录。
+图片删除/剪切的 `event.beforeSelection` 可能不存在：只有合法旧文字范围才记录，没有时省略，不伪造删除后的光标。快照可直接接收 `undefined`；自行读取端点的接入方须判空。React 同时提供独立复制的 `beforeBlockSelection`，传给第三参数后可在撤销时恢复图片高亮。单图剪切与随后粘贴仍是两条独立记录。
 
 策略只作用于本次记录，不存入 `HistoryEntry` 或 `HistoryState`。`canMergeHistoryEntries` 的第三参数只检查 entry 对，不知道 redoStack；分支保护由 `recordHistory` 执行。低层 `mergeHistoryEntries` 仍是无条件合并 helper，调用方应先判断。
 
@@ -161,6 +168,16 @@ history = recordHistory({
 - `redoHistory` 会把栈顶 entry 从 redoStack 移回 undoStack。
 - 返回的 entry、document、selection 和栈内容都会复制，避免调用方修改污染 history。
 - `undoCommand`、`redoCommand` 需要 payload 中传入 `{ history }`，成功时返回 `document`、`history` 和可选 `selection`。
+
+## 块选区恢复
+
+`createHistorySnapshot(document, selection?, blockSelection?)` 的第三参数为可选增量能力。未传入时不生成该字段，旧快照、无文字选区的图片文档和原有两参数调用保持兼容。文字范围与块选区可同时保存，各自独立克隆；块选区是宿主显式状态，不从旧文字范围或文档内容猜测。
+
+`undoHistory` / `redoHistory` 返回对应 before/after 的可选 `blockSelection`；`undoCommand` / `redoCommand` 也在 CommandResult 中透传它。快照、entry、栈迁移结果和返回选区的路径数组互不共享；底层 `mergeHistoryEntries` 仍是显式无条件合并工具，会复制外侧 before/after，自动合并判断由 `canMergeHistoryEntries` 负责。
+
+宿主必须应用返回的文档和选区，包括在返回值没有 blockSelection 时清除当前块选区，不能保留一个旧高亮。Demo 仅恢复在对应文档中合法的图片块，并清除旧 cell 高亮和悬浮文字工具栏锚点；普通文字 History 不会凭空选中图片。图片删除/剪切的 after 快照不带块选区，重做后恢复文字光标并清除图片高亮。
+
+History 只是值快照，不校验、修复或映射宿主传入的块路径，不读取 DOM、不管理焦点，也不记录单独的点击选择。核心类型可保存 BlockSelection，不代表 React 支持表格、Divider、多块或单元格矩形选择的恢复。接入方须校验路径并回传受控 `blockSelection`；再次复制要求根聚焦，其他剪贴板安全规则不变。
 
 ## 快捷键规则
 
@@ -191,5 +208,9 @@ history = recordHistory({
 - `packages/core/tests/history/redo.test.ts`
 - `packages/core/tests/history/shortcut.test.ts`
 - `packages/core/tests/history/command.test.ts`
+- `packages/core/tests/history/block-selection.test.ts`
+- `packages/core/tests/history/block-selection-isolation.test.ts`
+- `packages/core/tests/history/image-cut.test.ts`
+- `tests/e2e/image-history.spec.ts`
 - `packages/core/tests/public-api.test.ts`
 - `tests/e2e/demo-shell.spec.ts`
