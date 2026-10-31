@@ -7,6 +7,7 @@ import {
   createMarkdownInputRuleResult,
   createBackspaceInputTransaction,
   createBlockSelection,
+  cloneBlockSelection,
   createCellSelection,
   createCompositionState,
   createDeleteInputTransaction,
@@ -132,6 +133,7 @@ export interface RichTextEditorTransactionEvent {
   after: DocumentNode;
   batch?: string;
   before: DocumentNode;
+  beforeBlockSelection?: BlockSelection;
   beforeSelection?: RangeSelection;
   inputType: RichTextEditorInputType;
   selection: RangeSelection;
@@ -195,6 +197,7 @@ const defaultCommandRegistry = createDefaultCommandRegistry();
 
 interface KeyboardInputResult {
   batch?: string;
+  beforeBlockSelection?: BlockSelection;
   beforeSelection?: RangeSelection;
   inputType: RichTextEditorInputType;
   selection: RangeSelection;
@@ -360,7 +363,7 @@ function createDeleteImageCommandResult(
     payload: { selection: blockSelection },
   });
 
-  return result.selection
+  const input = result.selection
     ? createKeyboardInputResultFromCommandResult(
         result,
         beforeSelection &&
@@ -370,6 +373,9 @@ function createDeleteImageCommandResult(
           : undefined,
         "deleteImage",
       )
+    : undefined;
+  return input
+    ? { ...input, beforeBlockSelection: cloneBlockSelection(blockSelection) }
     : undefined;
 }
 
@@ -584,6 +590,9 @@ function RichTextEditorComponent(
       const transactionEvent: RichTextEditorTransactionEvent = {
         after: nextDocument,
         before: document,
+        ...(input.beforeBlockSelection
+          ? { beforeBlockSelection: cloneBlockSelection(input.beforeBlockSelection) }
+          : {}),
         ...(input.beforeSelection ? { beforeSelection: input.beforeSelection } : {}),
         inputType: input.inputType,
         selection: input.selection,

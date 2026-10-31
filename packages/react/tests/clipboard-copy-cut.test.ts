@@ -497,6 +497,7 @@ describe("RichTextEditor selected image clipboard", () => {
     const change = host.onTransaction.mock.calls[0]![0];
     expect(change).toMatchObject({
       before: value,
+      beforeBlockSelection: createBlockSelection([1]),
       inputType: "deleteByCut",
       beforeSelection: {
         anchor: { path: [0, 0], offset: 1 },
@@ -537,6 +538,7 @@ describe("RichTextEditor selected image clipboard", () => {
       expect(host.onTransaction).toHaveBeenCalledTimes(1);
       const change = host.onTransaction.mock.calls[0]![0];
       expect(change).not.toHaveProperty("beforeSelection");
+      expect(change.beforeBlockSelection).toEqual(createBlockSelection([0]));
       expect(change.after).toEqual(createDocument([createParagraph()]));
       expect(change.selection.anchor).toEqual({ path: [0, 0], offset: 0 });
     },
