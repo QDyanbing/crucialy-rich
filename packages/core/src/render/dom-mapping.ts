@@ -23,6 +23,11 @@ function isTextDomNode(node: Node): node is Text {
   return node.nodeType === TEXT_NODE;
 }
 
+function getTextChildren(element: Element): Text[] | undefined {
+  const children = Array.from(element.childNodes);
+  return children.every(isTextDomNode) ? children : undefined;
+}
+
 function isDomOffset(value: number): boolean {
   return Number.isInteger(value) && value >= 0;
 }
@@ -113,8 +118,21 @@ export function domPointToModelPoint(
   if (isTextDomNode(domPoint.node)) {
     const element = findClosestModelPathElement(domPoint.node);
     const path = element ? getElementModelPath(element) : undefined;
-
-    return path ? createValidPoint(document, path, domPoint.offset) : undefined;
+    const texts = element ? getTextChildren(element) : undefined;
+    const index = texts?.indexOf(domPoint.node);
+    if (
+      !path ||
+      !texts ||
+      index === undefined ||
+      index < 0 ||
+      domPoint.offset > domPoint.node.data.length
+    ) {
+      return undefined;
+    }
+    const prefix = texts
+      .slice(0, index)
+      .reduce((length, text) => length + text.data.length, 0);
+    return createValidPoint(document, path, prefix + domPoint.offset);
   }
 
   if (!isElementNode(domPoint.node)) {
@@ -129,8 +147,8 @@ export function domPointToModelPoint(
   }
 
   if (isTextNode(modelNode)) {
-    const children = Array.from(domPoint.node.childNodes);
-    if (domPoint.offset > children.length || !children.every(isTextDomNode)) {
+    const children = getTextChildren(domPoint.node);
+    if (!children || domPoint.offset > children.length) {
       return undefined;
     }
     const offset = children
