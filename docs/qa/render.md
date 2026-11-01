@@ -13,6 +13,7 @@
 - `packages/core/tests/public-api.test.ts`：渲染公开 API 导出。
 - `packages/react/tests/public-api.test.ts`：React 组件渲染 value、defaultValue、空 document、受控优先级和组合 mark 结构化样式。
 - `tests/e2e/demo-shell.spec.ts`：演示编辑区、组件示例和渲染边界示例。
+- 2026-11-01 补充 DOM 元素/拆分 Text/容器边界、任务 checkbox、异常 DOM 和结构回归，覆盖 59 项新增 Core、15 项 React 与 8 项 Chromium 用例；构建后的映射函数运行时与声明验证通过，详见[选区同步验收](./selection-sync.md)。
 
 命令：
 
@@ -52,8 +53,10 @@ pnpm test:e2e
 
 ## 当前限制
 
-- 图片尚未实现；Divider 内部不产生 text Point，列表使用递归 model path。
+- 图片与 Divider 渲染为 void，内部不产生 text Point，列表使用递归 model path。DOM 映射支持当前直接文字叶子及同叶子拆分 Text，不解释任意嵌套包装或根/表格结构端点，不把 DOM 内容导入模型。
 
 ## 结论
 
 当前模型到 DOM 结构渲染、Block Type 语义标签、文字样式与链接组合、DOM 与模型位置映射、React 组件渲染和演示边界验收均已闭环。
+
+2026-11-01 全量本地验证通过：1861 项单测与 242 项 Chromium 用例，桌面/手机选区恢复截图无溢出或遮挡；主 JS 约 512.58 KB，既有分包提示非阻断，未调整构建策略。
