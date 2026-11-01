@@ -25,6 +25,7 @@ function isTextDomNode(node: Node): node is Text {
 }
 
 function getTextChildren(element: Element): Text[] | undefined {
+  if (["INPUT", "IMG", "HR", "BR"].includes(element.tagName)) return undefined;
   const children = Array.from(element.childNodes);
   return children.every(isTextDomNode) ? children : undefined;
 }
@@ -63,12 +64,17 @@ function createBlockBoundaryPoint(
     if (!isElementNode(child)) return undefined;
     const childPath = getElementModelPath(child);
     const text = childPath ? getNodeAtPath(document, childPath) : undefined;
+    const texts = getTextChildren(child);
     return childPath &&
       childPath.length === path.length + 1 &&
       path.every((part, index) => part === childPath[index]) &&
       isTextNode(text) &&
-      getTextChildren(child)
-      ? createValidPoint(document, childPath, atEnd ? text.text.length : 0)
+      texts
+      ? createValidPoint(
+          document,
+          childPath,
+          atEnd ? texts.reduce((length, child) => length + child.data.length, 0) : 0,
+        )
       : undefined;
   }
   function ignorable(child: Node): boolean {
