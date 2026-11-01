@@ -8,6 +8,8 @@
 
 ### 新增
 
+- 修正 DOM 选区端点映射：文字元素 offset 按子节点索引换算，同一模型叶子的拆分 Text 累计 UTF-16 前缀，反向恢复不再截到首节点末尾。文本容器按实际 DOM 边界定位，任务 checkbox、排版空白和注释不占文字索引，非法/结构端点不猜测或夹取。
+- 补齐 Core、React、构建包与桌面/手机 Chromium 回归，验证完整复制、正反向剪切、独立粘贴 History、原生输入和任务状态保留；不新增示例、API、模型节点或跨结构编辑能力。
 - History 快照新增可选 `blockSelection`，撤销/重做与 Command 结果透传独立块路径；React 图片删除/剪切事务输出 `beforeBlockSelection`，宿主可记录并恢复图片高亮，旧快照与文字调用保持兼容。
 - 含块选区的 entry 不参与 batch/adjacent 自动合并；Demo 接通图片选中态的按钮/快捷键恢复，文字快照与重做清除旧高亮，选中图片时清除旧文字悬浮工具栏锚点，修复手机遮挡。
 - `getClipboardHtml` 扩展为接受 `RangeSelection | BlockSelection`，块选区仅导出安全顶层图片；原范围契约与 `getClipboardText` 保持不变。

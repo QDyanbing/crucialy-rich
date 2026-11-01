@@ -218,6 +218,7 @@ const shortcutCommandName = getCommandNameFromShortcut({
 - 图片引用仅接受 ready、无凭据的 HTTP/HTTPS，保留 alt 和正安全整数宽高，不复制文件字节、blob 或内部属性，不验证资源可达性；不扩大跨图片文字剪切或受限粘贴目标。React 的单图剪切复用既有 `deleteImage`，Core 未新增命令，详见[单图剪切](../../docs/features/copy-cut.md#单图剪切)。
 - `getClipboardHtml` 同时接受 `RangeSelection | BlockSelection`，后者仅支持单张安全顶层图片，不包含邻块或其他类型，非法选区返回 `undefined`。`getClipboardText` 仍只接受文字范围，见[图片块选区](../../docs/features/copy-cut.md#图片块选区)。
 - History 块选区：`createHistorySnapshot(document, selection?, blockSelection?)` 可独立克隆块路径，`undoHistory` / `redoHistory` 及其 Command 结果透传可选 `blockSelection`。两种自动合并策略遇到任一前后快照含块选区均保留独立记录；旧调用不变，宿主须应用/清除选区并校验路径，见[块选区恢复](../../docs/features/history.md#块选区恢复)。
+- DOM 映射：元素 offset 按真实子节点边界换算，Text 使用局部 UTF-16 偏移，拆分叶子累计前缀并支持反向恢复；任务 checkbox、块外层排版空白与注释不占文字索引。不映射 void、根/表格结构端点或任意嵌套包装，不夹取越界位置，详见[DOM 偏移规则](../../docs/features/selection-sync.md#dom-偏移规则)。
 
 ## 构建产物
 
