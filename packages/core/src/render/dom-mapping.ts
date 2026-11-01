@@ -1,5 +1,6 @@
 import {
-  isListItemNode,
+  isListEntryNode,
+  isListNode,
   isTextBlockNode,
   isTextNode,
   type DocumentNode,
@@ -44,29 +45,66 @@ function createValidPoint(
 
 function createBlockBoundaryPoint(
   document: DocumentNode,
+  element: Element,
   path: Path,
   offset: number,
 ): Point | undefined {
   const node = getNodeAtPath(document, path);
 
-  if ((!isTextBlockNode(node) && !isListItemNode(node)) || node.children.length === 0) {
+  if (
+    (!isTextBlockNode(node) && !isListEntryNode(node)) ||
+    node.children.length === 0
+  ) {
     return undefined;
   }
 
-  if (offset <= 0) {
-    return createValidPoint(document, [...path, 0], 0);
-  }
-
-  if (offset >= node.children.length) {
-    const lastTextIndex = node.children.length - 1;
-    const lastTextNode = node.children[lastTextIndex];
-
-    return lastTextNode
-      ? createValidPoint(document, [...path, lastTextIndex], lastTextNode.text.length)
+  const children = Array.from(element.childNodes);
+  function childPoint(child: Node, atEnd: boolean): Point | undefined {
+    if (!isElementNode(child)) return undefined;
+    const childPath = getElementModelPath(child);
+    const text = childPath ? getNodeAtPath(document, childPath) : undefined;
+    return childPath &&
+      childPath.length === path.length + 1 &&
+      path.every((part, index) => part === childPath[index]) &&
+      isTextNode(text) &&
+      getTextChildren(child)
+      ? createValidPoint(document, childPath, atEnd ? text.text.length : 0)
       : undefined;
   }
-
-  return createValidPoint(document, [...path, offset], 0);
+  function ignorable(child: Node): boolean {
+    if (child.nodeType === 8 || (isTextDomNode(child) && child.data.trim() === ""))
+      return true;
+    return (
+      isListEntryNode(node) &&
+      node.type === "taskItem" &&
+      isElementNode(child) &&
+      child.tagName === "INPUT" &&
+      child.getAttribute("data-crucialy-task-item") === "true" &&
+      child.getAttribute("data-crucialy-path") === encodeModelPath(path)
+    );
+  }
+  for (let index = offset; index < children.length; index++) {
+    const child = children[index]!;
+    if (ignorable(child)) continue;
+    const point = childPoint(child, false);
+    if (point) return point;
+    const childPath = isElementNode(child) ? getElementModelPath(child) : undefined;
+    if (
+      isListEntryNode(node) &&
+      childPath &&
+      childPath.length === path.length + 1 &&
+      path.every((part, i) => part === childPath[i]) &&
+      isListNode(getNodeAtPath(document, childPath))
+    )
+      break;
+    return undefined;
+  }
+  for (let index = offset - 1; index >= 0; index--) {
+    const child = children[index]!;
+    if (ignorable(child)) continue;
+    return childPoint(child, true);
+  }
+  return undefined;
 }
 
 export function getElementModelPath(element: Element): Path | undefined {
@@ -138,6 +176,11 @@ export function domPointToModelPoint(
   if (!isElementNode(domPoint.node)) {
     return undefined;
   }
+  if (
+    domPoint.offset > domPoint.node.childNodes.length ||
+    ["INPUT", "IMG", "HR", "BR"].includes(domPoint.node.tagName)
+  )
+    return undefined;
 
   const path = getElementModelPath(domPoint.node);
   const modelNode = path ? getNodeAtPath(document, path) : undefined;
@@ -157,7 +200,7 @@ export function domPointToModelPoint(
     return createValidPoint(document, path, offset);
   }
 
-  return createBlockBoundaryPoint(document, path, domPoint.offset);
+  return createBlockBoundaryPoint(document, domPoint.node, path, domPoint.offset);
 }
 
 export function modelPointToDomPoint(

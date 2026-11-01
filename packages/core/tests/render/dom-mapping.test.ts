@@ -117,14 +117,8 @@ describe("dom model path helpers", () => {
     const model = createDocument([
       createParagraph([createText("Hello"), createText(" world")]),
     ]);
-    document.body.innerHTML = `
-      <div data-crucialy-path="[]">
-        <p data-crucialy-path="[0]">
-          <span data-crucialy-path="[0,0]">Hello</span>
-          <span data-crucialy-path="[0,1]"> world</span>
-        </p>
-      </div>
-    `;
+    document.body.innerHTML =
+      '<div data-crucialy-path="[]"><p data-crucialy-path="[0]"><span data-crucialy-path="[0,0]">Hello</span><span data-crucialy-path="[0,1]"> world</span></p></div>';
     const paragraph = document.querySelector("p");
 
     expect(paragraph).not.toBeNull();
@@ -147,11 +141,7 @@ describe("dom model path helpers", () => {
     ["quote", createQuote([createText("Quote")]), "blockquote"],
   ] as const)("maps %s dom boundaries to model points", (_name, block, tagName) => {
     const model = createDocument([block]);
-    document.body.innerHTML = `
-      <${tagName} data-crucialy-path="[0]">
-        <span data-crucialy-path="[0,0]">${block.children[0]?.text}</span>
-      </${tagName}>
-    `;
+    document.body.innerHTML = `<${tagName} data-crucialy-path="[0]"><span data-crucialy-path="[0,0]">${block.children[0]?.text}</span></${tagName}>`;
     const element = document.querySelector(tagName);
 
     expect(element).not.toBeNull();
@@ -169,13 +159,8 @@ describe("dom model path helpers", () => {
     const model = createDocument([
       createBulletList([createListItem([createText("项目")])]),
     ]);
-    document.body.innerHTML = `
-      <ul data-crucialy-path="[0]">
-        <li data-crucialy-path="[0,0]">
-          <span data-crucialy-path="[0,0,0]">项目</span>
-        </li>
-      </ul>
-    `;
+    document.body.innerHTML =
+      '<ul data-crucialy-path="[0]"><li data-crucialy-path="[0,0]"><span data-crucialy-path="[0,0,0]">项目</span></li></ul>';
     const item = document.querySelector("li");
 
     expect(domPointToModelPoint(model, { node: item!, offset: 0 })).toEqual({
