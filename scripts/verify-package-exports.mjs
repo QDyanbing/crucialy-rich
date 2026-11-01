@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { access, readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { JSDOM } from "jsdom";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const publicPackages = [
@@ -16,6 +17,8 @@ const publicPackages = [
       "getAdjacentCellSelection",
       "getClipboardText",
       "getClipboardHtml",
+      "domPointToModelPoint",
+      "modelPointToDomPoint",
     ],
   },
   {
@@ -171,6 +174,50 @@ function verifyMixedImagePaste(core) {
       assert.deepEqual(redone.document, after);
       assert.deepEqual(redone.selection, result.selection);
     }
+  }
+}
+
+function verifyDomBoundaryMapping(core) {
+  const model = core.createDocument([
+    core.createParagraph([core.createText("A\ud83d\ude00B", { bold: true })]),
+    core.createTaskList([core.createTaskItem([core.createText("task")], true)]),
+  ]);
+  const dom = new JSDOM(core.renderNodeToHtml(core.renderDocument(model)));
+  try {
+    const root = dom.window.document.body;
+    const leaf = root.querySelector("strong");
+    const suffix = leaf.firstChild.splitText(1);
+    assert.deepEqual(core.domPointToModelPoint(model, { node: leaf, offset: 2 }), {
+      path: [0, 0],
+      offset: 4,
+    });
+    assert.deepEqual(core.domPointToModelPoint(model, { node: suffix, offset: 2 }), {
+      path: [0, 0],
+      offset: 3,
+    });
+    assert.deepEqual(
+      core.modelPointToDomPoint(root, model, { path: [0, 0], offset: 3 }),
+      { node: suffix, offset: 2 },
+    );
+    assert.equal(
+      core.domPointToModelPoint(model, { node: leaf, offset: 3 }),
+      undefined,
+    );
+    const item = root.querySelector("li");
+    assert.deepEqual(core.domPointToModelPoint(model, { node: item, offset: 1 }), {
+      path: [1, 0, 0],
+      offset: 0,
+    });
+    assert.deepEqual(core.domPointToModelPoint(model, { node: item, offset: 2 }), {
+      path: [1, 0, 0],
+      offset: 4,
+    });
+    assert.equal(
+      core.domPointToModelPoint(model, { node: item.firstChild, offset: 0 }),
+      undefined,
+    );
+  } finally {
+    dom.window.close();
   }
 }
 
@@ -659,6 +706,15 @@ for (const packageConfig of publicPackages) {
   }
 
   if (packageConfig.directory === "packages/core") {
+    verifyDomBoundaryMapping(runtime);
+    assert.match(
+      declarations,
+      /domPointToModelPoint\(document: DocumentNode, domPoint: DomPoint\)/,
+    );
+    assert.match(
+      declarations,
+      /modelPointToDomPoint\(root: ParentNode, document: DocumentNode, point: Point\)/,
+    );
     verifyClipboardFiltering(runtime);
     verifyCodePaste(runtime);
     verifyOfficePaste(runtime);
