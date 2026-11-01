@@ -5,6 +5,7 @@ import {
   createParagraph,
   createText,
   domPointToModelPoint,
+  modelPointToDomPoint,
 } from "../../src";
 
 const value = "甲😀乙";
@@ -20,6 +21,27 @@ function splitLeaf(offset: number) {
 }
 
 describe("split DOM text node mapping", () => {
+  it.each([0, 1, 2, 3, 4])(
+    "restores every model offset after a split at %s",
+    (split) => {
+      const { element } = splitLeaf(split);
+      for (let offset = 0; offset <= value.length; offset++) {
+        const point = { path: [0, 0], offset };
+        const dom = modelPointToDomPoint(element, model, point)!;
+        expect(dom).toBeDefined();
+        expect(dom.offset).toBeLessThanOrEqual((dom.node as Text).length);
+        expect(domPointToModelPoint(model, dom)).toEqual(point);
+      }
+    },
+  );
+
+  it("does not clamp a model point to the end of a shortened DOM leaf", () => {
+    const { element, first } = splitLeaf(1);
+    element.replaceChildren(first);
+    expect(
+      modelPointToDomPoint(element, model, { path: [0, 0], offset: 3 }),
+    ).toBeUndefined();
+  });
   it.each([0, 1, 2, 3, 4])(
     "accumulates UTF-16 offsets after a split at %s",
     (split) => {

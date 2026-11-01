@@ -170,16 +170,15 @@ export function modelPointToDomPoint(
   }
 
   const element = findElementByModelPath(root, point.path);
-  const textNode = Array.from(element?.childNodes ?? []).find(isTextDomNode);
-
-  if (textNode) {
-    return {
-      node: textNode,
-      offset: Math.min(point.offset, textNode.data.length),
-    };
+  const texts = element ? getTextChildren(element) : undefined;
+  if (!element || !texts) return undefined;
+  let offset = point.offset;
+  for (const text of texts) {
+    if (offset <= text.data.length) return { node: text, offset };
+    offset -= text.data.length;
   }
 
-  return element
+  return texts.length === 0 && offset === 0
     ? {
         node: element,
         offset: 0,
