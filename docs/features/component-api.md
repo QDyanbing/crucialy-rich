@@ -99,6 +99,7 @@ ref 命令事件的 `inputType` 为 `command`。受控模式不会自行替换 `
 - 组件仍不内置 History；宿主须把 `undoHistory` / `redoHistory` 或 History Command 返回的 document、selection 和可选 blockSelection 回传，没有块选区时清除旧值。ref `executeCommand` 不自动应用只带 document/history 而没有 transaction 的 History 结果。路径合法性与焦点由宿主管理，见[块选区恢复](./history.md#块选区恢复)。
 - 普通文本输入的 `onTransaction` 事件会带有 `batch: "typing"`，宿主可用于连续输入合并。
 - 输入处理会复用当前 DOM selection，先转换为模型 selection，再创建输入 transaction。
+- DOM 元素端点使用子节点索引、Text 端点使用局部 UTF-16 偏移；同一文字叶子的拆分 Text 累计前缀，任务 checkbox 不占文字索引。输入、剪贴板与 ref 共用 Core 映射，不支持的结构端点不猜测位置，详见[DOM 偏移规则](./selection-sync.md#dom-偏移规则)。
 - 普通文本输入会通过 `insertTextCommand` 创建 transaction。
 - 非折叠 selection 下的 Backspace/Delete 会通过 `deleteSelectionCommand` 创建 transaction。
 - 原生复制输出模型选区的纯文本；剪切复用 `deleteSelection` 并输出独立 `deleteByCut` transaction，写入失败、禁用命令及不支持的范围不删除。只读支持复制，详见[复制与剪切](./copy-cut.md)。

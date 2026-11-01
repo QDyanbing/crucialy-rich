@@ -146,6 +146,8 @@ React 使用已有受控 `blockSelection`。可编辑模式点击图片会聚焦
 
 复制不受 Command Registry 限制，不触发 `onChange`、`onSelectionChange` 或 `onTransaction`。文字剪切先用当前 Registry 执行 `deleteSelection`，图片块剪切使用 `deleteImage`，均要求返回成功、非空 transaction 和结果 selection；缺失、禁用、执行失败或空结果均不写入剪贴板，也不修改模型。自定义命令应遵守既有纯函数与合法 transaction 契约。
 
+DOM 文字选区端点可以是直接 Text 或对应文字叶子元素，元素 offset 按子节点边界换算；同一叶子中的拆分 Text 会累计 UTF-16 前缀。任务 checkbox 不占列表项文字索引，但控件本身的端点不支持；这些映射修正不改变模型复制内容、剪切范围或 History 规则，详见[DOM 偏移规则](./selection-sync.md#dom-偏移规则)。
+
 剪切成功后输出 `inputType: "deleteByCut"`，不带 batch；宿主按已有 `onTransaction` 流程记录为独立 History。受控模式由宿主回传新文档和选区；非受控模式更新内部文档。前后快照保留原始选区方向，撤销后恢复选中文字，重做后回到删除起点；之后输入是另一条记录。
 
 ## 范围边界

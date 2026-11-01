@@ -96,11 +96,14 @@ interface RenderedElementNode {
 
 当前规则：
 
-- text 节点内的偏移映射到对应的 text 模型节点。
+- Text 节点内使用 UTF-16 局部偏移；同一模型文字叶子被拆成多个直接 DOM Text 时累计前缀长度，反向恢复也定位到相应片段，不截断到第一个节点。
+- 文字叶子元素的 offset 是 DOM 子节点索引，先换算为累计文字长度，不直接当作字符偏移。
 - 空 text 没有文本 DOM 节点时，落在对应 `span` 元素的偏移 `0`。
-- paragraph、heading、quote 或 codeBlock 元素的边界可映射到块内首尾 Point。
+- paragraph、heading、quote、codeBlock 和普通/任务列表项按真实 DOM 子节点映射文字边界，外层排版空白、注释与任务 checkbox 不占模型文字索引；控件本身、子列表之后、根和表格结构端点不猜测为文字位置。
 - Divider 只有 block path，不产生 text path 或内部 Point；相邻文本 Point 负责删除边界。
 - 非法 DOM 偏移、没有模型路径的 DOM 节点、非法模型位置都返回 `undefined`。
+
+完整边界、空叶子与拆分规则见[DOM 偏移规则](./selection-sync.md#dom-偏移规则)。映射不修改 DOM、不新增事务，也不把宿主改写的 DOM 当作模型内容；文字叶子中的任意嵌套包装不在支持范围内。
 
 ## 边界渲染
 
