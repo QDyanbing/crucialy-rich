@@ -11,12 +11,15 @@ import {
   undoHistory,
   type DocumentNode,
 } from "@crucialy-rich/core";
-import { act, createElement } from "react";
+import { act, createElement, createRef } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { RichTextEditor } from "../src";
+import { RichTextEditor, type RichTextEditorHandle } from "../src";
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
+vi.hoisted(() => {
+  Object.defineProperty(window, "TextEvent", { configurable: true, value: InputEvent });
+});
 const roots: ReturnType<typeof createRoot>[] = [];
 afterEach(() => {
   for (const root of roots.splice(0)) act(() => root.unmount());
@@ -32,6 +35,7 @@ function mount(model: DocumentNode = value) {
   roots.push(root);
   const onChange = vi.fn();
   const onTransaction = vi.fn();
+  const ref = createRef<RichTextEditorHandle>();
   act(() =>
     root.render(
       createElement(RichTextEditor, {
@@ -40,12 +44,13 @@ function mount(model: DocumentNode = value) {
         clipboardFormat: "html",
         onChange,
         onTransaction,
+        ref,
       }),
     ),
   );
   const editor = container.firstElementChild as HTMLDivElement;
   editor.focus();
-  return { editor, onChange, onTransaction };
+  return { editor, onChange, onTransaction, ref };
 }
 
 function dispatch(editor: HTMLElement, type: "copy" | "cut") {
@@ -66,6 +71,64 @@ function dispatch(editor: HTMLElement, type: "copy" | "cut") {
 }
 
 describe("React clipboard DOM boundaries", () => {
+  it.each(["element-end", "split-caret", "element-range"])(
+    "uses mapped positions for beforeinput at %s",
+    (scenario) => {
+      const host = mount();
+      const leaf = host.editor.querySelector("strong")!;
+      const selection = window.getSelection()!;
+      if (scenario === "split-caret") {
+        const suffix = (leaf.firstChild as Text).splitText(1);
+        selection.setBaseAndExtent(suffix, 2, suffix, 2);
+      } else
+        selection.setBaseAndExtent(leaf, scenario === "element-end" ? 1 : 0, leaf, 1);
+      const input = new InputEvent("textInput", {
+        bubbles: true,
+        cancelable: true,
+        inputType: "insertText",
+        data: "新",
+      });
+      act(() => host.editor.dispatchEvent(input));
+      expect(input.defaultPrevented).toBe(true);
+      expect(host.editor.textContent).toBe(
+        scenario === "element-end"
+          ? "甲😀乙新"
+          : scenario === "split-caret"
+            ? "甲😀新乙"
+            : "新",
+      );
+      expect(host.onTransaction).toHaveBeenCalledTimes(1);
+      const event = host.onTransaction.mock.calls[0]![0];
+      expect(event.beforeSelection.anchor.offset).toBe(
+        scenario === "element-end" ? 4 : scenario === "split-caret" ? 3 : 0,
+      );
+    },
+  );
+
+  it("uses the full leaf end through ref getSelection and executeCommand", () => {
+    const host = mount();
+    const leaf = host.editor.querySelector("strong")!;
+    window.getSelection()!.setBaseAndExtent(leaf, 1, leaf, 1);
+    expect(host.ref.current!.getSelection()!.anchor.offset).toBe(4);
+    act(() => {
+      expect(host.ref.current!.executeCommand("insertText", { text: "新" }).ok).toBe(
+        true,
+      );
+    });
+    expect(host.editor.textContent).toBe("甲😀乙新");
+    expect(host.onTransaction.mock.calls[0]![0].beforeSelection.anchor.offset).toBe(4);
+  });
+
+  it("does not borrow matching element paths from another editor", () => {
+    const first = mount();
+    const second = mount();
+    const leaf = second.editor.querySelector("strong")!;
+    window.getSelection()!.setBaseAndExtent(leaf, 0, leaf, 1);
+    expect(first.ref.current!.getSelection()).toBeUndefined();
+    expect(dispatch(first.editor, "cut").data).toEqual({});
+    expect(first.onTransaction).not.toHaveBeenCalled();
+    expect(second.ref.current!.getSelection()!.focus.offset).toBe(4);
+  });
   for (const action of ["copy", "cut"] as const) {
     it.each([false, true])(
       `${action} uses full text for leaf element endpoints (%s)`,
