@@ -129,7 +129,14 @@ export function domPointToModelPoint(
   }
 
   if (isTextNode(modelNode)) {
-    return createValidPoint(document, path, domPoint.offset);
+    const children = Array.from(domPoint.node.childNodes);
+    if (domPoint.offset > children.length || !children.every(isTextDomNode)) {
+      return undefined;
+    }
+    const offset = children
+      .slice(0, domPoint.offset)
+      .reduce((length, text) => length + text.data.length, 0);
+    return createValidPoint(document, path, offset);
   }
 
   return createBlockBoundaryPoint(document, path, domPoint.offset);
