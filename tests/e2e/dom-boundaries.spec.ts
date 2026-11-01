@@ -18,6 +18,80 @@ async function clipboard(page: Page, type: "copy" | "cut") {
 }
 
 for (const mobile of [false, true]) {
+  test(`edits fragmented DOM text through native input and history (mobile: ${mobile})`, async ({
+    page,
+  }) => {
+    if (mobile) await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+    const editor = page.getByLabel("已渲染文档");
+    const json = page.getByLabel("文档 JSON", { exact: true });
+    const original = JSON.parse((await json.textContent())!);
+    const text = original.children[0].children[0].text as string;
+    await editor.evaluate((root) => {
+      (root as HTMLElement).focus();
+      const leaf = root.querySelector('[data-crucialy-path="[0,0]"]')!;
+      const suffix = (leaf.firstChild as Text).splitText(3);
+      window.getSelection()!.setBaseAndExtent(suffix, 2, suffix, 2);
+    });
+    await page.keyboard.type("新");
+    const edited = JSON.parse((await json.textContent())!);
+    expect(edited.children[0].children[0].text).toBe(
+      text.slice(0, 5) + "新" + text.slice(5),
+    );
+    await expect(editor.locator('[data-crucialy-path="[0,0]"]')).toHaveText(
+      edited.children[0].children[0].text,
+    );
+    await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+    await page.getByRole("button", { name: "撤销", exact: true }).click();
+    await expect
+      .poll(async () => JSON.parse((await json.textContent())!))
+      .toEqual(original);
+    await expect(page.getByLabel("锚点偏移")).toHaveValue("5");
+    await page.getByRole("button", { name: "重做", exact: true }).click();
+    await expect
+      .poll(async () => JSON.parse((await json.textContent())!))
+      .toEqual(edited);
+    await editor.focus();
+    await page.keyboard.type("!");
+    await expect(editor.locator('[data-crucialy-path="[0,0]"]')).toHaveText(
+      text.slice(0, 5) + "新!" + text.slice(5),
+    );
+    await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+  });
+
+  test(`cuts task text from item boundaries without changing checkbox state (mobile: ${mobile})`, async ({
+    page,
+  }) => {
+    if (mobile) await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+    await page.getByLabel("模型示例").selectOption("list-clipboard");
+    const editor = page.getByLabel("已渲染文档");
+    const json = page.getByLabel("文档 JSON", { exact: true });
+    const original = JSON.parse((await json.textContent())!);
+    const text = original.children[2].children[1].children[0].text as string;
+    await editor.evaluate((root) => {
+      (root as HTMLElement).focus();
+      const item = root.querySelector('[data-crucialy-path="[2,1]"]')!;
+      item.insertBefore(document.createTextNode(" \n"), item.firstChild);
+      item.insertBefore(document.createComment("gap"), item.lastChild);
+      window.getSelection()!.setBaseAndExtent(item, 0, item, item.childNodes.length);
+    });
+    expect((await clipboard(page, "copy")).text).toBe(text);
+    expect((await clipboard(page, "cut")).text).toBe(text);
+    const edited = JSON.parse((await json.textContent())!);
+    expect(edited.children[2].children[1].children[0].text).toBe("");
+    expect(edited.children[2].children[1].checked).toBe(true);
+    expect(edited.children[2].children[0]).toEqual(original.children[2].children[0]);
+    expect(edited.children[2].children[2]).toEqual(original.children[2].children[2]);
+    await expect(editor.locator('[data-crucialy-path="[2,1]"] input')).toBeChecked();
+    await page.getByRole("button", { name: "撤销", exact: true }).click();
+    await expect
+      .poll(async () => JSON.parse((await json.textContent())!))
+      .toEqual(original);
+    await expect(editor.locator('[data-crucialy-path="[2,1]"] input')).toBeChecked();
+    await expect(page.getByLabel("模型校验状态")).toHaveText("合法");
+  });
+
   for (const backward of [false, true]) {
     test(`round trips element-boundary clipboard and history (mobile: ${mobile}, backward: ${backward})`, async ({
       page,
