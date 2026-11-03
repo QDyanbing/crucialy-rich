@@ -1,10 +1,7 @@
 import { createCommandFailure, createCommandSkipped } from "./result";
+import { getCommandErrorReason } from "./error";
 import type { CommandRegistry } from "./registry";
 import type { CommandInput, CommandName, CommandResult } from "./types";
-
-function getErrorReason(error: unknown): string {
-  return error instanceof Error ? error.message : "Command execution failed.";
-}
 
 export function executeCommand(
   registry: CommandRegistry,
@@ -26,6 +23,6 @@ export function executeCommand(
     }
     return command.execute(input);
   } catch (error) {
-    return createCommandFailure(name, getErrorReason(error));
+    return createCommandFailure(name, getCommandErrorReason(error));
   }
 }

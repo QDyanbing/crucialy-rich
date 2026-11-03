@@ -1,5 +1,6 @@
 import type { CommandRegistry } from "./registry";
 import type { CommandInput, CommandName } from "./types";
+import { getCommandErrorReason } from "./error";
 
 export interface CommandState {
   active: boolean;
@@ -26,23 +27,32 @@ export function queryCommandState(
     };
   }
 
-  const enabled = command.canExecute ? command.canExecute(input) : true;
-  const active = command.isActive ? command.isActive(input) : false;
+  try {
+    const enabled = command.canExecute ? command.canExecute(input) : true;
+    const active = command.isActive ? command.isActive(input) : false;
 
-  if (enabled) {
+    if (enabled) {
+      return {
+        active,
+        commandName: name,
+        disabled: false,
+        registered: true,
+      };
+    }
     return {
       active,
       commandName: name,
-      disabled: false,
+      disabled: true,
+      reason: "Command cannot execute in the current context.",
+      registered: true,
+    };
+  } catch (error) {
+    return {
+      active: false,
+      commandName: name,
+      disabled: true,
+      reason: getCommandErrorReason(error),
       registered: true,
     };
   }
-
-  return {
-    active,
-    commandName: name,
-    disabled: true,
-    reason: "Command cannot execute in the current context.",
-    registered: true,
-  };
 }
