@@ -927,7 +927,9 @@ function RichTextEditorComponent(
     const fragment = parseClipboardData(
       {
         getData: (mimeType) => event.clipboardData.getData(mimeType),
-        types: Array.from(event.clipboardData.types),
+        get types() {
+          return Array.from(event.clipboardData.types);
+        },
       },
       DEFAULT_CLIPBOARD_PARSERS,
       (candidate) =>
