@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   canExecuteCommand,
@@ -21,6 +21,25 @@ function createCommand(command: Partial<Command> = {}): Command {
 }
 
 describe("canExecuteCommand", () => {
+  it.each([new Error("Guard failed."), "guard", null, Symbol("guard")])(
+    "fails closed without executing a throwing guard (%s)",
+    (error) => {
+      const execute = vi.fn(() => createCommandSuccess("noop"));
+      const isActive = vi.fn(() => true);
+      const registry = createCommandRegistry([
+        createCommand({
+          canExecute: () => {
+            throw error;
+          },
+          execute,
+          isActive,
+        }),
+      ]);
+      expect(canExecuteCommand(registry, "noop", { context })).toBe(false);
+      expect(execute).not.toHaveBeenCalled();
+      expect(isActive).not.toHaveBeenCalled();
+    },
+  );
   it("returns false for a missing command", () => {
     const registry = createCommandRegistry();
 

@@ -12,5 +12,9 @@ export function canExecuteCommand(
     return false;
   }
 
-  return command.canExecute ? command.canExecute(input) : true;
+  try {
+    return command.canExecute ? command.canExecute(input) : true;
+  } catch {
+    return false;
+  }
 }
