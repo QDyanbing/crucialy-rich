@@ -101,6 +101,8 @@ ref 命令事件的 `inputType` 为 `command`。受控模式不会自行替换 `
 - 输入处理会复用当前 DOM selection，先转换为模型 selection，再创建输入 transaction。
 - DOM 元素端点使用子节点索引、Text 端点使用局部 UTF-16 偏移；同一文字叶子的拆分 Text 累计前缀，任务 checkbox 不占文字索引。输入、剪贴板与 ref 共用 Core 映射，不支持的结构端点不猜测位置，详见[DOM 偏移规则](./selection-sync.md#dom-偏移规则)。
 - 普通文本输入会通过 `insertTextCommand` 创建 transaction。
+- 同步扩展异常由 Core 转为失败/不可用结果。已识别的格式快捷键和有效文字选区上的 Enter 取消浏览器默认行为，命令失败不修改 DOM；Backspace/Delete 的命令执行 failure 不继续旧 fallback，非折叠范围被禁用/拒绝时也不转入直接删除。图片删除失败不借用遗留文字选区。正常折叠单字符 helper 路径仍按既有规则运行，不把所有内置 helper 当作自定义 Registry 的权限系统。
+- 粘贴在读取 MIME/数据时失败不提交事务，正常候选拒绝仍可降级；原生 clipboardData 属性在 React 构造事件前抛错、宿主事件回调异常、扩展副作用和异步回调不在此保护范围内，详见[读取与回调异常](./paste.md#读取与回调异常)。
 - 非折叠 selection 下的 Backspace/Delete 会通过 `deleteSelectionCommand` 创建 transaction。
 - 原生复制输出模型选区的纯文本；剪切复用 `deleteSelection` 并输出独立 `deleteByCut` transaction，写入失败、禁用命令及不支持的范围不删除。只读支持复制，详见[复制与剪切](./copy-cut.md)。
 - `clipboardFormat="html"` 还可复制同一列表同一层级的跨项结构、编号和任务状态；单项片段仍为 paragraph，跨项剪切和列表内富格式粘贴能力不变，不支持的结构范围回退完整纯文本。

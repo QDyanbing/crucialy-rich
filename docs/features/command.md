@@ -240,6 +240,7 @@ const mergeBlockCommand: Command;
 
 ## 当前限制
 
+- 公共入口只隔离同步扩展调用的异常，不回滚扩展在抛错前自行修改的对象、DOM 或外部状态，不验证任意成功结果/transaction，也不捕获异步 Promise 拒绝。command 与 guard 应保持纯函数，宿主事件回调仍由宿主负责处理异常。
 - 文本插入和删除 command 支持同一文本容器、连续顶层文本块或同 cell 连续 paragraph range；暂不跨越列表项、cell、进出表格和 void block 等结构边界。
 - `pasteCommand` 不接受跨列表项、跨 cell 或进出列表/表格的选区；CodeBlock、列表项和 cell 内只接受 `text/plain` fragment。结构化 fragment 仍按独立顶层 block 插入，不改变这些目标的纯文本或嵌套 schema；所有目标的纯文本 fragment 均须由 paragraph blocks 组成。
 - boolean mark、文字属性、链接和清除格式 command 支持 paragraph、heading、quote 的单块或连续顶层跨块 selection，也支持同一列表项或同一表格单元格内的连续 paragraph；CodeBlock、Divider、Image、跨列表项和跨单元格 selection 不接受 marks。
@@ -247,3 +248,11 @@ const mergeBlockCommand: Command;
 - 快捷键模块不处理权限；宿主提供自定义 registry 时，React 编辑器会使用该 registry 执行命中的默认快捷键名称。
 - History 模块已提供 `undoCommand` 和 `redoCommand`；默认 Command 注册表暂不内置 history command。
 - 当前没有批量 command pipeline。
+
+## 扩展异常边界
+
+`executeCommand` 会捕获 Registry `get`、`canExecute` 和 `execute` 的同步异常并返回 `failure`，不继续执行目标命令；正常缺失仍是 `failure`，正常 guard `false` 仍是 `skipped`。`canExecuteCommand` 在查找或 guard 异常时返回 `false`，不调用 execute 或 isActive。
+
+`queryCommandState` 的查找失败返回 `registered: false`、`disabled: true`、`active: false`；已找到 command 后 guard/isActive 抛错则保留 `registered: true`，其余状态同样关闭，并提供错误原因。普通 guard 返回 false 时仍按原规则读取 active，不把“正常禁用”和“异常禁用”混为一谈。
+
+Error 使用可读取的字符串 message；非 Error、非字符串 message 或 message 自身读取失败时，统一使用 `Command execution failed.`。状态查询不执行命令，也不是权限系统；isActive 异常只影响查询，程序调用 executeCommand 不读取 isActive。公共签名与返回类型不变。

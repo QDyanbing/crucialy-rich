@@ -70,6 +70,7 @@ interface SlashCommandItem {
 - `/h2` 不会残留在标题正文中。
 - 删除和块命令只产生一个 History 记录。
 - 目标命令失败时不会暴露只删除了触发文本的半成品 Transaction。
+- Registry/guard/execute 同步异常经 executeCommand 转为 failure，仍不暴露触发文本清理事务，源模型保持原样；修复扩展后可重新执行，清理和目标命令仍合为一次 History。这里只承诺纯函数扩展的事务隔离，不回滚插件自行产生的副作用。
 - 跨 mark text 节点的触发文本可以安全清理，两端未删除文本保留原 marks。
 
 ## 当前边界

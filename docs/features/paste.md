@@ -62,6 +62,16 @@ const fragment = parseClipboardData(source, DEFAULT_CLIPBOARD_PARSERS, (candidat
 
 纯文本继续复用目标规则：正文按换行分段，CodeBlock 保留 LF、缩进和字面标签，列表拆项并保留编号/checked，cell 的折叠光标允许范围内的 TSV 二维填充，有选区则只替换该 cell 内文字。成功粘贴为一次 Transaction/History，可撤销、重做和继续输入。来源降级不扩展原有跨项、跨 cell 等选区能力边界。
 
+## 读取与回调异常
+
+`parseClipboardData` 在进入解析时仅复制一次 source.types，后续按同一 MIME 快照处理。无匹配 parser 仍不读取数据；HTML 会先读取并检查 Office 标记，读取失败时不会绕过检查去尝试其他格式。
+
+source 元数据、getData、parser 或直接传入的 acceptFragment 同步抛错时，当前调用返回 undefined 并停止，不重试后续 parser。parser 正常返回 undefined、过滤器正常返回 false 时仍可继续降级；Office 仍仅使用实际提供的纯文本。该边界只覆盖本次同步调用，不回滚插件副作用，不处理异步 parser。
+
+React 对 ClipboardData 的 MIME 访问放在 Core 解析边界内：缺失数据、types 读取/枚举失败或 getData 抛错不提交 transaction，不改变模型/选区/History；后续正常事件仍可处理。宿主取消、只读和 IME 仍优先返回。React 在构造合成事件时会先读取原生事件的 clipboardData 属性，若该属性自身抛错，发生在组件处理之前，不属于本组件可兜底的范围；宿主回调抛错同样不吞掉。
+
+候选查询中的 `canExecuteCommand` 会把 guard 异常转换为 false，因此该候选与正常不可用一样可继续尝试后续实际格式；只有被明确接受的候选才能执行一次粘贴。不要把“候选不可用后的格式降级”理解为“执行失败后的自动重试”，后者仍禁止。
+
 ## 范围替换
 
 - 纯文本支持同一顶层文本块或连续顶层 paragraph、heading、quote、codeBlock 的选区替换；HTML/Markdown 要求规范化选区的起点不在 CodeBlock 内。

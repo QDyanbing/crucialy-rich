@@ -1,5 +1,13 @@
 // @vitest-environment jsdom
-import { createDocument, createParagraph, createText } from "@crucialy-rich/core";
+import {
+  createDocument,
+  createParagraph,
+  createText,
+  createCommandRegistry,
+  pasteCommand,
+  canExecutePasteCommand,
+  type PasteCommandPayload,
+} from "@crucialy-rich/core";
 import { act, createElement } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -49,6 +57,7 @@ function paste(editor: HTMLElement, stage: string) {
   const getData = vi.fn((mime: string) => {
     if (stage === "plain-read" || (stage === "html-read" && mime === "text/html"))
       throw new Error("Data unavailable.");
+    if (stage === "rich-guard" && mime === "text/html") return "<p>rich</p>";
     return "新";
   });
   const readTypes = vi.fn(() => {
@@ -59,7 +68,9 @@ function paste(editor: HTMLElement, stage: string) {
           throw new Error("MIME iterator failed.");
         },
       };
-    return stage === "html-read" ? ["text/html", "text/plain"] : ["text/plain"];
+    return stage === "html-read" || stage === "rich-guard"
+      ? ["text/html", "text/plain"]
+      : ["text/plain"];
   });
   const readData = vi.fn(() => {
     if (stage === "missing") return null;
@@ -77,6 +88,27 @@ function paste(editor: HTMLElement, stage: string) {
 }
 
 describe("React clipboard source exceptions", () => {
+  it("treats a guard exception as an unavailable candidate and uses only an explicitly accepted fallback", () => {
+    const registry = createCommandRegistry([
+      {
+        ...pasteCommand,
+        canExecute: (input) => {
+          if ((input.payload as PasteCommandPayload).fragment.mimeType === "text/html")
+            throw new Error("Rich target unavailable.");
+          return canExecutePasteCommand(input);
+        },
+      },
+    ]);
+    const host = mount({ commandRegistry: registry });
+    const result = paste(host.editor, "rich-guard");
+    expect(result.getData.mock.calls.map(([mime]) => mime)).toEqual([
+      "text/html",
+      "text/plain",
+    ]);
+    expect(host.editor.textContent).toBe("前新后");
+    expect(host.onTransaction).toHaveBeenCalledTimes(1);
+    expect(errors).not.toHaveBeenCalled();
+  });
   it.each(["missing", "types", "iterator", "html-read", "plain-read"])(
     "keeps model and selection intact when %s is unavailable",
     (stage) => {
