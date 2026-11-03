@@ -402,16 +402,13 @@ function createMergeBlockCommandResult(
   registry: CommandRegistry,
   document: DocumentNode,
   selection: RangeSelection,
-  inputType: KeyboardInputResult["inputType"] = "deleteBackward",
-): KeyboardInputResult | undefined {
-  const result = executeCoreCommand(registry, MERGE_BLOCK_COMMAND_NAME, {
+): CommandResult {
+  return executeCoreCommand(registry, MERGE_BLOCK_COMMAND_NAME, {
     context: {
       document,
       selection,
     },
   });
-
-  return createKeyboardInputResultFromCommandResult(result, selection, inputType);
 }
 
 function createCollapsedSelection(point: RangeSelection["anchor"]): RangeSelection {
@@ -431,7 +428,7 @@ function createMergeNextBlockCommandResult(
   registry: CommandRegistry,
   document: DocumentNode,
   selection: RangeSelection,
-): KeyboardInputResult | undefined {
+): CommandResult | undefined {
   if (!isCollapsed(selection)) {
     return undefined;
   }
@@ -457,7 +454,6 @@ function createMergeNextBlockCommandResult(
       path: [blockIndex + 1, 0],
       offset: 0,
     }),
-    "deleteForward",
   );
 }
 
@@ -677,6 +673,7 @@ function RichTextEditorComponent(
     const shortcutAction = getEditorShortcutAction(event.nativeEvent);
 
     if (shortcutAction?.type === "command") {
+      event.preventDefault();
       const shortcutSelection = getModelSelectionFromDom(event.currentTarget, document);
       const result = shortcutSelection
         ? executeCoreCommand(registry, shortcutAction.commandName, {
@@ -696,13 +693,13 @@ function RichTextEditorComponent(
           : undefined;
 
       if (shortcutInput) {
-        event.preventDefault();
         commitInputResult(shortcutInput);
-        return;
       }
+      return;
     }
 
     if (blockSelection && (event.key === "Backspace" || event.key === "Delete")) {
+      event.preventDefault();
       const deleteImageInput = createDeleteImageCommandResult(
         registry,
         document,
@@ -710,13 +707,11 @@ function RichTextEditorComponent(
         getModelSelectionFromDom(event.currentTarget, document) ?? selection,
       );
 
-      if (deleteImageInput) {
-        event.preventDefault();
+      if (deleteImageInput && deleteImageInput.transaction.operations.length > 0) {
         commitInputResult(deleteImageInput);
         onBlockSelectionChange?.(undefined);
-
-        return;
       }
+      return;
     }
 
     const modelSelection = getModelSelectionFromDom(event.currentTarget, document);
@@ -747,6 +742,7 @@ function RichTextEditorComponent(
     }
 
     if (event.key === "Enter") {
+      event.preventDefault();
       const splitBlockInput = createSplitBlockCommandResult(
         registry,
         document,
@@ -754,17 +750,17 @@ function RichTextEditorComponent(
       );
 
       if (splitBlockInput) {
-        event.preventDefault();
         commitInputResult(splitBlockInput);
-
-        return;
       }
+      return;
     }
 
     if (event.key === "Backspace" || event.key === "Delete") {
-      const deleteSelectionInput = createDeleteSelectionCommandResult(
-        registry,
-        document,
+      const result = executeCoreCommand(registry, DELETE_SELECTION_COMMAND_NAME, {
+        context: { document, selection: modelSelection },
+      });
+      const deleteSelectionInput = createKeyboardInputResultFromCommandResult(
+        result,
         modelSelection,
         event.key === "Backspace" ? "deleteBackward" : "deleteForward",
       );
@@ -775,13 +771,18 @@ function RichTextEditorComponent(
 
         return;
       }
+      if (result.status === "failure" || !isCollapsed(modelSelection)) {
+        event.preventDefault();
+        return;
+      }
     }
 
     if (event.key === "Backspace") {
-      const mergeBlockInput = createMergeBlockCommandResult(
-        registry,
-        document,
+      const result = createMergeBlockCommandResult(registry, document, modelSelection);
+      const mergeBlockInput = createKeyboardInputResultFromCommandResult(
+        result,
         modelSelection,
+        "deleteBackward",
       );
 
       if (mergeBlockInput) {
@@ -790,19 +791,34 @@ function RichTextEditorComponent(
 
         return;
       }
+      if (result.status === "failure") {
+        event.preventDefault();
+        return;
+      }
     }
 
     if (event.key === "Delete") {
-      const mergeNextBlockInput = createMergeNextBlockCommandResult(
+      const result = createMergeNextBlockCommandResult(
         registry,
         document,
         modelSelection,
       );
+      const mergeNextBlockInput = result
+        ? createKeyboardInputResultFromCommandResult(
+            result,
+            modelSelection,
+            "deleteForward",
+          )
+        : undefined;
 
       if (mergeNextBlockInput) {
         event.preventDefault();
         commitInputResult(mergeNextBlockInput);
 
+        return;
+      }
+      if (result?.status === "failure") {
+        event.preventDefault();
         return;
       }
     }
