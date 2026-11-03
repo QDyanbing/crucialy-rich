@@ -8,13 +8,11 @@ export function executeCommand(
   name: CommandName,
   input: CommandInput,
 ): CommandResult {
-  const command = registry.get(name);
-
-  if (!command) {
-    return createCommandFailure(name, "Command is not registered.");
-  }
-
   try {
+    const command = registry.get(name);
+    if (!command) {
+      return createCommandFailure(name, "Command is not registered.");
+    }
     if (command.canExecute && !command.canExecute(input)) {
       return createCommandSkipped(
         name,

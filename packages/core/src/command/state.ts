@@ -15,19 +15,19 @@ export function queryCommandState(
   name: CommandName,
   input: CommandInput,
 ): CommandState {
-  const command = registry.get(name);
-
-  if (!command) {
-    return {
-      active: false,
-      commandName: name,
-      disabled: true,
-      reason: "Command is not registered.",
-      registered: false,
-    };
-  }
-
+  let registered = false;
   try {
+    const command = registry.get(name);
+    if (!command) {
+      return {
+        active: false,
+        commandName: name,
+        disabled: true,
+        reason: "Command is not registered.",
+        registered: false,
+      };
+    }
+    registered = true;
     const enabled = command.canExecute ? command.canExecute(input) : true;
     const active = command.isActive ? command.isActive(input) : false;
 
@@ -52,7 +52,7 @@ export function queryCommandState(
       commandName: name,
       disabled: true,
       reason: getCommandErrorReason(error),
-      registered: true,
+      registered,
     };
   }
 }

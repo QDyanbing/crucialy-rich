@@ -6,13 +6,11 @@ export function canExecuteCommand(
   name: CommandName,
   input: CommandInput,
 ): boolean {
-  const command = registry.get(name);
-
-  if (!command) {
-    return false;
-  }
-
   try {
+    const command = registry.get(name);
+    if (!command) {
+      return false;
+    }
     return command.canExecute ? command.canExecute(input) : true;
   } catch {
     return false;
