@@ -1,10 +1,10 @@
 # 工具栏
 
+Toolbar 是 `@crucialy-rich/react` 提供的 Command 交互层。它消费文档、模型选区和 Command Registry，但不自行持有文档、选区或 History。
+
 ## 扩展异常
 
 状态查询捕获 Registry、canExecute 和 isActive 的同步异常，异常项禁用且不激活，其他正常项继续渲染和使用。渲染后 guard 发生异常时，点击仍通过 executeCommand 返回 failure，不输出半成品 transaction；宿主 onCommand 可能收到失败结果，应检查 ok 后再应用。组件不回滚扩展副作用或捕获宿主回调异常，详见[扩展异常边界](./command.md#扩展异常边界)。
-
-Toolbar 是 `@crucialy-rich/react` 提供的 Command 交互层。它消费文档、模型选区和 Command Registry，但不自行持有文档、选区或 History。
 
 ## 配置结构
 
