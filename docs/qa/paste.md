@@ -32,6 +32,9 @@
 
 ## 自动化覆盖
 
+- 2026-11-03：Core `clipboard/source-errors.test.ts` 7 项覆盖元数据/getData 异常、MIME 一次快照、无匹配不读取与 HTML 来源检查失败不绕过；`clipboard/parser-errors.test.ts` 11 项覆盖 parser/直接过滤器的 Error/非 Error 抛出中止、正常拒绝降级和 Office 排除的 parser 不调用。
+- React `clipboard-source-errors.test.ts` 9 项验证缺失 ClipboardData、types 读取/枚举失败、HTML/纯文本读取失败、宿主/只读优先、后续有效粘贴，以及 guard 异常转 false 后仅使用被明确允许的实际纯文本。后者是候选拒绝降级，不是执行失败重试。
+- `tests/e2e/clipboard-errors.spec.ts`：8 项，桌面 1280×720 与手机 390×844 注入缺失数据、MIME 不可读、HTML/纯文本读取失败，验证默认取消、模型/选区/History 不变、无 pageerror、复制仍正确、后续粘贴一次 History 和撤销重做。截图已检查，无溢出或遮挡；不读取真实系统剪贴板、不请求权限。
 - 图文混排：`clipboard/html-mixed-image.test.ts`、`clipboard/markdown-mixed-image.test.ts` 和 `command/mixed-image-paste-history.test.ts` 覆盖块顺序、包装 marks/链接、连续/末尾图片、空白换行、安全降级、引用式图片语法、代码字面文字、容器边界、正反向选区、单次 History 与续编。React `mixed-image-paste.test.ts` 验证原生事件与受限目标、Office 策略；Chromium 七条用例验证图片实际加载、属性过滤、MIME 优先级、History 和降级，构建产物公开入口同时通过。
 - Office：`clipboard/office.test.ts`、`history/office-paste.test.ts` 与 React `office-paste.test.ts` 验证完整文档/片段的标记识别、误判边界、无匹配 parser 不读取、自定义 parser 降级、空纯文本拒绝、正反向选区、单条 History、代码换行、列表编号/checked、cell TSV、宿主接管及只读。Chromium 六条用例覆盖正文与代码续编、cell TSV/选区、History 和 rich-only 拒绝；构建产物公开入口同时验证。
 - CodeBlock：Core/History 与 React 覆盖单块多行、CRLF、缩进、空行、UTF-16 offset、正反向跨 text/跨块替换、归一化光标、富格式降级和空纯文本拒绝；Chromium 六条用例检查精确 textContent、换行不退出、History 与继续输入。
@@ -53,6 +56,8 @@
 
 ## 安全结论
 
+同步读取/parser/直接过滤回调异常中止当前调用，不把未处理内容交给浏览器写入；正常拒绝仍按既有能力降级。异常保护不回滚插件副作用或异步错误；React 在组件处理前构造合成事件时读取的原生 clipboardData 属性若自身抛错，不在组件保护内，宿主事件回调同样不吞异常。
+
 Clipboard 原始内容不会直接注入编辑器 DOM。HTML 先由标准 parser 建树，再映射到白名单模型；链接继续使用已有协议清洗，最终文档还会经过 Transaction 规范化。
 
 React 可编辑编辑器接管后即取消 paste 默认写入；无法处理、命令失败或组合输入期间不修改模型、不新增 History。只读与宿主 `onPaste` 接管保持独立。自动化验证 Clipboard 事件管线与取消标记，不等同于所有操作系统剪贴板来源的兼容性验收。
@@ -62,6 +67,8 @@ React 可编辑编辑器接管后即取消 paste 默认写入；无法处理、�
 第 20 周粘贴能力已完成代码、测试、中文 Demo、文档和浏览器验收闭环，并在对应模型完成后补齐了 HTML/Markdown 行内代码与分隔线、HTML 文字标记别名、行内 mark CSS、安全文字属性、链接元数据、有序列表起始编号、嵌套列表、顶层表格、安全图片与任务列表导入。
 
 范围粘贴已扩展到连续顶层文本块、同 cell 连续 paragraph 及同一列表项内的纯文本。结构化 HTML/Markdown fragment 仍不插入现有 cell 或 item；跨列表项、跨 cell 及进出列表/表格的范围粘贴仍未支持。
+
+2026-11-03 全量本地验证通过：1951 项单测、250 项 Chromium 用例。失败恢复、Office 与目标降级、结构拒绝、History 和续编均通过；实际系统/跨浏览器剪贴板兼容性不由这些故障注入用例保证。
 
 普通 paragraph 的 HTML／Markdown 图文混排已支持按顺序拆成文字段落和独立图片块，不保留行内环绕和图片链接；heading、quote、列表项、cell、CodeBlock 内部模型与富片段插入限制保持不变。
 

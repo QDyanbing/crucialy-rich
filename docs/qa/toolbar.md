@@ -19,6 +19,7 @@
 
 - 配置与默认项：`toolbar-config.test.ts`、`toolbar-defaults.test.ts`。
 - 状态与执行：`toolbar-state.test.ts`、`toolbar-execute.test.ts`。
+- `packages/react/tests/toolbar-errors.test.ts`：4 项验证 Registry/guard/isActive 异常只禁用对应项，正常项的 active/点击保持可用；guard 在渲染后才异常时，点击输出可检查的 failure、无 transaction，并保留独立选区快照。
 - 固定渲染：`toolbar-render.test.ts`、`fixed-toolbar-state.test.ts`。
 - 悬浮行为：`floating-toolbar-visibility.test.ts`、`floating-toolbar-position.test.ts`、`floating-toolbar-render.test.ts`。
 - 选区快照：`toolbar-selection.test.ts`。
@@ -31,3 +32,5 @@ pnpm check:all
 ## 结论
 
 第 17 周工具栏范围已闭环。配置、状态、固定/悬浮渲染、命令执行、选区恢复、窄屏边界、History 和中文 Demo 均有自动化覆盖。
+
+2026-11-03 同步扩展失败隔离已验证，全量 `pnpm check:all` 为 1951 项单测、250 项 Chromium 用例通过。宿主须检查 onCommand 的 result.ok 再应用；不承诺回滚插件副作用或捕获宿主/异步异常。

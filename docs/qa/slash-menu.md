@@ -18,6 +18,7 @@
 ## 自动化入口
 
 - React 单测：`packages/react/tests/slash-menu-*.test.ts`、`floating-slash-menu.test.ts`。
+- `packages/react/tests/slash-menu-errors.test.ts`：5 项验证目标 Registry/guard/execute 抛错时返回失败、不暴露清理事务、源 `/query` 保留；正常禁用仍 skipped，修复后可重试，触发清理和目标事务组成单条 History 并正确撤销/重做。
 - Core 回归：`packages/core/tests/operation/delete-text.test.ts`。
 - 浏览器闭环：`tests/e2e/demo-shell.spec.ts` 中的斜杠菜单场景。
 
@@ -28,3 +29,5 @@ pnpm check:all
 ## 结论
 
 斜杠菜单的配置、打开关闭、定位、键盘选择、命令执行、触发清理、History 和中文 Demo 均有自动化覆盖。
+
+2026-11-03 同步扩展异常回归通过，全量本地结果为 1951 项单测、250 项 Chromium 用例。隔离保证基于纯函数扩展和合法事务，不回滚插件自行产生的外部副作用。

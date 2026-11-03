@@ -54,6 +54,10 @@ Command 验收覆盖注册、查询、状态读取、执行结果、文本编辑
 - `packages/core/tests/command/state.test.ts`：状态读取和默认命令状态矩阵。
 - `packages/core/tests/command/integration.test.ts`：默认注册表综合执行闭环。
 - `tests/e2e/demo-shell.spec.ts`：demo 操作区、真实键盘输入和 Command 状态面板。
+- 2026-11-03：`execute.test.ts` 新增 4 项、`can-execute.test.ts` 新增 4 项，覆盖 guard 的 Error/非 Error 抛出及不执行目标；`state-errors.test.ts` 10 项验证状态异常、正常禁用 active 兼容与异常 message getter；`registry-errors.test.ts` 5 项验证自定义 get/访问器失败，不额外调用 has/list。
+- `packages/react/tests/command-extension-errors.test.ts`：31 项，覆盖 guard/execute/lookup 异常下的剪切、粘贴、格式快捷键、Enter、Backspace、Delete、输入与 ref，无模型/选区/事务回调；图片失败不误删遗留文字，折叠合并失败不落入旧 fallback，禁用范围删除不直接编辑，成功 Delete 合并的 before 光标为实际源位置。
+- `packages/react/tests/toolbar-errors.test.ts`：4 项，验证异常项禁用、正常项 active/点击继续可用，以及渲染后 guard 才失败时输出 failure 而非事务。`slash-menu-errors.test.ts`：5 项，验证失败清理隔离、普通 skipped 兼容、修复后重试与一次 History 往返。
+- `scripts/verify-package-exports.mjs`：构建包验证 Command/Registry 异常结果、剪贴板回调中止和后续正常解析，内部错误 helper 不进入公共导出。
 
 ## 手测场景
 
@@ -87,6 +91,7 @@ Command 验收覆盖注册、查询、状态读取、执行结果、文本编辑
 
 ## 当前限制
 
+- 同步异常保护不等于权限系统或任意插件回滚：不撤销扩展自行修改的对象/DOM/外部状态，不捕获异步 Promise 拒绝、宿主回调或验证任意成功 transaction；纯函数与合法结果仍是扩展契约。isActive 只影响查询，程序执行不读取它。
 - 文本 command 支持同一文本容器和连续顶层文本块 range selection。
 - boolean mark、文字属性、链接和清除格式 command 支持 paragraph、heading、quote 中的单块或连续顶层跨块 selection，也支持同一列表项或同一表格单元格段落；CodeBlock、void block、跨列表项和跨单元格 selection 保持拒绝。
 - `splitBlockCommand` 支持 collapsed、同容器和连续顶层文本块 selection；`mergeBlockCommand` / `insertDividerCommand` 仍只支持 collapsed selection。
@@ -97,3 +102,5 @@ Command 验收覆盖注册、查询、状态读取、执行结果、文本编辑
 ## 结论
 
 Command 系统已经完成默认注册表、文本与 Block 编辑、四种 boolean mark、三种文字属性、Link、Heading、Quote、CodeBlock、Divider 和可执行快捷键：demo 和 React 复用同一套 registry，状态面板可验证 command 可用性和 active 状态，自动化测试覆盖默认注册、状态矩阵、综合执行和浏览器交互。
+
+2026-11-03 全量本地 `pnpm check:all` 通过：251 个文件/1951 项单测、250 项 Chromium 用例。同步扩展失败和键盘后续编辑保护通过；正常输入、列表、表格、图片、快捷键和 History 的既有浏览器回归继续通过。
