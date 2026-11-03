@@ -12,6 +12,8 @@ const publicPackages = [
       "createCompositionState",
       "createDocument",
       "executeCommand",
+      "canExecuteCommand",
+      "queryCommandState",
       "parseClipboardData",
       "DEFAULT_CLIPBOARD_PARSERS",
       "getAdjacentCellSelection",
@@ -175,6 +177,79 @@ function verifyMixedImagePaste(core) {
       assert.deepEqual(redone.selection, result.selection);
     }
   }
+}
+
+function verifyExtensionFailureBoundaries(core) {
+  let executions = 0;
+  const input = { context: { document: core.createDocument() } };
+  const registry = core.createCommandRegistry([
+    {
+      name: "broken",
+      canExecute() {
+        throw new Error("Guard failed.");
+      },
+      execute() {
+        executions++;
+        return core.createCommandSuccess("broken");
+      },
+    },
+  ]);
+  assert.equal(core.canExecuteCommand(registry, "broken", input), false);
+  assert.deepEqual(core.executeCommand(registry, "broken", input), {
+    commandName: "broken",
+    ok: false,
+    status: "failure",
+    reason: "Guard failed.",
+  });
+  assert.equal(core.queryCommandState(registry, "broken", input).disabled, true);
+  assert.equal(executions, 0);
+  const unavailable = {
+    ...registry,
+    get() {
+      throw new Error("Lookup failed.");
+    },
+  };
+  assert.equal(core.canExecuteCommand(unavailable, "broken", input), false);
+  assert.equal(core.executeCommand(unavailable, "broken", input).status, "failure");
+  assert.equal(core.queryCommandState(unavailable, "broken", input).registered, false);
+  const reads = [];
+  assert.equal(
+    core.parseClipboardData(
+      {
+        types: ["text/html", "text/plain"],
+        getData(mime) {
+          reads.push(mime);
+          throw new Error("Clipboard unavailable.");
+        },
+      },
+      core.DEFAULT_CLIPBOARD_PARSERS,
+    ),
+    undefined,
+  );
+  assert.deepEqual(reads, ["text/html"]);
+  const source = { types: ["text/plain"], getData: () => "plain" };
+  assert.equal(
+    core.parseClipboardData(source, [
+      {
+        mimeType: "text/plain",
+        parse() {
+          throw new Error("Parser failed.");
+        },
+      },
+    ]),
+    undefined,
+  );
+  assert.equal(
+    core.parseClipboardData(source, core.DEFAULT_CLIPBOARD_PARSERS, () => {
+      throw new Error("Filter failed.");
+    }),
+    undefined,
+  );
+  assert.equal(
+    core.parseClipboardData(source, core.DEFAULT_CLIPBOARD_PARSERS).mimeType,
+    "text/plain",
+  );
+  assert.equal("getCommandErrorReason" in core, false);
 }
 
 function verifyDomBoundaryMapping(core) {
@@ -706,6 +781,7 @@ for (const packageConfig of publicPackages) {
   }
 
   if (packageConfig.directory === "packages/core") {
+    verifyExtensionFailureBoundaries(runtime);
     verifyDomBoundaryMapping(runtime);
     assert.match(
       declarations,
