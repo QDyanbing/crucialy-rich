@@ -17,11 +17,13 @@ export function executeCommand(
     return createCommandFailure(name, "Command is not registered.");
   }
 
-  if (command.canExecute && !command.canExecute(input)) {
-    return createCommandSkipped(name, "Command cannot execute in the current context.");
-  }
-
   try {
+    if (command.canExecute && !command.canExecute(input)) {
+      return createCommandSkipped(
+        name,
+        "Command cannot execute in the current context.",
+      );
+    }
     return command.execute(input);
   } catch (error) {
     return createCommandFailure(name, getErrorReason(error));

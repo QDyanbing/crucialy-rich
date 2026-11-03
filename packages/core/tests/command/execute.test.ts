@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   createCommandRegistry,
@@ -21,6 +21,29 @@ function createCommand(command: Partial<Command> = {}): Command {
 }
 
 describe("executeCommand", () => {
+  it.each([new Error("Guard failed."), "guard", null, Symbol("guard")])(
+    "returns failure without executing when canExecute throws %s",
+    (error) => {
+      const execute = vi.fn(() => createCommandSuccess("noop"));
+      const registry = createCommandRegistry([
+        createCommand({
+          canExecute: () => {
+            throw error;
+          },
+          execute,
+        }),
+      ]);
+      const before = structuredClone(context.document);
+      expect(executeCommand(registry, "noop", { context })).toEqual({
+        commandName: "noop",
+        ok: false,
+        status: "failure",
+        reason: error instanceof Error ? error.message : "Command execution failed.",
+      });
+      expect(execute).not.toHaveBeenCalled();
+      expect(context.document).toEqual(before);
+    },
+  );
   it("executes a command by name", () => {
     const registry = createCommandRegistry([createCommand()]);
 
