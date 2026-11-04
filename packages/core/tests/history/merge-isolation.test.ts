@@ -40,7 +40,8 @@ describe("explicit history merge ownership", () => {
     const original = structuredClone(entry.transaction.operations);
     const operation = merged.transaction.operations[0]!;
     if (operation.type === "insert_block" && operation.block.type === "taskList") {
-      operation.block.children[0]!.checked = false;
+      const item = operation.block.children[0]!;
+      if (item.type === "taskItem") item.checked = false;
       operation.path[0] = 99;
     }
     merged.before.blockSelection!.path[0] = 99;

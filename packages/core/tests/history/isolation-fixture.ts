@@ -63,7 +63,8 @@ export function isolationEntry(): HistoryEntry {
 export function mutateSnapshot(snapshot: HistorySnapshot): void {
   for (const block of snapshot.document.children) {
     if (block.type === "taskList") {
-      block.children[0]!.checked = false;
+      const item = block.children[0]!;
+      if (item.type === "taskItem") item.checked = false;
       block.children[0]!.children[0]!.text = "修改任务";
       const nested = block.children[0]!.nested;
       if (nested?.type === "orderedList") {
