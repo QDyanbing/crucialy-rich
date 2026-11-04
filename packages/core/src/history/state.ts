@@ -1,3 +1,4 @@
+import { cloneHistoryEntry } from "./entry";
 import type { HistoryEntry, HistoryState } from "./types";
 
 export function createHistoryState(
@@ -5,8 +6,8 @@ export function createHistoryState(
   redoStack: HistoryEntry[] = [],
 ): HistoryState {
   return {
-    redoStack: [...redoStack],
-    undoStack: [...undoStack],
+    redoStack: redoStack.map(cloneHistoryEntry),
+    undoStack: undoStack.map(cloneHistoryEntry),
   };
 }
 

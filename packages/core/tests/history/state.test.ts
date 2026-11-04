@@ -37,6 +37,30 @@ describe("createHistoryState", () => {
     expect(state.undoStack).toHaveLength(1);
     expect(state.redoStack).toHaveLength(1);
   });
+
+  it.each(["undoStack", "redoStack"] as const)(
+    "isolates entry contents in %s from the supplied entries",
+    (stack) => {
+      const entry = createEntry("typing");
+      const state = createHistoryState(
+        stack === "undoStack" ? [entry] : [],
+        stack === "redoStack" ? [entry] : [],
+      );
+      const expected = structuredClone(state);
+
+      entry.batch = "changed";
+      entry.after.document.children.push({
+        type: "paragraph",
+        children: [{ type: "text", text: "污染" }],
+      });
+      expect(state).toEqual(expected);
+      state[stack][0]!.before.document.children.push({
+        type: "paragraph",
+        children: [{ type: "text", text: "反向修改" }],
+      });
+      expect(entry.before.document.children).toEqual([]);
+    },
+  );
 });
 
 describe("clearHistory", () => {

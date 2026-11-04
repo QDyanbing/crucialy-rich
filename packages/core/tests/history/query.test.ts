@@ -39,7 +39,9 @@ describe("history query helpers", () => {
     const latestRedo = createEntry("latest-redo");
     const history = createHistoryState([firstUndo, latestUndo], [latestRedo]);
 
-    expect(getUndoEntry(history)).toBe(latestUndo);
-    expect(getRedoEntry(history)).toBe(latestRedo);
+    expect(getUndoEntry(history)).toEqual(latestUndo);
+    expect(getUndoEntry(history)).toBe(history.undoStack.at(-1));
+    expect(getRedoEntry(history)).toEqual(latestRedo);
+    expect(getRedoEntry(history)).toBe(history.redoStack.at(-1));
   });
 });
