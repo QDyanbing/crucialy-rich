@@ -21,6 +21,11 @@ const publicPackages = [
       "getClipboardHtml",
       "domPointToModelPoint",
       "modelPointToDomPoint",
+      "createHistoryState",
+      "recordHistory",
+      "cloneHistoryEntry",
+      "getUndoEntry",
+      "getRedoEntry",
     ],
   },
   {
@@ -293,6 +298,65 @@ function verifyDomBoundaryMapping(core) {
     );
   } finally {
     dom.window.close();
+  }
+}
+
+function verifyHistoryOwnership(core) {
+  function entry(batch) {
+    const document = core.createDocument([
+      core.createParagraph([
+        core.createText("original", { link: { href: "https://example.com/" } }),
+      ]),
+    ]);
+    const point = { path: [0, 0], offset: 1 };
+    const snapshot = core.createHistorySnapshot(document, {
+      anchor: point,
+      focus: point,
+    });
+    return {
+      before: snapshot,
+      after: snapshot,
+      batch,
+      transaction: core.createTransaction([core.createInsertTextOperation(point, "x")]),
+    };
+  }
+  const source = entry("typing");
+  const initialized = core.createHistoryState([source, source], [source]);
+  const expected = structuredClone(initialized);
+  source.before.document.children[0].children[0].marks.link.href =
+    "https://changed.test/";
+  source.transaction.operations[0].point.path[0] = 99;
+  assert.deepEqual(initialized, expected);
+  initialized.undoStack[0].after.selection.focus.offset = 99;
+  assert.deepEqual(initialized.undoStack[1], expected.undoStack[1]);
+  assert.deepEqual(initialized.redoStack[0], expected.redoStack[0]);
+  assert.equal(core.getUndoEntry(initialized), initialized.undoStack.at(-1));
+  assert.equal(core.getRedoEntry(initialized), initialized.redoStack.at(-1));
+
+  for (const policy of ["batch", "adjacent"]) {
+    for (const mode of ["empty", "append", "merge"]) {
+      const history = core.createHistoryState(
+        [entry("older"), entry("typing")],
+        mode === "empty" ? [entry("redo")] : [],
+      );
+      const input = entry(mode === "append" ? "new" : "typing");
+      if (mode === "empty") input.transaction = core.createTransaction();
+      const next = core.recordHistory({ history, mergePolicy: policy, ...input });
+      const detached = structuredClone(next);
+      history.undoStack[0].before.document.children[0].children[0].text = "changed";
+      history.undoStack[1].transaction.operations.length = 0;
+      if (history.redoStack.length)
+        history.redoStack[0].before.selection.anchor.path[0] = 99;
+      assert.deepEqual(next, detached);
+      assert.equal(next.undoStack.length, mode === "append" ? 3 : 2);
+      assert.equal(next.redoStack.length, mode === "empty" ? 1 : 0);
+      const undone = core.undoHistory(next);
+      undone.document.children[0].children[0].text = "host edit";
+      undone.entry.before.selection.anchor.path[0] = 99;
+      assert.deepEqual(next, detached);
+      const redone = core.redoHistory(undone.history);
+      assert.deepEqual(redone.document, detached.undoStack.at(-1).after.document);
+    }
   }
 }
 
@@ -797,6 +861,7 @@ for (const packageConfig of publicPackages) {
     verifyMixedImagePaste(runtime);
     verifyCellNavigation(runtime);
     verifyHistoryMergePolicy(runtime);
+    verifyHistoryOwnership(runtime);
     verifyHistoryBlockSelection(runtime);
     for (const name of ["HistorySnapshot", "HistoryChange", "CommandResult"]) {
       assert.match(
