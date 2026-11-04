@@ -87,6 +87,30 @@ describe("recordHistory", () => {
     });
   });
 
+  it("preserves both stacks by value without sharing entries on an empty record", () => {
+    const entry = {
+      before: createSnapshot("前"),
+      after: createSnapshot("后"),
+      transaction: createTransaction([
+        createInsertTextOperation({ path: [0, 0], offset: 0 }, "后"),
+      ]),
+    };
+    const history = createHistoryState([entry], [entry]);
+    const next = recordHistory({
+      history,
+      before: entry.before,
+      after: entry.after,
+      transaction: createTransaction(),
+    });
+    const expected = structuredClone(next);
+    expect(next).toEqual(history);
+    history.undoStack[0]!.before.selection!.anchor.path[0] = 99;
+    history.redoStack[0]!.transaction.operations.length = 0;
+    expect(next).toEqual(expected);
+    next.undoStack[0]!.after.selection!.focus.offset = 99;
+    expect(history.undoStack[0]!.after.selection!.focus.offset).toBe(1);
+  });
+
   it("merges consecutive records with the same batch", () => {
     const firstTransaction = createTransaction([
       createInsertTextOperation({ path: [0, 0], offset: 0 }, "你"),
