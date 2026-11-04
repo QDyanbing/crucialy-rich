@@ -218,6 +218,7 @@ const shortcutCommandName = getCommandNameFromShortcut({
 - 图片引用仅接受 ready、无凭据的 HTTP/HTTPS，保留 alt 和正安全整数宽高，不复制文件字节、blob 或内部属性，不验证资源可达性；不扩大跨图片文字剪切或受限粘贴目标。React 的单图剪切复用既有 `deleteImage`，Core 未新增命令，详见[单图剪切](../../docs/features/copy-cut.md#单图剪切)。
 - `getClipboardHtml` 同时接受 `RangeSelection | BlockSelection`，后者仅支持单张安全顶层图片，不包含邻块或其他类型，非法选区返回 `undefined`。`getClipboardText` 仍只接受文字范围，见[图片块选区](../../docs/features/copy-cut.md#图片块选区)。
 - History 块选区：`createHistorySnapshot(document, selection?, blockSelection?)` 可独立克隆块路径，`undoHistory` / `redoHistory` 及其 Command 结果透传可选 `blockSelection`。两种自动合并策略遇到任一前后快照含块选区均保留独立记录；旧调用不变，宿主须应用/清除选区并校验路径，见[块选区恢复](../../docs/features/history.md#块选区恢复)。
+- History 引用隔离：状态创建与记录的空事务/追加/合并路径逐条复制保留的 entry，修复旧状态污染新分支的问题。栈顶查询保持当前 entry 引用语义，需要独立副本时使用 `cloneHistoryEntry`；类型签名和合并策略不变，成本与边界见[状态引用与隔离](../../docs/features/history.md#状态引用与隔离)。
 - DOM 映射：元素 offset 按真实子节点边界换算，Text 使用局部 UTF-16 偏移，拆分叶子累计前缀并支持反向恢复；任务 checkbox、块外层排版空白与注释不占文字索引。不映射 void、根/表格结构端点或任意嵌套包装，不夹取越界位置，详见[DOM 偏移规则](../../docs/features/selection-sync.md#dom-偏移规则)。
 - 同步异常：Command 入口隔离 Registry/guard/execute/state 回调异常，返回 failure、false 或异常禁用状态；`parseClipboardData` 固定一次 MIME 快照，源读取/parser/直接过滤回调异常中止，正常拒绝仍可降级。仅覆盖同步调用，不回滚插件副作用、不吞异步错误，详见[扩展异常边界](../../docs/features/command.md#扩展异常边界)。
 

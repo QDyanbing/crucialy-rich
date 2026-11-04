@@ -6,6 +6,11 @@
 
 ## 未发布
 
+### 修复
+
+- 修复 `createHistoryState` 与 `recordHistory` 只复制部分栈数组而共享旧 entry 的问题；状态初始化、空事务、追加及合并的保留 entry 现独立复制，旧状态和新分支不再互相污染。类型签名、空事务不清空 redo 和两种合并策略保持不变。
+- 补齐嵌套模型/marks/link、19 种 Operation、重复 entry、撤销重做及 History Command 的隔离回归，增加 React 宿主检查点与构建产物验证。栈顶查询仍返回当前 entry 引用，不新增冻结、持久化或容量限制；文档明确复制成本和引用兼容性。
+
 ### 新增
 
 - Command 同步扩展异常保护覆盖 Registry 查找、canExecute、execute 与状态查询；异常转换为失败/不可用，工具栏正常项不受影响，Slash 失败不暴露触发文字清理的半成品事务。公开签名不变，不回滚插件副作用或捕获宿主/异步错误。
