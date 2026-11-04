@@ -1,4 +1,4 @@
-import { createHistoryEntry } from "./entry";
+import { cloneHistoryEntry, createHistoryEntry } from "./entry";
 import { canMergeHistoryEntries, mergeHistoryEntries } from "./merge";
 import { createHistoryState } from "./state";
 import type { HistoryState, RecordHistoryInput } from "./types";
@@ -18,7 +18,7 @@ export function recordHistory(input: RecordHistoryInput): HistoryState {
     return {
       redoStack: [],
       undoStack: [
-        ...input.history.undoStack.slice(0, -1),
+        ...input.history.undoStack.slice(0, -1).map(cloneHistoryEntry),
         mergeHistoryEntries(previousEntry, nextEntry),
       ],
     };
@@ -26,6 +26,6 @@ export function recordHistory(input: RecordHistoryInput): HistoryState {
 
   return {
     redoStack: [],
-    undoStack: [...input.history.undoStack, nextEntry],
+    undoStack: [...input.history.undoStack.map(cloneHistoryEntry), nextEntry],
   };
 }
