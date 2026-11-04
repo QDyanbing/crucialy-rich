@@ -122,6 +122,23 @@ const undoCommand: Command;
 const redoCommand: Command;
 ```
 
+## 状态引用与隔离
+
+`createHistoryState(undoStack?, redoStack?)` 不只复制栈数组，还逐条复制 entry 的 before/after、文档、文字/块选区和 Transaction。即使同一 entry 重复出现在不同栈或位置，返回的各位置也不共享这些可变对象。
+
+`recordHistory` 的空事务、追加和合并三条路径都会复制保留的旧 entry。宿主保存旧状态后，修改旧状态不会污染新状态；修改新状态也不会反向改变旧状态。空事务仍按值保留两个栈，不清空 redo、不创建记录，也不改变合并边界。
+
+```ts
+const checkpoint = createHistoryState(history.undoStack, history.redoStack);
+// 两个状态的 entry 独立，可分别继续 recordHistory / undoHistory / redoHistory。
+```
+
+`undoHistory` / `redoHistory` 返回的文档、选区、诊断 entry 和新栈各自独立，History Command 结果也不与传入的 history payload 共享。把恢复文档交回宿主继续编辑，不会因此修改栈中的快照。
+
+这不是不可变对象系统：返回值没有冻结，直接修改当前状态仍会修改它自身。`getUndoEntry` / `getRedoEntry` 保持原有语义，直接返回当前状态的栈顶引用，不额外复制；只用于读取。需要可修改的副本时，使用 `cloneHistoryEntry`。查询结果与最初传给 `createHistoryState` 的 entry 不再是同一对象，不应依赖二者的引用相等。
+
+复制沿用现有快照和 Transaction 的模型字段规则，不是任意宿主对象的通用深拷贝，也不校验 History 数据是否有效或连续。每次初始化、记录和栈迁移的复制成本随保留快照的总体积增长；当前没有自动容量限制或持久化机制，大文档/长历史由宿主控制保留数量。
+
 ## 记录规则
 
 - history entry 使用 before/after 快照记录文档和 selection。
@@ -191,13 +208,22 @@ History 只是值快照，不校验、修复或映射宿主传入的块路径，
 
 - 暂未实现时间窗口、自动输入类型细分或完整文档快照连续性校验；宿主应保证传入的 before/after 快照按实际编辑顺序连续。
 - `adjacent` 只比较记录边界，不追踪中间的选区事件；光标离开后又回到同一点，或撤销后先完成重做使 redoStack 为空，均不强制开启新批次。需要这些边界时由宿主调整 batch。
-- 当前快照克隆覆盖 document、所有文本 block、Divider、text 和 text marks；CodeBlock 纯文本、Divider void 结构和 block path 在 undo/redo 中保持不变。
+- 当前快照克隆覆盖 document、文本 block、嵌套列表与任务状态/编号、表格多段落、图片元数据、Divider、text 和完整 marks/link；CodeBlock 纯文本与 void 结构在 undo/redo 中保持不变。不保存任意宿主元数据。
 
 ## 验收
 
 - `packages/core/tests/history/entry.test.ts`
 - `packages/core/tests/history/snapshot.test.ts`
 - `packages/core/tests/history/state.test.ts`
+- `packages/core/tests/history/state-isolation.test.ts`
+- `packages/core/tests/history/snapshot-isolation.test.ts`
+- `packages/core/tests/history/transaction-isolation.test.ts`
+- `packages/core/tests/history/record-isolation.test.ts`
+- `packages/core/tests/history/merge-isolation.test.ts`
+- `packages/core/tests/history/undo-isolation.test.ts`
+- `packages/core/tests/history/redo-isolation.test.ts`
+- `packages/core/tests/history/command-isolation.test.ts`
+- `packages/react/tests/history-checkpoint.test.ts`
 - `packages/core/tests/history/record.test.ts`
 - `packages/core/tests/history/merge.test.ts`
 - `packages/core/tests/history/merge-policy.test.ts`
