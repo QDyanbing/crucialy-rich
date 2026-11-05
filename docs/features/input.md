@@ -70,6 +70,20 @@ keydown Backspace/Delete/Enter
   -> onSelectionChange(nextSelection)
 ```
 
+## 字素删除与 UTF-16
+
+折叠光标的 Backspace/Delete 按字素簇删除，不按单个 UTF-16 单元截断。实现使用运行时的 `Intl.Segmenter`（`granularity: "grapheme"`），覆盖代理对 emoji、组合重音、肤色、旗帜、ZWJ 和键帽等组合；具体 Unicode 分段规则随运行时实现。使用这些删除 helper 的环境须提供 `Intl.Segmenter`，不包含降级算法或内置 polyfill。分段器延迟到删除时创建，单纯导入包不构造它。
+
+同一文本容器内先拼接所有文字叶子进行分段，再把选中簇的起止位置映射回模型 Point。因此格式、链接或空文字占位不会阻断删除，甚至一个代理对或组合序列跨不同 marks 叶子时也可整体删除。生成的仍是一条 `delete_text`，未选中的文字格式、任务状态、子列表、表格邻格和其他块保留。
+
+- 光标位于合法字素边界时，Backspace 删除前一簇，Delete 删除后一簇。
+- 模型 Point 仍使用 UTF-16 offset，不改为字素索引。宿主显式放置在簇内部的合法 UTF-16 光标，会删除包含该点的整簇，并落到该簇原起点；不保留半个字符。
+- 范围选区和低层 `delete_text` 仍按显式 UTF-16 端点精确删除，不自动扩展到字素边界；输入、粘贴和 DOM 映射也不因此改变 offset 协议。
+- 不跨文本容器寻找字符；到达真实段首/段尾时继续使用已有合并、void 删除或列表退出规则。React Delete 不再把中间格式叶子的末尾误当成整个段落末尾。
+- 非法 path、非整数、负数或越界 offset 不生成删除/合并/移除块操作。非折叠范围仍交给原 Command 管线，不在低层 collapsed helper 内处理。
+
+React 继续先处理宿主回调、只读与 IME 保护；整簇删除产生一个独立、无 typing batch 的事件，History 由宿主记录。没有新增按词删除、光标按字素移动或手机软键盘 `beforeinput deleteContentBackward/Forward` 入口；手机视口验收使用 Chromium 的键盘事件，不代表真实设备输入法兼容性验收。每次分段仅扫描当前文本容器，不修改模型字符串或进行 Unicode 规范化。
+
 ## Core API
 
 ```ts
@@ -124,13 +138,13 @@ function createSelectionAfterTabInput(input: TabInput): RangeSelection;
 
 当前 `createBackspaceInputTransaction` 会根据 collapsed selection 位置创建：
 
-- `delete_text`：光标不在 text 节点开头时删除前一个字符。
+- `delete_text`：当前文本容器内存在前一个字素，或光标在字素内部时，删除完整簇。
 - `merge_block`：光标位于非首段段首时合并上一段。
 - 空 transaction：光标位于首段段首或 selection 非折叠时。
 
 当前 `createDeleteInputTransaction` 会根据 collapsed selection 位置创建：
 
-- `delete_text`：光标不在 text 节点末尾时删除后一个字符。
+- `delete_text`：当前文本容器内存在后一个字素，或光标在字素内部时，删除完整簇。
 - `merge_block`：光标位于非末段段尾时合并下一段。
 - 空 transaction：光标位于末段末尾或 selection 非折叠时。
 

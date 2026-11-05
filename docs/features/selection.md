@@ -31,6 +31,8 @@ API：
 
 `Point` 定位 text 节点内的偏移。
 
+`offset` 使用 JavaScript 字符串的 UTF-16 单元索引，不是 Unicode 码点或字素序号。`isValidPoint` 只校验整数范围，不强制字素边界；折叠 Backspace/Delete 会为整簇删除计算范围，但显式范围操作、DOM 映射和序列化保持原端点协议，见[字素删除](./input.md#字素删除与-utf-16)。
+
 ```ts
 interface Point {
   path: Path;
