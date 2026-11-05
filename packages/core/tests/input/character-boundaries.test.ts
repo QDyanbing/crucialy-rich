@@ -70,9 +70,10 @@ describe("empty model leaves between visible characters", () => {
       [createDeleteInputTransaction, { path: [0, 1], offset: 0 }],
       [createBackspaceInputTransaction, { path: [0, 4], offset: 0 }],
     ] as const) {
+      const caret = { path: [...point.path], offset: point.offset };
       const transaction = create({
         document,
-        selection: { anchor: point, focus: point },
+        selection: { anchor: caret, focus: caret },
       });
       const after = applyTransaction(document, transaction);
       expect(transaction.operations.map((operation) => operation.type)).toEqual([
