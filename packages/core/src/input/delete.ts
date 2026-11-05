@@ -1,7 +1,6 @@
 import {
   isParagraphNode,
   isTableCellNode,
-  isTextNode,
   isVoidBlockNode,
   type DocumentNode,
 } from "../model";
@@ -16,6 +15,7 @@ import {
 import {
   getNodeAtPath,
   isCollapsed,
+  isValidPoint,
   type Point,
   type RangeSelection,
 } from "../selection";
@@ -42,12 +42,6 @@ function createCollapsedSelection(point: Point): RangeSelection {
 
 function getCollapsedPoint(selection: RangeSelection): Point | undefined {
   return isCollapsed(selection) ? selection.anchor : undefined;
-}
-
-function getTextLength(document: DocumentNode, point: Point): number | undefined {
-  const node = getNodeAtPath(document, point.path);
-
-  return isTextNode(node) ? node.text.length : undefined;
 }
 
 function hasNextBlock(document: DocumentNode, point: Point): boolean {
@@ -117,13 +111,7 @@ function getNextTableParagraphPoint(
 export function createDeleteInputTransaction(input: DeleteInput): Transaction {
   const point = getCollapsedPoint(input.selection);
 
-  if (!point) {
-    return createTransaction();
-  }
-
-  const textLength = getTextLength(input.document, point);
-
-  if (textLength === undefined) {
+  if (!point || !isValidPoint(input.document, point)) {
     return createTransaction();
   }
 

@@ -15,6 +15,7 @@ import {
 import {
   getNodeAtPath,
   isCollapsed,
+  isValidPoint,
   type Point,
   type RangeSelection,
 } from "../selection";
@@ -92,7 +93,7 @@ function getPreviousBlockIndex(point: Point): number | undefined {
 export function createBackspaceInputTransaction(input: BackspaceInput): Transaction {
   const point = getCollapsedPoint(input.selection);
 
-  if (!point) {
+  if (!point || !isValidPoint(input.document, point)) {
     return createTransaction();
   }
 
