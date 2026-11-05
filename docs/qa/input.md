@@ -27,6 +27,18 @@ pnpm test
 pnpm test:e2e
 ```
 
+## 字素删除回归（2026-11-05）
+
+- `character-range.test.ts`：9 项，验证代理对、组合重音、肤色、旗帜、ZWJ、键帽、CRLF、簇内光标及容器边界；内部范围 helper 未新增公共包导出。
+- `backspace-unicode.test.ts` / `delete-unicode.test.ts`：各 8 项，验证两个方向整体删除、韩文组合、簇内 UTF-16 光标、合法恢复点与源模型不变。
+- `character-containers.test.ts`：22 项，覆盖 paragraph、heading、quote、codeBlock、普通/有序/任务列表项、嵌套项与 cell paragraph，保留 marks/link、start/checked、子列表、邻段/邻格；拆到不同 marks 叶子的代理对也按完整簇删除。
+- `character-boundaries.test.ts`：21 项，验证非法 offset/path 不触发结构回退、显式范围不扩张及空格式占位之间的删除。
+- `packages/core/tests/history/character-deletion.test.ts`：10 项，验证一次删除的一条事务、原 UTF-16 光标/格式恢复、重做和独立续编；以上共新增 78 项 Core 测试。
+- React 新增 24 项：`forward-merge-boundary.test.ts` 3 项，验证中间叶子末尾不合并、无关失败 merge 扩展不被调用及真实段尾合并；`character-deletion.test.ts` 10 项，验证按键事务、旧光标、无 typing batch 和链接保留；`character-deletion-guards.test.ts` 11 项，验证只读/宿主/IME、受控回传及多实例隔离。
+- Chromium 新增 14 项：`character-deletion.spec.ts` 8 项，使用桌面真实键盘验证整簇删除、History 和续编；`character-structured.spec.ts` 6 项，在手机视口验证跨格式删除、任务勾选及表格邻格/邻段保留。富格式粘贴保留前置空段，测试按实际模型定位目标段，不假定它必为第一段。
+- 构建入口冒烟验证两个方向的 Unicode 删除、跨格式、非法点、UTF-16 结果与 History。桌面/手机截图已查看，删除后文字、链接样式及未选段落正常，无溢出或遮挡；本轮未新增 Demo 样例或控件。
+- 本地 `pnpm check:all` 退出码 0：格式、lint、根工程与包级类型、269 个文件/2109 项单测、构建/包产物与 264 项 Chromium 全部通过，详见[全量回归](./full-regression.md)。
+
 ## 手测场景
 
 | 场景           | 操作                                   | 期望                              | 结果 |
@@ -68,7 +80,8 @@ pnpm test:e2e
 
 ## 当前限制
 
-- 跨块替换与删除只接受连续顶层 paragraph、heading、quote 或 codeBlock，不跨越列表、表格、图片和分隔线。
+- 范围替换与删除接受同一文本容器、连续顶层文本块或同 cell 连续 paragraph，不跨列表项、不同 cell、进出表格、图片和分隔线。
+- 整簇删除只作用于折叠 Backspace/Delete，依赖运行时 `Intl.Segmenter`，没有内置 polyfill；Point、DOM 与显式范围仍使用 UTF-16 offset。手机视口使用键盘事件，不构成真实软键盘/输入法验收，未新增 beforeinput 删除、按词删除或字素光标导航。
 - `createEnterInputTransaction` 低层 helper 仍只接受 collapsed selection；范围删除由 `splitBlockCommand` 组合。
 - React 组件通过 `onTransaction` 暴露记录入口，但 History 状态仍由宿主维护。
 - 拖拽输入仍未实现。
