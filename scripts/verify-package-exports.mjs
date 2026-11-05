@@ -26,6 +26,10 @@ const publicPackages = [
       "cloneHistoryEntry",
       "getUndoEntry",
       "getRedoEntry",
+      "createBackspaceInputTransaction",
+      "createDeleteInputTransaction",
+      "createSelectionAfterBackspaceInput",
+      "createSelectionAfterDeleteInput",
     ],
   },
   {
@@ -182,6 +186,81 @@ function verifyMixedImagePaste(core) {
       assert.deepEqual(redone.selection, result.selection);
     }
   }
+}
+
+function verifyCharacterDeletion(core) {
+  assert.equal("createCharacterDeletionRange" in core, false);
+  for (const cluster of [
+    "\u{1f600}",
+    "e\u0301",
+    "\u{1f469}\u200d\u{1f4bb}",
+    "\u{1f1e8}\u{1f1f3}",
+  ]) {
+    for (const backward of [true, false]) {
+      const document = core.createDocument([
+        core.createParagraph([core.createText(`A${cluster}B`)]),
+      ]);
+      const point = { path: [0, 0], offset: backward ? 1 + cluster.length : 1 };
+      const selection = { anchor: point, focus: point };
+      const input = { document, selection };
+      const transaction = backward
+        ? core.createBackspaceInputTransaction(input)
+        : core.createDeleteInputTransaction(input);
+      const after = core.applyTransaction(document, transaction);
+      const nextSelection = backward
+        ? core.createSelectionAfterBackspaceInput(input)
+        : core.createSelectionAfterDeleteInput(input);
+      assert.equal(after.children[0].children[0].text, "AB");
+      assert.deepEqual(nextSelection.anchor, { path: [0, 0], offset: 1 });
+      assert.equal(core.isValidPoint(after, nextSelection.anchor), true);
+      const history = core.recordHistory({
+        history: core.createHistoryState(),
+        before: core.createHistorySnapshot(document, selection),
+        after: core.createHistorySnapshot(after, nextSelection),
+        transaction,
+      });
+      const undone = core.undoHistory(history);
+      assert.deepEqual(undone.document, document);
+      assert.deepEqual(undone.selection, selection);
+      assert.deepEqual(core.redoHistory(undone.history).document, after);
+    }
+  }
+  const document = core.createDocument([
+    core.createParagraph([
+      core.createText("Ae", { bold: true }),
+      core.createText("\u0301", { italic: true }),
+      core.createText("B"),
+    ]),
+    core.createDivider(),
+  ]);
+  const point = { path: [0, 0], offset: 1 };
+  const after = core.applyTransaction(
+    document,
+    core.createDeleteInputTransaction({
+      document,
+      selection: { anchor: point, focus: point },
+    }),
+  );
+  assert.deepEqual(
+    after.children[0],
+    core.createParagraph([core.createText("A", { bold: true }), core.createText("B")]),
+  );
+  assert.equal(after.children[1].type, "divider");
+  const invalid = { path: [0, 0], offset: 99 };
+  assert.deepEqual(
+    core.createDeleteInputTransaction({
+      document,
+      selection: { anchor: invalid, focus: invalid },
+    }).operations,
+    [],
+  );
+  assert.deepEqual(
+    core.createBackspaceInputTransaction({
+      document,
+      selection: { anchor: invalid, focus: invalid },
+    }).operations,
+    [],
+  );
 }
 
 function verifyExtensionFailureBoundaries(core) {
@@ -845,6 +924,7 @@ for (const packageConfig of publicPackages) {
   }
 
   if (packageConfig.directory === "packages/core") {
+    verifyCharacterDeletion(runtime);
     verifyExtensionFailureBoundaries(runtime);
     verifyDomBoundaryMapping(runtime);
     assert.match(
