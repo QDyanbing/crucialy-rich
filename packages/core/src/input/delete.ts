@@ -19,6 +19,7 @@ import {
   type Point,
   type RangeSelection,
 } from "../selection";
+import { createCharacterDeletionRange } from "./character-range";
 
 export interface DeleteInput {
   document: DocumentNode;
@@ -57,18 +58,6 @@ function hasNextBlock(document: DocumentNode, point: Point): boolean {
     blockIndex !== undefined &&
     blockIndex < document.children.length - 1
   );
-}
-
-function createDeleteNextCharacterTransaction(point: Point): Transaction {
-  return createTransaction([
-    createDeleteTextOperation({
-      anchor: clonePoint(point),
-      focus: {
-        path: [...point.path],
-        offset: point.offset + 1,
-      },
-    }),
-  ]);
 }
 
 function createMergeNextBlockTransaction(point: Point): Transaction {
@@ -138,9 +127,8 @@ export function createDeleteInputTransaction(input: DeleteInput): Transaction {
     return createTransaction();
   }
 
-  if (point.offset < textLength) {
-    return createDeleteNextCharacterTransaction(point);
-  }
+  const range = createCharacterDeletionRange(input.document, point, "forward");
+  if (range) return createTransaction([createDeleteTextOperation(range)]);
 
   const nextTableParagraphPoint = getNextTableParagraphPoint(input.document, point);
 
