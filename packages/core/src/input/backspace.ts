@@ -18,6 +18,7 @@ import {
   type Point,
   type RangeSelection,
 } from "../selection";
+import { createCharacterDeletionRange } from "./character-range";
 
 export interface BackspaceInput {
   document: DocumentNode;
@@ -78,18 +79,6 @@ function isMergeStart(point: Point): boolean {
   );
 }
 
-function createDeletePreviousCharacterTransaction(point: Point): Transaction {
-  return createTransaction([
-    createDeleteTextOperation({
-      anchor: {
-        path: [...point.path],
-        offset: point.offset - 1,
-      },
-      focus: clonePoint(point),
-    }),
-  ]);
-}
-
 function createMergePreviousBlockTransaction(point: Point): Transaction {
   return createTransaction([createMergeBlockOperation(point)]);
 }
@@ -113,9 +102,8 @@ export function createBackspaceInputTransaction(input: BackspaceInput): Transact
     return listStartTransaction;
   }
 
-  if (point.offset > 0) {
-    return createDeletePreviousCharacterTransaction(point);
-  }
+  const range = createCharacterDeletionRange(input.document, point, "backward");
+  if (range) return createTransaction([createDeleteTextOperation(range)]);
 
   if (isMergeStart(point)) {
     if (point.path.length === 5) {
