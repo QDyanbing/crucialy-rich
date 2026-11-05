@@ -25,6 +25,7 @@ import {
   executeCommand as executeCoreCommand,
   finishComposition,
   getNodeAtPath,
+  getTextContainerOffset,
   getClipboardText,
   getClipboardHtml,
   getAdjacentCellSelection,
@@ -34,6 +35,7 @@ import {
   isCollapsed,
   isValidPoint,
   isTextNode,
+  isTextBlockNode,
   MERGE_BLOCK_COMMAND_NAME,
   parseClipboardData,
   PASTE_COMMAND_NAME,
@@ -436,13 +438,17 @@ function createMergeNextBlockCommandResult(
   const point = selection.anchor;
   const [blockIndex] = point.path;
   const node = getNodeAtPath(document, point.path);
+  const block = blockIndex === undefined ? undefined : document.children[blockIndex];
 
   if (
     point.path.length !== 2 ||
     blockIndex === undefined ||
     blockIndex >= document.children.length - 1 ||
     !isTextNode(node) ||
-    point.offset !== node.text.length
+    point.offset !== node.text.length ||
+    !isTextBlockNode(block) ||
+    getTextContainerOffset(document, point) !==
+      block.children.reduce((length, text) => length + text.text.length, 0)
   ) {
     return undefined;
   }
