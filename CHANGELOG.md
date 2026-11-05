@@ -8,6 +8,8 @@
 
 ### 修复
 
+- 修复折叠 Backspace/Delete 按单个 UTF-16 单元删除造成的 emoji/组合字符损坏；复用 `Intl.Segmenter`，支持同一文本容器内跨 marks/链接叶子删除完整簇，显式范围与 Point 协议不变。非法光标不生成结构删除操作。
+- 修复 React Delete 在中间格式叶子末尾提前合并下一段的问题，保留真实段尾合并、History 和邻项/邻格元数据；补齐 Core、React、构建入口与桌面/手机视口回归。不新增模型、API、Demo 样例、polyfill、按词删除或软键盘 beforeinput 删除入口。
 - 修复 `createHistoryState` 与 `recordHistory` 只复制部分栈数组而共享旧 entry 的问题；状态初始化、空事务、追加及合并的保留 entry 现独立复制，旧状态和新分支不再互相污染。类型签名、空事务不清空 redo 和两种合并策略保持不变。
 - 补齐嵌套模型/marks/link、19 种 Operation、重复 entry、撤销重做及 History Command 的隔离回归，增加 React 宿主检查点与构建产物验证。栈顶查询仍返回当前 entry 引用，不新增冻结、持久化或容量限制；文档明确复制成本和引用兼容性。
 

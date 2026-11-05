@@ -16,6 +16,8 @@
 
 非折叠选区编辑已支持同一文本容器内跨 text 节点、跨连续顶层 paragraph、heading、quote、codeBlock，以及同一表格单元格内的连续 paragraph。输入替换、Backspace、Delete、Enter、选区映射和 History 往返共用 `delete_text` / `delete_range` operation；跨列表项、跨单元格、进出表格、图片和分隔线等结构边界暂不参与范围删除。
 
+折叠 Backspace/Delete 已改为整簇删除，避免拆坏 emoji、组合重音、旗帜和 ZWJ 序列，也支持同一容器内跨格式叶子；修正 Delete 在中间文字叶子末尾提前合并下一段的问题。Point 与显式范围仍使用 UTF-16 offset，运行时须提供 `Intl.Segmenter`，具体边界见[字素删除](./docs/features/input.md#字素删除与-utf-16)。
+
 History 新增可选 `mergePolicy: "adjacent"`：连续 typing 保持合并，光标跳变、表格换格、选区替换及撤销后的新输入可独立撤销。Demo 已启用；Core 默认仍保留相同非空 batch 的既有合并规则，策略由宿主选择，具体边界见 [History 文档](./docs/features/history.md)。
 
 History 状态创建、空事务、追加和合并均隔离旧 entry，保留的旧状态不会因新分支修改而被污染；嵌套模型、事务和撤销/重做结果已有 Core、React 与构建产物验证。栈顶查询仍返回当前 entry 引用，不是可随意修改的副本；复制成本与保留快照总量有关，详见[状态引用与隔离](./docs/features/history.md#状态引用与隔离)。

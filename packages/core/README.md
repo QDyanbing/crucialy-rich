@@ -221,6 +221,7 @@ const shortcutCommandName = getCommandNameFromShortcut({
 - History 引用隔离：状态创建与记录的空事务/追加/合并路径逐条复制保留的 entry，修复旧状态污染新分支的问题。栈顶查询保持当前 entry 引用语义，需要独立副本时使用 `cloneHistoryEntry`；类型签名和合并策略不变，成本与边界见[状态引用与隔离](../../docs/features/history.md#状态引用与隔离)。
 - DOM 映射：元素 offset 按真实子节点边界换算，Text 使用局部 UTF-16 偏移，拆分叶子累计前缀并支持反向恢复；任务 checkbox、块外层排版空白与注释不占文字索引。不映射 void、根/表格结构端点或任意嵌套包装，不夹取越界位置，详见[DOM 偏移规则](../../docs/features/selection-sync.md#dom-偏移规则)。
 - 同步异常：Command 入口隔离 Registry/guard/execute/state 回调异常，返回 failure、false 或异常禁用状态；`parseClipboardData` 固定一次 MIME 快照，源读取/parser/直接过滤回调异常中止，正常拒绝仍可降级。仅覆盖同步调用，不回滚插件副作用、不吞异步错误，详见[扩展异常边界](../../docs/features/command.md#扩展异常边界)。
+- 折叠删除：Backspace/Delete helper 用 `Intl.Segmenter` 识别完整字素，可跨同一文本容器内的 marks 叶子，返回既有 `delete_text` 与 UTF-16 选区；非法光标不进入结构删除。无新公共 API、polyfill 或 Unicode 规范化，显式范围操作不扩张，见[字素删除](../../docs/features/input.md#字素删除与-utf-16)。
 
 ## 构建产物
 
