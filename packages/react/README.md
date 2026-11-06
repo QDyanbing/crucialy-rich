@@ -57,7 +57,8 @@ export function Demo() {
 - 图片：支持 URL/本地 object URL 插入、块选区、删除和安全 HTML 图片粘贴。
 - 表格：支持单元格内输入、删除、Enter、Backspace/Delete 段落合并、点击高亮、纯文本 TSV 填充和顶层 HTML 表格粘贴。
 - 快捷键：支持 Mod+B/I/U、Mod+Shift+X、Mod+Alt+0–6、Mod+Shift+7/8/9；History 快捷键继续由宿主状态接管。
-- Backspace/Delete 键盘入口按完整字素删除 emoji/组合序列，跨格式边界不误合并下一段，生成一个独立事务。受控、只读、宿主拦截、IME 与多实例保护保持原行为；仍需运行时 `Intl.Segmenter`，手机软键盘删除入口不在本次范围内，见[字素删除](../../docs/features/input.md#字素删除与-utf-16)。
+- Backspace/Delete 键盘入口按完整字素删除 emoji/组合序列，跨格式边界不误合并下一段，生成一个独立事务。受控、只读、宿主拦截、IME 与多实例保护保持原行为；仍需运行时 `Intl.Segmenter`，见[字素删除](../../docs/features/input.md#字素删除与-utf-16)。
+- 原生可取消 `beforeinput deleteContentBackward/Forward` 复用文字、范围和图片删除，不依赖 keydown；新增 `onNativeBeforeInput?: (event: InputEvent) => void` 观察/取消原始 DOM 事件，与 React `onBeforeInput` 分离。监听器随 props 更新、卸载清理，键盘路径不重复记录；不可取消、按词/软行等类型与真实设备边界见[原生删除意图](../../docs/features/input.md#原生删除意图)。
 - 输入规则：支持 paragraph 开头的标题、列表、引用和代码块 Markdown 前缀。
 - 文字样式：五种 boolean mark 与字号、文字颜色、背景色可应用到连续顶层 paragraph、heading、quote，以及同一列表项或同一表格单元格内的连续 paragraph，并作为一个 transaction 进入宿主 History。
 - 清除格式：默认 Command 与 Toolbar 可一次移除选区中的全部 boolean mark、文字属性和链接，并支持 History 撤销/重做。

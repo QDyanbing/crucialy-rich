@@ -15,6 +15,8 @@
 
 ### 新增
 
+- React 新增原生可取消 `beforeinput deleteContentBackward/Forward` 删除入口，复用既有 Command、字素、范围、合并和图片规则；新增可选 `onNativeBeforeInput` 接收原始 InputEvent，宿主可取消。现有 React 事件和事务类型不变，不新增 Core API 或 Demo 控件。
+- 补齐受控 History/续编、只读/IME/控件/选区归属、命令失败、StrictMode、props 更新、卸载、SSR 与构建包挂载验证，以及桌面/手机视口原生事件和键盘单次提交回归。不可取消事件、其他删除类型及真实软键盘兼容性不由此保证。
 - Command 同步扩展异常保护覆盖 Registry 查找、canExecute、execute 与状态查询；异常转换为失败/不可用，工具栏正常项不受影响，Slash 失败不暴露触发文字清理的半成品事务。公开签名不变，不回滚插件副作用或捕获宿主/异步错误。
 - 剪贴板只读取一次 MIME 快照，源读取/parser/直接过滤回调异常中止，正常候选拒绝继续原降级；React 缺失或不可读 ClipboardData 不提交事务，后续正常粘贴可恢复。补齐 Core、React、构建产物和桌面/手机浏览器回归。
 - 截断键盘命令失败后的旧删除 fallback，禁止失败的图片删除使用遗留文字范围；Enter 和已识别格式快捷键取消默认 DOM 修改，非折叠删除被禁用时不直接删除。修正 Delete 合并段落事务的原光标快照，正常输入/合并路径保持可用。
