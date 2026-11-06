@@ -717,7 +717,20 @@ function RichTextEditorComponent(
     )
       return;
     event.preventDefault();
-    if (blockSelection) return;
+    if (blockSelection) {
+      if (!ownsBlockClipboardSelection(root)) return;
+      const input = createDeleteImageCommandResult(
+        registry,
+        document,
+        blockSelection,
+        getModelSelectionFromDom(root, document) ?? selection,
+      );
+      if (input && input.transaction.operations.length > 0) {
+        commitInputResult(input);
+        onBlockSelectionChange?.(undefined);
+      }
+      return;
+    }
     const currentSelection = getModelSelectionFromDom(root, document);
     if (!currentSelection) return;
     const input = createTextDeletionInputResult(

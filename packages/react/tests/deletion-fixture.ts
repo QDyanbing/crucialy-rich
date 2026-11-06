@@ -18,7 +18,7 @@ afterEach(() => {
 
 export function mountDeletionEditor(
   value: DocumentNode,
-  point: Point,
+  point: Point | undefined,
   options: Partial<RichTextEditorProps> = {},
 ) {
   const container = document.createElement("div");
@@ -50,7 +50,7 @@ export function mountDeletionEditor(
     )!.firstChild!;
     window.getSelection()!.setBaseAndExtent(text, next.offset, text, next.offset);
   }
-  setCaret(point);
+  if (point) setCaret(point);
   return {
     ref,
     editor,
