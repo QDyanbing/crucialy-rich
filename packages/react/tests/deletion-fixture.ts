@@ -1,5 +1,5 @@
 import { type DocumentNode, type Point } from "@crucialy-rich/core";
-import { act, createElement, createRef } from "react";
+import { act, createElement, createRef, StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, vi } from "vitest";
 import {
@@ -20,6 +20,7 @@ export function mountDeletionEditor(
   value: DocumentNode,
   point: Point | undefined,
   options: Partial<RichTextEditorProps> = {},
+  strict = false,
 ) {
   const container = document.createElement("div");
   document.body.append(container);
@@ -32,7 +33,6 @@ export function mountDeletionEditor(
   let props: RichTextEditorProps = {
     contentEditable: true,
     defaultValue: value,
-    ref,
     onChange,
     onTransaction,
     onSelectionChange,
@@ -40,7 +40,10 @@ export function mountDeletionEditor(
   };
   function rerender(next: Partial<RichTextEditorProps> = {}) {
     props = { ...props, ...next };
-    act(() => root.render(createElement(RichTextEditor, props)));
+    act(() => {
+      const editor = createElement(RichTextEditor, { ...props, ref });
+      root.render(strict ? createElement(StrictMode, null, editor) : editor);
+    });
   }
   rerender();
   const editor = ref.current!.getElement()!;
