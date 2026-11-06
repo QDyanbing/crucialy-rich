@@ -101,6 +101,7 @@ export interface RichTextEditorProps
   onCellSelectionChange?: (selection: CellSelection | undefined) => void;
   onChange?: (value: DocumentNode) => void;
   onCompositionStateChange?: (state: CompositionState) => void;
+  onNativeBeforeInput?: (event: InputEvent) => void;
   onSelectionChange?: (selection: RangeSelection) => void;
   onTransaction?: (event: RichTextEditorTransactionEvent) => void;
   selection?: RangeSelection;
@@ -504,6 +505,7 @@ function RichTextEditorComponent(
     defaultValue,
     label = "Rich text editor",
     onBeforeInput,
+    onNativeBeforeInput,
     onBlockSelectionChange,
     onCellSelectionChange,
     onClick,
@@ -693,6 +695,14 @@ function RichTextEditorComponent(
       commitInputResult(input);
     }
   }
+
+  useIsomorphicLayoutEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const listener = (event: InputEvent) => onNativeBeforeInput?.(event);
+    root.addEventListener("beforeinput", listener);
+    return () => root.removeEventListener("beforeinput", listener);
+  });
 
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     onKeyDown?.(event);

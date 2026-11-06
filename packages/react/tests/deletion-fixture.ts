@@ -58,6 +58,16 @@ export function mountDeletionEditor(
     onTransaction,
     onSelectionChange,
     setCaret,
+    nativeInput(inputType: string, extra: InputEventInit = {}) {
+      const event = new InputEvent("beforeinput", {
+        bubbles: true,
+        cancelable: true,
+        inputType,
+        ...extra,
+      });
+      act(() => editor.dispatchEvent(event));
+      return event;
+    },
     press(key: string, extra: KeyboardEventInit = {}) {
       const event = new KeyboardEvent("keydown", {
         bubbles: true,
