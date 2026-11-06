@@ -22,6 +22,12 @@
 | `className`                | `string`                                                                          | 传给编辑器根节点的样式类名。                    |
 | DOM 事件属性               | `onBeforeInput`、`onClick`、`onComposition*`、`onKeyDown`、`onMouseUp`、`onKeyUp` | 用于输入、链接交互和选区同步。                  |
 
+## 原生输入回调
+
+新增可选 `onNativeBeforeInput?: (event: InputEvent) => void`，同步接收根节点的原始 DOM beforeinput。宿主调用 `preventDefault()` 后，组件不继续处理；该回调与 React `onBeforeInput` 分离，不伪造 SyntheticEvent，也不在 SSR 执行或输出为 HTML 属性。
+
+可取消的 `deleteContentBackward/Forward` 已接入文字、范围与图片删除。键盘仍先经过 `onKeyDown`，只读、IME、不可取消事件和内嵌控件不触发模型删除；具体优先级、选区归属、未支持类型及设备边界见[原生删除意图](./input.md#原生删除意图)。回调异常仍由宿主处理，原有事务类型和受控回传方式保持不变。
+
 ## 受控用法
 
 ```tsx

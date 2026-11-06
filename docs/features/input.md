@@ -82,7 +82,34 @@ keydown Backspace/Delete/Enter
 - 不跨文本容器寻找字符；到达真实段首/段尾时继续使用已有合并、void 删除或列表退出规则。React Delete 不再把中间格式叶子的末尾误当成整个段落末尾。
 - 非法 path、非整数、负数或越界 offset 不生成删除/合并/移除块操作。非折叠范围仍交给原 Command 管线，不在低层 collapsed helper 内处理。
 
-React 继续先处理宿主回调、只读与 IME 保护；整簇删除产生一个独立、无 typing batch 的事件，History 由宿主记录。没有新增按词删除、光标按字素移动或手机软键盘 `beforeinput deleteContentBackward/Forward` 入口；手机视口验收使用 Chromium 的键盘事件，不代表真实设备输入法兼容性验收。每次分段仅扫描当前文本容器，不修改模型字符串或进行 Unicode 规范化。
+React 继续先处理宿主回调、只读与 IME 保护；整簇删除产生一个独立、无 typing batch 的事件，History 由宿主记录。另已接入下述可取消的原生删除事件，但不新增按词删除或光标按字素移动。手机视口及合成原生事件不代表真实设备输入法兼容性验收。每次分段仅扫描当前文本容器，不修改模型字符串或进行 Unicode 规范化。
+
+## 原生删除意图
+
+没有 keydown 时，根节点上的可取消 `beforeinput` 事件可通过 `inputType: "deleteContentBackward" | "deleteContentForward"` 进入现有删除管线。监听器使用 DOM `addEventListener`，不依赖 React 的合成 `onBeforeInput` 是否生成无文字的删除事件。
+
+```text
+native beforeinput
+  -> onNativeBeforeInput(originalEvent)
+  -> 取消状态 / cancelable / editable / IME / 内嵌控件检查
+  -> 取消受支持删除事件的默认 DOM 修改
+  -> 读取当前编辑器拥有的 DOM Selection 或已选图片块
+  -> 共享 Command / merge / 字素 helper
+  -> onChange / onTransaction / onSelectionChange
+```
+
+`onNativeBeforeInput?: (event: InputEvent) => void` 是新增可选 prop，接收原始 DOM 事件而非 React SyntheticEvent。它同步观察所有到达根节点的原生 beforeinput，包括只读、组合期和未支持类型；调用 `preventDefault()` 可阻止本组件继续处理。宿主接管时应明确取消事件，不捕获或回滚宿主回调异常。原 React `onBeforeInput` 与 `onKeyDown` 保持原调用方式；键盘路径仍先调用 `onKeyDown`，不能假定每次按键删除都会产生原生 beforeinput。
+
+正常键盘删除在 keydown 取消浏览器默认行为，因此不再产生第二次原生删除，也不重复记录 History；组件不使用定时器或“忽略下一事件”标记。宿主主动派发两个独立删除事件，仍会被视为两个意图。
+
+- 折叠文字删除复用整簇 helper；显式范围继续使用原 Command 和结构边界，拒绝跨 cell 等不支持范围，不放开浏览器默认删除。
+- 段首/段尾合并、相邻 void、列表项和 cell 内段落规则保持现有行为；guard/execute/Registry 查找 failure 不继续 fallback。普通 collapsed range guard 返回 false 时仍可走既有字符 helper，不把 Registry 当作整个编辑器的权限系统。
+- 已选图片优先使用 `deleteImage`，要求根聚焦且 DOM 选区归属合法，可没有 DOM Range；成功才清除块选区，仍输出 `deleteImage`、可选旧文字范围与 `beforeBlockSelection`，失败不借用遗留文字。
+- 没有当前编辑器拥有的合法文字 DOM 选区时，取消受支持事件但不提交事务，不借用受控 selection 或其他实例的 DOM Range。文档首尾 no-op 不新增 History。
+- 内嵌 input、textarea、select、button 或不可编辑后代的事件不触发编辑器删除；宿主回调仍可观察它们。
+- 只读、组合期、`isComposing` 与不可取消事件不进入模型删除。不可取消 beforeinput 不做事后 DOM 修复；`deleteWord*`、软行删除等未支持类型只观察、不转换成字符删除，也不自动阻止默认行为，宿主可自行取消。
+
+监听器随当前 props/value/Registry 更新并在卸载时清理，StrictMode 不重复提交。受控宿主仍须回传 after/selection，组件不内置 History。当前验收包含 Chromium 合成原生事件、真实键盘、SSR 和构建包挂载，不宣称完整覆盖 Android/iOS 软键盘、各浏览器 targetRanges 或所有 IME 的不可取消事件。
 
 ## Core API
 
