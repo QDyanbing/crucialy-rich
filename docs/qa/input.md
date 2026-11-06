@@ -39,6 +39,17 @@ pnpm test:e2e
 - 构建入口冒烟验证两个方向的 Unicode 删除、跨格式、非法点、UTF-16 结果与 History。桌面/手机截图已查看，删除后文字、链接样式及未选段落正常，无溢出或遮挡；本轮未新增 Demo 样例或控件。
 - 本地 `pnpm check:all` 退出码 0：格式、lint、根工程与包级类型、269 个文件/2109 项单测、构建/包产物与 264 项 Chromium 全部通过，详见[全量回归](./full-regression.md)。
 
+## 原生删除回归（2026-11-06）
+
+- 新增 `onNativeBeforeInput`，同步观察根节点原始 beforeinput，宿主可取消。两个可取消的原生删除类型复用键盘管线，不伪造 React 合成事件，不新增 Core API、事务类型或 Demo 控件。
+- React 新增 88 项：`native-input-hook` 5 项、`native-delete-backward` 8 项、`native-delete-forward` 9 项、`native-delete-image` 8 项、`native-delete-guards` 22 项、`native-delete-history` 4 项、`native-input-lifecycle` 7 项、`native-delete-errors` 24 项，公开 API 文件新增 1 项 SSR 回归。
+- 覆盖无 keydown 的整簇与显式范围、真实边界合并、相邻 void、图片优先/失败不退回文字、无 DOM Range、图片单节点修复、History 和受控续编；只读、宿主取消、组合期、不可取消事件、内嵌控件、无归属选区及跨 cell 拒绝均保持模型不变。
+- 验证 Registry 查找/guard/execute failure 不继续 fallback；普通折叠 guard 返回 false 仍保留原 helper 行为，不扩大 Registry 的权限语义。props、文档、回调和 Registry 更新后不读取旧闭包，StrictMode 单次提交，卸载删除监听器。
+- Chromium 新增 12 项：`native-deletion.spec.ts` 6 项，覆盖桌面合成原生事件、反向跨段范围、History/续编和真实键盘单次入栈；`native-deletion-mobile.spec.ts` 6 项，覆盖任务、cell 和图片选区恢复后再次删除。图片使用已解码的离线 PNG 夹具，不验证外部图片服务。
+- 构建产物检查验证可选 InputEvent 回调声明、SSR 不执行/不序列化回调、实际挂载后的两个删除方向与卸载清理。桌面 1280×720 与手机 390×844 的截图已查看，内容和图片高亮清楚，无溢出或工具栏遮挡。
+- 本地 `pnpm check:all` 退出码 0：277 个文件/2197 项 Vitest、276 项 Chromium，格式、lint、根工程/包级类型、构建及公开包检查全部通过。主 JS 约 513.99 KB，已有非阻断分包提示不变，详见[全量回归](./full-regression.md)。
+- 平台范围：Chromium 合成原生事件与键盘验证不等同于真机软键盘验收；不转换 deleteWord/软行等类型，不读取 targetRanges 扩张选区，也不事后修复不可取消 beforeinput 的 DOM 修改。
+
 ## 手测场景
 
 | 场景           | 操作                                   | 期望                              | 结果 |
@@ -81,7 +92,7 @@ pnpm test:e2e
 ## 当前限制
 
 - 范围替换与删除接受同一文本容器、连续顶层文本块或同 cell 连续 paragraph，不跨列表项、不同 cell、进出表格、图片和分隔线。
-- 整簇删除只作用于折叠 Backspace/Delete，依赖运行时 `Intl.Segmenter`，没有内置 polyfill；Point、DOM 与显式范围仍使用 UTF-16 offset。手机视口使用键盘事件，不构成真实软键盘/输入法验收，未新增 beforeinput 删除、按词删除或字素光标导航。
+- 整簇删除作用于键盘及已支持的可取消原生折叠删除，依赖运行时 `Intl.Segmenter`，没有内置 polyfill；Point、DOM 与显式范围仍使用 UTF-16 offset。手机视口和合成原生事件不构成真实软键盘/输入法验收，不支持按词删除、字素光标导航或不可取消事件的 DOM 修复。
 - `createEnterInputTransaction` 低层 helper 仍只接受 collapsed selection；范围删除由 `splitBlockCommand` 组合。
 - React 组件通过 `onTransaction` 暴露记录入口，但 History 状态仍由宿主维护。
 - 拖拽输入仍未实现。

@@ -2,29 +2,30 @@
 
 ## 执行信息
 
-- 日期：2026-11-05
+- 日期：2026-11-06
 - 版本：`0.1.0`
 - 分支：`master`
 - 命令：`pnpm check:all`
 
 ## 自动化结果
 
-| 检查项     | 结果 | 说明                                                        |
-| ---------- | ---- | ----------------------------------------------------------- |
-| Prettier   | 通过 | 全仓文件格式一致                                            |
-| ESLint     | 通过 | 0 warning、0 error                                          |
-| TypeScript | 通过 | 根工程与 core/react/demo 包级检查全部通过                   |
-| Vitest     | 通过 | 269 个测试文件，2109 项测试                                 |
-| Core 构建  | 通过 | ESM、source map、类型声明生成成功                           |
-| React 构建 | 通过 | ESM、source map、类型声明生成成功                           |
-| Demo 构建  | 通过 | Vite 生产构建成功                                           |
-| 包产物导入 | 通过 | 导出/声明、Clipboard、History、CodeBlock 与 Office 冒烟通过 |
-| Playwright | 通过 | Chromium 264 项测试                                         |
+| 检查项     | 结果 | 说明                                                                      |
+| ---------- | ---- | ------------------------------------------------------------------------- |
+| Prettier   | 通过 | 全仓文件格式一致                                                          |
+| ESLint     | 通过 | 0 warning、0 error                                                        |
+| TypeScript | 通过 | 根工程与 core/react/demo 包级检查全部通过                                 |
+| Vitest     | 通过 | 277 个测试文件，2197 项测试                                               |
+| Core 构建  | 通过 | ESM、source map、类型声明生成成功                                         |
+| React 构建 | 通过 | ESM、source map、类型声明生成成功                                         |
+| Demo 构建  | 通过 | Vite 生产构建成功                                                         |
+| 包产物导入 | 通过 | 导出/声明、Clipboard、History、CodeBlock、Office 与 Native Input 冒烟通过 |
+| Playwright | 通过 | Chromium 276 项测试                                                       |
 
-Demo 主 JS 产物约 513.41 KB，Vite 给出超过 500 KB 的非阻断分包提示；构建退出码为 0，本轮未调整打包策略。
+Demo 主 JS 产物约 513.99 KB，Vite 给出超过 500 KB 的非阻断分包提示；构建退出码为 0，本轮未调整打包策略。
 
 ## 核心路径
 
+- 2026-11-06 原生删除意图闭环通过：新增可选 `onNativeBeforeInput` 接收/取消原始 DOM InputEvent，可取消 `deleteContentBackward/Forward` 复用既有文字、范围、合并、void 和已选图片删除，事务类型、UTF-16 与结构边界保持原样。新增 88 项 React 单测和 12 项 Chromium，用例覆盖无 keydown、真实键盘单次入栈、History/续编、图片选中态恢复、任务 checked、cell 邻格、宿主/只读/IME/控件/选区归属、命令失败、最新 props/Registry、StrictMode/卸载与 SSR；构建包完成类型和实际挂载/卸载验证。桌面/手机截图已检查，图片离线夹具解码、高亮、尺寸及无工具栏遮挡通过。未新增 Core API、模型、Demo 控件、按词/软行删除、targetRanges 扩展或不可取消事件修复，不宣称真实 Android/iOS 软键盘全面兼容。
 - 2026-11-05 字素删除闭环通过：折叠 Backspace/Delete 使用运行时 `Intl.Segmenter` 删除完整簇，修复 emoji/组合序列被单个 UTF-16 删除拆坏的问题；同一容器内跨 marks、链接、空文字占位或拆分代理对仍可删除，非法光标不进入结构回退。React Delete 只在真实段尾合并，不在中间格式叶子末尾提前合并下一段。新增 78 项 Core、24 项 React 和 14 项 Chromium 测试，覆盖九类文本容器、邻项/邻格元数据、History/续编、受控、只读、宿主、IME 和多实例保护，构建产物公开入口验证通过。桌面 1280×720 与手机 390×844 的删除结果截图已检查，文字格式保留且无溢出遮挡。公开 API/Point 仍为 UTF-16，显式范围不扩张；无新模型/示例、Unicode 规范化、polyfill、按词删除或软键盘 beforeinput 删除入口，手机视口不代表真实设备兼容性验收。
 - 2026-11-04 History 状态引用隔离通过：修复初始化、空事务记录及追加/合并保留 entry 的共享引用；旧状态、新分支和重复栈位置独立。新增 53 项 Core、3 项 React 测试，覆盖任务子列表/编号、表格多段落、marks/link、图片元数据、文字/块选区、19 种 Operation、显式合并、撤销/重做与 Command 的各返回通道，以及宿主保留检查点后的撤销、重做和续编。构建产物验证初始化与两种策略下的三条记录路径，既有 250 项 Chromium 回归通过。本轮不改变 UI、Demo 示例、公开签名或合并规则；栈顶查询仍返回当前 entry 引用，未新增冻结、自动容量限制、持久化或通用宿主对象复制，复制成本随保留快照总体积增长。
 - 2026-11-03 同步扩展异常边界通过：Command guard/execute/Registry 查找、状态查询、异常 message getter 和非 Error 抛出均转为失败/不可用；正常工具栏项继续可用，Slash 目标失败不暴露清理事务，修复后可重试并单次撤销。剪贴板 MIME 一次快照、源读取/parser/直接过滤回调异常中止、正常拒绝降级、Office 来源预检及后续恢复通过。React 键盘 failure 不继续旧删除 fallback，图片失败不误用旧文字范围，Enter/格式快捷键不退回原生 DOM 修改，Delete 合并保留实际 before 光标。新增 41 项 Core、49 项 React 和 8 项桌面/手机 Chromium 用例，构建包公开入口与既有 API 通过；故障注入后的模型/DOM/选区/History 保持、正常复制/粘贴与撤销重做、无 pageerror 及截图检查通过。不承诺异步错误、宿主回调、React 构造事件前的原生 clipboardData 属性异常或扩展副作用回滚；候选 guard 异常转 false 后，仅后续被明确允许的实际格式可继续。
