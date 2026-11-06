@@ -20,6 +20,14 @@ import * as reactPackage from "../src/index";
 import { RichTextEditor } from "../src/index";
 
 describe("@crucialy-rich/react public API", () => {
+  it("accepts a native InputEvent policy without invoking or serializing it during SSR", () => {
+    const policy = vi.fn((event: InputEvent) => event.preventDefault());
+    const html = renderToStaticMarkup(
+      createElement(RichTextEditor, { onNativeBeforeInput: policy }),
+    );
+    expect(policy).not.toHaveBeenCalled();
+    expect(html).not.toContain("onNativeBeforeInput");
+  });
   it("exposes an importable package entry", () => {
     expect(reactPackage).toBeDefined();
   });

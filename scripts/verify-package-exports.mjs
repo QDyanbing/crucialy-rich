@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createRequire } from "node:module";
 import { access, readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -37,6 +38,103 @@ const publicPackages = [
     expectedExports: ["FixedToolbar", "FloatingSlashMenu", "RichTextEditor"],
   },
 ];
+
+async function verifyNativeInputBinding(react) {
+  const require = createRequire(resolve(repositoryRoot, "packages/react/package.json"));
+  const { createElement, act } = require("react");
+  const { renderToStaticMarkup } = require("react-dom/server");
+  let observed = 0;
+  const html = renderToStaticMarkup(
+    createElement(react.RichTextEditor, {
+      onNativeBeforeInput: () => observed++,
+    }),
+  );
+  assert.equal(observed, 0);
+  assert.equal(html.includes("onNativeBeforeInput"), false);
+
+  const dom = new JSDOM("<!doctype html><body></body>");
+  const globals = {
+    window: dom.window,
+    document: dom.window.document,
+    navigator: dom.window.navigator,
+    HTMLElement: dom.window.HTMLElement,
+    Element: dom.window.Element,
+    Node: dom.window.Node,
+    IS_REACT_ACT_ENVIRONMENT: true,
+  };
+  const previous = new Map(
+    Object.keys(globals).map((key) => [
+      key,
+      Object.getOwnPropertyDescriptor(globalThis, key),
+    ]),
+  );
+  try {
+    for (const [key, value] of Object.entries(globals))
+      Object.defineProperty(globalThis, key, {
+        configurable: true,
+        writable: true,
+        value,
+      });
+    const { createRoot } = require("react-dom/client");
+    const core = await import(
+      pathToFileURL(resolve(repositoryRoot, "packages/core/dist/index.js")).href
+    );
+    for (const type of ["deleteContentBackward", "deleteContentForward"]) {
+      const container = dom.window.document.createElement("div");
+      dom.window.document.body.append(container);
+      const root = createRoot(container);
+      const transactions = [];
+      let calls = 0;
+      let editor;
+      try {
+        act(() =>
+          root.render(
+            createElement(react.RichTextEditor, {
+              contentEditable: true,
+              defaultValue: core.createDocument([
+                core.createParagraph([core.createText("A\u{1f600}B")]),
+              ]),
+              onNativeBeforeInput: () => calls++,
+              onTransaction: (event) => transactions.push(event),
+            }),
+          ),
+        );
+        editor = container.firstElementChild;
+        editor.focus();
+        const text = editor.querySelector("span").firstChild;
+        const offset = type === "deleteContentBackward" ? 3 : 1;
+        dom.window.getSelection().setBaseAndExtent(text, offset, text, offset);
+        const event = new dom.window.InputEvent("beforeinput", {
+          inputType: type,
+          bubbles: true,
+          cancelable: true,
+        });
+        act(() => editor.dispatchEvent(event));
+        assert.equal(event.defaultPrevented, true);
+        assert.equal(editor.textContent, "AB");
+        assert.equal(calls, 1);
+        assert.equal(transactions.length, 1);
+        assert.equal(transactions[0].transaction.operations[0].type, "delete_text");
+      } finally {
+        act(() => root.unmount());
+      }
+      editor.dispatchEvent(
+        new dom.window.InputEvent("beforeinput", {
+          inputType: type,
+          bubbles: true,
+          cancelable: true,
+        }),
+      );
+      assert.equal(calls, 1);
+    }
+  } finally {
+    dom.window.close();
+    for (const [key, descriptor] of previous) {
+      if (descriptor) Object.defineProperty(globalThis, key, descriptor);
+      else Reflect.deleteProperty(globalThis, key);
+    }
+  }
+}
 
 function verifyClipboardFiltering(core) {
   const point = { path: [0, 0, 0, 0, 0], offset: 0 };
@@ -970,6 +1068,8 @@ for (const packageConfig of publicPackages) {
   }
 
   if (packageConfig.directory === "packages/react") {
+    assert.match(declarations, /onNativeBeforeInput\?: \(event: InputEvent\) => void/);
+    await verifyNativeInputBinding(runtime);
     assert.ok(declarations.includes('"onCopy"'));
     assert.ok(declarations.includes('"onCut"'));
     assert.ok(declarations.includes('"deleteByCut"'));
