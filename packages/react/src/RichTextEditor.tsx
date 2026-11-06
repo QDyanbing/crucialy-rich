@@ -463,6 +463,36 @@ function createMergeNextBlockCommandResult(
   );
 }
 
+function createTextDeletionInputResult(
+  key: "Backspace" | "Delete",
+  registry: CommandRegistry,
+  document: DocumentNode,
+  selection: RangeSelection,
+): KeyboardInputResult | undefined {
+  const inputType = key === "Backspace" ? "deleteBackward" : "deleteForward";
+  const result = executeCoreCommand(registry, DELETE_SELECTION_COMMAND_NAME, {
+    context: { document, selection },
+  });
+  const rangeInput = createKeyboardInputResultFromCommandResult(
+    result,
+    selection,
+    inputType,
+  );
+  if (rangeInput) return rangeInput;
+  if (result.status === "failure" || !isCollapsed(selection)) return undefined;
+
+  const merge =
+    key === "Backspace"
+      ? createMergeBlockCommandResult(registry, document, selection)
+      : createMergeNextBlockCommandResult(registry, document, selection);
+  const mergeInput = merge
+    ? createKeyboardInputResultFromCommandResult(merge, selection, inputType)
+    : undefined;
+  if (mergeInput) return mergeInput;
+  if (merge?.status === "failure") return undefined;
+  return createKeyboardInputResult(key, document, selection);
+}
+
 function RichTextEditorComponent(
   {
     blockSelection,
@@ -762,71 +792,15 @@ function RichTextEditorComponent(
     }
 
     if (event.key === "Backspace" || event.key === "Delete") {
-      const result = executeCoreCommand(registry, DELETE_SELECTION_COMMAND_NAME, {
-        context: { document, selection: modelSelection },
-      });
-      const deleteSelectionInput = createKeyboardInputResultFromCommandResult(
-        result,
-        modelSelection,
-        event.key === "Backspace" ? "deleteBackward" : "deleteForward",
-      );
-
-      if (deleteSelectionInput) {
-        event.preventDefault();
-        commitInputResult(deleteSelectionInput);
-
-        return;
-      }
-      if (result.status === "failure" || !isCollapsed(modelSelection)) {
-        event.preventDefault();
-        return;
-      }
-    }
-
-    if (event.key === "Backspace") {
-      const result = createMergeBlockCommandResult(registry, document, modelSelection);
-      const mergeBlockInput = createKeyboardInputResultFromCommandResult(
-        result,
-        modelSelection,
-        "deleteBackward",
-      );
-
-      if (mergeBlockInput) {
-        event.preventDefault();
-        commitInputResult(mergeBlockInput);
-
-        return;
-      }
-      if (result.status === "failure") {
-        event.preventDefault();
-        return;
-      }
-    }
-
-    if (event.key === "Delete") {
-      const result = createMergeNextBlockCommandResult(
+      event.preventDefault();
+      const input = createTextDeletionInputResult(
+        event.key,
         registry,
         document,
         modelSelection,
       );
-      const mergeNextBlockInput = result
-        ? createKeyboardInputResultFromCommandResult(
-            result,
-            modelSelection,
-            "deleteForward",
-          )
-        : undefined;
-
-      if (mergeNextBlockInput) {
-        event.preventDefault();
-        commitInputResult(mergeNextBlockInput);
-
-        return;
-      }
-      if (result?.status === "failure") {
-        event.preventDefault();
-        return;
-      }
+      if (input) commitInputResult(input);
+      return;
     }
 
     const input = createKeyboardInputResult(
