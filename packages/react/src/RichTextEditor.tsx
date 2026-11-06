@@ -712,7 +712,8 @@ function RichTextEditorComponent(
       !editable ||
       compositionRef.current.active ||
       event.isComposing ||
-      event.inputType !== "deleteContentBackward"
+      (event.inputType !== "deleteContentBackward" &&
+        event.inputType !== "deleteContentForward")
     )
       return;
     event.preventDefault();
@@ -720,7 +721,7 @@ function RichTextEditorComponent(
     const currentSelection = getModelSelectionFromDom(root, document);
     if (!currentSelection) return;
     const input = createTextDeletionInputResult(
-      "Backspace",
+      event.inputType === "deleteContentBackward" ? "Backspace" : "Delete",
       registry,
       document,
       currentSelection,
