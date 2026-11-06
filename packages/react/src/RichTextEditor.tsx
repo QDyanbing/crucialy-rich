@@ -699,10 +699,34 @@ function RichTextEditorComponent(
   useIsomorphicLayoutEffect(() => {
     const root = rootRef.current;
     if (!root) return;
-    const listener = (event: InputEvent) => onNativeBeforeInput?.(event);
+    const listener = (event: InputEvent) => handleNativeBeforeInput(event, root);
     root.addEventListener("beforeinput", listener);
     return () => root.removeEventListener("beforeinput", listener);
   });
+
+  function handleNativeBeforeInput(event: InputEvent, root: HTMLDivElement) {
+    onNativeBeforeInput?.(event);
+    if (
+      event.defaultPrevented ||
+      !event.cancelable ||
+      !editable ||
+      compositionRef.current.active ||
+      event.isComposing ||
+      event.inputType !== "deleteContentBackward"
+    )
+      return;
+    event.preventDefault();
+    if (blockSelection) return;
+    const currentSelection = getModelSelectionFromDom(root, document);
+    if (!currentSelection) return;
+    const input = createTextDeletionInputResult(
+      "Backspace",
+      registry,
+      document,
+      currentSelection,
+    );
+    if (input) commitInputResult(input);
+  }
 
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     onKeyDown?.(event);
