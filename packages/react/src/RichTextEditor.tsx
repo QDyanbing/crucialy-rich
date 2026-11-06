@@ -706,12 +706,16 @@ function RichTextEditorComponent(
 
   function handleNativeBeforeInput(event: InputEvent, root: HTMLDivElement) {
     onNativeBeforeInput?.(event);
+    const target = event.target as Element | null;
     if (
       event.defaultPrevented ||
       !event.cancelable ||
       !editable ||
       compositionRef.current.active ||
       event.isComposing ||
+      (target !== root &&
+        typeof target?.closest === "function" &&
+        target.closest('input, textarea, select, button, [contenteditable="false"]')) ||
       (event.inputType !== "deleteContentBackward" &&
         event.inputType !== "deleteContentForward")
     )
