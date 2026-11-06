@@ -29,19 +29,20 @@ export function mountDeletionEditor(
   const onChange = vi.fn(),
     onTransaction = vi.fn(),
     onSelectionChange = vi.fn();
-  act(() =>
-    root.render(
-      createElement(RichTextEditor, {
-        contentEditable: true,
-        defaultValue: value,
-        ref,
-        onChange,
-        onTransaction,
-        onSelectionChange,
-        ...options,
-      }),
-    ),
-  );
+  let props: RichTextEditorProps = {
+    contentEditable: true,
+    defaultValue: value,
+    ref,
+    onChange,
+    onTransaction,
+    onSelectionChange,
+    ...options,
+  };
+  function rerender(next: Partial<RichTextEditorProps> = {}) {
+    props = { ...props, ...next };
+    act(() => root.render(createElement(RichTextEditor, props)));
+  }
+  rerender();
   const editor = ref.current!.getElement()!;
   editor.focus();
   function setCaret(next: Point) {
@@ -58,6 +59,11 @@ export function mountDeletionEditor(
     onTransaction,
     onSelectionChange,
     setCaret,
+    rerender,
+    unmount() {
+      act(() => root.unmount());
+      roots.splice(roots.indexOf(root), 1);
+    },
     nativeInput(inputType: string, extra: InputEventInit = {}) {
       const event = new InputEvent("beforeinput", {
         bubbles: true,
