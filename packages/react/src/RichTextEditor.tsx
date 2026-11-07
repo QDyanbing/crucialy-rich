@@ -835,6 +835,11 @@ function RichTextEditorComponent(
       return;
     }
 
+    if (blockSelection && event.key === "Enter") {
+      event.preventDefault();
+      return;
+    }
+
     const modelSelection = getModelSelectionFromDom(event.currentTarget, document);
 
     if (!modelSelection) {
@@ -864,7 +869,6 @@ function RichTextEditorComponent(
 
     if (event.key === "Enter") {
       event.preventDefault();
-      if (blockSelection) return;
       const soft = event.shiftKey && !event.altKey && !event.ctrlKey && !event.metaKey;
       const splitBlockInput = soft
         ? createLineBreakCommandResult(registry, document, modelSelection)
