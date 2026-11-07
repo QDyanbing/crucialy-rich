@@ -734,10 +734,19 @@ function RichTextEditorComponent(
         typeof target?.closest === "function" &&
         target.closest('input, textarea, select, button, [contenteditable="false"]')) ||
       (event.inputType !== "deleteContentBackward" &&
-        event.inputType !== "deleteContentForward")
+        event.inputType !== "deleteContentForward" &&
+        event.inputType !== "insertParagraph")
     )
       return;
     event.preventDefault();
+    if (event.inputType === "insertParagraph") {
+      if (blockSelection) return;
+      const currentSelection = getModelSelectionFromDom(root, document);
+      if (!currentSelection) return;
+      const input = createSplitBlockCommandResult(registry, document, currentSelection);
+      if (input) commitInputResult(input);
+      return;
+    }
     if (blockSelection) {
       if (!ownsBlockClipboardSelection(root)) return;
       const input = createDeleteImageCommandResult(
