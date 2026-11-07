@@ -50,6 +50,18 @@ pnpm test:e2e
 - 本地 `pnpm check:all` 退出码 0：277 个文件/2197 项 Vitest、276 项 Chromium，格式、lint、根工程/包级类型、构建及公开包检查全部通过。主 JS 约 513.99 KB，已有非阻断分包提示不变，详见[全量回归](./full-regression.md)。
 - 平台范围：Chromium 合成原生事件与键盘验证不等同于真机软键盘验收；不转换 deleteWord/软行等类型，不读取 targetRanges 扩张选区，也不事后修复不可取消 beforeinput 的 DOM 修改。
 
+## 换段与软换行回归（2026-11-07）
+
+- 原生 `insertParagraph` 接入现有 `splitBlock`，Shift+Enter 和原生 `insertLineBreak` 通过现有 `insertText` 插入 LF。新增软换行事务类型，两个操作均无 typing batch；不新增 Core API、模型节点、Operation 或 Demo 控件。
+- Core 新增 `line-break-contract.test.ts` 10 项，验证六类文字容器、UTF-16、正反跨块范围、CodeBlock 字面 LF 不退出，以及模型纯文本/HTML 剪贴板数据保留 LF。
+- React 新增 86 项：`line-break-keyboard` 8 项、`native-paragraph` 7 项、`native-line-break` 7 项、`newline-containers` 14 项、`newline-ranges` 12 项、`newline-protections` 26 项、`newline-history` 3 项、`newline-lifecycle` 8 项，公开 API 文件新增 1 项 SSR 回归。
+- 覆盖段首/中/尾、marks/link、列表 start/checked 与子列表、空引用退出、CodeBlock 双 Enter 与软换行差异、cell 内多段落和邻格保留；范围只删除显式端点，不跨 cell。命令禁用/查找/guard/execute 异常、只读、宿主取消、IME、不可取消事件、无 DOM 选区和图片块保护均不提交错误事务。
+- 受控宿主明确接受 after/selection 后才更新内容，undo/redo 恢复原光标和结构；续编独立撤销。StrictMode、最新回调/Registry、卸载和多实例监听器隔离继续通过。
+- Chromium 新增 12 项：`newline.spec.ts` 6 项，验证物理 Enter/Shift+Enter、原生两种意图、反向跨段范围、一次入栈/撤销重做与续编；通过文字 Range 的几何位置确认 LF 显示为两行。`newline-mobile.spec.ts` 6 项，验证任务拆项/保留 checked、cell 分段/软换行和代码块退出差异。
+- 构建包实际挂载验证四种原生编辑、软换行事件与无 batch、类型声明和监听器清理。桌面 1280×720、手机 390×844 截图已查看：软换行分行、任务复选框、编号与邻项正常，无溢出遮挡。
+- 本地 `pnpm check:all` 退出码 0：286 个文件/2293 项 Vitest、288 项 Chromium，格式、lint、根工程/包级类型、构建及公开包检查全部通过。Demo 主 JS 约 514.47 KB，已有非阻断分包提示保留，详见[全量回归](./full-regression.md)。
+- 集成限制：`RichTextEditorInputType` 新增 `insertLineBreak`，穷尽 switch 需补分支；LF 复用文字叶子，宿主须以 `white-space: pre-wrap` 等 CSS 显示，不保证外部应用排版。没有独立 br、软行删除、targetRanges 选区扩展或不可取消事件 DOM 修复，手机视口不等于真机软键盘兼容性验收。
+
 ## 手测场景
 
 | 场景           | 操作                                   | 期望                              | 结果 |
@@ -94,6 +106,7 @@ pnpm test:e2e
 - 范围替换与删除接受同一文本容器、连续顶层文本块或同 cell 连续 paragraph，不跨列表项、不同 cell、进出表格、图片和分隔线。
 - 整簇删除作用于键盘及已支持的可取消原生折叠删除，依赖运行时 `Intl.Segmenter`，没有内置 polyfill；Point、DOM 与显式范围仍使用 UTF-16 offset。手机视口和合成原生事件不构成真实软键盘/输入法验收，不支持按词删除、字素光标导航或不可取消事件的 DOM 修复。
 - `createEnterInputTransaction` 低层 helper 仍只接受 collapsed selection；范围删除由 `splitBlockCommand` 组合。
+- 原生 `insertParagraph` 与普通 Enter 复用现有规则；Shift+Enter/原生 `insertLineBreak` 为文字 LF，不拆块，新增同名事务类型。显示依赖保留 LF 的 CSS，暂不生成独立 br 或自动适配外部应用排版。
 - React 组件通过 `onTransaction` 暴露记录入口，但 History 状态仍由宿主维护。
 - 拖拽输入仍未实现。
 
