@@ -735,15 +735,22 @@ function RichTextEditorComponent(
         target.closest('input, textarea, select, button, [contenteditable="false"]')) ||
       (event.inputType !== "deleteContentBackward" &&
         event.inputType !== "deleteContentForward" &&
-        event.inputType !== "insertParagraph")
+        event.inputType !== "insertParagraph" &&
+        event.inputType !== "insertLineBreak")
     )
       return;
     event.preventDefault();
-    if (event.inputType === "insertParagraph") {
+    if (
+      event.inputType === "insertParagraph" ||
+      event.inputType === "insertLineBreak"
+    ) {
       if (blockSelection) return;
       const currentSelection = getModelSelectionFromDom(root, document);
       if (!currentSelection) return;
-      const input = createSplitBlockCommandResult(registry, document, currentSelection);
+      const input =
+        event.inputType === "insertParagraph"
+          ? createSplitBlockCommandResult(registry, document, currentSelection)
+          : createLineBreakCommandResult(registry, document, currentSelection);
       if (input) commitInputResult(input);
       return;
     }
