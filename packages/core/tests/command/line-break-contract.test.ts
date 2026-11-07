@@ -15,9 +15,24 @@ import {
   getNodeAtPath,
   isValidPoint,
   validateDocument,
+  getClipboardText,
+  getClipboardHtml,
+  parseHtml,
 } from "../../src";
 
 describe("existing insertText command as a soft line break primitive", () => {
+  it("retains literal LF through model text and HTML clipboard data", () => {
+    const document = createDocument([
+      createParagraph([createText("前\n后", { bold: true })]),
+    ]);
+    const selection = {
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 3 },
+    };
+    expect(getClipboardText(document, selection)).toBe("前\n后");
+    const html = getClipboardHtml(document, selection)!;
+    expect(parseHtml(html)!.blocks).toEqual(document.children);
+  });
   it.each(["paragraph", "heading", "quote", "code", "task", "cell"])(
     "keeps a LF in the same %s text container",
     (kind) => {
