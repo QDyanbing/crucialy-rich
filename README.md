@@ -20,6 +20,8 @@
 
 可取消的原生 `beforeinput deleteContentBackward/Forward` 也已接入共享删除管线，无 keydown 时仍通过模型事务更新文字、范围或已选图片。新增可选 `onNativeBeforeInput` 供宿主观察和取消原始事件，键盘删除不重复入 History；不支持的类型、不可取消事件及真实设备验收限制见[原生删除意图](./docs/features/input.md#原生删除意图)。
 
+原生 `insertParagraph` 已复用 Enter 的分段规则；Shift+Enter 与原生 `insertLineBreak` 在块内插入 LF，不拆列表项或退出代码块，且独立记录 History。事务类型新增 `insertLineBreak`，穷尽 switch 的集成需补分支；宿主 CSS 须保留文字换行，详见[换段与软换行](./docs/features/input.md#换段与软换行)。
+
 History 新增可选 `mergePolicy: "adjacent"`：连续 typing 保持合并，光标跳变、表格换格、选区替换及撤销后的新输入可独立撤销。Demo 已启用；Core 默认仍保留相同非空 batch 的既有合并规则，策略由宿主选择，具体边界见 [History 文档](./docs/features/history.md)。
 
 History 状态创建、空事务、追加和合并均隔离旧 entry，保留的旧状态不会因新分支修改而被污染；嵌套模型、事务和撤销/重做结果已有 Core、React 与构建产物验证。栈顶查询仍返回当前 entry 引用，不是可随意修改的副本；复制成本与保留快照总量有关，详见[状态引用与隔离](./docs/features/history.md#状态引用与隔离)。

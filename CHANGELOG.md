@@ -8,6 +8,7 @@
 
 ### 修复
 
+- 已选图片时阻止键盘 Enter/Shift+Enter 借用遗留文字范围或继续默认 DOM 插入；没有 DOM Range 也保持图片及模型不变。
 - 修复折叠 Backspace/Delete 按单个 UTF-16 单元删除造成的 emoji/组合字符损坏；复用 `Intl.Segmenter`，支持同一文本容器内跨 marks/链接叶子删除完整簇，显式范围与 Point 协议不变。非法光标不生成结构删除操作。
 - 修复 React Delete 在中间格式叶子末尾提前合并下一段的问题，保留真实段尾合并、History 和邻项/邻格元数据；补齐 Core、React、构建入口与桌面/手机视口回归。不新增模型、API、Demo 样例、polyfill、按词删除或软键盘 beforeinput 删除入口。
 - 修复 `createHistoryState` 与 `recordHistory` 只复制部分栈数组而共享旧 entry 的问题；状态初始化、空事务、追加及合并的保留 entry 现独立复制，旧状态和新分支不再互相污染。类型签名、空事务不清空 redo 和两种合并策略保持不变。
@@ -15,6 +16,8 @@
 
 ### 新增
 
+- React 接入可取消原生 `insertParagraph`，复用分段/列表/引用/代码/cell 规则；Shift+Enter 与原生 `insertLineBreak` 插入字面 LF，不新增模型、Operation 或公共 Core API。两个入口均无 typing batch，范围替换为原子事务并可独立撤销。
+- `RichTextEditorInputType` 新增 `insertLineBreak`，穷尽 switch 的宿主需补分支；软换行显示依赖保留 LF 的 CSS。补齐容器/范围/保护、History/受控、监听器/SSR、LF 剪贴板数据、构建包及桌面/手机浏览器回归，未宣称真机软键盘全面兼容。
 - React 新增原生可取消 `beforeinput deleteContentBackward/Forward` 删除入口，复用既有 Command、字素、范围、合并和图片规则；新增可选 `onNativeBeforeInput` 接收原始 InputEvent，宿主可取消。现有 React 事件和事务类型不变，不新增 Core API 或 Demo 控件。
 - 补齐受控 History/续编、只读/IME/控件/选区归属、命令失败、StrictMode、props 更新、卸载、SSR 与构建包挂载验证，以及桌面/手机视口原生事件和键盘单次提交回归。不可取消事件、其他删除类型及真实软键盘兼容性不由此保证。
 - Command 同步扩展异常保护覆盖 Registry 查找、canExecute、execute 与状态查询；异常转换为失败/不可用，工具栏正常项不受影响，Slash 失败不暴露触发文字清理的半成品事务。公开签名不变，不回滚插件副作用或捕获宿主/异步错误。
