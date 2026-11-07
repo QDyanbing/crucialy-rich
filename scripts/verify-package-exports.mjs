@@ -79,7 +79,12 @@ async function verifyNativeInputBinding(react) {
     const core = await import(
       pathToFileURL(resolve(repositoryRoot, "packages/core/dist/index.js")).href
     );
-    for (const type of ["deleteContentBackward", "deleteContentForward"]) {
+    for (const type of [
+      "deleteContentBackward",
+      "deleteContentForward",
+      "insertParagraph",
+      "insertLineBreak",
+    ]) {
       const container = dom.window.document.createElement("div");
       dom.window.document.body.append(container);
       const root = createRoot(container);
@@ -111,10 +116,36 @@ async function verifyNativeInputBinding(react) {
         });
         act(() => editor.dispatchEvent(event));
         assert.equal(event.defaultPrevented, true);
-        assert.equal(editor.textContent, "AB");
+        assert.equal(
+          editor.textContent,
+          type.startsWith("delete")
+            ? "AB"
+            : type === "insertLineBreak"
+              ? "A\n\u{1f600}B"
+              : "A\u{1f600}B",
+        );
+        assert.equal(
+          editor.querySelectorAll("p").length,
+          type === "insertParagraph" ? 2 : 1,
+        );
         assert.equal(calls, 1);
         assert.equal(transactions.length, 1);
-        assert.equal(transactions[0].transaction.operations[0].type, "delete_text");
+        assert.equal(
+          transactions[0].transaction.operations[0].type,
+          type.startsWith("delete")
+            ? "delete_text"
+            : type === "insertParagraph"
+              ? "split_block"
+              : "insert_text",
+        );
+        if (type === "insertLineBreak") {
+          assert.equal(transactions[0].inputType, "insertLineBreak");
+          assert.equal("batch" in transactions[0], false);
+          assert.deepEqual(transactions[0].selection.anchor, {
+            path: [0, 0],
+            offset: 2,
+          });
+        }
       } finally {
         act(() => root.unmount());
       }
@@ -1068,6 +1099,7 @@ for (const packageConfig of publicPackages) {
   }
 
   if (packageConfig.directory === "packages/react") {
+    assert.ok(declarations.includes('"insertLineBreak"'));
     assert.match(declarations, /onNativeBeforeInput\?: \(event: InputEvent\) => void/);
     await verifyNativeInputBinding(runtime);
     assert.ok(declarations.includes('"onCopy"'));
