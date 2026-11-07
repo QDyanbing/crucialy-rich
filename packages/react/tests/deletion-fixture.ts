@@ -49,9 +49,10 @@ export function mountDeletionEditor(
   const editor = ref.current!.getElement()!;
   editor.focus();
   function setCaret(next: Point) {
-    const text = editor.querySelector(
+    const leaf = editor.querySelector(
       `[data-crucialy-path="${JSON.stringify(next.path)}"]`,
-    )!.firstChild!;
+    )!;
+    const text = leaf.firstChild ?? leaf;
     window.getSelection()!.setBaseAndExtent(text, next.offset, text, next.offset);
   }
   if (point) setCaret(point);
