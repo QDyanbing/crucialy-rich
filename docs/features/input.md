@@ -111,6 +111,20 @@ native beforeinput
 
 监听器随当前 props/value/Registry 更新并在卸载时清理，StrictMode 不重复提交。受控宿主仍须回传 after/selection，组件不内置 History。当前验收包含 Chromium 合成原生事件、真实键盘、SSR 和构建包挂载，不宣称完整覆盖 Android/iOS 软键盘、各浏览器 targetRanges 或所有 IME 的不可取消事件。
 
+## 换段与软换行
+
+`Enter` 和可取消原生 `insertParagraph` 复用 `splitBlock` Command，保留已有分段、列表拆项/空项退出、空引用退出、cell 内分段和 CodeBlock 双 Enter 退出规则。Shift+Enter（不同时按 Ctrl/Meta/Alt）与可取消原生 `insertLineBreak` 则复用 `insertText` Command 插入一个 LF，不拆块、不退出引用/列表/代码块，也不改变任务状态或有序编号。
+
+软换行沿用 `TextNode.text` 中的 `\n`，不增加模型节点、Operation 或公共 Core API。渲染仍是原文字叶子，不生成独立 `br`；宿主样式应使用 `white-space: pre-wrap` 等规则显示文字中的 LF，Demo 已具备该样式。模型纯文本和可选 HTML 复制/解析可保留 LF，但外部应用的排版由其自身规则决定。
+
+两个原生入口都先执行 `onNativeBeforeInput`，复用删除入口的取消、只读、IME、cancelable、内嵌控件、当前 DOM 选区归属和监听器清理保护。没有合法且归属当前根的文字范围时，取消受支持事件但不提交；不从受控 selection 或 targetRanges 猜测位置。图片块选中时，原生换段/换行及键盘 Enter/Shift+Enter 均不借用遗留文字，取消默认操作并保持图片。
+
+显式范围先按既有端点与结构边界删除，再分段或插入 LF，同一次事务完成；不扩张端点，不允许跨列表项、不同 cell 或 void 的范围。命令缺失/禁用或同步异常时不继续默认 DOM 修改；软换行调用的是 `insertText`，没有绕过 Registry。
+
+换段事件仍为 `insertParagraph`；软换行新增 `RichTextEditorInputType` 成员 `insertLineBreak`。两者都无 typing batch，各作为独立 History 记录，宿主仍负责受控回传与撤销重做。对 `inputType` 做穷尽 switch 的集成需添加该成员。普通文字输入和 Composition batch 不变。
+
+正常物理按键先在 keydown 取消默认行为，不会再以 beforeinput 重复提交；独立派发的原生意图仍是独立编辑。本轮不新增 Markdown 输入规则、独立行内换行节点、软行删除或不可取消事件的 DOM 修复，也不宣称真机软键盘已全面验收。
+
 ## Core API
 
 ```ts
