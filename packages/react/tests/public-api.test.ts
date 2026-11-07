@@ -20,6 +20,14 @@ import * as reactPackage from "../src/index";
 import { RichTextEditor } from "../src/index";
 
 describe("@crucialy-rich/react public API", () => {
+  it("renders soft break text without introducing a new model or DOM node", () => {
+    const value = createDocument([
+      createParagraph([createText("A\nB", { bold: true })]),
+    ]);
+    const html = renderToStaticMarkup(createElement(RichTextEditor, { value }));
+    expect(html).toContain('<strong data-crucialy-path="[0,0]">A\nB</strong>');
+    expect(html).not.toContain("<br");
+  });
   it("accepts a native InputEvent policy without invoking or serializing it during SSR", () => {
     const policy = vi.fn((event: InputEvent) => event.preventDefault());
     const html = renderToStaticMarkup(
