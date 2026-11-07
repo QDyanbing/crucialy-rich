@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { characterDocument, setCharacterCaret } from "./character-helpers";
-import { nativeDelete } from "./native-input-helpers";
+import { nativeInput } from "./native-input-helpers";
 
 for (const type of ["deleteContentBackward", "deleteContentForward"]) {
   for (const context of ["task", "cell"]) {
@@ -26,7 +26,7 @@ for (const type of ["deleteContentBackward", "deleteContentForward"]) {
       await page.keyboard.insertText("A\u{1f600}B");
       const before = await characterDocument(page);
       await setCharacterCaret(page, path, type === "deleteContentBackward" ? 3 : 1);
-      expect(await nativeDelete(page, type)).toBe(true);
+      expect(await nativeInput(page, type)).toBe(true);
       const expected = structuredClone(before);
       let text = expected;
       for (const index of path) text = text.children[index];
@@ -66,7 +66,7 @@ for (const type of ["deleteContentBackward", "deleteContentForward"]) {
     await image.click();
     await editor.focus();
     await editor.evaluate(() => window.getSelection()!.removeAllRanges());
-    expect(await nativeDelete(page, type)).toBe(true);
+    expect(await nativeInput(page, type)).toBe(true);
     await expect(image).toHaveCount(0);
     const expected = structuredClone(before);
     expected.children.splice(2, 1);
@@ -86,7 +86,7 @@ for (const type of ["deleteContentBackward", "deleteContentForward"]) {
     });
     await editor.focus();
     await editor.evaluate(() => window.getSelection()!.removeAllRanges());
-    expect(await nativeDelete(page, type)).toBe(true);
+    expect(await nativeInput(page, type)).toBe(true);
     await expect(image).toHaveCount(0);
     await undo.click();
     await page.getByRole("button", { name: "重做", exact: true }).click();

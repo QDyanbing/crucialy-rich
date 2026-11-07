@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { characterDocument, setCharacterCaret } from "./character-helpers";
-import { nativeDelete } from "./native-input-helpers";
+import { nativeInput } from "./native-input-helpers";
 
 for (const type of ["deleteContentBackward", "deleteContentForward"]) {
   for (const mode of ["caret", "range"]) {
@@ -30,7 +30,7 @@ for (const type of ["deleteContentBackward", "deleteContentForward"]) {
         });
       }
       const before = await characterDocument(page);
-      expect(await nativeDelete(page, type)).toBe(true);
+      expect(await nativeInput(page, type)).toBe(true);
       const expected = structuredClone(before);
       if (mode === "caret") expected.children[0].children[0].text = "AB";
       else {
