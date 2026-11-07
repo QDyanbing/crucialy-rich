@@ -123,6 +123,7 @@ export type RichTextEditorInputType =
   | "deleteImage"
   | "deleteForward"
   | "insertParagraph"
+  | "insertLineBreak"
   | "insertFromPaste"
   | "insertFromInputRule"
   | "insertCompositionText"
@@ -398,6 +399,22 @@ function createSplitBlockCommandResult(
     result,
     selection,
     "insertParagraph",
+  );
+}
+
+function createLineBreakCommandResult(
+  registry: CommandRegistry,
+  document: DocumentNode,
+  selection: RangeSelection,
+): KeyboardInputResult | undefined {
+  const result = executeCoreCommand(registry, INSERT_TEXT_COMMAND_NAME, {
+    context: { document, selection },
+    payload: { text: "\n" },
+  });
+  return createKeyboardInputResultFromCommandResult(
+    result,
+    selection,
+    "insertLineBreak",
   );
 }
 
@@ -831,11 +848,11 @@ function RichTextEditorComponent(
 
     if (event.key === "Enter") {
       event.preventDefault();
-      const splitBlockInput = createSplitBlockCommandResult(
-        registry,
-        document,
-        modelSelection,
-      );
+      if (blockSelection) return;
+      const soft = event.shiftKey && !event.altKey && !event.ctrlKey && !event.metaKey;
+      const splitBlockInput = soft
+        ? createLineBreakCommandResult(registry, document, modelSelection)
+        : createSplitBlockCommandResult(registry, document, modelSelection);
 
       if (splitBlockInput) {
         commitInputResult(splitBlockInput);
