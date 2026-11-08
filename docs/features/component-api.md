@@ -133,6 +133,7 @@ ref 命令事件的 `inputType` 为 `command`。受控模式不会自行替换 `
 - 宿主可在 `onKeyDown` 中用 `getHistoryShortcutAction` 接入撤销/重做快捷键；外部 `preventDefault` 后组件不会继续执行普通输入处理。
 - Ctrl/Meta 主修饰键组合可执行默认 boolean mark、标题、引用和列表 Command；绑定 payload 会透传，并输出 `formatShortcut` transaction。
 - Composition 候选阶段暂停普通输入、编辑快捷键和粘贴；结束时只输出一次 `insertCompositionText` transaction。
+- Composition 状态通知是独立快照；start/update/end 的宿主取消按事件阶段生效。文档引用变化、只读或块选区会清理活跃会话，迟到 end 不复用旧起点；同引用的无关 props 更新不取消。组合期间应保持受控 value 引用稳定，异常与真机边界见[中文输入法](./ime.md#取消与通知)。
 - paragraph 开头命中 Markdown 前缀时输出 `insertFromInputRule` transaction，并把选区移动到目标结构起点。
 - 输入、删除、分段和段落合并都不会直接信任浏览器默认修改后的 DOM。
 - 外部 `onBeforeInput` / `onKeyDown` 会先执行，若已 `preventDefault`，内部不再处理对应输入。
