@@ -239,6 +239,20 @@ function getModelSelectionFromDom(root: HTMLDivElement, document: DocumentNode) 
     : undefined;
 }
 
+function isNonEditorInputTarget(
+  root: HTMLDivElement,
+  target: EventTarget | null,
+): boolean {
+  const element = target as Element | null;
+  return (
+    element !== root &&
+    typeof element?.closest === "function" &&
+    Boolean(
+      element.closest('input, textarea, select, button, [contenteditable="false"]'),
+    )
+  );
+}
+
 function writeClipboardData(
   event: ClipboardEvent<HTMLDivElement>,
   text: string,
@@ -744,16 +758,13 @@ function RichTextEditorComponent(
 
   function handleNativeBeforeInput(event: InputEvent, root: HTMLDivElement) {
     onNativeBeforeInput?.(event);
-    const target = event.target as Element | null;
     if (
       event.defaultPrevented ||
       !event.cancelable ||
       !editable ||
       compositionRef.current.active ||
       event.isComposing ||
-      (target !== root &&
-        typeof target?.closest === "function" &&
-        target.closest('input, textarea, select, button, [contenteditable="false"]')) ||
+      isNonEditorInputTarget(root, event.target) ||
       (event.inputType !== "deleteContentBackward" &&
         event.inputType !== "deleteContentForward" &&
         event.inputType !== "insertParagraph" &&
@@ -1143,11 +1154,18 @@ function RichTextEditorComponent(
   function handleCompositionStart(event: CompositionEvent<HTMLDivElement>) {
     onCompositionStart?.(event);
 
-    if (event.defaultPrevented || !editable) {
+    const blocked =
+      event.defaultPrevented ||
+      !editable ||
+      blockSelection ||
+      isNonEditorInputTarget(event.currentTarget, event.target);
+    const modelSelection = blocked
+      ? undefined
+      : getModelSelectionFromDom(event.currentTarget, document);
+    if (!modelSelection) {
+      if (compositionRef.current.active) publishCompositionState(cancelComposition());
       return;
     }
-
-    const modelSelection = getModelSelectionFromDom(event.currentTarget, document);
 
     if (modelSelection) {
       compositionDocumentRef.current = document;
@@ -1158,7 +1176,12 @@ function RichTextEditorComponent(
   function handleCompositionUpdate(event: CompositionEvent<HTMLDivElement>) {
     onCompositionUpdate?.(event);
 
-    if (event.defaultPrevented || !editable || !compositionRef.current.active) {
+    if (
+      event.defaultPrevented ||
+      !editable ||
+      !compositionRef.current.active ||
+      isNonEditorInputTarget(event.currentTarget, event.target)
+    ) {
       return;
     }
 
@@ -1172,6 +1195,7 @@ function RichTextEditorComponent(
   function handleCompositionEnd(event: CompositionEvent<HTMLDivElement>) {
     onCompositionEnd?.(event);
 
+    if (isNonEditorInputTarget(event.currentTarget, event.target)) return;
     if (!compositionRef.current.active) return;
     const commit = finishComposition(compositionRef.current, event.data);
 
