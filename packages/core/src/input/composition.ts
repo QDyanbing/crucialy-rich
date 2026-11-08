@@ -37,7 +37,12 @@ export function updateComposition(
   return {
     ...state,
     data,
-    ...(selection ? { selection: cloneRangeSelection(selection) } : {}),
+    ...(state.startSelection
+      ? { startSelection: cloneRangeSelection(state.startSelection) }
+      : {}),
+    ...((selection ?? state.selection)
+      ? { selection: cloneRangeSelection((selection ?? state.selection)!) }
+      : {}),
   };
 }
 
