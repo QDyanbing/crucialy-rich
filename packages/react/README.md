@@ -43,7 +43,8 @@ export function Demo() {
 - `selection` / `onSelectionChange`：受控模型选区和输入后的选区回调。
 - `cellSelection` / `onCellSelectionChange`：受控单元格选中态和点击 cell 后的路径回调。
 - `onTransaction`：输入后输出 before、after、transaction、inputType 和输入前后 selection；普通文本输入会带有 `batch: "typing"`。
-- `onCompositionStateChange`：输出输入法候选状态；确认候选词后只提交一次 transaction。
+- `onCompositionStateChange`：输出独立的输入法状态/Range 快照，宿主修改通知不影响内部会话；确认候选词后只提交一次 transaction。宿主取消 end 会清理会话但不提交，同一个 compositionend 的 React beforeinput 回退不重复写入。
+- 组合会话绑定开始时的文档引用，文档换引用、切只读或选中块后取消；受控 value 在未编辑时需保持引用稳定。只更新回调、Registry 或文字 selection 不改变起始锚点，History composition batch 规则不变，具体取消语义与真机限制见[中文输入法](../../docs/features/ime.md)。
 - `commandRegistry`：允许宿主提供自定义 Command 注册表，内部输入和 ref 共用该注册表。
 - `ref`：暴露 `focus`、`getElement`、`getDocument`、`getSelection` 和 `executeCommand`。
 - `contentEditable`：开启普通文本输入、Backspace、Delete、Enter、列表 Tab 和 Shift+Tab。

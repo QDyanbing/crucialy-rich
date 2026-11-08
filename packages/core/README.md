@@ -207,6 +207,7 @@ const shortcutCommandName = getCommandNameFromShortcut({
 - Operation：文本、Mark、链接和 Block Type operation；Mark、链接和清除格式支持顶层文本块、列表项与表格单元格段落内的同容器范围；另包含同容器 `delete_text`、跨顶层文本块 `delete_range`、`split_block`、`merge_block`、通用 `insert_block` 与 `remove_block`。
 - Transaction：`createTransaction`、`applyOperation`、`applyTransaction`、`summarizeOperation`、`summarizeTransaction`、`createTransactionAcceptanceReport`。
 - 输入：基础文本输入与删除 helper、Composition 状态机、`getEditorShortcutAction`、`findMarkdownInputRule` 和 `createMarkdownInputRuleResult`。
+- Composition 活跃更新会独立复制起始/当前 Range，包括沿用旧当前选区的情况，后续候选和外部快照不共享 path；空闲 update 仍返回原对象。Core helper 不追踪文档身份，React 失效规则见[中文输入法](../../docs/features/ime.md)。
 - 当前输入与 command 管线覆盖普通文本插入、同容器跨 text 与连续顶层文本块选区编辑、非折叠 Enter、段中删除、文本块合并/分裂、CodeBlock 换行/退出、相邻 void block 删除和输入后 selection 落点。
 - Command：默认注册表、状态查询、带 payload 的快捷键映射、跨连续顶层文本块、列表项及同一表格单元格连续段落的文字样式与链接、Heading、Quote、CodeBlock、Divider、BulletList、OrderedList、文本与 block command。
 - Clipboard：Markdown、HTML、纯文本解析优先级与 `paste` command；HTML 白名单覆盖标题、引用、代码块、行内代码、分隔线、三层普通/任务列表、marks、安全链接、图片和顶层表格，`b/i/u/s/strike/del/code` 与安全 `font-weight` / `font-style` / `text-decoration` 会映射到已有 boolean mark，安全 `font-size` / `color` / `background-color` 会映射到文字属性，`ol[start]` 保留安全整数编号，链接保留规范化后的 target/rel，任务项保留 checked，图片复用 URL 安全规则，表格行会规范为矩形结构；Markdown 行内代码和水平分隔线复用同一映射。

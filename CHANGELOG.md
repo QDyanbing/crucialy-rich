@@ -8,6 +8,9 @@
 
 ### 修复
 
+- 修复 Composition 候选更新共享当前/起始 Range、状态通知直接暴露内部对象的问题；活跃快照和通知独立复制，旧候选或宿主修改不污染后续提交。公开类型和空闲 update 引用语义保持不变。
+- 修复宿主取消 update/end 未生效、未配对/重复结束多发通知，以及同一 compositionend 经 React beforeinput 回退重复发事务的问题。正常取消/失败释放会话，后续可重试，History batch 不变。
+- 组合会话新增文档引用归属：替换文档、切只读或块选区清理旧候选；受控 value 需保持未编辑引用稳定。内嵌控件和其他实例范围不能启动正文会话，补齐 Core/React/构建包与桌面/手机视口回归，不宣称真实平台 IME 全面兼容。
 - 已选图片时阻止键盘 Enter/Shift+Enter 借用遗留文字范围或继续默认 DOM 插入；没有 DOM Range 也保持图片及模型不变。
 - 修复折叠 Backspace/Delete 按单个 UTF-16 单元删除造成的 emoji/组合字符损坏；复用 `Intl.Segmenter`，支持同一文本容器内跨 marks/链接叶子删除完整簇，显式范围与 Point 协议不变。非法光标不生成结构删除操作。
 - 修复 React Delete 在中间格式叶子末尾提前合并下一段的问题，保留真实段尾合并、History 和邻项/邻格元数据；补齐 Core、React、构建入口与桌面/手机视口回归。不新增模型、API、Demo 样例、polyfill、按词删除或软键盘 beforeinput 删除入口。
