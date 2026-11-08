@@ -63,6 +63,20 @@ export function mountDeletionEditor(
     onTransaction,
     onSelectionChange,
     setCaret,
+    compose(
+      type: "compositionstart" | "compositionupdate" | "compositionend",
+      data = "",
+      extra: CompositionEventInit = {},
+    ) {
+      const event = new CompositionEvent(type, {
+        bubbles: true,
+        cancelable: true,
+        data,
+        ...extra,
+      });
+      act(() => editor.dispatchEvent(event));
+      return event;
+    },
     rerender,
     unmount() {
       act(() => root.unmount());

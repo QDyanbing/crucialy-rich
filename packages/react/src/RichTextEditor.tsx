@@ -8,6 +8,7 @@ import {
   createBackspaceInputTransaction,
   createBlockSelection,
   cloneBlockSelection,
+  cloneRangeSelection,
   createCellSelection,
   createCompositionState,
   createDeleteInputTransaction,
@@ -630,7 +631,15 @@ function RichTextEditorComponent(
   function publishCompositionState(nextState: CompositionState) {
     compositionRef.current = nextState;
     setCompositionActive(nextState.active);
-    onCompositionStateChange?.(nextState);
+    onCompositionStateChange?.({
+      ...nextState,
+      ...(nextState.selection
+        ? { selection: cloneRangeSelection(nextState.selection) }
+        : {}),
+      ...(nextState.startSelection
+        ? { startSelection: cloneRangeSelection(nextState.startSelection) }
+        : {}),
+    });
   }
 
   function commitInputResult(input: KeyboardInputResult) {
