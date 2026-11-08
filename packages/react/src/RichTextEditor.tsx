@@ -548,6 +548,7 @@ function RichTextEditorComponent(
 ): ReactElement {
   const rootRef = useRef<HTMLDivElement>(null);
   const compositionRef = useRef<CompositionState>(createCompositionState());
+  const compositionDocumentRef = useRef<DocumentNode>();
   const [compositionActive, setCompositionActive] = useState(false);
   const [uncontrolledDocument, setUncontrolledDocument] = useState(
     () => defaultValue ?? createDocument(),
@@ -620,6 +621,15 @@ function RichTextEditorComponent(
     applyModelSelectionToDom(rootRef.current, document, selection);
   }, [document, selection]);
 
+  useIsomorphicLayoutEffect(() => {
+    if (
+      compositionRef.current.active &&
+      (!editable || blockSelection || compositionDocumentRef.current !== document)
+    ) {
+      publishCompositionState(cancelComposition());
+    }
+  }, [document, editable, blockSelection]);
+
   function commitDocumentChange(nextDocument: DocumentNode) {
     if (!controlled) {
       setUncontrolledDocument(nextDocument);
@@ -629,6 +639,7 @@ function RichTextEditorComponent(
   }
 
   function publishCompositionState(nextState: CompositionState) {
+    if (!nextState.active) compositionDocumentRef.current = undefined;
     compositionRef.current = nextState;
     setCompositionActive(nextState.active);
     onCompositionStateChange?.({
@@ -1139,6 +1150,7 @@ function RichTextEditorComponent(
     const modelSelection = getModelSelectionFromDom(event.currentTarget, document);
 
     if (modelSelection) {
+      compositionDocumentRef.current = document;
       publishCompositionState(startComposition(modelSelection));
     }
   }
