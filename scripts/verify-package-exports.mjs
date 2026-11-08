@@ -11,6 +11,9 @@ const publicPackages = [
     directory: "packages/core",
     expectedExports: [
       "createCompositionState",
+      "startComposition",
+      "updateComposition",
+      "finishComposition",
       "createDocument",
       "executeCommand",
       "canExecuteCommand",
@@ -158,6 +161,69 @@ async function verifyNativeInputBinding(react) {
       );
       assert.equal(calls, 1);
     }
+    for (const mode of ["commit", "cancel", "replace"]) {
+      const container = dom.window.document.createElement("div");
+      dom.window.document.body.append(container);
+      const root = createRoot(container);
+      const transactions = [];
+      const initial = core.createDocument([
+        core.createParagraph([core.createText("AB")]),
+      ]);
+      const render = (props = {}) =>
+        act(() =>
+          root.render(
+            createElement(react.RichTextEditor, {
+              contentEditable: true,
+              defaultValue: initial,
+              onTransaction: (event) => transactions.push(event),
+              onCompositionEnd: (event) => {
+                if (mode === "cancel") event.preventDefault();
+              },
+              onCompositionStateChange: (state) => {
+                state.active = false;
+                if (state.startSelection) state.startSelection.anchor.path[0] = 99;
+              },
+              ...props,
+            }),
+          ),
+        );
+      try {
+        render();
+        const editor = container.firstElementChild;
+        editor.focus();
+        const text = editor.querySelector("span").firstChild;
+        dom.window.getSelection().setBaseAndExtent(text, 1, text, 1);
+        const compose = (type, data = "") =>
+          act(() =>
+            editor.dispatchEvent(
+              new dom.window.CompositionEvent(type, {
+                data,
+                bubbles: true,
+                cancelable: true,
+              }),
+            ),
+          );
+        compose("compositionstart");
+        compose("compositionupdate", "候选");
+        assert.equal(editor.getAttribute("data-composing"), "true");
+        assert.equal(transactions.length, 0);
+        if (mode === "replace")
+          render({
+            value: core.createDocument([core.createParagraph([core.createText("CD")])]),
+          });
+        compose("compositionend", "中");
+        assert.equal(editor.getAttribute("data-composing"), "false");
+        assert.equal(
+          editor.textContent,
+          mode === "commit" ? "A中B" : mode === "replace" ? "CD" : "AB",
+        );
+        assert.equal(transactions.length, mode === "commit" ? 1 : 0);
+        if (mode === "commit")
+          assert.equal(transactions[0].inputType, "insertCompositionText");
+      } finally {
+        act(() => root.unmount());
+      }
+    }
   } finally {
     dom.window.close();
     for (const [key, descriptor] of previous) {
@@ -165,6 +231,20 @@ async function verifyNativeInputBinding(react) {
       else Reflect.deleteProperty(globalThis, key);
     }
   }
+}
+
+function verifyCompositionSnapshots(core) {
+  const range = {
+    anchor: { path: [0, 0], offset: 1 },
+    focus: { path: [0, 0], offset: 2 },
+  };
+  const previous = core.startComposition(range);
+  const next = core.updateComposition(previous, "中文");
+  previous.startSelection.anchor.path[0] = 99;
+  previous.selection.focus.offset = 99;
+  assert.deepEqual(next.startSelection, range);
+  assert.deepEqual(next.selection, range);
+  assert.deepEqual(core.finishComposition(next), { data: "中文", selection: range });
 }
 
 function verifyClipboardFiltering(core) {
@@ -1053,6 +1133,7 @@ for (const packageConfig of publicPackages) {
   }
 
   if (packageConfig.directory === "packages/core") {
+    verifyCompositionSnapshots(runtime);
     verifyCharacterDeletion(runtime);
     verifyExtensionFailureBoundaries(runtime);
     verifyDomBoundaryMapping(runtime);
