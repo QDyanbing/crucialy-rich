@@ -10,7 +10,7 @@
 4. `compositionend` 使用最终事件文本和起始选区创建一次文本插入。
 5. 空文本结束或失效状态不会生成 transaction。
 
-当前活跃会话还绑定开始时的文档引用。换成新文档对象、切到只读或出现块选区后，会话恢复空闲；迟到的 update/end 不会往新文档复用旧位置。仅更新标签、回调、Registry 或文字 selection 不会改变起始锚点。新的合法 start 可重新定义锚点；被取消、没有归属选区、来自内嵌控件或图片选中时的新 start 会丢弃旧会话。
+当前活跃会话还绑定开始时的文档引用。换成新文档对象、切到只读或出现块选区后，已有文字会话恢复空闲；迟到的 update/end 不会往新文档复用旧位置。仅更新标签、回调、Registry 或文字 selection 不会改变起始锚点。新的合法 start 可重新定义锚点；被取消、没有归属选区或来自内嵌控件的新 start 会丢弃旧会话。若 start 发生时已经选中图片块，只建立 active 但无 startSelection 的保护状态，维持组件不导出图片、不执行模型剪切/删除的保护；结束时清理，不借用旧文字起点或提交文本。
 
 最终提交的 `onTransaction` 事件使用 `inputType: "insertCompositionText"` 和 `batch: "composition"`。候选阶段的 Backspace 交给输入法处理，不会触发模型删除。
 

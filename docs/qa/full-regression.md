@@ -2,7 +2,7 @@
 
 ## 执行信息
 
-- 日期：2026-11-07
+- 日期：2026-11-08
 - 版本：`0.1.0`
 - 分支：`master`
 - 命令：`pnpm check:all`
@@ -14,17 +14,18 @@
 | Prettier   | 通过 | 全仓文件格式一致                                                          |
 | ESLint     | 通过 | 0 warning、0 error                                                        |
 | TypeScript | 通过 | 根工程与 core/react/demo 包级检查全部通过                                 |
-| Vitest     | 通过 | 286 个测试文件，2293 项测试                                               |
+| Vitest     | 通过 | 295 个测试文件，2350 项测试                                               |
 | Core 构建  | 通过 | ESM、source map、类型声明生成成功                                         |
 | React 构建 | 通过 | ESM、source map、类型声明生成成功                                         |
 | Demo 构建  | 通过 | Vite 生产构建成功                                                         |
 | 包产物导入 | 通过 | 导出/声明、Clipboard、History、CodeBlock、Office 与 Native Input 冒烟通过 |
-| Playwright | 通过 | Chromium 288 项测试                                                       |
+| Playwright | 通过 | Chromium 300 项测试                                                       |
 
-Demo 主 JS 产物约 514.47 KB，Vite 给出超过 500 KB 的非阻断分包提示；构建退出码为 0，本轮未调整打包策略。
+Demo 主 JS 产物约 515.19 KB，Vite 给出超过 500 KB 的非阻断分包提示；构建退出码为 0，本轮未调整打包策略。
 
 ## 核心路径
 
+- 2026-11-08 Composition 生命周期修正通过：活跃候选和通知独立复制 Range，宿主取消 update/end 生效，同一 compositionend 的 React beforeinput 回退不重复发事务。文字会话绑定文档引用，替换/只读/块选区清理旧候选，未配对结束不插入；无关 props/selection 更新保留原锚点。新增 6 项 Core、51 项 React 和 12 项 Chromium，覆盖通知变异、取消/失效/失败恢复、内嵌控件/多实例、受控 History、既有 batch 合并、StrictMode/卸载与构建包实际挂载。全量检查发现并修正图片块 start 的旧剪贴板保护冲突：使用无文字起点的 active 保护状态，保留复制/剪切/删除保护，结束只清理不写文字，原 105 项剪贴板测试继续通过。桌面/手机合成事件验证任务、代码、同 cell 正反范围、撤销重做和续编，截图内容与布局正常。API、模型、History 策略和 Demo 控件不变；受控 value 需稳定引用，不检测原地修改、不重映射旧锚点、不宣称所有平台真实 IME 事件序列已验收。
 - 2026-11-07 原生换段与软换行通过：`insertParagraph` 复用现有 Enter 规则，Shift+Enter/`insertLineBreak` 复用文字 LF，不新增模型节点、Operation 或公共 Core API。新增 10 项 Core、86 项 React 和 12 项 Chromium 测试，覆盖普通/格式/结构容器、空引用、CodeBlock 退出差异、任务 checked/编号、cell 邻段、正反范围原子替换、LF 剪贴板数据、独立 History/受控续编、失败与宿主/只读/IME/选区归属、监听器/SSR。已选图片的键盘 Enter 即使没有 DOM Range 也不改旧文字。构建包验证四类原生编辑及新事务成员，桌面真实键盘/原生事件不重复入栈；浏览器 Range 几何和桌面/手机截图确认软换行实际分行，任务复选框、邻项与布局正常。`RichTextEditorInputType` 增加 `insertLineBreak`，穷尽 switch 需适配；显示需保留 LF 的 CSS。未增加 Demo 控件、独立 br 节点、targetRanges 扩展或不可取消事件修复，不宣称真机软键盘全面兼容。
 - 2026-11-06 原生删除意图闭环通过：新增可选 `onNativeBeforeInput` 接收/取消原始 DOM InputEvent，可取消 `deleteContentBackward/Forward` 复用既有文字、范围、合并、void 和已选图片删除，事务类型、UTF-16 与结构边界保持原样。新增 88 项 React 单测和 12 项 Chromium，用例覆盖无 keydown、真实键盘单次入栈、History/续编、图片选中态恢复、任务 checked、cell 邻格、宿主/只读/IME/控件/选区归属、命令失败、最新 props/Registry、StrictMode/卸载与 SSR；构建包完成类型和实际挂载/卸载验证。桌面/手机截图已检查，图片离线夹具解码、高亮、尺寸及无工具栏遮挡通过。未新增 Core API、模型、Demo 控件、按词/软行删除、targetRanges 扩展或不可取消事件修复，不宣称真实 Android/iOS 软键盘全面兼容。
 - 2026-11-05 字素删除闭环通过：折叠 Backspace/Delete 使用运行时 `Intl.Segmenter` 删除完整簇，修复 emoji/组合序列被单个 UTF-16 删除拆坏的问题；同一容器内跨 marks、链接、空文字占位或拆分代理对仍可删除，非法光标不进入结构回退。React Delete 只在真实段尾合并，不在中间格式叶子末尾提前合并下一段。新增 78 项 Core、24 项 React 和 14 项 Chromium 测试，覆盖九类文本容器、邻项/邻格元数据、History/续编、受控、只读、宿主、IME 和多实例保护，构建产物公开入口验证通过。桌面 1280×720 与手机 390×844 的删除结果截图已检查，文字格式保留且无溢出遮挡。公开 API/Point 仍为 UTF-16，显式范围不扩张；无新模型/示例、Unicode 规范化、polyfill、按词删除或软键盘 beforeinput 删除入口，手机视口不代表真实设备兼容性验收。

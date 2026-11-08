@@ -1154,6 +1154,17 @@ function RichTextEditorComponent(
   function handleCompositionStart(event: CompositionEvent<HTMLDivElement>) {
     onCompositionStart?.(event);
 
+    if (
+      blockSelection &&
+      !event.defaultPrevented &&
+      editable &&
+      !isNonEditorInputTarget(event.currentTarget, event.target)
+    ) {
+      compositionDocumentRef.current = document;
+      publishCompositionState({ active: true, data: "" });
+      return;
+    }
+
     const blocked =
       event.defaultPrevented ||
       !editable ||

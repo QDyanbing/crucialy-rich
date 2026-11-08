@@ -56,9 +56,13 @@ describe("composition start ownership", () => {
       { blockSelection: createBlockSelection([1]) },
     );
     host.compose("compositionstart");
+    expect(host.editor.getAttribute("data-composing")).toBe("true");
+    host.press("Delete");
+    expect(host.editor.querySelector("img")).not.toBeNull();
     host.compose("compositionend", "不应插入");
     expect(host.onTransaction).not.toHaveBeenCalled();
     expect(host.editor.querySelector("img")).not.toBeNull();
+    expect(host.editor.getAttribute("data-composing")).toBe("false");
   });
 
   it("cancels an older session if a new start is rejected", () => {
