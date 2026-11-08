@@ -671,6 +671,7 @@ function RichTextEditorComponent(
     onBeforeInput?.(event);
 
     if (
+      event.nativeEvent.type === "compositionend" ||
       event.defaultPrevented ||
       !editable ||
       compositionRef.current.active ||
