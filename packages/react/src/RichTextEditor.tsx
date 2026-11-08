@@ -1146,7 +1146,7 @@ function RichTextEditorComponent(
   function handleCompositionUpdate(event: CompositionEvent<HTMLDivElement>) {
     onCompositionUpdate?.(event);
 
-    if (!compositionRef.current.active) {
+    if (event.defaultPrevented || !editable || !compositionRef.current.active) {
       return;
     }
 
@@ -1160,11 +1160,12 @@ function RichTextEditorComponent(
   function handleCompositionEnd(event: CompositionEvent<HTMLDivElement>) {
     onCompositionEnd?.(event);
 
+    if (!compositionRef.current.active) return;
     const commit = finishComposition(compositionRef.current, event.data);
 
     publishCompositionState(cancelComposition());
 
-    if (!editable || !commit) {
+    if (event.defaultPrevented || !editable || !commit) {
       return;
     }
 
