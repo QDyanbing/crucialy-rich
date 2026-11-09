@@ -72,6 +72,8 @@ Quote 内按 Enter 会保留引用格式分段；空 Quote 再按 Enter 则原�
 
 第 18 周“斜杠菜单闭环”已全部完成：React 包提供 Slash Command 配置校验、默认块命令目录、中文/英文关键词过滤、paragraph 折叠光标触发识别、浮层定位、Escape 关闭、上下键循环选择和 Enter/鼠标执行；`/query` 清理与目标命令合并为一个 Transaction，支持跨 mark 文本节点和一次撤销。
 
+斜杠菜单已补齐执行前触发文字/精确范围校验、执行事件与导航快照隔离，以及同树多实例 DOM ID。Demo 的输入法候选键盘/点击不执行菜单，带修饰键操作不被菜单接管，Shift+Enter 仍为软换行。校验不比较文档身份或当前光标，宿主仍负责刷新菜单；接入与内部 ID 变化见[斜杠菜单契约](./docs/features/slash-menu.md#执行前校验)。
+
 第 19 周“图片闭环”已全部完成：core 支持安全 ImageNode、URL 清洗、校验/规范化、语义化 `img` 渲染、`insertImage` / `deleteImage` 命令和独立 BlockSelection；React 支持图片点击选中、Backspace/Delete 删除及本地 object URL 预览，Demo 提供中文 URL、本地和删除流程，真实上传由外部接入。
 
 第 20 周“粘贴闭环”已全部完成并继续扩展：core 提供可扩展 Clipboard parser、Markdown/HTML/纯文本优先级、安全 HTML 白名单和 `paste` 命令；纯文本换行转换为 paragraph，结构化内容保留标题、引用、代码块、行内代码、分隔线、marks、三层普通/任务列表、安全图片和顶层表格，`b/i/u/s/strike/del/code` 与白名单内的 `font-weight`、`font-style`、`text-decoration` 会规范化为已有文字标记，安全链接保留白名单内的 target/rel，行内样式保留安全字号、文字色和背景色，有序列表保留安全整数起始编号。React 通过 `onPaste` 生成统一 Transaction，Demo 与 Playwright 覆盖三种中文粘贴流程及 HTML/Markdown 行内代码与分隔线、HTML 标记别名、行内 mark 样式、链接元数据、嵌套列表与续编编号、表格、图片、任务列表导入。
