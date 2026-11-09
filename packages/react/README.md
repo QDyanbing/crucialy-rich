@@ -93,7 +93,9 @@ Toolbar 当前支持：
 - `findSlashMenuTrigger`：识别 paragraph 折叠光标前的 `/query` 并返回待清理 Range。
 - `SlashMenu` / `FloatingSlashMenu`：渲染可访问菜单并定位到浏览器光标附近。
 - `getSlashMenuKeyboardAction` / `moveSlashMenuSelection`：处理 Escape、上下键循环和 Enter 选择。
-- `executeSlashCommand`：清理触发文本、执行目标命令并合并 Transaction。
+- `executeSlashCommand`：先复核当前 paragraph 的精确触发文字/范围，再清理和执行目标命令并合并 Transaction；过期触发不进入 Registry、不暴露清理事务，返回独立 trigger 快照。
+
+打开与有效导航状态均隔离触发 Range，菜单内部 DOM ID 按实例生成，不应从配置 ID 拼接。键盘 helper 仅解析 key，宿主仍需排除已取消事件、修饰键和输入法候选操作；Demo 的组合期间键盘/点击保护及 Shift+Enter 软换行均已接通。执行位置以 trigger 为准，不校验文档身份或当前光标，完整限制见下方说明。
 
 完整说明见[组件 API](../../docs/features/component-api.md)、[工具栏](../../docs/features/toolbar.md)和[斜杠菜单](../../docs/features/slash-menu.md)。
 

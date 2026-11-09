@@ -156,6 +156,16 @@ ref 命令事件的 `inputType` 为 `command`。受控模式不会自行替换 `
 
 Toolbar 通过 class name 暴露样式入口，不捆绑主题 CSS。完整契约见[工具栏](./toolbar.md)。
 
+## 斜杠菜单 API
+
+- `findSlashMenuTrigger(document, selection)`：识别顶层 paragraph 合法折叠光标前的 `/query`，返回 UTF-16 Range。
+- `openSlashMenu` / `moveSlashMenuSelection`：打开、导航并隔离触发范围；关闭/空结果导航保留原状态引用。
+- `SlashMenu` / `FloatingSlashMenu`：受控菜单及光标浮层，pointerdown 保留编辑区焦点；DOM ID 为内部实例标识，独立 SSR 根需配置各自的 `identifierPrefix`。
+- `executeSlashCommand(item, registry, context, trigger)`：先校验当前触发内容与精确范围，再把清理和目标事务合并；非法/过期触发返回 failure，不查 Registry，不提交清理。事件 trigger 为独立快照，item/payload 仍透传。
+- `getSlashMenuKeyboardAction(key)`：仅解析键名；宿主自行处理取消、修饰键和 Composition 优先级。Demo 在组合期间不处理菜单键盘/点击，Shift+Enter 继续走软换行。
+
+执行位置来自 trigger，不比较文档身份或当前 selection，也不重映射旧范围。完整契约与范围限制见[斜杠菜单](./slash-menu.md#执行前校验)。
+
 ## 当前边界
 
 当前组件仍不内置 history 状态、链接菜单或完整结构剪贴板写出；悬浮 Toolbar 的 Range 矩形由宿主同步。Clipboard 纯文本与可选 HTML 导出、parser 和粘贴命令来自 core，图片上传仍由宿主接入。`clipboardFormat="html"` 可保留受支持文字范围的格式，另支持单张安全图片块复制/剪切；不支持的文字范围回退纯文本，跨结构文字剪切或受限粘贴目标边界不变。

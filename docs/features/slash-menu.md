@@ -53,6 +53,7 @@ interface SlashCommandItem {
 - `FloatingSlashMenu` 在缺少光标矩形或没有匹配项时不渲染。
 - `calculateSlashMenuPosition` 优先放在光标下方，空间不足时翻到上方，并限制在视口边距内。
 - 菜单项 pointerdown 会阻止默认焦点迁移，使浏览器选区仍保留在编辑区。
+- 菜单项 DOM ID 由 React `useId` 和当前项索引生成，同一 React 树中的多个菜单可复用配置而不重复 ID；ID 属于内部实现，不应拼接配置 `id` 查询节点。独立 SSR 根须使用不同的 `identifierPrefix`，并在水合时保持一致。
 
 ## 键盘行为
 
@@ -63,6 +64,10 @@ interface SlashCommandItem {
 
 `getSlashMenuKeyboardAction`、`getNextSlashMenuIndex` 和 `moveSlashMenuSelection` 都是无 DOM 依赖的纯函数，宿主可在编辑器的 keydown 流程中复用。
 
+`getSlashMenuKeyboardAction` 只解析 key 字符串，不知道事件是否已取消、是否带修饰键或处于输入法组合阶段。宿主须先检查这些状态，再处理菜单。Demo 在活跃 Composition 或原生 `isComposing` 时不拦截键盘，也不执行菜单点击；Alt/Ctrl/Meta/Shift 组合键跳过菜单分支，继续交给原有编辑流程。例如菜单打开时 Shift+Enter 仍插入 LF，不选择标题。宿主自行接入的撤销/重做快捷键也须遵守组合输入保护。
+
+`openSlashMenu` 和有效导航生成的状态独立复制触发信息与 Range/两端 path，修改旧状态不会改变后续导航分支。关闭或空结果导航仍返回原状态，不承诺所有调用都创建新对象。
+
 ## 命令执行
 
 `executeSlashCommand` 先在临时文档中删除触发 Range，再以清理后的折叠选区执行目标 core Command。两段 operation 只有在目标命令成功时才合并为一个 Transaction，因此：
@@ -72,6 +77,14 @@ interface SlashCommandItem {
 - 目标命令失败时不会暴露只删除了触发文本的半成品 Transaction。
 - Registry/guard/execute 同步异常经 executeCommand 转为 failure，仍不暴露触发文本清理事务，源模型保持原样；修复扩展后可重新执行，清理和目标命令仍合为一次 History。这里只承诺纯函数扩展的事务隔离，不回滚插件自行产生的副作用。
 - 跨 mark text 节点的触发文本可以安全清理，两端未删除文本保留原 marks。
+
+### 执行前校验
+
+执行前会在当前文档的 Range focus 重新识别触发条件，并核对 `text`、`query`、起点文字偏移和同一顶层 paragraph 归属。触发文字已变、范围多含前文、折叠/反向/跨块范围、非法端点或块类型变化均返回 failure；不查 Registry、不暴露清理事务或新选区，也不修改源文档。空查询 `/`、中文/emoji/组合重音和跨 marks 仍可执行，Point offset 继续使用 UTF-16；不同叶子上表示同一文字边界的合法起点不会被误拒绝。
+
+这里检查的是内容和范围，而非文档身份：未改变触发文字的新文档引用或触发后正文修改仍可执行，无法识别同位置、同文字但属于另一次编辑的触发。`trigger.range` 是执行位置，`context.selection` 可省略，也不要求当前光标仍停在该位置。宿主负责在文档/选区变化时刷新或关闭菜单，不应把本校验当作旧选区重映射或权限控制。
+
+返回事件的 `trigger` 是调用开始时的独立快照；其 Range 与输入对象不共享引用，即使目标同步扩展修改调用方保存的触发对象，也不改变本次事件。`item` 和不透明 `payload` 仍按原引用透传，不承诺复制插件对象或回滚扩展副作用。
 
 ## 当前边界
 
