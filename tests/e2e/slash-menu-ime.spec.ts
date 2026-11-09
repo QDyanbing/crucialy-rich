@@ -39,3 +39,39 @@ for (const mode of ["session", "native"]) {
     });
   }
 }
+
+for (const viewport of [
+  { width: 1280, height: 720 },
+  { width: 390, height: 844 },
+]) {
+  test(`ignores a Slash pointer choice during composition at width ${viewport.width}`, async ({
+    page,
+  }) => {
+    await page.setViewportSize(viewport);
+    const errors: string[] = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    await page.goto("/");
+    await setCharacterCaret(page, [0, 0], 0);
+    await page.keyboard.type("/h2");
+    const menu = page.getByRole("listbox", { name: "插入块菜单" });
+    const editor = page.getByLabel("已渲染文档");
+    const before = await characterDocument(page);
+    await compose(page, "compositionstart");
+    await menu.getByRole("option").click();
+    await expect.poll(() => characterDocument(page)).toEqual(before);
+    await expect(editor).toHaveAttribute("data-composing", "true");
+    await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
+    await expect(menu).toBeVisible();
+    await compose(page, "compositionend", "");
+    await menu.getByRole("option").click();
+    await expect(menu).toHaveCount(0);
+    await expect(editor.locator("h2")).toContainText("你好");
+    await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 2');
+    await page.getByRole("button", { name: "撤销", exact: true }).click();
+    await expect.poll(() => characterDocument(page)).toEqual(before);
+    await page.getByRole("button", { name: "重做", exact: true }).click();
+    await expect(editor.locator("h2")).toContainText("你好");
+    await editor.screenshot({ path: test.info().outputPath("slash-result.png") });
+    expect(errors).toEqual([]);
+  });
+}

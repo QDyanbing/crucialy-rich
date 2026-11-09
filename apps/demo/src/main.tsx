@@ -1794,7 +1794,7 @@ function DemoApp() {
   function handleSlashCommand(item: SlashCommandItem) {
     const trigger = slashMenuState.trigger;
 
-    if (!trigger) {
+    if (!trigger || compositionState.active) {
       return;
     }
 
