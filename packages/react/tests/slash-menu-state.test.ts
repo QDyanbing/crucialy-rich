@@ -56,6 +56,29 @@ describe("slash menu state", () => {
     expect(moveSlashMenuSelection(openState, "next", 0)).toBe(openState);
   });
 
+  it("keeps navigation branches and their trigger endpoints independent", () => {
+    const opened = openSlashMenu(trigger);
+    const first = moveSlashMenuSelection(opened, "next", 3);
+    const sibling = moveSlashMenuSelection(opened, "previous", 3);
+    const next = moveSlashMenuSelection(first, "next", 3);
+    first.trigger!.range.anchor.path[0] = 99;
+    first.trigger!.range.focus.offset = 99;
+    first.trigger!.query = "changed";
+    expect(opened.trigger).toEqual(trigger);
+    expect(sibling.trigger).toEqual(trigger);
+    expect(next.trigger).toEqual(trigger);
+    expect(next.activeIndex).toBe(2);
+    next.trigger!.range.focus.path[0] = 88;
+    expect(next.trigger!.range.anchor.path).toEqual([0, 0]);
+  });
+
+  it("can navigate an open state without inventing a missing trigger", () => {
+    expect(moveSlashMenuSelection({ open: true, activeIndex: 0 }, "next", 2)).toEqual({
+      open: true,
+      activeIndex: 1,
+    });
+  });
+
   it("resolves only a valid active item", () => {
     const items = [
       { commandName: "setHeading", id: "heading", label: "标题" },

@@ -30,6 +30,7 @@ export function moveSlashMenuSelection(
   return {
     ...state,
     activeIndex: getNextSlashMenuIndex(state.activeIndex, direction, itemCount),
+    ...(state.trigger ? { trigger: cloneSlashMenuTrigger(state.trigger) } : {}),
   };
 }
 
