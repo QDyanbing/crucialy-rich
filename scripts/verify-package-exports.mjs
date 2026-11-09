@@ -38,9 +38,85 @@ const publicPackages = [
   },
   {
     directory: "packages/react",
-    expectedExports: ["FixedToolbar", "FloatingSlashMenu", "RichTextEditor"],
+    expectedExports: [
+      "FixedToolbar",
+      "FloatingSlashMenu",
+      "RichTextEditor",
+      "SlashMenu",
+      "executeSlashCommand",
+      "findSlashMenuTrigger",
+      "openSlashMenu",
+      "moveSlashMenuSelection",
+    ],
   },
 ];
+
+async function verifySlashMenuContract(react) {
+  const core = await import(
+    pathToFileURL(resolve(repositoryRoot, "packages/core/dist/index.js")).href
+  );
+  const document = core.createDocument([
+    core.createParagraph([core.createText("/h正文")]),
+  ]);
+  const point = { path: [0, 0], offset: 2 };
+  const trigger = react.findSlashMenuTrigger(document, { anchor: point, focus: point });
+  const item = {
+    id: "heading",
+    label: "二级标题",
+    commandName: core.SET_HEADING_COMMAND_NAME,
+    payload: { level: 2 },
+  };
+  const registry = core.createDefaultCommandRegistry();
+  const changed = core.createDocument([
+    core.createParagraph([core.createText("正文内容")]),
+  ]);
+  const rejected = react.executeSlashCommand(
+    item,
+    registry,
+    { document: changed },
+    trigger,
+  );
+  assert.equal(rejected.result.status, "failure");
+  assert.equal(rejected.result.transaction, undefined);
+  const event = react.executeSlashCommand(item, registry, { document }, trigger);
+  assert.equal(event.result.ok, true);
+  assert.deepEqual(
+    event.result.transaction.operations.map((op) => op.type),
+    ["delete_text", "set_block_type"],
+  );
+  const after = core.applyTransaction(document, event.result.transaction);
+  assert.equal(after.children[0].type, "heading");
+  assert.equal(after.children[0].children[0].text, "正文");
+  const history = core.recordHistory({
+    history: core.createHistoryState(),
+    transaction: event.result.transaction,
+    before: core.createHistorySnapshot(document),
+    after: core.createHistorySnapshot(after, event.result.selection),
+  });
+  assert.equal(history.undoStack.length, 1);
+  assert.deepEqual(core.undoHistory(history).document, document);
+  const opened = react.openSlashMenu(trigger);
+  const moved = react.moveSlashMenuSelection(opened, "next", 2);
+  moved.trigger.range.anchor.path[0] = 99;
+  event.trigger.range.focus.offset = 99;
+  assert.deepEqual(opened.trigger, trigger);
+  assert.equal(trigger.range.focus.offset, 2);
+  assert.equal("cloneSlashMenuTrigger" in react, false);
+  const require = createRequire(resolve(repositoryRoot, "packages/react/package.json"));
+  const { createElement } = require("react");
+  const { renderToStaticMarkup } = require("react-dom/server");
+  const html = renderToStaticMarkup(
+    createElement(
+      "div",
+      null,
+      createElement(react.SlashMenu, { items: [item] }),
+      createElement(react.SlashMenu, { items: [item] }),
+    ),
+  );
+  const ids = [...html.matchAll(/ id="([^"]+)"/gu)].map((match) => match[1]);
+  assert.equal(ids.length, 2);
+  assert.equal(new Set(ids).size, 2);
+}
 
 async function verifyNativeInputBinding(react) {
   const require = createRequire(resolve(repositoryRoot, "packages/react/package.json"));
@@ -1180,6 +1256,7 @@ for (const packageConfig of publicPackages) {
   }
 
   if (packageConfig.directory === "packages/react") {
+    await verifySlashMenuContract(runtime);
     assert.ok(declarations.includes('"insertLineBreak"'));
     assert.match(declarations, /onNativeBeforeInput\?: \(event: InputEvent\) => void/);
     await verifyNativeInputBinding(runtime);
