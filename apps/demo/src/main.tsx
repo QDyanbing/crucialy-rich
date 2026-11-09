@@ -1700,6 +1700,10 @@ function DemoApp() {
   }
 
   function handleEditorKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (compositionState.active || event.nativeEvent.isComposing) {
+      return;
+    }
+
     if (slashMenuState.open) {
       const slashAction = getSlashMenuKeyboardAction(event.key);
 
