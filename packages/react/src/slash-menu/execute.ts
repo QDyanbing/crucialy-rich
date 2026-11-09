@@ -11,6 +11,7 @@ import {
 } from "@crucialy-rich/core";
 
 import type { SlashCommandEvent, SlashCommandItem, SlashMenuTrigger } from "./types";
+import { findSlashMenuTrigger } from "./trigger";
 
 function createFailure(item: SlashCommandItem, reason: string): CommandResult {
   return {
@@ -29,8 +30,21 @@ export function executeSlashCommand(
 ): SlashCommandEvent {
   const [blockIndex] = trigger.range.anchor.path;
   const textOffset = getBlockTextOffset(context.document, trigger.range.anchor);
+  const currentTrigger = findSlashMenuTrigger(context.document, {
+    anchor: trigger.range.focus,
+    focus: trigger.range.focus,
+  });
 
-  if (blockIndex === undefined || textOffset === undefined) {
+  if (
+    blockIndex === undefined ||
+    textOffset === undefined ||
+    trigger.range.anchor.path.length !== 2 ||
+    blockIndex !== trigger.range.focus.path[0] ||
+    !currentTrigger ||
+    currentTrigger.text !== trigger.text ||
+    currentTrigger.query !== trigger.query ||
+    getBlockTextOffset(context.document, currentTrigger.range.anchor) !== textOffset
+  ) {
     return {
       item,
       result: createFailure(item, "Slash menu trigger is not a valid text range."),
