@@ -12,6 +12,7 @@ import {
 
 import type { SlashCommandEvent, SlashCommandItem, SlashMenuTrigger } from "./types";
 import { findSlashMenuTrigger } from "./trigger";
+import { cloneSlashMenuTrigger } from "./snapshot";
 
 function createFailure(item: SlashCommandItem, reason: string): CommandResult {
   return {
@@ -26,8 +27,9 @@ export function executeSlashCommand(
   item: SlashCommandItem,
   registry: CommandRegistry,
   context: CommandContext,
-  trigger: SlashMenuTrigger,
+  inputTrigger: SlashMenuTrigger,
 ): SlashCommandEvent {
+  const trigger = cloneSlashMenuTrigger(inputTrigger);
   const [blockIndex] = trigger.range.anchor.path;
   const textOffset = getBlockTextOffset(context.document, trigger.range.anchor);
   const currentTrigger = findSlashMenuTrigger(context.document, {
