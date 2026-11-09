@@ -1700,7 +1700,11 @@ function DemoApp() {
   }
 
   function handleEditorKeyDown(event: KeyboardEvent<HTMLDivElement>) {
-    if (compositionState.active || event.nativeEvent.isComposing) {
+    if (
+      event.defaultPrevented ||
+      compositionState.active ||
+      event.nativeEvent.isComposing
+    ) {
       return;
     }
 

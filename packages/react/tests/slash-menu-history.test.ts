@@ -54,9 +54,27 @@ describe("default Slash command History", () => {
         expect(result.transaction!.operations[0]!.type).toBe("delete_text");
         const after = applyTransaction(document, result.transaction!);
         expect(validateDocument(after).valid).toBe(true);
-        expect(after.children.some((block) => block.type === types[item.id])).toBe(
-          true,
-        );
+        const target = after.children[item.id === "divider" ? 1 : 0]!;
+        expect(target.type).toBe(types[item.id]);
+        if (target.type === "heading") {
+          expect(target.level).toBe(Number(item.id.at(-1)));
+        }
+        if (target.type === "divider") {
+          expect(after.children[2]).toEqual(createParagraph([createText("正文")]));
+        } else if (
+          target.type === "bulletList" ||
+          target.type === "orderedList" ||
+          target.type === "taskList"
+        ) {
+          expect(target.children[0]!.children).toEqual([createText("正文")]);
+          if (target.type === "taskList")
+            expect(target.children[0]).toMatchObject({
+              type: "taskItem",
+              checked: false,
+            });
+        } else {
+          expect(target.children).toEqual([createText("正文")]);
+        }
         expect(JSON.stringify(after)).not.toContain(text);
         expect(after.children.at(-1)).toEqual(document.children[1]);
         expect(result.selection).toBeDefined();
