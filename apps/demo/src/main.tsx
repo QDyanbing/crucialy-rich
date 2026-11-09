@@ -1704,7 +1704,13 @@ function DemoApp() {
       return;
     }
 
-    if (slashMenuState.open) {
+    if (
+      slashMenuState.open &&
+      !event.altKey &&
+      !event.ctrlKey &&
+      !event.metaKey &&
+      !event.shiftKey
+    ) {
       const slashAction = getSlashMenuKeyboardAction(event.key);
 
       if (slashAction) {
