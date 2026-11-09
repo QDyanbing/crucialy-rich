@@ -1,4 +1,5 @@
 import type { MouseEvent, PointerEvent, ReactElement } from "react";
+import { useId } from "react";
 
 import type { SlashCommandItem } from "./types";
 
@@ -21,6 +22,8 @@ export function SlashMenu({
   label = "斜杠菜单",
   onSelect,
 }: SlashMenuProps): ReactElement {
+  const menuId = useId();
+
   function handlePointerDown(event: PointerEvent<HTMLButtonElement>) {
     event.preventDefault();
   }
@@ -41,7 +44,7 @@ export function SlashMenu({
           aria-selected={index === activeIndex}
           className="crucialy-slash-menu__item"
           data-command={item.commandName}
-          id={`crucialy-slash-menu-${item.id}`}
+          id={`crucialy-slash-menu-${menuId}-${index}`}
           key={item.id}
           role="option"
           type="button"

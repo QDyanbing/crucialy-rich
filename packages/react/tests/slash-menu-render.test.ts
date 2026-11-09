@@ -40,7 +40,31 @@ describe("SlashMenu", () => {
 
     expect(html.match(/aria-selected="true"/gu)).toHaveLength(1);
     expect(html).toContain(
-      'aria-selected="true" class="crucialy-slash-menu__item" data-command="toggleQuote" id="crucialy-slash-menu-quote"',
+      'aria-selected="true" class="crucialy-slash-menu__item" data-command="toggleQuote"',
     );
+  });
+
+  it("assigns unique DOM IDs when two editors reuse the same menu configuration", () => {
+    const html = renderToStaticMarkup(
+      createElement(
+        "div",
+        null,
+        createElement(SlashMenu, { items }),
+        createElement(SlashMenu, { items }),
+      ),
+    );
+    const ids = [...html.matchAll(/ id="([^"]+)"/gu)].map((match) => match[1]);
+    expect(ids).toHaveLength(4);
+    expect(new Set(ids).size).toBe(4);
+  });
+
+  it("keeps arbitrary configuration IDs out of DOM ID syntax", () => {
+    const html = renderToStaticMarkup(
+      createElement(SlashMenu, {
+        items: [{ ...items[0]!, id: "heading with spaces" }],
+      }),
+    );
+    expect(html).not.toContain("heading with spaces");
+    expect(html).toMatch(/ id="[^\s"]+"/u);
   });
 });
