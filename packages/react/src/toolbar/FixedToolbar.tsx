@@ -4,7 +4,7 @@ import {
   type DocumentNode,
   type RangeSelection,
 } from "@crucialy-rich/core";
-import { useMemo, useRef, type ReactElement } from "react";
+import { useRef, type ReactElement } from "react";
 
 import { createDefaultToolbarItems } from "./defaults";
 import { executeToolbarCommand } from "./execute";
@@ -45,14 +45,10 @@ export function FixedToolbar({
     registry: CommandRegistry;
     selection: RangeSelection | undefined;
   }>();
-  const resolvedItems = useMemo(
-    () =>
-      resolveToolbarItems(
-        items,
-        registry,
-        selection ? { document, selection } : { document },
-      ),
-    [document, items, registry, selection],
+  const resolvedItems = resolveToolbarItems(
+    items,
+    registry,
+    selection ? { document, selection } : { document },
   );
 
   function handleCommandPointerDown(item: ResolvedToolbarCommandItem) {
