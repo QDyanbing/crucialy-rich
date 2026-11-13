@@ -4,6 +4,7 @@ import type { ResolvedToolbarCommandItem, ResolvedToolbarItem } from "./types";
 
 export interface ToolbarProps {
   className?: string;
+  disabled?: boolean;
   items: readonly ResolvedToolbarItem[];
   label?: string;
   onCommand?: (item: ResolvedToolbarCommandItem) => void;
@@ -17,6 +18,7 @@ function joinClassNames(...classNames: Array<string | undefined>): string {
 
 export function Toolbar({
   className,
+  disabled = false,
   items,
   label = "富文本工具栏",
   onCommand,
@@ -60,7 +62,7 @@ export function Toolbar({
             className="crucialy-toolbar__button"
             data-command={item.commandName}
             data-state={item.state.active ? "active" : "inactive"}
-            disabled={item.state.disabled}
+            disabled={disabled || item.state.disabled}
             key={item.id}
             title={item.label}
             type="button"

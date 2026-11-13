@@ -1909,6 +1909,7 @@ function DemoApp() {
           </div>
           {showFixedToolbar ? (
             <FixedToolbar
+              disabled={compositionState.active}
               document={normalizedDocument}
               items={fixedToolbarItems}
               onCommand={handleToolbarCommand}
@@ -2097,6 +2098,7 @@ function DemoApp() {
           />
           {showFloatingToolbar && !blockSelection ? (
             <FloatingToolbar
+              disabled={compositionState.active}
               anchorRect={floatingToolbarRect}
               document={normalizedDocument}
               items={floatingToolbarItems}

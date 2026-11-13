@@ -31,6 +31,10 @@ export function mountToolbar(initial: FixedToolbarProps, strict = false) {
       props = { ...props, ...next };
       render();
     },
+    replace(next: FixedToolbarProps) {
+      props = next;
+      render();
+    },
     press(index = 0) {
       act(() =>
         button(index).dispatchEvent(

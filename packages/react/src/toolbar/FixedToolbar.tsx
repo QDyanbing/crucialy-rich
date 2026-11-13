@@ -4,7 +4,7 @@ import {
   type DocumentNode,
   type RangeSelection,
 } from "@crucialy-rich/core";
-import { useRef, type ReactElement } from "react";
+import { useEffect, useRef, type ReactElement } from "react";
 
 import { createDefaultToolbarItems } from "./defaults";
 import { executeToolbarCommand } from "./execute";
@@ -23,6 +23,7 @@ const defaultToolbarItems = createDefaultToolbarItems();
 export interface FixedToolbarProps {
   className?: string;
   document: DocumentNode;
+  disabled?: boolean;
   items?: readonly ToolbarItem[];
   label?: string;
   onCommand?: (event: ToolbarCommandEvent) => void;
@@ -33,6 +34,7 @@ export interface FixedToolbarProps {
 export function FixedToolbar({
   className,
   document,
+  disabled = false,
   items = defaultToolbarItems,
   label = "固定格式工具栏",
   onCommand,
@@ -43,6 +45,7 @@ export function FixedToolbar({
     document: DocumentNode;
     item: { id: string; commandName: string; payload: unknown };
     registry: CommandRegistry;
+    canceled: boolean;
     selection: RangeSelection | undefined;
   }>();
   const resolvedItems = resolveToolbarItems(
@@ -51,9 +54,17 @@ export function FixedToolbar({
     selection ? { document, selection } : { document },
   );
 
+  useEffect(() => {
+    if ((disabled || !onCommand) && savedSelectionRef.current) {
+      savedSelectionRef.current.canceled = true;
+    }
+  }, [disabled, onCommand]);
+
   function handleCommandPointerDown(item: ResolvedToolbarCommandItem) {
+    if (disabled || !onCommand) return;
     savedSelectionRef.current = {
       document,
+      canceled: false,
       item: { id: item.id, commandName: item.commandName, payload: item.payload },
       registry,
       selection: createToolbarSelectionSnapshot(selection),
@@ -67,6 +78,7 @@ export function FixedToolbar({
 
     const saved = savedSelectionRef.current;
     savedSelectionRef.current = undefined;
+    if (disabled || saved?.canceled) return;
     if (
       saved &&
       (saved.document !== document ||
@@ -89,6 +101,7 @@ export function FixedToolbar({
 
   return (
     <Toolbar
+      disabled={disabled}
       items={resolvedItems}
       label={label}
       onCommandPointerDown={handleCommandPointerDown}
