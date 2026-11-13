@@ -8,6 +8,8 @@
 
 ### 修复
 
+- 工具栏按下快照绑定文档、Registry、按钮命令和 payload 引用，拒绝跨上下文沿用；执行/回调前消费，指针取消及宿主已取消的按下/点击释放快照，非主指针和中/右键不捕获。事件 selection 在进入命令扩展前复制，失败、重入和后续激活不复用旧范围。
+- 固定/悬浮工具栏重渲染时刷新可变 Registry 状态，不再因缓存保留旧 active/disabled；注册变更仍需宿主触发渲染。补齐默认九类命令的正反向 History、多实例、StrictMode、失败恢复、构建包与桌面/手机浏览器回归，既有模型、事务和 History 策略保持不变。
 - Slash 执行前复核当前 paragraph 的 `/query`、精确起止范围与块归属，拒绝过期/不一致触发，不查 Registry、不暴露清理事务；空查询、中文/Unicode 和跨格式边界仍支持。执行事件及有效导航状态隔离 trigger Range，公开类型与 History 原子事务保持不变。
 - 修复重复菜单配置生成相同 DOM ID，以及 Demo 菜单抢占已取消事件、输入法键盘/点击和修饰键的问题；同树菜单使用实例 ID，组合期间不执行菜单命令，Shift+Enter 保留软换行。补齐 SSR 水合、多实例、默认命令 History、构建包与桌面/手机回归；内部 ID 不再可由配置 ID 拼接，宿主仍负责触发刷新与组合输入保护，详见[斜杠菜单](./docs/features/slash-menu.md)。
 - 修复 Composition 候选更新共享当前/起始 Range、状态通知直接暴露内部对象的问题；活跃快照和通知独立复制，旧候选或宿主修改不污染后续提交。公开类型和空闲 update 引用语义保持不变。
@@ -21,6 +23,7 @@
 
 ### 新增
 
+- 低层/固定/悬浮工具栏新增可选 `disabled`（默认 false），低层 `Toolbar` 新增 `onCommandCancel(item)` 清理通知。Demo 在 Composition 活跃时锁定固定/悬浮按钮，结束后恢复；禁用或移除回调的已提交状态不复活旧手势。这不是编辑器全局只读或副作用回滚，引用稳定与接入限制见[工具栏](./docs/features/toolbar.md)。
 - React 接入可取消原生 `insertParagraph`，复用分段/列表/引用/代码/cell 规则；Shift+Enter 与原生 `insertLineBreak` 插入字面 LF，不新增模型、Operation 或公共 Core API。两个入口均无 typing batch，范围替换为原子事务并可独立撤销。
 - `RichTextEditorInputType` 新增 `insertLineBreak`，穷尽 switch 的宿主需补分支；软换行显示依赖保留 LF 的 CSS。补齐容器/范围/保护、History/受控、监听器/SSR、LF 剪贴板数据、构建包及桌面/手机浏览器回归，未宣称真机软键盘全面兼容。
 - React 新增原生可取消 `beforeinput deleteContentBackward/Forward` 删除入口，复用既有 Command、字素、范围、合并和图片规则；新增可选 `onNativeBeforeInput` 接收原始 InputEvent，宿主可取消。现有 React 事件和事务类型不变，不新增 Core API 或 Demo 控件。
