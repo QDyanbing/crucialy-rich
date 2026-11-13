@@ -42,7 +42,16 @@ export function Toolbar({
     event: PointerEvent<HTMLButtonElement>,
     item: ResolvedToolbarCommandItem,
   ) {
-    if (event.defaultPrevented || event.button !== 0 || event.isPrimary === false)
+    if (event.defaultPrevented) {
+      onCommandCancel?.(item);
+      return;
+    }
+    if (
+      disabled ||
+      item.state.disabled ||
+      event.button !== 0 ||
+      event.isPrimary === false
+    )
       return;
     event.preventDefault();
     onCommandPointerDown?.(item);

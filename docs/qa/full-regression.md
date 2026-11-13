@@ -2,29 +2,30 @@
 
 ## 执行信息
 
-- 日期：2026-11-09
+- 日期：2026-11-13
 - 版本：`0.1.0`
 - 分支：`master`
 - 命令：`pnpm check:all`
 
 ## 自动化结果
 
-| 检查项     | 结果 | 说明                                                                             |
-| ---------- | ---- | -------------------------------------------------------------------------------- |
-| Prettier   | 通过 | 全仓文件格式一致                                                                 |
-| ESLint     | 通过 | 0 warning、0 error                                                               |
-| TypeScript | 通过 | 根工程与 core/react/demo 包级检查全部通过                                        |
-| Vitest     | 通过 | 301 个测试文件，2406 项测试                                                      |
-| Core 构建  | 通过 | ESM、source map、类型声明生成成功                                                |
-| React 构建 | 通过 | ESM、source map、类型声明生成成功                                                |
-| Demo 构建  | 通过 | Vite 生产构建成功                                                                |
-| 包产物导入 | 通过 | 导出/声明、Clipboard、History、CodeBlock、Office、Native Input 与 Slash 冒烟通过 |
-| Playwright | 通过 | Chromium 323 项测试                                                              |
+| 检查项     | 结果 | 说明                                                                                      |
+| ---------- | ---- | ----------------------------------------------------------------------------------------- |
+| Prettier   | 通过 | 全仓文件格式一致                                                                          |
+| ESLint     | 通过 | 0 warning、0 error                                                                        |
+| TypeScript | 通过 | 根工程与 core/react/demo 包级检查全部通过                                                 |
+| Vitest     | 通过 | 311 个测试文件，2466 项测试                                                               |
+| Core 构建  | 通过 | ESM、source map、类型声明生成成功                                                         |
+| React 构建 | 通过 | ESM、source map、类型声明生成成功                                                         |
+| Demo 构建  | 通过 | Vite 生产构建成功                                                                         |
+| 包产物导入 | 通过 | 导出/声明、Clipboard、History、CodeBlock、Office、Native Input、Slash 与 Toolbar 冒烟通过 |
+| Playwright | 通过 | Chromium 331 项测试                                                                       |
 
-Demo 主 JS 产物约 515.46 KB，Vite 给出超过 500 KB 的非阻断分包提示；构建退出码为 0，本轮未调整打包策略。
+Demo 主 JS 产物约 516.13 KB，Vite 给出超过 500 KB 的非阻断分包提示；构建退出码为 0，本轮未调整打包策略。
 
 ## 核心路径
 
+- 2026-11-13 Toolbar 手势与状态修正通过：执行事件 selection 在进入扩展前独立捕获，按下快照绑定文档、Registry、按钮命令及 payload 引用，执行/回调前消费；归属不一致取消，失效操作不通知 onCommand。pointercancel、宿主已取消的按下/点击释放快照，非主指针、中/右键和禁用按钮不捕获。每次渲染刷新可变 Registry 状态，不增加注册订阅。新增可选 disabled 和低层 onCommandCancel，Demo 的固定/悬浮按钮在组合输入期间锁定，恢复不复活旧手势。新增 60 项 React 单测覆盖正反向范围、九类默认命令正文/格式及单条 History、重入/失败重试、归属、缺失选区、取消/禁用、回调更新、多实例、StrictMode、卸载重挂与 SSR；构建包实际挂载两类工具栏并验证声明、快照、归属和取消。新增 8 项桌面/手机 Chromium 验证组合锁定/恢复、模型替换后的旧手势拒绝、宿主取消、格式及撤销重做，截图中文字和选区正常，无 pageerror。公开 API 仅增加可选项，模型与 History 策略不变；宿主需稳定引用，不检测原地修改、不重映射旧范围、不提供窗口级拖拽释放监听，不承诺扩展副作用回滚、其他宿主控件的禁用或真机 IME 全面兼容。
 - 2026-11-09 Slash 安全执行通过：执行前重识别当前 paragraph 的精确 `/query`，拒绝过期文本、元数据不一致、多含前文、折叠/反向/跨块范围、非法端点及块类型变化，不查 Registry、不泄露清理事务。执行事件与有效导航 Range 独立，同树菜单 ID 不重复，SSR 水合保持稳定。新增 56 项 React 单测验证 Unicode/跨 marks/等价边界、全部十类默认命令的正文、层级、任务状态和单条 History，以及多实例/焦点/回调生命周期；构建产物验证公开入口和内部 helper 不外泄。新增 23 项 Chromium 验证活跃/原生 Composition 键盘、组合期间点击、修饰键、Shift+Enter 和宿主已取消事件，结束后可执行并撤销/重做；桌面与手机结果截图排版正常。命令矩阵断言加强后，该组 20 项单测另行复验通过。公开签名、模型和 Demo 示例不变，不比较文档身份/当前光标，不重映射旧范围；内部 ID 不可从配置拼接，独立 SSR 根仍须设置 identifierPrefix，真机 IME 全面兼容未由此保证。
 - 2026-11-08 Composition 生命周期修正通过：活跃候选和通知独立复制 Range，宿主取消 update/end 生效，同一 compositionend 的 React beforeinput 回退不重复发事务。文字会话绑定文档引用，替换/只读/块选区清理旧候选，未配对结束不插入；无关 props/selection 更新保留原锚点。新增 6 项 Core、51 项 React 和 12 项 Chromium，覆盖通知变异、取消/失效/失败恢复、内嵌控件/多实例、受控 History、既有 batch 合并、StrictMode/卸载与构建包实际挂载。全量检查发现并修正图片块 start 的旧剪贴板保护冲突：使用无文字起点的 active 保护状态，保留复制/剪切/删除保护，结束只清理不写文字，原 105 项剪贴板测试继续通过。桌面/手机合成事件验证任务、代码、同 cell 正反范围、撤销重做和续编，截图内容与布局正常。API、模型、History 策略和 Demo 控件不变；受控 value 需稳定引用，不检测原地修改、不重映射旧锚点、不宣称所有平台真实 IME 事件序列已验收。
 - 2026-11-07 原生换段与软换行通过：`insertParagraph` 复用现有 Enter 规则，Shift+Enter/`insertLineBreak` 复用文字 LF，不新增模型节点、Operation 或公共 Core API。新增 10 项 Core、86 项 React 和 12 项 Chromium 测试，覆盖普通/格式/结构容器、空引用、CodeBlock 退出差异、任务 checked/编号、cell 邻段、正反范围原子替换、LF 剪贴板数据、独立 History/受控续编、失败与宿主/只读/IME/选区归属、监听器/SSR。已选图片的键盘 Enter 即使没有 DOM Range 也不改旧文字。构建包验证四类原生编辑及新事务成员，桌面真实键盘/原生事件不重复入栈；浏览器 Range 几何和桌面/手机截图确认软换行实际分行，任务复选框、邻项与布局正常。`RichTextEditorInputType` 增加 `insertLineBreak`，穷尽 switch 需适配；显示需保留 LF 的 CSS。未增加 Demo 控件、独立 br 节点、targetRanges 扩展或不可取消事件修复，不宣称真机软键盘全面兼容。
