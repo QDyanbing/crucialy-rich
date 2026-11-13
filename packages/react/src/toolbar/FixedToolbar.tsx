@@ -11,7 +11,11 @@ import { executeToolbarCommand } from "./execute";
 import { resolveToolbarItems } from "./state";
 import { createToolbarSelectionSnapshot } from "./selection";
 import { Toolbar } from "./Toolbar";
-import type { ToolbarCommandEvent, ToolbarItem } from "./types";
+import type {
+  ResolvedToolbarCommandItem,
+  ToolbarCommandEvent,
+  ToolbarItem,
+} from "./types";
 
 const defaultToolbarRegistry = createDefaultCommandRegistry();
 const defaultToolbarItems = createDefaultToolbarItems();
@@ -37,6 +41,8 @@ export function FixedToolbar({
 }: FixedToolbarProps): ReactElement {
   const savedSelectionRef = useRef<{
     document: DocumentNode;
+    item: { id: string; commandName: string; payload: unknown };
+    registry: CommandRegistry;
     selection: RangeSelection | undefined;
   }>();
   const resolvedItems = useMemo(
@@ -49,9 +55,11 @@ export function FixedToolbar({
     [document, items, registry, selection],
   );
 
-  function handleCommandPointerDown() {
+  function handleCommandPointerDown(item: ResolvedToolbarCommandItem) {
     savedSelectionRef.current = {
       document,
+      item: { id: item.id, commandName: item.commandName, payload: item.payload },
+      registry,
       selection: createToolbarSelectionSnapshot(selection),
     };
   }
@@ -63,7 +71,15 @@ export function FixedToolbar({
 
     const saved = savedSelectionRef.current;
     savedSelectionRef.current = undefined;
-    if (saved && saved.document !== document) return;
+    if (
+      saved &&
+      (saved.document !== document ||
+        saved.registry !== registry ||
+        saved.item.id !== item.id ||
+        saved.item.commandName !== item.commandName ||
+        saved.item.payload !== item.payload)
+    )
+      return;
     const commandSelection = saved ? saved.selection : selection;
 
     onCommand?.(
