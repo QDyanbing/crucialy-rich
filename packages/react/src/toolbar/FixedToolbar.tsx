@@ -56,6 +56,7 @@ export function FixedToolbar({
     }
 
     const commandSelection = savedSelectionRef.current ?? selection;
+    savedSelectionRef.current = undefined;
 
     onCommand?.(
       executeToolbarCommand(
@@ -64,7 +65,6 @@ export function FixedToolbar({
         commandSelection ? { document, selection: commandSelection } : { document },
       ),
     );
-    savedSelectionRef.current = undefined;
   }
 
   return (
