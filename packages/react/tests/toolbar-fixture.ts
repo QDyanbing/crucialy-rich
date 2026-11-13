@@ -41,5 +41,10 @@ export function mountToolbar(initial: FixedToolbarProps, strict = false) {
     click(index = 0) {
       act(() => button(index).click());
     },
+    cancel(index = 0) {
+      act(() =>
+        button(index).dispatchEvent(new MouseEvent("pointercancel", { bubbles: true })),
+      );
+    },
   };
 }

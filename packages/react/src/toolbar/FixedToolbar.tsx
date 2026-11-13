@@ -96,6 +96,9 @@ export function FixedToolbar({
       items={resolvedItems}
       label={label}
       onCommandPointerDown={handleCommandPointerDown}
+      onCommandPointerCancel={() => {
+        savedSelectionRef.current = undefined;
+      }}
       {...(className ? { className } : {})}
       {...(onCommand ? { onCommand: handleCommand } : {})}
     />

@@ -8,6 +8,7 @@ export interface ToolbarProps {
   label?: string;
   onCommand?: (item: ResolvedToolbarCommandItem) => void;
   onCommandPointerDown?: (item: ResolvedToolbarCommandItem) => void;
+  onCommandPointerCancel?: (item: ResolvedToolbarCommandItem) => void;
 }
 
 function joinClassNames(...classNames: Array<string | undefined>): string {
@@ -20,6 +21,7 @@ export function Toolbar({
   label = "富文本工具栏",
   onCommand,
   onCommandPointerDown,
+  onCommandPointerCancel,
 }: ToolbarProps): ReactElement {
   function handleCommandClick(
     event: MouseEvent<HTMLButtonElement>,
@@ -64,6 +66,7 @@ export function Toolbar({
             type="button"
             onClick={(event) => handleCommandClick(event, item)}
             onPointerDown={(event) => handleCommandPointerDown(event, item)}
+            onPointerCancel={() => onCommandPointerCancel?.(item)}
           >
             {item.text ?? item.label}
           </button>
