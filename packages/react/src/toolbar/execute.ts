@@ -12,13 +12,13 @@ export function executeToolbarCommand(
   registry: CommandRegistry,
   context: CommandContext,
 ): ToolbarCommandEvent {
+  const selection = context.selection
+    ? cloneRangeSelection(context.selection)
+    : undefined;
   const result = executeCommand(registry, item.commandName, {
     context,
     payload: item.payload,
   });
-  const selection = context.selection
-    ? cloneRangeSelection(context.selection)
-    : undefined;
 
   return {
     item,
