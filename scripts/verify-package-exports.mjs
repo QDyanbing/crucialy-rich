@@ -40,6 +40,10 @@ const publicPackages = [
     directory: "packages/react",
     expectedExports: [
       "FixedToolbar",
+      "Toolbar",
+      "FloatingToolbar",
+      "executeToolbarCommand",
+      "resolveToolbarItems",
       "FloatingSlashMenu",
       "RichTextEditor",
       "SlashMenu",
@@ -296,6 +300,117 @@ async function verifyNativeInputBinding(react) {
         assert.equal(transactions.length, mode === "commit" ? 1 : 0);
         if (mode === "commit")
           assert.equal(transactions[0].inputType, "insertCompositionText");
+      } finally {
+        act(() => root.unmount());
+      }
+    }
+    const captured = {
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 1 },
+    };
+    const context = {
+      document: core.createDocument([core.createParagraph([core.createText("AB")])]),
+      selection: structuredClone(captured),
+    };
+    const registry = core.createCommandRegistry([
+      {
+        name: "capture",
+        execute(input) {
+          input.context.selection.anchor.path[0] = 99;
+          return core.createCommandSuccess("capture");
+        },
+      },
+    ]);
+    const [item] = react.resolveToolbarItems(
+      [{ id: "capture", commandName: "capture", label: "快照", type: "command" }],
+      registry,
+      context,
+    );
+    assert.deepEqual(
+      react.executeToolbarCommand(item, registry, context).selection,
+      captured,
+    );
+    for (const Component of [react.FixedToolbar, react.FloatingToolbar]) {
+      const container = dom.window.document.createElement("div");
+      dom.window.document.body.append(container);
+      const root = createRoot(container);
+      const events = [];
+      const value = core.createDocument([
+        core.createParagraph([core.createText("AB")]),
+      ]);
+      const original = {
+        anchor: { path: [0, 0], offset: 0 },
+        focus: { path: [0, 0], offset: 1 },
+      };
+      const current = {
+        anchor: { path: [0, 0], offset: 1 },
+        focus: { path: [0, 0], offset: 2 },
+      };
+      const render = (document, selection, disabled = false) =>
+        act(() =>
+          root.render(
+            createElement(Component, {
+              document,
+              selection,
+              disabled,
+              onCommand: (event) => events.push(event),
+              ...(Component === react.FloatingToolbar
+                ? {
+                    anchorRect: {
+                      bottom: 120,
+                      height: 20,
+                      left: 20,
+                      top: 100,
+                      width: 100,
+                    },
+                  }
+                : {}),
+            }),
+          ),
+        );
+      const button = () => container.querySelector("button");
+      const press = () =>
+        act(() =>
+          button().dispatchEvent(
+            new dom.window.MouseEvent("pointerdown", {
+              bubbles: true,
+              button: 0,
+              cancelable: true,
+            }),
+          ),
+        );
+      const click = () => act(() => button().click());
+      try {
+        render(value, original);
+        press();
+        render(value, current);
+        click();
+        assert.deepEqual(events[0].selection, original);
+        const after = core.applyTransaction(value, events[0].result.transaction);
+        assert.equal(after.children[0].children[0].marks.bold, true);
+        press();
+        const replacement = core.createDocument([
+          core.createParagraph([core.createText("CD")]),
+        ]);
+        render(replacement, current);
+        click();
+        assert.equal(events.length, 1);
+        render(replacement, current, true);
+        assert.equal(button().disabled, true);
+        click();
+        assert.equal(events.length, 1);
+        render(replacement, current);
+        click();
+        assert.deepEqual(events[1].selection, current);
+        press();
+        act(() =>
+          button().dispatchEvent(
+            new dom.window.MouseEvent("pointercancel", { bubbles: true }),
+          ),
+        );
+        render(replacement, original);
+        click();
+        assert.deepEqual(events[2].selection, original);
       } finally {
         act(() => root.unmount());
       }
@@ -1256,6 +1371,15 @@ for (const packageConfig of publicPackages) {
   }
 
   if (packageConfig.directory === "packages/react") {
+    for (const name of ["ToolbarProps", "FixedToolbarProps"])
+      assert.match(
+        declarations,
+        new RegExp(`interface ${name} \\{[^}]*disabled\\?: boolean`),
+      );
+    assert.match(
+      declarations,
+      /onCommandCancel\?: \(item: ResolvedToolbarCommandItem\) => void/,
+    );
     await verifySlashMenuContract(runtime);
     assert.ok(declarations.includes('"insertLineBreak"'));
     assert.match(declarations, /onNativeBeforeInput\?: \(event: InputEvent\) => void/);
