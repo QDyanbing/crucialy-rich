@@ -9,7 +9,7 @@ export interface ToolbarProps {
   label?: string;
   onCommand?: (item: ResolvedToolbarCommandItem) => void;
   onCommandPointerDown?: (item: ResolvedToolbarCommandItem) => void;
-  onCommandPointerCancel?: (item: ResolvedToolbarCommandItem) => void;
+  onCommandCancel?: (item: ResolvedToolbarCommandItem) => void;
 }
 
 function joinClassNames(...classNames: Array<string | undefined>): string {
@@ -23,12 +23,17 @@ export function Toolbar({
   label = "富文本工具栏",
   onCommand,
   onCommandPointerDown,
-  onCommandPointerCancel,
+  onCommandCancel,
 }: ToolbarProps): ReactElement {
   function handleCommandClick(
     event: MouseEvent<HTMLButtonElement>,
     item: ResolvedToolbarCommandItem,
   ) {
+    if (event.defaultPrevented) {
+      onCommandCancel?.(item);
+      return;
+    }
+    if (event.button !== 0) return;
     event.preventDefault();
     onCommand?.(item);
   }
@@ -37,6 +42,8 @@ export function Toolbar({
     event: PointerEvent<HTMLButtonElement>,
     item: ResolvedToolbarCommandItem,
   ) {
+    if (event.defaultPrevented || event.button !== 0 || event.isPrimary === false)
+      return;
     event.preventDefault();
     onCommandPointerDown?.(item);
   }
@@ -68,7 +75,7 @@ export function Toolbar({
             type="button"
             onClick={(event) => handleCommandClick(event, item)}
             onPointerDown={(event) => handleCommandPointerDown(event, item)}
-            onPointerCancel={() => onCommandPointerCancel?.(item)}
+            onPointerCancel={() => onCommandCancel?.(item)}
           >
             {item.text ?? item.label}
           </button>
