@@ -153,6 +153,12 @@ ref 命令事件的 `inputType` 为 `command`。受控模式不会自行替换 `
 - `resolveToolbarItems(items, registry, context)`：把 CommandState 映射到配置。
 - `executeToolbarCommand(item, registry, context)`：执行命令并返回 `ToolbarCommandEvent`。
 - `createToolbarSelectionSnapshot(selection)`：为 pointerdown 到 click 之间保存独立模型选区。
+- `disabled?: boolean`：低层/固定/悬浮工具栏统一禁用按钮，默认 false，不覆盖命令自身的禁用条件；Demo 在组合输入期间接入此开关。
+- 低层 `Toolbar.onCommandCancel(item)`：pointercancel 或已取消的按下/点击通知，用于清理手势快照；固定/悬浮工具栏已内部处理。
+
+按下快照绑定文档、Registry、按钮命令及 payload 引用；归属不匹配时取消该次操作，不跨文档猜测范围。快照在执行/回调前消费，取消或已提交的禁用状态不复活旧手势。同文档 selection 更新仍保留按下范围，未配对 click 使用当前选区。`ToolbarCommandEvent.selection` 在命令执行前捕获，操作后选区读取 `result.selection`，扩展副作用不回滚。
+
+固定/悬浮工具栏每次重渲染刷新可变 Registry 状态，但不自动订阅注册变更。稳定引用、范围与事件限制见[选区恢复](./toolbar.md#选区恢复)。
 
 Toolbar 通过 class name 暴露样式入口，不捆绑主题 CSS。完整契约见[工具栏](./toolbar.md)。
 
