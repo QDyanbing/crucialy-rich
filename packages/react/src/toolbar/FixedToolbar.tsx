@@ -35,7 +35,10 @@ export function FixedToolbar({
   registry = defaultToolbarRegistry,
   selection,
 }: FixedToolbarProps): ReactElement {
-  const savedSelectionRef = useRef<RangeSelection>();
+  const savedSelectionRef = useRef<{
+    document: DocumentNode;
+    selection: RangeSelection | undefined;
+  }>();
   const resolvedItems = useMemo(
     () =>
       resolveToolbarItems(
@@ -47,7 +50,10 @@ export function FixedToolbar({
   );
 
   function handleCommandPointerDown() {
-    savedSelectionRef.current = createToolbarSelectionSnapshot(selection);
+    savedSelectionRef.current = {
+      document,
+      selection: createToolbarSelectionSnapshot(selection),
+    };
   }
 
   function handleCommand(item: (typeof resolvedItems)[number]) {
@@ -55,8 +61,10 @@ export function FixedToolbar({
       return;
     }
 
-    const commandSelection = savedSelectionRef.current ?? selection;
+    const saved = savedSelectionRef.current;
     savedSelectionRef.current = undefined;
+    if (saved && saved.document !== document) return;
+    const commandSelection = saved ? saved.selection : selection;
 
     onCommand?.(
       executeToolbarCommand(
