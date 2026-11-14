@@ -155,10 +155,11 @@ function createRenderedElement(
   node: RenderedElementNode,
   blockSelection?: BlockSelection,
   cellSelection?: CellSelection,
+  taskControlsDisabled = false,
 ): ReactElement {
   const children =
     node.children?.map((child) =>
-      createRenderedElement(child, blockSelection, cellSelection),
+      createRenderedElement(child, blockSelection, cellSelection, taskControlsDisabled),
     ) ?? node.text;
   const blockSelected =
     node.tagName === "img" &&
@@ -173,6 +174,11 @@ function createRenderedElement(
     node.tagName,
     {
       ...node.attributes,
+      ...(taskControlsDisabled &&
+      node.tagName === "input" &&
+      node.attributes?.["data-crucialy-task-item"] === "true"
+        ? { disabled: true }
+        : {}),
       key: node.path.join(".") || "root",
       ...(blockSelected || cellSelected ? { "data-selected": "true" } : {}),
       ...(node.style ? { style: node.style } : {}),
@@ -1082,6 +1088,11 @@ function RichTextEditorComponent(
       return;
     }
 
+    if (compositionRef.current.active) {
+      event.preventDefault();
+      return;
+    }
+
     const image = event.target.closest<HTMLImageElement>(
       'img[data-crucialy-image="true"]',
     );
@@ -1255,7 +1266,12 @@ function RichTextEditorComponent(
       suppressContentEditableWarning={suppressContentEditableWarning ?? editable}
     >
       {renderedDocument.children?.map((child) =>
-        createRenderedElement(child, blockSelection, cellSelection),
+        createRenderedElement(
+          child,
+          blockSelection,
+          cellSelection,
+          !editable || compositionActive,
+        ),
       )}
     </div>
   );
