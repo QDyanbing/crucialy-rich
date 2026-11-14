@@ -1093,6 +1093,17 @@ function RichTextEditorComponent(
       return;
     }
 
+    const taskControl = event.target.closest<HTMLInputElement>(
+      'input[data-crucialy-task-item="true"]',
+    );
+    const itemPath = taskControl ? getElementModelPath(taskControl) : undefined;
+    const taskItem = itemPath ? getNodeAtPath(document, itemPath) : undefined;
+    if (
+      taskControl &&
+      (taskControl.type !== "checkbox" || taskItem?.type !== "taskItem")
+    )
+      return;
+
     const image = event.target.closest<HTMLImageElement>(
       'img[data-crucialy-image="true"]',
     );
@@ -1125,33 +1136,24 @@ function RichTextEditorComponent(
       onCellSelectionChange?.(undefined);
     }
 
-    const taskControl = event.target.closest<HTMLInputElement>(
-      'input[data-crucialy-task-item="true"]',
-    );
+    if (taskControl && itemPath && taskItem?.type === "taskItem") {
+      const currentSelection = getModelSelectionFromDom(
+        event.currentTarget,
+        document,
+      ) ??
+        selection ?? {
+          anchor: { offset: 0, path: [...itemPath, 0] },
+          focus: { offset: 0, path: [...itemPath, 0] },
+        };
 
-    if (taskControl && event.currentTarget.contains(taskControl)) {
-      const itemPath = getElementModelPath(taskControl);
-
-      if (itemPath) {
-        const currentSelection = getModelSelectionFromDom(
-          event.currentTarget,
-          document,
-        ) ??
-          selection ?? {
-            anchor: { offset: 0, path: [...itemPath, 0] },
-            focus: { offset: 0, path: [...itemPath, 0] },
-          };
-
-        commitInputResult({
-          beforeSelection: currentSelection,
-          inputType: "setTaskItemChecked",
-          selection: currentSelection,
-          transaction: createTransaction([
-            createSetTaskItemCheckedOperation(itemPath, taskControl.checked),
-          ]),
-        });
-      }
-
+      commitInputResult({
+        beforeSelection: currentSelection,
+        inputType: "setTaskItemChecked",
+        selection: currentSelection,
+        transaction: createTransaction([
+          createSetTaskItemCheckedOperation(itemPath, !taskItem.checked),
+        ]),
+      });
       return;
     }
 
