@@ -142,6 +142,7 @@ async function verifyNativeInputBinding(react) {
     navigator: dom.window.navigator,
     HTMLElement: dom.window.HTMLElement,
     Element: dom.window.Element,
+    Document: dom.window.Document,
     Node: dom.window.Node,
     IS_REACT_ACT_ENVIRONMENT: true,
   };
@@ -300,6 +301,99 @@ async function verifyNativeInputBinding(react) {
         assert.equal(transactions.length, mode === "commit" ? 1 : 0);
         if (mode === "commit")
           assert.equal(transactions[0].inputType, "insertCompositionText");
+      } finally {
+        act(() => root.unmount());
+      }
+    }
+    for (const editable of [false, true]) {
+      const container = dom.window.document.createElement("div");
+      dom.window.document.body.append(container);
+      const root = createRoot(container);
+      const value = core.createDocument([
+        core.createParagraph([core.createText("正文")]),
+        core.createTaskList([core.createTaskItem([core.createText("待办")])]),
+        core.createImage("https://example.com/a.png"),
+      ]);
+      const selection = {
+        anchor: { path: [0, 0], offset: 1 },
+        focus: { path: [0, 0], offset: 1 },
+      };
+      const events = [],
+        blocks = [];
+      let cancelClick = false;
+      try {
+        act(() =>
+          root.render(
+            createElement(react.RichTextEditor, {
+              contentEditable: editable,
+              defaultValue: value,
+              selection,
+              onTransaction: (event) => events.push(event),
+              onBlockSelectionChange: (block) => blocks.push(block),
+              onClick: (event) => {
+                if (cancelClick) event.preventDefault();
+              },
+            }),
+          ),
+        );
+        const editor = container.firstElementChild;
+        const checkbox = editor.querySelector("input");
+        const image = editor.querySelector("img");
+        assert.equal(checkbox.disabled, !editable);
+        if (!editable) {
+          act(() => checkbox.click());
+          assert.equal(events.length, 0);
+          continue;
+        }
+        checkbox.focus();
+        const key = new dom.window.KeyboardEvent("keydown", {
+          key: "Backspace",
+          bubbles: true,
+          cancelable: true,
+        });
+        act(() => checkbox.dispatchEvent(key));
+        assert.equal(key.defaultPrevented, false);
+        assert.equal(events.length, 0);
+        checkbox.checked = true;
+        act(() => checkbox.click());
+        assert.equal(events.length, 1);
+        assert.deepEqual(events[0].transaction.operations, [
+          { type: "set_task_item_checked", path: [1, 0], checked: true },
+        ]);
+        assert.notEqual(events[0].beforeSelection, events[0].selection);
+        assert.equal(dom.window.document.activeElement, checkbox);
+        cancelClick = true;
+        act(() => checkbox.click());
+        assert.equal(events.length, 1);
+        cancelClick = false;
+        image.setAttribute("data-crucialy-path", "[0]");
+        act(() => image.click());
+        assert.equal(blocks.filter(Boolean).length, 0);
+        image.setAttribute("data-crucialy-path", "[2]");
+        act(() => image.click());
+        assert.deepEqual(blocks.at(-1), { type: "block", path: [2] });
+        const text = editor.querySelector("span").firstChild;
+        dom.window.getSelection().setBaseAndExtent(text, 1, text, 1);
+        act(() =>
+          editor.dispatchEvent(
+            new dom.window.CompositionEvent("compositionstart", {
+              bubbles: true,
+              cancelable: true,
+            }),
+          ),
+        );
+        assert.equal(checkbox.disabled, true);
+        act(() =>
+          editor.dispatchEvent(
+            new dom.window.CompositionEvent("compositionend", {
+              data: "",
+              bubbles: true,
+              cancelable: true,
+            }),
+          ),
+        );
+        assert.equal(checkbox.disabled, false);
+        assert.equal(events.length, 1);
       } finally {
         act(() => root.unmount());
       }
