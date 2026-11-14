@@ -253,9 +253,10 @@ function isNonEditorInputTarget(
   return (
     element !== root &&
     typeof element?.closest === "function" &&
-    Boolean(
+    (Boolean(
       element.closest('input, textarea, select, button, [contenteditable="false"]'),
-    )
+    ) ||
+      element.closest('[data-crucialy-rich-editor="true"]') !== root)
   );
 }
 
@@ -704,6 +705,7 @@ function RichTextEditorComponent(
     if (
       event.nativeEvent.type === "compositionend" ||
       event.defaultPrevented ||
+      isNonEditorInputTarget(event.currentTarget, event.target) ||
       !editable ||
       compositionRef.current.active ||
       (event.nativeEvent as InputEvent).isComposing
@@ -822,6 +824,7 @@ function RichTextEditorComponent(
 
     if (
       event.defaultPrevented ||
+      isNonEditorInputTarget(event.currentTarget, event.target) ||
       !editable ||
       compositionRef.current.active ||
       event.nativeEvent.isComposing
@@ -947,7 +950,12 @@ function RichTextEditorComponent(
 
   function handleCopy(event: ClipboardEvent<HTMLDivElement>) {
     onCopy?.(event);
-    if (event.defaultPrevented || compositionRef.current.active) return;
+    if (
+      event.defaultPrevented ||
+      compositionRef.current.active ||
+      isNonEditorInputTarget(event.currentTarget, event.target)
+    )
+      return;
     if (blockSelection) {
       if (!ownsBlockClipboardSelection(event.currentTarget)) return;
       event.preventDefault();
@@ -974,7 +982,12 @@ function RichTextEditorComponent(
 
   function handleCut(event: ClipboardEvent<HTMLDivElement>) {
     onCut?.(event);
-    if (event.defaultPrevented || !editable) return;
+    if (
+      event.defaultPrevented ||
+      !editable ||
+      isNonEditorInputTarget(event.currentTarget, event.target)
+    )
+      return;
     event.preventDefault();
     if (compositionRef.current.active) return;
     if (blockSelection) {
@@ -1032,7 +1045,11 @@ function RichTextEditorComponent(
   function handlePaste(event: ClipboardEvent<HTMLDivElement>) {
     onPaste?.(event);
 
-    if (event.defaultPrevented || !editable) {
+    if (
+      event.defaultPrevented ||
+      !editable ||
+      isNonEditorInputTarget(event.currentTarget, event.target)
+    ) {
       return;
     }
 
