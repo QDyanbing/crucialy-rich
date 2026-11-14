@@ -47,6 +47,7 @@ interface OrderedListNode {
 - `toggleBulletList`、`toggleOrderedList` 和 `toggleTaskList` 支持 paragraph 包装、列表类型互换和再次执行恢复 paragraph。
 - 列表转换保留文字、marks 和 selection 方向；普通列表转任务列表时补 `checked: false`。
 - checkbox 使用 `set_task_item_checked` 更新任务状态，并进入 Transaction 与 History。
+- React 任务点击以模型 checked 为准并校验 taskItem 路径，只读/组合期间禁用控件；原生空格键不会同时编辑旧文字范围，前后选区快照独立。受控接入、焦点与取消边界见[编辑区交互](./editor-interactions.md)。
 - React 编辑器支持 Ctrl/Meta + Shift + 7 切换 OrderedList、Ctrl/Meta + Shift + 8 切换 BulletList。
 
 ## 键盘输入

@@ -77,6 +77,8 @@ export function Demo() {
 - DOM 元素端点、拆分 Text 和任务项 checkbox 边界共用 Core 的真实子节点/UTF-16 映射，覆盖剪贴板、输入、ref 与光标恢复；不把 DOM 改写视为模型导入，不扩大跨结构编辑范围，见[DOM 偏移规则](../../docs/features/selection-sync.md#dom-偏移规则)。
 - 扩展失败：工具栏异常项关闭，正常项继续可用；键盘命令 failure 不继续旧删除 fallback，图片失败不误用遗留文字范围，Enter/格式快捷键拒绝后不交浏览器直接改 DOM。剪贴板 MIME/数据不可用不提交模型事务，后续正常事件可恢复，宿主回调与 React 构造事件前的异常不在保护内，详见[读取与回调异常](../../docs/features/paste.md#读取与回调异常)。
 
+编辑区点击已支持宿主取消、图片/单元格/任务模型路径校验和最近实例归属；任务以模型 checked 为准，只读/组合期间禁用复选框。内嵌控件与嵌套实例的输入不会借用外层旧文字范围，获焦时暂缓选区回写，Demo 保留原生空格键连续勾选。完整事件、History 和焦点限制见[编辑区交互](../../docs/features/editor-interactions.md)。
+
 Toolbar 当前支持：
 
 - `createDefaultToolbarItems`：创建 Bold、Italic、Underline、Strike、Inline Code、清除格式、Link、H2 和 Quote 默认配置。

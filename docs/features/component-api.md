@@ -143,6 +143,10 @@ ref 命令事件的 `inputType` 为 `command`。受控模式不会自行替换 `
 - 受控 `selection` 会在文档或选区更新后的 layout effect 中回写 DOM，可用于菜单 command 完成后恢复浏览器选区。
 - 初始渲染或浏览器选区变化不会触发 `onChange`。
 
+## 编辑区交互
+
+编辑区点击与内嵌控件的宿主取消、模型目标校验、Composition/只读禁用、事件/Range 归属和焦点恢复边界见[编辑区交互](./editor-interactions.md)。任务勾选保留独立的前后选区快照；内嵌控件获焦时暂缓文字选区回写，不新增 blur 自动同步。
+
 ## Toolbar API
 
 - `Toolbar`：接收已经解析状态的 items，只负责语义渲染。
