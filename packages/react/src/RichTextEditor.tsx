@@ -1180,19 +1180,25 @@ function RichTextEditorComponent(
     }
 
     if (taskControl && itemPath && taskItem?.type === "taskItem") {
+      const savedSelection =
+        selection &&
+        isValidPoint(document, selection.anchor) &&
+        isValidPoint(document, selection.focus)
+          ? selection
+          : undefined;
       const currentSelection = getModelSelectionFromDom(
         event.currentTarget,
         document,
       ) ??
-        selection ?? {
+        savedSelection ?? {
           anchor: { offset: 0, path: [...itemPath, 0] },
           focus: { offset: 0, path: [...itemPath, 0] },
         };
 
       commitInputResult({
-        beforeSelection: currentSelection,
+        beforeSelection: cloneRangeSelection(currentSelection),
         inputType: "setTaskItemChecked",
-        selection: currentSelection,
+        selection: cloneRangeSelection(currentSelection),
         transaction: createTransaction([
           createSetTaskItemCheckedOperation(itemPath, !taskItem.checked),
         ]),
