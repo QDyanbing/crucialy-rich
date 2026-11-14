@@ -1084,7 +1084,12 @@ function RichTextEditorComponent(
   function handleClick(event: MouseEvent<HTMLDivElement>) {
     onClick?.(event);
 
-    if (event.defaultPrevented || !editable || !(event.target instanceof Element)) {
+    if (
+      event.defaultPrevented ||
+      !editable ||
+      !(event.target instanceof Element) ||
+      event.target.closest('[data-crucialy-rich-editor="true"]') !== event.currentTarget
+    ) {
       return;
     }
 
@@ -1107,6 +1112,12 @@ function RichTextEditorComponent(
     const image = event.target.closest<HTMLImageElement>(
       'img[data-crucialy-image="true"]',
     );
+    if (
+      !image &&
+      !taskControl &&
+      isNonEditorInputTarget(event.currentTarget, event.target)
+    )
+      return;
 
     if (image && event.currentTarget.contains(image)) {
       const imagePath = getElementModelPath(image);
