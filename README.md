@@ -90,6 +90,8 @@ Quote 内按 Enter 会保留引用格式分段；空 Quote 再按 Enter 则原�
 
 Composition 已补齐状态/通知选区隔离、宿主取消、同一结束事件的 React 回退去重，以及文档替换/只读/块选区后的旧会话清理。受控 value 的文档引用在组合期间须保持稳定；语义相同的新对象也视为替换，不把旧候选写入新文档。History batch 和公开 API 不变，真机事件序列边界见[中文输入法](./docs/features/ime.md)。
 
+编辑区交互已补齐点击取消、模型路径与最近实例校验，任务 checked 以模型为准，只读/组合期间禁用复选框。内嵌控件和嵌套实例不借用外层文字 Range，控件获焦时暂缓选区回写；Demo 支持空格连续勾选，每次单独进入 History。前后快照、受控回传及焦点限制见[编辑区交互](./docs/features/editor-interactions.md)。
+
 第 24 周“组件 API、集成回归与发布闭环”已全部完成：`RichTextEditor` 提供 Command Registry 和 ref API，core/react 已形成 `0.1.0` ESM 发布产物，全量回归、Demo 示例索引、中文文档中心和发布说明草稿均已完成。当前 `0.1.0` 发布候选已就绪，尚未创建 tag 或发布 npm 包。
 
 ## 技术栈
@@ -215,6 +217,7 @@ pnpm test:e2e
 - [Command 系统](./docs/features/command.md)
 - [History 记录与撤销重做](./docs/features/history.md)
 - [工具栏](./docs/features/toolbar.md)
+- [编辑区交互](./docs/features/editor-interactions.md)
 - [斜杠菜单](./docs/features/slash-menu.md)
 - [图片](./docs/features/image.md)
 - [粘贴](./docs/features/paste.md)
