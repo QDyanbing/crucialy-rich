@@ -1111,27 +1111,35 @@ function RichTextEditorComponent(
     if (image && event.currentTarget.contains(image)) {
       const imagePath = getElementModelPath(image);
 
-      if (imagePath) {
+      if (
+        imagePath?.length === 1 &&
+        getNodeAtPath(document, imagePath)?.type === "image"
+      ) {
         event.preventDefault();
         event.currentTarget.focus();
+        onCellSelectionChange?.(undefined);
         onBlockSelectionChange?.(createBlockSelection(imagePath));
       }
 
       return;
     }
 
-    onBlockSelectionChange?.(undefined);
-
     const tableCell = event.target.closest<HTMLTableCellElement>(
       'td[data-crucialy-table-cell="true"]',
     );
 
-    if (tableCell && event.currentTarget.contains(tableCell)) {
-      const cellPath = getElementModelPath(tableCell);
+    const cellPath = tableCell ? getElementModelPath(tableCell) : undefined;
+    if (
+      tableCell &&
+      (!cellPath ||
+        cellPath.length !== 3 ||
+        getNodeAtPath(document, cellPath)?.type !== "tableCell")
+    )
+      return;
 
-      if (cellPath) {
-        onCellSelectionChange?.(createCellSelection(cellPath));
-      }
+    onBlockSelectionChange?.(undefined);
+    if (cellPath) {
+      onCellSelectionChange?.(createCellSelection(cellPath));
     } else {
       onCellSelectionChange?.(undefined);
     }
