@@ -251,6 +251,7 @@ pnpm test:e2e
 - [第 23 周 QA](./docs/qa/week-23.md)
 - [第 24 周 QA](./docs/qa/week-24.md)
 - [工具栏闭环验收](./docs/qa/toolbar.md)
+- [编辑区交互验收](./docs/qa/editor-interactions.md)
 - [斜杠菜单闭环验收](./docs/qa/slash-menu.md)
 - [图片闭环验收](./docs/qa/image.md)
 - [粘贴闭环验收](./docs/qa/paste.md)
