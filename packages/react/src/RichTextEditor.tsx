@@ -1078,7 +1078,7 @@ function RichTextEditorComponent(
   function handleClick(event: MouseEvent<HTMLDivElement>) {
     onClick?.(event);
 
-    if (!editable || !(event.target instanceof Element)) {
+    if (event.defaultPrevented || !editable || !(event.target instanceof Element)) {
       return;
     }
 
