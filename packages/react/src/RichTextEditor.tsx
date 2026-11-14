@@ -237,10 +237,17 @@ function createKeyboardInputResultFromCommandResult(
 
 function getModelSelectionFromDom(root: HTMLDivElement, document: DocumentNode) {
   const domSelection = root.ownerDocument.getSelection();
+  function ownsNode(node: Node | null) {
+    const element = node instanceof Element ? node : node?.parentElement;
+    return (
+      root.contains(node) &&
+      element?.closest('[data-crucialy-rich-editor="true"]') === root
+    );
+  }
 
   return domSelection &&
-    root.contains(domSelection.anchorNode) &&
-    root.contains(domSelection.focusNode)
+    ownsNode(domSelection.anchorNode) &&
+    ownsNode(domSelection.focusNode)
     ? domSelectionToModelSelection(document, domSelection)
     : undefined;
 }
