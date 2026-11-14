@@ -119,10 +119,21 @@ import {
   useState,
   type ChangeEvent,
   type KeyboardEvent,
+  type SyntheticEvent,
 } from "react";
 import { createRoot } from "react-dom/client";
 
 import "./styles.css";
+
+function isEditorTextEvent(event: SyntheticEvent<HTMLDivElement>): boolean {
+  const target = event.target;
+  return (
+    target instanceof Element &&
+    (target === event.currentTarget ||
+      (!target.closest('input, textarea, select, button, [contenteditable="false"]') &&
+        target.closest('[data-crucialy-rich-editor="true"]') === event.currentTarget))
+  );
+}
 
 type ModelExampleId =
   | "regular"
@@ -1701,6 +1712,7 @@ function DemoApp() {
 
   function handleEditorKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     if (
+      !isEditorTextEvent(event) ||
       event.defaultPrevented ||
       compositionState.active ||
       event.nativeEvent.isComposing
@@ -1812,7 +1824,8 @@ function DemoApp() {
     applyCommandResult(event.result, modelSelection);
   }
 
-  function handleBrowserSelectionSync() {
+  function handleBrowserSelectionSync(event: SyntheticEvent<HTMLDivElement>) {
+    if (!isEditorTextEvent(event)) return;
     const browserSelection = window.getSelection();
     const nextSelection = browserSelection
       ? domSelectionToModelSelection(normalizedDocument, browserSelection)

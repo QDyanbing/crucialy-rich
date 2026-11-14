@@ -646,7 +646,16 @@ function RichTextEditorComponent(
       return;
     }
 
-    applyModelSelectionToDom(rootRef.current, document, selection);
+    const root = rootRef.current;
+    const activeElement = root.ownerDocument.activeElement;
+    if (
+      activeElement &&
+      root.contains(activeElement) &&
+      isNonEditorInputTarget(root, activeElement)
+    )
+      return;
+
+    applyModelSelectionToDom(root, document, selection);
   }, [document, selection]);
 
   useIsomorphicLayoutEffect(() => {

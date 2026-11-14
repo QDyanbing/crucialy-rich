@@ -4,6 +4,37 @@ import { describe, expect, it, vi } from "vitest";
 import { mountInteractionEditor } from "./editor-interaction-fixture";
 
 describe("editor click lifecycle", () => {
+  it.each(["task", "nested-editor"])(
+    "does not restore a text range over a focused %s",
+    (kind) => {
+      const host = mountInteractionEditor();
+      const control =
+        kind === "task"
+          ? host.target('input[type="checkbox"]')
+          : document.createElement("div");
+      if (kind === "nested-editor") {
+        control.tabIndex = 0;
+        control.setAttribute("data-crucialy-rich-editor", "true");
+        host.editor.append(control);
+      }
+      control.focus();
+      const restore = vi.spyOn(window.getSelection()!, "setBaseAndExtent");
+      try {
+        host.rerender({
+          value: structuredClone(host.value),
+          selection: {
+            anchor: { path: [0, 0], offset: 0 },
+            focus: { path: [0, 0], offset: 2 },
+          },
+        });
+        expect(restore).not.toHaveBeenCalled();
+        expect(document.activeElement).toBe(control);
+      } finally {
+        restore.mockRestore();
+      }
+    },
+  );
+
   it.each(["img", "td", "p"])("does not process readonly %s clicks", (selector) => {
     const onClick = vi.fn();
     const host = mountInteractionEditor({ contentEditable: false, onClick });
