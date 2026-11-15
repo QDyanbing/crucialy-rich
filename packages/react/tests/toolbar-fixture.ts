@@ -45,6 +45,19 @@ export function mountToolbar(initial: FixedToolbarProps, strict = false) {
     click(index = 0) {
       act(() => button(index).click());
     },
+    focus(index = 0) {
+      act(() => button(index).focus());
+    },
+    key(index: number, key: string, extra: KeyboardEventInit = {}) {
+      const event = new KeyboardEvent("keydown", {
+        key,
+        bubbles: true,
+        cancelable: true,
+        ...extra,
+      });
+      act(() => button(index).dispatchEvent(event));
+      return event;
+    },
     cancel(index = 0) {
       act(() =>
         button(index).dispatchEvent(new MouseEvent("pointercancel", { bubbles: true })),

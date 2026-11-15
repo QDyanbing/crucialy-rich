@@ -1,5 +1,5 @@
-import type { MouseEvent, PointerEvent, ReactElement } from "react";
-import { useState } from "react";
+import type { KeyboardEvent, MouseEvent, PointerEvent, ReactElement } from "react";
+import { useRef, useState } from "react";
 
 import type { ResolvedToolbarCommandItem, ResolvedToolbarItem } from "./types";
 
@@ -27,6 +27,7 @@ export function Toolbar({
   onCommandCancel,
 }: ToolbarProps): ReactElement {
   const [focusedId, setFocusedId] = useState<string>();
+  const buttonRefs = useRef(new Map<string, HTMLButtonElement>());
   const enabledItems = disabled
     ? []
     : items.filter(
@@ -36,6 +37,27 @@ export function Toolbar({
   const tabStopId = enabledItems.some((item) => item.id === focusedId)
     ? focusedId
     : enabledItems[0]?.id;
+
+  function handleKeyDown(
+    event: KeyboardEvent<HTMLButtonElement>,
+    item: ResolvedToolbarCommandItem,
+  ) {
+    if (
+      event.defaultPrevented ||
+      disabled ||
+      item.state.disabled ||
+      enabledItems.length === 0
+    )
+      return;
+    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+    const current = enabledItems.findIndex((candidate) => candidate.id === item.id);
+    if (current < 0) return;
+    const step = event.key === "ArrowRight" ? 1 : -1;
+    const next =
+      enabledItems[(current + step + enabledItems.length) % enabledItems.length]!;
+    event.preventDefault();
+    buttonRefs.current.get(next.id)?.focus();
+  }
 
   function handleCommandClick(
     event: MouseEvent<HTMLButtonElement>,
@@ -94,8 +116,13 @@ export function Toolbar({
             key={item.id}
             title={item.label}
             type="button"
+            ref={(button) => {
+              if (button) buttonRefs.current.set(item.id, button);
+              else buttonRefs.current.delete(item.id);
+            }}
             tabIndex={item.id === tabStopId ? 0 : -1}
             onFocus={() => setFocusedId(item.id)}
+            onKeyDown={(event) => handleKeyDown(event, item)}
             onClick={(event) => handleCommandClick(event, item)}
             onPointerDown={(event) => handleCommandPointerDown(event, item)}
             onPointerCancel={() => onCommandCancel?.(item)}
