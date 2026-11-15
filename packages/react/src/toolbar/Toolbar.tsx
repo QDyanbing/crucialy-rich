@@ -1,4 +1,5 @@
 import type { MouseEvent, PointerEvent, ReactElement } from "react";
+import { useState } from "react";
 
 import type { ResolvedToolbarCommandItem, ResolvedToolbarItem } from "./types";
 
@@ -25,6 +26,17 @@ export function Toolbar({
   onCommandPointerDown,
   onCommandCancel,
 }: ToolbarProps): ReactElement {
+  const [focusedId, setFocusedId] = useState<string>();
+  const enabledItems = disabled
+    ? []
+    : items.filter(
+        (item): item is ResolvedToolbarCommandItem =>
+          item.type === "command" && !item.state.disabled,
+      );
+  const tabStopId = enabledItems.some((item) => item.id === focusedId)
+    ? focusedId
+    : enabledItems[0]?.id;
+
   function handleCommandClick(
     event: MouseEvent<HTMLButtonElement>,
     item: ResolvedToolbarCommandItem,
@@ -82,6 +94,8 @@ export function Toolbar({
             key={item.id}
             title={item.label}
             type="button"
+            tabIndex={item.id === tabStopId ? 0 : -1}
+            onFocus={() => setFocusedId(item.id)}
             onClick={(event) => handleCommandClick(event, item)}
             onPointerDown={(event) => handleCommandPointerDown(event, item)}
             onPointerCancel={() => onCommandCancel?.(item)}
