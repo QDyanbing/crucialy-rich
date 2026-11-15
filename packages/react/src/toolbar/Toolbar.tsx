@@ -50,12 +50,16 @@ export function Toolbar({
       event.altKey ||
       event.ctrlKey ||
       event.metaKey ||
-      event.shiftKey ||
+      (event.shiftKey && event.key !== "Tab") ||
       disabled ||
       item.state.disabled ||
       enabledItems.length === 0
     )
       return;
+    if (["Enter", " ", "Tab"].includes(event.key)) {
+      onCommandCancel?.(item);
+      return;
+    }
     if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
     const current = enabledItems.findIndex((candidate) => candidate.id === item.id);
     if (current < 0) return;
@@ -72,6 +76,7 @@ export function Toolbar({
           ? enabledItems[enabledItems.length - 1]!
           : enabledItems[(current + step + enabledItems.length) % enabledItems.length]!;
     event.preventDefault();
+    onCommandCancel?.(item);
     buttonRefs.current.get(next.id)?.focus();
   }
 
