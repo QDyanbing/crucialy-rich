@@ -49,12 +49,16 @@ export function Toolbar({
       enabledItems.length === 0
     )
       return;
-    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
     const current = enabledItems.findIndex((candidate) => candidate.id === item.id);
     if (current < 0) return;
     const step = event.key === "ArrowRight" ? 1 : -1;
     const next =
-      enabledItems[(current + step + enabledItems.length) % enabledItems.length]!;
+      event.key === "Home"
+        ? enabledItems[0]!
+        : event.key === "End"
+          ? enabledItems[enabledItems.length - 1]!
+          : enabledItems[(current + step + enabledItems.length) % enabledItems.length]!;
     event.preventDefault();
     buttonRefs.current.get(next.id)?.focus();
   }
