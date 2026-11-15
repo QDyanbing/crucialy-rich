@@ -505,6 +505,49 @@ async function verifyNativeInputBinding(react) {
         render(replacement, original);
         click();
         assert.deepEqual(events[2].selection, original);
+        const buttons = container.querySelectorAll("button");
+        const toolbar = container.querySelector('[role="toolbar"]');
+        assert.equal(container.querySelectorAll('button[tabindex="0"]').length, 1);
+        press();
+        render(replacement, current);
+        act(() => buttons[0].focus());
+        const key = (index, value) =>
+          act(() =>
+            buttons[index].dispatchEvent(
+              new dom.window.KeyboardEvent("keydown", {
+                key: value,
+                bubbles: true,
+                cancelable: true,
+              }),
+            ),
+          );
+        key(0, "ArrowRight");
+        assert.equal(dom.window.document.activeElement, buttons[1]);
+        assert.equal(buttons[1].tabIndex, 0);
+        assert.equal(events.length, 3);
+        key(1, "Enter");
+        assert.equal(events.length, 3);
+        act(() => buttons[1].click());
+        assert.equal(events.length, 4);
+        assert.deepEqual(events[3].selection, current);
+        const italic = core.applyTransaction(replacement, events[3].result.transaction);
+        assert.deepEqual(italic.children[0].children, [
+          core.createText("C"),
+          core.createText("D", { italic: true }),
+        ]);
+        key(1, "Home");
+        assert.equal(dom.window.document.activeElement, buttons[0]);
+        key(0, "End");
+        assert.equal(dom.window.document.activeElement, buttons[8]);
+        toolbar.style.direction = "rtl";
+        act(() => buttons[0].focus());
+        key(0, "ArrowLeft");
+        assert.equal(dom.window.document.activeElement, buttons[1]);
+        render(replacement, current, true);
+        assert.equal(container.querySelectorAll('button[tabindex="0"]').length, 0);
+        render(replacement, current);
+        assert.equal(container.querySelectorAll('button[tabindex="0"]').length, 1);
+        assert.equal(events.length, 4);
       } finally {
         act(() => root.unmount());
       }

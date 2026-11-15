@@ -50,6 +50,22 @@ for (const width of [1280, 390]) {
       await expect(bold).toBeFocused();
       await page.keyboard.press("ArrowLeft");
       await expect(quote).toBeFocused();
+      const geometry = await quote.evaluate((button) => {
+        const toolbar = button.closest('[role="toolbar"]')!.getBoundingClientRect();
+        const bounds = button.getBoundingClientRect();
+        const range = document.createRange();
+        range.selectNodeContents(button);
+        return {
+          lines: range.getClientRects().length,
+          left: bounds.left,
+          right: bounds.right,
+          toolbarLeft: toolbar.left,
+          toolbarRight: toolbar.right,
+        };
+      });
+      expect(geometry.lines).toBe(1);
+      expect(geometry.left).toBeGreaterThanOrEqual(geometry.toolbarLeft + 1);
+      expect(geometry.right).toBeLessThanOrEqual(geometry.toolbarRight - 1);
       await expect(toolbar.locator('button[tabindex="0"]')).toHaveCount(1);
       await toolbar.screenshot({
         path: test.info().outputPath("toolbar-keyboard-focus.png"),
