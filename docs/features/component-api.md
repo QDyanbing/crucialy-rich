@@ -158,7 +158,8 @@ ref 命令事件的 `inputType` 为 `command`。受控模式不会自行替换 `
 - `executeToolbarCommand(item, registry, context)`：执行命令并返回 `ToolbarCommandEvent`。
 - `createToolbarSelectionSnapshot(selection)`：为 pointerdown 到 click 之间保存独立模型选区。
 - `disabled?: boolean`：低层/固定/悬浮工具栏统一禁用按钮，默认 false，不覆盖命令自身的禁用条件；Demo 在组合输入期间接入此开关。
-- 低层 `Toolbar.onCommandCancel(item)`：pointercancel 或已取消的按下/点击通知，用于清理手势快照；固定/悬浮工具栏已内部处理。
+- 低层 `Toolbar.onCommandCancel(item)`：pointercancel、已取消的按下/点击，以及有效键盘导航/激活/Tab 离开通知，用于清理手势快照；固定/悬浮工具栏已内部处理。
+- 工具栏统一单 Tab 入口、左右键回绕、Home/End 和 RTL；Enter/Space 保留原生 click 激活，导航不改文档。焦点 ID 为组件内部状态，不增加公共签名，完整规则见[键盘导航](./toolbar.md#键盘导航)。
 
 按下快照绑定文档、Registry、按钮命令及 payload 引用；归属不匹配时取消该次操作，不跨文档猜测范围。快照在执行/回调前消费，取消或已提交的禁用状态不复活旧手势。同文档 selection 更新仍保留按下范围，未配对 click 使用当前选区。`ToolbarCommandEvent.selection` 在命令执行前捕获，操作后选区读取 `result.selection`，扩展副作用不回滚。
 

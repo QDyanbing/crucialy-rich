@@ -85,7 +85,8 @@ Toolbar 当前支持：
 - `FixedToolbar`：根据 document/selection 展示 active 和 disabled，并通过 `onCommand` 输出执行结果。
 - `FloatingToolbar`：根据非折叠 selection 和宿主提供的 `anchorRect` 显示在选区附近。
 - pointerdown 选区快照绑定文档/Registry/按钮命令/payload 引用，归属不一致时拒绝本次手势；同文档 selection 更新仍使用按下范围，快照在执行与回调前消费。
-- 可选 `disabled` 统一禁用低层/固定/悬浮工具栏，Demo 在组合输入期间接入；恢复后不复活旧手势。`Toolbar.onCommandCancel` 通知 pointercancel 或宿主已取消事件，固定/悬浮工具栏已处理清理。
+- 可选 `disabled` 统一禁用低层/固定/悬浮工具栏，Demo 在组合输入期间接入；恢复后不复活旧手势。`Toolbar.onCommandCancel` 通知 pointercancel、宿主已取消事件和有效键盘导航/激活/Tab 离开，固定/悬浮工具栏已处理清理。
+- 单 Tab 入口记忆实际上次焦点，左右键跳过禁用/分隔项并回绕，Home/End 定位首尾，RTL 读取实时 direction。Enter/Space 只经原生 click 执行一次，导航不发事务；改键、IME、配置更新、SSR 与自定义主题限制见[键盘导航](../../docs/features/toolbar.md#键盘导航)。
 - 每次重渲染刷新可变 Registry 的命令状态，但不自动订阅注册变更。`ToolbarCommandEvent.selection` 是命令执行前快照，操作后位置读取 `result.selection`；范围引用与宿主接入限制见下方工具栏文档。
 - 固定/悬浮组件只提供结构 class，产品主题、History 应用和链接菜单由宿主负责。
 

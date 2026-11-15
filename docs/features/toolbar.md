@@ -94,9 +94,31 @@ Toolbar 不复制 Bold、Link 或 Block Type 的状态判断规则，模型能�
 - 使用 fixed 定位；宿主负责从浏览器 Range 读取并更新 `anchorRect`。
 - `toolbarSize` 和 `viewport` 可覆盖默认尺寸，便于自定义外观与测试。
 
+## 键盘导航
+
+低层、固定和悬浮工具栏统一使用 roving tabindex，遵循 [W3C Toolbar 横向键盘模式](https://www.w3.org/WAI/ARIA/apg/patterns/toolbar/)。公开 prop/类型不变，键盘焦点不是文档选区，也不改变命令 active 状态。
+
+| 按键                         | 行为                                                            |
+| ---------------------------- | --------------------------------------------------------------- |
+| Tab / Shift+Tab              | 原生进入/离开工具栏，不逐个经过所有按钮，也不阻止默认跳转       |
+| ArrowLeft / ArrowRight       | 移动到前后可用命令，跳过 disabled 和 separator，首尾回绕        |
+| Home / End                   | 移动到首个/最后一个可用命令                                     |
+| Enter / Space                | 保留原生按钮激活，只通过 click 执行一次命令；keydown 不直接执行 |
+| ArrowUp / ArrowDown 及其他键 | 不参与横向导航                                                  |
+
+每组最多一个可用按钮是 Tab 入口：优先使用上次实际获得焦点的有效配置 ID，否则选择首个可用项。空配置或全部禁用时没有入口；配置重排仍按最新顺序导航。命令 active 不等于键盘 focus，pointerdown 保留编辑区焦点时不会假装按钮已获得焦点。新增/恢复项目不会主动抢焦点，动态移除或禁用聚焦项时也不额外强制转移浏览器焦点。
+
+左右键在 keydown 时读取工具栏当前计算样式 direction：RTL 反转左右方向，Home/End 仍按配置顺序定位首尾。每个实例的按钮 ref 与焦点记忆独立，不查询其他工具栏。只处理按钮自身且最近 toolbar 根属于本实例的事件，不接管按钮内额外控件或嵌套工具栏的按键。
+
+宿主已取消的事件、IME 的 isComposing / keyCode 229 不触发导航；除 Shift+Tab 外，Alt/Ctrl/Meta/Shift 组合键不被接管。这不是全局 IME 状态机，宿主仍须在组合期间传 disabled，Demo 已接入。
+
+可用的导航、Enter/Space 激活及 Tab/Shift+Tab 离开会先调用 `onCommandCancel(当前项)`，释放可能残留的指针选区。固定/悬浮工具栏内部已处理；低层宿主若实现自己的快照，也应清理。导航不发 onCommand、不生成事务或 History；键盘激活读取当前模型 selection，结果应用与撤销/重做仍由宿主负责。取消通知现在不再仅限于指针事件，宿主回调异常仍不捕获。
+
+初始 SSR 和水合使用相同的首个可用入口，不自动 focus；卸载后焦点记忆重置。Demo 按钮保持单行与非压缩宽度，窄条横向滚动；自定义主题仍需提供清晰的 focus-visible 和可用滚动容器。这里没有竖向/二维导航、全局快捷键、自动返回编辑区、屏幕阅读器全面兼容认证或浮层滚动定位监听。
+
 ## 选区恢复
 
-Toolbar button 在未取消的主指针、主按钮 `pointerdown` 阶段阻止默认焦点迁移，并通过 `createToolbarSelectionSnapshot` 深拷贝模型选区。右键、中键及非主指针不会捕获；宿主已取消的按下/点击不继续处理。低层 `Toolbar` 的可选 `onCommandCancel(item)` 会在 `pointercancel` 或已取消的按下/点击时通知宿主清理待处理状态；`FixedToolbar` 已接入此清理。
+Toolbar button 在未取消的主指针、主按钮 `pointerdown` 阶段阻止默认焦点迁移，并通过 `createToolbarSelectionSnapshot` 深拷贝模型选区。右键、中键及非主指针不会捕获；宿主已取消的按下/点击不继续处理。低层 `Toolbar` 的可选 `onCommandCancel(item)` 会在 `pointercancel`、已取消的按下/点击或上述键盘意图开始时通知宿主清理待处理状态；`FixedToolbar` 已接入此清理。
 
 按下快照记录文档引用、Registry 引用、按钮 ID、commandName、payload 引用以及当时的选区（包括缺失选区）。点击前若这些归属不一致，本次手势取消，不执行命令、不通知 onCommand；下一次新激活可使用当前上下文。同文档只更新 selection 或展示文字/样式时，仍使用原按下范围。文档即使内容相等，只要换引用也视为替换；宿主应保持未编辑模型和配置 payload 引用稳定。
 
