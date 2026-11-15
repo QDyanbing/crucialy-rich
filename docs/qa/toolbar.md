@@ -43,10 +43,27 @@
 pnpm check:all
 ```
 
+## 键盘导航验收
+
+2026-11-15 新增 83 项 React 单测和 14 项 Chromium 用例，覆盖低层、固定和悬浮工具栏：
+
+- `toolbar-tab-stop.test.ts`、`toolbar-arrow-navigation.test.ts`、`toolbar-home-end.test.ts`、`toolbar-rtl-navigation.test.ts`：25 项，单入口、焦点记忆、方向回绕、禁用/分隔项跳过、Home/End 与实时 RTL。
+- `toolbar-keyboard-guards.test.ts`：28 项，四类修饰键、isComposing/keyCode 229、宿主取消与后续恢复。
+- `toolbar-keyboard-selection.test.ts`：7 项，导航/Enter/Space/Tab/Shift+Tab 释放旧指针 Range，不在 keydown 提交命令。
+- `toolbar-focus-ownership.test.ts`、`toolbar-dynamic-focus.test.ts`：11 项，子控件/最近根/多实例隔离，配置重排、动态禁用、焦点与 active 分离、空/单项恢复不抢焦点。
+- `toolbar-keyboard-lifecycle.test.ts`：3 项，双组 SSR 水合、StrictMode 最新回调与单次通知、卸载重挂。
+- `toolbar-keyboard-history.test.ts`：9 项，固定/悬浮、正反选区、两种激活键单条 History 往返，以及 guard 失败重试。
+- `scripts/verify-package-exports.mjs`：构建包实际挂载后验证单入口、方向/Home/End/RTL、旧快照释放、目标文字格式、禁用/恢复，导航不发命令。
+- `tests/e2e/toolbar-keyboard.spec.ts`：14 项，桌面/手机真实 Tab/Shift+Tab 进入/离开与记忆、方向/Home/End、Enter/Space 原生单次激活和撤销重做、继承 RTL 与宿主取消，无 pageerror。
+
+1280×844 与 390×844 的焦点截图已检查。窄工具栏的中文“链接/引用”曾被压成多行，现用非压缩单行按钮并保留横向滚动；浏览器 Range 几何断言确认焦点按钮文字为单行且按钮完整位于滚动容器内部。焦点样式可见，没有新增示例或控件。
+
 ## 结论
 
 第 17 周工具栏范围已闭环。配置、状态、固定/悬浮渲染、命令执行、选区恢复、窄屏边界、History 和中文 Demo 均有自动化覆盖。
 
-2026-11-13 本地 `pnpm check:all` 通过：311 个单测文件、2466 项单测、331 项 Chromium 用例。新增 60 项 React、8 项 Chromium 验证；1280px 与 390px 视口的固定/悬浮格式结果截图已检查，中文文字及范围正常。
+2026-11-15 本地 `pnpm check:all` 通过：331 个单测文件、2672 项单测、353 项 Chromium 用例。本轮新增 83 项 React、14 项 Chromium 验证，既有手势、编辑区与 History 回归继续通过。
+
+Tab 顺序已改为每组一个入口；低层 onCommandCancel 现在也接收有效键盘导航/激活/Tab 离开通知，宿主应允许清理快照。IME 仍由宿主传 disabled，自定义主题需提供焦点样式与可用滚动容器。不新增自动 focus、竖向/二维导航、全局快捷键、自动返回编辑区或屏幕阅读器认证，完整规则见[键盘导航](../features/toolbar.md#键盘导航)。
 
 宿主须检查 onCommand 的 result.ok 再应用，event.selection 是执行前范围，操作后位置读取 result.selection。disabled 只锁定工具栏，不是全局只读；不检测文档/payload 原地修改、不重映射旧范围、不提供窗口级释放监听，也不回滚插件副作用或捕获宿主/异步异常。注册变更需宿主触发渲染，稳定引用和其他边界见[工具栏契约](../features/toolbar.md)。
