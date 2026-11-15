@@ -44,6 +44,8 @@ export function Toolbar({
     item: ResolvedToolbarCommandItem,
   ) {
     if (
+      event.target !== event.currentTarget ||
+      event.currentTarget.closest('[role="toolbar"]') !== toolbarRef.current ||
       event.defaultPrevented ||
       event.nativeEvent.isComposing ||
       event.nativeEvent.keyCode === 229 ||
@@ -143,7 +145,9 @@ export function Toolbar({
               else buttonRefs.current.delete(item.id);
             }}
             tabIndex={item.id === tabStopId ? 0 : -1}
-            onFocus={() => setFocusedId(item.id)}
+            onFocus={(event) => {
+              if (event.target === event.currentTarget) setFocusedId(item.id);
+            }}
             onKeyDown={(event) => handleKeyDown(event, item)}
             onClick={(event) => handleCommandClick(event, item)}
             onPointerDown={(event) => handleCommandPointerDown(event, item)}
