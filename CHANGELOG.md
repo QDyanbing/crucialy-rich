@@ -25,6 +25,8 @@
 
 ### 新增
 
+- 低层/固定/悬浮工具栏新增单 Tab 入口、实际上次焦点记忆、左右键跳过禁用/分隔项并回绕、Home/End 及实时 RTL 方向。原生 Enter/Space 只通过 click 执行一次命令；导航不生成事务或 History，不自动抢焦点，不新增公共 prop、Core API 或模型字段。
+- 键盘导航/激活及 Tab/Shift+Tab 离开扩展现有 onCommandCancel 清理通知，避免使用旧指针 Range；修饰键、宿主取消、IME 和焦点归属保护保持独立。补齐动态配置、多实例、SSR/水合、StrictMode、History、包产物与桌面/手机回归；Demo 的中文按钮标签不再被压成多行，窄条保留横向滚动。Tab 顺序和低层取消通知的兼容性见[键盘导航](./docs/features/toolbar.md#键盘导航)。
 - 低层/固定/悬浮工具栏新增可选 `disabled`（默认 false），低层 `Toolbar` 新增 `onCommandCancel(item)` 清理通知。Demo 在 Composition 活跃时锁定固定/悬浮按钮，结束后恢复；禁用或移除回调的已提交状态不复活旧手势。这不是编辑器全局只读或副作用回滚，引用稳定与接入限制见[工具栏](./docs/features/toolbar.md)。
 - React 接入可取消原生 `insertParagraph`，复用分段/列表/引用/代码/cell 规则；Shift+Enter 与原生 `insertLineBreak` 插入字面 LF，不新增模型、Operation 或公共 Core API。两个入口均无 typing batch，范围替换为原子事务并可独立撤销。
 - `RichTextEditorInputType` 新增 `insertLineBreak`，穷尽 switch 的宿主需补分支；软换行显示依赖保留 LF 的 CSS。补齐容器/范围/保护、History/受控、监听器/SSR、LF 剪贴板数据、构建包及桌面/手机浏览器回归，未宣称真机软键盘全面兼容。

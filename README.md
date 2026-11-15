@@ -72,6 +72,8 @@ Quote 内按 Enter 会保留引用格式分段；空 Quote 再按 Enter 则原�
 
 工具栏已补齐文档/命令归属校验、执行前快照与一次性消费、取消及失败恢复；重渲染会刷新同一可变 Registry 的状态。可选 `disabled` 已接入 Demo 组合输入期间的固定/悬浮按钮，恢复后不复活旧手势；它不是全局只读锁。宿主需保持文档/payload 引用稳定，具体事件、状态刷新与 History 接入见[工具栏契约](./docs/features/toolbar.md#选区恢复)。
 
+工具栏现提供单 Tab 入口、左右键回绕、Home/End 和 RTL；焦点移动不编辑文档，Enter/Space 原生激活各提交一次命令。键盘操作先释放旧指针选区，兼容动态禁用、配置重排和 SSR 水合；中文按钮在窄条中保持单行并横向滚动。Tab 顺序及 onCommandCancel 扩展通知的接入变化见[工具栏键盘导航](./docs/features/toolbar.md#键盘导航)。
+
 第 18 周“斜杠菜单闭环”已全部完成：React 包提供 Slash Command 配置校验、默认块命令目录、中文/英文关键词过滤、paragraph 折叠光标触发识别、浮层定位、Escape 关闭、上下键循环选择和 Enter/鼠标执行；`/query` 清理与目标命令合并为一个 Transaction，支持跨 mark 文本节点和一次撤销。
 
 斜杠菜单已补齐执行前触发文字/精确范围校验、执行事件与导航快照隔离，以及同树多实例 DOM ID。Demo 的输入法候选键盘/点击不执行菜单，带修饰键操作不被菜单接管，Shift+Enter 仍为软换行。校验不比较文档身份或当前光标，宿主仍负责刷新菜单；接入与内部 ID 变化见[斜杠菜单契约](./docs/features/slash-menu.md#执行前校验)。
