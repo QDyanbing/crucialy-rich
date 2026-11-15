@@ -28,6 +28,7 @@ export function Toolbar({
 }: ToolbarProps): ReactElement {
   const [focusedId, setFocusedId] = useState<string>();
   const buttonRefs = useRef(new Map<string, HTMLButtonElement>());
+  const toolbarRef = useRef<HTMLDivElement>(null);
   const enabledItems = disabled
     ? []
     : items.filter(
@@ -52,7 +53,12 @@ export function Toolbar({
     if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
     const current = enabledItems.findIndex((candidate) => candidate.id === item.id);
     if (current < 0) return;
-    const step = event.key === "ArrowRight" ? 1 : -1;
+    const rtl =
+      toolbarRef.current &&
+      event.currentTarget.ownerDocument.defaultView?.getComputedStyle(
+        toolbarRef.current,
+      ).direction === "rtl";
+    const step = (event.key === "ArrowRight" ? 1 : -1) * (rtl ? -1 : 1);
     const next =
       event.key === "Home"
         ? enabledItems[0]!
@@ -97,6 +103,7 @@ export function Toolbar({
 
   return (
     <div
+      ref={toolbarRef}
       aria-label={label}
       className={joinClassNames("crucialy-toolbar", className)}
       role="toolbar"
