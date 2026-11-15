@@ -45,6 +45,12 @@ export function Toolbar({
   ) {
     if (
       event.defaultPrevented ||
+      event.nativeEvent.isComposing ||
+      event.nativeEvent.keyCode === 229 ||
+      event.altKey ||
+      event.ctrlKey ||
+      event.metaKey ||
+      event.shiftKey ||
       disabled ||
       item.state.disabled ||
       enabledItems.length === 0
