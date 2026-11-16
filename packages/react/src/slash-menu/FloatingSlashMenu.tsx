@@ -1,4 +1,5 @@
 import type { ReactElement } from "react";
+import { useEffect, useRef } from "react";
 
 import { calculateSlashMenuPosition } from "./position";
 import { SlashMenu, type SlashMenuProps } from "./SlashMenu";
@@ -20,12 +21,46 @@ function getViewport(): SlashMenuViewport {
 }
 
 export function FloatingSlashMenu({
+  activeIndex = 0,
   anchorRect,
   items,
   menuSize = defaultMenuSize,
   viewport = getViewport(),
   ...menuProps
 }: FloatingSlashMenuProps): ReactElement | null {
+  const rootRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const root = rootRef.current;
+    if (
+      !root ||
+      !Number.isInteger(activeIndex) ||
+      activeIndex < 0 ||
+      root.clientHeight <= 0
+    )
+      return;
+    const item = root.querySelectorAll<HTMLElement>('[role="option"]')[activeIndex];
+    if (!item) return;
+    const bounds = root.getBoundingClientRect();
+    const option = item.getBoundingClientRect();
+    const top = bounds.top + root.clientTop;
+    const bottom = top + root.clientHeight;
+    const delta =
+      option.top < top || option.height > root.clientHeight
+        ? option.top - top
+        : option.bottom > bottom
+          ? option.bottom - bottom
+          : 0;
+    if (delta !== 0) root.scrollTop = Math.max(0, root.scrollTop + delta);
+  }, [
+    activeIndex,
+    items,
+    anchorRect,
+    menuSize.height,
+    menuSize.width,
+    viewport.height,
+    viewport.width,
+  ]);
+
   if (!anchorRect || items.length === 0) {
     return null;
   }
@@ -39,18 +74,20 @@ export function FloatingSlashMenu({
 
   return (
     <div
+      ref={rootRef}
       className="crucialy-floating-slash-menu"
       data-placement={position.placement}
       style={{
         left: position.left,
         maxHeight: fittedSize.height,
+        overflowY: "auto",
         position: "fixed",
         top: position.top,
         width: fittedSize.width,
         zIndex: 1000,
       }}
     >
-      <SlashMenu items={items} {...menuProps} />
+      <SlashMenu activeIndex={activeIndex} items={items} {...menuProps} />
     </div>
   );
 }
