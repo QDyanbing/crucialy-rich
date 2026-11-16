@@ -25,10 +25,12 @@ export function SlashMenu({
   const menuId = useId();
 
   function handlePointerDown(event: PointerEvent<HTMLButtonElement>) {
+    if (event.defaultPrevented) return;
     event.preventDefault();
   }
 
   function handleClick(event: MouseEvent<HTMLButtonElement>, item: SlashCommandItem) {
+    if (event.defaultPrevented) return;
     event.preventDefault();
     onSelect?.(item);
   }
