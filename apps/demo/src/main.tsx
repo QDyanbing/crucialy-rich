@@ -106,6 +106,7 @@ import {
   type FloatingToolbarAnchorRect,
   type LocalImageResource,
   type RichTextEditorTransactionEvent,
+  type RichTextEditorHandle,
   type SlashCommandItem,
   type SlashMenuAnchorRect,
   type SlashMenuTrigger,
@@ -1048,6 +1049,7 @@ function DemoApp() {
   const savedLinkSelectionRef = useRef<RangeSelection | null>(null);
   const dismissedSlashTriggerRef = useRef<string | null>(null);
   const localImageResourcesRef = useRef<LocalImageResource[]>([]);
+  const editorRef = useRef<RichTextEditorHandle>(null);
   const [lastTransaction, setLastTransaction] = useState<Transaction | null>(null);
   const [lastTransactionReport, setLastTransactionReport] =
     useState<TransactionAcceptanceReport | null>(null);
@@ -1081,6 +1083,41 @@ function DemoApp() {
     },
     [],
   );
+  useEffect(() => {
+    const root = editorRef.current?.getElement();
+    const ownerDocument = root?.ownerDocument;
+    const view = ownerDocument?.defaultView;
+    if (!root || !ownerDocument || !view) return;
+    let frame: number | undefined;
+    const schedule = (event: Event) => {
+      if (
+        event.type === "scroll" &&
+        event.target instanceof Element &&
+        event.target.closest(
+          ".crucialy-floating-toolbar, .crucialy-floating-slash-menu",
+        )
+      )
+        return;
+      if (frame !== undefined) view.cancelAnimationFrame(frame);
+      frame = view.requestAnimationFrame(() => {
+        frame = undefined;
+        refreshOverlayRects();
+      });
+    };
+    ownerDocument.addEventListener("scroll", schedule, true);
+    ownerDocument.addEventListener("focusin", schedule);
+    ownerDocument.addEventListener("selectionchange", schedule);
+    view.addEventListener("resize", schedule);
+    refreshOverlayRects();
+    return () => {
+      ownerDocument.removeEventListener("scroll", schedule, true);
+      ownerDocument.removeEventListener("focusin", schedule);
+      ownerDocument.removeEventListener("selectionchange", schedule);
+      view.removeEventListener("resize", schedule);
+      if (frame !== undefined) view.cancelAnimationFrame(frame);
+    };
+  }, [normalizedDocument, blockSelection]);
+
   const selectedLink = useMemo(
     () =>
       getSelectedLinkMark({
@@ -1836,26 +1873,52 @@ function DemoApp() {
     applyCommandResult(event.result, modelSelection);
   }
 
-  function handleBrowserSelectionSync(event: SyntheticEvent<HTMLDivElement>) {
-    if (!isEditorTextEvent(event)) return;
-    const browserSelection = window.getSelection();
-    const nextSelection = browserSelection
-      ? domSelectionToModelSelection(normalizedDocument, browserSelection)
-      : undefined;
-
-    if (nextSelection) {
-      setModelSelection(nextSelection);
-      syncSlashMenu(findSlashMenuTrigger(normalizedDocument, nextSelection));
-    }
-
+  function readEditorSelection() {
+    const root = editorRef.current?.getElement();
+    const browserSelection = root?.ownerDocument.getSelection();
+    const owns = (node: Node | null) =>
+      root?.contains(node) &&
+      (node instanceof Element ? node : node?.parentElement)?.closest(
+        '[data-crucialy-rich-editor="true"]',
+      ) === root;
     if (
-      nextSelection &&
-      !isCollapsed(nextSelection) &&
-      browserSelection &&
-      browserSelection.rangeCount > 0
-    ) {
-      const rect = browserSelection.getRangeAt(0).getBoundingClientRect();
+      !root ||
+      !browserSelection ||
+      browserSelection.rangeCount === 0 ||
+      !owns(browserSelection.anchorNode) ||
+      !owns(browserSelection.focusNode)
+    )
+      return undefined;
+    const nextSelection = domSelectionToModelSelection(
+      normalizedDocument,
+      browserSelection,
+    );
+    return nextSelection ? { root, browserSelection, nextSelection } : undefined;
+  }
 
+  function refreshOverlayRects() {
+    const current = readEditorSelection();
+    if (!current || blockSelection) {
+      setFloatingToolbarRect(null);
+      setSlashMenuRect(null);
+      return;
+    }
+    const { root, browserSelection, nextSelection } = current;
+    const rect = browserSelection.getRangeAt(0).getBoundingClientRect();
+    const view = root.ownerDocument.defaultView;
+    if (
+      !view ||
+      rect.height <= 0 ||
+      rect.bottom <= 0 ||
+      rect.top >= view.innerHeight ||
+      rect.right < 0 ||
+      rect.left >= view.innerWidth
+    ) {
+      setFloatingToolbarRect(null);
+      setSlashMenuRect(null);
+      return;
+    }
+    if (!isCollapsed(nextSelection)) {
       setFloatingToolbarRect({
         bottom: rect.bottom,
         height: rect.height,
@@ -1866,23 +1929,31 @@ function DemoApp() {
       setSlashMenuRect(null);
       return;
     }
-
     setFloatingToolbarRect(null);
-
+    const active = root.ownerDocument.activeElement;
     if (
-      nextSelection &&
-      isCollapsed(nextSelection) &&
-      browserSelection &&
-      browserSelection.rangeCount > 0
+      active === root ||
+      (active instanceof Element &&
+        root.parentElement?.contains(active) &&
+        active.closest(".crucialy-floating-slash-menu"))
     ) {
-      const rect = browserSelection.getRangeAt(0).getBoundingClientRect();
-
       setSlashMenuRect({ bottom: rect.bottom, left: rect.left, top: rect.top });
     } else {
       setSlashMenuRect(null);
     }
   }
 
+  function handleBrowserSelectionSync(event: SyntheticEvent<HTMLDivElement>) {
+    if (!isEditorTextEvent(event)) return;
+    const current = readEditorSelection();
+    if (current) {
+      setModelSelection(current.nextSelection);
+      syncSlashMenu(findSlashMenuTrigger(normalizedDocument, current.nextSelection));
+    } else {
+      syncSlashMenu(undefined);
+    }
+    refreshOverlayRects();
+  }
   return (
     <main className="app-shell" aria-labelledby="page-title">
       <header className="top-bar">
@@ -2103,6 +2174,7 @@ function DemoApp() {
             </output>
           </div>
           <RichTextEditor
+            ref={editorRef}
             {...(blockSelection ? { blockSelection } : {})}
             {...(cellSelection ? { cellSelection } : {})}
             className="rendered-document"

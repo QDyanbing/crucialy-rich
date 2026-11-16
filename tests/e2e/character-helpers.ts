@@ -1,6 +1,10 @@
 import { type Page } from "@playwright/test";
 
 export async function setCharacterCaret(page: Page, path: number[], offset: number) {
+  await page
+    .getByLabel("已渲染文档")
+    .locator(`[data-crucialy-path="${JSON.stringify(path)}"]`)
+    .scrollIntoViewIfNeeded();
   await page.getByLabel("已渲染文档").evaluate(
     (root, point) => {
       (root as HTMLElement).focus();

@@ -57,7 +57,10 @@ for (const viewport of [
     const editor = page.getByLabel("已渲染文档");
     const before = await characterDocument(page);
     await compose(page, "compositionstart");
-    await menu.getByRole("option").click();
+    await expect(menu.getByRole("option")).toBeDisabled();
+    await menu
+      .getByRole("option")
+      .evaluate((button: HTMLButtonElement) => button.click());
     await expect.poll(() => characterDocument(page)).toEqual(before);
     await expect(editor).toHaveAttribute("data-composing", "true");
     await expect(page.getByLabel("History 状态")).toContainText('"undoStack": 1');
