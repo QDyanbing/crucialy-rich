@@ -172,10 +172,13 @@ Toolbar 通过 class name 暴露样式入口，不捆绑主题 CSS。完整契�
 - `findSlashMenuTrigger(document, selection)`：识别顶层 paragraph 合法折叠光标前的 `/query`，返回 UTF-16 Range。
 - `openSlashMenu` / `moveSlashMenuSelection`：打开、导航并隔离触发范围；关闭/空结果导航保留原状态引用。
 - `SlashMenu` / `FloatingSlashMenu`：受控菜单及光标浮层，pointerdown 保留编辑区焦点；DOM ID 为内部实例标识，独立 SSR 根需配置各自的 `identifierPrefix`。
+- 两种菜单新增可选 `disabled?: boolean`，默认 false；只禁用菜单按钮，不替宿主处理键盘或权限。FloatingSlashMenu 自身纵向滚动并保持活动项可见，不滚动页面。
 - `executeSlashCommand(item, registry, context, trigger)`：先校验当前触发内容与精确范围，再把清理和目标事务合并；非法/过期触发返回 failure，不查 Registry，不提交清理。事件 trigger 为独立快照，item/payload 仍透传。
-- `getSlashMenuKeyboardAction(key)`：仅解析键名；宿主自行处理取消、修饰键和 Composition 优先级。Demo 在组合期间不处理菜单键盘/点击，Shift+Enter 继续走软换行。
+- `getSlashMenuKeyboardAction(key)`：仅解析键名；宿主自行处理取消、修饰键和 Composition 优先级。Demo 在组合/原生 isComposing/keyCode 229 期间不处理菜单键盘，组合时传 disabled；Shift+Enter 继续软换行，Tab/Shift+Tab 关闭且保留原生跳转，空结果 Enter 继续分段。
 
 执行位置来自 trigger，不比较文档身份或当前 selection，也不重映射旧范围。完整契约与范围限制见[斜杠菜单](./slash-menu.md#执行前校验)。
+
+两种浮层拒绝无效几何，按各自声明尺寸限制视口边界；Slash 可纵向滚动，Toolbar 声明高度放不下时隐藏。React 不测量真实主题大小或注册全局监听；Demo 的 RAF/滚动/resize/选区/焦点同步是宿主实现，详见[浮层与定位](./slash-menu.md#浮层与定位)和[悬浮工具栏](./toolbar.md#悬浮工具栏)。
 
 ## 当前边界
 

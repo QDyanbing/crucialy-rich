@@ -90,9 +90,12 @@ Toolbar 不复制 Bold、Link 或 Block Type 的状态判断规则，模型能�
 `FloatingToolbar` 复用固定工具栏，只在 selection 非折叠且提供 `anchorRect` 时显示：
 
 - 默认居中放在选区上方；空间不足时放到下方。
-- 左右位置限制在 8px 视口边距内，窄屏宽度不会超过视口。
+- 上下左右位置均限制在 8px 视口边距内，窄屏宽度不会超过视口；纯定位函数对屏幕外锚点也做上下夹取。
 - 使用 fixed 定位；宿主负责从浏览器 Range 读取并更新 `anchorRect`。
 - `toolbarSize` 和 `viewport` 可覆盖默认尺寸，便于自定义外观与测试。
+- 非有限几何、颠倒上下边界、负锚点宽高、非正工具栏尺寸、视口任一方向不超过 16px，或声明的工具栏高度无法放进视口边距时不渲染。横向可收窄，纵向不裁掉命令按钮；组件不自行测量主题高度，宿主须传入真实的 toolbarSize。
+
+Demo 捕获页面/祖先滚动，并在 resize、focusin、selectionchange 与模型更新后用 requestAnimationFrame 刷新主编辑区 Range；工具栏自身滚动被排除，监听和排队帧在清理时释放。外部/空/屏幕外 Range 隐藏浮层，重新进入可见范围后恢复；仅焦点离开而 Range 仍有效时不隐藏，保证 Tab/Shift+Tab 记忆入口可用。刷新只更新矩形，不生成模型或 History 变更。React 包本身仍不监听这些事件，也不保证自定义裁剪/transform/门户或真实移动端 visualViewport 行为。
 
 ## 键盘导航
 

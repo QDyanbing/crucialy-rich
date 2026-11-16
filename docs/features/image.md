@@ -38,6 +38,8 @@ executeCommand(registry, INSERT_IMAGE_COMMAND_NAME, {
 
 React 包导出 `createLocalImageResource(file)`。它只接受 `image/*` 文件，通过 `URL.createObjectURL` 生成可插入的 `blob:` payload，并返回幂等的 `revoke()`。集成方必须在图片不再使用或组件卸载时释放地址。
 
+Demo 在插入失败时立即 revoke；成功资源保留到 Demo 卸载，不在普通重渲染、撤销或图片暂时离开当前文档时释放，因为 History 可能仍引用该 URL。卸载 cleanup 只注册一次，修复旧实现每次重渲染就撤销地址的问题。长会话宿主若需提前回收，必须同时检查当前模型和全部 History 引用；当前 Demo 不做引用计数或内存上限管理，也不能把 blob URL 持久化成跨会话地址。
+
 本地入口只提供当前浏览器会话内的预览，不读取文件内容、不上传、不生成永久地址。生产环境应由外部上传适配器取得 HTTPS 地址，再执行 `insertImage`。
 
 ## HTML 粘贴

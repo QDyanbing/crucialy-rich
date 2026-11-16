@@ -50,21 +50,24 @@ interface SlashCommandItem {
 ## 浮层与定位
 
 - `SlashMenu` 渲染 `listbox/option` 可访问语义，并通过 `aria-selected` 标记活动项。
-- `FloatingSlashMenu` 在缺少光标矩形或没有匹配项时不渲染。
+- 两种菜单均支持 `disabled?: boolean`，默认 false；禁用时保留选中态、输出 aria-disabled 并禁用原生按钮，不执行指针选择。宿主仍须保护自己的键盘/命令入口，不能把此 prop 当作权限或只读控制。
+- `FloatingSlashMenu` 在缺少光标矩形、没有匹配项、输入非有限数值、上下边界颠倒、尺寸非正或视口任一方向不超过 16px 时不渲染。
 - `calculateSlashMenuPosition` 优先放在光标下方，空间不足时翻到上方，并限制在视口边距内。
-- 菜单项 pointerdown 会阻止默认焦点迁移，使浏览器选区仍保留在编辑区。
+- 浮层宽高最多使用视口减去两侧各 8px 的空间；内容纵向滚动。活动索引、配置或几何改变时只调整自身 scrollTop，让活动项进入可视区域，不调用 scrollIntoView、不滚动页面或抢焦点；单项高于容器时对齐其顶部。无效索引不滚动。
+- 菜单项只在未取消、主指针、左键且目标属于本按钮时阻止 pointerdown 默认焦点迁移；click 同样尊重宿主取消、禁用、按钮及目标归属，按钮内额外输入控件不触发选择。标签点击仍可选择。
 - 菜单项 DOM ID 由 React `useId` 和当前项索引生成，同一 React 树中的多个菜单可复用配置而不重复 ID；ID 属于内部实现，不应拼接配置 `id` 查询节点。独立 SSR 根须使用不同的 `identifierPrefix`，并在水合时保持一致。
 
 ## 键盘行为
 
 - `Escape`：关闭当前触发位置的菜单。
 - `ArrowDown` / `ArrowUp`：循环移动活动项，首尾可回绕。
-- `Enter`：选择活动项；空结果或非法索引不会执行。
+- `Enter`：选择活动项；非法索引不会执行。Demo 空结果时不拦截 Enter，继续正常分段，不吞掉 `/query`。
+- `Tab` / `Shift+Tab`：Demo 关闭当前触发，不阻止浏览器原生焦点跳转，也不生成事务。
 - 其他按键继续交给编辑器处理。
 
 `getSlashMenuKeyboardAction`、`getNextSlashMenuIndex` 和 `moveSlashMenuSelection` 都是无 DOM 依赖的纯函数，宿主可在编辑器的 keydown 流程中复用。
 
-`getSlashMenuKeyboardAction` 只解析 key 字符串，不知道事件是否已取消、是否带修饰键或处于输入法组合阶段。宿主须先检查这些状态，再处理菜单。Demo 在活跃 Composition 或原生 `isComposing` 时不拦截键盘，也不执行菜单点击；Alt/Ctrl/Meta/Shift 组合键跳过菜单分支，继续交给原有编辑流程。例如菜单打开时 Shift+Enter 仍插入 LF，不选择标题。宿主自行接入的撤销/重做快捷键也须遵守组合输入保护。
+`getSlashMenuKeyboardAction` 只解析 key 字符串，不知道事件是否已取消、是否带修饰键或处于输入法组合阶段。宿主须先检查这些状态，再处理菜单。Demo 在活跃 Composition、原生 `isComposing` 或兼容性 `keyCode === 229` 时不拦截键盘，组合期间给菜单传 disabled；除 Shift+Tab 外，Alt/Ctrl/Meta/Shift 组合键跳过菜单分支，继续交给原有编辑流程。例如菜单打开时 Shift+Enter 仍插入 LF，不选择标题。React 编辑区也跳过 keyCode 229，不把候选确认误当作分段/删除/格式命令。宿主自行接入的撤销/重做快捷键也须遵守组合输入保护。
 
 `openSlashMenu` 和有效导航生成的状态独立复制触发信息与 Range/两端 path，修改旧状态不会改变后续导航分支。关闭或空结果导航仍返回原状态，不承诺所有调用都创建新对象。
 
@@ -90,4 +93,6 @@ interface SlashCommandItem {
 
 - 当前不在 heading、quote、codeBlock 或列表中触发，保证默认块命令都从 paragraph 的稳定上下文开始。
 - React 包提供受控菜单组件和纯函数，不自行持有文档、History 或注册全局键盘监听。
-- Demo 已接入浏览器选区矩形；宿主产品仍需根据自身滚动容器决定何时刷新位置。
+- Demo 根据主编辑区两端归属的 Range 更新矩形：捕获文档滚动、窗口 resize、focusin 和 selectionchange，并用 requestAnimationFrame 合并刷新；卸载或依赖更新时移除监听并取消排队帧。菜单/工具栏自身滚动不触发重定位，避免覆盖手动菜单滚动。
+- Demo 在 Range 离开编辑器、锚点离开视口或选中图片时隐藏旧浮层；Slash 另要求焦点在编辑器或自身菜单内，焦点返回可恢复未取消查询。选区工具栏允许键盘焦点暂离，保留 Tab 返回能力。位置刷新不修改文档、History、活动索引或模型选区。
+- React 包不注册这些全局监听，也不测量真实主题尺寸；集成方须更新 anchorRect/viewport，并使声明的 menuSize 与实际样式一致。自定义滚动裁剪、visualViewport/缩放、CSS transform 和门户布局需由宿主适配，不宣称任意嵌套容器都已兼容。
