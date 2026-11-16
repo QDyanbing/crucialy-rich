@@ -8,6 +8,9 @@
 
 ### 修复
 
+- 修复 Demo 本地图片在普通重渲染时提前 revoke 的问题：成功插入的 blob URL 保留到卸载，撤销/重做可继续读取，失败插入立即释放；不新增上传或永久资源地址。
+- Slash 选择尊重原生取消、主指针/左键及按钮目标归属；Demo 空结果 Enter 继续分段，Tab/Shift+Tab 关闭但不阻止焦点跳转，选中图片时清除旧菜单。React 编辑区与 Demo 补齐 keyCode 229 组合保护，不把候选确认当作编辑命令。
+- 修复浮层上下越界和非法几何渲染，Slash 可纵向收缩滚动，Toolbar 声明高度放不下时隐藏；Demo 捕获滚动、缩放、选区和焦点变化并合帧更新锚点，清理监听及排队帧。屏幕外/外部 Range 隐藏，不产生 History；自定义裁剪、visualViewport 和实际主题测量仍由宿主负责。
 - 编辑区点击尊重宿主取消、只读、Composition 和最近编辑器归属；图片/cell/任务先校验模型路径，正常图片选中时清除旧 cell。任务以模型 checked 切换，不读取被改写的 DOM 状态，只读/组合期间禁用复选框，恢复后可正常操作。
 - 内嵌控件与嵌套实例的文字、键盘、剪贴板事件不借用外层旧 Range，两端归属也单独复核；控件获焦时暂缓受控文字选区回写。任务前后选区独立，非法受控范围不进入快照；Demo 跳过控件 keyup/mouseup 同步和快捷键，原生空格连续勾选各产生一条事务。补齐受控/History、SSR、构建包与桌面/手机回归，公开签名和模型不变，焦点及事件边界见[编辑区交互](./docs/features/editor-interactions.md)。
 - 工具栏按下快照绑定文档、Registry、按钮命令和 payload 引用，拒绝跨上下文沿用；执行/回调前消费，指针取消及宿主已取消的按下/点击释放快照，非主指针和中/右键不捕获。事件 selection 在进入命令扩展前复制，失败、重入和后续激活不复用旧范围。
@@ -25,6 +28,7 @@
 
 ### 新增
 
+- `SlashMenu` / `FloatingSlashMenu` 新增可选 `disabled`，默认 false；Demo 组合期间禁用原生菜单按钮。FloatingSlashMenu 仅滚动自身以保持活动项可见，不抢编辑焦点或滚动页面；具体接入和边界见[斜杠菜单](./docs/features/slash-menu.md)。
 - 低层/固定/悬浮工具栏新增单 Tab 入口、实际上次焦点记忆、左右键跳过禁用/分隔项并回绕、Home/End 及实时 RTL 方向。原生 Enter/Space 只通过 click 执行一次命令；导航不生成事务或 History，不自动抢焦点，不新增公共 prop、Core API 或模型字段。
 - 键盘导航/激活及 Tab/Shift+Tab 离开扩展现有 onCommandCancel 清理通知，避免使用旧指针 Range；修饰键、宿主取消、IME 和焦点归属保护保持独立。补齐动态配置、多实例、SSR/水合、StrictMode、History、包产物与桌面/手机回归；Demo 的中文按钮标签不再被压成多行，窄条保留横向滚动。Tab 顺序和低层取消通知的兼容性见[键盘导航](./docs/features/toolbar.md#键盘导航)。
 - 低层/固定/悬浮工具栏新增可选 `disabled`（默认 false），低层 `Toolbar` 新增 `onCommandCancel(item)` 清理通知。Demo 在 Composition 活跃时锁定固定/悬浮按钮，结束后恢复；禁用或移除回调的已提交状态不复活旧手势。这不是编辑器全局只读或副作用回滚，引用稳定与接入限制见[工具栏](./docs/features/toolbar.md)。
