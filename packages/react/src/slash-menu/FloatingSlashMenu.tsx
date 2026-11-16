@@ -61,7 +61,24 @@ export function FloatingSlashMenu({
     viewport.width,
   ]);
 
-  if (!anchorRect || items.length === 0) {
+  if (
+    !anchorRect ||
+    items.length === 0 ||
+    ![
+      anchorRect.top,
+      anchorRect.bottom,
+      anchorRect.left,
+      menuSize.width,
+      menuSize.height,
+      viewport.width,
+      viewport.height,
+    ].every(Number.isFinite) ||
+    anchorRect.bottom < anchorRect.top ||
+    menuSize.width <= 0 ||
+    menuSize.height <= 0 ||
+    viewport.width <= 16 ||
+    viewport.height <= 16
+  ) {
     return null;
   }
 

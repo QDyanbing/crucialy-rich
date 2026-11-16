@@ -30,7 +30,29 @@ export function FloatingToolbar({
   viewport = getViewport(),
   ...toolbarProps
 }: FloatingToolbarProps): ReactElement | null {
-  if (!anchorRect || !isFloatingToolbarVisible(toolbarProps.selection)) {
+  if (
+    !anchorRect ||
+    !isFloatingToolbarVisible(toolbarProps.selection) ||
+    ![
+      anchorRect.top,
+      anchorRect.bottom,
+      anchorRect.left,
+      anchorRect.width,
+      anchorRect.height,
+      toolbarSize.width,
+      toolbarSize.height,
+      viewport.width,
+      viewport.height,
+    ].every(Number.isFinite) ||
+    anchorRect.bottom < anchorRect.top ||
+    anchorRect.width < 0 ||
+    anchorRect.height < 0 ||
+    toolbarSize.width <= 0 ||
+    toolbarSize.height <= 0 ||
+    viewport.width <= 16 ||
+    viewport.height <= 16 ||
+    toolbarSize.height > viewport.height - 16
+  ) {
     return null;
   }
 
