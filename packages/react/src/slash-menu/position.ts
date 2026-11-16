@@ -20,12 +20,20 @@ export function calculateSlashMenuPosition(
   const topBelow = anchor.bottom + gap;
 
   if (topBelow + menu.height <= viewport.height - margin) {
-    return { left, placement: "below", top: topBelow };
+    return {
+      left,
+      placement: "below",
+      top: clamp(topBelow, margin, viewport.height - menu.height - margin),
+    };
   }
 
   return {
     left,
     placement: "above",
-    top: clamp(anchor.top - menu.height - gap, margin, viewport.height - margin),
+    top: clamp(
+      anchor.top - menu.height - gap,
+      margin,
+      viewport.height - menu.height - margin,
+    ),
   };
 }
