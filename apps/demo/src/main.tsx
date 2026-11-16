@@ -1075,9 +1075,12 @@ function DemoApp() {
     [pasteMimeType, pasteValue],
   );
 
-  useEffect(() => () => {
-    localImageResourcesRef.current.forEach((resource) => resource.revoke());
-  });
+  useEffect(
+    () => () => {
+      localImageResourcesRef.current.forEach((resource) => resource.revoke());
+    },
+    [],
+  );
   const selectedLink = useMemo(
     () =>
       getSelectedLinkMark({
