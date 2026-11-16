@@ -36,6 +36,19 @@
 pnpm check:all
 ```
 
+## 浮层与退出验收
+
+2026-11-16 新增测试并完成本地 `pnpm check:all`；全量数字见[全量回归](./full-regression.md)。
+
+- `slash-menu-cancellation` / `slash-menu-pointer` / `slash-menu-disabled`：11 项，宿主原生取消、主指针/左键/目标归属、标签点击、禁用与恢复。
+- `floating-slash-scroll` / `slash-position-bounds` / `overlay-geometry`：8 项局部滚动、16 项 Slash 上下左右边界，以及与 Toolbar 共用的 25 项 SSR 几何校验；超高选项对齐顶部，不抢焦点或滚动页面。
+- `editor-ime-legacy-key`：4 项，keyCode 229 不分段、删除或格式化，之后正常键盘仍可编辑。
+- `slash-keyboard-exit.spec.ts`：8 项，桌面/手机空结果 Enter 与 History、Tab/Shift+Tab 原生离开、图片选择清旧菜单和候选确认保护。
+- `overlay-viewport.spec.ts`：8 项桌面/手机共用浮层用例；Slash 部分验证活动末项完整可见、手动菜单滚动保留、页面滚动与 resize 后坐标、屏幕外隐藏/返回恢复、焦点离开/返回，模型与 History 不变，无 pageerror。测试先把编辑文字滚入视口，不再用屏幕外人工光标要求浮层可见。
+- 构建产物验证可选 disabled 声明、原生禁用语义、滚动样式、宽度收缩、无效几何隐藏与屏幕外坐标夹取；原有 32 项工具栏键盘、Slash 组合与退出场景定向复验通过。
+
+1280×844 / 390×844 及 resize 后 1000×600 / 360×600 的截图已检查，菜单中文标签、末项可见性和视口边界正常。监听刷新属于 Demo 宿主实现，不验证任意自定义裁剪容器、transform、门户或真机 visualViewport/软键盘行为。
+
 ## 结论
 
 斜杠菜单的配置、打开关闭、定位、键盘选择、命令执行、触发清理、History 和中文 Demo 均有自动化覆盖。

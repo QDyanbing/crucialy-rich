@@ -42,6 +42,12 @@
 pnpm check:all
 ```
 
+## 本地图片资源验收
+
+2026-11-16 `local-image-lifecycle.spec.ts` 两条 Chromium 用例通过：真实 PNG 的 blob URL 在插入后、普通控件重渲染、撤销与重做后仍可 fetch，图片 naturalWidth 为 1；无合法插入上下文时不增加图片或 History，文件输入复位。成功资源仅在 Demo 卸载 cleanup 中回收，失败资源仍立即回收；原有 `local-image.test.ts` 的资源创建/幂等释放回归通过。
+
+本轮没有创建上传服务、永久 URL 或资源引用计数；当前文档外的 History 仍可能引用 blob，所以撤销不能成为释放条件。长会话容量、跨会话存储不在验收范围，全量结果见[全量回归](./full-regression.md)。
+
 ## 结论
 
 第 19 周图片能力已形成代码、测试、中文 Demo、文档和浏览器验收闭环，并补齐安全 HTML 图片粘贴。上传服务仍由集成方提供。

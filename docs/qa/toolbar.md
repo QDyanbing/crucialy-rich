@@ -58,6 +58,12 @@ pnpm check:all
 
 1280×844 与 390×844 的焦点截图已检查。窄工具栏的中文“链接/引用”曾被压成多行，现用非压缩单行按钮并保留横向滚动；浏览器 Range 几何断言确认焦点按钮文字为单行且按钮完整位于滚动容器内部。焦点样式可见，没有新增示例或控件。
 
+## 浮层几何验收
+
+2026-11-16 `toolbar-position-bounds.test.ts` 新增 16 项，屏幕外及普通锚点、水平边界和自定义间距均限制在视口内；`overlay-geometry.test.ts` 中 14 项验证 Toolbar 非有限/无效几何和声明高度无法放入视口时隐藏。构建包调用同一定位入口并验证无效组件不渲染。
+
+`overlay-viewport.spec.ts` 的两条 Toolbar 路径在桌面/手机验证滚动后追随 Range、resize 后收窄、外部 Range 隐藏及重新选择恢复，模型与 History 保持不变，无 pageerror。1000×600 / 280×600 的工具栏截图已检查；此前 14 项 roving tabindex、Tab/Shift+Tab 记忆与原生键盘激活回归全部通过。全量结果见[全量回归](./full-regression.md)。宿主仍须提供真实 toolbarSize；自定义主题测量、裁剪/transform/门户和真机 visualViewport 不在验收范围。
+
 ## 结论
 
 第 17 周工具栏范围已闭环。配置、状态、固定/悬浮渲染、命令执行、选区恢复、窄屏边界、History 和中文 Demo 均有自动化覆盖。
