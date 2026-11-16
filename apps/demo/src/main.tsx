@@ -2126,6 +2126,7 @@ function DemoApp() {
           ) : null}
           {slashMenuState.open ? (
             <FloatingSlashMenu
+              disabled={compositionState.active}
               activeIndex={slashMenuState.activeIndex}
               anchorRect={slashMenuRect}
               items={filteredSlashCommandItems}

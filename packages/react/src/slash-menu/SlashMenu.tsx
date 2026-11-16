@@ -6,6 +6,7 @@ import type { SlashCommandItem } from "./types";
 export interface SlashMenuProps {
   activeIndex?: number;
   className?: string;
+  disabled?: boolean;
   items: readonly SlashCommandItem[];
   label?: string;
   onSelect?: (item: SlashCommandItem) => void;
@@ -26,6 +27,7 @@ function ownsButtonTarget(target: EventTarget, button: HTMLButtonElement): boole
 export function SlashMenu({
   activeIndex = 0,
   className,
+  disabled = false,
   items,
   label = "斜杠菜单",
   onSelect,
@@ -33,7 +35,7 @@ export function SlashMenu({
   const menuId = useId();
 
   function handlePointerDown(event: PointerEvent<HTMLButtonElement>) {
-    if (event.defaultPrevented) return;
+    if (event.defaultPrevented || disabled) return;
     if (
       event.button !== 0 ||
       event.isPrimary === false ||
@@ -44,7 +46,7 @@ export function SlashMenu({
   }
 
   function handleClick(event: MouseEvent<HTMLButtonElement>, item: SlashCommandItem) {
-    if (event.defaultPrevented) return;
+    if (event.defaultPrevented || disabled) return;
     if (event.button !== 0 || !ownsButtonTarget(event.target, event.currentTarget))
       return;
     event.preventDefault();
@@ -54,12 +56,15 @@ export function SlashMenu({
   return (
     <div
       aria-label={label}
+      aria-disabled={disabled || undefined}
       className={joinClassNames("crucialy-slash-menu", className)}
       role="listbox"
     >
       {items.map((item, index) => (
         <button
           aria-selected={index === activeIndex}
+          aria-disabled={disabled || undefined}
+          disabled={disabled}
           className="crucialy-slash-menu__item"
           data-command={item.commandName}
           id={`crucialy-slash-menu-${menuId}-${index}`}
