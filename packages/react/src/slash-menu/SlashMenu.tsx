@@ -15,6 +15,14 @@ function joinClassNames(...classNames: Array<string | undefined>): string {
   return classNames.filter(Boolean).join(" ");
 }
 
+function ownsButtonTarget(target: EventTarget, button: HTMLButtonElement): boolean {
+  return (
+    target instanceof Element &&
+    target.closest("button") === button &&
+    !target.closest('input, textarea, select, [contenteditable="true"]')
+  );
+}
+
 export function SlashMenu({
   activeIndex = 0,
   className,
@@ -26,11 +34,19 @@ export function SlashMenu({
 
   function handlePointerDown(event: PointerEvent<HTMLButtonElement>) {
     if (event.defaultPrevented) return;
+    if (
+      event.button !== 0 ||
+      event.isPrimary === false ||
+      !ownsButtonTarget(event.target, event.currentTarget)
+    )
+      return;
     event.preventDefault();
   }
 
   function handleClick(event: MouseEvent<HTMLButtonElement>, item: SlashCommandItem) {
     if (event.defaultPrevented) return;
+    if (event.button !== 0 || !ownsButtonTarget(event.target, event.currentTarget))
+      return;
     event.preventDefault();
     onSelect?.(item);
   }
