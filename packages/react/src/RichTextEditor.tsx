@@ -843,7 +843,8 @@ function RichTextEditorComponent(
       isNonEditorInputTarget(event.currentTarget, event.target) ||
       !editable ||
       compositionRef.current.active ||
-      event.nativeEvent.isComposing
+      event.nativeEvent.isComposing ||
+      event.nativeEvent.keyCode === 229
     ) {
       return;
     }

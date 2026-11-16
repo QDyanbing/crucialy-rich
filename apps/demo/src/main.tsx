@@ -1215,6 +1215,13 @@ function DemoApp() {
     return `${trigger.range.anchor.path.join(".")}:${trigger.range.anchor.offset}`;
   }
 
+  function dismissSlashMenu() {
+    if (slashMenuState.trigger)
+      dismissedSlashTriggerRef.current = getSlashTriggerKey(slashMenuState.trigger);
+    setSlashMenuRect(null);
+    setSlashMenuState(closeSlashMenu());
+  }
+
   function syncSlashMenu(trigger: SlashMenuTrigger | undefined) {
     if (!trigger) {
       dismissedSlashTriggerRef.current = null;
@@ -1348,7 +1355,11 @@ function DemoApp() {
 
   function handleBlockSelectionChange(selection: BlockSelection | undefined) {
     setBlockSelection(selection);
-    if (selection) setFloatingToolbarRect(null);
+    if (selection) {
+      setFloatingToolbarRect(null);
+      setSlashMenuRect(null);
+      setSlashMenuState(closeSlashMenu());
+    }
   }
 
   function handleInsertText() {
@@ -1718,31 +1729,29 @@ function DemoApp() {
       !isEditorTextEvent(event) ||
       event.defaultPrevented ||
       compositionState.active ||
-      event.nativeEvent.isComposing
+      event.nativeEvent.isComposing ||
+      event.nativeEvent.keyCode === 229
     ) {
       return;
     }
 
-    if (
-      slashMenuState.open &&
-      !event.altKey &&
-      !event.ctrlKey &&
-      !event.metaKey &&
-      !event.shiftKey
-    ) {
-      const slashAction = getSlashMenuKeyboardAction(event.key);
+    if (slashMenuState.open && !event.altKey && !event.ctrlKey && !event.metaKey) {
+      if (event.key === "Tab") {
+        dismissSlashMenu();
+        return;
+      }
+      const slashAction = event.shiftKey
+        ? undefined
+        : getSlashMenuKeyboardAction(event.key);
 
-      if (slashAction) {
+      if (
+        slashAction === "close" ||
+        (slashAction && filteredSlashCommandItems.length > 0)
+      ) {
         event.preventDefault();
 
         if (slashAction === "close") {
-          if (slashMenuState.trigger) {
-            dismissedSlashTriggerRef.current = getSlashTriggerKey(
-              slashMenuState.trigger,
-            );
-          }
-          setSlashMenuRect(null);
-          setSlashMenuState(closeSlashMenu());
+          dismissSlashMenu();
           return;
         }
 
