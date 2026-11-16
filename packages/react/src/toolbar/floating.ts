@@ -44,10 +44,11 @@ export function calculateFloatingToolbarPosition(
     viewport.width - toolbar.width - margin,
   );
   const topAbove = anchor.top - toolbar.height - gap;
-  const top =
-    topAbove >= margin
-      ? topAbove
-      : clamp(anchor.bottom + gap, margin, viewport.height - toolbar.height - margin);
+  const top = clamp(
+    topAbove >= margin ? topAbove : anchor.bottom + gap,
+    margin,
+    viewport.height - toolbar.height - margin,
+  );
 
   return { left, top };
 }
