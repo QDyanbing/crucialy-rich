@@ -120,6 +120,62 @@ async function verifySlashMenuContract(react) {
   const ids = [...html.matchAll(/ id="([^"]+)"/gu)].map((match) => match[1]);
   assert.equal(ids.length, 2);
   assert.equal(new Set(ids).size, 2);
+  const disabledHtml = renderToStaticMarkup(
+    createElement(react.SlashMenu, { items: [item], disabled: true }),
+  );
+  assert.match(disabledHtml, /aria-disabled="true"/);
+  assert.match(disabledHtml, /disabled=""/);
+  const viewport = { height: 600, width: 240 };
+  const anchorRect = { top: 200, bottom: 220, left: 100, width: 40, height: 20 };
+  const selection = { anchor: { path: [0, 0], offset: 0 }, focus: point };
+  const floatingProps = {
+    anchorRect,
+    viewport,
+    document,
+    selection,
+    items: [item],
+    disabled: true,
+  };
+  const floatingHtml = renderToStaticMarkup(
+    createElement(react.FloatingSlashMenu, floatingProps),
+  );
+  assert.match(floatingHtml, /width:224px/);
+  assert.match(floatingHtml, /overflow-y:auto/);
+  assert.match(floatingHtml, /aria-disabled="true"/);
+  for (const Component of [react.FloatingSlashMenu, react.FloatingToolbar]) {
+    for (const invalid of [
+      { ...floatingProps, anchorRect: { ...anchorRect, top: NaN } },
+      { ...floatingProps, viewport: { height: 16, width: 240 } },
+      { ...floatingProps, anchorRect: { ...anchorRect, bottom: 100 } },
+    ]) {
+      assert.equal(renderToStaticMarkup(createElement(Component, invalid)), "");
+    }
+  }
+  assert.equal(
+    renderToStaticMarkup(
+      createElement(react.FloatingToolbar, {
+        ...floatingProps,
+        items: [],
+        toolbarSize: { width: 200, height: 601 },
+      }),
+    ),
+    "",
+  );
+  for (const top of [-10000, 10000]) {
+    const offscreenAnchor = { ...anchorRect, top, bottom: top + 20 };
+    const slash = react.calculateSlashMenuPosition(
+      offscreenAnchor,
+      { height: 200, width: 200 },
+      viewport,
+    );
+    const toolbar = react.calculateFloatingToolbarPosition(
+      offscreenAnchor,
+      { height: 40, width: 200 },
+      viewport,
+    );
+    assert.ok(slash.top >= 8 && slash.top <= 392);
+    assert.ok(toolbar.top >= 8 && toolbar.top <= 552);
+  }
 }
 
 async function verifyNativeInputBinding(react) {
@@ -1508,7 +1564,7 @@ for (const packageConfig of publicPackages) {
   }
 
   if (packageConfig.directory === "packages/react") {
-    for (const name of ["ToolbarProps", "FixedToolbarProps"])
+    for (const name of ["ToolbarProps", "FixedToolbarProps", "SlashMenuProps"])
       assert.match(
         declarations,
         new RegExp(`interface ${name} \\{[^}]*disabled\\?: boolean`),
