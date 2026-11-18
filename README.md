@@ -58,6 +58,8 @@ text marks schema 当前支持 `bold`、`italic`、`underline`、`strike` 和 `c
 
 第 12 周链接闭环已完成：包括结构化 Link Mark、HTTP/HTTPS/mailto URL sanitize、target/rel 白名单、`set_link` operation、`setLink` / `unsetLink` command、`core.link` 功能命名空间、统一链接选区状态读取、安全 `<a>` 渲染、编辑态点击拦截、只读态原生跳转、菜单选区快照与恢复、History 生命周期以及中文创建/编辑/取消验收样例。
 
+Demo 链接弹层已补齐保存范围的文档归属和失效清理，确认状态与执行读取同一范围；编辑、撤销重做或图片选择后不会沿用旧会话。打开聚焦地址，输入框 Enter 确认、Escape 关闭，成功后可直接续编；取消/组合保护、原生 Tab 进出和正反向跨块 History 均有覆盖。这是宿主 UI，不新增公开链接组件，具体接入见[链接弹层规则](./docs/features/link.md#弹层选区恢复)。
+
 第 13 周“标题和引用闭环”已全部完成：文档模型可表达 paragraph、1–6 级 heading 和 quote；Heading 与 Quote 均完成语义渲染、默认 command、单块/多块类型切换、History 往返、中文混合块 Demo 和浏览器验收，跨块正向/反向选区不会丢失文字、marks 或选区方向。
 
 Quote 内按 Enter 会保留引用格式分段；空 Quote 再按 Enter 则原地退出为正文。选区 Enter 清空 Quote 后同样退出，并可通过 History 撤销、重做。
