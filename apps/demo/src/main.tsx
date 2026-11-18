@@ -1224,6 +1224,15 @@ function DemoApp() {
       textColorValue,
     ],
   );
+  const linkDialogSelection = linkEditorOpen
+    ? readLinkSelectionSnapshot(savedLinkSelectionRef.current, normalizedDocument)
+    : undefined;
+  const linkConfirmationDisabled =
+    !linkDialogSelection ||
+    queryCommandState(demoCommandRegistry, SET_LINK_COMMAND_NAME, {
+      context: { document: normalizedDocument, selection: linkDialogSelection },
+      payload: createLinkCommandPayload(linkHrefValue, linkTargetValue, linkRelValue),
+    }).disabled;
   const selectedHeadingOption =
     selectedHeadingLevel ??
     (commandStates.find((command) => command.commandName === SET_HEADING_COMMAND_NAME)
@@ -2464,7 +2473,7 @@ function DemoApp() {
                     </button>
                     <button
                       type="button"
-                      disabled={isCommandDisabled(SET_LINK_COMMAND_NAME)}
+                      disabled={linkConfirmationDisabled}
                       onClick={handleSetLink}
                     >
                       确认链接
