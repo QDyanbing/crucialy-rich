@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { characterDocument } from "./character-helpers";
+import { characterDocument, setCharacterCaret } from "./character-helpers";
 import { compose } from "./composition-helpers";
 
 test("locks link controls during composition and recovers the captured range", async ({
@@ -14,6 +14,7 @@ test("locks link controls during composition and recovers the captured range", a
   await compose(page, "compositionend");
   await opener.click();
   const before = await characterDocument(page);
+  await setCharacterCaret(page, [0, 0], 0);
   await compose(page, "compositionstart");
   const confirm = page.getByRole("button", { name: "确认链接" });
   await expect(confirm).toBeDisabled();

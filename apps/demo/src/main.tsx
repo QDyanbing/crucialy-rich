@@ -1696,16 +1696,13 @@ function DemoApp() {
       return;
     }
 
-    applyCommandResult(
-      executeCommand(demoCommandRegistry, SET_LINK_COMMAND_NAME, {
-        context: {
-          document: normalizedDocument,
-          selection: linkSelection,
-        },
-        payload: createLinkCommandPayload(linkHrefValue, linkTargetValue, linkRelValue),
-      }),
-      linkSelection,
-    );
+    if (linkConfirmationDisabled) return;
+    const result = executeCommand(demoCommandRegistry, SET_LINK_COMMAND_NAME, {
+      context: { document: normalizedDocument, selection: linkSelection },
+      payload: createLinkCommandPayload(linkHrefValue, linkTargetValue, linkRelValue),
+    });
+    if (!result.ok || !result.transaction || !result.selection) return;
+    applyCommandResult(result, linkSelection);
     handleCloseLinkEditor();
     editorRef.current?.focus({ preventScroll: true });
   }
@@ -1715,6 +1712,29 @@ function DemoApp() {
     savedLinkSelectionRef.current = null;
     setLinkEditorOpen(false);
     linkOpenerRef.current?.focus({ preventScroll: true });
+  }
+
+  function handleLinkDialogKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (
+      event.defaultPrevented ||
+      compositionState.active ||
+      event.nativeEvent.isComposing ||
+      event.nativeEvent.keyCode === 229 ||
+      event.altKey ||
+      event.ctrlKey ||
+      event.metaKey ||
+      event.shiftKey ||
+      !(event.target instanceof Element) ||
+      event.target.closest('[role="dialog"]') !== event.currentTarget
+    )
+      return;
+    if (event.key === "Escape") {
+      event.preventDefault();
+      handleCloseLinkEditor();
+    } else if (event.key === "Enter" && event.target instanceof HTMLInputElement) {
+      event.preventDefault();
+      handleSetLink();
+    }
   }
 
   function handleSaveLinkSelection(event: PointerEvent<HTMLButtonElement>) {
@@ -2452,6 +2472,7 @@ function DemoApp() {
               <button
                 ref={linkOpenerRef}
                 aria-expanded={linkEditorOpen}
+                aria-controls={linkEditorOpen ? "demo-link-settings" : undefined}
                 aria-haspopup="dialog"
                 disabled={compositionState.active}
                 type="button"
@@ -2464,7 +2485,13 @@ function DemoApp() {
                 链接
               </button>
               {linkEditorOpen ? (
-                <div aria-label="链接设置" className="link-popover" role="dialog">
+                <div
+                  id="demo-link-settings"
+                  aria-label="链接设置"
+                  className="link-popover"
+                  role="dialog"
+                  onKeyDown={handleLinkDialogKeyDown}
+                >
                   <label>
                     <span>链接地址</span>
                     <input
