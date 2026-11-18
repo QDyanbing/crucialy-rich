@@ -147,6 +147,8 @@ ref 命令事件的 `inputType` 为 `command`。受控模式不会自行替换 `
 
 编辑区点击与内嵌控件的宿主取消、模型目标校验、Composition/只读禁用、事件/Range 归属和焦点恢复边界见[编辑区交互](./editor-interactions.md)。任务勾选保留独立的前后选区快照；内嵌控件获焦时暂缓文字选区回写，不新增 blur 自动同步。
 
+Demo 链接设置仍是宿主 UI，不是组件 prop 或公开导出：保存范围绑定文档，确认状态与执行读取同一快照；新文档/图片选择清理旧弹层。地址聚焦、Enter 确认、Escape 关闭、原生 Tab 进出、确认后返回正文，以及取消/组合保护的具体规则见[弹层选区恢复](./link.md#弹层选区恢复)。React 组件、Core 链接 Command 与 History 公开签名没有变化。
+
 ## Toolbar API
 
 - `Toolbar`：接收已经解析状态的 items，只负责语义渲染。
