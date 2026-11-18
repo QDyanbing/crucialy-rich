@@ -1053,6 +1053,8 @@ function DemoApp() {
   const [slashMenuRect, setSlashMenuRect] = useState<SlashMenuAnchorRect | null>(null);
   const [slashMenuState, setSlashMenuState] = useState(closeSlashMenu);
   const savedLinkSelectionRef = useRef<LinkSelectionSnapshot | null>(null);
+  const linkOpenerRef = useRef<HTMLButtonElement>(null);
+  const linkHrefInputRef = useRef<HTMLInputElement>(null);
   const dismissedSlashTriggerRef = useRef<string | null>(null);
   const localImageResourcesRef = useRef<LocalImageResource[]>([]);
   const editorRef = useRef<RichTextEditorHandle>(null);
@@ -1131,6 +1133,10 @@ function DemoApp() {
       setLinkEditorOpen(false);
     }
   }, [normalizedDocument, blockSelection]);
+
+  useEffect(() => {
+    if (linkEditorOpen) linkHrefInputRef.current?.focus();
+  }, [linkEditorOpen]);
 
   const selectedLink = useMemo(
     () =>
@@ -1701,11 +1707,14 @@ function DemoApp() {
       linkSelection,
     );
     handleCloseLinkEditor();
+    editorRef.current?.focus({ preventScroll: true });
   }
 
-  function handleCloseLinkEditor() {
+  function handleCloseLinkEditor(event?: SyntheticEvent) {
+    if (event?.defaultPrevented) return;
     savedLinkSelectionRef.current = null;
     setLinkEditorOpen(false);
+    linkOpenerRef.current?.focus({ preventScroll: true });
   }
 
   function handleSaveLinkSelection(event: PointerEvent<HTMLButtonElement>) {
@@ -2441,6 +2450,7 @@ function DemoApp() {
             </button>
             <div className="link-control">
               <button
+                ref={linkOpenerRef}
                 aria-expanded={linkEditorOpen}
                 aria-haspopup="dialog"
                 disabled={compositionState.active}
@@ -2458,6 +2468,7 @@ function DemoApp() {
                   <label>
                     <span>链接地址</span>
                     <input
+                      ref={linkHrefInputRef}
                       aria-label="链接地址"
                       inputMode="url"
                       value={linkHrefValue}
