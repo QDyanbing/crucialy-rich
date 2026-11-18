@@ -119,6 +119,8 @@ import {
   useState,
   type ChangeEvent,
   type KeyboardEvent,
+  type MouseEvent,
+  type PointerEvent,
   type SyntheticEvent,
 } from "react";
 import { createRoot } from "react-dom/client";
@@ -1228,6 +1230,7 @@ function DemoApp() {
     ? readLinkSelectionSnapshot(savedLinkSelectionRef.current, normalizedDocument)
     : undefined;
   const linkConfirmationDisabled =
+    compositionState.active ||
     !linkDialogSelection ||
     queryCommandState(demoCommandRegistry, SET_LINK_COMMAND_NAME, {
       context: { document: normalizedDocument, selection: linkDialogSelection },
@@ -1676,7 +1679,8 @@ function DemoApp() {
     applyBackgroundColor(null);
   }
 
-  function handleSetLink() {
+  function handleSetLink(event?: SyntheticEvent) {
+    if (event?.defaultPrevented || compositionState.active) return;
     const linkSelection = readLinkSelectionSnapshot(
       savedLinkSelectionRef.current,
       normalizedDocument,
@@ -1704,14 +1708,25 @@ function DemoApp() {
     setLinkEditorOpen(false);
   }
 
-  function handleSaveLinkSelection() {
-    if (!linkEditorOpen) {
-      savedLinkSelectionRef.current =
-        createLinkSelectionSnapshot(normalizedDocument, modelSelection) ?? null;
-    }
+  function handleSaveLinkSelection(event: PointerEvent<HTMLButtonElement>) {
+    if (linkEditorOpen) return;
+    savedLinkSelectionRef.current = null;
+    if (
+      event.defaultPrevented ||
+      compositionState.active ||
+      event.button !== 0 ||
+      event.isPrimary === false
+    )
+      return;
+    savedLinkSelectionRef.current =
+      createLinkSelectionSnapshot(normalizedDocument, modelSelection) ?? null;
   }
 
-  function handleToggleLinkEditor() {
+  function handleToggleLinkEditor(event: MouseEvent<HTMLButtonElement>) {
+    if (event.defaultPrevented || compositionState.active || event.button !== 0) {
+      if (!linkEditorOpen) savedLinkSelectionRef.current = null;
+      return;
+    }
     if (linkEditorOpen) {
       handleCloseLinkEditor();
       return;
@@ -1746,7 +1761,8 @@ function DemoApp() {
     setLinkEditorOpen(true);
   }
 
-  function handleUnsetLink() {
+  function handleUnsetLink(event?: SyntheticEvent) {
+    if (event?.defaultPrevented || compositionState.active) return;
     applyCommandResult(
       executeCommand(demoCommandRegistry, UNSET_LINK_COMMAND_NAME, {
         context: {
@@ -2427,9 +2443,13 @@ function DemoApp() {
               <button
                 aria-expanded={linkEditorOpen}
                 aria-haspopup="dialog"
+                disabled={compositionState.active}
                 type="button"
                 onClick={handleToggleLinkEditor}
                 onPointerDown={handleSaveLinkSelection}
+                onPointerCancel={() => {
+                  if (!linkEditorOpen) savedLinkSelectionRef.current = null;
+                }}
               >
                 链接
               </button>
@@ -2484,7 +2504,9 @@ function DemoApp() {
             </div>
             <button
               type="button"
-              disabled={isCommandDisabled(UNSET_LINK_COMMAND_NAME)}
+              disabled={
+                compositionState.active || isCommandDisabled(UNSET_LINK_COMMAND_NAME)
+              }
               onClick={handleUnsetLink}
             >
               取消链接
