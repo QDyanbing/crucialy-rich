@@ -7,7 +7,6 @@ import {
   BOLD_COMMAND_NAME,
   canRedo,
   canUndo,
-  cloneRangeSelection,
   cloneBlockSelection,
   createBulletList,
   createCodeBlock,
@@ -123,6 +122,11 @@ import {
   type SyntheticEvent,
 } from "react";
 import { createRoot } from "react-dom/client";
+import {
+  createLinkSelectionSnapshot,
+  readLinkSelectionSnapshot,
+  type LinkSelectionSnapshot,
+} from "./link-selection";
 
 import "./styles.css";
 
@@ -1046,7 +1050,7 @@ function DemoApp() {
     useState<FloatingToolbarAnchorRect | null>(null);
   const [slashMenuRect, setSlashMenuRect] = useState<SlashMenuAnchorRect | null>(null);
   const [slashMenuState, setSlashMenuState] = useState(closeSlashMenu);
-  const savedLinkSelectionRef = useRef<RangeSelection | null>(null);
+  const savedLinkSelectionRef = useRef<LinkSelectionSnapshot | null>(null);
   const dismissedSlashTriggerRef = useRef<string | null>(null);
   const localImageResourcesRef = useRef<LocalImageResource[]>([]);
   const editorRef = useRef<RichTextEditorHandle>(null);
@@ -1656,8 +1660,14 @@ function DemoApp() {
   }
 
   function handleSetLink() {
-    const linkSelection =
-      savedLinkSelectionRef.current ?? cloneRangeSelection(modelSelection);
+    const linkSelection = readLinkSelectionSnapshot(
+      savedLinkSelectionRef.current,
+      normalizedDocument,
+    );
+    if (!linkSelection) {
+      handleCloseLinkEditor();
+      return;
+    }
 
     applyCommandResult(
       executeCommand(demoCommandRegistry, SET_LINK_COMMAND_NAME, {
@@ -1679,7 +1689,8 @@ function DemoApp() {
 
   function handleSaveLinkSelection() {
     if (!linkEditorOpen) {
-      savedLinkSelectionRef.current = cloneRangeSelection(modelSelection);
+      savedLinkSelectionRef.current =
+        createLinkSelectionSnapshot(normalizedDocument, modelSelection) ?? null;
     }
   }
 
@@ -1689,8 +1700,17 @@ function DemoApp() {
       return;
     }
 
-    const linkSelection =
-      savedLinkSelectionRef.current ?? cloneRangeSelection(modelSelection);
+    const snapshot =
+      savedLinkSelectionRef.current ??
+      createLinkSelectionSnapshot(normalizedDocument, modelSelection);
+    const linkSelection = readLinkSelectionSnapshot(
+      snapshot ?? null,
+      normalizedDocument,
+    );
+    if (!linkSelection) {
+      savedLinkSelectionRef.current = null;
+      return;
+    }
     const savedLink = getSelectedLinkMark({
       context: {
         document: normalizedDocument,
@@ -1698,7 +1718,7 @@ function DemoApp() {
       },
     });
 
-    savedLinkSelectionRef.current = linkSelection;
+    savedLinkSelectionRef.current = snapshot ?? null;
 
     if (savedLink) {
       setLinkHrefValue(savedLink.href);
