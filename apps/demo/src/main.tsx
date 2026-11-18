@@ -1122,6 +1122,14 @@ function DemoApp() {
     };
   }, [normalizedDocument, blockSelection]);
 
+  useEffect(() => {
+    const snapshot = savedLinkSelectionRef.current;
+    if (snapshot && (snapshot.document !== normalizedDocument || blockSelection)) {
+      savedLinkSelectionRef.current = null;
+      setLinkEditorOpen(false);
+    }
+  }, [normalizedDocument, blockSelection]);
+
   const selectedLink = useMemo(
     () =>
       getSelectedLinkMark({
