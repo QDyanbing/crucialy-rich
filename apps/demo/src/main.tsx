@@ -1237,6 +1237,7 @@ function DemoApp() {
     : undefined;
   const linkConfirmationDisabled =
     compositionState.active ||
+    Boolean(blockSelection) ||
     !linkDialogSelection ||
     queryCommandState(demoCommandRegistry, SET_LINK_COMMAND_NAME, {
       context: { document: normalizedDocument, selection: linkDialogSelection },
@@ -1743,6 +1744,7 @@ function DemoApp() {
     if (
       event.defaultPrevented ||
       compositionState.active ||
+      blockSelection ||
       event.button !== 0 ||
       event.isPrimary === false
     )
@@ -1752,7 +1754,12 @@ function DemoApp() {
   }
 
   function handleToggleLinkEditor(event: MouseEvent<HTMLButtonElement>) {
-    if (event.defaultPrevented || compositionState.active || event.button !== 0) {
+    if (
+      event.defaultPrevented ||
+      compositionState.active ||
+      blockSelection ||
+      event.button !== 0
+    ) {
       if (!linkEditorOpen) savedLinkSelectionRef.current = null;
       return;
     }
@@ -1791,7 +1798,7 @@ function DemoApp() {
   }
 
   function handleUnsetLink(event?: SyntheticEvent) {
-    if (event?.defaultPrevented || compositionState.active) return;
+    if (event?.defaultPrevented || compositionState.active || blockSelection) return;
     applyCommandResult(
       executeCommand(demoCommandRegistry, UNSET_LINK_COMMAND_NAME, {
         context: {
@@ -2474,9 +2481,17 @@ function DemoApp() {
                 aria-expanded={linkEditorOpen}
                 aria-controls={linkEditorOpen ? "demo-link-settings" : undefined}
                 aria-haspopup="dialog"
-                disabled={compositionState.active}
+                disabled={compositionState.active || Boolean(blockSelection)}
                 type="button"
                 onClick={handleToggleLinkEditor}
+                onKeyDown={(event) => {
+                  if (
+                    !linkEditorOpen &&
+                    !event.defaultPrevented &&
+                    (event.key === "Enter" || event.key === " " || event.key === "Tab")
+                  )
+                    savedLinkSelectionRef.current = null;
+                }}
                 onPointerDown={handleSaveLinkSelection}
                 onPointerCancel={() => {
                   if (!linkEditorOpen) savedLinkSelectionRef.current = null;
@@ -2543,7 +2558,9 @@ function DemoApp() {
             <button
               type="button"
               disabled={
-                compositionState.active || isCommandDisabled(UNSET_LINK_COMMAND_NAME)
+                compositionState.active ||
+                Boolean(blockSelection) ||
+                isCommandDisabled(UNSET_LINK_COMMAND_NAME)
               }
               onClick={handleUnsetLink}
             >
