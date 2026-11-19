@@ -615,9 +615,12 @@ function RichTextEditorComponent(
           document,
           selection,
         );
+        const beforeSelection = currentSelection
+          ? cloneRangeSelection(currentSelection)
+          : undefined;
         const result = executeCoreCommand(registry, name, {
-          context: currentSelection
-            ? { document, selection: currentSelection }
+          context: beforeSelection
+            ? { document, selection: cloneRangeSelection(beforeSelection) }
             : { document },
           ...(payload === undefined ? {} : { payload }),
         });
@@ -625,7 +628,7 @@ function RichTextEditorComponent(
         if (result.transaction && result.selection) {
           const input = createKeyboardInputResultFromCommandResult(
             result,
-            currentSelection,
+            beforeSelection,
             "command",
           );
 
