@@ -2,7 +2,7 @@
 
 ## 执行范围
 
-2026-11-19 完成定向回归。公开 prop、ref 方法签名、Command 和 History 策略不变；完整契约见[命令与通知快照](../features/component-api.md#命令与通知快照)。全仓结果单独记录在[全量回归](./full-regression.md)。
+2026-11-19 完成定向与全量回归：`pnpm check:all` 通过，349 个单测文件、2841 项单测与 421 项 Chromium。公开 prop、ref 方法签名、Command 和 History 策略不变；完整契约见[命令与通知快照](../features/component-api.md#命令与通知快照)，全部门禁与构建信息见[全量回归](./full-regression.md)。
 
 修复前已用 3 条单测复现无旧文字 Range 的成功命令不提交，以及 3 条单测复现扩展修改输入范围会污染受控 prop/before 快照。
 
@@ -13,7 +13,7 @@
 - `ref-command-without-range.test.ts`：3 项，明确图片 payload 删除、受控/非受控文档级扩展，成功事务应用且不伪造 beforeSelection。
 - `ref-selection-resolution.test.ts`：4 项，非法两端不外露/传给命令，合法当前 DOM 优先，其他实例或外部 Range 只能使用显式合法后备。
 - `ref-command-snapshot.test.ts`：3 项，guard/execute 修改上下文和失败扩展均不通过该 Range 改写宿主 prop，before 为执行前范围。
-- `ref-selection-snapshot.test.ts`：3 项，getter 每次独立复制，修改旧副本不影响后续读取、控件更新或下一次命令。
+- `ref-selection-snapshot.test.ts`：3 项，getter 每次独立复制，修改旧副本不影响后续读取、受控更新或下一次命令。
 - `command-result-range-snapshot.test.ts`：2 项，ref/快捷键在 onChange 前捕获结果 Range，源结果后续修改不污染前后事件范围。
 - `editor-notification-ranges.test.ts`：12 项，ref、快捷键、Enter、原生 insertParagraph、删除和 Composition 提交中，事务与选区回调互不共享 Range，受控 prop 不被改写。
 - `ref-command-matrix.test.ts`：44 项，11 类命令 × 受控/非受控 × 正反范围。验证 core 事务接入、一次通知、操作前后文档/范围，以及受控回传前后状态；不重复实现 core 规则。

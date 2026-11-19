@@ -2,29 +2,30 @@
 
 ## 执行信息
 
-- 日期：2026-11-18
+- 日期：2026-11-19
 - 版本：`0.1.0`
 - 分支：`master`
 - 命令：`pnpm check:all`
 
 ## 自动化结果
 
-| 检查项     | 结果 | 说明                                                                                      |
-| ---------- | ---- | ----------------------------------------------------------------------------------------- |
-| Prettier   | 通过 | 全仓文件格式一致                                                                          |
-| ESLint     | 通过 | 0 warning、0 error                                                                        |
-| TypeScript | 通过 | 根工程与 core/react/demo 包级检查全部通过                                                 |
-| Vitest     | 通过 | 340 个测试文件，2758 项测试                                                               |
-| Core 构建  | 通过 | ESM、source map、类型声明生成成功                                                         |
-| React 构建 | 通过 | ESM、source map、类型声明生成成功                                                         |
-| Demo 构建  | 通过 | Vite 生产构建成功                                                                         |
-| 包产物导入 | 通过 | 导出/声明、Clipboard、History、CodeBlock、Office、Native Input、Slash 与 Toolbar 冒烟通过 |
-| Playwright | 通过 | Chromium 409 项测试                                                                       |
+| 检查项     | 结果 | 说明                                                                                           |
+| ---------- | ---- | ---------------------------------------------------------------------------------------------- |
+| Prettier   | 通过 | 全仓文件格式一致                                                                               |
+| ESLint     | 通过 | 0 warning、0 error                                                                             |
+| TypeScript | 通过 | 根工程与 core/react/demo 包级检查全部通过                                                      |
+| Vitest     | 通过 | 349 个测试文件，2841 项测试                                                                    |
+| Core 构建  | 通过 | ESM、source map、类型声明生成成功                                                              |
+| React 构建 | 通过 | ESM、source map、类型声明生成成功                                                              |
+| Demo 构建  | 通过 | Vite 生产构建成功                                                                              |
+| 包产物导入 | 通过 | 导出/声明、Clipboard、History、CodeBlock、Office、Native Input、Slash、Toolbar 与 ref 冒烟通过 |
+| Playwright | 通过 | Chromium 421 项测试                                                                            |
 
-Demo 主 JS 产物约 523.47 KB，Vite 给出超过 500 KB 的非阻断分包提示；构建退出码为 0，本轮未调整打包策略。
+Demo 主 JS 产物约 523.60 KB，Vite 给出超过 500 KB 的非阻断分包提示；构建退出码为 0，本轮未调整打包策略。
 
 ## 核心路径
 
+- 2026-11-19 命令式 ref 与范围通知回归通过：无旧文字 Range 的成功命令可提交明确图片 payload 或文档级事务，beforeSelection 缺失时省略；getter/执行使用合法本实例 DOM 或显式受控后备。getSelection、命令上下文、执行前范围及结果/回调范围分别复制，扩展或单次通知的 Range 修改不污染 prop、其他通知及返回结果。新增 9 个文件 83 项 React 单测，覆盖 11 类常用命令、受控/非受控、正反方向、Registry/回调更新、只读宿主命令、Composition 文档失效、StrictMode、多实例、History 以及 ref/快捷键/键盘/原生换段/组合提交的通知隔离。新增 12 项 Chromium 在 1280×844 / 390×844 验证 getter 副本、修改事务通知后续编、明确图片路径无旧 Range 删除，图片夹具实际解码，命令结果截图已检查。构建包实际挂载验证同一行为，浏览器 TSX 夹具纳入类型检查；全量旧路径继续通过。公开签名、模型和 History 策略不变，隔离仅针对 Range/path，不承诺文档/事务/payload 复制、任意插件事务校验或全局权限锁；泛用 ref 的块高亮、焦点与 History 仍由宿主管理。详见[命令式 ref 验收](./ref-command.md)。
 - 2026-11-18 链接弹层生命周期回归通过：保存范围绑定源文档、校验并独立复制两端；编辑/撤销重做/规范化/切换示例及图片选择清理旧会话，确认状态、执行和 History before 使用同一保存范围。原生取消、组合保护、主指针/左键、pointercancel 和键盘进入的遗留快照清理通过；图片选中时文字链接操作禁用。打开地址聚焦一次，明确关闭返回入口、确认返回正文续编，失效不抢新编辑焦点；输入框 Enter 单次确认、Escape 关闭、原生 Tab 进出及无效草稿修正均通过。新增 6 项 Demo 快照单测和 38 项 Chromium；桌面/手机正反向跨块设置、单条 History、撤销恢复模型及 DOM 方向、重做、焦点和布局均验证，1280×844 / 390×844 弹层截图已检查，无溢出或 pageerror。Core/React 公共签名、链接支持范围与 History 策略未变；不新增通用弹层、旧位置重映射、权限、焦点陷阱或真机 IME 认证。证据与限制见[链接弹层生命周期验收](./link.md#弹层生命周期验收)。
 - 2026-11-16 本地图片与浮层回归通过：成功 blob URL 经重渲染、撤销和重做仍可读取并解码，失败插入不改模型或 History。Slash 尊重原生取消、主指针/按钮/目标归属及 disabled，组合期间禁用按钮；活动项只滚动自身容器。两种浮层夹取上下边界，组件拒绝非有限/无效几何，Slash 收缩滚动、Toolbar 声明高度放不下时隐藏。Demo 用 RAF 合并滚动/resize/选区/焦点刷新并清理监听，屏幕外或外部 Range 隐藏，返回可见范围恢复；Tab/Shift+Tab 不困住焦点，空结果 Enter 正常分段，选中图片清除旧菜单，React 与 Demo 跳过 keyCode 229。新增 80 项 React 单测、18 项 Chromium，用构建包验证 disabled 声明和几何契约；32 项既有键盘/组合/退出用例定向复验通过。桌面/手机活动项、缩窄工具栏和重定位截图已检查，几何断言与模型/History 无变化断言通过。未验证自定义裁剪/transform/门户、真实 visualViewport 或真机 IME；本地资源仍无跨会话持久化与容量管理，详见[斜杠菜单](./slash-menu.md#浮层与退出验收)、[工具栏](./toolbar.md#浮层几何验收)和[本地图片](./image.md#本地图片资源验收)。
 - 2026-11-15 Toolbar 键盘闭环通过：单 Tab 入口记忆实际上次焦点，左右键跳过禁用/分隔项并首尾回绕，Home/End 按配置定位首尾，方向键实时读取计算样式 RTL；空/全禁用无入口，配置变化回退但不自动抢焦点。宿主取消、修饰键、IME 与按钮/最近根归属隔离，导航/原生激活/Tab 离开先释放旧指针 Range。Enter/Space 保留原生 click 单次执行，导航本身不发命令或 History。新增 83 项 React 单测覆盖动态配置、事件/焦点归属、多实例、SSR 水合、StrictMode、卸载、键盘快照及固定/悬浮正反向 History 和失败重试；构建包实际挂载同一行为通过。新增 14 项 Chromium 在 1280×844 / 390×844 验证真实 Tab/Shift+Tab 进出与记忆、方向/Home/End、原生 Enter/Space 单次执行及撤销重做、继承 RTL/宿主取消，无 pageerror。截图发现并修复中文按钮被压成多行，非压缩单行标签与横向滚动保留，焦点按钮的单行文字及容器边界几何检查通过。公开签名、模型、Registry 和 History 策略不变；Tab 顺序及低层 onCommandCancel 通知范围变化已写入文档，不宣称竖向/二维导航、全局快捷键、自动返回编辑区或辅助技术全面认证。证据见[工具栏键盘验收](./toolbar.md#键盘导航验收)。
