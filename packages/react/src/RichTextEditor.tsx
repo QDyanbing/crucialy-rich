@@ -226,9 +226,11 @@ function createKeyboardInputResultFromCommandResult(
   }
 
   const inputResult: KeyboardInputResult = {
-    ...(beforeSelection ? { beforeSelection } : {}),
+    ...(beforeSelection
+      ? { beforeSelection: cloneRangeSelection(beforeSelection) }
+      : {}),
     inputType,
-    selection: result.selection,
+    selection: cloneRangeSelection(result.selection),
     transaction: result.transaction,
   };
 
