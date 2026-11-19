@@ -646,7 +646,8 @@ function RichTextEditorComponent(
         return rootRef.current;
       },
       getSelection() {
-        return getRefModelSelection(rootRef.current, document, selection);
+        const current = getRefModelSelection(rootRef.current, document, selection);
+        return current ? cloneRangeSelection(current) : undefined;
       },
     }),
     [
