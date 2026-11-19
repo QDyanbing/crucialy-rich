@@ -252,6 +252,22 @@ function getModelSelectionFromDom(root: HTMLDivElement, document: DocumentNode) 
     : undefined;
 }
 
+function getRefModelSelection(
+  root: HTMLDivElement | null,
+  document: DocumentNode,
+  selection?: RangeSelection,
+): RangeSelection | undefined {
+  const current = root ? getModelSelectionFromDom(root, document) : undefined;
+  return (
+    current ??
+    (selection &&
+    isValidPoint(document, selection.anchor) &&
+    isValidPoint(document, selection.focus)
+      ? selection
+      : undefined)
+  );
+}
+
 function isNonEditorInputTarget(
   root: HTMLDivElement,
   target: EventTarget | null,
@@ -594,9 +610,11 @@ function RichTextEditorComponent(
         rootRef.current?.focus(options);
       },
       executeCommand(name, payload) {
-        const currentSelection = rootRef.current
-          ? (getModelSelectionFromDom(rootRef.current, document) ?? selection)
-          : selection;
+        const currentSelection = getRefModelSelection(
+          rootRef.current,
+          document,
+          selection,
+        );
         const result = executeCoreCommand(registry, name, {
           context: currentSelection
             ? { document, selection: currentSelection }
@@ -625,9 +643,7 @@ function RichTextEditorComponent(
         return rootRef.current;
       },
       getSelection() {
-        return rootRef.current
-          ? (getModelSelectionFromDom(rootRef.current, document) ?? selection)
-          : selection;
+        return getRefModelSelection(rootRef.current, document, selection);
       },
     }),
     [
