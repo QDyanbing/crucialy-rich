@@ -723,9 +723,11 @@ function RichTextEditorComponent(
         ...(input.beforeBlockSelection
           ? { beforeBlockSelection: cloneBlockSelection(input.beforeBlockSelection) }
           : {}),
-        ...(input.beforeSelection ? { beforeSelection: input.beforeSelection } : {}),
+        ...(input.beforeSelection
+          ? { beforeSelection: cloneRangeSelection(input.beforeSelection) }
+          : {}),
         inputType: input.inputType,
-        selection: input.selection,
+        selection: cloneRangeSelection(input.selection),
         transaction: input.transaction,
       };
 
@@ -734,7 +736,7 @@ function RichTextEditorComponent(
       );
     }
 
-    onSelectionChange?.(input.selection);
+    onSelectionChange?.(cloneRangeSelection(input.selection));
   }
 
   function handleBeforeInput(event: FormEvent<HTMLDivElement>) {
