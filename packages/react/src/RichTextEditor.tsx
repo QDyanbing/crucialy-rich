@@ -604,7 +604,7 @@ function RichTextEditorComponent(
           ...(payload === undefined ? {} : { payload }),
         });
 
-        if (currentSelection && result.transaction && result.selection) {
+        if (result.transaction && result.selection) {
           const input = createKeyboardInputResultFromCommandResult(
             result,
             currentSelection,
