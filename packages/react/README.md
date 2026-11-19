@@ -47,6 +47,8 @@ export function Demo() {
 - 组合会话绑定开始时的文档引用，文档换引用、切只读或选中块后取消；受控 value 在未编辑时需保持引用稳定。只更新回调、Registry 或文字 selection 不改变起始锚点，History composition batch 规则不变，具体取消语义与真机限制见[中文输入法](../../docs/features/ime.md)。
 - `commandRegistry`：允许宿主提供自定义 Command 注册表，内部输入和 ref 共用该注册表。
 - `ref`：暴露 `focus`、`getElement`、`getDocument`、`getSelection` 和 `executeCommand`。
+- ref 的 getter 与命令只使用合法的当前 DOM/受控范围；getSelection 每次返回独立 Range/path，命令上下文和 before Range 也独立捕获。无旧文字选区的成功命令可提交事务，例如用明确 payload 删除图片；通知省略 beforeSelection，不伪造旧光标。
+- 命令结果与事务/选区回调的 Range 互相隔离，单次通知修改不污染其他通知或 ref 返回结果；文档/事务/payload 不因此深拷贝。泛用 ref 不代管块高亮、History 或焦点，只读仍允许宿主主动执行命令，完整边界见[命令与通知快照](../../docs/features/component-api.md#命令与通知快照)。
 - `contentEditable`：开启普通文本输入、Backspace、Delete、Enter、列表 Tab 和 Shift+Tab。
 - 输入事件：通过模型 transaction 更新文档，并在输入后回传稳定模型选区；普通文本输入、非折叠删除选区、选区 Enter 分段和段首 Backspace 合并复用 core command。
 - HTML/Markdown 文字粘贴：原生 paste 会保留 `b/i/u/s/strike/del/code` 与 Markdown 反引号对应的 boolean mark 组合，并输出 `insertFromPaste` transaction。

@@ -87,11 +87,21 @@ export function CommandEditor() {
 
 - `focus(options?)`：聚焦 contenteditable 根节点。
 - `getElement()`：返回根 `HTMLDivElement`，未挂载时返回 `null`。
-- `getDocument()`：返回组件当前使用的 `DocumentNode`。
-- `getSelection()`：优先读取两个端点都属于当前编辑器根节点的 DOM Selection，并转换为模型选区；不可用时回退到宿主显式传入的 selection，不借用其他实例的浏览器选区。
-- `executeCommand(name, payload?)`：使用当前文档、选区和 `commandRegistry` 执行命令；成功 transaction 通过 `onChange`、`onSelectionChange` 和 `onTransaction` 输出。
+- `getDocument()`：返回组件当前使用的 `DocumentNode` 引用，不是深拷贝，宿主不应原地修改。
+- `getSelection()`：优先读取两端都属于当前编辑器根节点的 DOM Selection；不可用时仅回退到两端均合法的显式 selection。不借用其他实例的浏览器选区，也不暴露失效受控范围。每次返回独立 Range 与端点 path，修改读出值不改变 prop 或下一次读取；无合法范围时返回 undefined。
+- `executeCommand(name, payload?)`：使用当前文档、合法选区和 `commandRegistry` 执行命令。进入扩展前分别复制命令上下文与 before Range；成功且同时返回 transaction/selection 时提交，不再要求执行前已有文字选区。
 
 ref 命令事件的 `inputType` 为 `command`。受控模式不会自行替换 `value`，宿主必须在 `onChange` 后回传新文档；非受控模式会更新内部文档。`contentEditable={false}` 只禁止用户输入，宿主仍可主动执行 ref 命令。
+
+### 命令与通知快照
+
+- 没有旧文字选区不等于禁止命令：例如 `executeCommand(DELETE_IMAGE_COMMAND_NAME, { selection: blockSelection })` 使用明确 payload 删除图片，或扩展仅依赖文档执行。是否可执行仍由 Registry/Command 决定，不能用新选区伪造 beforeSelection；缺失时事务通知省略该字段。
+- 无选区命令仍须成功返回 transaction 和操作后 selection 才进入提交管线。非空事务按既有顺序调用 onChange、onTransaction、onSelectionChange；空事务只通知 selection。failure/skipped 不提交，缺少 transaction/selection 或仅带 document/history 的结果不自动应用。
+- 命令结果的前后 Range 在调用 onChange 前捕获。提交事务时，onTransaction 的 beforeSelection/selection 和 onSelectionChange 的参数各自独立复制，不与返回的 CommandResult.selection 共享；一个回调修改范围不会污染另一个回调或 ref 返回值。Range 保留正反方向，不新增 History batch。
+- 泛用 ref 不自动推断、清除或恢复 blockSelection/cellSelection；按明确图片 payload 执行时，需要图片高亮 History 的宿主自行把已知块路径传给快照第三参数，并回传块选区。键盘/原生图片删除与剪切的 beforeBlockSelection 专用通知仍保持原行为。
+- 最新文档、Registry、回调和受控范围随渲染更新；Registry 原地补注册的命令在执行时读取。命令式调用不受 contentEditable/编辑器 Composition 的用户输入锁限制；非受控命令替换文档后，原组合会话按现有文档归属规则取消。受控宿主仍负责回传新文档，不应在候选阶段无意覆盖会话。
+
+隔离只针对 Range/path；document、transaction、item/payload 及扩展副作用不因此深拷贝或回滚。仍要求扩展返回合法事务和操作后选区，不增加任意扩展事务的全面校验、不捕获宿主回调异常，也不承诺未挂载后继续使用旧 handle、批处理内同步重入刷新或 ref 自动管理焦点/History。只读不是权限边界，需要禁止程序调用时应由宿主守卫。
 
 ## 当前行为
 
@@ -104,7 +114,7 @@ ref 命令事件的 `inputType` 为 `command`。受控模式不会自行替换 `
 - 输入后会通过 `onSelectionChange` 输出新的折叠选区。
 - 折叠 Backspace/Delete 使用 Core 字素分段删除整个字符簇，可跨同一容器的格式叶子，不在中间叶子末尾提前合并段落；Point 仍为 UTF-16 offset，范围删除不扩张。运行时须支持 `Intl.Segmenter`，边界见[字素删除](./input.md#字素删除与-utf-16)。
 - 非空 transaction 输入后会通过 `onTransaction` 输出输入前文档、输入后文档、输入前 selection、输入后 selection、transaction 和 inputType。
-- `beforeSelection` 为可选 `RangeSelection`：文字输入仍提供旧文字范围；图片删除/剪切只保存合法旧文字范围，没有时省略，不把删除后的光标冒充旧选区。接入方读取端点前须判空。图片删除/剪切还提供独立复制的 `beforeBlockSelection?: BlockSelection`，记录时传给 `createHistorySnapshot` 第三参数，可在撤销后恢复图片高亮；其他文字事务不生成该字段。
+- `beforeSelection` 为可选 `RangeSelection`：文字输入仍提供旧文字范围；图片删除/剪切或无旧范围的 ref 命令没有合法旧文字范围时省略，不把删除后的光标冒充旧选区。接入方读取端点前须判空。键盘/原生图片删除及剪切还提供独立复制的 `beforeBlockSelection?: BlockSelection`，记录时传给 `createHistorySnapshot` 第三参数，可在撤销后恢复图片高亮；泛用 ref 的块选区由宿主管理。
 - 组件仍不内置 History；宿主须把 `undoHistory` / `redoHistory` 或 History Command 返回的 document、selection 和可选 blockSelection 回传，没有块选区时清除旧值。ref `executeCommand` 不自动应用只带 document/history 而没有 transaction 的 History 结果。路径合法性与焦点由宿主管理，见[块选区恢复](./history.md#块选区恢复)。
 - 普通文本输入的 `onTransaction` 事件会带有 `batch: "typing"`，宿主可用于连续输入合并。
 - 输入处理会复用当前 DOM selection，先转换为模型 selection，再创建输入 transaction。
