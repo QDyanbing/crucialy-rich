@@ -180,7 +180,7 @@ async function verifySlashMenuContract(react) {
 
 async function verifyNativeInputBinding(react) {
   const require = createRequire(resolve(repositoryRoot, "packages/react/package.json"));
-  const { createElement, act } = require("react");
+  const { createElement, createRef, act } = require("react");
   const { renderToStaticMarkup } = require("react-dom/server");
   let observed = 0;
   const html = renderToStaticMarkup(
@@ -219,6 +219,86 @@ async function verifyNativeInputBinding(react) {
     const core = await import(
       pathToFileURL(resolve(repositoryRoot, "packages/core/dist/index.js")).href
     );
+    for (const controlled of [false, true]) {
+      for (const image of [false, true]) {
+        const value = core.createDocument([
+          image
+            ? core.createImage("https://example.com/ref.png")
+            : core.createParagraph([core.createText("命令正文")]),
+        ]);
+        const selection = {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [0, 0], offset: 2 },
+        };
+        const ref = createRef();
+        const container = dom.window.document.createElement("div");
+        dom.window.document.body.append(container);
+        const root = createRoot(container);
+        let after, notification, beforeSelection;
+        let changes = 0,
+          transactions = 0;
+        const props = {
+          ref,
+          contentEditable: true,
+          defaultValue: value,
+          ...(controlled ? { value } : {}),
+          ...(image ? {} : { selection }),
+          onChange(next) {
+            changes++;
+            after = next;
+          },
+          onTransaction(event) {
+            transactions++;
+            beforeSelection = event.beforeSelection;
+            event.selection.anchor.offset = 99;
+            event.selection.focus.path[0] = 99;
+          },
+          onSelectionChange(next) {
+            notification = structuredClone(next);
+          },
+        };
+        try {
+          act(() => root.render(createElement(react.RichTextEditor, props)));
+          dom.window.getSelection().removeAllRanges();
+          if (!image) {
+            const snapshot = ref.current.getSelection();
+            snapshot.anchor.path[0] = 99;
+            snapshot.focus.offset = 99;
+            assert.deepEqual(ref.current.getSelection(), selection);
+          }
+          let result;
+          act(() => {
+            result = ref.current.executeCommand(
+              image ? core.DELETE_IMAGE_COMMAND_NAME : core.BOLD_COMMAND_NAME,
+              image ? { selection: core.createBlockSelection([0]) } : undefined,
+            );
+          });
+          assert.equal(result.ok, true);
+          assert.equal(changes, 1);
+          assert.equal(transactions, 1);
+          assert.deepEqual(beforeSelection, image ? undefined : selection);
+          assert.deepEqual(notification, result.selection);
+          assert.notEqual(notification.anchor.offset, 99);
+          assert.deepEqual(ref.current.getDocument(), controlled ? value : after);
+          if (controlled)
+            act(() =>
+              root.render(
+                createElement(react.RichTextEditor, {
+                  ...props,
+                  value: after,
+                  selection: notification,
+                }),
+              ),
+            );
+          assert.equal(container.querySelectorAll("img").length, 0);
+          if (!image)
+            assert.equal(container.querySelector("strong").textContent, "命令");
+        } finally {
+          act(() => root.unmount());
+          container.remove();
+        }
+      }
+    }
     for (const type of [
       "deleteContentBackward",
       "deleteContentForward",
