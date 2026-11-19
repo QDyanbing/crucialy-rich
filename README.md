@@ -14,6 +14,8 @@
 
 当前 React 组件已支持通过 `value` / `defaultValue` 展示文档模型，普通文本输入、非折叠删除选区、选区 Enter 分段、段首 Backspace 合并和段尾 Delete 合并会优先复用 command；组件会通过 `onTransaction` 暴露真实输入 transaction。演示页按钮命令和真实输入都会记录 history，并支持撤销、重做、Ctrl/Meta + Z、Ctrl/Meta + Shift + Z、Ctrl/Meta + Y、连续 typing 合并和 undoStack/redoStack 状态查看。
 
+命令式 ref 已补齐无旧文字选区的事务提交与合法选区回退；getSelection、扩展上下文和通知范围分别复制，不通过 Range 引用污染宿主或其他回调。受控模式仍等待回传 value，只读仍允许宿主主动调用命令，History/图片高亮仍由宿主管理。兼容性与引用边界见[命令与通知快照](./docs/features/component-api.md#命令与通知快照)。
+
 非折叠选区编辑已支持同一文本容器内跨 text 节点、跨连续顶层 paragraph、heading、quote、codeBlock，以及同一表格单元格内的连续 paragraph。输入替换、Backspace、Delete、Enter、选区映射和 History 往返共用 `delete_text` / `delete_range` operation；跨列表项、跨单元格、进出表格、图片和分隔线等结构边界暂不参与范围删除。
 
 折叠 Backspace/Delete 已改为整簇删除，避免拆坏 emoji、组合重音、旗帜和 ZWJ 序列，也支持同一容器内跨格式叶子；修正 Delete 在中间文字叶子末尾提前合并下一段的问题。Point 与显式范围仍使用 UTF-16 offset，运行时须提供 `Intl.Segmenter`，具体边界见[字素删除](./docs/features/input.md#字素删除与-utf-16)。
