@@ -84,7 +84,7 @@ for (const controlled of [false, true]) {
           expect(host.onSelectionChange).toHaveBeenCalledTimes(1);
           expect(host.ref.current!.getDocument()).toEqual(controlled ? value : after);
           if (controlled) {
-            host.rerender({ value: after, selection: expected.selection });
+            host.rerender({ value: after, selection: expected.selection! });
             expect(host.ref.current!.getDocument()).toEqual(after);
           }
         },

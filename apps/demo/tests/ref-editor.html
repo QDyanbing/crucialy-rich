@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>命令式编辑验收</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 16px;
+        font: 16px/1.5 sans-serif;
+        color: #202822;
+      }
+      main {
+        max-width: 640px;
+        margin: auto;
+      }
+      h1 {
+        font-size: 24px;
+      }
+      h2 {
+        font-size: 18px;
+      }
+      section {
+        margin-top: 24px;
+      }
+      button {
+        padding: 8px;
+        margin: 4px;
+      }
+      .editor {
+        min-height: 80px;
+        border: 1px solid #829186;
+        padding: 12px;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+      output {
+        display: block;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        font-size: 12px;
+      }
+      img {
+        width: 40px;
+        height: 40px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./ref-editor.tsx"></script>
+  </body>
+</html>

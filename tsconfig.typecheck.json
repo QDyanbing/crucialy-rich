@@ -16,6 +16,7 @@
     "packages/*/tests/**/*.ts",
     "playwright.config.ts",
     "tests/**/*.ts",
+    "apps/demo/tests/**/*.tsx",
     "vitest.config.ts"
   ]
 }

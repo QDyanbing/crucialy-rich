@@ -56,7 +56,8 @@ describe("ref selection resolution", () => {
     document.body.append(outside);
     window.getSelection()!.setBaseAndExtent(outside, 1, outside, 2);
     expect(host.ref.current!.getSelection()).toEqual(selection);
-    host.rerender({ selection: undefined });
-    expect(host.ref.current!.getSelection()).toBeUndefined();
+    const other = mountDeletionEditor(value, undefined);
+    window.getSelection()!.setBaseAndExtent(outside, 1, outside, 2);
+    expect(other.ref.current!.getSelection()).toBeUndefined();
   });
 });

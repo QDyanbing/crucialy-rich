@@ -63,7 +63,7 @@ describe("ref command History integration", () => {
         const redo = redoHistory(undo.history)!;
         expect(redo.document).toEqual(after);
         expect(redo.selection).toEqual(finalRange);
-        host.rerender({ value: undo.document, selection: undo.selection });
+        host.rerender({ value: undo.document, selection: undo.selection! });
         expect(host.ref.current!.getDocument()).toEqual(value);
       },
     );
