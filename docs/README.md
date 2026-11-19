@@ -54,6 +54,7 @@
 
 ## 专项验收
 
+- [命令式 ref 与范围通知](./qa/ref-command.md)
 - [0.1.0 全量回归](./qa/full-regression.md)、[0.1.0 发布验收](./qa/release.md)、[0.1.0 发布说明草稿](./release-notes/0.1.0.md)
 - [模型](./qa/model.md)、[选区](./qa/selection.md)、[渲染](./qa/render.md)、[选区同步](./qa/selection-sync.md)
 - [Operation](./qa/operation.md)、[Command](./qa/command.md)、[History](./qa/history.md)、[输入事件](./qa/input.md)、[跨节点与跨块选区编辑](./qa/range-editing.md)
