@@ -25,15 +25,17 @@ export function createLocalImageResource(
     return undefined;
 
   let objectUrl: string;
+  const allocate = urlApi.createObjectURL.bind(urlApi);
+  const release = urlApi.revokeObjectURL.bind(urlApi);
   try {
-    objectUrl = urlApi.createObjectURL(file);
+    objectUrl = allocate(file);
   } catch {
     return undefined;
   }
   const src = sanitizeImageSrc(objectUrl);
 
   if (!src || !src.startsWith("blob:") || src.length === 5) {
-    urlApi.revokeObjectURL(objectUrl);
+    release(objectUrl);
     return undefined;
   }
 
@@ -48,7 +50,7 @@ export function createLocalImageResource(
     revoke() {
       if (!revoked) {
         revoked = true;
-        urlApi.revokeObjectURL(objectUrl);
+        release(objectUrl);
       }
     },
   };
