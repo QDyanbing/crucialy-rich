@@ -7,6 +7,7 @@ import {
   BOLD_COMMAND_NAME,
   canRedo,
   canUndo,
+  canExecuteCommand,
   cloneBlockSelection,
   createBulletList,
   createCodeBlock,
@@ -1480,9 +1481,19 @@ function DemoApp() {
   }
 
   function handleLocalImageChange(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
+    const input = event.currentTarget;
+    const file = input.files?.[0];
+    input.value = "";
 
-    if (!file) {
+    if (
+      !file ||
+      compositionState.active ||
+      blockSelection ||
+      !canExecuteCommand(demoCommandRegistry, INSERT_IMAGE_COMMAND_NAME, {
+        context: { document: normalizedDocument, selection: modelSelection },
+        payload: { src: "blob:null/local-preview" },
+      })
+    ) {
       return;
     }
 
@@ -1497,15 +1508,13 @@ function DemoApp() {
         payload: resource.payload,
       });
 
-      if (result.ok) {
+      if (result.ok && result.transaction && result.selection) {
         localImageResourcesRef.current.push(resource);
         applyCommandResult(result);
       } else {
         resource.revoke();
       }
     }
-
-    event.target.value = "";
   }
 
   function handlePasteExample() {
