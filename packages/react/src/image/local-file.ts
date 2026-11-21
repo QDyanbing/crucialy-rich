@@ -14,7 +14,7 @@ export function createLocalImageResource(
   file: File,
   urlApi: ObjectUrlApi = globalThis.URL,
 ): LocalImageResource | undefined {
-  if (!file.type.startsWith("image/")) {
+  if (!/^image\/[a-z0-9!#$&^_.+-]+$/i.test(file.type)) {
     return undefined;
   }
 
