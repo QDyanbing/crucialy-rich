@@ -12,11 +12,17 @@ export interface ObjectUrlApi {
 
 export function createLocalImageResource(
   file: File,
-  urlApi: ObjectUrlApi = URL,
+  urlApi: ObjectUrlApi = globalThis.URL,
 ): LocalImageResource | undefined {
   if (!file.type.startsWith("image/")) {
     return undefined;
   }
+
+  if (
+    typeof urlApi?.createObjectURL !== "function" ||
+    typeof urlApi?.revokeObjectURL !== "function"
+  )
+    return undefined;
 
   const objectUrl = urlApi.createObjectURL(file);
   const src = sanitizeImageSrc(objectUrl);
