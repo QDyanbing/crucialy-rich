@@ -32,7 +32,7 @@ export function createLocalImageResource(
   }
   const src = sanitizeImageSrc(objectUrl);
 
-  if (!src) {
+  if (!src || !src.startsWith("blob:") || src.length === 5) {
     urlApi.revokeObjectURL(objectUrl);
     return undefined;
   }
