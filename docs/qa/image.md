@@ -44,6 +44,18 @@ pnpm check:all
 
 ## 本地图片资源验收
 
+2026-11-21 分配与适配器定向验收通过：`pnpm exec vitest run packages/react/tests/local-image*.test.ts` 为 8 个文件、39 项，含本轮新增 7 个文件、36 项；`pnpm exec playwright test tests/e2e/local-image*.spec.ts` 为 10 项，含新增 8 项。根类型检查、生产构建与构建包导入验证通过；全仓结果见[全量回归](./full-regression.md)。
+
+- capabilities/allocation：能力缺失不分配，分配抛错无半成品，后续成功调用可恢复。
+- protocol/adapter/release：非 blob 与空 blob 拒绝，原字符串清理；创建时方法与接收者绑定，payload 修改不重定向释放，多适配器独立，抛错及重入只尝试一次，不打断其他资源清理。
+- mime/file：完整 MIME 标签与真实 File 名称、大小写及 SVG 子类型验证；只检查元数据，不读取或解码文件字节。
+- `local-image-guards.spec.ts`：无合法插入上下文或活跃 Composition 时不分配，输入复位，组合结束可重选同一文件。
+- `local-image-recovery.spec.ts`：桌面/手机分配抛错、非 blob 结果后模型/History 不变，再选同一文件可成功解码，新增一次 History，无 pageerror。
+- `local-image-multiple.spec.ts`：两张图片各有独立 URL，撤销/重做及取消文件选择后均可 fetch，不因暂离当前模型而提前释放。
+- 构建产物验证缺失能力、分配失败、非 blob 拒绝、原方法/原 URL 释放及错误隔离，公共类型签名不变。
+
+1280×844 / 390×844 的恢复结果截图已检查，文字与编辑区边界正常；1px PNG 仅为解码夹具，不代表产品照片。失败清理不重试、不保证适配器实际回收，不提供上传、持久化、内容安全检查或真机 IME 全面认证。
+
 2026-11-16 `local-image-lifecycle.spec.ts` 两条 Chromium 用例通过：真实 PNG 的 blob URL 在插入后、普通控件重渲染、撤销与重做后仍可 fetch，图片 naturalWidth 为 1；无合法插入上下文时不增加图片或 History，文件输入复位。成功资源仅在 Demo 卸载 cleanup 中回收，失败资源仍立即回收；原有 `local-image.test.ts` 的资源创建/幂等释放回归通过。
 
 本轮没有创建上传服务、永久 URL 或资源引用计数；当前文档外的 History 仍可能引用 blob，所以撤销不能成为释放条件。长会话容量、跨会话存储不在验收范围，全量结果见[全量回归](./full-regression.md)。
