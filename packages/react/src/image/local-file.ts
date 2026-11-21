@@ -33,13 +33,21 @@ export function createLocalImageResource(
     return undefined;
   }
   const src = sanitizeImageSrc(objectUrl);
+  let revoked = false;
+  const revoke = () => {
+    if (revoked) return;
+    revoked = true;
+    try {
+      release(objectUrl);
+    } catch {
+      /* Cleanup is best-effort for injected adapters. */
+    }
+  };
 
   if (!src || !src.startsWith("blob:") || src.length === 5) {
-    release(objectUrl);
+    revoke();
     return undefined;
   }
-
-  let revoked = false;
 
   return {
     payload: {
@@ -47,11 +55,6 @@ export function createLocalImageResource(
       src,
       status: "ready",
     },
-    revoke() {
-      if (!revoked) {
-        revoked = true;
-        release(objectUrl);
-      }
-    },
+    revoke,
   };
 }
