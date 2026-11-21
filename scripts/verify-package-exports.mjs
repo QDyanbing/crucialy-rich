@@ -55,6 +55,57 @@ const publicPackages = [
   },
 ];
 
+function verifyLocalImageContract(react) {
+  const file = { name: "本地.png", type: "image/png" };
+  assert.equal(react.createLocalImageResource(file, {}), undefined);
+  assert.equal(
+    react.createLocalImageResource(file, {
+      createObjectURL() {
+        throw new Error("allocation failed");
+      },
+      revokeObjectURL() {},
+    }),
+    undefined,
+  );
+  let releases = 0;
+  const api = {
+    createObjectURL() {
+      return "blob:null/built-resource";
+    },
+    revokeObjectURL(url) {
+      assert.equal(url, "blob:null/built-resource");
+      releases++;
+      throw new Error("release failed");
+    },
+  };
+  const resource = react.createLocalImageResource(file, api);
+  assert.deepEqual(resource.payload, {
+    alt: "本地.png",
+    src: "blob:null/built-resource",
+    status: "ready",
+  });
+  api.revokeObjectURL = () => {
+    throw new Error("replacement must not be used");
+  };
+  resource.payload.src = "https://example.com/changed";
+  resource.revoke();
+  resource.revoke();
+  assert.equal(releases, 1);
+  let rejected = 0;
+  assert.equal(
+    react.createLocalImageResource(file, {
+      createObjectURL: () => "https://example.com/not-local",
+      revokeObjectURL: () => rejected++,
+    }),
+    undefined,
+  );
+  assert.equal(rejected, 1);
+  assert.equal(
+    react.createLocalImageResource({ ...file, type: "image/" }, api),
+    undefined,
+  );
+}
+
 async function verifySlashMenuContract(react) {
   const core = await import(
     pathToFileURL(resolve(repositoryRoot, "packages/core/dist/index.js")).href
@@ -1654,6 +1705,7 @@ for (const packageConfig of publicPackages) {
       /onCommandCancel\?: \(item: ResolvedToolbarCommandItem\) => void/,
     );
     await verifySlashMenuContract(runtime);
+    verifyLocalImageContract(runtime);
     assert.ok(declarations.includes('"insertLineBreak"'));
     assert.match(declarations, /onNativeBeforeInput\?: \(event: InputEvent\) => void/);
     await verifyNativeInputBinding(runtime);
