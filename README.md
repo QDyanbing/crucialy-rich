@@ -84,6 +84,8 @@ Quote 内按 Enter 会保留引用格式分段；空 Quote 再按 Enter 则原�
 
 第 19 周“图片闭环”已全部完成：core 支持安全 ImageNode、URL 清洗、校验/规范化、语义化 `img` 渲染、`insertImage` / `deleteImage` 命令和独立 BlockSelection；React 支持图片点击选中、Backspace/Delete 删除及本地 object URL 预览，Demo 提供中文 URL、本地和删除流程，真实上传由外部接入。
 
+本地资源创建已补齐 URL 能力、分配异常、MIME 与 blob 结果检查；清理绑定原适配器并隔离释放异常，最多尝试一次，不保证失败适配器实际释放成功。Demo 不在无效上下文或组合期间分配资源，失败后可重选同一文件；文件内容验证、上传与持久化仍由宿主提供，见[本地文件契约](./docs/features/image.md#本地文件)。
+
 浮层已补齐无效几何保护、上下边界限制和 Slash 活动项局部滚动。Demo 监听滚动、resize、选区及焦点并合帧更新锚点；空结果 Enter 继续分段，Tab/Shift+Tab 退出菜单，输入法 keyCode 229 不执行编辑命令。两种 Slash 菜单新增可选 `disabled`，组合期间禁用；React 包本身不接管全局监听，详见[浮层职责](./docs/features/slash-menu.md#当前边界)。本地图片修复重渲染提前释放，成功 URL 在 Demo 卸载时回收，History 撤销/重做仍可读取；生命周期限制见[本地文件](./docs/features/image.md#本地文件)。
 
 第 20 周“粘贴闭环”已全部完成并继续扩展：core 提供可扩展 Clipboard parser、Markdown/HTML/纯文本优先级、安全 HTML 白名单和 `paste` 命令；纯文本换行转换为 paragraph，结构化内容保留标题、引用、代码块、行内代码、分隔线、marks、三层普通/任务列表、安全图片和顶层表格，`b/i/u/s/strike/del/code` 与白名单内的 `font-weight`、`font-style`、`text-decoration` 会规范化为已有文字标记，安全链接保留白名单内的 target/rel，行内样式保留安全字号、文字色和背景色，有序列表保留安全整数起始编号。React 通过 `onPaste` 生成统一 Transaction，Demo 与 Playwright 覆盖三种中文粘贴流程及 HTML/Markdown 行内代码与分隔线、HTML 标记别名、行内 mark 样式、链接元数据、嵌套列表与续编编号、表格、图片、任务列表导入。
