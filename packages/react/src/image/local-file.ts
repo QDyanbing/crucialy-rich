@@ -24,7 +24,12 @@ export function createLocalImageResource(
   )
     return undefined;
 
-  const objectUrl = urlApi.createObjectURL(file);
+  let objectUrl: string;
+  try {
+    objectUrl = urlApi.createObjectURL(file);
+  } catch {
+    return undefined;
+  }
   const src = sanitizeImageSrc(objectUrl);
 
   if (!src) {
