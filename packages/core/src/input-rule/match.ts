@@ -1,5 +1,10 @@
 import { isParagraphNode, type DocumentNode } from "../model";
-import { getBlockTextOffset, isCollapsed, type RangeSelection } from "../selection";
+import {
+  getBlockTextOffset,
+  isCollapsed,
+  isValidPoint,
+  type RangeSelection,
+} from "../selection";
 import type { MarkdownInputRuleMatch, MarkdownInputRuleName } from "./types";
 
 const MARKDOWN_INPUT_RULES: readonly {
@@ -24,6 +29,8 @@ export function findMarkdownInputRule(
 ): MarkdownInputRuleMatch | undefined {
   if (
     input.data.length === 0 ||
+    !isValidPoint(input.document, input.selection.anchor) ||
+    !isValidPoint(input.document, input.selection.focus) ||
     !isCollapsed(input.selection) ||
     input.selection.anchor.path.length !== 2
   ) {
