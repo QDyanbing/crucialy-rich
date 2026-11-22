@@ -55,6 +55,37 @@ const publicPackages = [
   },
 ];
 
+function verifyInputRuleSuffixes(core) {
+  for (const prefix of ["#", ">", "-", "1.", "``"]) {
+    const document = core.createDocument([
+      core.createParagraph([core.createText(prefix + "正文😀")]),
+    ]);
+    const point = { path: [0, 0], offset: prefix.length };
+    const input = {
+      document,
+      selection: { anchor: point, focus: point },
+      data: prefix === "``" ? "`" : " ",
+    };
+    const result = core.createMarkdownInputRuleResult(input);
+    assert.ok(result);
+    const after = core.applyTransaction(document, result.transaction);
+    const block = after.children[0];
+    const texts = core.isListNode(block) ? block.children[0].children : block.children;
+    assert.equal(texts.map((node) => node.text).join(""), "正文😀");
+    assert.ok(core.isValidPoint(after, result.selection.anchor));
+    const history = core.recordHistory({
+      history: core.createHistoryState(),
+      transaction: result.transaction,
+      before: core.createHistorySnapshot(document, input.selection),
+      after: core.createHistorySnapshot(after, result.selection),
+    });
+    const undo = core.undoHistory(history);
+    assert.deepEqual(undo.document, document);
+    assert.deepEqual(core.redoHistory(undo.history).document, after);
+    assert.equal(core.createMarkdownInputRuleResult({ ...input, data: "" }), undefined);
+  }
+}
+
 function verifyLocalImageContract(react) {
   const file = { name: "本地.png", type: "image/png" };
   assert.equal(react.createLocalImageResource(file, {}), undefined);
@@ -1648,6 +1679,7 @@ for (const packageConfig of publicPackages) {
   }
 
   if (packageConfig.directory === "packages/core") {
+    verifyInputRuleSuffixes(runtime);
     verifyCompositionSnapshots(runtime);
     verifyCharacterDeletion(runtime);
     verifyExtensionFailureBoundaries(runtime);
