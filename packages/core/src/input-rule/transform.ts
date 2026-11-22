@@ -64,7 +64,10 @@ export function createMarkdownInputRuleResult(
       transaction: createTransaction([
         createDeleteTextOperation(match.prefixRange),
         createRemoveBlockOperation([match.blockIndex]),
-        createInsertBlockOperation([match.blockIndex], createCodeBlock()),
+        createInsertBlockOperation(
+          [match.blockIndex],
+          createCodeBlock(remainder.children),
+        ),
       ]),
     };
   }
