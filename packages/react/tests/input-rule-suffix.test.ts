@@ -75,4 +75,34 @@ describe("React input rule suffixes", () => {
       expect(host.ref.current!.getDocument()).toEqual(value);
     },
   );
+  it.each([
+    {},
+    { shiftKey: true },
+    { ctrlKey: true },
+    { altKey: true },
+    { metaKey: true },
+  ])("handles native Space with modifiers %j", (modifiers) => {
+    const host = mountDeletionEditor(
+      createDocument([createParagraph([createText("AB")])]),
+      { path: [0, 0], offset: 1 },
+    );
+    act(() =>
+      host.editor.dispatchEvent(
+        new window.KeyboardEvent("keypress", {
+          key: " ",
+          charCode: 32,
+          which: 32,
+          bubbles: true,
+          cancelable: true,
+          ...modifiers,
+        }),
+      ),
+    );
+    if ("ctrlKey" in modifiers || "altKey" in modifiers || "metaKey" in modifiers)
+      expect(host.onTransaction).not.toHaveBeenCalled();
+    else {
+      expect(host.onTransaction).toHaveBeenCalledTimes(1);
+      expect(host.editor.textContent).toBe("A B");
+    }
+  });
 });
