@@ -8,6 +8,7 @@ import {
 import { act } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { mountDeletionEditor } from "./deletion-fixture";
+import type { RichTextEditorTransactionEvent } from "../src";
 vi.hoisted(() =>
   Object.defineProperty(window, "TextEvent", { configurable: true, value: InputEvent }),
 );
@@ -34,7 +35,8 @@ describe("React input rule suffixes", () => {
           ),
         );
         expect(host.onTransaction).toHaveBeenCalledTimes(1);
-        const event = host.onTransaction.mock.calls[0]![0];
+        const event: RichTextEditorTransactionEvent =
+          host.onTransaction.mock.calls[0]![0];
         expect(event.inputType).toBe("insertFromInputRule");
         const block = event.after.children[0]!;
         const children = isListNode(block)

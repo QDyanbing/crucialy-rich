@@ -192,6 +192,15 @@ function isEditableContent(contentEditable: RichTextEditorProps["contentEditable
 }
 
 function getInsertTextInputData(event: Event): string | undefined {
+  if (event.type === "keypress") {
+    const keyboard = event as globalThis.KeyboardEvent;
+    return keyboard.charCode === 32 &&
+      !keyboard.altKey &&
+      !keyboard.ctrlKey &&
+      !keyboard.metaKey
+      ? " "
+      : undefined;
+  }
   const inputEvent = event as InputEvent;
 
   if (inputEvent.inputType && inputEvent.inputType !== "insertText") {
