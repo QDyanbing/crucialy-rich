@@ -50,4 +50,18 @@
 
 ## 结论
 
-第 23 周范围已闭环并完成快捷键扩展，输入法候选阶段没有中间模型写入，快捷键和输入规则都通过统一 Command、Transaction 与 History 边界工作。
+### 2026-11-22 输入规则正文保留
+
+定向验证 `packages/core/tests/input-rule` 与 `packages/react/tests/input-rule-suffix.test.ts` 共 10 个文件、65 项通过，含本轮新增 8 个文件、52 项；两份输入规则浏览器 spec 的 14 项用例全部通过。根类型检查、生产构建及构建包导入验证通过，全仓门禁结果见[全量回归](./full-regression.md)。
+
+- empty-data/invalid-point：10 项，空输入不重复转换，非法两端在生成删除事务前拒绝。
+- bullet/ordered/code-suffix：9 项，中文、emoji/组合重音、多行后缀保留，源文档不改写；代码去除 marks 和链接。
+- formatted-suffix：10 项，五种规则的跨格式与一次完整输入、合法新光标、后缀格式及邻段隔离。
+- suffix-history：5 项，一次撤销转换恢复原前缀、完整后缀与光标，重做完整恢复新结构。
+- React：18 项，受控/非受控五规则、宿主取消/只读/组合保护，以及 native Space/Shift+Space 与 Ctrl/Alt/Meta 分流。React 的 Space 特殊分支通过带 charCode/which 的真实 keypress 形状验证；合成 textInput 测试在该分支之前运行，避免 React 模块内 Space 去重标记干扰夹具。
+- Chromium：1280×844 / 390×844 的真实 Space/Backquote 触发五种转换，后缀、邻段、一次撤销/重做无丢失；取消按键及活跃组合期间无模型/History 变更，恢复后可触发。主流程无 pageerror，桌面标题和手机代码结果截图已检查。
+- 构建包：五种规则的后缀、合法光标、空 data 拒绝和 History 往返通过。
+
+仍仅处理顶层 paragraph、UTF-16 范围和既有五种规则，不扩展列表/cell 内触发，不新增粘贴解析、Registry 权限或真机 IME 认证。空后缀原行为保持，代码块去格式符合原 schema。
+
+第 23 周范围已闭环并完成快捷键扩展。快捷键复用 Command；输入规则直接生成 Transaction，再由宿主接入 History，不应把它误述为 Registry 命令。
