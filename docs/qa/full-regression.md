@@ -2,7 +2,7 @@
 
 ## 执行信息
 
-- 日期：2026-11-21
+- 日期：2026-11-22
 - 版本：`0.1.0`
 - 分支：`master`
 - 命令：`pnpm check:all`
@@ -14,17 +14,18 @@
 | Prettier   | 通过 | 全仓文件格式一致                                                                               |
 | ESLint     | 通过 | 0 warning、0 error                                                                             |
 | TypeScript | 通过 | 根工程与 core/react/demo 包级检查全部通过                                                      |
-| Vitest     | 通过 | 356 个测试文件，2877 项测试                                                                    |
+| Vitest     | 通过 | 364 个测试文件，2929 项测试                                                                    |
 | Core 构建  | 通过 | ESM、source map、类型声明生成成功                                                              |
 | React 构建 | 通过 | ESM、source map、类型声明生成成功                                                              |
 | Demo 构建  | 通过 | Vite 生产构建成功                                                                              |
 | 包产物导入 | 通过 | 导出/声明、Clipboard、History、CodeBlock、Office、Native Input、Slash、Toolbar 与 ref 冒烟通过 |
-| Playwright | 通过 | Chromium 429 项测试                                                                            |
+| Playwright | 通过 | Chromium 443 项测试                                                                            |
 
-Demo 主 JS 产物约 523.97 KB，Vite 给出超过 500 KB 的非阻断分包提示；构建退出码为 0，本轮未调整打包策略。
+Demo 主 JS 产物约 524.28 KB，Vite 给出超过 500 KB 的非阻断分包提示；构建退出码为 0，本轮未调整打包策略。
 
 ## 核心路径
 
+- 2026-11-22 输入规则正文保留与真实 Space 回归通过：无序/有序列表和代码块转换只消费前缀，不再丢弃光标后的正文；列表保留 marks/链接，代码保持纯文本，空 data 与非法端点不生成规则事务。新增 8 个文件 52 项单测，覆盖五规则、跨格式/批量输入、Unicode/多行、邻段隔离、受控模式和 History；定向共 65 项单测与新增 14 项 Chromium 通过。真实 Space/Backquote 在桌面和手机触发转换后保留正文，一次撤销/重做完整恢复；React Space 的 keypress 分支补齐空格数据，Shift+Space 仍为文字，修饰键/取消/组合保护通过。构建包规则、合法光标与 History 往返通过，截图已检查，无主流程 pageerror。公开类型、模型、触发范围和 History 策略不变，不新增粘贴规则、Registry 权限或真机 IME 认证；详见[输入规则验收](./ime-shortcuts-input-rules.md)。
 - 2026-11-21 本地图片资源回归通过：缺失 URL 能力、分配异常、完整 image MIME 和 blob 结果校验均已覆盖；清理绑定创建时的适配器与原始 URL，重复或重入最多尝试一次，释放异常被隔离且不重试，不保证适配器实际成功。Demo 提前复位输入，不在不可插入、图片选中或组合期间分配资源。新增 7 个文件 36 项单测和 8 项 Chromium；定向共 39 项单测、10 项浏览器用例通过，覆盖同文件失败重选、真实 PNG 解码、多图独立 URL 与 History 往返，构建包复验通过。桌面/手机截图已检查；不读取文件字节、不新增上传或持久化，公开签名和 History 策略不变。证据与限制见[本地图片资源验收](./image.md#本地图片资源验收)。
 
 - 2026-11-19 命令式 ref 与范围通知回归通过：无旧文字 Range 的成功命令可提交明确图片 payload 或文档级事务，beforeSelection 缺失时省略；getter/执行使用合法本实例 DOM 或显式受控后备。getSelection、命令上下文、执行前范围及结果/回调范围分别复制，扩展或单次通知的 Range 修改不污染 prop、其他通知及返回结果。新增 9 个文件 83 项 React 单测，覆盖 11 类常用命令、受控/非受控、正反方向、Registry/回调更新、只读宿主命令、Composition 文档失效、StrictMode、多实例、History 以及 ref/快捷键/键盘/原生换段/组合提交的通知隔离。新增 12 项 Chromium 在 1280×844 / 390×844 验证 getter 副本、修改事务通知后续编、明确图片路径无旧 Range 删除，图片夹具实际解码，命令结果截图已检查。构建包实际挂载验证同一行为，浏览器 TSX 夹具纳入类型检查；全量旧路径继续通过。公开签名、模型和 History 策略不变，隔离仅针对 Range/path，不承诺文档/事务/payload 复制、任意插件事务校验或全局权限锁；泛用 ref 的块高亮、焦点与 History 仍由宿主管理。详见[命令式 ref 验收](./ref-command.md)。
