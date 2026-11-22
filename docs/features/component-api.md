@@ -145,6 +145,7 @@ ref 命令事件的 `inputType` 为 `command`。受控模式不会自行替换 `
 - Composition 候选阶段暂停普通输入、编辑快捷键和粘贴；结束时只输出一次 `insertCompositionText` transaction。
 - Composition 状态通知是独立快照；start/update/end 的宿主取消按事件阶段生效。文档引用变化、只读或块选区会清理活跃会话，迟到 end 不复用旧起点；同引用的无关 props 更新不取消。组合期间应保持受控 value 引用稳定，异常与真机边界见[中文输入法](./ime.md#取消与通知)。
 - paragraph 开头命中 Markdown 前缀时输出 `insertFromInputRule` transaction，并把选区移动到目标结构起点。
+- 输入规则保留光标后的已有正文，列表保留格式，代码块按纯文本规则去样式；真实 Space 的 React keypress 路径也进入模型，不再仅支持合成文本空格。范围、History 与取消约束见[输入规则](./input-rules.md)。
 - 输入、删除、分段和段落合并都不会直接信任浏览器默认修改后的 DOM。
 - 外部 `onBeforeInput` / `onKeyDown` 会先执行，若已 `preventDefault`，内部不再处理对应输入。
 - 组件内部输入、快捷键、粘贴和 ref 命令统一使用 `commandRegistry`；未传入时使用 core 默认注册表。
