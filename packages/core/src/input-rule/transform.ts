@@ -1,4 +1,5 @@
 import {
+  applyDeleteText,
   createInsertBlockOperation,
   createDeleteTextOperation,
   createRemoveBlockOperation,
@@ -11,6 +12,7 @@ import {
   createCodeBlock,
   createListItem,
   createOrderedList,
+  isParagraphNode,
 } from "../model";
 import { findMarkdownInputRule, type FindMarkdownInputRuleInput } from "./match";
 import type { MarkdownInputRuleResult } from "./types";
@@ -23,11 +25,16 @@ export function createMarkdownInputRuleResult(
   if (!match) {
     return undefined;
   }
+  const remainder = applyDeleteText(
+    input.document,
+    createDeleteTextOperation(match.prefixRange),
+  ).children[match.blockIndex];
+  if (!isParagraphNode(remainder)) return undefined;
 
   if (match.name === "bulletList" || match.name === "orderedList") {
     const list =
       match.name === "bulletList"
-        ? createBulletList([createListItem()])
+        ? createBulletList([createListItem(remainder.children)])
         : createOrderedList([createListItem()]);
     const point = { path: [match.blockIndex, 0, 0], offset: 0 };
 
