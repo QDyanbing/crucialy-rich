@@ -22,7 +22,11 @@ export interface FindMarkdownInputRuleInput {
 export function findMarkdownInputRule(
   input: FindMarkdownInputRuleInput,
 ): MarkdownInputRuleMatch | undefined {
-  if (!isCollapsed(input.selection) || input.selection.anchor.path.length !== 2) {
+  if (
+    input.data.length === 0 ||
+    !isCollapsed(input.selection) ||
+    input.selection.anchor.path.length !== 2
+  ) {
     return undefined;
   }
 
