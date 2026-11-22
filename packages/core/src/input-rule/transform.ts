@@ -35,7 +35,7 @@ export function createMarkdownInputRuleResult(
     const list =
       match.name === "bulletList"
         ? createBulletList([createListItem(remainder.children)])
-        : createOrderedList([createListItem()]);
+        : createOrderedList([createListItem(remainder.children)]);
     const point = { path: [match.blockIndex, 0, 0], offset: 0 };
 
     return {
