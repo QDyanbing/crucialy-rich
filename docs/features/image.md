@@ -70,6 +70,10 @@ blob、loading/error、凭据 URL 或非法源模型使整个 HTML 范围片段�
 
 选中图片后按 Backspace 或 Delete 会执行 `deleteImage`。删除后优先把光标放到后方文本，再回退到前方文本；若没有可编辑文本，则插入空 paragraph，保证可以继续输入。
 
+有受控 blockSelection 时，普通文字、Space、输入规则和原生粘贴不会借用残留 DOM 文字 Range；已识别的文字格式快捷键也被取消，不进入 Registry。粘贴在读取格式/数据和解析前停止，不改变文字、图片、高亮或 History。当前不把输入解释为替换图片，也不自动在图片旁插入段落。
+
+宿主 onBeforeInput/onPaste/onKeyDown 仍先执行，取消、只读和组合保护优先级不变；这不是 ref 命令或宿主外部按钮的权限锁。点击文字时组件通知清除块选区，宿主须回传清除后的状态才能恢复文字编辑；仅改变浏览器 Range 不表示受控块选区已解除。Backspace/Delete、单图复制/剪切和宿主 History 的原路径保持可用。
+
 图片删除和剪切没有合法旧文字选区时，事务省略 `beforeSelection`；宿主读取前须判空。事务另外提供 `beforeBlockSelection`，传给 History 快照第三参数后，宿主可回传撤销结果中的块选区来恢复高亮；未接入时仍只恢复内容。Demo 已接入，重做清除高亮并恢复文字光标，见[块选区恢复](./history.md#块选区恢复)。
 
 ## 渲染与边界
