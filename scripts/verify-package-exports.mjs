@@ -301,6 +301,72 @@ async function verifyNativeInputBinding(react) {
     const core = await import(
       pathToFileURL(resolve(repositoryRoot, "packages/core/dist/index.js")).href
     );
+    {
+      const container = dom.window.document.createElement("div");
+      dom.window.document.body.append(container);
+      const root = createRoot(container);
+      let changes = 0;
+      let reads = 0;
+      try {
+        act(() =>
+          root.render(
+            createElement(react.RichTextEditor, {
+              defaultValue: core.createDocument([
+                core.createParagraph([core.createText("保留正文")]),
+                core.createImage("https://example.com/image.png"),
+              ]),
+              blockSelection: core.createBlockSelection([1]),
+              contentEditable: true,
+              onChange: () => changes++,
+            }),
+          ),
+        );
+        const editor = container.firstElementChild;
+        editor.focus();
+        const text = editor.querySelector("span").firstChild;
+        dom.window.getSelection().setBaseAndExtent(text, 1, text, 1);
+        const key = new dom.window.KeyboardEvent("keydown", {
+          key: "b",
+          ctrlKey: true,
+          bubbles: true,
+          cancelable: true,
+        });
+        act(() => editor.dispatchEvent(key));
+        assert.equal(key.defaultPrevented, true);
+        const paste = new dom.window.Event("paste", {
+          bubbles: true,
+          cancelable: true,
+        });
+        Object.defineProperty(paste, "clipboardData", {
+          value: {
+            types: ["text/plain"],
+            getData() {
+              reads++;
+              return "替换";
+            },
+          },
+        });
+        act(() => editor.dispatchEvent(paste));
+        assert.equal(paste.defaultPrevented, true);
+        assert.equal(reads, 0);
+        assert.equal(changes, 0);
+        act(() =>
+          editor.dispatchEvent(
+            new dom.window.KeyboardEvent("keydown", {
+              key: "Delete",
+              bubbles: true,
+              cancelable: true,
+            }),
+          ),
+        );
+        assert.equal(changes, 1);
+        assert.equal(editor.querySelectorAll("img").length, 0);
+        assert.equal(editor.textContent, "保留正文");
+      } finally {
+        act(() => root.unmount());
+        container.remove();
+      }
+    }
     for (const controlled of [false, true]) {
       for (const image of [false, true]) {
         const value = core.createDocument([
