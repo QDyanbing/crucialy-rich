@@ -768,6 +768,11 @@ function RichTextEditorComponent(
       return;
     }
 
+    if (blockSelection) {
+      event.preventDefault();
+      return;
+    }
+
     const modelSelection = getModelSelectionFromDom(event.currentTarget, document);
 
     if (!modelSelection) {
@@ -1105,7 +1110,7 @@ function RichTextEditorComponent(
 
     event.preventDefault();
 
-    if (compositionRef.current.active) {
+    if (compositionRef.current.active || blockSelection) {
       return;
     }
 
