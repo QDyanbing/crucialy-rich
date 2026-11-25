@@ -891,6 +891,7 @@ function RichTextEditorComponent(
 
     if (shortcutAction?.type === "command") {
       event.preventDefault();
+      if (blockSelection) return;
       const shortcutSelection = getModelSelectionFromDom(event.currentTarget, document);
       const result = shortcutSelection
         ? executeCoreCommand(registry, shortcutAction.commandName, {
