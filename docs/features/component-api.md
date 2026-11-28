@@ -164,6 +164,14 @@ Demo 链接设置仍是宿主 UI，不是组件 prop 或公开导出：保存范
 
 ## Toolbar API
 
+### Demo 宿主命令策略
+
+Demo 在编辑器 Composition 活跃或有 blockSelection 时，暂停依赖文字上下文的外部文档命令：格式/字号/颜色、结构转换、图片/表格插入、表格行列编辑和示例粘贴。直接命令入口先检查状态再访问 Registry，返回 skipped 时不产生事务；命令结果应用入口也复核状态。固定/悬浮 Toolbar、Slash、手动按钮/格式选择器和 Command 调试状态使用相同禁用条件，保留原 active 状态，不改变 Core Command 的能力判断。
+
+图片选中时撤销/重做仍可用，回传文字快照会按原 History 规则清除旧高亮；重新点击文字并清除受控块选区后恢复文档命令。组合期间撤销、重做和规范化按钮暂停，事件处理函数同步复核；空 compositionend 只结束候选，不新增 History，结束后恢复先前 undo/redo 栈。显式切换模型示例仍是重置操作，会取消旧会话和清空示例 History，不被伪装成文字命令。
+
+编辑配置字段、示例文本和显示设置不等于提交事务，可以保留自己的 UI 状态；例如程序触发禁用选择器 change 可以更新草稿值，但执行保护不会借用旧范围修改模型。这里是 Demo 的同步宿主策略，不新增 RichTextEditor/Toolbar prop，也不把 contentEditable 或 ref 变成权限锁；其他产品须按自身需求接入。它不回滚插件副作用、不阻断任意异步旧回调，也不替宿主管理数据访问权限。
+
 - `Toolbar`：接收已经解析状态的 items，只负责语义渲染。
 - `FixedToolbar`：接收 `document`、`selection`、items 和可选 Registry，自动查询状态并执行命令。
 - `FloatingToolbar`：在 FixedToolbar 基础上接收 `anchorRect`、`toolbarSize` 和 `viewport`，非空选区时按视口定位。
