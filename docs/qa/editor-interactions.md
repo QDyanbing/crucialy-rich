@@ -38,4 +38,13 @@
 
 ## 边界
 
+## 2026-11-28 Demo 外部控件验收
+
+- `tests/smoke/demo-command-policy.test.ts`：3 项通过，锁定时不访问 Registry，解除后正常委托，不改变输入 payload 和结果身份。
+- `demo-image-command-policy.spec.ts`：4 项桌面/手机用例通过，图片选中时固定工具栏、手动格式、字号及调试状态禁用；脚本触发选择器 change 不改模型，回到文字后恢复格式命令，图片选中时 Undo/Redo 仍可正常恢复内容。
+- `demo-composition-policy.spec.ts`：4 项通过，候选阶段格式、七个表格按钮、History 与规范化不可执行，模型及栈不变，结束后恢复格式化与撤销/重做。显式切换模型示例仍保留重置语义。
+- 既有 6 项图片输入/本地分配、24 项工具栏键盘/Slash 组合及 8 项图片 History 定向回归通过。根类型检查通过，桌面和手机禁用工具栏截图已检查，单行按钮和原横向滚动布局不变。
+
+策略只在 Demo 同步文档命令入口生效，不改变 Core/React/ref，不回滚插件副作用或保证任意异步旧回调安全。全量执行结果见[全量回归](./full-regression.md)。
+
 公开签名和模型不变，React 只读/组合期间任务控件新增 disabled 语义。文字 selection 的回写在控件获焦时暂缓，没有 blur 自动恢复；宿主需要返回编辑区并更新选区。测试不代表任意嵌套编辑器产品、DOM 防篡改或真实设备 IME 全面兼容，也不回滚宿主回调或扩展副作用。详见[编辑区交互契约](../features/editor-interactions.md)。
