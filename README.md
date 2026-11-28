@@ -10,6 +10,8 @@
 
 ## 当前阶段
 
+Demo 外部控件现与编辑区保持一致：图片选中或组合期间不执行依赖文字上下文的文档命令，按钮、选择器及命令调试状态同步禁用；图片 History 保留，组合期间 History/规范化暂停，结束恢复。此策略属于 Demo 宿主，不改变公共 ref 的程序调用能力，见[宿主命令策略](./docs/features/component-api.md#demo-宿主命令策略)。
+
 Markdown 输入规则已修复列表/代码转换丢失光标后正文，以及真实 Space 未进入模型的问题；格式、Unicode、单条 History 和桌面/手机键盘回归均有覆盖。具体边界见[输入规则](./docs/features/input-rules.md)。
 
 已完成工程初始化、文档模型第一版、模型选区第一版、基础模型渲染第一版、DOM 与模型位置映射第一版、选区双向同步第一版、React 组件 API 第一版、渲染闭环验收、`insertText`、`deleteText`、`toggle_mark`、`clear_marks`、`set_link`、`set_block_type`、`splitBlock`、`mergeBlock` operation 第一版、Transaction 第一版、Operation 闭环验收、`beforeinput insertText` 第一版、Backspace 第一版、Delete 第一版、Enter 第一版、基础编辑闭环验收、Command 基础接口、文本编辑命令、Block 编辑命令、Bold 命令、Italic 命令、Underline 命令、Strike 命令、Inline Code 命令、清除格式命令、Heading 命令、Quote 命令、Mark 切分与合并第一版、Bold/Italic 闭环验收、Underline/Strike 闭环验收、标题和引用闭环验收、五种 boolean mark 叠加规则、mark 快捷键映射、Command 状态读取、Command 闭环验收、History 撤销/重做第一版、连续输入合并第一版、撤销重做快捷键第一版、text marks 属性模型、字号闭环、安全文字颜色与背景色闭环、文字属性综合验收、Link Mark 模型以及链接设置/取消 command 第一版。
