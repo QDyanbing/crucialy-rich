@@ -34,7 +34,6 @@ import {
   DELETE_SELECTION_COMMAND_NAME,
   DELETE_TABLE_COMMAND_NAME,
   domSelectionToModelSelection,
-  executeCommand,
   getNodeAtPath,
   getSelectedHeadingLevel,
   getSelectedLinkMark,
@@ -72,6 +71,7 @@ import {
   undoHistory,
   validateDocument,
   type CommandName,
+  type CommandInput,
   type CommandResult,
   type CommandState,
   type ClipboardMimeType,
@@ -130,6 +130,8 @@ import {
   readLinkSelectionSnapshot,
   type LinkSelectionSnapshot,
 } from "./link-selection";
+
+import { executeDemoCommand as executeGuardedDemoCommand } from "./command-policy";
 
 import "./styles.css";
 
@@ -1175,6 +1177,7 @@ function DemoApp() {
       ),
     [historyState],
   );
+  const demoEditingLocked = compositionState.active || Boolean(blockSelection);
   const commandStates = useMemo<DemoCommandState[]>(
     () =>
       demoCommandDescriptors.map((command) => ({
@@ -1320,6 +1323,15 @@ function DemoApp() {
     });
   }
 
+  function executeDemoCommand(name: CommandName, input: CommandInput) {
+    return executeGuardedDemoCommand(
+      demoCommandRegistry,
+      name,
+      input,
+      demoEditingLocked,
+    );
+  }
+
   function isCommandDisabled(name: CommandName) {
     return (
       commandStates.find((command) => command.commandName === name)?.disabled ?? true
@@ -1360,7 +1372,7 @@ function DemoApp() {
   }
 
   function applyCommandResult(result: CommandResult, beforeSelection = modelSelection) {
-    if (!result.ok || !result.transaction || !result.selection) {
+    if (demoEditingLocked || !result.ok || !result.transaction || !result.selection) {
       return;
     }
 
@@ -1433,7 +1445,7 @@ function DemoApp() {
 
   function handleInsertText() {
     applyCommandResult(
-      executeCommand(demoCommandRegistry, INSERT_TEXT_COMMAND_NAME, {
+      executeDemoCommand(INSERT_TEXT_COMMAND_NAME, {
         context: {
           document: normalizedDocument,
           selection: modelSelection,
@@ -1447,7 +1459,7 @@ function DemoApp() {
 
   function handleInsertDivider() {
     applyCommandResult(
-      executeCommand(demoCommandRegistry, INSERT_DIVIDER_COMMAND_NAME, {
+      executeDemoCommand(INSERT_DIVIDER_COMMAND_NAME, {
         context: {
           document: normalizedDocument,
           selection: modelSelection,
@@ -1458,7 +1470,7 @@ function DemoApp() {
 
   function handleTableCommand(commandName: CommandName, payload?: object) {
     applyCommandResult(
-      executeCommand(demoCommandRegistry, commandName, {
+      executeDemoCommand(commandName, {
         context: {
           document: normalizedDocument,
           selection: modelSelection,
@@ -1470,7 +1482,7 @@ function DemoApp() {
 
   function handleInsertImage() {
     applyCommandResult(
-      executeCommand(demoCommandRegistry, INSERT_IMAGE_COMMAND_NAME, {
+      executeDemoCommand(INSERT_IMAGE_COMMAND_NAME, {
         context: {
           document: normalizedDocument,
           selection: modelSelection,
@@ -1500,7 +1512,7 @@ function DemoApp() {
     const resource = createLocalImageResource(file);
 
     if (resource) {
-      const result = executeCommand(demoCommandRegistry, INSERT_IMAGE_COMMAND_NAME, {
+      const result = executeDemoCommand(INSERT_IMAGE_COMMAND_NAME, {
         context: {
           document: normalizedDocument,
           selection: modelSelection,
@@ -1523,7 +1535,7 @@ function DemoApp() {
     }
 
     applyCommandResult(
-      executeCommand(demoCommandRegistry, PASTE_COMMAND_NAME, {
+      executeDemoCommand(PASTE_COMMAND_NAME, {
         context: {
           document: normalizedDocument,
           selection: modelSelection,
@@ -1542,7 +1554,7 @@ function DemoApp() {
 
   function handleToggleList(commandName: CommandName) {
     applyCommandResult(
-      executeCommand(demoCommandRegistry, commandName, {
+      executeDemoCommand(commandName, {
         context: {
           document: normalizedDocument,
           selection: modelSelection,
@@ -1553,7 +1565,7 @@ function DemoApp() {
 
   function handleBold() {
     applyCommandResult(
-      executeCommand(demoCommandRegistry, BOLD_COMMAND_NAME, {
+      executeDemoCommand(BOLD_COMMAND_NAME, {
         context: {
           document: normalizedDocument,
           selection: modelSelection,
@@ -1564,7 +1576,7 @@ function DemoApp() {
 
   function handleItalic() {
     applyCommandResult(
-      executeCommand(demoCommandRegistry, ITALIC_COMMAND_NAME, {
+      executeDemoCommand(ITALIC_COMMAND_NAME, {
         context: {
           document: normalizedDocument,
           selection: modelSelection,
@@ -1575,7 +1587,7 @@ function DemoApp() {
 
   function handleUnderline() {
     applyCommandResult(
-      executeCommand(demoCommandRegistry, UNDERLINE_COMMAND_NAME, {
+      executeDemoCommand(UNDERLINE_COMMAND_NAME, {
         context: {
           document: normalizedDocument,
           selection: modelSelection,
@@ -1586,7 +1598,7 @@ function DemoApp() {
 
   function handleStrike() {
     applyCommandResult(
-      executeCommand(demoCommandRegistry, STRIKE_COMMAND_NAME, {
+      executeDemoCommand(STRIKE_COMMAND_NAME, {
         context: {
           document: normalizedDocument,
           selection: modelSelection,
@@ -1597,7 +1609,7 @@ function DemoApp() {
 
   function handleQuote() {
     applyCommandResult(
-      executeCommand(demoCommandRegistry, TOGGLE_QUOTE_COMMAND_NAME, {
+      executeDemoCommand(TOGGLE_QUOTE_COMMAND_NAME, {
         context: {
           document: normalizedDocument,
           selection: modelSelection,
@@ -1608,7 +1620,7 @@ function DemoApp() {
 
   function handleCodeBlock() {
     applyCommandResult(
-      executeCommand(demoCommandRegistry, SET_CODE_BLOCK_COMMAND_NAME, {
+      executeDemoCommand(SET_CODE_BLOCK_COMMAND_NAME, {
         context: {
           document: normalizedDocument,
           selection: modelSelection,
@@ -1625,7 +1637,7 @@ function DemoApp() {
 
     setFontSizeValue(nextValue);
     applyCommandResult(
-      executeCommand(demoCommandRegistry, SET_FONT_SIZE_COMMAND_NAME, {
+      executeDemoCommand(SET_FONT_SIZE_COMMAND_NAME, {
         context: {
           document: normalizedDocument,
           selection: modelSelection,
@@ -1639,7 +1651,7 @@ function DemoApp() {
 
   function handleHeadingChange(event: ChangeEvent<HTMLSelectElement>) {
     applyCommandResult(
-      executeCommand(demoCommandRegistry, SET_HEADING_COMMAND_NAME, {
+      executeDemoCommand(SET_HEADING_COMMAND_NAME, {
         context: {
           document: normalizedDocument,
           selection: modelSelection,
@@ -1651,7 +1663,7 @@ function DemoApp() {
 
   function applyTextColor(textColor: string | null) {
     applyCommandResult(
-      executeCommand(demoCommandRegistry, SET_TEXT_COLOR_COMMAND_NAME, {
+      executeDemoCommand(SET_TEXT_COLOR_COMMAND_NAME, {
         context: {
           document: normalizedDocument,
           selection: modelSelection,
@@ -1674,7 +1686,7 @@ function DemoApp() {
 
   function applyBackgroundColor(backgroundColor: string | null) {
     applyCommandResult(
-      executeCommand(demoCommandRegistry, SET_BACKGROUND_COLOR_COMMAND_NAME, {
+      executeDemoCommand(SET_BACKGROUND_COLOR_COMMAND_NAME, {
         context: {
           document: normalizedDocument,
           selection: modelSelection,
@@ -1707,7 +1719,7 @@ function DemoApp() {
     }
 
     if (linkConfirmationDisabled) return;
-    const result = executeCommand(demoCommandRegistry, SET_LINK_COMMAND_NAME, {
+    const result = executeDemoCommand(SET_LINK_COMMAND_NAME, {
       context: { document: normalizedDocument, selection: linkSelection },
       payload: createLinkCommandPayload(linkHrefValue, linkTargetValue, linkRelValue),
     });
@@ -1809,7 +1821,7 @@ function DemoApp() {
   function handleUnsetLink(event?: SyntheticEvent) {
     if (event?.defaultPrevented || compositionState.active || blockSelection) return;
     applyCommandResult(
-      executeCommand(demoCommandRegistry, UNSET_LINK_COMMAND_NAME, {
+      executeDemoCommand(UNSET_LINK_COMMAND_NAME, {
         context: {
           document: normalizedDocument,
           selection: modelSelection,
@@ -1820,7 +1832,7 @@ function DemoApp() {
 
   function handleDeleteText() {
     applyCommandResult(
-      executeCommand(demoCommandRegistry, DELETE_SELECTION_COMMAND_NAME, {
+      executeDemoCommand(DELETE_SELECTION_COMMAND_NAME, {
         context: {
           document: normalizedDocument,
           selection: modelSelection,
@@ -1831,7 +1843,7 @@ function DemoApp() {
 
   function handleSplitBlock() {
     applyCommandResult(
-      executeCommand(demoCommandRegistry, SPLIT_BLOCK_COMMAND_NAME, {
+      executeDemoCommand(SPLIT_BLOCK_COMMAND_NAME, {
         context: {
           document: normalizedDocument,
           selection: modelSelection,
@@ -1842,7 +1854,7 @@ function DemoApp() {
 
   function handleMergeBlock() {
     applyCommandResult(
-      executeCommand(demoCommandRegistry, MERGE_BLOCK_COMMAND_NAME, {
+      executeDemoCommand(MERGE_BLOCK_COMMAND_NAME, {
         context: {
           document: normalizedDocument,
           selection: modelSelection,
@@ -1957,7 +1969,7 @@ function DemoApp() {
   function handleSlashCommand(item: SlashCommandItem) {
     const trigger = slashMenuState.trigger;
 
-    if (!trigger || compositionState.active) {
+    if (!trigger || demoEditingLocked) {
       return;
     }
 
