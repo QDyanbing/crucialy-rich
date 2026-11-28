@@ -1180,49 +1180,56 @@ function DemoApp() {
   const demoEditingLocked = compositionState.active || Boolean(blockSelection);
   const commandStates = useMemo<DemoCommandState[]>(
     () =>
-      demoCommandDescriptors.map((command) => ({
-        ...queryCommandState(demoCommandRegistry, command.name, {
-          context: {
-            document: normalizedDocument,
-            selection: modelSelection,
-          },
-          payload:
-            command.name === INSERT_TEXT_COMMAND_NAME
-              ? {
-                  text: insertTextValue,
-                }
-              : command.name === INSERT_IMAGE_COMMAND_NAME
-                ? { alt: "网络图片", src: imageUrlValue }
-                : command.name === PASTE_COMMAND_NAME && pasteFragment
-                  ? { fragment: pasteFragment }
-                  : command.name === SET_FONT_SIZE_COMMAND_NAME
-                    ? {
-                        fontSize: parseFontSizeOption(fontSizeValue),
-                      }
-                    : command.name === SET_TEXT_COLOR_COMMAND_NAME
+      demoCommandDescriptors
+        .map((command) => ({
+          ...queryCommandState(demoCommandRegistry, command.name, {
+            context: {
+              document: normalizedDocument,
+              selection: modelSelection,
+            },
+            payload:
+              command.name === INSERT_TEXT_COMMAND_NAME
+                ? {
+                    text: insertTextValue,
+                  }
+                : command.name === INSERT_IMAGE_COMMAND_NAME
+                  ? { alt: "网络图片", src: imageUrlValue }
+                  : command.name === PASTE_COMMAND_NAME && pasteFragment
+                    ? { fragment: pasteFragment }
+                    : command.name === SET_FONT_SIZE_COMMAND_NAME
                       ? {
-                          textColor: textColorValue,
+                          fontSize: parseFontSizeOption(fontSizeValue),
                         }
-                      : command.name === SET_BACKGROUND_COLOR_COMMAND_NAME
+                      : command.name === SET_TEXT_COLOR_COMMAND_NAME
                         ? {
-                            backgroundColor: backgroundColorValue,
+                            textColor: textColorValue,
                           }
-                        : command.name === SET_LINK_COMMAND_NAME
-                          ? createLinkCommandPayload(
-                              linkHrefValue,
-                              linkTargetValue,
-                              linkRelValue,
-                            )
-                          : command.name === SET_HEADING_COMMAND_NAME
-                            ? { level: selectedHeadingLevel ?? null }
-                            : command.name === SET_CODE_BLOCK_COMMAND_NAME
-                              ? { enabled: true }
-                              : undefined,
-        }),
-        label: command.label,
-      })),
+                        : command.name === SET_BACKGROUND_COLOR_COMMAND_NAME
+                          ? {
+                              backgroundColor: backgroundColorValue,
+                            }
+                          : command.name === SET_LINK_COMMAND_NAME
+                            ? createLinkCommandPayload(
+                                linkHrefValue,
+                                linkTargetValue,
+                                linkRelValue,
+                              )
+                            : command.name === SET_HEADING_COMMAND_NAME
+                              ? { level: selectedHeadingLevel ?? null }
+                              : command.name === SET_CODE_BLOCK_COMMAND_NAME
+                                ? { enabled: true }
+                                : undefined,
+          }),
+          label: command.label,
+        }))
+        .map((state) =>
+          demoEditingLocked
+            ? { ...state, disabled: true, reason: "编辑上下文暂不可用" }
+            : state,
+        ),
     [
       backgroundColorValue,
+      demoEditingLocked,
       fontSizeValue,
       insertTextValue,
       imageUrlValue,
@@ -2115,7 +2122,7 @@ function DemoApp() {
           </div>
           {showFixedToolbar ? (
             <FixedToolbar
-              disabled={compositionState.active}
+              disabled={demoEditingLocked}
               document={normalizedDocument}
               items={fixedToolbarItems}
               onCommand={handleToolbarCommand}
@@ -2189,7 +2196,7 @@ function DemoApp() {
             </button>
             <button
               type="button"
-              disabled={tableIndex < 0}
+              disabled={demoEditingLocked || tableIndex < 0}
               onClick={() =>
                 handleTableCommand(ADD_ROW_BEFORE_COMMAND_NAME, {
                   path: [tableIndex],
@@ -2201,7 +2208,7 @@ function DemoApp() {
             </button>
             <button
               type="button"
-              disabled={tableIndex < 0}
+              disabled={demoEditingLocked || tableIndex < 0}
               onClick={() =>
                 handleTableCommand(ADD_ROW_AFTER_COMMAND_NAME, {
                   path: [tableIndex],
@@ -2213,7 +2220,7 @@ function DemoApp() {
             </button>
             <button
               type="button"
-              disabled={tableIndex < 0}
+              disabled={demoEditingLocked || tableIndex < 0}
               onClick={() =>
                 handleTableCommand(DELETE_ROW_COMMAND_NAME, {
                   path: [tableIndex],
@@ -2225,7 +2232,7 @@ function DemoApp() {
             </button>
             <button
               type="button"
-              disabled={tableIndex < 0}
+              disabled={demoEditingLocked || tableIndex < 0}
               onClick={() =>
                 handleTableCommand(ADD_COLUMN_BEFORE_COMMAND_NAME, {
                   columnIndex: 0,
@@ -2237,7 +2244,7 @@ function DemoApp() {
             </button>
             <button
               type="button"
-              disabled={tableIndex < 0}
+              disabled={demoEditingLocked || tableIndex < 0}
               onClick={() =>
                 handleTableCommand(ADD_COLUMN_AFTER_COMMAND_NAME, {
                   columnIndex: 0,
@@ -2249,7 +2256,7 @@ function DemoApp() {
             </button>
             <button
               type="button"
-              disabled={tableIndex < 0}
+              disabled={demoEditingLocked || tableIndex < 0}
               onClick={() =>
                 handleTableCommand(DELETE_COLUMN_COMMAND_NAME, {
                   columnIndex: 0,
@@ -2261,7 +2268,7 @@ function DemoApp() {
             </button>
             <button
               type="button"
-              disabled={tableIndex < 0}
+              disabled={demoEditingLocked || tableIndex < 0}
               onClick={() =>
                 handleTableCommand(DELETE_TABLE_COMMAND_NAME, {
                   path: [tableIndex],
@@ -2305,7 +2312,7 @@ function DemoApp() {
           />
           {showFloatingToolbar && !blockSelection ? (
             <FloatingToolbar
-              disabled={compositionState.active}
+              disabled={demoEditingLocked}
               anchorRect={floatingToolbarRect}
               document={normalizedDocument}
               items={floatingToolbarItems}
@@ -2317,7 +2324,7 @@ function DemoApp() {
           ) : null}
           {slashMenuState.open ? (
             <FloatingSlashMenu
-              disabled={compositionState.active}
+              disabled={demoEditingLocked}
               activeIndex={slashMenuState.activeIndex}
               anchorRect={slashMenuRect}
               items={filteredSlashCommandItems}
