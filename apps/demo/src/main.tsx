@@ -1372,6 +1372,7 @@ function DemoApp() {
   }
 
   function handleNormalize() {
+    if (compositionState.active) return;
     setDocumentValue(normalizeDocument(documentValue));
     setHistoryState(createHistoryState());
     setLastTransaction(null);
@@ -1871,10 +1872,12 @@ function DemoApp() {
   }
 
   function handleUndo() {
+    if (compositionState.active) return;
     applyHistoryChange(undoHistory(historyState));
   }
 
   function handleRedo() {
+    if (compositionState.active) return;
     applyHistoryChange(redoHistory(historyState));
   }
 
@@ -2403,7 +2406,11 @@ function DemoApp() {
             >
               取消背景色
             </button>
-            <button type="button" onClick={handleNormalize}>
+            <button
+              type="button"
+              disabled={compositionState.active}
+              onClick={handleNormalize}
+            >
               规范化
             </button>
           </div>
@@ -2660,14 +2667,14 @@ function DemoApp() {
             </button>
             <button
               type="button"
-              disabled={!canUndo(historyState)}
+              disabled={compositionState.active || !canUndo(historyState)}
               onClick={handleUndo}
             >
               撤销
             </button>
             <button
               type="button"
-              disabled={!canRedo(historyState)}
+              disabled={compositionState.active || !canRedo(historyState)}
               onClick={handleRedo}
             >
               重做
